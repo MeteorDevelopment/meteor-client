@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.combat.AnchorAura;
 import meteordevelopment.meteorclient.systems.modules.combat.BedAura;
 import meteordevelopment.meteorclient.systems.modules.combat.CrystalAura;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
+import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
@@ -30,6 +31,8 @@ import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
     private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
+    //BARITONE related modules
+    private static final Class<? extends Module>[] BARITONE_MODULES = new Class[] { InfinityMiner.class };
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgThreshold = settings.createGroup("Threshold");
@@ -100,7 +103,9 @@ public class AutoEat extends Module {
     public boolean eating;
     private int slot, prevSlot;
 
-    private final List<Class<? extends Module>> wasAura = new ArrayList<>();
+    private final List<Class<? extends Module>> wasAura = new ArrayList<>(); 
+       private final List<Class<? extends Module>> wasBaritoneList = new ArrayList<>();
+
     private boolean wasBaritone = false;
 
     public AutoEat() {
@@ -179,9 +184,19 @@ public class AutoEat extends Module {
         }
 
         // Pause baritone
+        wasBaritoneList.clear();
         if (pauseBaritone.get() && PathManagers.get().isPathing() && !wasBaritone) {
             wasBaritone = true;
             PathManagers.get().pause();
+            // pause baritone related modules (listed in BARITONE_MODULES)
+                 for (Class<? extends Module> klass : BARITONE_MODULES) {
+                Module module = Modules.get().get(klass);
+
+                if (module.isActive()) {
+                    wasBaritoneList.add(klass);
+                    module.toggle();
+                }
+            }
         }
     }
 
@@ -209,11 +224,20 @@ public class AutoEat extends Module {
                 }
             }
         }
+        
 
         // Resume baritone
         if (pauseBaritone.get() && wasBaritone) {
             wasBaritone = false;
             PathManagers.get().resume();
+            // Resume all paused baritone related modules (listed in BARITONE_MODULES)
+                   for (Class<? extends Module> klass : BARITONE_MODULES) {
+                Module module = Modules.get().get(klass);
+
+                if (wasBaritoneList.contains(klass) && !module.isActive()) {
+                    module.toggle();
+                }
+            }
         }
     }
 
