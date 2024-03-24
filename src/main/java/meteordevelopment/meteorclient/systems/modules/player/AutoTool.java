@@ -189,7 +189,7 @@ public class AutoTool extends Module {
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
-        if (!itemStack.isSuitableFor(state) && !(itemStack.getItem() instanceof SwordItem && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock)) && !(itemStack.getItem() instanceof ShearsItem && (state.getBlock() instanceof LeavesBlock))) return -1;
+        if (!itemStack.isSuitableFor(state) && !(itemStack.getItem() instanceof SwordItem && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock)) && !(itemStack.getItem() instanceof ShearsItem && state.getBlock() instanceof LeavesBlock || isWoolBlock(state.getBlock()))) return -1;
 
         if (silkTouchEnderChest
             && state.getBlock() == Blocks.ENDER_CHEST
@@ -225,6 +225,25 @@ public class AutoTool extends Module {
     }
     public static boolean isTool(ItemStack itemStack) {
         return isTool(itemStack.getItem());
+    }
+
+    private static boolean isWoolBlock(Block block) {
+        return block == Blocks.WHITE_WOOL
+            || block == Blocks.BLACK_WOOL
+            || block == Blocks.BLUE_WOOL
+            || block == Blocks.BROWN_WOOL
+            || block == Blocks.GRAY_WOOL
+            || block == Blocks.CYAN_WOOL
+            || block == Blocks.GREEN_WOOL
+            || block == Blocks.LIGHT_BLUE_WOOL
+            || block == Blocks.LIGHT_GRAY_WOOL
+            || block == Blocks.LIME_WOOL
+            || block == Blocks.MAGENTA_WOOL
+            || block == Blocks.ORANGE_WOOL
+            || block == Blocks.PINK_WOOL
+            || block == Blocks.PURPLE_WOOL
+            || block == Blocks.RED_WOOL
+            || block == Blocks.YELLOW_WOOL;
     }
 
     private static boolean isFortunable(Block block) {
