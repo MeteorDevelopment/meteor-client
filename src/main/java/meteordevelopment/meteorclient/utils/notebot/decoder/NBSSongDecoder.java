@@ -86,13 +86,11 @@ public class NBSSongDecoder extends SongDecoder {
             }
             tick += jumpTicks * (20f / speed);
             //System.out.println("Tick: " + tick);
-            short layer = -1;
             while (true) {
                 short jumpLayers = readShort(dataInputStream); // jumps till next layer
                 if (jumpLayers == 0) {
                     break;
                 }
-                layer += jumpLayers;
                 //System.out.println("Layer: " + layer);
                 byte instrument = dataInputStream.readByte();
 

@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.gui.tabs;
 
 import meteordevelopment.meteorclient.gui.tabs.builtin.*;
-import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.PreInit;
 

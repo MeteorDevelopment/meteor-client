@@ -24,7 +24,7 @@ import net.minecraft.particle.ParticleType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringHelper;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +78,7 @@ public class Names {
 
     public static String get(ParticleType<?> type) {
         if (!(type instanceof ParticleEffect)) return "";
-        return particleTypesNames.computeIfAbsent(type, effect1 -> WordUtils.capitalize(((ParticleEffect) effect1).asString().substring(10).replace("_", " ")));
+        return particleTypesNames.computeIfAbsent(type, effect1 -> StringUtils.capitalize(((ParticleEffect) effect1).asString().substring(10).replace("_", " ")));
     }
 
     public static String getSoundName(Identifier id) {

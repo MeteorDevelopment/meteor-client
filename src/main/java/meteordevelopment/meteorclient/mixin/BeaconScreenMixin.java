@@ -39,8 +39,8 @@ public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandle
     private void changeButtons(CallbackInfo ci) {
         if (!Modules.get().get(BetterBeacons.class).isActive()) return;
         List<StatusEffect> effects = Arrays.stream(BeaconBlockEntity.EFFECTS_BY_LEVEL).flatMap(Arrays::stream).toList();
-
-        if (MinecraftClient.getInstance().currentScreen instanceof BeaconScreen beaconScreen) {
+        MinecraftClient instance = MinecraftClient.getInstance();
+        if (instance.currentScreen instanceof BeaconScreen beaconScreen) {
             for (int x = 0; x < 3; x++) {
                 for (int y = 0; y < 2; y++) {
                     StatusEffect effect = effects.get(x * 2 + y);

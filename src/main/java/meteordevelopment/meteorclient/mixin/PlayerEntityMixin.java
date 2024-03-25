@@ -46,7 +46,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "clipAtLedge", at = @At("HEAD"), cancellable = true)
     protected void clipAtLedge(CallbackInfoReturnable<Boolean> info) {
-        if (!getWorld().isClient) return;
+        World world = getWorld();
+        if (!world.isClient) return;
 
         ClipAtLedgeEvent event = MeteorClient.EVENT_BUS.post(ClipAtLedgeEvent.get());
         if (event.isSet()) info.setReturnValue(event.isClip());
@@ -54,14 +55,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/ItemEntity;", at = @At("HEAD"), cancellable = true)
     private void onDropItem(ItemStack stack, boolean bl, boolean bl2, CallbackInfoReturnable<ItemEntity> info) {
-        if (getWorld().isClient && !stack.isEmpty()) {
+        World world = getWorld();
+        if (world.isClient && !stack.isEmpty()) {
             if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack)).isCancelled()) info.cancel();
         }
     }
 
     @ModifyReturnValue(method = "getBlockBreakingSpeed", at = @At(value = "RETURN"))
     public float onGetBlockBreakingSpeed(float breakSpeed, BlockState block) {
-        if (!getWorld().isClient) return breakSpeed;
+        World world = getWorld();
+        if (!world.isClient) return breakSpeed;
 
         SpeedMine speedMine = Modules.get().get(SpeedMine.class);
         if (!speedMine.isActive() || speedMine.mode.get() != SpeedMine.Mode.Normal || !speedMine.filter(block.getBlock())) return breakSpeed;
@@ -82,7 +85,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "jump", at = @At("HEAD"), cancellable = true)
     public void dontJump(CallbackInfo info) {
-        if (!getWorld().isClient) return;
+        World world = getWorld();
+        if (!world.isClient) return;
 
         Anchor module = Modules.get().get(Anchor.class);
         if (module.isActive() && module.cancelJump) info.cancel();
@@ -91,7 +95,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @ModifyReturnValue(method = "getMovementSpeed", at = @At("RETURN"))
     private float onGetMovementSpeed(float original) {
-        if (!getWorld().isClient) return original;
+        World world = getWorld();
+        if (!world.isClient) return original;
         if (!Modules.get().get(NoSlow.class).slowness()) return original;
 
         float walkSpeed = getAbilities().getWalkSpeed();
@@ -106,7 +111,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(method = "getOffGroundSpeed", at = @At("HEAD"), cancellable = true)
     private void onGetOffGroundSpeed(CallbackInfoReturnable<Float> info) {
-        if (!getWorld().isClient) return;
+        World world = getWorld();
+        if (!world.isClient) return;
 
         float speed = Modules.get().get(Flight.class).getOffGroundSpeed();
         if (speed != -1) info.setReturnValue(speed);
