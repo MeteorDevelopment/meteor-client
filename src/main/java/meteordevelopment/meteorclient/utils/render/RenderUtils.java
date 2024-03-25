@@ -164,12 +164,13 @@ public class RenderUtils {
             double x1 = pos.getX(), y1 = pos.getY(), z1 = pos.getZ(),
                    x2 = pos.getX() + 1, y2 = pos.getY() + 1, z2 = pos.getZ() + 1;
 
+            double d = (double) (ticks - event.tickDelta) / duration;
+
             if (fade) {
-                sideColor.a *= (double) ticks / duration;
-                lineColor.a *= (double) ticks / duration;
+                sideColor.a = (int) (sideColor.a * d);
+                lineColor.a = (int) (lineColor.a * d);
             }
             if (shrink) {
-                double d = (double) ticks / duration;
                 x1 += d; y1 += d; z1 += d;
                 x2 -= d; y2 -= d; z2 -= d;
             }
