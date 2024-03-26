@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 
+import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -14,6 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -21,6 +23,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.EntityGroup;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.BlockTags;
 
@@ -40,6 +43,13 @@ public class AutoTool extends Module {
         .build()
     );
 
+    private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
+        .name("weapon")
+        .description("What type of weapon to use.")
+        .defaultValue(Weapon.Sword)
+        .build()
+    );
+
     private final Setting<Boolean> silkTouchForEnderChest = sgGeneral.add(new BoolSetting.Builder()
         .name("silk-touch-for-ender-chest")
         .description("Mines Ender Chests only with the Silk Touch enchantment.")
@@ -50,7 +60,7 @@ public class AutoTool extends Module {
     private final Setting<Boolean> fortuneForOresCrops = sgGeneral.add(new BoolSetting.Builder()
         .name("fortune-for-ores-and-crops")
         .description("Mines Ores and crops only with the Fortune enchantment.")
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 
@@ -73,7 +83,7 @@ public class AutoTool extends Module {
 
     private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
         .name("switch-back")
-        .description("Switches your hand to whatever was selected when releasing your attack key.")
+        .description("Switches your hand to whatever was selected when releasing your attack key. (Won't work with weapons)")
         .defaultValue(false)
         .build()
     );
@@ -137,6 +147,11 @@ public class AutoTool extends Module {
         }
 
         wasPressed = mc.options.attackKey.isPressed();
+    }
+
+    @EventHandler
+    private void onAttack(AttackEntityEvent event) {
+        InvUtils.swap(getBestWeapon(EntityUtils.getGroup(event.entity)), false);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -234,6 +249,38 @@ public class AutoTool extends Module {
         return Xray.ORES.contains(block) || block instanceof CropBlock;
     }
 
+    private int getBestWeapon(EntityGroup group) {
+        int slotS = mc.player.getInventory().selectedSlot;
+        int slotA = mc.player.getInventory().selectedSlot;
+        double damageS = 0;
+        double damageA = 0;
+        double currentDamageS;
+        double currentDamageA;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.getItem() instanceof SwordItem swordItem
+                && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
+                currentDamageS = swordItem.getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(stack, group) + 2;
+                if (currentDamageS > damageS) {
+                    damageS = currentDamageS;
+                    slotS = i;
+                }
+            } else if (stack.getItem() instanceof AxeItem axeItem
+                && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
+                currentDamageA = axeItem.getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(stack, group) + 2;
+                if (currentDamageA > damageA) {
+                    damageA = currentDamageA;
+                    slotA = i;
+                }
+            }
+        }
+        if (weapon.get() == Weapon.Sword) return slotS;
+        else if (weapon.get() == Weapon.Axe) return slotA;
+        else if (weapon.get() == Weapon.Sword) return slotA;
+        else if (weapon.get() == Weapon.Axe) return slotS;
+        else return mc.player.getInventory().selectedSlot;
+    }
+
     public enum EnchantPreference {
         None,
         Fortune,
@@ -243,5 +290,10 @@ public class AutoTool extends Module {
     public enum ListMode {
         Whitelist,
         Blacklist
+    }
+
+    public enum Weapon {
+        Sword,
+        Axe
     }
 }
