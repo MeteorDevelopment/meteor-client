@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
+    "ClientBrandRetrieverMixin",
     "AbstractBlockAccessor",
     "AbstractBlockMixin",
     "AbstractBlockStateMixin",
