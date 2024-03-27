@@ -29,6 +29,12 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
     @Shadow
@@ -95,6 +101,25 @@ public abstract class WorldRendererMixin {
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
     private void onRender(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
         PostProcessShaders.endRender();
+    }
+
+    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;hasOutline(Lnet/minecraft/entity/Entity;)Z"))
+    private boolean shouldMobGlow(boolean original, @Local Entity entity) {
+    	ESP esp = Modules.get().get(ESP.class);
+    	Color entityGlowColor = esp.getColor(entity);
+    	if (entityGlowColor == null) return original;
+        return esp.isGlow() && !esp.shouldSkip(entity) || original;
+    }
+
+    @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;setColor(IIII)V"))
+    private void setGlowColor(OutlineVertexConsumerProvider instance, int red, int green, int blue, int alpha, Operation<Void> original, @Local LocalRef<Entity> entity) {
+    	ESP esp = Modules.get().get(ESP.class);
+    	Color entityGlowColor = esp.getColor(entity.get());
+        if (esp.isGlow() && !esp.shouldSkip(entity.get()) && entityGlowColor != null) {
+            instance.setColor(entityGlowColor.r, entityGlowColor.g, entityGlowColor.b, entityGlowColor.a);
+        } else {
+            original.call(instance, red, green, blue, alpha);
+        }
     }
 
     @Inject(method = "onResized", at = @At("HEAD"))
