@@ -71,6 +71,7 @@
     "CrossbowItemAccessor",
     "CustomPayloadS2CPacketMixin",
     "DefaultSkinHelperMixin",
+    "DirectConnectScreenMixin",
     "DisconnectedScreenMixin",
     "DrawContextMixin",
     "ElytraFeatureRendererMixin",

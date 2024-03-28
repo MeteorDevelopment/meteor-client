@@ -66,8 +66,25 @@ public class ServerSpoof extends Module {
         .build()
     );
 
+    public final Setting<Boolean> bypassAntiDirectConnect = sgGeneral.add(new BoolSetting.Builder()
+        .name("bypass-anti-direct-connect")
+        .description("Whether to bypass AntiDirectConnect.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Integer> bypassAntiDirectConnectDelay = sgGeneral.add(new IntSetting.Builder()
+        .name("bypass-anti-direct-connect-delay")
+        .description("How long to wait after sending SLP in milliseconds.")
+        .defaultValue(800)
+        .range(200, 3000)
+        .sliderRange(200, 3000)
+        .visible(bypassAntiDirectConnect::get)
+        .build()
+    );
+    
     public ServerSpoof() {
-        super(Categories.Misc, "server-spoof", "Spoof client brand, resource pack and channels.");
+        super(Categories.Misc, "server-spoof", "Bypass AntiDirectConnect and spoof client brand, resource pack and channels.");
 
         MeteorClient.EVENT_BUS.subscribe(new Listener());
     }
