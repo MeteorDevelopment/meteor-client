@@ -4,9 +4,11 @@ plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
-archivesBaseName = project.archives_base_name
-version = project.mod_version + (project.hasProperty("devbuild") ? ("-" + project.findProperty("devbuild")) : "")
-group = project.maven_group
+base {
+    archivesName = project.archives_base_name
+    version = project.mod_version + (project.hasProperty("devbuild") ? ("-" + project.findProperty("devbuild")) : "")
+    group = project.maven_group
+}
 
 repositories {
     maven {
@@ -110,7 +112,7 @@ processResources {
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${archivesBaseName}" }
+        rename { "${it}_${project.base.archivesName.get()}" }
     }
 
     manifest {
@@ -123,6 +125,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 
     withSourcesJar()
+    withJavadocJar()
 }
 
 remapJar {
@@ -133,15 +136,6 @@ remapJar {
 javadoc {
     options.addStringOption("Xdoclint:none", "-quiet")
     options.encoding = "UTF-8"
-}
-
-tasks.register("javadocJar", Jar) {
-    from javadoc
-    archiveClassifier.set("javadoc")
-}
-
-build {
-    dependsOn javadocJar
 }
 
 publishing {
