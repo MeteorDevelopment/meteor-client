@@ -78,4 +78,9 @@ public class MBlockPos {
         result = 31 * result + z;
         return result;
     }
+
+    @Override
+    public String toString() {
+        return this.x + ", " + this.y + ", " + this.z;
+    }
 }
