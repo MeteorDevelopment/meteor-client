@@ -227,7 +227,7 @@ public class BlockUtils {
         BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
 
         InstaMine im = Modules.get().get(InstaMine.class);
-        if (im.isActive() && im.blockPos.equals(pos) && im.shouldMine()) {
+        if (im != null && im.isActive() && im.blockPos.equals(pos) && im.shouldMine()) {
             im.sendPacket();
             return true;
         }
