@@ -139,13 +139,6 @@ public class HighwayBuilder extends Module {
         .build()
     );
 
-    private final Setting<Boolean> taskSpeedup = sgGeneral.add(new BoolSetting.Builder()
-        .name("task-shortcut")
-        .description("Shortcuts to the next task by not double checking that you actually finished it. Disable if you get errors.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Setting<Boolean> pauseOnLag = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-on-lag")
         .description("Pauses the current process while the server stops responding.")
@@ -415,7 +408,7 @@ public class HighwayBuilder extends Module {
         if (Modules.get().get(AutoEat.class).eating) return;
         if (Modules.get().get(AutoGap.class).isEating()) return;
 
-        if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1.0f) return;
+        if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 2.0f) return;
 
         count = 0;
 
@@ -928,7 +921,7 @@ public class HighwayBuilder extends Module {
                     if (b.blocksPerTick.get() == 1 || !BlockUtils.canInstaBreak(mcPos) || b.rotation.get().mine) break;
                 }
 
-                if (!it.hasNext() && BlockUtils.canInstaBreak(mcPos) && b.taskSpeedup.get()) finishedBreaking = true;
+                if (!it.hasNext() && BlockUtils.canInstaBreak(mcPos)) finishedBreaking = true;
             }
 
             if (finishedBreaking || !breaking) {
@@ -954,7 +947,7 @@ public class HighwayBuilder extends Module {
                     if (b.placementsPerTick.get() == 1) break;
                 }
 
-                if (!it.hasNext() && b.taskSpeedup.get()) finishedPlacing = true;
+                if (!it.hasNext()) finishedPlacing = true;
             }
 
             if (finishedPlacing || !placed) b.setState(nextState);
