@@ -36,7 +36,7 @@ public class CustomTextRenderer implements TextRenderer {
 
         fonts = new Font[5];
         for (int i = 0; i < fonts.length; i++) {
-            fonts[i] = new Font(buffer, (int) Math.round(18 * ((i * 0.5) + 1)));
+            fonts[i] = new Font(buffer, (int) Math.round(27 * ((i * 0.5) + 1)));
         }
     }
 
@@ -70,7 +70,7 @@ public class CustomTextRenderer implements TextRenderer {
         this.building = true;
         this.scaleOnly = scaleOnly;
 
-        this.fontScale = font.getHeight() / 18.0;
+        this.fontScale = font.getHeight() / 27.0;
         this.scale = 1 + (scale - fontScale) / fontScale;
     }
 
@@ -79,13 +79,13 @@ public class CustomTextRenderer implements TextRenderer {
         if (text.isEmpty()) return 0;
 
         Font font = building ? this.font : fonts[0];
-        return (font.getWidth(text, length) + (shadow ? 1 : 0)) * scale;
+        return (font.getWidth(text, length) + (shadow ? 1 : 0)) * scale / 1.5;
     }
 
     @Override
     public double getHeight(boolean shadow) {
         Font font = building ? this.font : fonts[0];
-        return (font.getHeight() + 1 + (shadow ? 1 : 0)) * scale;
+        return (font.getHeight() + 1 + (shadow ? 1 : 0)) * scale / 1.5;
     }
 
     @Override
@@ -98,13 +98,13 @@ public class CustomTextRenderer implements TextRenderer {
             int preShadowA = SHADOW_COLOR.a;
             SHADOW_COLOR.a = (int) (color.a / 255.0 * preShadowA);
 
-            width = font.render(mesh, text, x + fontScale * scale, y + fontScale * scale, SHADOW_COLOR, scale);
-            font.render(mesh, text, x, y, color, scale);
+            width = font.render(mesh, text, x + fontScale * scale / 1.5, y + fontScale * scale / 1.5, SHADOW_COLOR, scale / 1.5);
+            font.render(mesh, text, x, y, color, scale / 1.5);
 
             SHADOW_COLOR.a = preShadowA;
         }
         else {
-            width = font.render(mesh, text, x, y, color, scale);
+            width = font.render(mesh, text, x, y, color, scale / 1.5);
         }
 
         if (!wasBuilding) end();
