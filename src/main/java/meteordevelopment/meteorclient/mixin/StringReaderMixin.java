@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(StringReader.class)
 public class StringReaderMixin {
-    @Inject(method = "isAllowedInUnquotedString", at = @At("TAIL"), remap = false, cancellable = true)
+    @Inject(method = "isAllowedInUnquotedString", at = @At("RETURN"), remap = false, cancellable = true)
     private static void onIsAllowedInUnquotedString(char c, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(
             Character.isLetterOrDigit(c)

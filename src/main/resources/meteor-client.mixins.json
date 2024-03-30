@@ -162,6 +162,7 @@
     "StatusEffectInstanceAccessor",
     "StatusEffectInstanceMixin",
     "StringHelperMixin",
+    "StringReaderMixin",
     "SweetBerryBushBlockMixin",
     "TextHandlerAccessor",
     "TextRendererMixin",
@@ -176,8 +177,7 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor",
-    "StringReaderMixin"
+    "YggdrasilMinecraftSessionServiceAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
