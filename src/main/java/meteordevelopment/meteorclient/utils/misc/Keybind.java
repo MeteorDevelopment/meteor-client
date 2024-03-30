@@ -42,7 +42,6 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     public boolean canBindTo(boolean isKey, int value) {
-        if (isKey) return value != GLFW_KEY_ESCAPE;
         return true;
     }
 
