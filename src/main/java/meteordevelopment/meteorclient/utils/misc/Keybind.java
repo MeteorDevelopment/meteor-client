@@ -11,8 +11,6 @@ import net.minecraft.nbt.NbtCompound;
 
 import java.util.Objects;
 
-import static org.lwjgl.glfw.GLFW.*;
-
 public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     private boolean isKey;
     private int value;
