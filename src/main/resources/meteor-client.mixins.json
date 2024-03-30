@@ -176,7 +176,8 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor"
+    "YggdrasilMinecraftSessionServiceAccessor",
+    "StringReaderMixin"
   ],
   "injectors": {
     "defaultRequire": 1
