@@ -164,10 +164,10 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Setting<Boolean> itemDurability = sgPlayers.add(new BoolSetting.Builder()
-        .name("show-durability")
-        .description("Displays item durability as a percentage.")
-        .defaultValue(false)
+    private final Setting<Durability> itemDurability = sgPlayers.add(new EnumSetting.Builder<Durability>()
+        .name("durability")
+        .description("Displays item durability as either a total, percentage, or neither.")
+        .defaultValue(Durability.None)
         .visible(displayItems::get)
         .build()
     );
@@ -507,13 +507,17 @@ public class Nametags extends Module {
 
                 RenderUtils.drawItem(event.drawContext, stack, (int) x, (int) y, 2, true);
 
-                if (stack.isDamageable() && itemDurability.get()) {
+                if (stack.isDamageable() && itemDurability.get() != Durability.None) {
                     text.begin(0.75, false, true);
 
-                    int damagePercentage = Math.round(((stack.getMaxDamage() - stack.getDamage()) * 100f) / (float) stack.getMaxDamage());
+                    String damageText = switch (itemDurability.get()) {
+                        case Percentage -> String.format("%.0f%%", ((stack.getMaxDamage() - stack.getDamage()) * 100f) / (float) stack.getMaxDamage());
+                        case Total -> Integer.toString(stack.getMaxDamage() - stack.getDamage());
+                        default -> "err";
+                    };
                     Color damageColor = new Color(stack.getItemBarColor());
 
-                    text.render(damagePercentage + "%", (int) x, (int) y, damageColor.a(255), true);
+                    text.render(damageText, (int) x, (int) y, damageColor.a(255), true);
                     text.end();
                 }
 
@@ -677,6 +681,12 @@ public class Nametags extends Module {
     public enum Position {
         Above,
         OnTop
+    }
+
+    public enum Durability {
+        None,
+        Total,
+        Percentage
     }
 
     public enum DistanceColorMode {
