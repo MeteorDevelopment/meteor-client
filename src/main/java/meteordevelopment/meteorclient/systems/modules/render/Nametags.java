@@ -147,6 +147,14 @@ public class Nametags extends Module {
         .build()
     );
 
+    private final Setting<Boolean> itemDurability = sgPlayers.add(new BoolSetting.Builder()
+        .name("show-durability")
+        .description("Displays item durability as a percentage.")
+        .defaultValue(false)
+        .visible(displayItems::get)
+        .build()
+    );
+
     private final Setting<Double> itemSpacing = sgPlayers.add(new DoubleSetting.Builder()
         .name("item-spacing")
         .description("The spacing between items.")
@@ -498,6 +506,16 @@ public class Nametags extends Module {
                 ItemStack stack = getItem(player, i);
 
                 RenderUtils.drawItem(event.drawContext, stack, (int) x, (int) y, 2, true);
+
+                if (stack.isDamageable() && itemDurability.get()) {
+                    text.begin(0.75, false, true);
+
+                    int damagePercentage = Math.round(((stack.getMaxDamage() - stack.getDamage()) * 100f) / (float) stack.getMaxDamage());
+                    Color damageColor = new Color(stack.getItemBarColor());
+
+                    text.render(damagePercentage + "%", (int) x, (int) y, damageColor.a(255), true);
+                    text.end();
+                }
 
                 if (maxEnchantCount > 0 && displayEnchants.get()) {
                     text.begin(0.5 * enchantTextScale.get(), false, true);
