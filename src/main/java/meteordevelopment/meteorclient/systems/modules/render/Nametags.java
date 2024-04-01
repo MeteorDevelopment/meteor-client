@@ -147,14 +147,6 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Setting<Boolean> itemDurability = sgPlayers.add(new BoolSetting.Builder()
-        .name("show-durability")
-        .description("Displays item durability as a percentage.")
-        .defaultValue(false)
-        .visible(displayItems::get)
-        .build()
-    );
-
     private final Setting<Double> itemSpacing = sgPlayers.add(new DoubleSetting.Builder()
         .name("item-spacing")
         .description("The spacing between items.")
@@ -168,6 +160,14 @@ public class Nametags extends Module {
         .name("ignore-empty-slots")
         .description("Doesn't add spacing where an empty item stack would be.")
         .defaultValue(true)
+        .visible(displayItems::get)
+        .build()
+    );
+
+    private final Setting<Boolean> itemDurability = sgPlayers.add(new BoolSetting.Builder()
+        .name("show-durability")
+        .description("Displays item durability as a percentage.")
+        .defaultValue(false)
         .visible(displayItems::get)
         .build()
     );
