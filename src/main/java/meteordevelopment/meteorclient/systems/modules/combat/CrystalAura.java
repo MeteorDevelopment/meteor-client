@@ -1203,7 +1203,7 @@ public class CrystalAura extends Module {
 
     @Override
     public String getInfoString() {
-        return bestTarget != null && bestTargetTimer > 0 ? bestTarget.getName().toString() : null;
+        return bestTarget != null && bestTargetTimer > 0 ? EntityUtils.getName(bestTarget) : null;
     }
 
     private void findTargets() {
@@ -1234,9 +1234,9 @@ public class CrystalAura extends Module {
             if (!(entities.get().contains(entity.getType()))) continue;
 
             // Close enough to damage
-            if (entity.squaredDistanceTo(mc.player) > Math.pow(targetRange.get(), 2)) continue;
+            if (entity.squaredDistanceTo(mc.player) > targetRange.get() * targetRange.get()) continue;
 
-            targets.add((LivingEntity) entity);
+            if (entity instanceof LivingEntity livingEntity) targets.add(livingEntity);
         }
     }
 
