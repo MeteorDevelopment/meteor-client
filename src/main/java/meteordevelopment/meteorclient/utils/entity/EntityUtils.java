@@ -52,7 +52,7 @@ public class EntityUtils {
         return type == EntityType.MINECART || type == EntityType.BOAT || type == EntityType.CAMEL || type == EntityType.DONKEY || type == EntityType.HORSE || type == EntityType.LLAMA || type == EntityType.MULE || type == EntityType.PIG || type == EntityType.SKELETON_HORSE || type == EntityType.STRIDER || type == EntityType.ZOMBIE_HORSE;
     }
 
-    public static float getTotalHealth(PlayerEntity target) {
+    public static float getTotalHealth(LivingEntity target) {
         return target.getHealth() + target.getAbsorptionAmount();
     }
 
