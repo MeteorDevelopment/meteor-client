@@ -1212,11 +1212,11 @@ public class CrystalAura extends Module {
         // Living Entities
         for (Entity entity : mc.world.getEntities()) {
             // Ignore non-living
-            if (!(entity instanceof LivingEntity)) continue;
+            if (!(entity instanceof LivingEntity livingEntity)) continue;
 
             // Player
-            if (entity instanceof PlayerEntity player) {
-                if (player.getAbilities().creativeMode || entity == mc.player) continue;
+            if (livingEntity instanceof PlayerEntity player) {
+                if (player.getAbilities().creativeMode || livingEntity == mc.player) continue;
                 if (!player.isAlive() || !Friends.get().shouldAttack(player)) continue;
 
                 if (ignoreNakeds.get()) {
@@ -1231,12 +1231,12 @@ public class CrystalAura extends Module {
             }
 
             // Animals, water animals, monsters, bats, misc
-            if (!(entities.get().contains(entity.getType()))) continue;
+            if (!(entities.get().contains(livingEntity.getType()))) continue;
 
             // Close enough to damage
-            if (entity.squaredDistanceTo(mc.player) > targetRange.get() * targetRange.get()) continue;
+            if (livingEntity.squaredDistanceTo(mc.player) > targetRange.get() * targetRange.get()) continue;
 
-            if (entity instanceof LivingEntity livingEntity) targets.add(livingEntity);
+            targets.add(livingEntity);
         }
     }
 
