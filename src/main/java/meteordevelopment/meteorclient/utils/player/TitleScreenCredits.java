@@ -46,8 +46,7 @@ public abstract class TitleScreenCredits {
 
                 GithubRepo repo = credit.addon.getRepo();
                 Http.Request request = Http.get("https://api.github.com/repos/%s/branches/%s".formatted(repo.getOwnerName(), repo.branch()));
-                String auth = System.getenv("meteor.github.authorization");
-                if (auth != null && !auth.isBlank()) request.bearer(auth);
+                repo.authenticate(request);
                 HttpResponse<Response> res = request.sendJsonReponse(Response.class);
 
                 switch (res.statusCode()) {
@@ -55,7 +54,7 @@ public abstract class TitleScreenCredits {
                         String message = "Invalid authentication token for repository '%s'".formatted(repo.getOwnerName());
                         mc.getToastManager().add(new MeteorToast(Items.BARRIER, "GitHub: Unauthorized", message));
                         MeteorClient.LOG.warn(message);
-                        if (auth == null || auth.isBlank()) {
+                        if (System.getenv("meteor.github.authorization") == null) {
                             MeteorClient.LOG.info("Consider setting an authorization " +
                                 "token with the 'meteor.github.authorization' environment variable.");
                             MeteorClient.LOG.info("See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens");

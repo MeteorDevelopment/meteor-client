@@ -35,8 +35,7 @@ public class CommitsScreen extends WindowScreen {
         MeteorExecutor.execute(() -> {
             GithubRepo repo = addon.getRepo();
             Http.Request request = Http.get(String.format("https://api.github.com/repos/%s/compare/%s...%s", repo.getOwnerName(), addon.getCommit(), repo.branch()));
-            String auth = System.getenv("meteor.github.authorization");
-            if (auth != null && !auth.isBlank()) request.bearer(auth);
+            repo.authenticate(request);
             HttpResponse<Response> res = request.sendJsonReponse(Response.class);
 
             if (res.statusCode() == Http.SUCCESS) {
@@ -83,7 +82,7 @@ public class CommitsScreen extends WindowScreen {
             add(theme.horizontalSeparator()).padVertical(theme.scale(8)).expandX();
             WHorizontalList l = add(theme.horizontalList()).expandX().widget();
 
-            l.add(theme.label("Consider using an authentication token:")).expandX();
+            l.add(theme.label("Consider using an authentication token: ")).expandX();
             l.add(theme.button("Authorization Guide")).widget().action = () -> {
                 Util.getOperatingSystem().open("https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens");
             };
