@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Queue;
 
 public class Pool<T> {
