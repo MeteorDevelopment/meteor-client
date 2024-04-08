@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.utils.world;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.orbit.EventHandler;
@@ -32,11 +31,6 @@ public class BlockIterator {
     private static int hRadius, vRadius;
 
     private static boolean disableCurrent;
-
-    @PreInit
-    public static void init() {
-        MeteorClient.EVENT_BUS.subscribe(BlockIterator.class);
-    }
 
     @EventHandler(priority = EventPriority.LOWEST - 1)
     private static void onTick(TickEvent.Pre event) {
@@ -74,7 +68,7 @@ public class BlockIterator {
         hRadius = 0;
         vRadius = 0;
 
-        for (Callback callback : callbacks) callbackPool.free(callback);
+        callbackPool.freeAll(callbacks);
         callbacks.clear();
 
         for (Runnable callback : afterCallbacks) callback.run();
@@ -82,6 +76,11 @@ public class BlockIterator {
     }
 
     public static void register(int horizontalRadius, int verticalRadius, BiConsumer<BlockPos, BlockState> function) {
+        if (callbackPool.isEmpty() && callbacks.isEmpty()) {
+            // lazy initialization
+            MeteorClient.EVENT_BUS.subscribe(BlockIterator.class);
+        }
+
         hRadius = Math.max(hRadius, horizontalRadius);
         vRadius = Math.max(vRadius, verticalRadius);
 

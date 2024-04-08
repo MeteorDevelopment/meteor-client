@@ -6,6 +6,8 @@
 package meteordevelopment.meteorclient.utils.misc;
 
 import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Queue;
 
 public class Pool<T> {
@@ -16,12 +18,20 @@ public class Pool<T> {
         this.producer = producer;
     }
 
+    public synchronized boolean isEmpty() {
+        return items.isEmpty();
+    }
+
     public synchronized T get() {
-        if (items.size() > 0) return items.poll();
+        if (!items.isEmpty()) return items.poll();
         return producer.create();
     }
 
     public synchronized void free(T obj) {
         items.offer(obj);
+    }
+
+    public synchronized void freeAll(Collection<T> collection) {
+        items.addAll(collection);
     }
 }
