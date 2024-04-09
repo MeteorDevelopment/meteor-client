@@ -7,7 +7,10 @@ package meteordevelopment.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.VertexSorter;
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
@@ -247,7 +250,8 @@ public class Utils {
     }
 
     public static String getEnchantSimpleName(Enchantment enchantment, int length) {
-        return I18n.translate(enchantment.getTranslationKey()).substring(0, length);
+        String name = I18n.translate(enchantment.getTranslationKey());
+        return name.length() > length ? name.substring(0, length) : name;
     }
 
     public static boolean searchTextDefault(String text, String filter, boolean caseSensitive) {
