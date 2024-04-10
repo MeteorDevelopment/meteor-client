@@ -129,7 +129,7 @@ public class Http {
             return _send("*/*", HttpResponse.BodyHandlers.ofInputStream());
         }
 
-        public HttpResponse<InputStream> sendInputStreamReponse() {
+        public HttpResponse<InputStream> sendInputStreamResponse() {
             return _sendResponse("*/*", HttpResponse.BodyHandlers.ofInputStream());
         }
 
@@ -138,7 +138,7 @@ public class Http {
             return _send("*/*", HttpResponse.BodyHandlers.ofString());
         }
 
-        public HttpResponse<String> sendStringReponse() {
+        public HttpResponse<String> sendStringResponse() {
             return _sendResponse("*/*", HttpResponse.BodyHandlers.ofString());
         }
 
@@ -156,7 +156,7 @@ public class Http {
             return _send("application/json", JsonBodyHandler.ofJson(GSON, type));
         }
 
-        public <T> HttpResponse<T> sendJsonReponse(Type type) {
+        public <T> HttpResponse<T> sendJsonResponse(Type type) {
             return _sendResponse("*/*", JsonBodyHandler.ofJson(GSON, type));
         }
     }

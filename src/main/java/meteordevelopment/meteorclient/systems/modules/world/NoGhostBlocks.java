@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.entity.player.BreakBlockEvent;
+import meteordevelopment.meteorclient.events.entity.player.PlaceBlockEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -32,11 +33,11 @@ public class NoGhostBlocks extends Module {
     );
 
     public NoGhostBlocks() {
-        super(Categories.World, "no-ghost-blocks", "Attempts to prevent ghost blocks arising .");
+        super(Categories.World, "no-ghost-blocks", "Attempts to prevent ghost blocks arising.");
     }
 
     @EventHandler
-    public void onBreakBlock(BreakBlockEvent event) {
+    private void onBreakBlock(BreakBlockEvent event) {
         if (mc.isInSingleplayer() || !breaking.get()) return;
 
         event.cancel();
@@ -45,7 +46,10 @@ public class NoGhostBlocks extends Module {
         blockState.getBlock().onBreak(mc.world, event.blockPos, blockState, mc.player);
     }
 
-    public boolean placing() {
-        return isActive() && placing.get();
+    @EventHandler
+    private void onPlaceBlock(PlaceBlockEvent event) {
+        if (!placing.get()) return;
+
+        event.cancel();
     }
 }
