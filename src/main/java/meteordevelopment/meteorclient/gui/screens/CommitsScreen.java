@@ -36,7 +36,7 @@ public class CommitsScreen extends WindowScreen {
             GithubRepo repo = addon.getRepo();
             Http.Request request = Http.get(String.format("https://api.github.com/repos/%s/compare/%s...%s", repo.getOwnerName(), addon.getCommit(), repo.branch()));
             repo.authenticate(request);
-            HttpResponse<Response> res = request.sendJsonReponse(Response.class);
+            HttpResponse<Response> res = request.sendJsonResponse(Response.class);
 
             if (res.statusCode() == Http.SUCCESS) {
                 commits = res.body().commits;

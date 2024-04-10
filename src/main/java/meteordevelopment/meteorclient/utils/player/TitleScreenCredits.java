@@ -47,7 +47,7 @@ public abstract class TitleScreenCredits {
                 GithubRepo repo = credit.addon.getRepo();
                 Http.Request request = Http.get("https://api.github.com/repos/%s/branches/%s".formatted(repo.getOwnerName(), repo.branch()));
                 repo.authenticate(request);
-                HttpResponse<Response> res = request.sendJsonReponse(Response.class);
+                HttpResponse<Response> res = request.sendJsonResponse(Response.class);
 
                 switch (res.statusCode()) {
                     case Http.UNAUTHORIZED -> {
