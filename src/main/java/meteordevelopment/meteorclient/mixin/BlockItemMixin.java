@@ -21,9 +21,6 @@ public class BlockItemMixin {
     private void onPlace(ItemPlacementContext context, BlockState state, CallbackInfoReturnable<Boolean> info) {
         if (!context.getWorld().isClient) return;
 
-        PlaceBlockEvent event = PlaceBlockEvent.get(context.getBlockPos(), state.getBlock());
-        MeteorClient.EVENT_BUS.post(event);
-
-        if (event.isCancelled()) info.setReturnValue(true);
+        if (MeteorClient.EVENT_BUS.post(PlaceBlockEvent.get(context.getBlockPos(), state.getBlock())).isCancelled()) info.setReturnValue(true);
     }
 }
