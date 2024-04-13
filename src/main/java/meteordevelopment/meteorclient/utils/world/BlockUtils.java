@@ -29,6 +29,7 @@ import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Pair;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -36,6 +37,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -159,6 +165,7 @@ public class BlockUtils {
     }
 
     public static Direction getPlaceSide(BlockPos blockPos) {
+        ArrayList<Direction> placeableDirections = new ArrayList<>();
         for (Direction side : Direction.values()) {
             BlockPos neighbor = blockPos.offset(side);
             BlockState state = mc.world.getBlockState(neighbor);
@@ -169,7 +176,29 @@ public class BlockUtils {
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;
 
-            return side;
+            placeableDirections.add(side);
+        }
+
+        //Get the direction the player is looking at
+        Vec3d lookVec = blockPos.toCenterPos().subtract(mc.player.getEyePos());
+        //List of direction and their significance (a larger score means the player is looking more in that direction)
+        List<Pair<Direction, Double>> directionSignificance = Arrays.asList(
+            new Pair<>(Direction.WEST, -lookVec.getX()),
+            new Pair<>(Direction.EAST, lookVec.getX()),
+            new Pair<>(Direction.DOWN, -lookVec.getY()),
+            new Pair<>(Direction.UP, lookVec.getY()),
+            new Pair<>(Direction.NORTH, -lookVec.getZ()),
+            new Pair<>(Direction.SOUTH, lookVec.getZ())
+        );
+
+        // Sort the list descending based on the significance of the direction
+        Collections.sort(directionSignificance, (pair1, pair2) -> Double.compare(pair2.getRight(), pair1.getRight()));
+
+        //Return the direction the player is looking at the most and has a placeable neighbour
+        for (Pair<Direction, Double> pair : directionSignificance) {
+            if (placeableDirections.contains(pair.getLeft())) {
+                return pair.getLeft();
+            }
         }
 
         return null;
@@ -279,6 +308,10 @@ public class BlockUtils {
     public static boolean isClickable(Block block) {
         return block instanceof CraftingTableBlock
             || block instanceof AnvilBlock
+            || block instanceof LoomBlock
+            || block instanceof CartographyTableBlock
+            || block instanceof GrindstoneBlock
+            || block instanceof StonecutterBlock
             || block instanceof ButtonBlock
             || block instanceof AbstractPressurePlateBlock
             || block instanceof BlockWithEntity
