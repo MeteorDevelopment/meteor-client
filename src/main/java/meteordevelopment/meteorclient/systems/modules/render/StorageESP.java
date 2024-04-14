@@ -39,6 +39,7 @@ import java.util.List;
 
 public class StorageESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgOpened = settings.createGroup("Opened Rendering");
     private final Set<BlockPos> interactedBlocks = new HashSet<>();
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -62,12 +63,7 @@ public class StorageESP extends Module {
         .build()
     );
 
-    private final Setting<Boolean> opened = sgGeneral.add(new BoolSetting.Builder()
-        .name("hide-opened")
-        .description("Hides opened containers.")
-        .defaultValue(false)
-        .build()
-    );
+
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
@@ -158,6 +154,20 @@ public class StorageESP extends Module {
         .build()
     );
 
+    private final Setting<Boolean> hideOpened = sgOpened.add(new BoolSetting.Builder()
+        .name("hide-opened")
+        .description("Hides opened containers.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<SettingColor> openedColor = sgOpened.add(new ColorSetting.Builder()
+        .name("opened-color")
+        .description("Optional setting to change colors of opened chests, as opposed to not rendering.")
+        .defaultValue(new SettingColor(203, 90, 203, 0)) /// TRANSPARENT BY DEFAULT.
+        .build()
+    );
+
 
     private final Color lineColor = new Color(0, 0, 0, 0);
     private final Color sideColor = new Color(0, 0, 0, 0);
@@ -200,7 +210,8 @@ public class StorageESP extends Module {
         WVerticalList list = theme.verticalList();
 
         // Button to Clear Interacted Blocks
-        WButton clear = list.add(theme.button("Clear Opened Chests")).widget();
+        WButton clear = list.add(theme.button("Clear Rendering Cache")).expandX().widget();
+
         clear.action = () -> {
             interactedBlocks.clear();
         };
@@ -209,7 +220,7 @@ public class StorageESP extends Module {
 
     @EventHandler
     private void onBlockInteract(InteractBlockEvent event) {
-        if (!opened.get()) return;
+
         BlockPos pos = event.result.getBlockPos();
         BlockEntity blockEntity = mc.world.getBlockEntity(pos);
 
@@ -224,7 +235,6 @@ public class StorageESP extends Module {
                     // It's part of a double chest
                     Direction facing = state.get(ChestBlock.FACING);
                     BlockPos otherPartPos = pos.offset(chestType == ChestType.LEFT ? facing.rotateYClockwise() : facing.rotateYCounterclockwise());
-                    BlockEntity otherPart = mc.world.getBlockEntity(otherPartPos);
 
                     interactedBlocks.add(otherPartPos);
                 }
@@ -240,11 +250,19 @@ public class StorageESP extends Module {
 
         for (BlockEntity blockEntity : Utils.blockEntities()) {
             getBlockEntityColor(blockEntity);
-            if (opened.get() && interactedBlocks.contains(blockEntity.getPos())) {
-                continue;
-            }
 
-            getBlockEntityColor(blockEntity);
+            // Check if the block has been interacted with (opened)
+            if (interactedBlocks.contains(blockEntity.getPos())) {
+                if (hideOpened.get()) continue; // Skip rendering if "hideOpened" is true
+
+                // Set the color to openedColor if its alpha is greater than 0
+                // openedColor takes precedence.
+                if (openedColor.get().a > 0) {
+                    lineColor.set(openedColor.get());
+                    sideColor.set(openedColor.get());
+                    sideColor.a = fillOpacity.get(); // Maintain fill opacity setting for consistency
+                }
+            }
 
             if (render) {
                 double dist = PlayerUtils.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
@@ -270,11 +288,10 @@ public class StorageESP extends Module {
 
                 count++;
             }
-
-
         }
         if (mode.get() == Mode.Shader) PostProcessShaders.STORAGE_OUTLINE.endRender(() -> mesh.render(event.matrices));
     }
+
 
     private void renderBox(Render3DEvent event, BlockEntity blockEntity) {
         double x1 = blockEntity.getPos().getX();
