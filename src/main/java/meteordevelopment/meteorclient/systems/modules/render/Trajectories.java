@@ -27,6 +27,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
@@ -160,8 +161,8 @@ public class Trajectories extends Module {
         for (Path path : paths) path.clear();
 
         // Calculate paths
-        if (!simulator.set(entity, accurate.get(), tickDelta)) return;
-        getEmptyPath().calculate();
+        if (!simulator.set(entity, accurate.get())) return;
+        getEmptyPath().setStart(entity, tickDelta).calculate();
     }
 
     @EventHandler
@@ -189,14 +190,16 @@ public class Trajectories extends Module {
         private boolean hitQuad, hitQuadHorizontal;
         private double hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2;
 
-        private Entity entity;
+        private Entity collidingEntity;
+        public Vector3d lastPoint;
 
         public void clear() {
             for (Vector3d point : points) vec3s.free(point);
             points.clear();
 
             hitQuad = false;
-            entity = null;
+            collidingEntity = null;
+            lastPoint = null;
         }
 
         public void calculate() {
@@ -212,7 +215,16 @@ public class Trajectories extends Module {
 
                 addPoint();
             }
+        }
 
+        public Path setStart(Entity entity, double tickDelta) {
+            lastPoint = new Vector3d(
+                MathHelper.lerp(tickDelta, entity.lastRenderX, entity.getX()),
+                MathHelper.lerp(tickDelta, entity.lastRenderY, entity.getY()),
+                MathHelper.lerp(tickDelta, entity.lastRenderZ, entity.getZ())
+            );
+
+            return this;
         }
 
         private void addPoint() {
@@ -256,16 +268,14 @@ public class Trajectories extends Module {
                 points.add(Utils.set(vec3s.get(), result.getPos()));
             }
             else if (result.getType() == HitResult.Type.ENTITY) {
-                entity = ((EntityHitResult) result).getEntity();
+                collidingEntity = ((EntityHitResult) result).getEntity();
 
-                points.add(Utils.set(vec3s.get(), result.getPos()).add(0, entity.getHeight() / 2, 0));
+                points.add(Utils.set(vec3s.get(), result.getPos()).add(0, collidingEntity.getHeight() / 2, 0));
             }
         }
 
         public void render(Render3DEvent event) {
             // Render path
-            Vector3d lastPoint = null;
-
             for (Vector3d point : points) {
                 if (lastPoint != null) event.renderer.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
                 lastPoint = point;
@@ -278,12 +288,12 @@ public class Trajectories extends Module {
             }
 
             // Render entity
-            if (entity != null) {
-                double x = (entity.getX() - entity.prevX) * event.tickDelta;
-                double y = (entity.getY() - entity.prevY) * event.tickDelta;
-                double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
+            if (collidingEntity != null) {
+                double x = (collidingEntity.getX() - collidingEntity.prevX) * event.tickDelta;
+                double y = (collidingEntity.getY() - collidingEntity.prevY) * event.tickDelta;
+                double z = (collidingEntity.getZ() - collidingEntity.prevZ) * event.tickDelta;
 
-                Box box = entity.getBoundingBox();
+                Box box = collidingEntity.getBoundingBox();
                 event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
             }
         }
