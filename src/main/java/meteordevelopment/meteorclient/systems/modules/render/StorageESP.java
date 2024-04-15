@@ -249,19 +249,18 @@ public class StorageESP extends Module {
         if (mode.get() == Mode.Shader) mesh.begin();
 
         for (BlockEntity blockEntity : Utils.blockEntities()) {
+            // Check if the block has been interacted with (opened)
+            boolean interacted = interactedBlocks.contains(blockEntity.getPos());
+            if (interacted && hideOpened.get()) continue;  // Skip rendering if "hideOpened" is true
+
             getBlockEntityColor(blockEntity);
 
-            // Check if the block has been interacted with (opened)
-            if (interactedBlocks.contains(blockEntity.getPos())) {
-                if (hideOpened.get()) continue; // Skip rendering if "hideOpened" is true
-
-                // Set the color to openedColor if its alpha is greater than 0
+            // Set the color to openedColor if its alpha is greater than 0
+            if (interacted && openedColor.get().a > 0) {
                 // openedColor takes precedence.
-                if (openedColor.get().a > 0) {
-                    lineColor.set(openedColor.get());
-                    sideColor.set(openedColor.get());
-                    sideColor.a = fillOpacity.get(); // Maintain fill opacity setting for consistency
-                }
+                lineColor.set(openedColor.get());
+                sideColor.set(openedColor.get());
+                sideColor.a = fillOpacity.get(); // Maintain fill opacity setting for consistency
             }
 
             if (render) {
