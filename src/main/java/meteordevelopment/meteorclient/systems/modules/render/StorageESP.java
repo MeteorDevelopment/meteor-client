@@ -161,7 +161,7 @@ public class StorageESP extends Module {
 
     private final Setting<SettingColor> openedColor = sgOpened.add(new ColorSetting.Builder()
         .name("opened-color")
-        .description("Optional setting to change colors of opened chests, as opposed to not rendering.")
+        .description("Optional setting to change colors of opened chests, as opposed to not rendering. Disabled at zero opacity.")
         .defaultValue(new SettingColor(203, 90, 203, 0)) /// TRANSPARENT BY DEFAULT.
         .build()
     );
