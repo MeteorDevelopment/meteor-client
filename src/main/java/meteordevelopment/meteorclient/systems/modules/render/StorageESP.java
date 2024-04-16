@@ -63,8 +63,6 @@ public class StorageESP extends Module {
         .build()
     );
 
-
-
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .description("How the shapes are rendered.")
@@ -215,29 +213,29 @@ public class StorageESP extends Module {
         clear.action = () -> {
             interactedBlocks.clear();
         };
+
         return list;
     }
 
     @EventHandler
     private void onBlockInteract(InteractBlockEvent event) {
-
         BlockPos pos = event.result.getBlockPos();
         BlockEntity blockEntity = mc.world.getBlockEntity(pos);
 
-        if (blockEntity != null) {
-            interactedBlocks.add(pos);
-            if (blockEntity instanceof ChestBlockEntity) {
-                ChestBlockEntity chest = (ChestBlockEntity) blockEntity;
-                BlockState state = chest.getCachedState();
-                ChestType chestType = state.get(ChestBlock.CHEST_TYPE);
+        if (blockEntity == null) return;
 
-                if (chestType == ChestType.LEFT || chestType == ChestType.RIGHT) {
-                    // It's part of a double chest
-                    Direction facing = state.get(ChestBlock.FACING);
-                    BlockPos otherPartPos = pos.offset(chestType == ChestType.LEFT ? facing.rotateYClockwise() : facing.rotateYCounterclockwise());
+        interactedBlocks.add(pos);
+        if (blockEntity instanceof ChestBlockEntity) {
+            ChestBlockEntity chest = (ChestBlockEntity) blockEntity;
+            BlockState state = chest.getCachedState();
+            ChestType chestType = state.get(ChestBlock.CHEST_TYPE);
 
-                    interactedBlocks.add(otherPartPos);
-                }
+            if (chestType == ChestType.LEFT || chestType == ChestType.RIGHT) {
+                // It's part of a double chest
+                Direction facing = state.get(ChestBlock.FACING);
+                BlockPos otherPartPos = pos.offset(chestType == ChestType.LEFT ? facing.rotateYClockwise() : facing.rotateYCounterclockwise());
+
+                interactedBlocks.add(otherPartPos);
             }
         }
     }
