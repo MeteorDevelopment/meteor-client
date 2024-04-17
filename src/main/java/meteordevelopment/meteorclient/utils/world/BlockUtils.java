@@ -26,7 +26,6 @@ import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Pair;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -34,11 +33,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -163,8 +157,9 @@ public class BlockUtils {
 
     public static Direction getPlaceSide(BlockPos blockPos) {
         Vec3d lookVec = blockPos.toCenterPos().subtract(mc.player.getEyePos());
-        double bestRelevancy = Double.MIN_VALUE;
+        double bestRelevancy = -Double.MAX_VALUE;
         Direction bestSide = null;
+
         for (Direction side : Direction.values()) {
             BlockPos neighbor = blockPos.offset(side);
             BlockState state = mc.world.getBlockState(neighbor);
@@ -188,6 +183,7 @@ public class BlockUtils {
     public static Direction getClosestPlaceSide(BlockPos blockPos) {
         return getClosestPlaceSide(blockPos, mc.player.getEyePos());
     }
+
     public static Direction getClosestPlaceSide(BlockPos blockPos, Vec3d pos) {
         Direction closestSide = null;
         double closestDistance = Double.MAX_VALUE;
