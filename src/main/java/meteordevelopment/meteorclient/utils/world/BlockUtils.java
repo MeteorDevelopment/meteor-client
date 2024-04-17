@@ -10,10 +10,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.InstaMine;
 import meteordevelopment.meteorclient.utils.PreInit;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
-import meteordevelopment.meteorclient.utils.player.Rotations;
-import meteordevelopment.meteorclient.utils.player.SlotUtils;
+import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
@@ -165,7 +162,9 @@ public class BlockUtils {
     }
 
     public static Direction getPlaceSide(BlockPos blockPos) {
-        ArrayList<Direction> placeableDirections = new ArrayList<>();
+        Vec3d lookVec = blockPos.toCenterPos().subtract(mc.player.getEyePos());
+        double bestRelevancy = Double.MIN_VALUE;
+        Direction bestSide = null;
         for (Direction side : Direction.values()) {
             BlockPos neighbor = blockPos.offset(side);
             BlockState state = mc.world.getBlockState(neighbor);
@@ -176,32 +175,14 @@ public class BlockUtils {
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;
 
-            placeableDirections.add(side);
-        }
-
-        //Get the direction the player is looking at
-        Vec3d lookVec = blockPos.toCenterPos().subtract(mc.player.getEyePos());
-        //List of direction and their significance (a larger score means the player is looking more in that direction)
-        List<Pair<Direction, Double>> directionSignificance = Arrays.asList(
-            new Pair<>(Direction.WEST, -lookVec.getX()),
-            new Pair<>(Direction.EAST, lookVec.getX()),
-            new Pair<>(Direction.DOWN, -lookVec.getY()),
-            new Pair<>(Direction.UP, lookVec.getY()),
-            new Pair<>(Direction.NORTH, -lookVec.getZ()),
-            new Pair<>(Direction.SOUTH, lookVec.getZ())
-        );
-
-        // Sort the list descending based on the significance of the direction
-        Collections.sort(directionSignificance, (pair1, pair2) -> Double.compare(pair2.getRight(), pair1.getRight()));
-
-        //Return the direction the player is looking at the most and has a placeable neighbour
-        for (Pair<Direction, Double> pair : directionSignificance) {
-            if (placeableDirections.contains(pair.getLeft())) {
-                return pair.getLeft();
+            double relevancy = side.getAxis().choose(lookVec.getX(), lookVec.getY(), lookVec.getZ()) * side.getDirection().offset();
+            if (relevancy > bestRelevancy) {
+                bestRelevancy = relevancy;
+                bestSide = side;
             }
         }
 
-        return null;
+        return bestSide;
     }
 
     public static Direction getClosestPlaceSide(BlockPos blockPos) {
