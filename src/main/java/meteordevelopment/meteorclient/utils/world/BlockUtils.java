@@ -10,10 +10,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.InstaMine;
 import meteordevelopment.meteorclient.utils.PreInit;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
-import meteordevelopment.meteorclient.utils.player.Rotations;
-import meteordevelopment.meteorclient.utils.player.SlotUtils;
+import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
@@ -159,6 +156,10 @@ public class BlockUtils {
     }
 
     public static Direction getPlaceSide(BlockPos blockPos) {
+        Vec3d lookVec = blockPos.toCenterPos().subtract(mc.player.getEyePos());
+        double bestRelevancy = -Double.MAX_VALUE;
+        Direction bestSide = null;
+
         for (Direction side : Direction.values()) {
             BlockPos neighbor = blockPos.offset(side);
             BlockState state = mc.world.getBlockState(neighbor);
@@ -169,15 +170,20 @@ public class BlockUtils {
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;
 
-            return side;
+            double relevancy = side.getAxis().choose(lookVec.getX(), lookVec.getY(), lookVec.getZ()) * side.getDirection().offset();
+            if (relevancy > bestRelevancy) {
+                bestRelevancy = relevancy;
+                bestSide = side;
+            }
         }
 
-        return null;
+        return bestSide;
     }
 
     public static Direction getClosestPlaceSide(BlockPos blockPos) {
         return getClosestPlaceSide(blockPos, mc.player.getEyePos());
     }
+
     public static Direction getClosestPlaceSide(BlockPos blockPos, Vec3d pos) {
         Direction closestSide = null;
         double closestDistance = Double.MAX_VALUE;
@@ -279,6 +285,10 @@ public class BlockUtils {
     public static boolean isClickable(Block block) {
         return block instanceof CraftingTableBlock
             || block instanceof AnvilBlock
+            || block instanceof LoomBlock
+            || block instanceof CartographyTableBlock
+            || block instanceof GrindstoneBlock
+            || block instanceof StonecutterBlock
             || block instanceof ButtonBlock
             || block instanceof AbstractPressurePlateBlock
             || block instanceof BlockWithEntity
