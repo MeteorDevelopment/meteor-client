@@ -22,6 +22,13 @@ import java.util.Map;
 import java.util.Objects;
 
 public class Waypoint implements ISerializable<Waypoint> {
+    // enum to store our Waypoints Type
+    public enum Type {
+        PLAYER_CREATED,
+        DEATH
+    }
+    private Type type;
+
     public final Settings settings = new Settings();
 
     private final SettingGroup sgVisual = settings.createGroup("Visual");
@@ -93,7 +100,15 @@ public class Waypoint implements ISerializable<Waypoint> {
         .build()
     );
 
-    private Waypoint() {}
+    private Waypoint(Type type) {
+        this.type = type;
+    }
+
+    // Getter for type
+    public Type getType() {
+        return type;
+    }
+
     public Waypoint(NbtElement tag) {
         fromTag((NbtCompound) tag);
     }
@@ -140,6 +155,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         private String name = "", icon = "";
         private BlockPos pos = BlockPos.ORIGIN;
         private Dimension dimension = Dimension.Overworld;
+        private Type type = Type.PLAYER_CREATED;
 
         public Builder name(String name) {
             this.name = name;
@@ -161,8 +177,15 @@ public class Waypoint implements ISerializable<Waypoint> {
             return this;
         }
 
+        public Builder type(Type type) {
+            this.type = type;
+            return this;
+        }
+
+
+
         public Waypoint build() {
-            Waypoint waypoint = new Waypoint();
+            Waypoint waypoint = new Waypoint(type);
 
             if (!name.equals(waypoint.name.getDefaultValue())) waypoint.name.set(name);
             if (!icon.equals(waypoint.icon.getDefaultValue())) waypoint.icon.set(icon);

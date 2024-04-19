@@ -161,6 +161,7 @@ public class WaypointsModule extends Module {
                 .icon("skull")
                 .pos(BlockPos.ofFloored(deathPos).up(2))
                 .dimension(PlayerUtils.getDimension())
+                .type(Waypoint.Type.DEATH)
                 .build();
 
             Waypoints.get().add(waypoint);
@@ -175,7 +176,7 @@ public class WaypointsModule extends Module {
         ListIterator<Waypoint> wps = Waypoints.get().iteratorReverse();
         while (wps.hasPrevious()) {
             Waypoint wp = wps.previous();
-            if (wp.name.get().startsWith("Death ") && "skull".equals(wp.icon.get())) {
+            if (wp.getType() == Waypoint.Type.DEATH) {
                 oldWpC++;
                 if (oldWpC > max)
                     Waypoints.get().remove(wp);
