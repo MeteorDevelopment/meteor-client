@@ -73,7 +73,7 @@ public class Criticals extends Module {
                     sendPacket(0.0625);
                     sendPacket(0);
                 }
-                case Bypass -> {
+                case NCP_Packet -> {
                     sendPacket(0.11);
                     sendPacket(0.1100013579);
                     sendPacket(0.0000013579);
@@ -142,8 +142,13 @@ public class Criticals extends Module {
 
     public enum Mode {
         Packet,
-        Bypass,
+        NCP_Packet,
         Jump,
-        MiniJump
+        MiniJump;
+
+        @Override
+	    public String toString() {
+		    return super.toString().replace('_', ' ');
+	    }
     }
 }
