@@ -95,6 +95,7 @@ public abstract class Names {
     }
 
     public static String get(ItemStack stack) {
-        return !stack.getComponents().isEmpty() && stack.getNbt().contains("display", NbtElement.COMPOUND_TYPE) ? stack.getName().getString() : I18n.translate(stack.getTranslationKey());
+        //return !stack.getComponents().isEmpty() && stack.getNbt().contains("display", NbtElement.COMPOUND_TYPE) ? stack.getName().getString() : I18n.translate(stack.getTranslationKey());
+        return stack.getName().getString(); // pretty sure this is the same as it was
     }
 }

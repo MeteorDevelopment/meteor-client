@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.mixin.EntityEffectParticleEffectAccessor;
 import meteordevelopment.meteorclient.mixin.LivingEntityAccessor;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.PreInit;
@@ -22,6 +23,7 @@ import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.particle.EntityEffectParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
@@ -45,6 +47,7 @@ public class StatusEffectBruteForce {
     private static final Map<LivingEntity, EntityEffectCache> PLAYER_EFFECT_MAP = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectMap<IntObjectPair<MutableParticleColor>, Map<RegistryEntry<StatusEffect>, StatusEffectInstance>> EFFECT_CACHE_MAP = new Object2ObjectOpenHashMap<>();
     private static final Set<IntObjectPair<MutableParticleColor>> NULL_COLORS = new ObjectOpenHashSet<>();
+    private static final Map<Integer, StatusEffect> COLOURS = new Object2ObjectArrayMap<>();
 
     // status effects
 
@@ -106,12 +109,14 @@ public class StatusEffectBruteForce {
         for (var statusEffectEntry : Registries.STATUS_EFFECT.getEntrySet()) {
             if (statusEffectEntry.getValue().isInstant()) continue;
             IntObjectPair<MutableParticleColor> cacheKey = new IntObjectImmutablePair<>(statusEffectEntry.getValue().getColor(), MutableParticleColor.EMPTY);
-            EFFECT_CACHE_MAP.put(cacheKey, Map.of(statusEffectEntry.getValue(), new StatusEffectInstance(statusEffectEntry.getValue())));
+            EFFECT_CACHE_MAP.put(cacheKey, Map.of(Registries.STATUS_EFFECT.getEntry(statusEffectEntry.getValue()), new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(statusEffectEntry.getValue()))));
 
             // Primitive modded compat
             if (!statusEffectEntry.getKey().getValue().getNamespace().equals("minecraft")) {
-                ALL_ENTRIES.add(StatusEffectEntry.of(statusEffectEntry.getValue(), 1));
+                ALL_ENTRIES.add(StatusEffectEntry.of(Registries.STATUS_EFFECT.getEntry(statusEffectEntry.getValue()), 1));
             }
+
+            COLOURS.put(statusEffectEntry.getValue().getColor(), statusEffectEntry.getValue()); // lol
         }
     }
 
@@ -119,11 +124,24 @@ public class StatusEffectBruteForce {
      * Creates {@link EntityEffectCache} if missing, updates it if required.
      */
     public static EntityEffectCache fetch(LivingEntity entity) {
+        /*
         int particleColor = entity.getDataTracker().get(POTION_SWIRLS_COLOR);
         if (isEmpty(particleColor)) return null;
         EntityEffectCache container = PLAYER_EFFECT_MAP.computeIfAbsent(entity, o -> new EntityEffectCache());
         if (particleColor != container.particleColor) update(particleColor, entity, container);
         return container;
+
+         */
+
+        List<ParticleEffect> particleColor = entity.getDataTracker().get(POTION_SWIRLS_COLOR);
+        EntityEffectCache cache = new EntityEffectCache();
+
+        for (ParticleEffect effect : particleColor) {
+            effect = (EntityEffectParticleEffect) effect; // guh
+            cache.add(Registries.STATUS_EFFECT.getEntry(COLOURS.get(((EntityEffectParticleEffectAccessor) effect).getColor())));
+        }
+
+        return cache;
     }
 
     private static void update(int particleColor, LivingEntity entity, EntityEffectCache container) {
@@ -140,11 +158,11 @@ public class StatusEffectBruteForce {
         } else {
             // find status effects based on entity flags
             if (entity.isGlowing()) {
-                initialColor.add(StatusEffects.GLOWING);
+                initialColor.add(StatusEffects.GLOWING.value());
                 container.add(StatusEffects.GLOWING);
             }
             if (entity.isInvisible()) {
-                initialColor.add(StatusEffects.INVISIBILITY);
+                initialColor.add(StatusEffects.INVISIBILITY.value());
                 container.add(StatusEffects.INVISIBILITY);
             }
 
@@ -164,11 +182,11 @@ public class StatusEffectBruteForce {
         // find status effects based on tracked attributes
         AttributeContainer attributes = entity.getAttributes();
         for (var modifier : possibleModifiers) {
-            if (attributes.hasModifierForAttribute(modifier.attribute(), modifier.id())) {
-                double value = attributes.getModifierValue(modifier.attribute(), modifier.id());
+            if (attributes.hasModifierForAttribute(Registries.ATTRIBUTE.getEntry(modifier.attribute()), modifier.id())) {
+                double value = attributes.getModifierValue(Registries.ATTRIBUTE.getEntry(modifier.attribute()), modifier.id());
                 int amplifier = (int) Math.round(value / modifier.value());
                 initialColor.add(modifier.effect(), amplifier);
-                container.add(modifier.effect(), amplifier);
+                container.add(Registries.STATUS_EFFECT.getEntry(modifier.effect()), amplifier);
             }
         }
 
@@ -188,7 +206,7 @@ public class StatusEffectBruteForce {
     }
 
     @Nullable
-    private static Map<StatusEffect, StatusEffectInstance> bruteForce(Set<StatusEffectEntry> entries, MutableParticleColor initialColor, int particleColor) {
+    private static Map<RegistryEntry<StatusEffect>, StatusEffectInstance> bruteForce(Set<StatusEffectEntry> entries, MutableParticleColor initialColor, int particleColor) {
         int maxDepth = Config.get().heuristicDepth.get();
         for (int depth = 2; depth <= maxDepth; depth++) {
             for (var combination : Sets.combinations(entries, depth)) {
@@ -197,7 +215,7 @@ public class StatusEffectBruteForce {
                     // If the amplifiers of all applied effects match, then it cannot be inferred and should be assumed to be 1
                     boolean assumeLowestAmplifier = combination.stream().mapToInt(o -> o.amplifier).reduce((i1, i2) -> i1 == i2 ? i1 : -1).orElse(-1) != -1;
 
-                    Map<StatusEffect, StatusEffectInstance> map = new Reference2ObjectOpenHashMap<>();
+                    Map<RegistryEntry<StatusEffect>, StatusEffectInstance> map = new Reference2ObjectOpenHashMap<>();
 
                     for (var entry : combination) {
                         map.put(entry.effect, new StatusEffectInstance(entry.effect, 0, assumeLowestAmplifier ? 0 : entry.amplifier - 1));

@@ -9,12 +9,15 @@ import com.google.common.collect.Multimap;
 import meteordevelopment.meteorclient.mixin.ShulkerEntityAccessor;
 import meteordevelopment.meteorclient.mixininterface.IAttributeContainer;
 import meteordevelopment.meteorclient.mixininterface.IEntityAttributeInstance;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.mob.ShulkerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -29,12 +32,19 @@ public abstract class EntityAttributeHelper {
         // Equipment
         for (var equipmentSlot : EquipmentSlot.values()) {
             ItemStack stack = entity.getEquippedStack(equipmentSlot);
-            attributes.addTemporaryModifiers(stack.getAttributeModifiers(equipmentSlot));
+            //attributes.addTemporaryModifiers(stack.getAttributeModifiers(equipmentSlot));
+            stack.applyAttributeModifiers(equipmentSlot, (attribute, modifier) -> {
+                EntityAttributeInstance entityAttributeInstance = attributes.getCustomInstance(attribute);
+                if (entityAttributeInstance != null) {
+                    entityAttributeInstance.removeModifier(modifier.uuid());
+                    entityAttributeInstance.addTemporaryModifier(modifier);
+                }
+            });
         }
 
         // Status effects
         for (var statusEffect : StatusEffectHelper.getStatusEffects(entity)) {
-            statusEffect.getEffectType().onApplied(attributes, statusEffect.getAmplifier());
+            statusEffect.getEffectType().value().onApplied(attributes, statusEffect.getAmplifier());
         }
 
         handleSpecialCases(entity, attributes::getCustomInstance);
@@ -46,9 +56,9 @@ public abstract class EntityAttributeHelper {
     }
 
     /**
-     * @see LivingEntity#getAttributeInstance(EntityAttribute)
+     * @see LivingEntity#getAttributeInstance(RegistryEntry)
      */
-    public static EntityAttributeInstance getAttributeInstance(LivingEntity entity, EntityAttribute attribute) {
+    public static EntityAttributeInstance getAttributeInstance(LivingEntity entity, RegistryEntry<EntityAttribute> attribute) {
         double baseValue = getDefaultForEntity(entity).getBaseValue(attribute);
         EntityAttributeInstance attributeInstance = new EntityAttributeInstance(attribute, o1 -> {});
         attributeInstance.setBaseValue(baseValue);
@@ -58,6 +68,9 @@ public abstract class EntityAttributeHelper {
             ItemStack stack = entity.getEquippedStack(equipmentSlot);
             Multimap<EntityAttribute, EntityAttributeModifier> modifiers = stack.getAttributeModifiers(equipmentSlot);
             for (var modifier : modifiers.get(attribute)) attributeInstance.addTemporaryModifier(modifier);
+
+            AttributeModifiersComponent attributeModifiersComponent = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
+
         }
 
         // Status effects
@@ -76,13 +89,13 @@ public abstract class EntityAttributeHelper {
     }
 
     /**
-     * @see LivingEntity#getAttributeValue(EntityAttribute)
+     * @see LivingEntity#getAttributeValue(RegistryEntry)
      */
-    public static double getAttributeValue(LivingEntity entity, EntityAttribute attribute) {
+    public static double getAttributeValue(LivingEntity entity, RegistryEntry<EntityAttribute> attribute) {
         return getAttributeInstance(entity, attribute).getValue();
     }
 
-    private static void handleSpecialCases(LivingEntity entity, Function<EntityAttribute, EntityAttributeInstance> consumer) {
+    private static void handleSpecialCases(LivingEntity entity, Function<RegistryEntry<EntityAttribute>, EntityAttributeInstance> consumer) {
         if (entity instanceof ShulkerEntity shulkerEntity) {
             if (shulkerEntity.getDataTracker().get(ShulkerEntityAccessor.meteor$getPeekAmount()) == 0) {
                 @Nullable EntityAttributeInstance attributeInstance = consumer.apply(EntityAttributes.GENERIC_ARMOR);

@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
+import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Style;
@@ -32,6 +33,14 @@ public abstract class ScreenMixin {
     private void onRenderBackground(CallbackInfo info) {
         if (Utils.canUpdate() && Modules.get().get(NoRender.class).noGuiBackground())
             info.cancel();
+    }
+
+    @Inject(method = "handleTextClick", at = @At(value = "HEAD"), cancellable = true)
+    private void onInvalidClickEvent(Style style, CallbackInfoReturnable<Boolean> cir) {
+        if (!(style.getClickEvent() instanceof RunnableClickEvent runnableClickEvent)) return;
+
+        runnableClickEvent.runnable.run();
+        cir.setReturnValue(true);
     }
 
     @Inject(method = "handleTextClick", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", ordinal = 1, remap = false), cancellable = true)

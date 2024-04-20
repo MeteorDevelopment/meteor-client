@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DamageEvent;
@@ -29,6 +30,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
@@ -66,13 +68,15 @@ public abstract class LivingEntityMixin extends Entity {
         return event.walkOnFluid;
     }
 
-    @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasNoGravity()Z"))
-    private boolean travelHasNoGravityProxy(LivingEntity self) {
-        if (activeStatusEffects.containsKey(StatusEffects.LEVITATION) && Modules.get().get(PotionSpoof.class).shouldBlock(StatusEffects.LEVITATION)) {
+    /* todo need to fix this
+    @ModifyExpressionValue(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getFinalGravity()D"))
+    private double travelHasNoGravityProxy(double original) {
+        if (activeStatusEffects.containsKey(StatusEffects.LEVITATION) && Modules.get().get(PotionSpoof.class).shouldBlock(StatusEffects.LEVITATION.value())) {
             return !Modules.get().get(PotionSpoof.class).applyGravity.get();
         }
-        return self.hasNoGravity();
+        return original;
     }
+     */
 
     @Inject(method = "spawnItemParticles", at = @At("HEAD"), cancellable = true)
     private void spawnItemParticles(ItemStack stack, int count, CallbackInfo info) {
@@ -125,8 +129,8 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @ModifyReturnValue(method = "hasStatusEffect", at = @At("RETURN"))
-    private boolean hasStatusEffect(boolean original, StatusEffect effect) {
-        if (Modules.get().get(PotionSpoof.class).shouldBlock(effect)) return false;
+    private boolean hasStatusEffect(boolean original, RegistryEntry<StatusEffect> effect) {
+        if (Modules.get().get(PotionSpoof.class).shouldBlock(effect.value())) return false;
 
         return original;
     }

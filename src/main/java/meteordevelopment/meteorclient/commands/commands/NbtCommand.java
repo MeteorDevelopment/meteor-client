@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.component.ComponentMap;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
@@ -99,7 +100,7 @@ public class NbtCommand extends Command {
                 text.append(copyButton);
 
                 if (components == null) text.append("{}");
-                else text.append(" ").append(NbtHelper.toPrettyPrintedText(components));
+                else text.append(" ").append(Text.of(components.toString()));
 
                 info(text);
             }
@@ -137,7 +138,9 @@ public class NbtCommand extends Command {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
-                stack.applyComponentsFrom(CompoundNbtTagArgumentType.create().parse(new StringReader(mc.keyboard.getClipboard())));
+                NbtCompound nbt = CompoundNbtTagArgumentType.create().parse(new StringReader(mc.keyboard.getClipboard()));
+                NbtComponent component = NbtComponent.of(nbt);
+                stack.applyComponentsFrom(component);
                 setStack(stack);
             }
 

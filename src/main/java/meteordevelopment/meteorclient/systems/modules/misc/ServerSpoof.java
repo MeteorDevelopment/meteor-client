@@ -5,16 +5,15 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import io.netty.buffer.Unpooled;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.BrandCustomPayload;
 import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.c2s.common.ResourcePackStatusC2SPacket;
 import net.minecraft.network.packet.s2c.common.ResourcePackSendS2CPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -69,49 +68,63 @@ public class ServerSpoof extends Module {
     public ServerSpoof() {
         super(Categories.Misc, "server-spoof", "Spoof client brand, resource pack and channels.");
 
-        MeteorClient.EVENT_BUS.subscribe(new Listener());
+        runInMainMenu = true;
     }
 
-    private class Listener {
-        @EventHandler
-        private void onPacketSend(PacketEvent.Send event) {
-            if (!isActive()) return;
-            if (!(event.packet instanceof CustomPayloadC2SPacket)) return;
-            Identifier id = ((CustomPayloadC2SPacket) event.packet).payload().getId().id();
+    @EventHandler
+    private void onPacketSend(PacketEvent.Send event) {
+        if (!isActive() || !(event.packet instanceof CustomPayloadC2SPacket)) return;
+        Identifier id = ((CustomPayloadC2SPacket) event.packet).payload().getId().id();
 
-            if (spoofBrand.get() && id.equals(BrandCustomPayload.ID.id()))
-                event.packet.write(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
+        if (spoofBrand.get() && id.equals(BrandCustomPayload.ID.id()))
+            event.packet = new CustomPayloadC2SPacket(new BrandCustomPayload(brand.get()));
 
-            if (blockChannels.get()) {
-                for (String channel : channels.get()) {
-                    if (StringUtils.containsIgnoreCase(channel, id.toString())) {
-                        event.cancel();
-                        return;
-                    }
+        if (blockChannels.get()) {
+            for (String channel : channels.get()) {
+                if (StringUtils.containsIgnoreCase(id.toString(), channel)) {
+                    event.cancel();
+                    return;
                 }
             }
         }
+    }
 
-        @EventHandler
-        private void onPacketRecieve(PacketEvent.Receive event) {
-            if (!isActive()) return;
+    @EventHandler
+    private void onPacketReceive(PacketEvent.Receive event) {
+        if (!isActive()) return;
 
-            if (resourcePack.get()) {
-                if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
-                event.cancel();
-                MutableText msg = Text.literal("This server has ");
-                msg.append(packet.required() ? "a required " : "an optional ");
-                MutableText link = Text.literal("resource pack");
-                link.setStyle(link.getStyle()
-                    .withColor(Formatting.BLUE)
-                    .withUnderline(true)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.url()))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
-                );
-                msg.append(link);
-                msg.append(".");
-                info(msg);
-            }
+        if (resourcePack.get()) {
+            if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
+            event.cancel();
+
+            MutableText msg = Text.literal("This server has ");
+            msg.append(packet.required() ? "a required " : "an optional ").append("resource pack. ");
+
+            MutableText link = Text.literal("[Download]");
+            link.setStyle(link.getStyle()
+                .withColor(Formatting.BLUE)
+                .withUnderline(true)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.url()))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
+            );
+
+            // todo test resource pack acceptance and implement this
+            /*MutableText acceptance = Text.literal("[Spoof Acceptance]");
+            link.setStyle(link.getStyle()
+                .withColor(Formatting.DARK_GREEN)
+                .withUnderline(true)
+                .withClickEvent(new RunnableClickEvent(() -> {
+                    event.connection.send(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.ACCEPTED));
+                    event.connection.send(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED));
+                }))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to spoof accepting the recourse pack.")))
+            );
+
+             */
+
+            msg.append(link);
+            msg.append(".");
+            info(msg);
         }
     }
 }

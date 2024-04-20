@@ -47,8 +47,9 @@ public class EditBookTitleAndAuthorScreen extends WindowScreen {
         t.row();
 
         t.add(theme.button("Done")).expandX().widget().action = () -> {
-            itemStack.getNbt().putString("author", author.get());
-            itemStack.getNbt().putString("title", title.get());
+            WrittenBookContentComponent component = itemStack.get(DataComponentTypes.WRITTEN_BOOK_CONTENT);
+            WrittenBookContentComponent newComponent = new WrittenBookContentComponent(RawFilteredPair.of(title.get()), author.get(), component.generation(), component.pages(), component.resolved());
+            itemStack.set(DataComponentTypes.WRITTEN_BOOK_CONTENT, newComponent);
 
             BookScreen.Contents contents = new BookScreen.Contents(itemStack.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).getPages(mc.shouldFilterText()));
             List<String> pages = new ArrayList<>(contents.getPageCount());

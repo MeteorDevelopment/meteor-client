@@ -217,6 +217,13 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    private final Setting<Boolean> upgrades = sgHideFlags.add(new BoolSetting.Builder()
+        .name("armor-trim")
+        .description("Show armor trims when it's hidden.")
+        .defaultValue(false)
+        .build()
+    );
+
     public BetterTooltips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
     }
@@ -351,13 +358,15 @@ public class BetterTooltips extends Module {
 
     @EventHandler
     private void onSectionVisible(SectionVisibleEvent event) {
-        if (enchantments.get() && event.section == ItemStack.TooltipSection.ENCHANTMENTS ||
-            modifiers.get() && event.section == ItemStack.TooltipSection.MODIFIERS ||
-            unbreakable.get() && event.section == ItemStack.TooltipSection.UNBREAKABLE ||
-            canDestroy.get() && event.section == ItemStack.TooltipSection.CAN_DESTROY ||
-            canPlaceOn.get() && event.section == ItemStack.TooltipSection.CAN_PLACE ||
-            additional.get() && event.section == ItemStack.TooltipSection.ADDITIONAL ||
-            dye.get() && event.section == ItemStack.TooltipSection.DYE)
+        // todo investigate how section visibility works now
+        if (enchantments.get() && event.section == DataComponentTypes.STORED_ENCHANTMENTS ||
+            modifiers.get() && event.section == DataComponentTypes.ATTRIBUTE_MODIFIERS ||
+            unbreakable.get() && event.section == DataComponentTypes.UNBREAKABLE ||
+            canDestroy.get() && event.section == DataComponentTypes.CAN_BREAK ||
+            canPlaceOn.get() && event.section == DataComponentTypes.CAN_PLACE_ON ||
+            //additional.get() && event.section == ItemStack.TooltipSection.ADDITIONAL ||
+            dye.get() && event.section == DataComponentTypes.DYED_COLOR ||
+            upgrades.get() && event.section == DataComponentTypes.TRIM)
             event.visible = true;
     }
 

@@ -85,7 +85,11 @@ public abstract class NametagUtils {
 
     public static void begin(Vector3d pos, DrawContext drawContext) {
         begin(pos);
-        begin(drawContext.getMatrices(), pos);
+
+        MatrixStack matrices = drawContext.getMatrices();
+        matrices.push();
+        matrices.translate((float) pos.x, (float) pos.y, 0);
+        matrices.scale((float) scale, (float) scale, 1);
     }
 
     private static void begin(Matrix4fStack matrices, Vector3d pos) {

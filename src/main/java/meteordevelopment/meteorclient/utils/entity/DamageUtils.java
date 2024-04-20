@@ -132,7 +132,7 @@ public abstract class DamageUtils {
      * @see PlayerEntity#attack(Entity)
      */
     public static float getAttackDamage(LivingEntity attacker, LivingEntity target) {
-        float itemDamage = (float) EntityAttributeHelper.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE.value());
+        float itemDamage = (float) EntityAttributeHelper.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE);
 
         // Get enchant damage
         ItemStack stack = attacker.getStackInHand(attacker.getActiveHand());
@@ -204,7 +204,7 @@ public abstract class DamageUtils {
         }
 
         // Armor reduction
-        damage = DamageUtil.getDamageLeft(damage, damageSource, getArmor(entity), (float) EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS.value()));
+        damage = DamageUtil.getDamageLeft(damage, damageSource, getArmor(entity), (float) EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
 
         // Resistance reduction
         damage = resistanceReduction(entity, damage);
@@ -216,13 +216,13 @@ public abstract class DamageUtils {
     }
 
     private static float getArmor(LivingEntity entity) {
-        return (float) Math.floor(EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR.value()));
+        return (float) Math.floor(EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR));
     }
 
     /**
      * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
      */
-    private static float protectionReduction(Entity player, float damage, DamageSource source) {
+    private static float protectionReduction(LivingEntity player, float damage, DamageSource source) {
         int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), source);
         return DamageUtil.getInflictedDamage(damage, protLevel);
     }

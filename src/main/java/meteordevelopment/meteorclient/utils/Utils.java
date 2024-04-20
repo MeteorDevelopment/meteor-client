@@ -38,8 +38,10 @@ import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
@@ -147,9 +149,8 @@ public abstract class Utils {
                 ? itemStack.get(DataComponentTypes.STORED_ENCHANTMENTS).getEnchantments()
                 : itemStack.getEnchantments().getEnchantments();
 
-            for (int i = 0; i < itemEnchantments.size(); ++i) {
-                NbtCompound tag = itemEnchantments.getCompound(i);
-                Registries.ENCHANTMENT.getOrEmpty(Identifier.tryParse(tag.getString("id"))).ifPresent(enchantment -> itemEnchantments.add(enchantment, tag.getInt("lvl")));
+            for (RegistryEntry<Enchantment> itemEnchantment : itemEnchantments) {
+                enchantments.put(itemEnchantment.value(), itemStack.getEnchantments().getLevel(itemEnchantment.value()));
             }
         }
     }
@@ -218,11 +219,12 @@ public abstract class Utils {
             NbtComponent nbt2 = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
 
             if (nbt2.contains("Items")) {
-                NbtList nbt3 = (NbtList) nbt2.get("Items");
+                NbtList nbt3 = (NbtList) nbt2.getNbt().get("Items");
 
                 for (int i = 0; i < nbt3.size(); i++) {
                     int slot = nbt3.getCompound(i).getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
-                    if (slot >= 0 && slot < items.length) items[slot] = ItemStack.fromNbt(nbt3.getCompound(i));
+                    // now NPEs when mc.world == null
+                    if (slot >= 0 && slot < items.length) items[slot] = ItemStack.fromNbtOrEmpty(mc.player.getRegistryManager(), nbt3.getCompound(i));
                 }
             }
         }
@@ -243,7 +245,7 @@ public abstract class Utils {
     }
 
     public static boolean hasItems(ItemStack itemStack) {
-        NbtCompound compoundTag = itemStack.getSubNbt("BlockEntityTag");
+        NbtCompound compoundTag = itemStack.getComponents().get(DataComponentTypes.BLOCK_ENTITY_DATA).getNbt();
 //        itemStack.getComponents().get(DataComponentTypes.CONTAINER).???
         return compoundTag != null && compoundTag.contains("Items", 9);
     }
@@ -493,59 +495,18 @@ public abstract class Utils {
     }
 
     public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
-        NbtCompound tag = itemStack.getOrCreateNbt();
-        NbtList listTag;
+        ItemEnchantmentsComponent.Builder b = new ItemEnchantmentsComponent.Builder(EnchantmentHelper.getEnchantments(itemStack));
+        b.add(enchantment, level);
 
-        // Get list tag
-        if (!tag.contains("Enchantments", 9)) {
-            listTag = new NbtList();
-            tag.put("Enchantments", listTag);
-        } else {
-            listTag = tag.getList("Enchantments", 10);
-        }
-
-        // Check if item already has the enchantment and modify the level
-        String enchId = Registries.ENCHANTMENT.getId(enchantment).toString();
-
-        for (NbtElement _t : listTag) {
-            NbtCompound t = (NbtCompound) _t;
-
-            if (t.getString("id").equals(enchId)) {
-                t.putShort("lvl", (short) level);
-                return;
-            }
-        }
-
-        // Add the enchantment if it doesn't already have it
-        NbtCompound enchTag = new NbtCompound();
-        enchTag.putString("id", enchId);
-        enchTag.putShort("lvl", (short) level);
-
-        listTag.add(enchTag);
+        EnchantmentHelper.set(itemStack, b.build());
     }
 
     public static void clearEnchantments(ItemStack itemStack) {
-        ComponentMap components = itemStack.getComponents();
-        if (components != null) components.remove("Enchantments");
+        EnchantmentHelper.apply(itemStack, components -> components.remove((a) -> true));
     }
 
     public static void removeEnchantment(ItemStack itemStack, Enchantment enchantment) {
-        ComponentMap components = itemStack.getComponents();
-        if (components == null) return;
-
-        if (!components.contains("Enchantments", 9)) return;
-        NbtList list = components.getList("Enchantments", 10);
-
-        String enchId = Registries.ENCHANTMENT.getId(enchantment).toString();
-
-        for (Iterator<NbtElement> it = list.iterator(); it.hasNext(); ) {
-            NbtCompound ench = (NbtCompound) it.next();
-
-            if (ench.getString("id").equals(enchId)) {
-                it.remove();
-                break;
-            }
-        }
+        EnchantmentHelper.apply(itemStack, components -> components.remove(enchantment1 -> enchantment1.equals(enchantment)));
     }
 
     public static Color lerp(Color first, Color second, @Range(from = 0, to = 1) float v) {
