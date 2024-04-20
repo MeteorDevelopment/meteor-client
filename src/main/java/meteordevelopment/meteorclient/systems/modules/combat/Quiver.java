@@ -17,6 +17,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -25,11 +26,11 @@ import net.minecraft.item.BowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.potion.PotionUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Quiver extends Module {
@@ -40,7 +41,7 @@ public class Quiver extends Module {
     private final Setting<List<StatusEffect>> effects = sgGeneral.add(new StatusEffectListSetting.Builder()
         .name("effects")
         .description("Which effects to shoot you with.")
-        .defaultValue(StatusEffects.STRENGTH)
+        .defaultValue(StatusEffects.STRENGTH.value())
         .build()
     );
 
@@ -136,11 +137,11 @@ public class Quiver extends Module {
 
             if (item.getItem() != Items.TIPPED_ARROW)  continue;
 
-            List<StatusEffectInstance> effects = PotionUtil.getPotionEffects(item);
+            Iterator<StatusEffectInstance> effects = item.getItem().getComponents().get(DataComponentTypes.POTION_CONTENTS).getEffects().iterator();
 
-            if (effects.isEmpty()) continue;
+            if (!effects.hasNext()) continue;
 
-            StatusEffect effect = effects.get(0).getEffectType();
+            StatusEffect effect = effects.next().getEffectType().value();
 
             if (this.effects.get().contains(effect)
                 && !usedEffects.contains(effect)

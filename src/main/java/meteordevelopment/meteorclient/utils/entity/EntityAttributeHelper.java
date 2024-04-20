@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public class EntityAttributeHelper {
+public abstract class EntityAttributeHelper {
     /**
      * @see LivingEntity#getAttributes()
      */

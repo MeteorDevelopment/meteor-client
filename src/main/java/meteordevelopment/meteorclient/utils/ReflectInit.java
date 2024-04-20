@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ReflectInit {
+public abstract class ReflectInit {
     private static final List<Reflections> reflections = new ArrayList<>();
 
     public static void registerPackages() {

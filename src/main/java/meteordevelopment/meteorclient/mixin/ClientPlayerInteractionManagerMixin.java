@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.mixininterface.IClientPlayerInteractionMan
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.player.BreakDelay;
-import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -137,16 +136,6 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Inject(method = "dropCreativeStack", at = @At("HEAD"), cancellable = true)
     private void onDropCreativeStack(ItemStack stack, CallbackInfo info) {
         if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack)).isCancelled()) info.cancel();
-    }
-
-    @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
-    private void onGetReachDistance(CallbackInfoReturnable<Float> info) {
-        info.setReturnValue(Modules.get().get(Reach.class).blockReach());
-    }
-
-    @Inject(method = "hasExtendedReach", at = @At("HEAD"), cancellable = true)
-    private void onHasExtendedReach(CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().isActive(Reach.class)) info.setReturnValue(false);
     }
 
     @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 1))

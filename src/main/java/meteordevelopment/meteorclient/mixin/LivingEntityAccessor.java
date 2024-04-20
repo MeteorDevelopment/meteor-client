@@ -8,10 +8,13 @@ package meteordevelopment.meteorclient.mixin;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.registry.tag.TagKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import java.util.List;
 
 @Mixin(LivingEntity.class)
 public interface LivingEntityAccessor {
@@ -27,8 +30,8 @@ public interface LivingEntityAccessor {
     @Accessor("jumpingCooldown")
     void setJumpCooldown(int cooldown);
 
-    @Accessor("POTION_SWIRLS_COLOR")
-    static TrackedData<Integer> meteor$getPotionSwirlsColor() {
+    @Accessor("POTION_SWIRLS")
+    static TrackedData<List<ParticleEffect>> meteor$getPotionSwirls() {
         throw new AssertionError();
     }
 

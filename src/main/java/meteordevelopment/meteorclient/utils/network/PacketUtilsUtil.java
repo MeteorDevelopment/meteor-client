@@ -54,18 +54,13 @@ public abstract class PacketUtilsUtil {
         }
 
         @Override
-        public Lifecycle getEntryLifecycle(Class<? extends Packet<?>> object) {
-            return null;
-        }
-
-        @Override
         public Lifecycle getLifecycle() {
             return null;
         }
 
         @Override
         public Set<Identifier> getIds() {
-            return null;
+            return Collections.emptySet();
         }
 
         @Override

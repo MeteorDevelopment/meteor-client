@@ -1,5 +1,5 @@
 plugins {
-    id "fabric-loom" version "1.5-SNAPSHOT"
+    id "fabric-loom" version "1.6-SNAPSHOT"
     id "maven-publish"
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
@@ -119,8 +119,8 @@ jar {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 
     withSourcesJar()
 }

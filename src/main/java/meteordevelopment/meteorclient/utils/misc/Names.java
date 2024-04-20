@@ -13,6 +13,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.WeightedSoundSet;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
@@ -24,14 +25,14 @@ import net.minecraft.particle.ParticleType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringHelper;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class Names {
+public abstract class Names {
     private static final Map<StatusEffect, String> statusEffectNames = new Reference2ObjectOpenHashMap<>(16);
     private static final Map<Item, String> itemNames = new Reference2ObjectOpenHashMap<>(128);
     private static final Map<Block, String> blockNames = new Reference2ObjectOpenHashMap<>(128);
@@ -78,7 +79,7 @@ public class Names {
 
     public static String get(ParticleType<?> type) {
         if (!(type instanceof ParticleEffect)) return "";
-        return particleTypesNames.computeIfAbsent(type, effect1 -> WordUtils.capitalize(((ParticleEffect) effect1).asString().substring(10).replace("_", " ")));
+        return particleTypesNames.computeIfAbsent(type, effect1 -> StringUtils.capitalize(effect1.toString().substring(10).replace("_", " ")));
     }
 
     public static String getSoundName(Identifier id) {
@@ -94,6 +95,6 @@ public class Names {
     }
 
     public static String get(ItemStack stack) {
-        return stack.hasNbt() && stack.getNbt().contains("display", NbtElement.COMPOUND_TYPE) ? stack.getName().getString() : I18n.translate(stack.getTranslationKey());
+        return !stack.getComponents().isEmpty() && stack.getNbt().contains("display", NbtElement.COMPOUND_TYPE) ? stack.getName().getString() : I18n.translate(stack.getTranslationKey());
     }
 }

@@ -22,9 +22,13 @@ import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,13 +37,13 @@ import java.util.Set;
  * @author Crosby
  */
 public class StatusEffectBruteForce {
-    private static final TrackedData<Integer> POTION_SWIRLS_COLOR = LivingEntityAccessor.meteor$getPotionSwirlsColor();
+    private static final TrackedData<List<ParticleEffect>> POTION_SWIRLS_COLOR = LivingEntityAccessor.meteor$getPotionSwirls();
     private static final TrackedData<Boolean> POTION_SWIRLS_AMBIENT = LivingEntityAccessor.meteor$getPotionSwirlsAmbient();
     private static final int EMPTY_COLOR = 3694022;
     public static final Set<StatusEffectEntry> ALL_ENTRIES = new ReferenceOpenHashSet<>();
     public static final Set<StatusEffectEntry> BEACON_ENTRIES = new ReferenceOpenHashSet<>();
     private static final Map<LivingEntity, EntityEffectCache> PLAYER_EFFECT_MAP = new Object2ObjectOpenHashMap<>();
-    private static final Object2ObjectMap<IntObjectPair<MutableParticleColor>, Map<StatusEffect, StatusEffectInstance>> EFFECT_CACHE_MAP = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<IntObjectPair<MutableParticleColor>, Map<RegistryEntry<StatusEffect>, StatusEffectInstance>> EFFECT_CACHE_MAP = new Object2ObjectOpenHashMap<>();
     private static final Set<IntObjectPair<MutableParticleColor>> NULL_COLORS = new ObjectOpenHashSet<>();
 
     // status effects
@@ -174,7 +178,7 @@ public class StatusEffectBruteForce {
         // Map#computeIfAbsent(Object, Function) cannot cache null return values, so we use a separate cache for those
         if (NULL_COLORS.contains(cacheKey)) return;
 
-        @Nullable Map<StatusEffect, StatusEffectInstance> match = EFFECT_CACHE_MAP.get(cacheKey);
+        @Nullable Map<RegistryEntry<StatusEffect>, StatusEffectInstance> match = EFFECT_CACHE_MAP.get(cacheKey);
         if (match == null && Config.get().heuristicCombatUtils.get()) {
             match = bruteForce(possibleEntries, initialColor, particleColor);
             if (match == null) NULL_COLORS.add(cacheKey);
@@ -235,9 +239,9 @@ public class StatusEffectBruteForce {
         return (int) r << 16 | (int) g << 8 | (int) b;
     }
 
-    public record StatusEffectEntry(StatusEffect effect, int amplifier, float r, float g, float b) {
-        public static StatusEffectEntry of(StatusEffect effect, int amplifier) {
-            int color = effect.getColor();
+    public record StatusEffectEntry(RegistryEntry<StatusEffect> effect, int amplifier, float r, float g, float b) {
+        public static StatusEffectEntry of(RegistryEntry<StatusEffect> effect, int amplifier) {
+            int color = effect.value().getColor();
             float r = (float)(amplifier * (color >> 16 & 255)) / 255.0F;
             float g = (float)(amplifier * (color >> 8 & 255)) / 255.0F;
             float b = (float)(amplifier * (color & 255)) / 255.0F;

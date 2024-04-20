@@ -219,7 +219,7 @@ public class PotionTimersHud extends HudElement {
         for (Pair<StatusEffectInstance, String> potionEffectEntry : texts) {
             Color color = switch (colorMode.get()) {
                 case Effect -> {
-                    int c = potionEffectEntry.left().getEffectType().getColor();
+                    int c = potionEffectEntry.left().getEffectType().value().getColor();
                     yield new Color(c).a(255);
                 }
                 case Flat -> {
@@ -241,7 +241,7 @@ public class PotionTimersHud extends HudElement {
     }
 
     private String getString(StatusEffectInstance statusEffectInstance) {
-        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffectType()), statusEffectInstance.getAmplifier() + 1, StatusEffectUtil.getDurationText(statusEffectInstance, 1, mc.world.getTickManager().getTickRate()).getString());
+        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffectType().value()), statusEffectInstance.getAmplifier() + 1, StatusEffectUtil.getDurationText(statusEffectInstance, 1, mc.world.getTickManager().getTickRate()).getString());
     }
 
     private double getScale() {

@@ -32,7 +32,7 @@ import java.util.function.BiFunction;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @SuppressWarnings("JavadocReference")
-public class DamageUtils {
+public abstract class DamageUtils {
     // Explosion damage
 
     /**
@@ -132,11 +132,11 @@ public class DamageUtils {
      * @see PlayerEntity#attack(Entity)
      */
     public static float getAttackDamage(LivingEntity attacker, LivingEntity target) {
-        float itemDamage = (float) EntityAttributeHelper.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        float itemDamage = (float) EntityAttributeHelper.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE.value());
 
         // Get enchant damage
         ItemStack stack = attacker.getStackInHand(attacker.getActiveHand());
-        float enchantDamage = EnchantmentHelper.getAttackDamage(stack, target.getGroup());
+        float enchantDamage = EnchantmentHelper.getAttackDamage(stack, target.getType());
 
         // Factor charge
         if (attacker instanceof PlayerEntity playerEntity) {
@@ -204,7 +204,7 @@ public class DamageUtils {
         }
 
         // Armor reduction
-        damage = DamageUtil.getDamageLeft(damage, getArmor(entity), (float) EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft(damage, damageSource, getArmor(entity), (float) EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS.value()));
 
         // Resistance reduction
         damage = resistanceReduction(entity, damage);
@@ -216,7 +216,7 @@ public class DamageUtils {
     }
 
     private static float getArmor(LivingEntity entity) {
-        return (float) Math.floor(EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR));
+        return (float) Math.floor(EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR.value()));
     }
 
     /**

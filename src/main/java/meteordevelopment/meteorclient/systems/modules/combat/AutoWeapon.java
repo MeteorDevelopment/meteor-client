@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EntityGroup;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
@@ -51,7 +51,7 @@ public class AutoWeapon extends Module {
         InvUtils.swap(getBestWeapon(EntityUtils.getGroup(event.entity)), false);
     }
 
-    private int getBestWeapon(EntityGroup group) {
+    private int getBestWeapon(EntityType<?> group) {
         int slotS = mc.player.getInventory().selectedSlot;
         int slotA = mc.player.getInventory().selectedSlot;
         double damageS = 0;

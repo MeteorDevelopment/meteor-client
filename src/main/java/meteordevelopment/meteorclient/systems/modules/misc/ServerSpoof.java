@@ -77,9 +77,9 @@ public class ServerSpoof extends Module {
         private void onPacketSend(PacketEvent.Send event) {
             if (!isActive()) return;
             if (!(event.packet instanceof CustomPayloadC2SPacket)) return;
-            Identifier id = ((CustomPayloadC2SPacket) event.packet).payload().id();
+            Identifier id = ((CustomPayloadC2SPacket) event.packet).payload().getId().id();
 
-            if (spoofBrand.get() && id.equals(BrandCustomPayload.ID))
+            if (spoofBrand.get() && id.equals(BrandCustomPayload.ID.id()))
                 event.packet.write(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
 
             if (blockChannels.get()) {

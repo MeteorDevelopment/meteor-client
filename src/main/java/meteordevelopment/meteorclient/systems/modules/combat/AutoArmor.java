@@ -170,8 +170,8 @@ public class AutoArmor extends Module {
         score += enchantments.getInt(Enchantments.PROJECTILE_PROTECTION);
         score += enchantments.getInt(Enchantments.UNBREAKING);
         score += 2 * enchantments.getInt(Enchantments.MENDING);
-        score += itemStack.getItem() instanceof ArmorItem ? ((ArmorItem) itemStack.getItem()).getProtection() : 0;
-        score += itemStack.getItem() instanceof ArmorItem ? ((ArmorItem) itemStack.getItem()).getToughness() : 0;
+        score += itemStack.getItem() instanceof ArmorItem armorItem ? armorItem.getProtection() : 0;
+        score += itemStack.getItem() instanceof ArmorItem armorItem ? (int) armorItem.getToughness() : 0;
 
         return score;
     }

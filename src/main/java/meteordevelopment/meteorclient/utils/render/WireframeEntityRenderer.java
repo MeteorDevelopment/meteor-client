@@ -120,7 +120,7 @@ public class WireframeEntityRenderer {
             model.animateModel(livingEntity, limbAngle, limbDistance, event.tickDelta);
             model.setAngles(livingEntity, limbAngle, limbDistance, animationProgress, yaw, pitch);
 
-            renderer.setupTransforms(livingEntity, matrices, animationProgress, bodyYaw, event.tickDelta);
+            renderer.setupTransforms(livingEntity, matrices, animationProgress, bodyYaw, event.tickDelta, livingEntity.getScale());
             matrices.scale(-1, -1, 1);
             renderer.scale(livingEntity, matrices, event.tickDelta);
             matrices.translate(0, -1.5010000467300415, 0);

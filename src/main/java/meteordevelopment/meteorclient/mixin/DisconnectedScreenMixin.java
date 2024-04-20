@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.DirectionalLayoutWidget;
+import net.minecraft.client.network.CookieStorage;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -78,6 +79,6 @@ public abstract class DisconnectedScreenMixin extends Screen {
     @Unique
     private void tryConnecting() {
         var lastServer = Modules.get().get(AutoReconnect.class).lastServerConnection;
-        ConnectScreen.connect(new TitleScreen(), mc, lastServer.left(), lastServer.right(), false);
+        ConnectScreen.connect(new TitleScreen(), mc, lastServer.left(), lastServer.right(), false, new CookieStorage(null));
     }
 }

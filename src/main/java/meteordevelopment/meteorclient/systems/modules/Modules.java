@@ -608,11 +608,6 @@ public class Modules extends System<Modules> {
         }
 
         @Override
-        public Lifecycle getEntryLifecycle(Module object) {
-            return null;
-        }
-
-        @Override
         public Lifecycle getLifecycle() {
             return null;
         }

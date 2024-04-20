@@ -20,7 +20,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -41,7 +40,7 @@ import java.util.function.Predicate;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class EntityUtils {
+public abstract class EntityUtils {
     private static BlockPos.Mutable testPos = new BlockPos.Mutable();
 
     public static boolean isAttackable(EntityType<?> type) {
@@ -220,8 +219,7 @@ public class EntityUtils {
         return found.get();
     }
 
-    public static EntityGroup getGroup(Entity entity) {
-        if (entity instanceof LivingEntity livingEntity) return livingEntity.getGroup();
-        else return EntityGroup.DEFAULT;
+    public static EntityType<?> getGroup(Entity entity) {
+         return entity.getType();
     }
 }

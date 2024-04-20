@@ -18,12 +18,14 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandSource;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LodestoneTrackerComponent;
+import net.minecraft.component.type.MapDecorationsComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EyeOfEnderEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvents;
@@ -72,20 +74,20 @@ public class LocateCommand extends Command {
                 error("You need to hold a treasure map first");
                 return SINGLE_SUCCESS;
             }
-            NbtCompound tag = stack.getNbt();
-            NbtList nbt1 = (NbtList) tag.get("Decorations");
-            if (nbt1 == null) {
+            ComponentMap components = stack.getComponents();
+            MapDecorationsComponent mapDecorationsComponent = components.get(DataComponentTypes.MAP_DECORATIONS);
+            if (mapDecorationsComponent == null) {
                 error("Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
                 return SINGLE_SUCCESS;
             }
 
-            NbtCompound iconNBT = nbt1.getCompound(0);
-            if (iconNBT == null) {
+            MapDecorationsComponent.Decoration decoration = mapDecorationsComponent.decorations().get("0");
+            if (decoration == null) {
                 error("Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
                 return SINGLE_SUCCESS;
             }
 
-            Vec3d coords = new Vec3d(iconNBT.getDouble("x"), iconNBT.getDouble("y"), iconNBT.getDouble("z"));
+            Vec3d coords = new Vec3d(decoration.x(), 0, decoration.z());
             MutableText text = Text.literal("Buried Treasure located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
@@ -99,18 +101,23 @@ public class LocateCommand extends Command {
                 error("You need to hold a lodestone compass");
                 return SINGLE_SUCCESS;
             }
-            NbtCompound tag = stack.getNbt();
-            if (tag == null) {
-                error("Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
+            ComponentMap components = stack.getComponents();
+            if (components == null) {
+                error("Couldn't get the components data. Are you holding a (highlight)lodestone(default) compass?");
                 return SINGLE_SUCCESS;
             }
-            NbtCompound nbt1 = tag.getCompound("LodestonePos");
-            if (nbt1 == null) {
-                error("Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
+            LodestoneTrackerComponent lodestoneTrackerComponent = components.get(DataComponentTypes.LODESTONE_TRACKER);
+            if (lodestoneTrackerComponent == null) {
+                error("Couldn't get the components data. Are you holding a (highlight)lodestone(default) compass?");
                 return SINGLE_SUCCESS;
             }
 
-            Vec3d coords = new Vec3d(nbt1.getDouble("X"), nbt1.getDouble("Y"), nbt1.getDouble("Z"));
+            if (lodestoneTrackerComponent.target().isEmpty()) {
+                error("Couldn't get the lodestone's target.");
+                return SINGLE_SUCCESS;
+            }
+
+            Vec3d coords = Vec3d.of(lodestoneTrackerComponent.target().get().pos());
             MutableText text = Text.literal("Lodestone located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
@@ -124,20 +131,20 @@ public class LocateCommand extends Command {
                 error("You need to hold a woodland explorer map first");
                 return SINGLE_SUCCESS;
             }
-            NbtCompound tag = stack.getNbt();
-            NbtList nbt1 = (NbtList) tag.get("Decorations");
-            if (nbt1 == null) {
+            ComponentMap components = stack.getComponents();
+            MapDecorationsComponent mapDecorationsComponent = components.get(DataComponentTypes.MAP_DECORATIONS);
+            if (mapDecorationsComponent == null) {
                 error("Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
                 return SINGLE_SUCCESS;
             }
 
-            NbtCompound iconNBT = nbt1.getCompound(0);
-            if (iconNBT == null) {
+            MapDecorationsComponent.Decoration decoration = mapDecorationsComponent.decorations().get("0");
+            if (decoration == null) {
                 error("Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
                 return SINGLE_SUCCESS;
             }
 
-            Vec3d coords = new Vec3d(iconNBT.getDouble("x"), iconNBT.getDouble("y"), iconNBT.getDouble("z"));
+            Vec3d coords = new Vec3d(decoration.x(), 0, decoration.z());
             MutableText text = Text.literal("Mansion located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
@@ -201,19 +208,17 @@ public class LocateCommand extends Command {
 
             ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() == Items.FILLED_MAP) {
-                NbtCompound tag = stack.getNbt();
-                if (tag != null) {
-                    NbtList nbt1 = (NbtList) tag.get("Decorations");
-                    if (nbt1 != null) {
-                        NbtCompound iconNBT = nbt1.getCompound(0);
-                        if (iconNBT != null) {
-                            Vec3d coords = new Vec3d(iconNBT.getDouble("x"), iconNBT.getDouble("y"), iconNBT.getDouble("z"));
-                            MutableText text = Text.literal("Monument located at ");
-                            text.append(ChatUtils.formatCoords(coords));
-                            text.append(".");
-                            info(text);
-                            return SINGLE_SUCCESS;
-                        }
+                ComponentMap components = stack.getComponents();
+                MapDecorationsComponent mapDecorationsComponent = components.get(DataComponentTypes.MAP_DECORATIONS);
+                if (mapDecorationsComponent != null) {
+                    MapDecorationsComponent.Decoration decoration = mapDecorationsComponent.decorations().get("0");
+                    if (decoration != null) {
+                        Vec3d coords = new Vec3d(decoration.x(), 0, decoration.z());
+                        MutableText text = Text.literal("Monument located at ");
+                        text.append(ChatUtils.formatCoords(coords));
+                        text.append(".");
+                        info(text);
+                        return SINGLE_SUCCESS;
                     }
                 }
             }
@@ -269,8 +274,7 @@ public class LocateCommand extends Command {
         Vec3d pos = new Vec3d(x, y, z);
         if (this.firstStart == null) {
             this.firstStart = pos;
-        }
-        else {
+        } else {
             this.secondStart = pos;
         }
     }
@@ -281,8 +285,7 @@ public class LocateCommand extends Command {
         if (this.firstEnd == null) {
             this.firstEnd = pos;
             info("Please throw the second Eye Of Ender from a different location.");
-        }
-        else {
+        } else {
             this.secondEnd = pos;
             findStronghold();
         }

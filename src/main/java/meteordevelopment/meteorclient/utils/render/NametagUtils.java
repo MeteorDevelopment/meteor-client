@@ -11,12 +11,13 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3d;
 import org.joml.Vector4f;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class NametagUtils {
+public abstract class NametagUtils {
     private static final Vector4f vec4 = new Vector4f();
     private static final Vector4f mmMat4 = new Vector4f();
     private static final Vector4f pmMat4 = new Vector4f();
@@ -78,7 +79,7 @@ public class NametagUtils {
     }
 
     public static void begin(Vector3d pos) {
-        MatrixStack matrices = RenderSystem.getModelViewStack();
+        Matrix4fStack matrices = RenderSystem.getModelViewStack();
         begin(matrices, pos);
     }
 
@@ -87,14 +88,14 @@ public class NametagUtils {
         begin(drawContext.getMatrices(), pos);
     }
 
-    private static void begin(MatrixStack matrices, Vector3d pos) {
-        matrices.push();
-        matrices.translate(pos.x, pos.y, 0);
+    private static void begin(Matrix4fStack matrices, Vector3d pos) {
+        matrices.pushMatrix();
+        matrices.translate((float) pos.x, (float) pos.y, 0);
         matrices.scale((float) scale, (float) scale, 1);
     }
 
     public static void end() {
-        RenderSystem.getModelViewStack().pop();
+        RenderSystem.getModelViewStack().popMatrix();
     }
 
     public static void end(DrawContext drawContext) {

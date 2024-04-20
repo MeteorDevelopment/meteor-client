@@ -43,7 +43,7 @@ public class ClientConnectionMixin {
     @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
     private static <T extends PacketListener> void onHandlePacket(Packet<T> packet, PacketListener listener, CallbackInfo info) {
         if (packet instanceof BundleS2CPacket bundle) {
-            for (Iterator<Packet<ClientPlayPacketListener>> it = bundle.getPackets().iterator(); it.hasNext(); ) {
+            for (Iterator<Packet<? super ClientPlayPacketListener>> it = bundle.getPackets().iterator(); it.hasNext(); ) {
                 if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(it.next(), listener)).isCancelled()) it.remove();
             }
         } else if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet, listener)).isCancelled()) info.cancel();
@@ -52,7 +52,7 @@ public class ClientConnectionMixin {
     @Inject(method = "disconnect", at = @At("HEAD"))
     private void disconnect(Text disconnectReason, CallbackInfo ci) {
         if (Modules.get().get(HighwayBuilder.class).isActive()) {
-            MutableText text = Text.literal(String.format("\n\n%s[%sHighway Builder%s] Statistics:", Formatting.GRAY, Formatting.BLUE, Formatting.GRAY)).append("\n");
+            MutableText text = Text.literal("%n%n%s[%sHighway Builder%s] Statistics:%n".formatted(Formatting.GRAY, Formatting.BLUE, Formatting.GRAY));
             text.append(Modules.get().get(HighwayBuilder.class).getStatsText());
 
             ((MutableText) disconnectReason).append(text);

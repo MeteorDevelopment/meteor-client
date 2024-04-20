@@ -36,6 +36,9 @@ import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffect;
@@ -44,6 +47,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -60,17 +64,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.*;
 
-public class Utils {
+public abstract class Utils {
     public static final Pattern FILE_NAME_INVALID_CHARS_PATTERN = Pattern.compile("[\\s\\\\/:*?\"<>|]");
     public static final Color WHITE = new Color(255, 255, 255);
 
@@ -142,12 +143,13 @@ public class Utils {
         enchantments.clear();
 
         if (!itemStack.isEmpty()) {
-            NbtList listTag = itemStack.getItem() == Items.ENCHANTED_BOOK ? EnchantedBookItem.getEnchantmentNbt(itemStack) : itemStack.getEnchantments();
+            Set<RegistryEntry<Enchantment>> itemEnchantments = itemStack.getItem() == Items.ENCHANTED_BOOK
+                ? itemStack.get(DataComponentTypes.STORED_ENCHANTMENTS).getEnchantments()
+                : itemStack.getEnchantments().getEnchantments();
 
-            for (int i = 0; i < listTag.size(); ++i) {
-                NbtCompound tag = listTag.getCompound(i);
-
-                Registries.ENCHANTMENT.getOrEmpty(Identifier.tryParse(tag.getString("id"))).ifPresent((enchantment) -> enchantments.put(enchantment, tag.getInt("lvl")));
+            for (int i = 0; i < itemEnchantments.size(); ++i) {
+                NbtCompound tag = itemEnchantments.getCompound(i);
+                Registries.ENCHANTMENT.getOrEmpty(Identifier.tryParse(tag.getString("id"))).ifPresent(enchantment -> itemEnchantments.add(enchantment, tag.getInt("lvl")));
             }
         }
     }
@@ -210,10 +212,10 @@ public class Utils {
         }
 
         Arrays.fill(items, ItemStack.EMPTY);
-        NbtCompound nbt = itemStack.getNbt();
+        ComponentMap components = itemStack.getComponents();
 
-        if (nbt != null && nbt.contains("BlockEntityTag")) {
-            NbtCompound nbt2 = nbt.getCompound("BlockEntityTag");
+        if (components != null && components.contains(DataComponentTypes.BLOCK_ENTITY_DATA)) {
+            NbtComponent nbt2 = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
 
             if (nbt2.contains("Items")) {
                 NbtList nbt3 = (NbtList) nbt2.get("Items");
@@ -242,6 +244,7 @@ public class Utils {
 
     public static boolean hasItems(ItemStack itemStack) {
         NbtCompound compoundTag = itemStack.getSubNbt("BlockEntityTag");
+//        itemStack.getComponents().get(DataComponentTypes.CONTAINER).???
         return compoundTag != null && compoundTag.contains("Items", 9);
     }
 
@@ -298,9 +301,9 @@ public class Utils {
         // Find best route
         for (int i = 1; i <= textLength; i++) {
             for (int j = 1; j <= filterLength; j++) {
-                int sCost = d[i-1][j-1] + (from.charAt(i-1) == to.charAt(j-1) ? 0 : subCost);
-                int dCost = d[i-1][j] + delCost;
-                int iCost = d[i][j-1] + insCost;
+                int sCost = d[i - 1][j - 1] + (from.charAt(i - 1) == to.charAt(j - 1) ? 0 : subCost);
+                int dCost = d[i - 1][j] + delCost;
+                int iCost = d[i][j - 1] + insCost;
                 d[i][j] = Math.min(Math.min(dCost, iCost), sCost);
             }
         }
@@ -522,20 +525,20 @@ public class Utils {
     }
 
     public static void clearEnchantments(ItemStack itemStack) {
-        NbtCompound nbt = itemStack.getNbt();
-        if (nbt != null) nbt.remove("Enchantments");
+        ComponentMap components = itemStack.getComponents();
+        if (components != null) components.remove("Enchantments");
     }
 
     public static void removeEnchantment(ItemStack itemStack, Enchantment enchantment) {
-        NbtCompound nbt = itemStack.getNbt();
-        if (nbt == null) return;
+        ComponentMap components = itemStack.getComponents();
+        if (components == null) return;
 
-        if (!nbt.contains("Enchantments", 9)) return;
-        NbtList list = nbt.getList("Enchantments", 10);
+        if (!components.contains("Enchantments", 9)) return;
+        NbtList list = components.getList("Enchantments", 10);
 
         String enchId = Registries.ENCHANTMENT.getId(enchantment).toString();
 
-        for (Iterator<NbtElement> it = list.iterator(); it.hasNext();) {
+        for (Iterator<NbtElement> it = list.iterator(); it.hasNext(); ) {
             NbtCompound ench = (NbtCompound) it.next();
 
             if (ench.getString("id").equals(enchId)) {
@@ -565,8 +568,7 @@ public class Utils {
 
         try {
             port = Integer.parseInt(full.substring(full.lastIndexOf(':') + 1, full.length() - 1));
-        }
-        catch (NumberFormatException ignored) {
+        } catch (NumberFormatException ignored) {
             port = -1;
         }
 

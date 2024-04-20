@@ -81,7 +81,7 @@ public class AirPlace extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        double r = customRange.get() ? range.get() : mc.interactionManager.getReachDistance();
+        double r = customRange.get() ? range.get() : mc.player.getBlockInteractionRange();
         hitResult = mc.getCameraEntity().raycast(r, 0, false);
 
         if (!(hitResult instanceof BlockHitResult) || !(mc.player.getMainHandStack().getItem() instanceof BlockItem) && !(mc.player.getMainHandStack().getItem() instanceof SpawnEggItem)) return;
