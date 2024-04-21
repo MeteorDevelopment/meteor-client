@@ -143,7 +143,8 @@ public class Criticals extends Module {
     public enum Mode {
         Packet,
         NCP_Packet,
-        Jump;
+        Jump,
+        MiniJump;
 
         @Override
 	    public String toString() {
