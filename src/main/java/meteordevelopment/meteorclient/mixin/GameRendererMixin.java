@@ -74,11 +74,16 @@ public abstract class GameRendererMixin {
         RenderUtils.updateScreenCenter();
         NametagUtils.onRender(matrixStack, matrix4f);
 
+        RenderSystem.getModelViewStack().pushMatrix().mul(matrix4f2);
+        RenderSystem.applyModelViewMatrix();
+
         renderer.begin();
         MeteorClient.EVENT_BUS.post(event);
         renderer.render(matrixStack);
 
+        RenderSystem.getModelViewStack().popMatrix();
         RenderSystem.applyModelViewMatrix();
+
         client.getProfiler().pop();
     }
 
