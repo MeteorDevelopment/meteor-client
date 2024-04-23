@@ -46,7 +46,6 @@ import net.minecraft.util.collection.DefaultedList;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
 
@@ -252,9 +251,9 @@ public class BetterTooltips extends Module {
         if (beehive.get()) {
             if (event.itemStack.getItem() == Items.BEEHIVE || event.itemStack.getItem() == Items.BEE_NEST) {
                 ComponentMap components = event.itemStack.getComponents();
-                Map<String, String> properties = components.get(DataComponentTypes.BLOCK_STATE).properties();
-                if (properties != null) {
-                    String level = properties.get("honey_level");
+                BlockStateComponent blockStateComponent = components.get(DataComponentTypes.BLOCK_STATE);
+                if (blockStateComponent != null) {
+                    String level = blockStateComponent.properties().get("honey_level");
                     event.list.add(1, Text.literal(String.format("%sHoney level: %s%s%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
                 }
 

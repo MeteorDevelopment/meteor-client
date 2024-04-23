@@ -245,7 +245,7 @@ public abstract class Utils {
     }
 
     public static boolean hasItems(ItemStack itemStack) {
-        NbtCompound compoundTag = itemStack.getComponents().get(DataComponentTypes.BLOCK_ENTITY_DATA).getNbt();
+        NbtCompound compoundTag = itemStack.getComponents().getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).getNbt();
 //        itemStack.getComponents().get(DataComponentTypes.CONTAINER).???
         return compoundTag != null && compoundTag.contains("Items", 9);
     }

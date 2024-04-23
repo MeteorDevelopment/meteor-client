@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.mixin.ShulkerEntityAccessor;
 import meteordevelopment.meteorclient.mixin.StatusEffectAccessor;
 import meteordevelopment.meteorclient.mixininterface.IAttributeContainer;
 import meteordevelopment.meteorclient.mixininterface.IEntityAttributeInstance;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -17,6 +16,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.mob.ShulkerEntity;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import org.jetbrains.annotations.Nullable;
@@ -67,9 +68,10 @@ public abstract class EntityAttributeHelper {
         attributeInstance.setBaseValue(baseValue);
 
         // Equipment
-        for (var equipmentSlot : EquipmentSlot.values()) {
-            ItemStack stack = entity.getEquippedStack(equipmentSlot);
-            List<AttributeModifiersComponent.Entry> entries = stack.getComponents().get(DataComponentTypes.ATTRIBUTE_MODIFIERS).modifiers();
+        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+            Item stack = entity.getEquippedStack(equipmentSlot).getItem();
+            if (!(stack instanceof ArmorItem)) continue;
+            List<AttributeModifiersComponent.Entry> entries = stack.getAttributeModifiers().modifiers();
             for (AttributeModifiersComponent.Entry entry : entries) {
                 if (entry.attribute() == attribute) attributeInstance.addTemporaryModifier(entry.modifier());
             }
