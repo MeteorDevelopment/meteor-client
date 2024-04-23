@@ -159,6 +159,7 @@
     "SlotMixin",
     "SoundSystemMixin",
     "SplashTextResourceSupplierMixin",
+    "StatusEffectAccessor",
     "StatusEffectInstanceAccessor",
     "StatusEffectInstanceMixin",
     "StringHelperMixin",

@@ -72,17 +72,17 @@ public abstract class ChatHudMixin implements IChatHud {
 
     @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V", shift = At.Shift.AFTER))
     private void onAddMessageAfterNewChatHudLineVisible(ChatHudLine message, CallbackInfo ci) {
-        ((IChatHudLine) (Object) visibleMessages.get(0)).meteor$setId(nextId);
+        ((IChatHudLine) (Object) visibleMessages.getFirst()).meteor$setId(nextId);
     }
 
     @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V", shift = At.Shift.AFTER))
     private void onAddMessageAfterNewChatHudLine(ChatHudLine message, CallbackInfo ci) {
-        ((IChatHudLine) (Object) messages.get(0)).meteor$setId(nextId);
+        ((IChatHudLine) (Object) messages.getFirst()).meteor$setId(nextId);
     }
 
     @SuppressWarnings("DataFlowIssue")
     @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
-    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Local(ordinal = 2) int j) {
+    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Local(ordinal = 1) int j) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
         if (handler == null) return line;
 
@@ -167,7 +167,7 @@ public abstract class ChatHudMixin implements IChatHud {
 
     // Anti spam
 
-    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/ChatMessages;breakRenderedChatMessageLines(Lnet/minecraft/text/StringVisitable;ILnet/minecraft/client/font/TextRenderer;)Ljava/util/List;"), locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;isChatFocused()Z"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, int i, MessageIndicator.Icon icon, List<OrderedText> list) {
         if (Modules.get() == null) return; // baritone calls addMessage before we initialise
 

@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.entity;
 
-import com.google.common.collect.Multimap;
 import meteordevelopment.meteorclient.mixin.ShulkerEntityAccessor;
+import meteordevelopment.meteorclient.mixin.StatusEffectAccessor;
 import meteordevelopment.meteorclient.mixininterface.IAttributeContainer;
 import meteordevelopment.meteorclient.mixininterface.IEntityAttributeInstance;
 import net.minecraft.component.DataComponentTypes;
@@ -15,11 +15,14 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.*;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.mob.ShulkerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public abstract class EntityAttributeHelper {
@@ -66,17 +69,18 @@ public abstract class EntityAttributeHelper {
         // Equipment
         for (var equipmentSlot : EquipmentSlot.values()) {
             ItemStack stack = entity.getEquippedStack(equipmentSlot);
-            Multimap<EntityAttribute, EntityAttributeModifier> modifiers = stack.getAttributeModifiers(equipmentSlot);
-            for (var modifier : modifiers.get(attribute)) attributeInstance.addTemporaryModifier(modifier);
-
-            AttributeModifiersComponent attributeModifiersComponent = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-
+            List<AttributeModifiersComponent.Entry> entries = stack.getComponents().get(DataComponentTypes.ATTRIBUTE_MODIFIERS).modifiers();
+            for (AttributeModifiersComponent.Entry entry : entries) {
+                if (entry.attribute() == attribute) attributeInstance.addTemporaryModifier(entry.modifier());
+            }
         }
 
         // Status effects
         for (var statusEffect : StatusEffectHelper.getStatusEffects(entity)) {
-            AttributeModifierCreator factory = statusEffect.getEffectType().getAttributeModifiers().get(attribute);
-            if (factory != null) attributeInstance.addPersistentModifier(factory.createAttributeModifier(statusEffect.getAmplifier()));
+            Map<RegistryEntry<EntityAttribute>, StatusEffect.EffectAttributeModifierCreator> attributeModifiers = ((StatusEffectAccessor) statusEffect).getAttributeModifiers();
+            attributeModifiers.forEach((entityAttribute, modifierCreator) -> {
+                if (entityAttribute == attribute) attributeInstance.addPersistentModifier(modifierCreator.createAttributeModifier(statusEffect.getTranslationKey(), statusEffect.getAmplifier()));
+            });
         }
 
         handleSpecialCases(entity, someAttribute -> someAttribute == attribute ? attributeInstance : null);

@@ -84,7 +84,7 @@ public class ClientConnectionMixin {
     }
 
     @Inject(method = "addHandlers", at = @At("RETURN"))
-    private static void onAddHandlers(ChannelPipeline pipeline, NetworkSide side, PacketSizeLogger packetSizeLogger, CallbackInfo ci) {
+    private static void onAddHandlers(ChannelPipeline pipeline, NetworkSide side, boolean local, PacketSizeLogger packetSizeLogger, CallbackInfo ci) {
         if (side != NetworkSide.CLIENTBOUND) return;
 
         Proxy proxy = Proxies.get().getEnabled();

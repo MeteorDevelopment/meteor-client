@@ -18,13 +18,20 @@ import net.minecraft.component.ComponentMap;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtType;
+import net.minecraft.nbt.scanner.NbtScanner;
+import net.minecraft.nbt.visitor.NbtElementVisitor;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+
+import java.io.DataOutput;
+import java.io.IOException;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -41,11 +48,12 @@ public class NbtCommand extends Command {
 
             if (validBasic(stack)) {
                 NbtCompound tag = CompoundNbtTagArgumentType.get(s);
-                NbtCompound source = stack.getOrCreateNbt();
 
                 if (tag != null) {
-                    source.copyFrom(tag);
-                    setStack(stack);
+                    ItemStack newStack = ItemStack.fromNbtOrEmpty(mc.world.getRegistryManager(), tag);
+                    newStack.applyComponentsFrom(stack.getComponents());
+
+                    setStack(newStack);
                 } else {
                     error("Some of the NBT data could not be found, try using: " + Config.get().prefix.get() + "nbt set {nbt}");
                 }
@@ -58,7 +66,7 @@ public class NbtCommand extends Command {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
-                stack.applyComponentsFrom(CompoundNbtTagArgumentType.get(context));
+                stack = ItemStack.fromNbtOrEmpty(mc.world.getRegistryManager(), CompoundNbtTagArgumentType.get(context));
                 setStack(stack);
             }
 
@@ -70,7 +78,7 @@ public class NbtCommand extends Command {
 
             if (validBasic(stack)) {
                 NbtPathArgumentType.NbtPath path = context.getArgument("nbt_path", NbtPathArgumentType.NbtPath.class);
-                path.remove(stack.getComponents());
+                path.remove(stack.encode(mc.world.getRegistryManager()));
             }
 
             return SINGLE_SUCCESS;
@@ -114,14 +122,14 @@ public class NbtCommand extends Command {
             if (stack == null) {
                 error("You must hold an item in your main hand.");
             } else {
-                NbtCompound tag = stack.getOrCreateNbt();
-                mc.keyboard.setClipboard(tag.toString());
+                ComponentMap components = stack.getComponents();
+                mc.keyboard.setClipboard(components.toString());
                 MutableText nbt = Text.literal("NBT");
                 nbt.setStyle(nbt.getStyle()
                         .withFormatting(Formatting.UNDERLINE)
                         .withHoverEvent(new HoverEvent(
                                 HoverEvent.Action.SHOW_TEXT,
-                                NbtHelper.toPrettyPrintedText(tag)
+                                Text.of(components.toString())
                         )));
 
                 MutableText text = Text.literal("");
@@ -139,8 +147,9 @@ public class NbtCommand extends Command {
 
             if (validBasic(stack)) {
                 NbtCompound nbt = CompoundNbtTagArgumentType.create().parse(new StringReader(mc.keyboard.getClipboard()));
-                NbtComponent component = NbtComponent.of(nbt);
-                stack.applyComponentsFrom(component);
+
+                stack = ItemStack.fromNbtOrEmpty(mc.world.getRegistryManager(), nbt);
+
                 setStack(stack);
             }
 

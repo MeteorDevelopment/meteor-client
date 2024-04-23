@@ -120,6 +120,7 @@ public abstract class GameRendererMixin {
 
     // Freecam
 
+    @Unique
     private boolean freecamSet = false;
 
     @Inject(method = "updateCrosshairTarget", at = @At("HEAD"), cancellable = true)
@@ -178,15 +179,13 @@ public abstract class GameRendererMixin {
             ci.cancel();
     }
 
-    // FIXME: unsure
-    @ModifyVariable(method = "findCrosshairTarget", at = @At(value = "STORE", ordinal = 0), ordinal = 0)
-    private double updateTargetedEntityModifySurvivalReach(double d) {
-        return Modules.get().get(Reach.class).entityReach();
+    @ModifyVariable(method = "findCrosshairTarget", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private double updateTargetedEntityModifySurvivalReach(double blockInteractionRange) {
+        return Modules.get().get(Reach.class).blockReach();
     }
 
-    @ModifyVariable(method = "findCrosshairTarget", at = @At(value = "STORE", ordinal = 1), ordinal = 0)
-    private double updateTargetedEntityModifySquaredMaxReach(double e) {
-        Reach reach = Modules.get().get(Reach.class);
-        return reach.entityReach() * reach.entityReach();
+    @ModifyVariable(method = "findCrosshairTarget", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private double updateTargetedEntityModifySquaredMaxReach(double entityInteractionRange) {
+        return Modules.get().get(Reach.class).entityReach();
     }
 }

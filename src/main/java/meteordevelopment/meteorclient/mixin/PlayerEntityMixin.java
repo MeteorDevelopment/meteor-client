@@ -114,6 +114,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     // FIXME might not be needed?
+    /*
     @ModifyReturnValue(method = "getBlockInteractionRange", at = @At("RETURN"))
     private double modifyBlockInteractionRange(double original) {
         return Modules.get().get(Reach.class).blockReach();
@@ -123,4 +124,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private double modifyEntityInteractionRange(double original) {
         return Modules.get().get(Reach.class).entityReach();
     }
+
+     */
 }
