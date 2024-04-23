@@ -44,8 +44,8 @@
     }
   },
   "depends": {
-    "java": ">=17",
-    "minecraft": "1.20.5-rc.3",
+    "java": ">=21",
+    "minecraft": "${minecraft_version}",
     "fabricloader": ">=${loader_version}"
   },
   "breaks": {

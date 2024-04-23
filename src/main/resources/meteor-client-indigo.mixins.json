@@ -1,7 +1,7 @@
 {
   "required": false,
   "package": "meteordevelopment.meteorclient.mixin.indigo",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
     "AbstractBlockRenderContextMixin",
