@@ -253,7 +253,7 @@ public class LocateCommand extends Command {
         if (posList.size() < 3) {
             warning("Only %d block(s) found. This search might be a false positive.", posList.size());
         }
-        return new Vec3d(posList.get(0).getX(), posList.get(0).getY(), posList.get(0).getZ());
+        return new Vec3d(posList.getFirst().getX(), posList.getFirst().getY(), posList.getFirst().getZ());
     }
 
     @EventHandler

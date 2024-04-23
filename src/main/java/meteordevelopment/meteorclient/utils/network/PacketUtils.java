@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Stream;
 
-public abstract class PacketUtils {
+public class PacketUtils {
     public static final Registry<Class<? extends Packet<?>>> REGISTRY = new PacketRegistry();
 
     private static final Map<Class<? extends Packet<?>>, String> S2C_PACKETS = new HashMap<>();
@@ -436,6 +436,9 @@ public abstract class PacketUtils {
         S2C_PACKETS_R.put("EntityS2CPacket.Rotate", net.minecraft.network.packet.s2c.play.EntityS2CPacket.Rotate.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityS2CPacket.MoveRelative.class, "EntityS2CPacket.MoveRelative");
         S2C_PACKETS_R.put("EntityS2CPacket.MoveRelative", net.minecraft.network.packet.s2c.play.EntityS2CPacket.MoveRelative.class);
+    }
+
+    private PacketUtils() {
     }
 
     public static String getName(Class<? extends Packet<?>> packetClass) {

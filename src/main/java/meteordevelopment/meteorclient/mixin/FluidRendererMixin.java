@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FluidRenderer.class)
-public class FluidRendererMixin {
+public abstract class FluidRendererMixin {
     @Unique private final ThreadLocal<Integer> alphas = new ThreadLocal<>();
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)

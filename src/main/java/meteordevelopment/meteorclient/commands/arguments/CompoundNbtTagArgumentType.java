@@ -53,8 +53,8 @@ public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
         reader.expect('}');
         b.append('}');
         return StringNbtReader.parse(b.toString()
-                .replace("$", "\u00a7")
-                .replace("\u00a7\u00a7", "$")
+                .replace("$", "§")
+                .replace("§§", "$")
         );
     }
 

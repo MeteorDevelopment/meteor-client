@@ -40,8 +40,11 @@ import java.util.function.Predicate;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public abstract class EntityUtils {
+public class EntityUtils {
     private static BlockPos.Mutable testPos = new BlockPos.Mutable();
+
+    private EntityUtils() {
+    }
 
     public static boolean isAttackable(EntityType<?> type) {
         return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;
@@ -123,7 +126,7 @@ public abstract class EntityUtils {
 
             Block block = mc.world.getBlockState(testPos).getBlock();
             if (block != Blocks.OBSIDIAN && block != Blocks.NETHERITE_BLOCK && block != Blocks.CRYING_OBSIDIAN
-            && block != Blocks.RESPAWN_ANCHOR && block != Blocks.ANCIENT_DEBRIS) continue;
+                && block != Blocks.RESPAWN_ANCHOR && block != Blocks.ANCIENT_DEBRIS) continue;
 
             double testDistanceSquared = PlayerUtils.squaredDistanceTo(testPos);
             if (testDistanceSquared < bestDistanceSquared) {
@@ -158,8 +161,7 @@ public abstract class EntityUtils {
         if (percent < 0.5) {
             r = 255;
             g = (int) (255 * percent / 0.5);  // Closer to 0.5, closer to yellow (255,255,0)
-        }
-        else {
+        } else {
             g = 255;
             r = 255 - (int) (255 * (percent - 0.5) / 0.5); // Closer to 1.0, closer to green (0,255,0)
         }
@@ -220,6 +222,6 @@ public abstract class EntityUtils {
     }
 
     public static EntityType<?> getGroup(Entity entity) {
-         return entity.getType();
+        return entity.getType();
     }
 }

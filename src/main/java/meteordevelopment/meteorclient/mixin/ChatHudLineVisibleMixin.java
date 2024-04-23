@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(ChatHudLine.Visible.class)
-public class ChatHudLineVisibleMixin implements IChatHudLineVisible {
+public abstract class ChatHudLineVisibleMixin implements IChatHudLineVisible {
     @Shadow @Final private OrderedText content;
     @Unique private int id;
     @Unique private GameProfile sender;

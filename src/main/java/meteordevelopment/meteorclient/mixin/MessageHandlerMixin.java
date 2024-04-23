@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.time.Instant;
 
 @Mixin(MessageHandler.class)
-public class MessageHandlerMixin implements IMessageHandler {
+public abstract class MessageHandlerMixin implements IMessageHandler {
     @Unique
     private GameProfile sender;
 

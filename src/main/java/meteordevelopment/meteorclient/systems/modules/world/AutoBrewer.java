@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.utils.misc.MyPotion;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Potion;

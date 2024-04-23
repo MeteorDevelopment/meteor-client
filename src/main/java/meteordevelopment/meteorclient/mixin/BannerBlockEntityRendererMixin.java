@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BannerBlockEntityRenderer.class)
-public class BannerBlockEntityRendererMixin {
+public abstract class BannerBlockEntityRendererMixin {
 
     @Final
     @Shadow private ModelPart pillar;

@@ -44,8 +44,7 @@ public class WBlockPosEdit extends WHorizontalList {
         if (canUpdate()) {
             WButton click = add(theme.button("Click")).expandX().widget();
             click.action = () -> {
-                String sb = "Click!\n" + "Right click to pick a new position.\n" +
-                    "Left click to cancel.";
+                String sb = "Click!\nRight click to pick a new position.\nLeft click to cancel.";
                 Modules.get().get(Marker.class).info(sb);
 
                 clicking = true;

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BlockRenderer.class, remap = false)
-public class SodiumBlockRendererMixin {
+public abstract class SodiumBlockRendererMixin {
     @Inject(method = "renderModel", at = @At("HEAD"), cancellable = true)
     private void onRenderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers, CallbackInfo info) {
         int alpha = Xray.getAlpha(ctx.state(), ctx.pos());

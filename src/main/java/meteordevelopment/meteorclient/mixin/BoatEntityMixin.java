@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BoatEntity.class)
-public class BoatEntityMixin {
+public abstract class BoatEntityMixin {
     @Shadow private boolean pressingLeft;
 
     @Shadow private boolean pressingRight;

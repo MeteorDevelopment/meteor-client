@@ -180,8 +180,8 @@ public class AutoTrap extends Module {
 
             fillPlaceArray(target);
 
-            if (timer >= delay.get() && placePositions.size() > 0) {
-                BlockPos blockPos = placePositions.get(placePositions.size() - 1);
+            if (timer >= delay.get() && !placePositions.isEmpty()) {
+                BlockPos blockPos = placePositions.getLast();
 
                 if (BlockUtils.place(blockPos, itemResult, rotate.get(), 50, true)) {
                     placePositions.remove(blockPos);
@@ -201,7 +201,7 @@ public class AutoTrap extends Module {
         if (!render.get() || placePositions.isEmpty()) return;
 
         for (BlockPos pos : placePositions) {
-            boolean isFirst = pos.equals(placePositions.get(placePositions.size() - 1));
+            boolean isFirst = pos.equals(placePositions.getLast());
 
             Color side = isFirst ? nextSideColor.get() : sideColor.get();
             Color line = isFirst ? nextLineColor.get() : lineColor.get();

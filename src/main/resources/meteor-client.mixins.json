@@ -78,6 +78,7 @@
     "EntityAccessor",
     "EntityAttributeInstanceMixin",
     "EntityBucketItemAccessor",
+    "EntityEffectParticleEffectAccessor",
     "EntityMixin",
     "EntityRenderDispatcherMixin",
     "EntityRendererMixin",

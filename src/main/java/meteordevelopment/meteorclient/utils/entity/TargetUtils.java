@@ -29,7 +29,7 @@ public class TargetUtils {
         ENTITIES.clear();
         getList(ENTITIES, isGood, sortPriority, 1);
         if (!ENTITIES.isEmpty()) {
-            return ENTITIES.get(0);
+            return ENTITIES.getFirst();
         }
 
         return null;

@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Random;
 
 @Mixin(AbstractBlock.class)
-public class AbstractBlockMixin {
+public abstract class AbstractBlockMixin {
     private static final Random RANDOM = new Random();
 
     @Inject(method = "getAmbientOcclusionLightLevel", at = @At("HEAD"), cancellable = true)

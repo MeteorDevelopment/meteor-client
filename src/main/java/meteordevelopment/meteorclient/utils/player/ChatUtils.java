@@ -30,6 +30,9 @@ public class ChatUtils {
 
     private static Text PREFIX;
 
+    private ChatUtils() {
+    }
+
     @PostInit
     public static void init() {
         PREFIX = Text.empty()

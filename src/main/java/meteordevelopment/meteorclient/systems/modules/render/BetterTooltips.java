@@ -421,10 +421,10 @@ public class BetterTooltips extends Module {
 
         List<RawFilteredPair<String>> pages = components.get(DataComponentTypes.WRITABLE_BOOK_CONTENT).pages();
         if (pages.isEmpty()) return null;
-        if (bookItem.getItem() == Items.WRITABLE_BOOK) return Text.literal(pages.get(0).get(false));
+        if (bookItem.getItem() == Items.WRITABLE_BOOK) return Text.literal(pages.getFirst().get(false));
 
         try {
-            return Text.Serialization.fromLenientJson(pages.get(0).get(false), DynamicRegistryManager.EMPTY);
+            return Text.Serialization.fromLenientJson(pages.getFirst().get(false), DynamicRegistryManager.EMPTY);
         } catch (JsonParseException e) {
             return Text.literal("Invalid book data");
         }

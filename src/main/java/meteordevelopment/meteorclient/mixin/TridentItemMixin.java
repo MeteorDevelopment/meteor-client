@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(TridentItem.class)
-public class TridentItemMixin {
+public abstract class TridentItemMixin {
     @Inject(method = "onStoppedUsing", at = @At("HEAD"))
     private void onStoppedUsingHead(ItemStack stack, World world, LivingEntity user, int remainingUseTicks, CallbackInfo info) {
         if (user == mc.player) Utils.isReleasingTrident = true;

@@ -46,12 +46,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -73,7 +70,7 @@ import java.util.stream.Collectors;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.*;
 
-public abstract class Utils {
+public class Utils {
     public static final Pattern FILE_NAME_INVALID_CHARS_PATTERN = Pattern.compile("[\\s\\\\/:*?\"<>|]");
     public static final Color WHITE = new Color(255, 255, 255);
 
@@ -84,6 +81,9 @@ public abstract class Utils {
     public static double frameTime;
     public static Screen screenToOpen;
     public static VertexSorter vertexSorter;
+
+    private Utils() {
+    }
 
     @PreInit
     public static void init() {

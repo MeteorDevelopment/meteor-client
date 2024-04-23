@@ -177,12 +177,12 @@ public class Quiver extends Module {
         boolean charging = mc.options.useKey.isPressed();
 
         if (!charging) {
-            InvUtils.move().from(arrowSlots.get(0)).to(9);
+            InvUtils.move().from(arrowSlots.getFirst()).to(9);
             mc.options.useKey.setPressed(true);
         } else {
             if (BowItem.getPullProgress(mc.player.getItemUseTime()) >= 0.12) {
-                int targetSlot = arrowSlots.get(0);
-                arrowSlots.remove(0);
+                int targetSlot = arrowSlots.getFirst();
+                arrowSlots.removeFirst();
 
                 mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround()));
                 mc.options.useKey.setPressed(false);

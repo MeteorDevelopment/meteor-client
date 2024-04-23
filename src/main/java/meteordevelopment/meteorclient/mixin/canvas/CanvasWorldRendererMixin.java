@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;*/
 
 // TODO: 1.19.3
 //@Mixin(value = CanvasWorldRenderer.class, remap = false)
-public class CanvasWorldRendererMixin {
+public abstract class CanvasWorldRendererMixin {
     /*@ModifyVariable(method = "renderWorld", at = @At("LOAD"), name = "blockOutlines")
     private boolean renderWorld_blockOutlines(boolean blockOutlines) {
         if (Modules.get().isActive(BlockSelection.class)) return false;

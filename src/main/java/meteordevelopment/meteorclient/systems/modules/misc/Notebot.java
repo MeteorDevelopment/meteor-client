@@ -39,7 +39,6 @@ import net.minecraft.block.enums.Instrument;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -484,7 +483,7 @@ public class Notebot extends Module {
 
             if (uniqueNotesToUse.contains(note)) {
                 // Add correct noteblock position to a noteBlockPositions
-                noteBlockPositions.put(note, noteblocks.remove(0));
+                noteBlockPositions.put(note, noteblocks.removeFirst());
                 uniqueNotesToUse.remove(note);
             }
 
@@ -515,7 +514,7 @@ public class Notebot extends Module {
                 for (BlockPos pos : positions) {
                     if (foundNotes.isEmpty()) break;
 
-                    Note note = foundNotes.remove(0);
+                    Note note = foundNotes.removeFirst();
                     noteBlockPositions.put(note, pos);
 
                     uniqueNotesToUse.remove(note);
@@ -524,7 +523,7 @@ public class Notebot extends Module {
                 for (BlockPos pos : positions) {
                     if (uniqueNotesToUse.isEmpty()) break;
 
-                    Note note = uniqueNotesToUse.remove(0);
+                    Note note = uniqueNotesToUse.removeFirst();
                     noteBlockPositions.put(note, pos);
                 }
             }

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(FoliageColors.class)
-public class FoliageColorsMixin {
+public abstract class FoliageColorsMixin {
 
     @ModifyReturnValue(method = "getBirchColor", at = @At("RETURN"))
     private static int onGetBirchColor(int original) {

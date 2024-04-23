@@ -17,7 +17,7 @@ import org.joml.Vector4f;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public abstract class NametagUtils {
+public class NametagUtils {
     private static final Vector4f vec4 = new Vector4f();
     private static final Vector4f mmMat4 = new Vector4f();
     private static final Vector4f pmMat4 = new Vector4f();
@@ -28,6 +28,9 @@ public abstract class NametagUtils {
     private static double windowScale;
 
     public static double scale;
+
+    private NametagUtils() {
+    }
 
     public static void onRender(MatrixStack matrices, Matrix4f projection) {
         model = new Matrix4f(matrices.peek().getPositionMatrix());

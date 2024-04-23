@@ -59,16 +59,15 @@ public class ESPBlock {
     }
 
     public ESPBlock getSideBlock(int side) {
-        switch (side) {
-            case FO: return blockEsp.getBlock(x, y, z + 1);
-            case BA: return blockEsp.getBlock(x, y, z - 1);
-            case LE: return blockEsp.getBlock(x - 1, y, z);
-            case RI: return blockEsp.getBlock(x + 1, y, z);
-            case TO: return blockEsp.getBlock(x, y + 1, z);
-            case BO: return blockEsp.getBlock(x, y - 1, z);
-        }
-
-        return null;
+        return switch (side) {
+            case FO -> blockEsp.getBlock(x, y, z + 1);
+            case BA -> blockEsp.getBlock(x, y, z - 1);
+            case LE -> blockEsp.getBlock(x - 1, y, z);
+            case RI -> blockEsp.getBlock(x + 1, y, z);
+            case TO -> blockEsp.getBlock(x, y + 1, z);
+            case BO -> blockEsp.getBlock(x, y - 1, z);
+            default -> null;
+        };
     }
 
     private void assignGroup() {

@@ -196,7 +196,7 @@ public class TextHud extends HudElement {
 
             if (result.hasErrors()) {
                 script = null;
-                section = new Section(0, result.errors.get(0).toString());
+                section = new Section(0, result.errors.getFirst().toString());
                 calculateSize(renderer);
             }
             else script = Compiler.compile(result);

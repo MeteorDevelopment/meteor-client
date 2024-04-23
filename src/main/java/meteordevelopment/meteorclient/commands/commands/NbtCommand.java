@@ -15,23 +15,14 @@ import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.component.ComponentMap;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtType;
-import net.minecraft.nbt.scanner.NbtScanner;
-import net.minecraft.nbt.visitor.NbtElementVisitor;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-
-import java.io.DataOutput;
-import java.io.IOException;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;

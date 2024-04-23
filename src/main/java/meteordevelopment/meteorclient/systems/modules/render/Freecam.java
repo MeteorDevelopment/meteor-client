@@ -168,7 +168,7 @@ public class Freecam extends Module {
         if (reloadChunks.get()) mc.worldRenderer.reload();
         mc.options.setPerspective(perspective);
         if (staticView.get()) {
-            mc.options.getFovEffectScale().setValue((double)fovScale);
+            mc.options.getFovEffectScale().setValue(fovScale);
             mc.options.getBobView().setValue(bobView);
         }
     }

@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(ShulkerBoxBlock.class)
-public class ShulkerBoxBlockMixin {
+public abstract class ShulkerBoxBlockMixin {
     @Inject(method = "appendTooltip", at = @At("HEAD"), cancellable = true)
     private void onAppendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType options, CallbackInfo ci) {
         if (Modules.get() == null) return;

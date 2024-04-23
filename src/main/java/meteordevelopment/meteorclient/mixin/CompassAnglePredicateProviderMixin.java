@@ -9,7 +9,7 @@ import net.minecraft.client.item.CompassAnglePredicateProvider;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(CompassAnglePredicateProvider.class)
-public class CompassAnglePredicateProviderMixin {
+public abstract class CompassAnglePredicateProviderMixin {
     // TODO: I don't fucking know, someone fix this
     /*@Redirect(method = "method_43213", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getBodyYaw()F"))
     private float callLivingEntityGetYaw(Entity entity) {

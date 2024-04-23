@@ -32,7 +32,10 @@ import java.util.function.BiFunction;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @SuppressWarnings("JavadocReference")
-public abstract class DamageUtils {
+public class DamageUtils {
+    private DamageUtils() {
+    }
+
     // Explosion damage
 
     /**

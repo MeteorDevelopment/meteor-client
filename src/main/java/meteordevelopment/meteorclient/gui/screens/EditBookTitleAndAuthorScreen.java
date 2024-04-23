@@ -20,7 +20,6 @@ import net.minecraft.util.Hand;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.UnaryOperator;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 

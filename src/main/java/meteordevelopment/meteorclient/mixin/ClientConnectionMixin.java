@@ -39,7 +39,7 @@ import java.net.InetSocketAddress;
 import java.util.Iterator;
 
 @Mixin(ClientConnection.class)
-public class ClientConnectionMixin {
+public abstract class ClientConnectionMixin {
     @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
     private static <T extends PacketListener> void onHandlePacket(Packet<T> packet, PacketListener listener, CallbackInfo info) {
         if (packet instanceof BundleS2CPacket bundle) {

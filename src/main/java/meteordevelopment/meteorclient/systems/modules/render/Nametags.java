@@ -693,7 +693,7 @@ public class Nametags extends Module {
 
     public enum DistanceColorMode {
         Gradient,
-        Flat;
+        Flat
     }
 
     public boolean excludeBots() {

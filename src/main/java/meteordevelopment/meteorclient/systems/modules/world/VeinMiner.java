@@ -179,12 +179,12 @@ public class VeinMiner extends Module {
         blocks.removeIf(MyBlock::shouldRemove);
 
         if (!blocks.isEmpty()) {
-            if (tick < delay.get() && !blocks.get(0).mining) {
+            if (tick < delay.get() && !blocks.getFirst().mining) {
                 tick++;
                 return;
             }
             tick = 0;
-            blocks.get(0).mine();
+            blocks.getFirst().mine();
         }
     }
 

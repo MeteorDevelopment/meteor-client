@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import java.util.Random;
 
 @Mixin(AbstractBlock.AbstractBlockState.class)
-public class AbstractBlockStateMixin {
+public abstract class AbstractBlockStateMixin {
     private static final Random RANDOM = new Random();
 
     @ModifyVariable(method = "getModelOffset", at = @At("HEAD"), argsOnly = true)

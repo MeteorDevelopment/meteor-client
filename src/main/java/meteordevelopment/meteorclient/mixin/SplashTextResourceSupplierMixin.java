@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Random;
 
 @Mixin(SplashTextResourceSupplier.class)
-public class SplashTextResourceSupplierMixin {
+public abstract class SplashTextResourceSupplierMixin {
     private boolean override = true;
     private final Random random = new Random();
 

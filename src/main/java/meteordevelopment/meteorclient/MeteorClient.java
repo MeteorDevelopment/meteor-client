@@ -163,7 +163,7 @@ public class MeteorClient implements ClientModInitializer {
 
     private void toggleGui() {
         if (Utils.canCloseGui()) mc.currentScreen.close();
-        else if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
+        else if (Utils.canOpenGui()) Tabs.get().getFirst().openScreen(GuiThemes.get());
     }
 
     // Hide HUD

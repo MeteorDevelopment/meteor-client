@@ -145,7 +145,7 @@ public class Offhand extends Module {
     }
 
     @EventHandler(priority = HIGHEST + 999)
-    private void onTick(TickEvent.Pre event) throws InterruptedException {
+    private void onTick(TickEvent.Pre event) {
         FindItemResult result = InvUtils.find(Items.TOTEM_OF_UNDYING);
         totems = result.count();
 
@@ -262,7 +262,7 @@ public class Offhand extends Module {
         Totem(Items.TOTEM_OF_UNDYING),
         Shield(Items.SHIELD),
         Potion(Items.POTION);
-        net.minecraft.item.Item item;
+        final net.minecraft.item.Item item;
         Item(net.minecraft.item.Item item) {
             this.item = item;
         }

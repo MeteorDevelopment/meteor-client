@@ -84,7 +84,7 @@ public class Blink extends Module {
         if (!(event.packet instanceof PlayerMoveC2SPacket p)) return;
         event.cancel();
 
-        PlayerMoveC2SPacket prev = packets.size() == 0 ? null : packets.get(packets.size() - 1);
+        PlayerMoveC2SPacket prev = packets.isEmpty() ? null : packets.getLast();
 
         if (prev != null &&
                 p.isOnGround() == prev.isOnGround() &&

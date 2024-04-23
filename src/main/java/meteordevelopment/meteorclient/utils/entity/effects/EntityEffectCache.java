@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.utils.entity.effects;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.entry.RegistryEntry;
 
 import java.util.Map;
