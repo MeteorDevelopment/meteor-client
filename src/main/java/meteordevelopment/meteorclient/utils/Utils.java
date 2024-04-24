@@ -502,11 +502,11 @@ public class Utils {
     }
 
     public static void clearEnchantments(ItemStack itemStack) {
-        EnchantmentHelper.apply(itemStack, components -> components.remove((a) -> true));
+        EnchantmentHelper.apply(itemStack, components -> components.remove(a -> true));
     }
 
     public static void removeEnchantment(ItemStack itemStack, Enchantment enchantment) {
-        EnchantmentHelper.apply(itemStack, components -> components.remove(enchantment1 -> enchantment1.equals(enchantment)));
+        EnchantmentHelper.apply(itemStack, components -> components.remove(enchantment1 -> enchantment1.value().equals(enchantment)));
     }
 
     public static Color lerp(Color first, Color second, @Range(from = 0, to = 1) float v) {

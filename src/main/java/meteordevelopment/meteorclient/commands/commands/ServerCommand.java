@@ -35,16 +35,16 @@ import org.apache.commons.lang3.StringUtils;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ServerCommand extends Command {
-    private static final List<String> ANTICHEAT_LIST = Arrays.asList("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx", "vulcan", "abc", "spartan", "kauri", "anticheatreloaded", "witherac", "godseye", "matrix", "wraith", "antixrayheuristics", "grimac");
-    private static final String[] VERSION_ALIASES = {"version", "ver", "about", "bukkit:version", "bukkit:ver", "bukkit:about"}; // aliases for bukkit:version
+    private static final Set<String> ANTICHEAT_LIST = Set.of("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx", "vulcan", "abc", "spartan", "kauri", "anticheatreloaded", "witherac", "godseye", "matrix", "wraith", "antixrayheuristics", "grimac");
+    private static final Set<String> VERSION_ALIASES = Set.of("version", "ver", "about", "bukkit:version", "bukkit:ver", "bukkit:about"); // aliases for bukkit:version
     private String alias;
     private int ticks = 0;
     private boolean tick = false;
@@ -241,10 +241,8 @@ public class ServerCommand extends Command {
                 }
 
                 // checking if any of the bukkit:version commands are available, which we can also grab plugins from
-                if (alias == null) {
-                    for (String a : VERSION_ALIASES) {
-                        if (node.getName().equals(a)) alias = a;
-                    }
+                if (alias == null && VERSION_ALIASES.contains(node.getName())) {
+                    alias = node.getName();
                 }
             });
 
@@ -256,7 +254,7 @@ public class ServerCommand extends Command {
             if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
                 Suggestions matches = packet.getSuggestions();
 
-                if (matches == null) {
+                if (matches.isEmpty()) {
                     error("An error occurred while trying to find plugins.");
                     return;
                 }

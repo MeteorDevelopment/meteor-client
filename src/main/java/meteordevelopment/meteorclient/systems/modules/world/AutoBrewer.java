@@ -139,7 +139,7 @@ public class AutoBrewer extends Module {
             for (int slotI = 5; slotI < c.slots.size(); slotI++) {
                 if (c.slots.get(slotI).getStack().getItem() == Items.POTION) {
                     Potion potion = c.slots.get(slotI).getStack().get(DataComponentTypes.POTION_CONTENTS).potion().get().value();
-                    if (potion == Potions.WATER) {
+                    if (potion == Potions.WATER.value()) {
                         slot = slotI;
                         break;
                     }

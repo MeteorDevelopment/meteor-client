@@ -34,7 +34,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -46,19 +45,19 @@ public class LocateCommand extends Command {
     private Vec3d secondStart;
     private Vec3d secondEnd;
 
-    private final List<Block> netherFortressBlocks = Arrays.asList(
+    private final List<Block> netherFortressBlocks = List.of(
         Blocks.NETHER_BRICKS,
         Blocks.NETHER_BRICK_FENCE,
         Blocks.NETHER_WART
     );
 
-    private final List<Block> monumentBlocks = Arrays.asList(
+    private final List<Block> monumentBlocks = List.of(
         Blocks.PRISMARINE_BRICKS,
         Blocks.SEA_LANTERN,
         Blocks.DARK_PRISMARINE
     );
 
-    private final List<Block> strongholdBlocks = Arrays.asList(
+    private final List<Block> strongholdBlocks = List.of(
         Blocks.END_PORTAL_FRAME
     );
 

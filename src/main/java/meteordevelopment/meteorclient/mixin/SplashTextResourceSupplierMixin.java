@@ -9,19 +9,21 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import net.minecraft.client.gui.screen.SplashTextRenderer;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 @Mixin(SplashTextResourceSupplier.class)
 public abstract class SplashTextResourceSupplierMixin {
+    @Unique
     private boolean override = true;
+    @Unique
     private final Random random = new Random();
-
+    @Unique
     private final List<String> meteorSplashes = getMeteorSplashes();
 
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
@@ -32,8 +34,9 @@ public abstract class SplashTextResourceSupplierMixin {
         override = !override;
     }
 
+    @Unique
     private static List<String> getMeteorSplashes() {
-        return Arrays.asList(
+        return List.of(
                 "Meteor on Crack!",
                 "Star Meteor Client on GitHub!",
                 "Based utility mod.",
