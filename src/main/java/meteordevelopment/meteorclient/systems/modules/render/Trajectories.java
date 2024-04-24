@@ -142,7 +142,10 @@ public class Trajectories extends Module {
         ItemStack itemStack = player.getMainHandStack();
         if (itemStack == null) itemStack = player.getOffHandStack();
         if (itemStack == null) return;
-        if (!items.get().contains(itemStack.getItem())) return;
+        if (!items.get().contains(itemStack.getItem())) {
+            itemStack = player.getOffHandStack();
+            if (!items.get().contains(itemStack.getItem())) return;
+        }
 
         // Calculate paths
         if (!simulator.set(player, itemStack, 0, accurate.get(), tickDelta)) return;
