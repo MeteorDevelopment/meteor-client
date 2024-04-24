@@ -140,8 +140,6 @@ public class Trajectories extends Module {
 
         // Get item
         ItemStack itemStack = player.getMainHandStack();
-        if (itemStack == null) itemStack = player.getOffHandStack();
-        if (itemStack == null) return;
         if (!items.get().contains(itemStack.getItem())) {
             itemStack = player.getOffHandStack();
             if (!items.get().contains(itemStack.getItem())) return;
