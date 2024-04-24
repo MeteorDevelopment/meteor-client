@@ -15,6 +15,9 @@ import org.spongepowered.asm.mixin.injection.At;
 public class TextRendererMixin {
     @ModifyExpressionValue(method = "accept", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Style;isObfuscated()Z"))
     private boolean onRenderObfuscatedStyle(boolean original) {
+        if (Modules.get() == null || Modules.get().get(NoRender.class) == null) {
+            return original;
+        }
         return !Modules.get().get(NoRender.class).noObfuscation() && original;
     }
 }
