@@ -171,7 +171,7 @@ public abstract class ChatHudMixin implements IChatHud {
     private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, int i, MessageIndicator.Icon icon, List<OrderedText> list) {
         if (Modules.get() == null) return; // baritone calls addMessage before we initialise
 
-        getBetterChat().lines.add(0, list.size());
+        getBetterChat().lines.addFirst(list.size());
     }
 
     @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;"))
@@ -182,20 +182,7 @@ public abstract class ChatHudMixin implements IChatHud {
         int size = betterChat.lines.size();
 
         while (size > 100 + extra) {
-            betterChat.lines.removeInt(size - 1);
-            size--;
-        }
-    }
-
-    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;"))
-    private void onRemoveMessageVisible(ChatHudLine message, CallbackInfo ci) {
-        if (Modules.get() == null) return;
-
-        int extra = getBetterChat().isLongerChat() ? getBetterChat().getExtraChatLines() : 0;
-        int size = betterChat.lines.size();
-
-        while (size > 100 + extra) {
-            betterChat.lines.removeInt(size - 1);
+            betterChat.lines.removeLast();
             size--;
         }
     }

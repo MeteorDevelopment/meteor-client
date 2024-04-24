@@ -214,12 +214,12 @@ public abstract class GameRendererMixin {
     }
 
     @ModifyVariable(method = "findCrosshairTarget", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private double updateTargetedEntityModifySurvivalReach(double blockInteractionRange) {
+    private double modifyBlockInteractionReach(double blockInteractionRange) {
         return Modules.get().get(Reach.class).blockReach();
     }
 
-    @ModifyVariable(method = "findCrosshairTarget", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private double updateTargetedEntityModifySquaredMaxReach(double entityInteractionRange) {
+    @ModifyVariable(method = "findCrosshairTarget", at = @At("HEAD"), ordinal = 1, argsOnly = true)
+    private double modifyEntityInteractionReach(double entityInteractionRange) {
         return Modules.get().get(Reach.class).entityReach();
     }
 }

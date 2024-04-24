@@ -20,6 +20,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringHelper;
@@ -77,7 +78,7 @@ public abstract class Names {
 
     public static String get(ParticleType<?> type) {
         if (!(type instanceof ParticleEffect)) return "";
-        return particleTypesNames.computeIfAbsent(type, effect1 -> StringUtils.capitalize(effect1.toString().substring(10).replace("_", " ")));
+        return particleTypesNames.computeIfAbsent(type, effect1 -> StringUtils.capitalize(Registries.PARTICLE_TYPE.getId(type).getPath().replace("_", " ")));
     }
 
     public static String getSoundName(Identifier id) {
@@ -93,7 +94,6 @@ public abstract class Names {
     }
 
     public static String get(ItemStack stack) {
-        //return !stack.getComponents().isEmpty() && stack.getNbt().contains("display", NbtElement.COMPOUND_TYPE) ? stack.getName().getString() : I18n.translate(stack.getTranslationKey());
         return stack.getName().getString(); // pretty sure this is the same as it was
     }
 }
