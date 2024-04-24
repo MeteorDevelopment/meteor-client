@@ -240,7 +240,7 @@ public class Quiver extends Module {
 
     private boolean hasEffect(StatusEffect effect) {
         for (StatusEffectInstance statusEffect : mc.player.getStatusEffects()) {
-            if (statusEffect.getEffectType() == effect) return true;
+            if (statusEffect.getEffectType().value().equals(effect)) return true;
         }
 
         return false;

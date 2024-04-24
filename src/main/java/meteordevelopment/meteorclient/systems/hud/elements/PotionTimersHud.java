@@ -185,7 +185,7 @@ public class PotionTimersHud extends HudElement {
         texts.clear();
 
         for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
-            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType())) continue;
+            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType().value())) continue;
             if (!showAmbient.get() && statusEffectInstance.isAmbient()) continue;
             String text = getString(statusEffectInstance);
             texts.add(new ObjectObjectImmutablePair<>(statusEffectInstance, text));
@@ -250,7 +250,7 @@ public class PotionTimersHud extends HudElement {
 
     private boolean hasNoVisibleEffects() {
         for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
-            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType())) continue;
+            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType().value())) continue;
             if (!showAmbient.get() && statusEffectInstance.isAmbient()) continue;
             return false;
         }
