@@ -58,8 +58,18 @@ public abstract class GameRendererMixin {
     @Shadow
     @Final
     private Camera camera;
+
+    @Shadow
+    protected abstract void bobView(MatrixStack matrices, float tickDelta);
+
+    @Shadow
+    protected abstract void tiltViewWhenHurt(MatrixStack matrices, float tickDelta);
+
     @Unique
     private Renderer3D renderer;
+
+    @Unique
+    private final MatrixStack matrices = new MatrixStack();
 
     // FIXME: unsure
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
@@ -68,18 +78,37 @@ public abstract class GameRendererMixin {
 
         client.getProfiler().push(MeteorClient.MOD_ID + "_render");
 
+        // Create renderer and event
+
         if (renderer == null) renderer = new Renderer3D();
         Render3DEvent event = Render3DEvent.get(matrixStack, renderer, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
+
+        // Call utility classes
 
         RenderUtils.updateScreenCenter();
         NametagUtils.onRender(matrixStack, matrix4f);
 
+        // Update model view matrix
+
         RenderSystem.getModelViewStack().pushMatrix().mul(matrix4f2);
+
+        matrices.push();
+
+        tiltViewWhenHurt(matrices, camera.getLastTickDelta());
+        if (client.options.getBobView().getValue()) bobView(matrices, camera.getLastTickDelta());
+
+        RenderSystem.getModelViewStack().mul(matrices.peek().getPositionMatrix().invert());
+        matrices.pop();
+
         RenderSystem.applyModelViewMatrix();
+
+        // Render
 
         renderer.begin();
         MeteorClient.EVENT_BUS.post(event);
         renderer.render(matrixStack);
+
+        // Revert model view matrix
 
         RenderSystem.getModelViewStack().popMatrix();
         RenderSystem.applyModelViewMatrix();
