@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Scaffold;
+import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
@@ -112,8 +113,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if (speed != -1) info.setReturnValue(speed);
     }
 
-    // FIXME might not be needed?
-    /*
+
     @ModifyReturnValue(method = "getBlockInteractionRange", at = @At("RETURN"))
     private double modifyBlockInteractionRange(double original) {
         return Modules.get().get(Reach.class).blockReach();
@@ -123,6 +123,4 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private double modifyEntityInteractionRange(double original) {
         return Modules.get().get(Reach.class).entityReach();
     }
-
-     */
 }

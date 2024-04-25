@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.LiquidInteract;
 import meteordevelopment.meteorclient.systems.modules.player.NoMiningTrace;
-import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.render.Zoom;
@@ -38,7 +37,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -211,15 +209,5 @@ public abstract class GameRendererMixin {
         if (!Modules.get().get(Freecam.class).renderHands() ||
             !Modules.get().get(Zoom.class).renderHands())
             ci.cancel();
-    }
-
-    @ModifyVariable(method = "findCrosshairTarget", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private double modifyBlockInteractionReach(double blockInteractionRange) {
-        return Modules.get().get(Reach.class).blockReach();
-    }
-
-    @ModifyVariable(method = "findCrosshairTarget", at = @At("HEAD"), ordinal = 1, argsOnly = true)
-    private double modifyEntityInteractionReach(double entityInteractionRange) {
-        return Modules.get().get(Reach.class).entityReach();
     }
 }

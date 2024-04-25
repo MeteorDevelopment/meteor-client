@@ -22,7 +22,7 @@ public abstract class SplashTextResourceSupplierMixin {
     @Unique
     private boolean override = true;
     @Unique
-    private final Random random = new Random();
+    private static final Random random = new Random();
     @Unique
     private final List<String> meteorSplashes = getMeteorSplashes();
 

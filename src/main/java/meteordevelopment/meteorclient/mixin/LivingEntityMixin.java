@@ -67,16 +67,6 @@ public abstract class LivingEntityMixin extends Entity {
         return event.walkOnFluid;
     }
 
-    /* todo need to fix this
-    @ModifyExpressionValue(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getFinalGravity()D"))
-    private double travelHasNoGravityProxy(double original) {
-        if (activeStatusEffects.containsKey(StatusEffects.LEVITATION) && Modules.get().get(PotionSpoof.class).shouldBlock(StatusEffects.LEVITATION.value())) {
-            return !Modules.get().get(PotionSpoof.class).applyGravity.get();
-        }
-        return original;
-    }
-     */
-
     @Inject(method = "spawnItemParticles", at = @At("HEAD"), cancellable = true)
     private void spawnItemParticles(ItemStack stack, int count, CallbackInfo info) {
         NoRender noRender = Modules.get().get(NoRender.class);
