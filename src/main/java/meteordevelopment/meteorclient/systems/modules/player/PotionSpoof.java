@@ -50,13 +50,6 @@ public class PotionSpoof extends Module {
         .build()
     );
 
-    public final Setting<Boolean> applyGravity = sgGeneral.add(new BoolSetting.Builder()
-        .name("gravity")
-        .description("Applies gravity when levitating.")
-        .defaultValue(false)
-        .build()
-    );
-
     public PotionSpoof() {
         super(Categories.Player, "potion-spoof", "Spoofs potion statuses for you. SOME effects DO NOT work.");
     }

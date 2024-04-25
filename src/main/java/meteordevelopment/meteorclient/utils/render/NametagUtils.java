@@ -23,8 +23,8 @@ public class NametagUtils {
     private static final Vector4f pmMat4 = new Vector4f();
     private static final Vector3d camera = new Vector3d();
     private static final Vector3d cameraNegated = new Vector3d();
-    private static Matrix4f model;
-    private static Matrix4f projection;
+    private static final Matrix4f model = new Matrix4f();
+    private static final Matrix4f projection = new Matrix4f();
     private static double windowScale;
 
     public static double scale;
@@ -32,9 +32,9 @@ public class NametagUtils {
     private NametagUtils() {
     }
 
-    public static void onRender(MatrixStack matrices, Matrix4f projection) {
-        model = new Matrix4f(matrices.peek().getPositionMatrix());
-        NametagUtils.projection = projection;
+    public static void onRender(Matrix4f modelView) {
+        model.set(modelView);
+        NametagUtils.projection.set(RenderSystem.getProjectionMatrix());
 
         Utils.set(camera, mc.gameRenderer.getCamera().getPos());
         cameraNegated.set(camera);
