@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
 import meteordevelopment.meteorclient.systems.modules.player.AutoEat;
 import meteordevelopment.meteorclient.systems.modules.player.AutoGap;
 import meteordevelopment.meteorclient.systems.modules.player.AutoTool;
@@ -213,7 +214,11 @@ public class HighwayBuilder extends Module {
     private final Setting<List<Item>> trashItems = sgInventory.add(new ItemListSetting.Builder()
         .name("trash-items")
         .description("Items that are considered trash and can be thrown out.")
-        .defaultValue(Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GOLDEN_SWORD, Items.GLOWSTONE_DUST, Items.GLOWSTONE, Items.BLACKSTONE, Items.BASALT, Items.GHAST_TEAR, Items.SOUL_SAND, Items.SOUL_SOIL)
+        .defaultValue(
+            Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GOLDEN_SWORD, Items.GLOWSTONE_DUST,
+            Items.GLOWSTONE, Items.BLACKSTONE, Items.BASALT, Items.GHAST_TEAR, Items.SOUL_SAND, Items.SOUL_SOIL,
+            Items.ROTTEN_FLESH
+        )
         .build()
     );
 
@@ -338,6 +343,7 @@ public class HighwayBuilder extends Module {
             - getting echests and picks from shulker boxes - refactor echest blockade to be more general purpose?
             - access to your ec
         - separate walking forwards from the current state to speed up actions
+        - fix issues related to y level changes
      */
 
     @Override
@@ -407,6 +413,7 @@ public class HighwayBuilder extends Module {
 
         if (Modules.get().get(AutoEat.class).eating) return;
         if (Modules.get().get(AutoGap.class).isEating()) return;
+        if (Modules.get().get(KillAura.class).attacking) return;
 
         if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 2.0f) return;
 
@@ -964,8 +971,8 @@ public class HighwayBuilder extends Module {
         private int findHotbarSlot(HighwayBuilder b, boolean replaceTools) {
             int thrashSlot = -1;
             int slotsWithBlocks = 0;
-            int slotWithLeastBlocks = 65;
-            int slowWithLeastBlocksCount = 0;
+            int slotWithLeastBlocks = -1;
+            int slotWithLeastBlocksCount = Integer.MAX_VALUE;
 
             // Loop hotbar
             for (int i = 0; i < 9; i++) {
@@ -984,8 +991,8 @@ public class HighwayBuilder extends Module {
                 if (itemStack.getItem() instanceof BlockItem blockItem && b.blocksToPlace.get().contains(blockItem.getBlock())) {
                     slotsWithBlocks++;
 
-                    if (itemStack.getCount() < slowWithLeastBlocksCount) {
-                        slowWithLeastBlocksCount = itemStack.getCount();
+                    if (itemStack.getCount() < slotWithLeastBlocksCount) {
+                        slotWithLeastBlocksCount = itemStack.getCount();
                         slotWithLeastBlocks = i;
                     }
                 }
@@ -1073,7 +1080,10 @@ public class HighwayBuilder extends Module {
             if (b.mc.player.getInventory().getStack(bestSlot).getItem() instanceof PickaxeItem ){
                 int count = countItem(b, stack -> stack.getItem() instanceof PickaxeItem);
 
-                if (count <= b.savePickaxes.get()) b.error("Found less than the selected amount of pickaxes required: " + count + "/"  + (b.savePickaxes.get() + 1));
+                if (count <= b.savePickaxes.get()) {
+                    b.error("Found less than the selected amount of pickaxes required: " + count + "/" + (b.savePickaxes.get() + 1));
+                    return -1;
+                }
             }
 
             // Check if the tool is already in hotbar
