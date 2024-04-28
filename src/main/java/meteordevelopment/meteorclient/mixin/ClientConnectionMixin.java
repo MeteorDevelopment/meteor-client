@@ -23,7 +23,6 @@ import net.minecraft.network.NetworkSide;
 import net.minecraft.network.handler.PacketEncoderException;
 import net.minecraft.network.handler.PacketSizeLogger;
 import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
 import net.minecraft.text.MutableText;
@@ -40,13 +39,14 @@ import java.util.Iterator;
 
 @Mixin(ClientConnection.class)
 public abstract class ClientConnectionMixin {
-    @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
-    private static <T extends PacketListener> void onHandlePacket(Packet<T> packet, PacketListener listener, CallbackInfo info) {
+    @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/packet/Packet;)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;handlePacket(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;)V", shift = At.Shift.BEFORE), cancellable = true)
+    private void onHandlePacket(ChannelHandlerContext channelHandlerContext, Packet<?> packet, CallbackInfo ci) {
         if (packet instanceof BundleS2CPacket bundle) {
             for (Iterator<Packet<? super ClientPlayPacketListener>> it = bundle.getPackets().iterator(); it.hasNext(); ) {
-                if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(it.next(), listener)).isCancelled()) it.remove();
+                if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(it.next(), (ClientConnection) (Object) this)).isCancelled()) it.remove();
             }
-        } else if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet, listener)).isCancelled()) info.cancel();
+        } else if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet, (ClientConnection) (Object) this)).isCancelled()) ci.cancel();
     }
 
     @Inject(method = "disconnect", at = @At("HEAD"))

@@ -23,7 +23,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -228,13 +227,13 @@ public class ServerCommand extends Command {
         // the rationale is that since we should get this packet whenever we log into the server, we can capture it
         // straight away and not need to send a command completion packet for essentially the same results
         if (event.packet instanceof CommandTreeS2CPacket packet) {
-            ClientPlayNetworkHandlerAccessor handler = (ClientPlayNetworkHandlerAccessor) event.packetListener;
+            ClientPlayNetworkHandlerAccessor handler = (ClientPlayNetworkHandlerAccessor) event.connection.getPacketListener();
             commandTreePlugins.clear();
             alias = null;
 
             // This gets the root node of the command tree. From there, all of its children have to be of type
             // LiteralCommandNode, so we don't need to worry about checking or casting and can just grab the name
-            packet.getCommandTree(CommandRegistryAccess.of((RegistryWrapper.WrapperLookup) handler.getCombinedDynamicRegistries(), handler.getEnabledFeatures())).getChildren().forEach(node -> {
+            packet.getCommandTree(CommandRegistryAccess.of(handler.getCombinedDynamicRegistries(), handler.getEnabledFeatures())).getChildren().forEach(node -> {
                 String[] split = node.getName().split(":");
                 if (split.length > 1) {
                     if (!commandTreePlugins.contains(split[0])) commandTreePlugins.add(split[0]);

@@ -9,9 +9,11 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.BrandCustomPayload;
 import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.c2s.common.ResourcePackStatusC2SPacket;
 import net.minecraft.network.packet.s2c.common.ResourcePackSendS2CPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -58,7 +60,7 @@ public class ServerSpoof extends Module {
     private final Setting<List<String>> channels = sgGeneral.add(new StringListSetting.Builder()
         .name("channels")
         .description("If the channel contains the keyword, this outgoing channel will be blocked.")
-        .defaultValue("minecraft:register")
+        .defaultValue("fabric", "minecraft:register")
         .visible(blockChannels::get)
         .build()
     );
@@ -106,22 +108,19 @@ public class ServerSpoof extends Module {
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
             );
 
-            // todo test resource pack acceptance and implement this
-            /*MutableText acceptance = Text.literal("[Spoof Acceptance]");
+            MutableText acceptance = Text.literal("[Spoof Acceptance]");
             link.setStyle(link.getStyle()
                 .withColor(Formatting.DARK_GREEN)
                 .withUnderline(true)
                 .withClickEvent(new RunnableClickEvent(() -> {
-                    event.connection.send(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.ACCEPTED));
-                    event.connection.send(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED));
+                    event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ResourcePackStatusC2SPacket.Status.ACCEPTED));
+                    event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED));
                 }))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to spoof accepting the recourse pack.")))
             );
 
-             */
-
-            msg.append(link);
-            msg.append(".");
+            msg.append(link).append(" ");
+            msg.append(acceptance).append(".");
             info(msg);
         }
     }
