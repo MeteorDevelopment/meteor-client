@@ -60,7 +60,7 @@ public class ServerSpoof extends Module {
     private final Setting<List<String>> channels = sgGeneral.add(new StringListSetting.Builder()
         .name("channels")
         .description("If the channel contains the keyword, this outgoing channel will be blocked.")
-        .defaultValue("fabric", "minecraft:register")
+        .defaultValue("fabric", "minecraft:register", "minecraft:brand")
         .visible(blockChannels::get)
         .build()
     );
