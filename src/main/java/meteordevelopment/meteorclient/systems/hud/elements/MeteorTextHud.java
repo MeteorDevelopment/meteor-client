@@ -15,6 +15,7 @@ public class MeteorTextHud {
     public static final HudElementInfo<TextHud>.Preset TPS;
     public static final HudElementInfo<TextHud>.Preset PING;
     public static final HudElementInfo<TextHud>.Preset SPEED;
+    public static final HudElementInfo<TextHud>.Preset GAME_MODE;
     public static final HudElementInfo<TextHud>.Preset DURABILITY;
     public static final HudElementInfo<TextHud>.Preset POSITION;
     public static final HudElementInfo<TextHud>.Preset OPPOSITE_POSITION;
@@ -37,6 +38,7 @@ public class MeteorTextHud {
         TPS = addPreset("TPS", "TPS: #1{round(server.tps, 1)}");
         PING = addPreset("Ping", "Ping: #1{ping}");
         SPEED = addPreset("Speed", "Speed: #1{round(player.speed, 1)}", 0);
+        GAME_MODE = addPreset("Game mode", "Game mode: #1{player.gamemode}", 0);
         DURABILITY = addPreset("Durability", "Durability: #1{player.hand_or_offhand.durability}");
         POSITION = addPreset("Position", "Pos: #1{floor(camera.pos.x)}, {floor(camera.pos.y)}, {floor(camera.pos.z)}", 0);
         OPPOSITE_POSITION = addPreset("Opposite Position", "{player.opposite_dimension != \"End\" ? player.opposite_dimension + \":\" : \"\"} #1{player.opposite_dimension != \"End\" ? \"\" + floor(camera.opposite_dim_pos.x) + \", \" + floor(camera.opposite_dim_pos.y) + \", \" + floor(camera.opposite_dim_pos.z) : \"\"}", 0);
