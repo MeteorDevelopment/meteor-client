@@ -147,6 +147,8 @@ public class MeteorStarscript {
             .set("dimension", () -> Value.string(PlayerUtils.getDimension().name()))
             .set("opposite_dimension", () -> Value.string(PlayerUtils.getDimension().opposite().name()))
 
+            .set("gamemode", () -> mc.player != null ? Value.string(StringUtils.capitalize(PlayerUtils.getGameMode().getName())) : Value.null_())
+
             .set("pos", new ValueMap()
                 .set("_toString", () -> posString(false, false))
                 .set("x", () -> Value.number(mc.player != null ? mc.player.getX() : 0))
