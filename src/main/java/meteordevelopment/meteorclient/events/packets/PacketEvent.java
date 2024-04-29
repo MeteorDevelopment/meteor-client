@@ -27,6 +27,7 @@ public class PacketEvent {
     public static class Send extends Cancellable {
         private static final Send INSTANCE = new Send();
 
+        // overwriting this will overwrite the packet being sent
         public Packet<?> packet;
 
         public static Send get(Packet<?> packet) {
