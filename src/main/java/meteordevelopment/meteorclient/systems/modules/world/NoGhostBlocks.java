@@ -25,7 +25,7 @@ public class NoGhostBlocks extends Module {
         .build()
     );
 
-    private final Setting<Boolean> placing = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> placing = sgGeneral.add(new BoolSetting.Builder()
         .name("placing")
         .description("Whether to apply for block placement actions.")
         .defaultValue(true)
