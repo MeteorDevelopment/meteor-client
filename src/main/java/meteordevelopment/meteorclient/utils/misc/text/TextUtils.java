@@ -23,7 +23,7 @@ public class TextUtils {
     }
 
     public static List<ColoredText> toColoredTextList(Text text) {
-        Stack<ColoredText> stack = new Stack<>();
+        Deque<ColoredText> stack = new ArrayDeque<>();
         List<ColoredText> coloredTexts = new ArrayList<>();
         preOrderTraverse(text, stack, coloredTexts);
         coloredTexts.removeIf(e -> e.text().isEmpty());
@@ -93,7 +93,7 @@ public class TextUtils {
      * @param stack        An empty stack. This is used by the recursive algorithm to keep track of the parents of the current iteration
      * @param coloredTexts The list of colored text to return
      */
-    private static void preOrderTraverse(Text text, Stack<ColoredText> stack, List<ColoredText> coloredTexts) {
+    private static void preOrderTraverse(Text text, Deque<ColoredText> stack, List<ColoredText> coloredTexts) {
         if (text == null)
             return;
 
@@ -108,7 +108,7 @@ public class TextUtils {
         // and with no color, use the default of white.
         Color textColor;
         if (mcTextColor == null) {
-            if (stack.empty())
+            if (stack.isEmpty())
                 // No color defined, use default white
                 textColor = new Color(255, 255, 255);
             else

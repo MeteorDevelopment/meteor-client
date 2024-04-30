@@ -17,8 +17,11 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class ReflectInit {
+public class ReflectInit {
     private static final List<Reflections> reflections = new ArrayList<>();
+
+    private ReflectInit() {
+    }
 
     public static void registerPackages() {
         add(MeteorClient.ADDON);
@@ -46,7 +49,7 @@ public abstract class ReflectInit {
             Map<Class<?>, List<Method>> byClass = initTasks.stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
             Set<Method> left = new HashSet<>(initTasks);
 
-            for (Method m; (m = left.stream().findAny().orElse(null)) != null;) {
+            for (Method m; (m = left.stream().findAny().orElse(null)) != null; ) {
                 reflectInit(m, annotation, left, byClass);
             }
         }
@@ -75,13 +78,10 @@ public abstract class ReflectInit {
     private static <T extends Annotation> Class<?>[] getDependencies(Method task, Class<T> annotation) {
         T init = task.getAnnotation(annotation);
 
-        if (init instanceof PreInit pre) {
-            return pre.dependencies();
-        }
-        else if (init instanceof PostInit post) {
-            return post.dependencies();
-        }
-
-        return new Class<?>[]{};
+        return switch (init) {
+            case PreInit pre -> pre.dependencies();
+            case PostInit post -> post.dependencies();
+            default -> new Class<?>[]{};
+        };
     }
 }

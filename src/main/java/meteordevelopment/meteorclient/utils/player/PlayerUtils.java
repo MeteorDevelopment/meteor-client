@@ -44,6 +44,9 @@ public class PlayerUtils {
 
     private static final Color color = new Color();
 
+    private PlayerUtils() {
+    }
+
     public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
         if (Friends.get().isFriend(entity)) {
             return color.set(Config.get().friendColor.get()).a(defaultColor.a);

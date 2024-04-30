@@ -22,13 +22,16 @@ import java.util.UUID;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public abstract class FakeClientPlayer {
+public class FakeClientPlayer {
     private static ClientWorld world;
     private static PlayerEntity player;
     private static PlayerListEntry playerListEntry;
 
     private static UUID lastId;
     private static boolean needsNewEntry;
+
+    private FakeClientPlayer() {
+    }
 
     @PreInit
     public static void init() {

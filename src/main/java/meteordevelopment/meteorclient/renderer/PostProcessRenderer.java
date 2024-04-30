@@ -12,6 +12,9 @@ public class PostProcessRenderer {
     private static Mesh mesh;
     private static final MatrixStack matrices = new MatrixStack();
 
+    private PostProcessRenderer() {
+    }
+
     @PreInit
     public static void init() {
         mesh = new Mesh(DrawMode.Triangles, Mesh.Attrib.Vec2);

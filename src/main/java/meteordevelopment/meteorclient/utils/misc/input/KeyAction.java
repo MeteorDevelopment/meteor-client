@@ -13,8 +13,10 @@ public enum KeyAction {
     Release;
 
     public static KeyAction get(int action) {
-        if (action == GLFW.GLFW_PRESS) return Press;
-        else if (action == GLFW.GLFW_RELEASE) return Release;
-        else return Repeat;
+        return switch (action) {
+            case GLFW.GLFW_PRESS -> Press;
+            case GLFW.GLFW_RELEASE -> Release;
+            default -> Repeat;
+        };
     }
 }

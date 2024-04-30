@@ -8,6 +8,9 @@ package meteordevelopment.meteorclient.utils.network;
 public class OnlinePlayers {
     private static long lastPingTime;
 
+    private OnlinePlayers() {
+    }
+
     public static void update() {
         long time = System.currentTimeMillis();
 

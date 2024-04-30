@@ -67,7 +67,7 @@ import java.util.stream.Collectors;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public abstract class MeteorStarscript {
+public class MeteorStarscript {
     public static Starscript ss = new Starscript();
 
     private static final BlockPos.Mutable BP = new BlockPos.Mutable();

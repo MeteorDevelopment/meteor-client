@@ -42,6 +42,9 @@ public class WireframeEntityRenderer {
     private static Color sideColor, lineColor;
     private static ShapeMode shapeMode;
 
+    private WireframeEntityRenderer() {
+    }
+
     public static void render(Render3DEvent event, Entity entity, double scale, Color sideColor, Color lineColor, ShapeMode shapeMode) {
         WireframeEntityRenderer.sideColor = sideColor;
         WireframeEntityRenderer.lineColor = lineColor;

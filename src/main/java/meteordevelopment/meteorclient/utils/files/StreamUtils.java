@@ -8,28 +8,22 @@ package meteordevelopment.meteorclient.utils.files;
 import java.io.*;
 
 public class StreamUtils {
+    private StreamUtils() {
+    }
+
     public static void copy(File from, File to) {
-        try {
-            InputStream in = new FileInputStream(from);
-            OutputStream out = new FileOutputStream(to);
-
+        try (InputStream in = new FileInputStream(from);
+             OutputStream out = new FileOutputStream(to)) {
             copy(in, out);
-
-            in.close();
-            out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public static void copy(InputStream in, File to) {
-        try {
-            OutputStream out = new FileOutputStream(to);
-
+        try (OutputStream out = new FileOutputStream(to)) {
             copy(in, out);
-
             in.close();
-            out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

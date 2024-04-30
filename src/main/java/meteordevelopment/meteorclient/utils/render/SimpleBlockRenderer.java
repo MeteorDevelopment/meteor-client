@@ -28,6 +28,9 @@ public class SimpleBlockRenderer {
     private static final Direction[] DIRECTIONS = Direction.values();
     private static final Random RANDOM = Random.create();
 
+    private SimpleBlockRenderer() {
+    }
+
     public static void renderWithBlockEntity(BlockEntity blockEntity, float tickDelta, IVertexConsumerProvider vertexConsumerProvider) {
         SimpleBlockRenderer.render(blockEntity.getPos(), blockEntity.getCachedState(), vertexConsumerProvider);
 
