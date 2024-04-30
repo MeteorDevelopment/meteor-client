@@ -34,7 +34,13 @@ public class NbtCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("add").then(argument("nbt", CompoundNbtTagArgumentType.create()).executes(s -> {
+        builder.executes(context -> {
+            error("This command is not yet updated for 1.20.5 and above!");
+            return SINGLE_SUCCESS;
+        });
+
+        // TODO: Update using Components over NBT
+        /*builder.then(literal("add").then(argument("nbt", CompoundNbtTagArgumentType.create()).executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
@@ -85,15 +91,15 @@ public class NbtCommand extends Command {
 
                 MutableText copyButton = Text.literal("NBT");
                 copyButton.setStyle(copyButton.getStyle()
-                        .withFormatting(Formatting.UNDERLINE)
-                        .withClickEvent(new MeteorClickEvent(
-                                ClickEvent.Action.RUN_COMMAND,
-                                this.toString("copy")
-                        ))
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                Text.literal("Copy the NBT data to your clipboard.")
-                        )));
+                    .withFormatting(Formatting.UNDERLINE)
+                    .withClickEvent(new MeteorClickEvent(
+                        ClickEvent.Action.RUN_COMMAND,
+                        this.toString("copy")
+                    ))
+                    .withHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        Text.literal("Copy the NBT data to your clipboard.")
+                    )));
 
                 MutableText text = Text.literal("");
                 text.append(copyButton);
@@ -117,11 +123,11 @@ public class NbtCommand extends Command {
                 mc.keyboard.setClipboard(components.toString());
                 MutableText nbt = Text.literal("NBT");
                 nbt.setStyle(nbt.getStyle()
-                        .withFormatting(Formatting.UNDERLINE)
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                Text.of(components.toString())
-                        )));
+                    .withFormatting(Formatting.UNDERLINE)
+                    .withHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        Text.of(components.toString())
+                    )));
 
                 MutableText text = Text.literal("");
                 text.append(nbt);
@@ -154,11 +160,11 @@ public class NbtCommand extends Command {
                 int count = IntegerArgumentType.getInteger(context, "count");
                 stack.setCount(count);
                 setStack(stack);
-                info("Set mainhand stack count to %s.",count);
+                info("Set mainhand stack count to %s.", count);
             }
 
             return SINGLE_SUCCESS;
-        })));
+        })));*/
     }
 
     private void setStack(ItemStack stack) {
