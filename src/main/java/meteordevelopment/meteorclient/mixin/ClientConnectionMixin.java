@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.proxy.Socks4ProxyHandler;
@@ -65,8 +67,13 @@ public abstract class ClientConnectionMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/packet/Packet;)V", cancellable = true)
-    private void onSendPacketHead(Packet<?> packet, CallbackInfo info) {
-        if (MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet)).isCancelled()) info.cancel();
+    private void onSendPacketHead(CallbackInfo info, @Local LocalRef<Packet<?>> packet) {
+        PacketEvent.Send processedPacket = MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet.get()));
+        if (processedPacket.isCancelled()) {
+            info.cancel();
+        } else {
+            packet.set(processedPacket.packet);
+        }
     }
 
     @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V", at = @At("TAIL"))
