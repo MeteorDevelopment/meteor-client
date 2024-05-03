@@ -29,14 +29,4 @@ public interface LivingEntityAccessor {
 
     @Accessor("jumpingCooldown")
     void setJumpCooldown(int cooldown);
-
-    @Accessor("POTION_SWIRLS")
-    static TrackedData<List<ParticleEffect>> meteor$getPotionSwirls() {
-        throw new AssertionError();
-    }
-
-    @Accessor("POTION_SWIRLS_AMBIENT")
-    static TrackedData<Boolean> meteor$getPotionSwirlsAmbient() {
-        throw new AssertionError();
-    }
 }
