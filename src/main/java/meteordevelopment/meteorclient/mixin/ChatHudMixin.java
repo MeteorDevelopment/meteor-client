@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -41,16 +40,25 @@ import java.util.List;
 
 @Mixin(ChatHud.class)
 public abstract class ChatHudMixin implements IChatHud {
-    @Shadow @Final private MinecraftClient client;
-    @Shadow @Final private List<ChatHudLine.Visible> visibleMessages;
-    @Shadow @Final private List<ChatHudLine> messages;
+    @Shadow
+    @Final
+    private MinecraftClient client;
+    @Shadow
+    @Final
+    private List<ChatHudLine.Visible> visibleMessages;
+    @Shadow
+    @Final
+    private List<ChatHudLine> messages;
 
-    @Unique private BetterChat betterChat;
-    @Unique private int nextId;
-    @Unique private boolean skipOnAddMessage;
+    @Unique
+    private BetterChat betterChat;
+    @Unique
+    private int nextId;
+    @Unique
+    private boolean skipOnAddMessage;
 
     @Shadow
-    protected abstract void addMessage(Text message, @Nullable MessageSignatureData signature, int ticks, @Nullable MessageIndicator indicator, boolean refresh);
+    public abstract void addMessage(Text message, @Nullable MessageSignatureData signatureData, @Nullable MessageIndicator indicator);
 
     @Shadow
     public abstract void addMessage(Text message);
@@ -62,19 +70,19 @@ public abstract class ChatHudMixin implements IChatHud {
         nextId = 0;
     }
 
-    @Inject(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V", ordinal = 0, shift = At.Shift.AFTER))
-    private void onAddMessageAfterNewChatHudLineVisible(Text message, MessageSignatureData signature, int ticks, MessageIndicator indicator, boolean refresh, CallbackInfo info) {
-        ((IChatHudLine) (Object) visibleMessages.get(0)).meteor$setId(nextId);
+    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V", shift = At.Shift.AFTER))
+    private void onAddMessageAfterNewChatHudLineVisible(ChatHudLine message, CallbackInfo ci) {
+        ((IChatHudLine) (Object) visibleMessages.getFirst()).meteor$setId(nextId);
     }
 
-    @Inject(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V", ordinal = 1, shift = At.Shift.AFTER))
-    private void onAddMessageAfterNewChatHudLine(Text message, MessageSignatureData signature, int ticks, MessageIndicator indicator, boolean refresh, CallbackInfo info) {
-        ((IChatHudLine) (Object) messages.get(0)).meteor$setId(nextId);
+    @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V", shift = At.Shift.AFTER))
+    private void onAddMessageAfterNewChatHudLine(ChatHudLine message, CallbackInfo ci) {
+        ((IChatHudLine) (Object) messages.getFirst()).meteor$setId(nextId);
     }
 
     @SuppressWarnings("DataFlowIssue")
-    @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
-    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Local(ordinal = 2) int j) {
+    @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
+    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Local(ordinal = 1) int j) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
         if (handler == null) return line;
 
@@ -86,7 +94,7 @@ public abstract class ChatHudMixin implements IChatHud {
         return line;
     }
 
-    @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At(value = "NEW", target = "(ILnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)Lnet/minecraft/client/gui/hud/ChatHudLine;"))
+    @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V", at = @At(value = "NEW", target = "(ILnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)Lnet/minecraft/client/gui/hud/ChatHudLine;"))
     private ChatHudLine onAddMessage_modifyChatHudLine(ChatHudLine line) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
         if (handler == null) return line;
@@ -95,17 +103,17 @@ public abstract class ChatHudMixin implements IChatHud {
         return line;
     }
 
-    @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", cancellable = true)
-    private void onAddMessage(Text message, @Nullable MessageSignatureData signature, int ticks, @Nullable MessageIndicator indicator, boolean refresh, CallbackInfo info) {
+    @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V", cancellable = true)
+    private void onAddMessage(Text message, MessageSignatureData signatureData, MessageIndicator indicator, CallbackInfo ci) {
         if (skipOnAddMessage) return;
 
         ReceiveMessageEvent event = MeteorClient.EVENT_BUS.post(ReceiveMessageEvent.get(message, indicator, nextId));
 
-        if (event.isCancelled()) info.cancel();
+        if (event.isCancelled()) ci.cancel();
         else {
             visibleMessages.removeIf(msg -> ((IChatHudLine) (Object) msg).meteor$getId() == nextId && nextId != 0);
 
-            for (int i = messages.size() - 1; i > -1 ; i--) {
+            for (int i = messages.size() - 1; i > -1; i--) {
                 if (((IChatHudLine) (Object) messages.get(i)).meteor$getId() == nextId && nextId != 0) {
                     messages.remove(i);
                     Modules.get().get(BetterChat.class).lines.removeInt(i);
@@ -113,18 +121,25 @@ public abstract class ChatHudMixin implements IChatHud {
             }
 
             if (event.isModified()) {
-                info.cancel();
+                ci.cancel();
 
                 skipOnAddMessage = true;
-                addMessage(event.getMessage(), signature, ticks, event.getIndicator(), refresh);
+                addMessage(event.getMessage(), signatureData, event.getIndicator());
                 skipOnAddMessage = false;
             }
         }
     }
 
     //modify max lengths for messages and visible messages
-    @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At(value = "CONSTANT", args = "intValue=100"))
+    @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "CONSTANT", args = "intValue=100"))
     private int maxLength(int size) {
+        if (Modules.get() == null || !getBetterChat().isLongerChat()) return size;
+
+        return size + betterChat.getExtraChatLines();
+    }
+
+    @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "CONSTANT", args = "intValue=100"))
+    private int maxLengthVisible(int size) {
         if (Modules.get() == null || !getBetterChat().isLongerChat()) return size;
 
         return size + betterChat.getExtraChatLines();
@@ -152,24 +167,22 @@ public abstract class ChatHudMixin implements IChatHud {
 
     // Anti spam
 
-    @Inject(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;isChatFocused()Z"), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void onBreakChatMessageLines(Text message, MessageSignatureData signature, int ticks, MessageIndicator indicator, boolean refresh, CallbackInfo ci, int i, List<OrderedText> list) {
+    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;isChatFocused()Z"), locals = LocalCapture.CAPTURE_FAILSOFT)
+    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, int i, MessageIndicator.Icon icon, List<OrderedText> list) {
         if (Modules.get() == null) return; // baritone calls addMessage before we initialise
 
-        getBetterChat().lines.add(0, list.size());
+        getBetterChat().lines.addFirst(list.size());
     }
 
-    @Inject(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V",
-        slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/hud/ChatHud;messages:Ljava/util/List;")), at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;"))
-    private void onRemoveMessage(Text message, MessageSignatureData signature, int ticks, MessageIndicator indicator, boolean refresh, CallbackInfo ci) {
+    @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;"))
+    private void onRemoveMessage(ChatHudLine message, CallbackInfo ci) {
         if (Modules.get() == null) return;
 
         int extra = getBetterChat().isLongerChat() ? getBetterChat().getExtraChatLines() : 0;
         int size = betterChat.lines.size();
 
         while (size > 100 + extra) {
-            betterChat.lines.removeInt(size - 1);
+            betterChat.lines.removeLast();
             size--;
         }
     }

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.stream.Stream;
 
 @Mixin(AbstractSignEditScreen.class)
-public class AbstractSignEditScreenMixin {
+public abstract class AbstractSignEditScreenMixin {
     @ModifyExpressionValue(method = "<init>(Lnet/minecraft/block/entity/SignBlockEntity;ZZLnet/minecraft/text/Text;)V", at = @At(value = "INVOKE", target = "Ljava/util/stream/IntStream;mapToObj(Ljava/util/function/IntFunction;)Ljava/util/stream/Stream;"))
     private Stream<Text> modifyTranslatableText(Stream<Text> original) {
         return original.map(this::modifyText);

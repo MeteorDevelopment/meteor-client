@@ -34,7 +34,7 @@ public class TickRate {
     private void onReceivePacket(PacketEvent.Receive event) {
         if (event.packet instanceof WorldTimeUpdateS2CPacket) {
             long now = System.currentTimeMillis();
-            float timeElapsed = (float) (now - timeLastTimeUpdate) / 1000.0F;
+            float timeElapsed = (now - timeLastTimeUpdate) / 1000.0F;
             tickRates[nextIndex] = MathHelper.clamp(20.0f / timeElapsed, 0.0f, 20.0f);
             nextIndex = (nextIndex + 1) % tickRates.length;
             timeLastTimeUpdate = now;

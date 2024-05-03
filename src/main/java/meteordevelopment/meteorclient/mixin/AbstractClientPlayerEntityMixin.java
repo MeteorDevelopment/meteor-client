@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(AbstractClientPlayerEntity.class)
-public class AbstractClientPlayerEntityMixin {
+public abstract class AbstractClientPlayerEntityMixin {
     // Player model rendering in main menu
 
     @Inject(method = "getPlayerListEntry", at = @At("HEAD"), cancellable = true)

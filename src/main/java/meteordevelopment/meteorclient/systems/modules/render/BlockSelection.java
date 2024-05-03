@@ -12,8 +12,8 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -70,15 +70,14 @@ public class BlockSelection extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.crosshairTarget == null || !(mc.crosshairTarget instanceof BlockHitResult result)) return;
+        if (mc.crosshairTarget == null || !(mc.crosshairTarget instanceof BlockHitResult result) || result.getType() == HitResult.Type.MISS) return;
 
         if (hideInside.get() && result.isInsideBlock()) return;
 
         BlockPos bp = result.getBlockPos();
         Direction side = result.getSide();
 
-        BlockState state = mc.world.getBlockState(bp);
-        VoxelShape shape = state.getOutlineShape(mc.world, bp);
+        VoxelShape shape = mc.world.getBlockState(bp).getOutlineShape(mc.world, bp);
 
         if (shape.isEmpty()) return;
         Box box = shape.getBoundingBox();

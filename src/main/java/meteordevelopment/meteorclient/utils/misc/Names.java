@@ -18,13 +18,13 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringHelper;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +39,9 @@ public class Names {
     private static final Map<EntityType<?>, String> entityTypeNames = new Reference2ObjectOpenHashMap<>(64);
     private static final Map<ParticleType<?>, String> particleTypesNames = new Reference2ObjectOpenHashMap<>(64);
     private static final Map<Identifier, String> soundNames = new HashMap<>(64);
+
+    private Names() {
+    }
 
     @PreInit
     public static void init() {
@@ -78,7 +81,7 @@ public class Names {
 
     public static String get(ParticleType<?> type) {
         if (!(type instanceof ParticleEffect)) return "";
-        return particleTypesNames.computeIfAbsent(type, effect1 -> WordUtils.capitalize(((ParticleEffect) effect1).asString().substring(10).replace("_", " ")));
+        return particleTypesNames.computeIfAbsent(type, effect1 -> StringUtils.capitalize(Registries.PARTICLE_TYPE.getId(type).getPath().replace("_", " ")));
     }
 
     public static String getSoundName(Identifier id) {
@@ -94,6 +97,6 @@ public class Names {
     }
 
     public static String get(ItemStack stack) {
-        return stack.hasNbt() && stack.getNbt().contains("display", NbtElement.COMPOUND_TYPE) ? stack.getName().getString() : I18n.translate(stack.getTranslationKey());
+        return stack.getName().getString(); // pretty sure this is the same as it was
     }
 }

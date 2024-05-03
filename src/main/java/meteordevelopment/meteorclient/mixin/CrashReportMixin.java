@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(CrashReport.class)
-public class CrashReportMixin {
+public abstract class CrashReportMixin {
     @Inject(method = "addStackTrace", at = @At("TAIL"))
     private void onAddStackTrace(StringBuilder sb, CallbackInfo info) {
         sb.append("\n\n-- Meteor Client --\n\n");

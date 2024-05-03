@@ -12,6 +12,9 @@ import java.util.UUID;
 public class PlayerHeadUtils {
     public static PlayerHeadTexture STEVE_HEAD;
 
+    private PlayerHeadUtils() {
+    }
+
     @PostInit
     public static void init() {
         STEVE_HEAD = new PlayerHeadTexture();

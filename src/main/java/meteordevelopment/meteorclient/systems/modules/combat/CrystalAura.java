@@ -699,7 +699,7 @@ public class CrystalAura extends Module {
         // Find targets, break and place
         findTargets();
 
-        if (targets.size() > 0) {
+        if (!targets.isEmpty()) {
             if (!didRotateThisTick) doBreak();
             if (!didRotateThisTick) doPlace();
         }

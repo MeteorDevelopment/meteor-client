@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ExplosionS2CPacket.class)
-public class ExplosionS2CPacketMixin implements IExplosionS2CPacket {
+public abstract class ExplosionS2CPacketMixin implements IExplosionS2CPacket {
     @Shadow @Final @Mutable private float playerVelocityX;
 
     @Shadow @Final @Mutable private float playerVelocityY;

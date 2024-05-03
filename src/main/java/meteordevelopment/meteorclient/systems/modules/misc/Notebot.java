@@ -36,9 +36,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.enums.Instrument;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -483,7 +483,7 @@ public class Notebot extends Module {
 
             if (uniqueNotesToUse.contains(note)) {
                 // Add correct noteblock position to a noteBlockPositions
-                noteBlockPositions.put(note, noteblocks.remove(0));
+                noteBlockPositions.put(note, noteblocks.removeFirst());
                 uniqueNotesToUse.remove(note);
             }
 
@@ -514,7 +514,7 @@ public class Notebot extends Module {
                 for (BlockPos pos : positions) {
                     if (foundNotes.isEmpty()) break;
 
-                    Note note = foundNotes.remove(0);
+                    Note note = foundNotes.removeFirst();
                     noteBlockPositions.put(note, pos);
 
                     uniqueNotesToUse.remove(note);
@@ -523,7 +523,7 @@ public class Notebot extends Module {
                 for (BlockPos pos : positions) {
                     if (uniqueNotesToUse.isEmpty()) break;
 
-                    Note note = uniqueNotesToUse.remove(0);
+                    Note note = uniqueNotesToUse.removeFirst();
                     noteBlockPositions.put(note, pos);
                 }
             }
@@ -766,8 +766,8 @@ public class Notebot extends Module {
     private void scanForNoteblocks() {
         if (mc.interactionManager == null || mc.world == null || mc.player == null) return;
         scannedNoteblocks.clear();
-        int min = (int) (-mc.interactionManager.getReachDistance()) - 2;
-        int max = (int) mc.interactionManager.getReachDistance() + 2;
+        int min = (int) (-mc.player.getBlockInteractionRange()) - 2;
+        int max = (int) mc.player.getBlockInteractionRange() + 2;
 
         // Scan for noteblocks horizontally
         // 6^3 kek
@@ -782,7 +782,7 @@ public class Notebot extends Module {
                     // Copied from ServerPlayNetworkHandler#onPlayerInteractBlock
                     Vec3d vec3d2 = Vec3d.ofCenter(pos);
                     double sqDist = mc.player.getEyePos().squaredDistanceTo(vec3d2);
-                    if (sqDist > ServerPlayNetworkHandler.MAX_BREAK_SQUARED_DISTANCE) continue;
+                    if (sqDist > mc.player.getAttributeValue(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE)) continue;
 
                     if (!isValidScanSpot(pos)) continue;
 

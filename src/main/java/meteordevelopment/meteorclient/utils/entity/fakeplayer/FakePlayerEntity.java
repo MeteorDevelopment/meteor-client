@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.utils.entity.fakeplayer;
 
 import com.mojang.authlib.GameProfile;
-import meteordevelopment.meteorclient.utils.entity.EntityAttributeHelper;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,7 +33,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
         Byte playerModel = player.getDataTracker().get(PlayerEntity.PLAYER_MODEL_PARTS);
         dataTracker.set(PlayerEntity.PLAYER_MODEL_PARTS, playerModel);
 
-        getAttributes().setFrom(EntityAttributeHelper.getAttributes(player));
+        getAttributes().setFrom(player.getAttributes());
         setPose(player.getPose());
 
         capeX = getX();

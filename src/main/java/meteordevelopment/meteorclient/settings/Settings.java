@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -120,7 +121,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
 
     @Override
-    public Iterator<SettingGroup> iterator() {
+    public @NotNull Iterator<SettingGroup> iterator() {
         return groups.iterator();
     }
 

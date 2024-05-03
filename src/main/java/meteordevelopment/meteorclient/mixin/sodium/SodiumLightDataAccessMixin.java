@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = LightDataAccess.class, remap = false)
-public class SodiumLightDataAccessMixin {
+public abstract class SodiumLightDataAccessMixin {
     @Unique
     private static final int FULL_LIGHT = 15 | 15 << 4 | 15 << 8;
 

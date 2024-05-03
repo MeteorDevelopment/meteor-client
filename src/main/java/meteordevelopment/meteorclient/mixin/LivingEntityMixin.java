@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.systems.modules.player.PotionSpoof;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -25,14 +26,15 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -65,18 +67,10 @@ public abstract class LivingEntityMixin extends Entity {
         return event.walkOnFluid;
     }
 
-    @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasNoGravity()Z"))
-    private boolean travelHasNoGravityProxy(LivingEntity self) {
-        if (activeStatusEffects.containsKey(StatusEffects.LEVITATION) && Modules.get().get(PotionSpoof.class).shouldBlock(StatusEffects.LEVITATION)) {
-            return !Modules.get().get(PotionSpoof.class).applyGravity.get();
-        }
-        return self.hasNoGravity();
-    }
-
     @Inject(method = "spawnItemParticles", at = @At("HEAD"), cancellable = true)
     private void spawnItemParticles(ItemStack stack, int count, CallbackInfo info) {
         NoRender noRender = Modules.get().get(NoRender.class);
-        if (noRender.noEatParticles() && stack.isFood()) info.cancel();
+        if (noRender.noEatParticles() && stack.getComponents().contains(DataComponentTypes.FOOD)) info.cancel();
     }
 
     @Inject(method = "onEquipStack", at = @At("HEAD"), cancellable = true)
@@ -111,6 +105,7 @@ public abstract class LivingEntityMixin extends Entity {
         return original;
     }
 
+    @Unique
     private boolean previousElytra = false;
 
     @Inject(method = "isFallFlying", at = @At("TAIL"), cancellable = true)
@@ -124,8 +119,8 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @ModifyReturnValue(method = "hasStatusEffect", at = @At("RETURN"))
-    private boolean hasStatusEffect(boolean original, StatusEffect effect) {
-        if (Modules.get().get(PotionSpoof.class).shouldBlock(effect)) return false;
+    private boolean hasStatusEffect(boolean original, RegistryEntry<StatusEffect> effect) {
+        if (Modules.get().get(PotionSpoof.class).shouldBlock(effect.value())) return false;
 
         return original;
     }

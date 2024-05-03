@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 @Mixin(SimpleOption.class)
-public class SimpleOptionMixin implements ISimpleOption {
+public abstract class SimpleOptionMixin implements ISimpleOption {
     @Shadow Object value;
     @Shadow @Final private Consumer<Object> changeCallback;
 

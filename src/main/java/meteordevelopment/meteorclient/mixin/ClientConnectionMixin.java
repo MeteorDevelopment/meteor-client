@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.proxy.Socks4ProxyHandler;
@@ -23,7 +25,6 @@ import net.minecraft.network.NetworkSide;
 import net.minecraft.network.handler.PacketEncoderException;
 import net.minecraft.network.handler.PacketSizeLogger;
 import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
 import net.minecraft.text.MutableText;
@@ -39,20 +40,21 @@ import java.net.InetSocketAddress;
 import java.util.Iterator;
 
 @Mixin(ClientConnection.class)
-public class ClientConnectionMixin {
-    @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
-    private static <T extends PacketListener> void onHandlePacket(Packet<T> packet, PacketListener listener, CallbackInfo info) {
+public abstract class ClientConnectionMixin {
+    @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/packet/Packet;)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;handlePacket(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;)V", shift = At.Shift.BEFORE), cancellable = true)
+    private void onHandlePacket(ChannelHandlerContext channelHandlerContext, Packet<?> packet, CallbackInfo ci) {
         if (packet instanceof BundleS2CPacket bundle) {
-            for (Iterator<Packet<ClientPlayPacketListener>> it = bundle.getPackets().iterator(); it.hasNext(); ) {
-                if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(it.next(), listener)).isCancelled()) it.remove();
+            for (Iterator<Packet<? super ClientPlayPacketListener>> it = bundle.getPackets().iterator(); it.hasNext(); ) {
+                if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(it.next(), (ClientConnection) (Object) this)).isCancelled()) it.remove();
             }
-        } else if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet, listener)).isCancelled()) info.cancel();
+        } else if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet, (ClientConnection) (Object) this)).isCancelled()) ci.cancel();
     }
 
     @Inject(method = "disconnect", at = @At("HEAD"))
     private void disconnect(Text disconnectReason, CallbackInfo ci) {
         if (Modules.get().get(HighwayBuilder.class).isActive()) {
-            MutableText text = Text.literal(String.format("\n\n%s[%sHighway Builder%s] Statistics:", Formatting.GRAY, Formatting.BLUE, Formatting.GRAY)).append("\n");
+            MutableText text = Text.literal("%n%n%s[%sHighway Builder%s] Statistics:%n".formatted(Formatting.GRAY, Formatting.BLUE, Formatting.GRAY));
             text.append(Modules.get().get(HighwayBuilder.class).getStatsText());
 
             ((MutableText) disconnectReason).append(text);
@@ -65,8 +67,13 @@ public class ClientConnectionMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/packet/Packet;)V", cancellable = true)
-    private void onSendPacketHead(Packet<?> packet, CallbackInfo info) {
-        if (MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet)).isCancelled()) info.cancel();
+    private void onSendPacketHead(CallbackInfo info, @Local LocalRef<Packet<?>> packet) {
+        PacketEvent.Send processedPacket = MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet.get()));
+        if (processedPacket.isCancelled()) {
+            info.cancel();
+        } else {
+            packet.set(processedPacket.packet);
+        }
     }
 
     @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V", at = @At("TAIL"))
@@ -84,7 +91,7 @@ public class ClientConnectionMixin {
     }
 
     @Inject(method = "addHandlers", at = @At("RETURN"))
-    private static void onAddHandlers(ChannelPipeline pipeline, NetworkSide side, PacketSizeLogger packetSizeLogger, CallbackInfo ci) {
+    private static void onAddHandlers(ChannelPipeline pipeline, NetworkSide side, boolean local, PacketSizeLogger packetSizeLogger, CallbackInfo ci) {
         if (side != NetworkSide.CLIENTBOUND) return;
 
         Proxy proxy = Proxies.get().getEnabled();

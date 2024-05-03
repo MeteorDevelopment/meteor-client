@@ -41,7 +41,7 @@ public class AntiAnvil extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (int i = 0; i <= mc.interactionManager.getReachDistance(); i++) {
+        for (int i = 0; i <= mc.player.getBlockInteractionRange(); i++) {
             BlockPos pos = mc.player.getBlockPos().add(0, i + 3, 0);
 
             if (mc.world.getBlockState(pos).getBlock() == Blocks.ANVIL && mc.world.getBlockState(pos.down()).isAir()) {

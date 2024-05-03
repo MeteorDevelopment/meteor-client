@@ -613,7 +613,7 @@ public abstract class WTextBox extends WWidget {
         completions = renderer.getCompletions(text, this.cursor);
         completionsStart = 0;
         completionsW = null;
-        if (completions != null && completions.size() > 0) createCompletions(0);
+        if (completions != null && !completions.isEmpty()) createCompletions(0);
     }
     protected void onCursorChanged() {}
 

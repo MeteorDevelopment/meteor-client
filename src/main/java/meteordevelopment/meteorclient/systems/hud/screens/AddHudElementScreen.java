@@ -71,7 +71,7 @@ public class AddHudElementScreen extends WindowScreen {
 
         // Create widgets
         for (HudGroup group : grouped.keySet()) {
-            WSection section = add(theme.section(group.title)).expandX().widget();
+            WSection section = add(theme.section(group.title())).expandX().widget();
 
             for (Item item : grouped.get(group)) {
                 WHorizontalList l = section.add(theme.horizontalList()).expandX().widget();

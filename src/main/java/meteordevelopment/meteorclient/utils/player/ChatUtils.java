@@ -30,6 +30,9 @@ public class ChatUtils {
 
     private static Text PREFIX;
 
+    private ChatUtils() {
+    }
+
     @PostInit
     public static void init() {
         PREFIX = Text.empty()
@@ -43,7 +46,9 @@ public class ChatUtils {
         return PREFIX;
     }
 
-    /** Registers a custom prefix to be used when calling from a class in the specified package. When null is returned from the supplier the default Meteor prefix is used. */
+    /**
+     * Registers a custom prefix to be used when calling from a class in the specified package. When null is returned from the supplier the default Meteor prefix is used.
+     */
     public static void registerCustomPrefix(String packageName, Supplier<Text> supplier) {
         for (Pair<String, Supplier<Text>> pair : customPrefixes) {
             if (pair.getLeft().equals(packageName)) {
@@ -55,7 +60,9 @@ public class ChatUtils {
         customPrefixes.add(new Pair<>(packageName, supplier));
     }
 
-    /** The package name must match exactly to the one provided through {@link #registerCustomPrefix(String, Supplier)}. */
+    /**
+     * The package name must match exactly to the one provided through {@link #registerCustomPrefix(String, Supplier)}.
+     */
     public static void unregisterCustomPrefix(String packageName) {
         customPrefixes.removeIf(pair -> pair.getLeft().equals(packageName));
     }
@@ -66,7 +73,9 @@ public class ChatUtils {
 
     // Player
 
-    /** Sends the message as if the user typed it into chat. */
+    /**
+     * Sends the message as if the user typed it into chat.
+     */
     public static void sendPlayerMsg(String message) {
         mc.inGameHud.getChatHud().addToMessageHistory(message);
 
@@ -172,8 +181,7 @@ public class ChatUtils {
         if (forcedPrefixClassName != null) {
             className = forcedPrefixClassName;
             forcedPrefixClassName = null;
-        }
-        else {
+        } else {
             for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
                 if (foundChatUtils) {
                     if (!element.getClassName().equals(ChatUtils.class.getName())) {
@@ -228,6 +236,10 @@ public class ChatUtils {
                             style = style.withFormatting(Formatting.UNDERLINE);
                             result.setLength(0);
                         }
+                        case "(bold)" -> {
+                            style = style.withFormatting(Formatting.BOLD);
+                            result.setLength(0);
+                        }
                     }
                     formatting = false;
                 }
@@ -243,19 +255,20 @@ public class ChatUtils {
         String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
         MutableText coordsText = formatMsg(coordsString, Formatting.GRAY);
 
-        Style style = coordsText.getStyle().withFormatting(Formatting.BOLD).withHoverEvent(new HoverEvent(
-            HoverEvent.Action.SHOW_TEXT,
-            Text.literal("Set as Baritone goal")
-        ));
-
         if (BaritoneUtils.IS_AVAILABLE) {
-            style = style.withClickEvent(new MeteorClickEvent(
-                ClickEvent.Action.RUN_COMMAND,
-                String.format("%sgoto %d %d %d", BaritoneUtils.getPrefix(), (int) pos.x, (int) pos.y, (int) pos.z)
-            ));
+            Style style = coordsText.getStyle().withFormatting(Formatting.BOLD)
+                .withHoverEvent(new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    Text.literal("Set as Baritone goal")
+                ))
+                .withClickEvent(new MeteorClickEvent(
+                    ClickEvent.Action.RUN_COMMAND,
+                    String.format("%sgoto %d %d %d", BaritoneUtils.getPrefix(), (int) pos.x, (int) pos.y, (int) pos.z)
+                ));
+
+            coordsText.setStyle(style);
         }
 
-        coordsText.setStyle(style);
         return coordsText;
     }
 }

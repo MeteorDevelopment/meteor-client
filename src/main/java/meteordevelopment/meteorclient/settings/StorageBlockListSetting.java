@@ -147,11 +147,6 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         }
 
         @Override
-        public Lifecycle getEntryLifecycle(BlockEntityType<?> object) {
-            return null;
-        }
-
-        @Override
         public Lifecycle getLifecycle() {
             return null;
         }

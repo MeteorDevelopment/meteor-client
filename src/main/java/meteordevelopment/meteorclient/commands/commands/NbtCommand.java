@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.NbtPathArgumentType;
+import net.minecraft.component.ComponentMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -34,16 +34,23 @@ public class NbtCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("add").then(argument("nbt", CompoundNbtTagArgumentType.create()).executes(s -> {
+        builder.executes(context -> {
+            error("This command is not yet updated for 1.20.5 and above!");
+            return SINGLE_SUCCESS;
+        });
+
+        // TODO: Update using Components over NBT
+        /*builder.then(literal("add").then(argument("nbt", CompoundNbtTagArgumentType.create()).executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
                 NbtCompound tag = CompoundNbtTagArgumentType.get(s);
-                NbtCompound source = stack.getOrCreateNbt();
 
                 if (tag != null) {
-                    source.copyFrom(tag);
-                    setStack(stack);
+                    ItemStack newStack = ItemStack.fromNbtOrEmpty(mc.world.getRegistryManager(), tag);
+                    newStack.applyComponentsFrom(stack.getComponents());
+
+                    setStack(newStack);
                 } else {
                     error("Some of the NBT data could not be found, try using: " + Config.get().prefix.get() + "nbt set {nbt}");
                 }
@@ -56,7 +63,7 @@ public class NbtCommand extends Command {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
-                stack.setNbt(CompoundNbtTagArgumentType.get(context));
+                stack = ItemStack.fromNbtOrEmpty(mc.world.getRegistryManager(), CompoundNbtTagArgumentType.get(context));
                 setStack(stack);
             }
 
@@ -68,7 +75,7 @@ public class NbtCommand extends Command {
 
             if (validBasic(stack)) {
                 NbtPathArgumentType.NbtPath path = context.getArgument("nbt_path", NbtPathArgumentType.NbtPath.class);
-                path.remove(stack.getNbt());
+                path.remove(stack.encode(mc.world.getRegistryManager()));
             }
 
             return SINGLE_SUCCESS;
@@ -80,25 +87,25 @@ public class NbtCommand extends Command {
             if (stack == null) {
                 error("You must hold an item in your main hand.");
             } else {
-                NbtCompound tag = stack.getNbt();
+                ComponentMap components = stack.getComponents();
 
                 MutableText copyButton = Text.literal("NBT");
                 copyButton.setStyle(copyButton.getStyle()
-                        .withFormatting(Formatting.UNDERLINE)
-                        .withClickEvent(new MeteorClickEvent(
-                                ClickEvent.Action.RUN_COMMAND,
-                                this.toString("copy")
-                        ))
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                Text.literal("Copy the NBT data to your clipboard.")
-                        )));
+                    .withFormatting(Formatting.UNDERLINE)
+                    .withClickEvent(new MeteorClickEvent(
+                        ClickEvent.Action.RUN_COMMAND,
+                        this.toString("copy")
+                    ))
+                    .withHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        Text.literal("Copy the NBT data to your clipboard.")
+                    )));
 
                 MutableText text = Text.literal("");
                 text.append(copyButton);
 
-                if (tag == null) text.append("{}");
-                else text.append(" ").append(NbtHelper.toPrettyPrintedText(tag));
+                if (components == null) text.append("{}");
+                else text.append(" ").append(Text.of(components.toString()));
 
                 info(text);
             }
@@ -112,15 +119,15 @@ public class NbtCommand extends Command {
             if (stack == null) {
                 error("You must hold an item in your main hand.");
             } else {
-                NbtCompound tag = stack.getOrCreateNbt();
-                mc.keyboard.setClipboard(tag.toString());
+                ComponentMap components = stack.getComponents();
+                mc.keyboard.setClipboard(components.toString());
                 MutableText nbt = Text.literal("NBT");
                 nbt.setStyle(nbt.getStyle()
-                        .withFormatting(Formatting.UNDERLINE)
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                NbtHelper.toPrettyPrintedText(tag)
-                        )));
+                    .withFormatting(Formatting.UNDERLINE)
+                    .withHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        Text.of(components.toString())
+                    )));
 
                 MutableText text = Text.literal("");
                 text.append(nbt);
@@ -136,7 +143,10 @@ public class NbtCommand extends Command {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
-                stack.setNbt(CompoundNbtTagArgumentType.create().parse(new StringReader(mc.keyboard.getClipboard())));
+                NbtCompound nbt = CompoundNbtTagArgumentType.create().parse(new StringReader(mc.keyboard.getClipboard()));
+
+                stack = ItemStack.fromNbtOrEmpty(mc.world.getRegistryManager(), nbt);
+
                 setStack(stack);
             }
 
@@ -150,11 +160,11 @@ public class NbtCommand extends Command {
                 int count = IntegerArgumentType.getInteger(context, "count");
                 stack.setCount(count);
                 setStack(stack);
-                info("Set mainhand stack count to %s.",count);
+                info("Set mainhand stack count to %s.", count);
             }
 
             return SINGLE_SUCCESS;
-        })));
+        })));*/
     }
 
     private void setStack(ItemStack stack) {

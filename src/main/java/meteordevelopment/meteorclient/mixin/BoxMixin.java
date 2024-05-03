@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Box.class)
-public class BoxMixin implements IBox {
+public abstract class BoxMixin implements IBox {
     @Shadow @Final @Mutable public double minX;
     @Shadow @Final @Mutable public double minY;
     @Shadow @Final @Mutable public double minZ;

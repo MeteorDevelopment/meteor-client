@@ -389,11 +389,11 @@ public class Nuker extends Module {
             }
 
             // Update timer
-            if (!firstBlock && !lastBlockPos.equals(blocks.get(0))) {
+            if (!firstBlock && !lastBlockPos.equals(blocks.getFirst())) {
                 timer = delay.get();
 
                 firstBlock = false;
-                lastBlockPos.set(blocks.get(0));
+                lastBlockPos.set(blocks.getFirst());
 
                 if (timer > 0) return;
             }

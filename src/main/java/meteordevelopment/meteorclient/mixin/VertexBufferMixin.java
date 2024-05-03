@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.nio.ByteBuffer;
 
 @Mixin(VertexBuffer.class)
-public class VertexBufferMixin {
+public abstract class VertexBufferMixin {
     @Shadow private int indexBufferId;
 
     @Inject(method = "uploadIndexBuffer", at = @At("RETURN"))

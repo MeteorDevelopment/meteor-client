@@ -36,12 +36,12 @@ public abstract class EntityRendererMixin<T extends Entity> implements IEntityRe
     public abstract Identifier getTexture(Entity entity);
 
     @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)
-    private void onRenderLabel(T entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
-        if (PostProcessShaders.rendering) info.cancel();
-        if (Modules.get().get(NoRender.class).noNametags()) info.cancel();
+    private void onRenderLabel(T entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float tickDelta, CallbackInfo ci) {
+        if (PostProcessShaders.rendering) ci.cancel();
+        if (Modules.get().get(NoRender.class).noNametags()) ci.cancel();
         if (!(entity instanceof PlayerEntity)) return;
         if (Modules.get().get(Nametags.class).playerNametags() && !(EntityUtils.getGameMode((PlayerEntity) entity) == null && Modules.get().get(Nametags.class).excludeBots()))
-            info.cancel();
+            ci.cancel();
     }
 
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)

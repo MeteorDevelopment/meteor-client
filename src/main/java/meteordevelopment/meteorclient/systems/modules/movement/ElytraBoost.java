@@ -13,6 +13,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.FireworksComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.FireworkRocketItem;
@@ -51,6 +53,7 @@ public class ElytraBoost extends Module {
         .build()
     );
 
+    @SuppressWarnings("unused")
     private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
         .name("keybind")
         .description("The keybind to boost.")
@@ -90,7 +93,7 @@ public class ElytraBoost extends Module {
 
         if (mc.player.isFallFlying() && mc.currentScreen == null) {
             ItemStack itemStack = Items.FIREWORK_ROCKET.getDefaultStack();
-            itemStack.getOrCreateSubNbt("Fireworks").putByte("Flight", fireworkLevel.get().byteValue());
+            itemStack.set(DataComponentTypes.FIREWORKS, new FireworksComponent(fireworkLevel.get(), itemStack.get(DataComponentTypes.FIREWORKS).explosions()));
 
             FireworkRocketEntity entity = new FireworkRocketEntity(mc.world, itemStack, mc.player);
             fireworks.add(entity);

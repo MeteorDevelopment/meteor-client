@@ -24,12 +24,15 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class TargetUtils {
     private static final List<Entity> ENTITIES = new ArrayList<>();
 
+    private TargetUtils() {
+    }
+
     @Nullable
     public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
         ENTITIES.clear();
         getList(ENTITIES, isGood, sortPriority, 1);
         if (!ENTITIES.isEmpty()) {
-            return ENTITIES.get(0);
+            return ENTITIES.getFirst();
         }
 
         return null;

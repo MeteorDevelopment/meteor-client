@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BackgroundRenderer.class)
-public class BackgroundRendererMixin {
+public abstract class BackgroundRendererMixin {
     @Inject(method = "applyFog", at = @At("TAIL"))
     private static void onApplyFog(Camera camera, BackgroundRenderer.FogType fogType, float viewDistance, boolean thickFog, float tickDelta, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noFog() || Modules.get().isActive(Xray.class)) {

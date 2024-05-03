@@ -277,7 +277,7 @@ public class KillAura extends Module {
             return;
         }
 
-        Entity primary = targets.get(0);
+        Entity primary = targets.getFirst();
 
         if (autoSwitch.get()) {
             Predicate<ItemStack> predicate = switch (weapon.get()) {
@@ -406,7 +406,7 @@ public class KillAura extends Module {
     }
 
     public Entity getTarget() {
-        if (!targets.isEmpty()) return targets.get(0);
+        if (!targets.isEmpty()) return targets.getFirst();
         return null;
     }
 

@@ -18,6 +18,9 @@ import java.util.*;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class NbtUtils {
+    private NbtUtils() {
+    }
+
     public static <T extends ISerializable<?>> NbtList listToTag(Iterable<T> list) {
         NbtList tag = new NbtList();
         for (T item : list) tag.add(item.toTag());
