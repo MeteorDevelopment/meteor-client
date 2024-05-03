@@ -38,8 +38,4 @@ public class KeyBinds {
 
         return newBinds;
     }
-
-    public static int getKey(KeyBinding bind) {
-        return ((KeyBindingAccessor) bind).getKey().getCode();
-    }
 }

@@ -47,13 +47,13 @@ public class ResetCommand extends Command {
                 .then(argument("module", ModuleArgumentType.create()).executes(context -> {
                     Module module = context.getArgument("module", Module.class);
 
-                    module.keybind.set(true, -1);
+                    module.keybind.reset();
                     module.info("Reset bind.");
 
                     return SINGLE_SUCCESS;
                 }))
                 .then(literal("all").executes(context -> {
-                    Modules.get().getAll().forEach(module -> module.keybind.set(true, -1));
+                    Modules.get().getAll().forEach(module -> module.keybind.reset());
                     ChatUtils.infoPrefix("Modules", "Reset all binds.");
                     return SINGLE_SUCCESS;
                 }))

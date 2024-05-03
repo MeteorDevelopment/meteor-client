@@ -55,8 +55,8 @@ public class Macro implements ISerializable<Macro> {
         fromTag((NbtCompound) tag);
     }
 
-    public boolean onAction(boolean isKey, int value) {
-        if (!keybind.get().matches(isKey, value) || mc.currentScreen != null) return false;
+    public boolean onAction(boolean isKey, int value, int modifiers) {
+        if (!keybind.get().matches(isKey, value, modifiers) || mc.currentScreen != null) return false;
         return onAction();
     }
 
