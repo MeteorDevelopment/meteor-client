@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BiomeColorCache.class, remap = false)
-public class SodiumBiomeColorCacheMixin {
+public abstract class SodiumBiomeColorCacheMixin {
     @Unique
     private Ambience ambience;
 

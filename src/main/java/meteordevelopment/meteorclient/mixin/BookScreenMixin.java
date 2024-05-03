@@ -36,7 +36,7 @@ import java.util.Base64;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(BookScreen.class)
-public class BookScreenMixin extends Screen {
+public abstract class BookScreenMixin extends Screen {
     @Shadow
     private BookScreen.Contents contents;
 
@@ -67,7 +67,7 @@ public class BookScreenMixin extends Screen {
                     }
 
                     String encoded = Base64.getEncoder().encodeToString(bytes.array);
-                    
+
                     @SuppressWarnings("resource")
                     long available = MemoryStack.stackGet().getPointer();
                     long size = MemoryUtil.memLengthUTF8(encoded, true);

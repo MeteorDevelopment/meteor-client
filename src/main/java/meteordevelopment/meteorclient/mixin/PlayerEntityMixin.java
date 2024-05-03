@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Scaffold;
+import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
@@ -110,5 +111,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         float speed = Modules.get().get(Flight.class).getOffGroundSpeed();
         if (speed != -1) info.setReturnValue(speed);
+    }
+
+
+    @ModifyReturnValue(method = "getBlockInteractionRange", at = @At("RETURN"))
+    private double modifyBlockInteractionRange(double original) {
+        return Modules.get().get(Reach.class).blockReach();
+    }
+
+    @ModifyReturnValue(method = "getEntityInteractionRange", at = @At("RETURN"))
+    private double modifyEntityInteractionRange(double original) {
+        return Modules.get().get(Reach.class).entityReach();
     }
 }

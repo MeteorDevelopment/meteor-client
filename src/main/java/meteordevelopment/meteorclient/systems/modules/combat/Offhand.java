@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.*;
 
@@ -144,7 +145,7 @@ public class Offhand extends Module {
     }
 
     @EventHandler(priority = HIGHEST + 999)
-    private void onTick(TickEvent.Pre event) throws InterruptedException {
+    private void onTick(TickEvent.Pre event) {
         FindItemResult result = InvUtils.find(Items.TOTEM_OF_UNDYING);
         totems = result.count();
 
@@ -245,7 +246,7 @@ public class Offhand extends Module {
         return mc.player.getMainHandStack().getItem() == Items.BOW
             || mc.player.getMainHandStack().getItem() == Items.TRIDENT
             || mc.player.getMainHandStack().getItem() == Items.CROSSBOW
-            || mc.player.getMainHandStack().getItem().isFood();
+            || mc.player.getMainHandStack().getItem().getComponents().contains(DataComponentTypes.FOOD);
     }
 
     @Override
@@ -261,7 +262,7 @@ public class Offhand extends Module {
         Totem(Items.TOTEM_OF_UNDYING),
         Shield(Items.SHIELD),
         Potion(Items.POTION);
-        net.minecraft.item.Item item;
+        final net.minecraft.item.Item item;
         Item(net.minecraft.item.Item item) {
             this.item = item;
         }

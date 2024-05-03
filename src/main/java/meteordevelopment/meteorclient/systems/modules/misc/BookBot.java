@@ -20,15 +20,14 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.font.TextHandler;
-import net.minecraft.item.*;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.WritableBookContentComponent;
+import net.minecraft.component.type.WrittenBookContentComponent;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
@@ -40,7 +39,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.PrimitiveIterator;
+import java.util.Random;
 import java.util.function.Predicate;
 
 public class BookBot extends Module {
@@ -165,8 +167,10 @@ public class BookBot extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        Predicate<ItemStack> bookPredicate = i ->
-            i.getItem() == Items.WRITABLE_BOOK && (i.getNbt() == null || i.getNbt().get("pages") == null || ((NbtList) i.getNbt().get("pages")).isEmpty());
+        Predicate<ItemStack> bookPredicate = i -> {
+            WritableBookContentComponent component = i.get(DataComponentTypes.WRITABLE_BOOK_CONTENT);
+            return i.getItem() == Items.WRITABLE_BOOK && (component != null || component.pages().isEmpty());
+        };
 
         FindItemResult writableBook = InvUtils.find(bookPredicate);
 
@@ -217,8 +221,8 @@ public class BookBot extends Module {
                 message.append(Text.literal("The bookbot file is empty! ").formatted(Formatting.RED));
                 message.append(Text.literal("Click here to edit it.")
                     .setStyle(Style.EMPTY
-                            .withFormatting(Formatting.UNDERLINE, Formatting.RED)
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()))
+                        .withFormatting(Formatting.UNDERLINE, Formatting.RED)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()))
                     )
                 );
                 info(message);
@@ -247,6 +251,7 @@ public class BookBot extends Module {
 
     private void writeBook(PrimitiveIterator.OfInt chars) {
         ArrayList<String> pages = new ArrayList<>();
+        ArrayList<RawFilteredPair<Text>> filteredPages = new ArrayList<>();
         TextHandler.WidthRetriever widthRetriever = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).getWidthRetriever();
 
         int maxPages = mode.get() == Mode.File ? 100 : this.pages.get();
@@ -285,6 +290,7 @@ public class BookBot extends Module {
 
             // Reached end of page
             if (lineIndex == 14) {
+                filteredPages.add(RawFilteredPair.of(Text.of(page.toString())));
                 pages.add(page.toString());
                 page.setLength(0);
                 pageIndex++;
@@ -302,6 +308,7 @@ public class BookBot extends Module {
 
         // No more characters, end current page
         if (!page.isEmpty() && pageIndex != maxPages) {
+            filteredPages.add(RawFilteredPair.of(Text.of(page.toString())));
             pages.add(page.toString());
         }
 
@@ -310,13 +317,7 @@ public class BookBot extends Module {
         if (count.get() && bookCount != 0) title += " #" + bookCount;
 
         // Write data to book
-        mc.player.getMainHandStack().setSubNbt("title", NbtString.of(title));
-        mc.player.getMainHandStack().setSubNbt("author", NbtString.of(mc.player.getGameProfile().getName()));
-
-        // Write pages NBT
-        NbtList pageNbt = new NbtList();
-        pages.stream().map(NbtString::of).forEach(pageNbt::add);
-        if (!pages.isEmpty()) mc.player.getMainHandStack().setSubNbt("pages", pageNbt);
+        mc.player.getMainHandStack().set(DataComponentTypes.WRITTEN_BOOK_CONTENT, new WrittenBookContentComponent(RawFilteredPair.of(title), mc.player.getGameProfile().getName(), 0, filteredPages, true));
 
         // Send book update to server
         mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pages, sign.get() ? Optional.of(title) : Optional.empty()));

@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ChunkSkyLightProvider.class)
-public class ChunkSkyLightProviderMixin {
+public abstract class ChunkSkyLightProviderMixin {
     @Inject(at = @At("HEAD"), method = "method_51531", cancellable = true)
     private void recalculateLevel(long blockPos, long l, int lightLevel, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noSkylightUpdates()) ci.cancel();

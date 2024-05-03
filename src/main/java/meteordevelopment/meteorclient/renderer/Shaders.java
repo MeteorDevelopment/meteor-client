@@ -12,6 +12,9 @@ public class Shaders {
     public static Shader POS_TEX_COLOR;
     public static Shader TEXT;
 
+    private Shaders() {
+    }
+
     @PreInit
     public static void init() {
         POS_COLOR = new Shader("pos_color.vert", "pos_color.frag");

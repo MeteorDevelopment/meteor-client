@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(RaycastContext.class)
-public class RaycastContextMixin implements IRaycastContext {
+public abstract class RaycastContextMixin implements IRaycastContext {
     @Shadow @Final @Mutable private Vec3d start;
     @Shadow @Final @Mutable private Vec3d end;
     @Shadow @Final @Mutable private RaycastContext.ShapeType shapeType;

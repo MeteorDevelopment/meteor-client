@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Matrix4fStack;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
@@ -252,13 +253,13 @@ public class Mesh {
         GL.enableLineSmooth();
 
         if (rendering3D) {
-            MatrixStack matrixStack = RenderSystem.getModelViewStack();
-            matrixStack.push();
+            Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
+            matrixStack.pushMatrix();
 
-            if (matrices != null) matrixStack.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
+            if (matrices != null) matrixStack.mul(matrices.peek().getPositionMatrix());
 
             Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
-            matrixStack.translate(0, -cameraPos.y, 0);
+            matrixStack.translate(0, (float) -cameraPos.y, 0);
         }
 
         beganRendering = true;
@@ -288,7 +289,7 @@ public class Mesh {
     }
 
     public void endRender() {
-        if (rendering3D) RenderSystem.getModelViewStack().pop();
+        if (rendering3D) RenderSystem.getModelViewStack().popMatrix();
 
         GL.restoreState();
 

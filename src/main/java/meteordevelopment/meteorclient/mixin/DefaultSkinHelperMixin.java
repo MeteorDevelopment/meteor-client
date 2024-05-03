@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.UUID;
 
 @Mixin(DefaultSkinHelper.class)
-public class DefaultSkinHelperMixin {
+public abstract class DefaultSkinHelperMixin {
     // Player model rendering in main menu
     @Inject(method = "getSkinTextures(Ljava/util/UUID;)Lnet/minecraft/client/util/SkinTextures;", at = @At("HEAD"), cancellable = true)
     private static void onShouldUseSlimModel(UUID uuid, CallbackInfoReturnable<Boolean> info) {

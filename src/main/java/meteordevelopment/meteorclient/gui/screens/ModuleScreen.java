@@ -47,7 +47,7 @@ public class ModuleScreen extends WindowScreen {
         add(theme.label(module.description, getWindowWidth() / 2.0));
 
         // Settings
-        if (module.settings.groups.size() > 0) {
+        if (!module.settings.groups.isEmpty()) {
             settingsContainer = add(theme.verticalList()).expandX().widget();
             settingsContainer.add(theme.settings(module.settings)).expandX();
         }

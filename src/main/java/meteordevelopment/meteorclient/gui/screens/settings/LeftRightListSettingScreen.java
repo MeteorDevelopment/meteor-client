@@ -73,7 +73,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
             if (v != null) addValue(registry, v);
         });
 
-        if (left.cells.size() > 0) table.add(theme.verticalSeparator()).expandWidgetY();
+        if (!left.cells.isEmpty()) table.add(theme.verticalSeparator()).expandWidgetY();
 
         // Right (selected)
         abc(pairs -> {
@@ -132,7 +132,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
         if (!filterText.isEmpty()) values.sort(Comparator.comparingInt(value -> -value.getRight()));
         for (Pair<T, Integer> pair : values) forEach.accept(pair.getLeft());
 
-        if (table.cells.size() > 0) cell.expandX();
+        if (!table.cells.isEmpty()) cell.expandX();
 
         return table;
     }

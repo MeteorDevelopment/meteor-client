@@ -225,9 +225,8 @@ public class StorageESP extends Module {
         if (blockEntity == null) return;
 
         interactedBlocks.add(pos);
-        if (blockEntity instanceof ChestBlockEntity) {
-            ChestBlockEntity chest = (ChestBlockEntity) blockEntity;
-            BlockState state = chest.getCachedState();
+        if (blockEntity instanceof ChestBlockEntity chestBlockEntity) {
+            BlockState state = chestBlockEntity.getCachedState();
             ChestType chestType = state.get(ChestBlock.CHEST_TYPE);
 
             if (chestType == ChestType.LEFT || chestType == ChestType.RIGHT) {

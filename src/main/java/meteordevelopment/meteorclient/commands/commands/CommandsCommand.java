@@ -45,12 +45,12 @@ public class CommandsCommand extends Command {
         tooltip.append(Text.literal(Utils.nameToTitle(command.getName())).formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
 
         MutableText aliases = Text.literal(Config.get().prefix.get() + command.getName());
-        if (command.getAliases().size() > 0) {
+        if (!command.getAliases().isEmpty()) {
             aliases.append(", ");
             for (String alias : command.getAliases()) {
                 if (alias.isEmpty()) continue;
                 aliases.append(Config.get().prefix.get() + alias);
-                if (!alias.equals(command.getAliases().get(command.getAliases().size() - 1))) aliases.append(", ");
+                if (!alias.equals(command.getAliases().getLast())) aliases.append(", ");
             }
         }
         tooltip.append(aliases.formatted(Formatting.GRAY)).append("\n\n");
@@ -59,7 +59,7 @@ public class CommandsCommand extends Command {
 
         // Text
         MutableText text = Text.literal(Utils.nameToTitle(command.getName()));
-        if (command != Commands.COMMANDS.get(Commands.COMMANDS.size() - 1))
+        if (command != Commands.COMMANDS.getLast())
             text.append(Text.literal(", ").formatted(Formatting.GRAY));
         text.setStyle(text
             .getStyle()

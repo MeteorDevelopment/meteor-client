@@ -41,6 +41,9 @@ public class BlockUtils {
     public static boolean breaking;
     private static boolean breakingThisTick;
 
+    private BlockUtils() {
+    }
+
     @PreInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(BlockUtils.class);

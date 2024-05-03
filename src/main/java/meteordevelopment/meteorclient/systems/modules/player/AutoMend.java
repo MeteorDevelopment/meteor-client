@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
@@ -27,7 +28,7 @@ public class AutoMend extends Module {
     private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
         .name("blacklist")
         .description("Item blacklist.")
-        .filter(Item::isDamageable)
+        .filter(item -> item.getComponents().get(DataComponentTypes.DAMAGE) != null)
         .build()
     );
 
@@ -73,8 +74,7 @@ public class AutoMend extends Module {
 
                 toggle();
             }
-        }
-        else {
+        } else {
             InvUtils.move().from(slot).toOffhand();
             didMove = true;
         }

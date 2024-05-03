@@ -94,6 +94,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     );
 
     // Keybindings
+    @SuppressWarnings("unused")
     private final Setting<Keybind> keybind = sgKeybind.add(new KeybindSetting.Builder()
         .name("bind")
         .defaultValue(Keybind.none())

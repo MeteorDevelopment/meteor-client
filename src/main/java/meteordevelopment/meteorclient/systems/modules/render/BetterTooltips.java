@@ -23,24 +23,23 @@ import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.entity.BannerPattern;
-import net.minecraft.block.entity.BannerPatterns;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.*;
+import net.minecraft.component.type.BannerPatternsComponent.Layer;
+import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.Bucketable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.RawFilteredPair;
 import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.collection.DefaultedList;
 
@@ -217,6 +216,13 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    private final Setting<Boolean> upgrades = sgHideFlags.add(new BoolSetting.Builder()
+        .name("armor-trim")
+        .description("Show armor trims when it's hidden.")
+        .defaultValue(false)
+        .build()
+    );
+
     public BetterTooltips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
     }
@@ -226,34 +232,17 @@ public class BetterTooltips extends Module {
         // Status effects
         if (statusEffects.get()) {
             if (event.itemStack.getItem() == Items.SUSPICIOUS_STEW) {
-                NbtCompound tag = event.itemStack.getNbt();
-
-                if (tag != null) {
-                    NbtList effects = tag.getList("effects", 10);
-
-                    if (effects != null) {
-                        for (int i = 0; i < effects.size(); i++) {
-                            NbtCompound effectTag = effects.getCompound(i);
-                            byte effectId = effectTag.getByte("EffectId");
-                            int effectDuration = effectTag.contains("EffectDuration") ? effectTag.getInt("EffectDuration") : 160;
-                            StatusEffect type = Registries.STATUS_EFFECT.get(effectId);
-
-                            if (type != null) {
-                                StatusEffectInstance effect = new StatusEffectInstance(type, effectDuration, 0);
-                                event.list.add(1, getStatusText(effect));
-                            }
-                        }
+                SuspiciousStewEffectsComponent stewEffectsComponent = event.itemStack.get(DataComponentTypes.SUSPICIOUS_STEW_EFFECTS);
+                if (stewEffectsComponent != null) {
+                    for (StewEffect effectTag : stewEffectsComponent.effects()) {
+                        StatusEffectInstance effect = new StatusEffectInstance(effectTag.effect(), effectTag.duration(), 0);
+                        event.list.add(1, getStatusText(effect));
                     }
                 }
-            }
-            else if (event.itemStack.getItem().isFood()) {
-                FoodComponent food = event.itemStack.getItem().getFoodComponent();
-
+            } else {
+                FoodComponent food = event.itemStack.get(DataComponentTypes.FOOD);
                 if (food != null) {
-                    food.getStatusEffects().forEach((e) -> {
-                        StatusEffectInstance effect = e.getFirst();
-                        event.list.add(1, getStatusText(effect));
-                    });
+                    food.effects().forEach(e -> event.list.add(1, getStatusText(e.effect())));
                 }
             }
         }
@@ -261,20 +250,17 @@ public class BetterTooltips extends Module {
         //Beehive
         if (beehive.get()) {
             if (event.itemStack.getItem() == Items.BEEHIVE || event.itemStack.getItem() == Items.BEE_NEST) {
-                NbtCompound tag = event.itemStack.getNbt();
+                ComponentMap components = event.itemStack.getComponents();
+                BlockStateComponent blockStateComponent = components.get(DataComponentTypes.BLOCK_STATE);
+                if (blockStateComponent != null) {
+                    String level = blockStateComponent.properties().get("honey_level");
+                    event.list.add(1, Text.literal(String.format("%sHoney level: %s%s%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
+                }
 
-                if (tag != null) {
-                    NbtCompound blockStateTag = tag.getCompound("BlockStateTag");
-                    if (blockStateTag != null) {
-                        int level = blockStateTag.getInt("honey_level");
-                        event.list.add(1, Text.literal(String.format("%sHoney level: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
-                    }
-
-                    NbtCompound blockEntityTag = tag.getCompound("BlockEntityTag");
-                    if (blockEntityTag != null) {
-                        NbtList beesTag = blockEntityTag.getList("Bees", 10);
-                        event.list.add(1, Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, beesTag.size(), Formatting.GRAY)));
-                    }
+                NbtComponent nbtComponent = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+                if (nbtComponent != null) {
+                    NbtList beesTag = nbtComponent.copyNbt().getList("Bees", 10);
+                    event.list.add(1, Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, beesTag.size(), Formatting.GRAY)));
                 }
             }
         }
@@ -282,7 +268,7 @@ public class BetterTooltips extends Module {
         // Item size tooltip
         if (byteSize.get()) {
             try {
-                event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
+                event.itemStack.encode(mc.player.getRegistryManager()).write(ByteCountDataOutput.INSTANCE);
 
                 int byteCount = ByteCountDataOutput.INSTANCE.getCount();
                 String count;
@@ -306,7 +292,7 @@ public class BetterTooltips extends Module {
             || (event.itemStack.getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
             || (event.itemStack.getItem() instanceof EntityBucketItem && entitiesInBuckets.get() && !previewEntities())
             || (event.itemStack.getItem() instanceof BannerItem && banners.get() && !previewBanners())
-            || (event.itemStack.getItem() instanceof BannerPatternItem && banners.get()  && !previewBanners())
+            || (event.itemStack.getItem() instanceof BannerPatternItem && banners.get() && !previewBanners())
             || (event.itemStack.getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
             event.list.add(Text.literal(""));
             event.list.add(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
@@ -317,22 +303,25 @@ public class BetterTooltips extends Module {
     private void getTooltipData(TooltipDataEvent event) {
         // Container preview
         if (previewShulkers() && Utils.hasItems(event.itemStack)) {
-            NbtCompound compoundTag = event.itemStack.getSubNbt("BlockEntityTag");
-            DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
-            Inventories.readNbt(compoundTag, itemStacks);
-            event.tooltipData = new ContainerTooltipComponent(itemStacks, Utils.getShulkerColor(event.itemStack));
+            NbtComponent nbtComponent = event.itemStack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+            if (nbtComponent != null) {
+                DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
+                Inventories.readNbt(nbtComponent.copyNbt(), itemStacks, DynamicRegistryManager.EMPTY);
+                event.tooltipData = new ContainerTooltipComponent(itemStacks, Utils.getShulkerColor(event.itemStack));
+            }
         }
 
         // EChest preview
         else if (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest()) {
-            event.tooltipData = EChestMemory.isKnown() ? new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR)
+            event.tooltipData = EChestMemory.isKnown()
+                ? new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR)
                 : new TextTooltipComponent(Text.literal("Unknown ender chest inventory.").formatted(Formatting.DARK_RED));
         }
 
         // Map preview
         else if (event.itemStack.getItem() == Items.FILLED_MAP && previewMaps()) {
-            Integer mapId = FilledMapItem.getMapId(event.itemStack);
-            if (mapId != null) event.tooltipData = new MapTooltipComponent(mapId);
+            MapIdComponent mapIdComponent = event.itemStack.get(DataComponentTypes.MAP_ID);
+            if (mapIdComponent != null) event.tooltipData = new MapTooltipComponent(mapIdComponent.id());
         }
 
         // Book preview
@@ -344,14 +333,12 @@ public class BetterTooltips extends Module {
         // Banner preview
         else if (event.itemStack.getItem() instanceof BannerItem && previewBanners()) {
             event.tooltipData = new BannerTooltipComponent(event.itemStack);
-        }
-        else if (event.itemStack.getItem() instanceof BannerPatternItem patternItem && previewBanners()) {
-            boolean present = Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).isPresent() && Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().size() != 0;
-
-            RegistryEntry<BannerPattern> bannerPattern = (present ? Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().get(0) : null);
-            if (bannerPattern != null) event.tooltipData = new BannerTooltipComponent(createBannerFromPattern(bannerPattern));
-        }
-        else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
+        } else if (event.itemStack.getItem() instanceof BannerPatternItem patternItem && previewBanners()) {
+            BannerPatternsComponent bannerPatternsComponent = event.itemStack.get(DataComponentTypes.BANNER_PATTERNS);
+            if (bannerPatternsComponent != null) {
+                event.tooltipData = new BannerTooltipComponent(createBannerFromLayers(bannerPatternsComponent.layers()));
+            }
+        } else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
             ItemStack banner = createBannerFromShield(event.itemStack);
             if (banner != null) event.tooltipData = new BannerTooltipComponent(banner);
         }
@@ -361,7 +348,7 @@ public class BetterTooltips extends Module {
             EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).getEntityType();
             Entity entity = type.create(mc.world);
             if (entity != null) {
-                ((Bucketable) entity).copyDataFromNbt(event.itemStack.getOrCreateNbt());
+                ((Bucketable) entity).copyDataFromNbt(event.itemStack.get(DataComponentTypes.BUCKET_ENTITY_DATA).copyNbt());
                 ((EntityAccessor) entity).setInWater(true);
                 event.tooltipData = new EntityTooltipComponent(entity);
             }
@@ -370,27 +357,29 @@ public class BetterTooltips extends Module {
 
     @EventHandler
     private void onSectionVisible(SectionVisibleEvent event) {
-        if (enchantments.get() && event.section == ItemStack.TooltipSection.ENCHANTMENTS ||
-            modifiers.get() && event.section == ItemStack.TooltipSection.MODIFIERS ||
-            unbreakable.get() && event.section == ItemStack.TooltipSection.UNBREAKABLE ||
-            canDestroy.get() && event.section == ItemStack.TooltipSection.CAN_DESTROY ||
-            canPlaceOn.get() && event.section == ItemStack.TooltipSection.CAN_PLACE ||
-            additional.get() && event.section == ItemStack.TooltipSection.ADDITIONAL ||
-            dye.get() && event.section == ItemStack.TooltipSection.DYE)
+        // todo investigate how section visibility works now
+        if (enchantments.get() && event.section == DataComponentTypes.STORED_ENCHANTMENTS ||
+            modifiers.get() && event.section == DataComponentTypes.ATTRIBUTE_MODIFIERS ||
+            unbreakable.get() && event.section == DataComponentTypes.UNBREAKABLE ||
+            canDestroy.get() && event.section == DataComponentTypes.CAN_BREAK ||
+            canPlaceOn.get() && event.section == DataComponentTypes.CAN_PLACE_ON ||
+            //additional.get() && event.section == ItemStack.TooltipSection.ADDITIONAL ||
+            dye.get() && event.section == DataComponentTypes.DYED_COLOR ||
+            upgrades.get() && event.section == DataComponentTypes.TRIM)
             event.visible = true;
     }
 
-    public void applyCompactShulkerTooltip(ItemStack stack, List<Text> tooltip) {
-        NbtCompound tag = stack.getSubNbt("BlockEntityTag");
+    public void applyCompactShulkerTooltip(ItemStack shulkerItem, List<Text> tooltip) {
+        NbtComponent nbtComponent = shulkerItem.get(DataComponentTypes.BLOCK_ENTITY_DATA);
 
-        if (tag != null) {
-            if (tag.contains("LootTable", 8)) {
+        if (nbtComponent != null) {
+            if (nbtComponent.contains("LootTable")) {
                 tooltip.add(Text.literal("???????"));
             }
 
-            if (tag.contains("Items", 9)) {
+            if (nbtComponent.contains("Items")) {
                 DefaultedList<ItemStack> items = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                Inventories.readNbt(tag, items);
+                Inventories.readNbt(nbtComponent.copyNbt(), items, DynamicRegistryManager.EMPTY);
 
                 Object2IntMap<Item> counts = new Object2IntOpenHashMap<>();
 
@@ -418,51 +407,47 @@ public class BetterTooltips extends Module {
         MutableText text = Text.translatable(effect.getTranslationKey());
         if (effect.getAmplifier() != 0) {
             text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
-        }
-        else {
+        } else {
             text.append(String.format(" (%s)", StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
         }
 
-        if (effect.getEffectType().isBeneficial()) return text.formatted(Formatting.BLUE);
+        if (effect.getEffectType().value().isBeneficial()) return text.formatted(Formatting.BLUE);
         return text.formatted(Formatting.RED);
     }
 
-    private Text getFirstPage(ItemStack stack) {
-        NbtCompound tag = stack.getNbt();
-        if (tag == null) return null;
+    private Text getFirstPage(ItemStack bookItem) {
+        ComponentMap components = bookItem.getComponents();
+        if (components == ComponentMap.EMPTY) return null;
 
-        NbtList pages = tag.getList("pages", 8);
-        if (pages.size() < 1) return null;
-        if (stack.getItem() == Items.WRITABLE_BOOK) return Text.literal(pages.getString(0));
+        List<RawFilteredPair<String>> pages = components.get(DataComponentTypes.WRITABLE_BOOK_CONTENT).pages();
+        if (pages.isEmpty()) return null;
+        if (bookItem.getItem() == Items.WRITABLE_BOOK) return Text.literal(pages.getFirst().get(false));
 
         try {
-            return Text.Serialization.fromLenientJson(pages.getString(0));
+            return Text.Serialization.fromLenientJson(pages.getFirst().get(false), DynamicRegistryManager.EMPTY);
         } catch (JsonParseException e) {
             return Text.literal("Invalid book data");
         }
     }
 
-    private ItemStack createBannerFromPattern(RegistryEntry<BannerPattern> pattern) {
-        ItemStack itemStack = new ItemStack(Items.GRAY_BANNER);
-        NbtCompound nbt = itemStack.getOrCreateSubNbt("BlockEntityTag");
-        NbtList listNbt = new BannerPattern.Patterns().add(BannerPatterns.BASE, DyeColor.BLACK).add(pattern, DyeColor.WHITE).toNbt();
-        nbt.put("Patterns", listNbt);
-        return itemStack;
+    private ItemStack createBannerFromLayers(List<Layer> pattern) {
+        ItemStack bannerItem = new ItemStack(Items.GRAY_BANNER);
+        BannerPatternsComponent bannerPatterns = bannerItem.get(DataComponentTypes.BANNER_PATTERNS);
+        bannerPatterns.layers().addAll(pattern);
+        bannerItem.set(DataComponentTypes.BANNER_PATTERNS, bannerPatterns);
+        return bannerItem;
     }
 
-    private ItemStack createBannerFromShield(ItemStack item) {
-        if (!item.hasNbt()
-            || !item.getNbt().contains("BlockEntityTag")
-            || !item.getNbt().getCompound("BlockEntityTag").contains("Base"))
+    private ItemStack createBannerFromShield(ItemStack shieldItem) {
+        if (!shieldItem.getComponents().isEmpty()
+            || shieldItem.get(DataComponentTypes.BLOCK_ENTITY_DATA) == null
+            || shieldItem.get(DataComponentTypes.BASE_COLOR) == null)
             return null;
-        NbtList listNbt = new BannerPattern.Patterns().add(BannerPatterns.BASE, ShieldItem.getColor(item)).toNbt();
-        NbtCompound nbt = item.getOrCreateSubNbt("BlockEntityTag");
         ItemStack bannerItem = new ItemStack(Items.GRAY_BANNER);
-        NbtCompound bannerTag = bannerItem.getOrCreateSubNbt("BlockEntityTag");
-        bannerTag.put("Patterns", listNbt);
-        if (!nbt.contains("Patterns")) return bannerItem;
-        NbtList shieldPatterns = nbt.getList("Patterns", NbtElement.COMPOUND_TYPE);
-        listNbt.addAll(shieldPatterns);
+        BannerPatternsComponent bannerPatternsComponent = bannerItem.get(DataComponentTypes.BANNER_PATTERNS);
+        BannerPatternsComponent shieldPatternsComponent = shieldItem.get(DataComponentTypes.BANNER_PATTERNS);
+        if (shieldPatternsComponent == null) return bannerItem;
+        bannerPatternsComponent.layers().addAll(shieldPatternsComponent.layers());
         return bannerItem;
     }
 

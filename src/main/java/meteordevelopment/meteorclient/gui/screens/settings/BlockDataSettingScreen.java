@@ -60,7 +60,7 @@ public class BlockDataSettingScreen extends WindowScreen {
         for (Block block : Registries.BLOCK) {
             T blockData = (T) setting.get().get(block);
 
-            if (blockData != null && blockData.isChanged()) BLOCKS.add(0, block);
+            if (blockData != null && blockData.isChanged()) BLOCKS.addFirst(block);
             else BLOCKS.add(block);
         }
 

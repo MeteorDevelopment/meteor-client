@@ -78,8 +78,6 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
         return get();
     }
 
-
-
     public static class Builder extends SettingBuilder<Builder, List<SoundEvent>, SoundEventListSetting> {
         public Builder() {
             super(new ArrayList<>(0));

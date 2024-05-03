@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LightningEntityRenderer.class)
-public class LightningEntityRendererMixin {
+public abstract class LightningEntityRendererMixin {
     /**
      * @author Walaryne
      */

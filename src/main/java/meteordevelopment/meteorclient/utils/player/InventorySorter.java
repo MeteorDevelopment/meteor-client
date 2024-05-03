@@ -207,8 +207,8 @@ public class InventorySorter {
         private final List<Pair<ItemStack, List<MySlot>>> map = new ArrayList<>();
 
         public List<MySlot> get(ItemStack itemStack) {
-            for (var entry : map) {
-                if (areEqual(itemStack, entry.getLeft())) {
+            for (Pair<ItemStack, List<MySlot>> entry : map) {
+                if (ItemStack.areItemsEqual(itemStack, entry.getLeft())) {
                     return entry.getRight();
                 }
             }
@@ -216,12 +216,6 @@ public class InventorySorter {
             List<MySlot> list = new ArrayList<>();
             map.add(new Pair<>(itemStack, list));
             return list;
-        }
-
-        private boolean areEqual(ItemStack i1, ItemStack i2) {
-            if (!i1.isOf(i2.getItem()) || (i1.getNbt() == null && i2.getNbt() != null)) return false;
-
-            return i1.getNbt() == null || i1.getNbt().equals(i2.getNbt());
         }
     }
 

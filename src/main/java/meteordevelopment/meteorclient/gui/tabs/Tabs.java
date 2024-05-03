@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.gui.tabs;
 
 import meteordevelopment.meteorclient.gui.tabs.builtin.*;
-import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.PreInit;
 
@@ -15,6 +14,9 @@ import java.util.List;
 
 public class Tabs {
     private static final List<Tab> tabs = new ArrayList<>();
+
+    private Tabs() {
+    }
 
     @PreInit(dependencies = PathManagers.class)
     public static void init() {

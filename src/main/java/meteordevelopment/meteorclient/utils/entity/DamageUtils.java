@@ -33,6 +33,9 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @SuppressWarnings("JavadocReference")
 public class DamageUtils {
+    private DamageUtils() {
+    }
+
     // Explosion damage
 
     /**
@@ -132,11 +135,11 @@ public class DamageUtils {
      * @see PlayerEntity#attack(Entity)
      */
     public static float getAttackDamage(LivingEntity attacker, LivingEntity target) {
-        float itemDamage = (float) EntityAttributeHelper.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        float itemDamage = (float) attacker.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
 
         // Get enchant damage
         ItemStack stack = attacker.getStackInHand(attacker.getActiveHand());
-        float enchantDamage = EnchantmentHelper.getAttackDamage(stack, target.getGroup());
+        float enchantDamage = EnchantmentHelper.getAttackDamage(stack, target.getType());
 
         // Factor charge
         if (attacker instanceof PlayerEntity playerEntity) {
@@ -155,7 +158,7 @@ public class DamageUtils {
         damage = calculateReductions(damage, target, attacker instanceof PlayerEntity player ? mc.world.getDamageSources().playerAttack(player) : mc.world.getDamageSources().mobAttack(attacker));
 
         // Factor Fire Aspect
-        if (EnchantmentHelper.getFireAspect(attacker) > 0 && !StatusEffectHelper.hasStatusEffect(target, StatusEffects.FIRE_RESISTANCE)) {
+        if (EnchantmentHelper.getFireAspect(attacker) > 0 && !target.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
             damage++;
         }
 
@@ -169,7 +172,7 @@ public class DamageUtils {
      */
     public static float fallDamage(LivingEntity entity) {
         if (entity instanceof PlayerEntity player && player.getAbilities().flying) return 0f;
-        if (StatusEffectHelper.hasStatusEffect(entity, StatusEffects.SLOW_FALLING) || StatusEffectHelper.hasStatusEffect(entity, StatusEffects.LEVITATION)) return 0f;
+        if (entity.hasStatusEffect(StatusEffects.SLOW_FALLING) || entity.hasStatusEffect(StatusEffects.LEVITATION)) return 0f;
 
         // Fast path - Above the surface
         int surface = mc.world.getWorldChunk(entity.getBlockPos()).getHeightmap(Heightmap.Type.MOTION_BLOCKING).get(entity.getBlockX() & 15, entity.getBlockZ() & 15);
@@ -184,7 +187,7 @@ public class DamageUtils {
 
     private static float fallDamageReductions(LivingEntity entity, int surface) {
         int fallHeight = (int) (entity.getY() - surface + entity.fallDistance - 3d);
-        @Nullable StatusEffectInstance jumpBoostInstance = StatusEffectHelper.getStatusEffect(entity, StatusEffects.JUMP_BOOST);
+        @Nullable StatusEffectInstance jumpBoostInstance = entity.getStatusEffect(StatusEffects.JUMP_BOOST);
         if (jumpBoostInstance != null) fallHeight -= jumpBoostInstance.getAmplifier() + 1;
 
         return calculateReductions(fallHeight, entity, mc.world.getDamageSources().fall());
@@ -204,7 +207,7 @@ public class DamageUtils {
         }
 
         // Armor reduction
-        damage = DamageUtil.getDamageLeft(damage, getArmor(entity), (float) EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft(damage, damageSource, getArmor(entity), (float) entity.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
 
         // Resistance reduction
         damage = resistanceReduction(entity, damage);
@@ -216,13 +219,13 @@ public class DamageUtils {
     }
 
     private static float getArmor(LivingEntity entity) {
-        return (float) Math.floor(EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR));
+        return (float) Math.floor(entity.getAttributeValue(EntityAttributes.GENERIC_ARMOR));
     }
 
     /**
      * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
      */
-    private static float protectionReduction(Entity player, float damage, DamageSource source) {
+    private static float protectionReduction(LivingEntity player, float damage, DamageSource source) {
         int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), source);
         return DamageUtil.getInflictedDamage(damage, protLevel);
     }
@@ -231,7 +234,7 @@ public class DamageUtils {
      * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
      */
     private static float resistanceReduction(LivingEntity player, float damage) {
-        StatusEffectInstance resistance = StatusEffectHelper.getStatusEffect(player, StatusEffects.RESISTANCE);
+        StatusEffectInstance resistance = player.getStatusEffect(StatusEffects.RESISTANCE);
         if (resistance != null) {
             int lvl = resistance.getAmplifier() + 1;
             damage *= (1 - (lvl * 0.2f));
