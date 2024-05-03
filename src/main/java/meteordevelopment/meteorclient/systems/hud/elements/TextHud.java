@@ -89,7 +89,6 @@ public class TextHud extends HudElement {
         .name("condition")
         .description("Condition to check when shown is not Always.")
         .visible(() -> shown.get() != Shown.Always)
-        .defaultValue("")
         .onChanged(s -> recompile())
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
