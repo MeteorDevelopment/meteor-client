@@ -85,56 +85,56 @@ public class Notebot extends Module {
 
     public final Setting<NotebotUtils.NotebotMode> mode = sgGeneral.add(new EnumSetting.Builder<NotebotUtils.NotebotMode>()
         .name("mode")
-        .description("Select mode of notebot")
+        .description("Select mode of notebot.")
         .defaultValue(NotebotUtils.NotebotMode.ExactInstruments)
         .build()
     );
 
     public final Setting<InstrumentDetectMode> instrumentDetectMode = sgGeneral.add(new EnumSetting.Builder<InstrumentDetectMode>()
         .name("instrument-detect-mode")
-        .description("Select an instrument detect mode. Can be useful when server has a plugin that modifies noteblock state (e.g ItemsAdder) but noteblock can still play the right note")
+        .description("Select an instrument detect mode. Can be useful when server has a plugin that modifies noteblock state (e.g ItemsAdder) but noteblock can still play the right note.")
         .defaultValue(InstrumentDetectMode.BlockState)
         .build()
     );
 
     public final Setting<Boolean> polyphonic = sgGeneral.add(new BoolSetting.Builder()
         .name("polyphonic")
-        .description("Whether or not to allow multiple notes to be played at the same time")
+        .description("Whether or not to allow multiple notes to be played at the same time.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> autoRotate = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-rotate")
-        .description("Should client look at note block when it wants to hit it")
+        .description("Should client look at note block when it wants to hit it.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> autoPlay = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-play")
-        .description("Auto plays random songs")
+        .description("Auto plays random songs.")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<Boolean> roundOutOfRange = sgGeneral.add(new BoolSetting.Builder()
         .name("round-out-of-range")
-        .description("Rounds out of range notes")
+        .description("Rounds out of range notes.")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<Boolean> swingArm = sgGeneral.add(new BoolSetting.Builder()
         .name("swing-arm")
-        .description("Should swing arm on hit")
+        .description("Should swing arm on hit.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Integer> checkNoteblocksAgainDelay = sgGeneral.add(new IntSetting.Builder()
         .name("check-noteblocks-again-delay")
-        .description("How much delay should be between end of tuning and checking again")
+        .description("How much delay should be between end of tuning and checking again.")
         .defaultValue(10)
         .min(1)
         .sliderRange(1, 20)
@@ -228,7 +228,7 @@ public class Notebot extends Module {
 
     public final Setting<Boolean> showScannedNoteblocks = sgRender.add(new BoolSetting.Builder()
         .name("show-scanned-noteblocks")
-        .description("Show scanned Noteblocks")
+        .description("Show scanned Noteblocks.")
         .defaultValue(false)
         .build()
     );
@@ -424,6 +424,7 @@ public class Notebot extends Module {
             scanForNoteblocks();
             if (scannedNoteblocks.isEmpty()) {
                 error("Can't find any nearby noteblock!");
+                NotebotUtils.getRequirementString(song.getRequirements());
                 stop();
                 return;
             }
@@ -529,12 +530,8 @@ public class Notebot extends Module {
             }
         }
 
-        if (!uniqueNotesToUse.isEmpty()) {
-            for (Note note : uniqueNotesToUse) {
-                warning("Missing note: "+note.getInstrument()+", "+note.getNoteLevel());
-            }
-            warning(uniqueNotesToUse.size()+" missing notes!");
-        }
+        if (!uniqueNotesToUse.isEmpty()) warning("Missing note: ");
+        NotebotUtils.getRequirementString(uniqueNotesToUse).forEach(this::warning);
     }
 
     /**
@@ -664,6 +661,18 @@ public class Notebot extends Module {
     public void disable() {
         resetVariables();
         if (!isActive()) toggle();
+    }
+
+    public void getRequirements(File file) {
+        try {
+            if (song != null || stage != Stage.None) return;
+            song = SongDecoders.parse(file);
+            scanForNoteblocks();
+            setupNoteblocksMap();
+            song = null;
+        } catch (Exception e) {
+            error("Invalid song.");
+        }
     }
 
     /**

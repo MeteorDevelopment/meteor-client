@@ -107,7 +107,23 @@ public class NotebotCommand extends Command {
                     }
                     notebot.previewSong(songPath.toFile());
                     return SINGLE_SUCCESS;
-        })));
+                })
+            )
+        );
+
+        builder.then(
+            literal("requirements").then(
+                argument("song", NotebotSongArgumentType.create()).executes(ctx -> {
+                    Notebot notebot = Modules.get().get(Notebot.class);
+                    Path songPath = ctx.getArgument("song", Path.class);
+                    if (songPath == null || !songPath.toFile().exists()) {
+                        throw INVALID_SONG.create();
+                    }
+                    notebot.getRequirements(songPath.toFile());
+                    return SINGLE_SUCCESS;
+                })
+            )
+        );
 
         builder.then(literal("record").then(literal("start").executes(ctx -> {
             ticks = -1;
