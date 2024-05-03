@@ -116,6 +116,7 @@ tasks {
         targetCompatibility = JavaVersion.VERSION_21
 
         withSourcesJar()
+        withJavadocJar()
     }
 
     shadowJar {
