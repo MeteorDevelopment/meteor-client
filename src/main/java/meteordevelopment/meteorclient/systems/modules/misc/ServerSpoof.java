@@ -109,7 +109,7 @@ public class ServerSpoof extends Module {
             );
 
             MutableText acceptance = Text.literal("[Spoof Acceptance]");
-            link.setStyle(link.getStyle()
+            acceptance.setStyle(acceptance.getStyle()
                 .withColor(Formatting.DARK_GREEN)
                 .withUnderline(true)
                 .withClickEvent(new RunnableClickEvent(() -> {
