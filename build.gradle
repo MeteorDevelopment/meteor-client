@@ -123,6 +123,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 
     withSourcesJar()
+    withJavadocJar()
 }
 
 remapJar {
@@ -133,11 +134,6 @@ remapJar {
 javadoc {
     options.addStringOption("Xdoclint:none", "-quiet")
     options.encoding = "UTF-8"
-}
-
-tasks.register("javadocJar", Jar) {
-    from javadoc
-    archiveClassifier.set("javadoc")
 }
 
 build {
