@@ -40,6 +40,8 @@ public abstract class WorldRendererMixin {
     @Shadow
     private Framebuffer entityOutlinesFramebuffer;
 
+    @Unique private ESP esp;
+
     @Shadow
     protected abstract void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
 
@@ -105,20 +107,19 @@ public abstract class WorldRendererMixin {
 
     @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;hasOutline(Lnet/minecraft/entity/Entity;)Z"))
     private boolean shouldMobGlow(boolean original, @Local Entity entity) {
-    	ESP esp = Modules.get().get(ESP.class);
-    	Color entityGlowColor = esp.getColor(entity);
-    	if (entityGlowColor == null) return original;
-        return esp.isGlow() && !esp.shouldSkip(entity) || original;
+        if (!getESP().isGlow() || getESP().shouldSkip(entity)) return original;
+
+        return getESP().getColor(entity) != null || original;
     }
 
     @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;setColor(IIII)V"))
     private void setGlowColor(OutlineVertexConsumerProvider instance, int red, int green, int blue, int alpha, Operation<Void> original, @Local LocalRef<Entity> entity) {
-    	ESP esp = Modules.get().get(ESP.class);
-    	Color entityGlowColor = esp.getColor(entity.get());
-        if (esp.isGlow() && !esp.shouldSkip(entity.get()) && entityGlowColor != null) {
-            instance.setColor(entityGlowColor.r, entityGlowColor.g, entityGlowColor.b, entityGlowColor.a);
-        } else {
-            original.call(instance, red, green, blue, alpha);
+        if (!getESP().isGlow() || getESP().shouldSkip(entity.get())) original.call(instance, red, green, blue, alpha);
+        else {
+            Color color = getESP().getColor(entity.get());
+
+            if (color == null) original.call(instance, red, green, blue, alpha);
+            else instance.setColor(color.r, color.g, color.b, color.a);
         }
     }
 
@@ -159,5 +160,14 @@ public abstract class WorldRendererMixin {
     @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 1)
     private static int getLightmapCoordinatesModifyBlockLight(int sky) {
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.BLOCK), sky);
+    }
+
+    @Unique
+    private ESP getESP() {
+        if (esp == null) {
+            esp = Modules.get().get(ESP.class);
+        }
+
+        return esp;
     }
 }

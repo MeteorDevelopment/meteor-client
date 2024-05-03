@@ -349,7 +349,7 @@ public class ESP extends Module {
     public boolean isShader() {
         return isActive() && mode.get() == Mode.Shader;
     }
-    
+
     public boolean isGlow() {
         return isActive() && mode.get() == Mode.Glow;
     }
@@ -360,6 +360,7 @@ public class ESP extends Module {
         _2D,
         Shader,
         Glow;
+
         @Override
         public String toString() {
             return this == _2D ? "2D" : super.toString();
