@@ -142,11 +142,6 @@ tasks {
         options.encoding = "UTF-8"
     }
 
-    tasks.register("javadocJar", Jar) {
-        from javadoc
-        archiveClassifier.set("javadoc")
-    }
-
     build {
         dependsOn javadocJar
     }
