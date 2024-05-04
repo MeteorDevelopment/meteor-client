@@ -5,11 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import com.google.gson.JsonParseException;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
-import meteordevelopment.meteorclient.events.game.SectionVisibleEvent;
 import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
 import meteordevelopment.meteorclient.mixin.EntityAccessor;
 import meteordevelopment.meteorclient.mixin.EntityBucketItemAccessor;
@@ -75,7 +73,7 @@ public class BetterTooltips extends Module {
 
     private final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
         .name("middle-click-open")
-        .description("Opens a GUI window with the inventory of the storage block when you middle click the item.")
+        .description("Opens a GUI window with the inventory of the storage block or book when you middle click the item.")
         .defaultValue(true)
         .build()
     );
@@ -167,56 +165,63 @@ public class BetterTooltips extends Module {
 
     //Hide flags
 
-    private final Setting<Boolean> enchantments = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> tooltip = sgHideFlags.add(new BoolSetting.Builder()
+        .name("tooltip")
+        .description("Show the tooltip when it's hidden.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Boolean> enchantments = sgHideFlags.add(new BoolSetting.Builder()
         .name("enchantments")
         .description("Show enchantments when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> modifiers = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> modifiers = sgHideFlags.add(new BoolSetting.Builder()
         .name("modifiers")
         .description("Show item modifiers when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> unbreakable = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> unbreakable = sgHideFlags.add(new BoolSetting.Builder()
         .name("unbreakable")
         .description("Show \"Unbreakable\" tag when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> canDestroy = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> canDestroy = sgHideFlags.add(new BoolSetting.Builder()
         .name("can-destroy")
         .description("Show \"CanDestroy\" tag when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> canPlaceOn = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> canPlaceOn = sgHideFlags.add(new BoolSetting.Builder()
         .name("can-place-on")
         .description("Show \"CanPlaceOn\" tag when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> additional = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> additional = sgHideFlags.add(new BoolSetting.Builder()
         .name("additional")
         .description("Show potion effects, firework status, book author, etc when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> dye = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> dye = sgHideFlags.add(new BoolSetting.Builder()
         .name("dye")
         .description("Show dyed item tags when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> upgrades = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> upgrades = sgHideFlags.add(new BoolSetting.Builder()
         .name("armor-trim")
         .description("Show armor trims when it's hidden.")
         .defaultValue(false)
@@ -303,18 +308,15 @@ public class BetterTooltips extends Module {
     private void getTooltipData(TooltipDataEvent event) {
         // Container preview
         if (previewShulkers() && Utils.hasItems(event.itemStack)) {
-            NbtComponent nbtComponent = event.itemStack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
-            if (nbtComponent != null) {
-                DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                Inventories.readNbt(nbtComponent.copyNbt(), itemStacks, DynamicRegistryManager.EMPTY);
-                event.tooltipData = new ContainerTooltipComponent(itemStacks, Utils.getShulkerColor(event.itemStack));
-            }
+            ItemStack[] itemStacks = new ItemStack[27];
+            Utils.getItemsInContainerItem(event.itemStack, itemStacks);
+            event.tooltipData = new ContainerTooltipComponent(itemStacks, Utils.getShulkerColor(event.itemStack));
         }
 
         // EChest preview
         else if (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest()) {
             event.tooltipData = EChestMemory.isKnown()
-                ? new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR)
+                ? new ContainerTooltipComponent(EChestMemory.ITEMS.toArray(new ItemStack[27]), ECHEST_COLOR)
                 : new TextTooltipComponent(Text.literal("Unknown ender chest inventory.").formatted(Formatting.DARK_RED));
         }
 
@@ -333,7 +335,7 @@ public class BetterTooltips extends Module {
         // Banner preview
         else if (event.itemStack.getItem() instanceof BannerItem && previewBanners()) {
             event.tooltipData = new BannerTooltipComponent(event.itemStack);
-        } else if (event.itemStack.getItem() instanceof BannerPatternItem patternItem && previewBanners()) {
+        } else if (event.itemStack.getItem() instanceof BannerPatternItem && previewBanners()) {
             BannerPatternsComponent bannerPatternsComponent = event.itemStack.get(DataComponentTypes.BANNER_PATTERNS);
             if (bannerPatternsComponent != null) {
                 event.tooltipData = new BannerTooltipComponent(createBannerFromLayers(bannerPatternsComponent.layers()));
@@ -353,20 +355,6 @@ public class BetterTooltips extends Module {
                 event.tooltipData = new EntityTooltipComponent(entity);
             }
         }
-    }
-
-    @EventHandler
-    private void onSectionVisible(SectionVisibleEvent event) {
-        // todo investigate how section visibility works now
-        if (enchantments.get() && event.section == DataComponentTypes.STORED_ENCHANTMENTS ||
-            modifiers.get() && event.section == DataComponentTypes.ATTRIBUTE_MODIFIERS ||
-            unbreakable.get() && event.section == DataComponentTypes.UNBREAKABLE ||
-            canDestroy.get() && event.section == DataComponentTypes.CAN_BREAK ||
-            canPlaceOn.get() && event.section == DataComponentTypes.CAN_PLACE_ON ||
-            //additional.get() && event.section == ItemStack.TooltipSection.ADDITIONAL ||
-            dye.get() && event.section == DataComponentTypes.DYED_COLOR ||
-            upgrades.get() && event.section == DataComponentTypes.TRIM)
-            event.visible = true;
     }
 
     public void applyCompactShulkerTooltip(ItemStack shulkerItem, List<Text> tooltip) {
@@ -416,18 +404,20 @@ public class BetterTooltips extends Module {
     }
 
     private Text getFirstPage(ItemStack bookItem) {
-        ComponentMap components = bookItem.getComponents();
-        if (components == ComponentMap.EMPTY) return null;
+        if (bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT) != null) {
+            List<RawFilteredPair<String>> pages = bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT).pages();
 
-        List<RawFilteredPair<String>> pages = components.get(DataComponentTypes.WRITABLE_BOOK_CONTENT).pages();
-        if (pages.isEmpty()) return null;
-        if (bookItem.getItem() == Items.WRITABLE_BOOK) return Text.literal(pages.getFirst().get(false));
-
-        try {
-            return Text.Serialization.fromLenientJson(pages.getFirst().get(false), DynamicRegistryManager.EMPTY);
-        } catch (JsonParseException e) {
-            return Text.literal("Invalid book data");
+            if (pages.isEmpty()) return null;
+            return Text.literal(pages.getFirst().get(false));
         }
+        else if (bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null) {
+            List<RawFilteredPair<Text>> pages = bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).pages();
+            if (pages.isEmpty()) return null;
+
+            return pages.getFirst().get(false);
+        }
+
+        return null;
     }
 
     private ItemStack createBannerFromLayers(List<Layer> pattern) {
