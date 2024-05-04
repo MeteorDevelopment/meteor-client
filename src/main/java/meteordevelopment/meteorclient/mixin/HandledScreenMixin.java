@@ -12,9 +12,11 @@ import meteordevelopment.meteorclient.systems.modules.render.ItemHighlight;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
@@ -56,6 +58,9 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     @Shadow
     protected abstract void onMouseClick(Slot slot, int invSlot, int clickData, SlotActionType actionType);
+
+    @Shadow
+    public abstract void close();
 
     @Unique
     private static final ItemStack[] ITEMS = new ItemStack[27];
@@ -103,6 +108,11 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             ItemStack itemStack = focusedSlot.getStack();
             if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
                 cir.setReturnValue(Utils.openContainer(focusedSlot.getStack(), ITEMS, false));
+            }
+            else if (itemStack.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null || itemStack.get(DataComponentTypes.WRITABLE_BOOK_CONTENT) != null) {
+                close();
+                mc.setScreen(new BookScreen(BookScreen.Contents.create(itemStack)));
+                cir.setReturnValue(true);
             }
         }
     }
