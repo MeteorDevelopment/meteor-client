@@ -19,13 +19,19 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class ChestSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Chestplate> chestplate = sgGeneral.add(new EnumSetting.Builder<Chestplate>()
         .name("chestplate")
         .description("Which type of chestplate to swap to.")
-        .defaultValue(Chestplate.PreferNetherite)
+        .defaultValue(Chestplate.Best)
         .build()
     );
 
@@ -38,7 +44,7 @@ public class ChestSwap extends Module {
 
     private final Setting<Boolean> closeInventory = sgGeneral.add(new BoolSetting.Builder()
         .name("close-inventory")
-        .description("Sends inventory close after swap.")
+        .description("Sends inventory close packet after swap.")
         .defaultValue(false)
         .build()
     );
@@ -70,47 +76,75 @@ public class ChestSwap extends Module {
         }
     }
 
+    private Map<Integer, Map<ArmorItem, Integer>> getChestplates() {
+        Map<Integer, Map<ArmorItem, Integer>> chestplates = new HashMap<>();
+
+        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
+            Item item = mc.player.getInventory().main.get(i).getItem();
+
+            if (item instanceof ArmorItem armorItem && ((ArmorItem) item).getSlotType() == EquipmentSlot.CHEST) {
+                int armorProtection = armorItem.getProtection();
+                Map<ArmorItem, Integer> armorInfo = new HashMap<>();
+                armorInfo.put(armorItem, armorProtection);
+                chestplates.put(i, armorInfo);
+            }
+        }
+        return chestplates;
+    }
+
     private boolean equipChestplate() {
         int bestSlot = -1;
-        boolean breakLoop = false;
+
+        Map<Integer, Map<ArmorItem, Integer>> chestplates = getChestplates().entrySet().stream()
+            .sorted(Map.Entry.<Integer, Map<ArmorItem, Integer>>comparingByValue(
+                Comparator.comparingInt(armorInfo -> armorInfo.values().iterator().next())).reversed())
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (oldValue, newValue) -> oldValue,
+                LinkedHashMap::new
+            ));
 
         for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
             Item item = mc.player.getInventory().main.get(i).getItem();
 
             switch (chestplate.get()) {
+                case Leather:
+                    if (item == Items.LEATHER_CHESTPLATE) {
+                        bestSlot = i;
+                    }
+                    break;
+                case Chainmail:
+                    if (item == Items.CHAINMAIL_CHESTPLATE) {
+                        bestSlot = i;
+                    }
+                    break;
+                case Gold:
+                    if (item == Items.GOLDEN_CHESTPLATE) {
+                        bestSlot = i;
+                    }
+                    break;
+                case Iron:
+                    if (item == Items.IRON_CHESTPLATE) {
+                        bestSlot = i;
+                    }
+                    break;
                 case Diamond:
                     if (item == Items.DIAMOND_CHESTPLATE) {
                         bestSlot = i;
-                        breakLoop = true;
                     }
                     break;
                 case Netherite:
                     if (item == Items.NETHERITE_CHESTPLATE) {
                         bestSlot = i;
-                        breakLoop = true;
                     }
                     break;
-                case PreferDiamond:
-                    if (item == Items.DIAMOND_CHESTPLATE) {
-                        bestSlot = i;
-                        breakLoop = true;
-                    } else if (item == Items.NETHERITE_CHESTPLATE) {
-                        bestSlot = i;
-                    }
-                    break;
-                case PreferNetherite:
-                    if (item == Items.DIAMOND_CHESTPLATE) {
-                        bestSlot = i;
-                    } else if (item == Items.NETHERITE_CHESTPLATE) {
-                        bestSlot = i;
-                        breakLoop = true;
-                    }
+                case Best:
+                    Map.Entry<Integer, Map<ArmorItem, Integer>> firstEntry = chestplates.entrySet().iterator().next();
+                    bestSlot = firstEntry.getKey();
                     break;
             }
-
-            if (breakLoop) break;
         }
-
         if (bestSlot != -1) equip(bestSlot);
         return bestSlot != -1;
     }
@@ -141,9 +175,12 @@ public class ChestSwap extends Module {
     }
 
     public enum Chestplate {
+        Leather,
+        Chainmail,
+        Gold,
+        Iron,
         Diamond,
         Netherite,
-        PreferDiamond,
-        PreferNetherite
+        Best
     }
 }
