@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
 import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
 import meteordevelopment.meteorclient.mixin.EntityAccessor;
@@ -31,15 +31,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.RawFilteredPair;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.collection.DefaultedList;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -358,35 +355,27 @@ public class BetterTooltips extends Module {
     }
 
     public void applyCompactShulkerTooltip(ItemStack shulkerItem, List<Text> tooltip) {
-        NbtComponent nbtComponent = shulkerItem.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+        ContainerComponent containerComponent = shulkerItem.get(DataComponentTypes.CONTAINER);
 
-        if (nbtComponent != null) {
-            if (nbtComponent.contains("LootTable")) {
+        if (containerComponent != null) {
+            if (shulkerItem.contains(DataComponentTypes.CONTAINER_LOOT)) {
                 tooltip.add(Text.literal("???????"));
             }
 
-            if (nbtComponent.contains("Items")) {
-                DefaultedList<ItemStack> items = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                Inventories.readNbt(nbtComponent.copyNbt(), items, DynamicRegistryManager.EMPTY);
+            Multiset<Item> counts = HashMultiset.create();
 
-                Object2IntMap<Item> counts = new Object2IntOpenHashMap<>();
+            for (ItemStack item : containerComponent.iterateNonEmpty()) {
+                counts.add(item.getItem(), item.getCount());
+            }
 
-                for (ItemStack item : items) {
-                    if (item.isEmpty()) continue;
+            counts.entrySet().stream().sorted(Comparator.comparingInt(entry -> -entry.getCount())).limit(5).forEach(entry -> {
+                MutableText mutableText = entry.getElement().getName().copyContentOnly();
+                mutableText.append(Text.literal(" x").append(Integer.toString(entry.getCount())).formatted(Formatting.GRAY));
+                tooltip.add(mutableText);
+            });
 
-                    int count = counts.getInt(item.getItem());
-                    counts.put(item.getItem(), count + item.getCount());
-                }
-
-                counts.keySet().stream().sorted(Comparator.comparingInt(value -> -counts.getInt(value))).limit(5).forEach(item -> {
-                    MutableText mutableText = item.getName().copyContentOnly();
-                    mutableText.append(Text.literal(" x").append(String.valueOf(counts.getInt(item))).formatted(Formatting.GRAY));
-                    tooltip.add(mutableText);
-                });
-
-                if (counts.size() > 5) {
-                    tooltip.add((Text.translatable("container.shulkerBox.more", counts.size() - 5)).formatted(Formatting.ITALIC));
-                }
+            if (counts.size() > 5) {
+                tooltip.add((Text.translatable("container.shulkerBox.more", counts.size() - 5)).formatted(Formatting.ITALIC));
             }
         }
     }
