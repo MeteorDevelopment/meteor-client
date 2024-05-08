@@ -38,7 +38,6 @@ import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.enchantment.Enchantment;
@@ -258,8 +257,8 @@ public class Utils {
     }
 
     public static boolean hasItems(ItemStack itemStack) {
-        ContainerComponent container = itemStack.get(DataComponentTypes.CONTAINER);
-         if (container != null && container.copyFirstStack() != ItemStack.EMPTY) return true;
+        ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) itemStack.get(DataComponentTypes.CONTAINER));
+        if (container != null && !container.getStacks().isEmpty()) return true;
 
         NbtCompound compoundTag = itemStack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).getNbt();
         return compoundTag != null && compoundTag.contains("Items", 9);
