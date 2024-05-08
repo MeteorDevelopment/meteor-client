@@ -9,32 +9,34 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.registry.BuiltinRegistries;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class Command {
     protected static final CommandRegistryAccess REGISTRY_ACCESS = CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup());
+    protected static final int SINGLE_SUCCESS = com.mojang.brigadier.Command.SINGLE_SUCCESS;
+    protected static final MinecraftClient mc = MeteorClient.mc;
 
     private final String name;
     private final String title;
     private final String description;
-    private final List<String> aliases = new ArrayList<>();
+    private final List<String> aliases;
 
     public Command(String name, String description, String... aliases) {
         this.name = name;
         this.title = Utils.nameToTitle(name);
         this.description = description;
-        Collections.addAll(this.aliases, aliases);
+        this.aliases = List.of(aliases);
     }
 
     // Helper methods to painlessly infer the CommandSource generic type argument
