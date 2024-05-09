@@ -41,7 +41,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.collection.DefaultedList;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -284,8 +283,8 @@ public class BetterTooltips extends Module {
                 else count = String.format("%d bytes", byteCount);
 
                 event.list.add(Text.literal(count).formatted(Formatting.GRAY));
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                event.list.add(Text.literal("Error getting bytes.").formatted(Formatting.RED));
             }
         }
 
