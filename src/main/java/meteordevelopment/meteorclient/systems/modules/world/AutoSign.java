@@ -8,25 +8,31 @@ package meteordevelopment.meteorclient.systems.modules.world;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
 import meteordevelopment.meteorclient.mixin.AbstractSignEditScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.starscript.Script;
 import meteordevelopment.starscript.StandardLib;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
-import net.minecraft.network.packet.c2s.play.*;
-import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
-import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
-import meteordevelopment.starscript.Script;
-import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.TimeZone;
 
 public class AutoSign extends Module {
 
@@ -182,7 +188,7 @@ public class AutoSign extends Module {
 
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) throws InterruptedException {
-        if (!(event.screen instanceof AbstractSignEditScreen)) return;
+        if (!(event.screen instanceof AbstractSignEditScreen)) {return;}
         if (applyingBack) {
             applyingBack = false;
             event.cancel();
@@ -207,8 +213,9 @@ public class AutoSign extends Module {
         if (frontEnabled.get()) {
             boolean written = false;
             for (Text text : sign.getFrontText().getMessages(false))
-                if (!Objects.equals(text.getString(), "") && !written)
+                if (!Objects.equals(text.getString(), "") && !written) {
                     written = true;
+                }
             if (overwrite.get() || !written) {
                 mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), true,
                     frontScripts.get(0) != null ? MeteorStarscript.run(frontScripts.get(0)) : "error",
@@ -231,21 +238,28 @@ public class AutoSign extends Module {
             }
 
             boolean wasSneaking = mc.player.isSneaking();
-            if (wasSneaking) mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            if (wasSneaking) {
+                mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            }
 
             BlockHitResult bhr = new BlockHitResult(sign.getPos().toCenterPos(), mc.player.getFacing().getOpposite(), sign.getPos(), false);
             mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, bhr, 0));
 
-            if (wasSneaking) mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+            if (wasSneaking) {
+                mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+            }
 
-            if (offhand_swapped) mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, mc.player.getBlockPos(), mc.player.getFacing()));
+            if (offhand_swapped) {
+                mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, mc.player.getBlockPos(), mc.player.getFacing()));
+            }
         }
 
         if (backEnabled.get()) {
             boolean written = false;
             for (Text text : sign.getBackText().getMessages(false))
-                if (!Objects.equals(text.getString(), "") && !written)
+                if (!Objects.equals(text.getString(), "") && !written) {
                     written = true;
+                }
             if (overwrite.get() || !written) {
                 mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), false,
                     backScripts.get(0) != null ? MeteorStarscript.run(backScripts.get(0)) : "error",
@@ -265,8 +279,9 @@ public class AutoSign extends Module {
         }
 
         // When no sign side was updated open gui normally
-        if (updated)
+        if (updated) {
             event.cancel();
+        }
     }
 
     private void recompile(SettingGroup side, List<Script> sideScripts, int line) {
@@ -274,9 +289,10 @@ public class AutoSign extends Module {
 
         Script script = MeteorStarscript.compile(compileLine);
 
-        if (sideScripts.size() <= line - 1)
+        if (sideScripts.size() <= line - 1) {
             sideScripts.add(script);
-        else
+        } else {
             sideScripts.set(line - 1, script);
+        }
     }
 }
