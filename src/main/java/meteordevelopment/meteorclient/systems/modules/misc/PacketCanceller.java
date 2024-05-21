@@ -37,6 +37,7 @@ public class PacketCanceller extends Module {
 
     public PacketCanceller() {
         super(Categories.Misc, "packet-canceller", "Allows you to cancel certain packets.");
+        runInMainMenu = true;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
