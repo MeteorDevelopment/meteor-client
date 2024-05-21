@@ -22,6 +22,7 @@ import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
+import net.minecraft.network.PacketCallbacks;
 import net.minecraft.network.handler.PacketEncoderException;
 import net.minecraft.network.handler.PacketSizeLogger;
 import net.minecraft.network.listener.ClientPlayPacketListener;
@@ -30,6 +31,7 @@ import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -66,7 +68,7 @@ public abstract class ClientConnectionMixin {
         MeteorClient.EVENT_BUS.post(ServerConnectEndEvent.get(address));
     }
 
-    @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/packet/Packet;)V", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/PacketCallbacks;)V", cancellable = true)
     private void onSendPacketHead(CallbackInfo info, @Local LocalRef<Packet<?>> packet) {
         PacketEvent.Send processedPacket = MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet.get()));
         if (processedPacket.isCancelled()) {
@@ -76,8 +78,8 @@ public abstract class ClientConnectionMixin {
         }
     }
 
-    @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V", at = @At("TAIL"))
-    private void onSendPacketTail(Packet<?> packet, CallbackInfo info) {
+    @Inject(method = "send(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/PacketCallbacks;)V", at = @At("TAIL"))
+    private void onSendPacketTail(Packet<?> packet, @Nullable PacketCallbacks callbacks, CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(PacketEvent.Sent.get(packet));
     }
 
