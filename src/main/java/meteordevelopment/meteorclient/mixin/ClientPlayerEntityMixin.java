@@ -22,7 +22,9 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.damage.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -75,7 +77,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         if (Utils.canUpdate() && getWorld().isClient && canTakeDamage()) MeteorClient.EVENT_BUS.post(DamageEvent.get(this, source));
     }
 
-    @ModifyConstant(method = "canSprint", constant = @Constant(floatValue = 6.0f))
+    @ModifyExpressionValue(method = "canSprint", at = @At(value = "CONSTANT", args = "floatValue=6.0f"))
     private float onHunger(float constant) {
         if (Modules.get().get(NoSlow.class).hunger()) return -1;
         return constant;
