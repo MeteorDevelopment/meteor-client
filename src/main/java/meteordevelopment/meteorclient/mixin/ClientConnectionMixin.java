@@ -69,12 +69,9 @@ public abstract class ClientConnectionMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/PacketCallbacks;)V", cancellable = true)
-    private void onSendPacketHead(CallbackInfo info, @Local LocalRef<Packet<?>> packet) {
-        PacketEvent.Send processedPacket = MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet.get()));
-        if (processedPacket.isCancelled()) {
+    private void onSendPacketHead(CallbackInfo info, @Local(argsOnly = true) Packet<?> packet) {
+        if (MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet)).isCancelled()) {
             info.cancel();
-        } else {
-            packet.set(processedPacket.packet);
         }
     }
 
