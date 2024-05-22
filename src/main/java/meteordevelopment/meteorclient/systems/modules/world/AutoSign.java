@@ -29,21 +29,15 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.TimeZone;
 
 public class AutoSign extends Module {
 
-    private boolean applyingBack = false;
-
     private final SettingGroup front = settings.createGroup("Front");
     private final SettingGroup back = settings.createGroup("Back");
     private final SettingGroup other = settings.createGroup("Other");
-
-    private final List<Script> frontScripts = new ArrayList<>();
-    private final List<Script> backScripts = new ArrayList<>();
 
     // 4 lines at front of sign
     public final Setting<Boolean> frontEnabled = front.add(new BoolSetting.Builder()
@@ -57,7 +51,7 @@ public class AutoSign extends Module {
         .name("front-line-1")
         .description("Text in first line.")
         .defaultValue("{player}")
-        .onChanged(strings -> recompile(front, frontScripts, 1))
+        .onChanged(strings -> recompile(strings, 0, 0))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(frontEnabled::get)
         .build()
@@ -67,7 +61,7 @@ public class AutoSign extends Module {
         .name("front-line-2")
         .description("Text in second line.")
         .defaultValue("was here")
-        .onChanged(strings -> recompile(front, frontScripts, 2))
+        .onChanged(strings -> recompile(strings, 0, 1))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(frontEnabled::get)
         .build()
@@ -77,7 +71,7 @@ public class AutoSign extends Module {
         .name("front-line-3")
         .description("Text in third line.")
         .defaultValue("{date}")
-        .onChanged(strings -> recompile(front, frontScripts, 3))
+        .onChanged(strings -> recompile(strings, 0, 2))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(frontEnabled::get)
         .build()
@@ -87,7 +81,7 @@ public class AutoSign extends Module {
         .name("front-line-4")
         .description("Text in fourth line.")
         .defaultValue("{time}")
-        .onChanged(strings -> recompile(front, frontScripts, 4))
+        .onChanged(strings -> recompile(strings, 0, 3))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(frontEnabled::get)
         .build()
@@ -104,7 +98,7 @@ public class AutoSign extends Module {
     private final Setting<String> line1back = back.add(new StringSetting.Builder()
         .name("back-line-1")
         .description("Text in first line.")
-        .onChanged(strings -> recompile(back, backScripts, 1))
+        .onChanged(strings -> recompile(strings, 1, 0))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(backEnabled::get)
         .build()
@@ -115,7 +109,7 @@ public class AutoSign extends Module {
         .name("back-line-2")
         .description("Text in second line.")
         .defaultValue("It's MeteorTime.")
-        .onChanged(strings -> recompile(back, backScripts, 2))
+        .onChanged(strings -> recompile(strings, 1, 1))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(backEnabled::get)
         .build()
@@ -124,7 +118,7 @@ public class AutoSign extends Module {
     private final Setting<String> line3back = back.add(new StringSetting.Builder()
         .name("back-line-3")
         .description("Text in third line.")
-        .onChanged(strings -> recompile(back, backScripts, 3))
+        .onChanged(strings -> recompile(strings, 1, 2))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(backEnabled::get)
         .build()
@@ -133,7 +127,7 @@ public class AutoSign extends Module {
     private final Setting<String> line4back = back.add(new StringSetting.Builder()
         .name("back-line-4")
         .description("Text in fourth line.")
-        .onChanged(strings -> recompile(back, backScripts, 4))
+        .onChanged(strings -> recompile(strings, 1, 3))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(backEnabled::get)
         .build()
@@ -182,6 +176,10 @@ public class AutoSign extends Module {
         return list;
     }
 
+    private boolean applyingBack = false;
+    private final List<Script> frontScripts = Arrays.asList(new Script[4]);
+    private final List<Script> backScripts = Arrays.asList(new Script[4]);
+
     public AutoSign() {
         super(Categories.World, "auto-sign", "Automatically writes signs. Configure what to write dynamically using Starscript placeholders.");
     }
@@ -195,7 +193,7 @@ public class AutoSign extends Module {
             return;
         }
 
-        // apply custom format and timezone, not the nicest (temporary overwriting global date and time format)
+        // Apply custom format and timezone, not the nicest (temporary overwriting global date and time format)
         try {
             StandardLib.dateFormat.applyPattern(date.get());
             StandardLib.timeFormat.applyPattern(time.get());
@@ -211,11 +209,14 @@ public class AutoSign extends Module {
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
 
         if (frontEnabled.get()) {
+            // Check if front sign is already written
             boolean written = false;
-            for (Text text : sign.getFrontText().getMessages(false))
-                if (!Objects.equals(text.getString(), "") && !written) {
+            for (Text text : sign.getFrontText().getMessages(false)) {
+                if (!text.getString().isEmpty() && !written) {
                     written = true;
                 }
+            }
+
             if (overwrite.get() || !written) {
                 mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), true,
                     frontScripts.get(0) != null ? MeteorStarscript.run(frontScripts.get(0)) : "error",
@@ -254,12 +255,16 @@ public class AutoSign extends Module {
             }
         }
 
+        // TODO check if sign is editable
+
         if (backEnabled.get()) {
+            // Check if back sign is already written
             boolean written = false;
-            for (Text text : sign.getBackText().getMessages(false))
-                if (!Objects.equals(text.getString(), "") && !written) {
+            for (Text text : sign.getBackText().getMessages(false)) {
+                if (!text.getString().isEmpty() && !written) {
                     written = true;
                 }
+            }
             if (overwrite.get() || !written) {
                 mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), false,
                     backScripts.get(0) != null ? MeteorStarscript.run(backScripts.get(0)) : "error",
@@ -270,7 +275,7 @@ public class AutoSign extends Module {
             }
         }
 
-        // reset formating and timezones
+        // Reset formating and timezones
         StandardLib.dateFormat.applyPattern("dd. MM. yyyy");
         StandardLib.timeFormat.applyPattern("HH:mm");
         if (utcTimezone.get()) {
@@ -284,15 +289,15 @@ public class AutoSign extends Module {
         }
     }
 
-    private void recompile(SettingGroup side, List<Script> sideScripts, int line) {
-        String compileLine = (String) side.getByIndex(line).get();
+    private void recompile(String compileLine, int side, int line) {
+        List<Script> sideScripts;
+        if (side == 0) {
+            sideScripts = frontScripts;
+        } else {
+            sideScripts = backScripts;
+        }
 
         Script script = MeteorStarscript.compile(compileLine);
-
-        if (sideScripts.size() <= line - 1) {
-            sideScripts.add(script);
-        } else {
-            sideScripts.set(line - 1, script);
-        }
+        sideScripts.set(line, script);
     }
 }
