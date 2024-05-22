@@ -18,7 +18,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.starscript.Script;
-import meteordevelopment.starscript.StandardLib;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
@@ -31,7 +30,6 @@ import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 
 public class AutoSign extends Module {
 
@@ -140,27 +138,6 @@ public class AutoSign extends Module {
         .defaultValue(false)
         .build());
 
-    private final Setting<String> date = other.add(new StringSetting.Builder()
-        .name("date-format")
-        .description("Format string for {date} object.")
-        .defaultValue("yyyy-MM-dd")
-        .build()
-    );
-
-    private final Setting<String> time = other.add(new StringSetting.Builder()
-        .name("time-format")
-        .description("Format string for {time} object.")
-        .defaultValue("HH:mm z")
-        .build()
-    );
-
-    private final Setting<Boolean> utcTimezone = other.add(new BoolSetting.Builder()
-        .name("UTC-timezone")
-        .description("Whether to use UTC or your local timezone.")
-        .defaultValue(true)
-        .build()
-    );
-
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WHorizontalList list = theme.horizontalList();
@@ -191,18 +168,6 @@ public class AutoSign extends Module {
             applyingBack = false;
             event.cancel();
             return;
-        }
-
-        // Apply custom format and timezone, not the nicest (temporary overwriting global date and time format)
-        try {
-            StandardLib.dateFormat.applyPattern(date.get());
-            StandardLib.timeFormat.applyPattern(time.get());
-        } catch (IllegalArgumentException e) {
-            error(e.getMessage());
-        }
-        if (utcTimezone.get()) {
-            StandardLib.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            StandardLib.timeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         }
 
         boolean updated = false;
@@ -273,14 +238,6 @@ public class AutoSign extends Module {
                     backScripts.get(3) != null ? MeteorStarscript.run(backScripts.get(3)) : "error"));
                 updated = true;
             }
-        }
-
-        // Reset formating and timezones
-        StandardLib.dateFormat.applyPattern("dd. MM. yyyy");
-        StandardLib.timeFormat.applyPattern("HH:mm");
-        if (utcTimezone.get()) {
-            StandardLib.dateFormat.setTimeZone(TimeZone.getDefault());
-            StandardLib.timeFormat.setTimeZone(TimeZone.getDefault());
         }
 
         // When no sign side was updated open gui normally
