@@ -17,9 +17,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.util.Hand;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class AutoBreed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -57,7 +55,25 @@ public class AutoBreed extends Module {
         .build()
     );
 
-    private final List<Entity> animalsFed = new ArrayList<>();
+    private final Setting<Boolean> continuousBreeding = sgGeneral.add(new BoolSetting.Builder()
+        .name("continuous-breeding")
+        .description("Whether to feed the same animal again after a certain time period.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> breedingInterval = sgGeneral.add(new IntSetting.Builder()
+        .name("breeding-interval")
+        .description("Determines how often the same animal is fed in ticks.")
+        .min(1)
+        .sliderMax(24000)
+        .defaultValue(6600) // 30s in love mode and the 5-minute breeding cooldown
+        .visible(continuousBreeding::get)
+        .build()
+    );
+
+    private final LinkedHashMap<Entity, Integer> animalsFed = new LinkedHashMap<>();
+    private int tickCounter = 0;
 
     public AutoBreed() {
         super(Categories.World, "auto-breed", "Automatically breeds specified animals.");
@@ -66,6 +82,7 @@ public class AutoBreed extends Module {
     @Override
     public void onActivate() {
         animalsFed.clear();
+        tickCounter = 0;
     }
 
     @EventHandler
@@ -74,12 +91,8 @@ public class AutoBreed extends Module {
             if (!(entity instanceof AnimalEntity animal)) continue;
 
             if (!entities.get().contains(animal.getType())
-                || !switch (mobAgeFilter.get()) {
-                case Baby -> animal.isBaby();
-                case Adult -> !animal.isBaby();
-                case Both -> true;
-            }
-                || animalsFed.contains(animal)
+                || !isCorrectAge(animal)
+                || animalsFed.containsKey(animal)
                 || !PlayerUtils.isWithin(animal, range.get())
                 || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack()))
                 continue;
@@ -87,10 +100,16 @@ public class AutoBreed extends Module {
             Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> {
                 mc.interactionManager.interactEntity(mc.player, animal, hand.get());
                 mc.player.swingHand(hand.get());
-                animalsFed.add(animal);
+                animalsFed.putLast(animal, tickCounter);
             });
+            break;
+        }
 
-            return;
+        if (continuousBreeding.get()) {
+            while (!animalsFed.isEmpty() && animalsFed.firstEntry().getValue() < tickCounter - breedingInterval.get()) {
+                animalsFed.pollFirstEntry();
+            }
+            tickCounter++;
         }
     }
 
@@ -98,5 +117,13 @@ public class AutoBreed extends Module {
         Baby,
         Adult,
         Both
+    }
+
+    private boolean isCorrectAge(AnimalEntity animal) {
+        return switch (mobAgeFilter.get()) {
+            case Baby -> animal.isBaby();
+            case Adult -> !animal.isBaby();
+            case Both -> true;
+        };
     }
 }
