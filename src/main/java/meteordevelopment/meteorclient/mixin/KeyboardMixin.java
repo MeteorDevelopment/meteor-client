@@ -23,8 +23,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static org.lwjgl.glfw.GLFW.*;
-
 @Mixin(Keyboard.class)
 public abstract class KeyboardMixin {
     @Shadow @Final private MinecraftClient client;
@@ -34,9 +32,9 @@ public abstract class KeyboardMixin {
         if (key != GLFW.GLFW_KEY_UNKNOWN) {
             // on Linux/X11 the modifier is not active when the key is pressed and still active when the key is released
             // https://github.com/glfw/glfw/issues/1630
-            if (action == GLFW_PRESS) {
+            if (action == GLFW.GLFW_PRESS) {
                 modifiers |= Input.getModifier(key);
-            } else if (action == GLFW_RELEASE) {
+            } else if (action == GLFW.GLFW_RELEASE) {
                 modifiers &= ~Input.getModifier(key);
             }
 
