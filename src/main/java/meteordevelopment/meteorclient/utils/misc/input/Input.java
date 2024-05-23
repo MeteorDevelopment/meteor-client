@@ -12,6 +12,8 @@ import net.minecraft.client.option.KeyBinding;
 import org.lwjgl.glfw.GLFW;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_MOD_SUPER;
 
 public class Input {
     private static final boolean[] keys = new boolean[512];
@@ -59,5 +61,15 @@ public class Input {
             GLFW.glfwSetCursor(mc.getWindow().getHandle(), style.getGlfwCursor());
             lastCursorStyle = style;
         }
+    }
+
+    public static int getModifier(int key) {
+        return switch (key) {
+            case GLFW_KEY_LEFT_SHIFT, GLFW_KEY_RIGHT_SHIFT -> GLFW_MOD_SHIFT;
+            case GLFW_KEY_LEFT_CONTROL, GLFW_KEY_RIGHT_CONTROL -> GLFW_MOD_CONTROL;
+            case GLFW_KEY_LEFT_ALT, GLFW_KEY_RIGHT_ALT -> GLFW_MOD_ALT;
+            case GLFW_KEY_LEFT_SUPER, GLFW_KEY_RIGHT_SUPER -> GLFW_MOD_SUPER;
+            default -> 0;
+        };
     }
 }
