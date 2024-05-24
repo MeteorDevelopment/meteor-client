@@ -112,6 +112,13 @@ public class BetterChat extends Module {
         .build()
     );
 
+    private final Setting<Boolean> antiClear = sgFilter.add(new BoolSetting.Builder()
+        .name("anti-clear")
+        .description("Prevents servers from clearing chat.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> filterRegex = sgFilter.add(new BoolSetting.Builder()
         .name("filter-regex")
         .description("Filter out chat messages that match the regex filter.")
@@ -219,6 +226,7 @@ public class BetterChat extends Module {
     );
 
     private static final Pattern antiSpamRegex = Pattern.compile(" \\(([0-9]+)\\)$");
+    private static final Pattern antiClearRegex = Pattern.compile("\\\\n(\\\\n|\\s)*\\\\n");
     private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
     private static final Pattern usernameRegex = Pattern.compile("^(?:<[0-9]{2}:[0-9]{2}>\\s)?<(.*?)>.*");
 
@@ -247,6 +255,16 @@ public class BetterChat extends Module {
                     return;
                 }
             }
+        }
+
+        if (antiClear.get()) {
+            // more than two \n behind each other will be reduced to only two \n
+            String jsonString = Text.Serialization.toJsonString(message, mc.player.getRegistryManager());
+
+            Matcher antiClearMatcher = antiClearRegex.matcher(jsonString);
+            String replacedString = antiClearMatcher.replaceAll("\n\n");
+
+            message = (Text) Text.Serialization.fromJson(replacedString, mc.player.getRegistryManager());
         }
 
         if (antiSpam.get()) {
