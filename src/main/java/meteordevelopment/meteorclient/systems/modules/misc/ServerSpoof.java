@@ -5,16 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.mixin.ConnectScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
-import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.BrandCustomPayload;
 import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.c2s.common.ResourcePackStatusC2SPacket;
@@ -92,15 +88,8 @@ public class ServerSpoof extends Module {
         if (spoofBrand.get() && id.equals(BrandCustomPayload.ID.id()) && !mc.isInSingleplayer()) {
             CustomPayloadC2SPacket spoofedPacket = new CustomPayloadC2SPacket(new BrandCustomPayload(brand.get()));
 
-            // The brand packet is sent during the login phase.
-            // mc.getNetworkHandler() is still null so we can only access the connection through the connect-screen.
-            if (mc.currentScreen instanceof ConnectScreen connectScreen) {
-                ClientConnection connection = ((ConnectScreenAccessor) connectScreen).getConnection();
-                // PacketEvent.Send doesn't trigger if we send the packet like this
-                connection.send(spoofedPacket, null, true);
-            } else {
-                MeteorClient.LOG.error("Couldn't spoof the client brand. Falling back to blocking the packet");
-            }
+            // PacketEvent.Send doesn't trigger if we send the packet like this
+            event.connection.send(spoofedPacket, null, true);
             event.cancel();
         }
     }
