@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
@@ -19,6 +20,7 @@ import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.starscript.Script;
 import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
@@ -49,7 +51,7 @@ public class AutoSign extends Module {
         .name("front-line-1")
         .description("Text in first line.")
         .defaultValue("{player}")
-        .onChanged(strings -> recompile(strings, 0, 0))
+        .onChanged(strings -> recompile(strings, true, 0))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(frontEnabled::get)
         .build()
@@ -59,7 +61,7 @@ public class AutoSign extends Module {
         .name("front-line-2")
         .description("Text in second line.")
         .defaultValue("was here")
-        .onChanged(strings -> recompile(strings, 0, 1))
+        .onChanged(strings -> recompile(strings, true, 1))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(frontEnabled::get)
         .build()
@@ -69,7 +71,7 @@ public class AutoSign extends Module {
         .name("front-line-3")
         .description("Text in third line.")
         .defaultValue("{date}")
-        .onChanged(strings -> recompile(strings, 0, 2))
+        .onChanged(strings -> recompile(strings, true, 2))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(frontEnabled::get)
         .build()
@@ -79,7 +81,7 @@ public class AutoSign extends Module {
         .name("front-line-4")
         .description("Text in fourth line.")
         .defaultValue("{time}")
-        .onChanged(strings -> recompile(strings, 0, 3))
+        .onChanged(strings -> recompile(strings, true, 3))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(frontEnabled::get)
         .build()
@@ -96,7 +98,7 @@ public class AutoSign extends Module {
     private final Setting<String> line1back = back.add(new StringSetting.Builder()
         .name("back-line-1")
         .description("Text in first line.")
-        .onChanged(strings -> recompile(strings, 1, 0))
+        .onChanged(strings -> recompile(strings, false, 0))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(backEnabled::get)
         .build()
@@ -107,7 +109,7 @@ public class AutoSign extends Module {
         .name("back-line-2")
         .description("Text in second line.")
         .defaultValue("It's MeteorTime.")
-        .onChanged(strings -> recompile(strings, 1, 1))
+        .onChanged(strings -> recompile(strings, false, 1))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(backEnabled::get)
         .build()
@@ -116,7 +118,7 @@ public class AutoSign extends Module {
     private final Setting<String> line3back = back.add(new StringSetting.Builder()
         .name("back-line-3")
         .description("Text in third line.")
-        .onChanged(strings -> recompile(strings, 1, 2))
+        .onChanged(strings -> recompile(strings, false, 2))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(backEnabled::get)
         .build()
@@ -125,7 +127,7 @@ public class AutoSign extends Module {
     private final Setting<String> line4back = back.add(new StringSetting.Builder()
         .name("back-line-4")
         .description("Text in fourth line.")
-        .onChanged(strings -> recompile(strings, 1, 3))
+        .onChanged(strings -> recompile(strings, false, 3))
         .renderer(StarscriptTextBoxRenderer.class)
         .visible(backEnabled::get)
         .build()
@@ -153,7 +155,11 @@ public class AutoSign extends Module {
         return list;
     }
 
-    private boolean applyingBack = false;
+    private boolean signPlaced = false;
+    private boolean signUpdated = false;
+    private boolean frontToWrite;
+    private boolean backToWrite;
+    private int expectedPacket = 0;
     private final List<Script> frontScripts = Arrays.asList(new Script[4]);
     private final List<Script> backScripts = Arrays.asList(new Script[4]);
 
@@ -162,93 +168,137 @@ public class AutoSign extends Module {
     }
 
     @EventHandler
+    private void onSendPacket(PacketEvent.Send event) {
+        if (!(event.packet instanceof PlayerInteractBlockC2SPacket)) return;
+        if (expectedPacket == 1) {
+            // we send this packet in restartInteraction
+            expectedPacket = 2;
+        } else if (expectedPacket == 2) {
+            // as we already received restartInteraction packet
+            // but the expected packet was not reset by onOpenScreen
+            // we cant apply back sign
+            backToWrite = false;
+            signPlaced = false;
+            warning("It seems like that this server does not support sign editing, disabling back sign writing is recommended.");
+        }
+    }
+
+    @EventHandler
     private void onOpenScreen(OpenScreenEvent event) throws InterruptedException {
         if (!(event.screen instanceof AbstractSignEditScreen)) {return;}
-        if (applyingBack) {
-            applyingBack = false;
-            event.cancel();
-            return;
-        }
 
-        boolean updated = false;
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
 
-        if (frontEnabled.get()) {
-            // Check if front sign is already written
-            boolean written = false;
-            for (Text text : sign.getFrontText().getMessages(false)) {
-                if (!text.getString().isEmpty() && !written) {
-                    written = true;
-                }
-            }
+        if (!signPlaced) {
+            signPlaced = true;
+            frontToWrite = frontEnabled.get();
+            backToWrite = backEnabled.get();
+        }
 
-            if (overwrite.get() || !written) {
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), true,
-                    frontScripts.get(0) != null ? MeteorStarscript.run(frontScripts.get(0)) : "error",
-                    frontScripts.get(1) != null ? MeteorStarscript.run(frontScripts.get(1)) : "error",
-                    frontScripts.get(2) != null ? MeteorStarscript.run(frontScripts.get(2)) : "error",
-                    frontScripts.get(3) != null ? MeteorStarscript.run(frontScripts.get(3)) : "error"));
-                updated = true;
+        if (frontToWrite) {
+            boolean updated = writeSign(sign, true);
+            if (!signUpdated && updated) {
+                signUpdated = true;
+            }
+            frontToWrite = false;
+            if (backToWrite) {
+                // onOpenScreen will be called a second time if server accepts interaction
+                restartInteraction(sign);
+            }
+        } else if (backToWrite) {
+            boolean updated = writeSign(sign, false);
+            if (!signUpdated && updated) {
+                signUpdated = true;
+            }
+            backToWrite = false;
+            if (expectedPacket == 2) {
+                // Server accepted sign edit
+                expectedPacket = 0;
             }
         }
 
-        // Start a second sign interaction (if applicable) to apply second side of sign
-        if (updated && backEnabled.get()) {
-            applyingBack = true;
-
-            // If sign was placed with offhand
-            boolean offhand_swapped = false;
-            if (!mc.player.getMainHandStack().getTranslationKey().endsWith("sign") && !mc.player.getMainHandStack().getTranslationKey().endsWith("air")) {
-                mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, mc.player.getBlockPos(), mc.player.getFacing()));
-                offhand_swapped = true;
-            }
-
-            boolean wasSneaking = mc.player.isSneaking();
-            if (wasSneaking) {
-                mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-            }
-
-            BlockHitResult bhr = new BlockHitResult(sign.getPos().toCenterPos(), mc.player.getFacing().getOpposite(), sign.getPos(), false);
-            mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, bhr, 0));
-
-            if (wasSneaking) {
-                mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
-            }
-
-            if (offhand_swapped) {
-                mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, mc.player.getBlockPos(), mc.player.getFacing()));
-            }
+        if (!frontToWrite && !backToWrite) {
+            signPlaced = false;
         }
 
-        // TODO check if sign is editable
-
-        if (backEnabled.get()) {
-            // Check if back sign is already written
-            boolean written = false;
-            for (Text text : sign.getBackText().getMessages(false)) {
-                if (!text.getString().isEmpty() && !written) {
-                    written = true;
-                }
-            }
-            if (overwrite.get() || !written) {
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), false,
-                    backScripts.get(0) != null ? MeteorStarscript.run(backScripts.get(0)) : "error",
-                    backScripts.get(1) != null ? MeteorStarscript.run(backScripts.get(1)) : "error",
-                    backScripts.get(2) != null ? MeteorStarscript.run(backScripts.get(2)) : "error",
-                    backScripts.get(3) != null ? MeteorStarscript.run(backScripts.get(3)) : "error"));
-                updated = true;
-            }
-        }
-
-        // When no sign side was updated open gui normally
-        if (updated) {
+        // Cancel GUI only when something was updated
+        if (signUpdated || signPlaced) {
+            signUpdated = false;
             event.cancel();
         }
     }
 
-    private void recompile(String compileLine, int side, int line) {
+    private boolean writeSign(SignBlockEntity sign, boolean front) {
+        List<Script> script;
+        SignText signText;
+        if (front) {
+            script = frontScripts;
+            signText = sign.getFrontText();
+        } else {
+            script = backScripts;
+            signText = sign.getBackText();
+        }
+
+        // Check if side of sign is already written
+        boolean written = false;
+        for (Text text : signText.getMessages(false)) {
+            if (!text.getString().isEmpty() && !written) {
+                written = true;
+            }
+        }
+
+        if (overwrite.get() || !written) {
+            String line0 = script.get(0) != null ? MeteorStarscript.run(script.get(0)) : "error";
+            String line1 = script.get(1) != null ? MeteorStarscript.run(script.get(1)) : "error";
+            String line2 = script.get(2) != null ? MeteorStarscript.run(script.get(2)) : "error";
+            String line3 = script.get(3) != null ? MeteorStarscript.run(script.get(3)) : "error";
+            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), front,
+                line0 != null ? line0 : "error",
+                line1 != null ? line1 : "error",
+                line2 != null ? line2 : "error",
+                line3 != null ? line3 : "error"));
+            return true;
+        }
+        return false;
+    }
+
+    // Try a new sign interaction
+    private void restartInteraction(SignBlockEntity sign) {
+
+        // If sign was placed with offhand
+        boolean offhand_swapped = false;
+        if (!mc.player.getMainHandStack().getTranslationKey().endsWith("sign") && !mc.player.getMainHandStack().getTranslationKey().endsWith("air")) {
+            mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, mc.player.getBlockPos(), mc.player.getFacing()));
+            offhand_swapped = true;
+        }
+
+        // Avoid sneaking during interaction
+        boolean wasSneaking = mc.player.isSneaking();
+        if (wasSneaking) {
+            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+        }
+        BlockHitResult bhr = new BlockHitResult(sign.getPos().toCenterPos(), mc.player.getFacing().getOpposite(), sign.getPos(), false);
+
+        // expectedPacket shenanigans are used to identify if server accepted the sign edit
+        expectedPacket = 1;
+
+        // We can only improve chances, that this interaction triggers sign edit
+        // Since in the end the server decides, what to do with this interaction (as far as I know...)
+        // (if it allows sign edit or as example instead places a block)
+        mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, bhr, 0));
+
+        if (wasSneaking) {
+            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+        }
+
+        if (offhand_swapped) {
+            mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, mc.player.getBlockPos(), mc.player.getFacing()));
+        }
+    }
+
+    private void recompile(String compileLine, boolean front, int line) {
         List<Script> sideScripts;
-        if (side == 0) {
+        if (front) {
             sideScripts = frontScripts;
         } else {
             sideScripts = backScripts;
