@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class GeneralSettingsMixin {
     // specifies the '2' value on this line:
     // public final ModeSetting multiplayerScreenButtonOrientation = new ModeSetting(this, Text.translatable("general_settings.viafabricplus.multiplayer_screen_button_orientation"), 2, ORIENTATION_OPTIONS);
-    @ModifyExpressionValue(method = "<init>", at = @At(value = "CONSTANT", args = "intValue=2", ordinal = 1))
+    @ModifyExpressionValue(method = "<init>", at = @At(value = "CONSTANT", args = "intValue=2", ordinal = 1), remap = false)
     private int modifyDefaultPosition(int original) {
         return 4;
     }
