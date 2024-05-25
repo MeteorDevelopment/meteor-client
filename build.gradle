@@ -31,6 +31,10 @@ repositories {
         name = "vram"
         url = "https://maven.vram.io//"
     }
+    maven {
+        name = "ViaVersion"
+        url = "https://repo.viaversion.com"
+    }
     mavenCentral()
 }
 
@@ -58,6 +62,7 @@ dependencies {
     modCompileOnly("maven.modrinth:iris:${project.iris_version}") { transitive = false }
     //modCompileOnly("io.vram:canvas-fabric-mc119:1.0.+") { transitive = false } // TODO: 1.19.3
     modCompileOnly("maven.modrinth:indium:${project.indium_version}") { transitive = false }
+    modCompileOnly("de.florianmichael:ViaFabricPlus:${project.viafabricplus_version}") { transitive = false }
 
     // Baritone (https://github.com/MeteorDevelopment/baritone)
     modCompileOnly "meteordevelopment:baritone:${project.baritone_version}-SNAPSHOT"
