@@ -5,11 +5,13 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.Sprint;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Bounce;
@@ -121,6 +123,23 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyReturnValue(method = "hasStatusEffect", at = @At("RETURN"))
     private boolean hasStatusEffect(boolean original, RegistryEntry<StatusEffect> effect) {
         if (Modules.get().get(PotionSpoof.class).shouldBlock(effect.value())) return false;
+
+        return original;
+    }
+
+    @ModifyExpressionValue(method = "jump", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getYaw()F"))
+    private float modifyGetYaw(float original) {
+        if ((Object) this != mc.player) return original;
+
+        Sprint s = Modules.get().get(Sprint.class);
+        if (!s.isActive() || s.mode.get() != Sprint.Mode.Rage || !s.jumpFix.get()) return original;
+
+        float forward = Math.signum(mc.player.input.movementForward);
+        float strafe = 90 * Math.signum(mc.player.input.movementSideways);
+        if (forward != 0) strafe *= (forward * 0.5f);
+
+        original -= strafe;
+        if (forward < 0) original -= 180;
 
         return original;
     }
