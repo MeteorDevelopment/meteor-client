@@ -98,6 +98,11 @@ public abstract class InGameHudMixin {
         if (Modules.get().get(NoRender.class).noCrosshair()) ci.cancel();
     }
 
+    @Inject(method = "renderTitleAndSubtitle", at = @At("HEAD"), cancellable = true)
+    private void onRenderTitle(DrawContext context, float tickDelta, CallbackInfo ci) {
+        if (Modules.get().get(NoRender.class).noTitle()) ci.cancel();
+    }
+
     @Inject(method = "renderHeldItemTooltip", at = @At("HEAD"), cancellable = true)
     private void onRenderHeldItemTooltip(DrawContext context, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noHeldItemName()) ci.cancel();
