@@ -140,6 +140,12 @@ public class NoRender extends Module {
         .defaultValue(false)
         .build()
     );
+    private final Setting<Boolean> noTitle = sgHUD.add(new BoolSetting.Builder()
+        .name("title")
+        .description("Disables rendering of the title.")
+        .defaultValue(false)
+        .build()
+    );
 
     private final Setting<Boolean> noHeldItemName = sgHUD.add(new BoolSetting.Builder()
         .name("held-item-name")
@@ -435,6 +441,9 @@ public class NoRender extends Module {
 
     public boolean noCrosshair() {
         return isActive() && noCrosshair.get();
+    }
+    public boolean noTitle() {
+        return isActive() && noTitle.get();
     }
 
     public boolean noHeldItemName() {
