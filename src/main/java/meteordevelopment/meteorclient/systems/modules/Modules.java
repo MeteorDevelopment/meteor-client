@@ -221,6 +221,10 @@ public class Modules extends System<Modules> {
         this.moduleToBind = moduleToBind;
     }
 
+    /***
+     * @see meteordevelopment.meteorclient.commands.commands.BindCommand
+     * For ensuring we don't instantly bind the module to the enter key.
+     */
     public void awaitKeyRelease() {
         this.awaitingKeyRelease = true;
     }
@@ -243,6 +247,8 @@ public class Modules extends System<Modules> {
         if (!isBinding()) return false;
 
         if (awaitingKeyRelease) {
+            if (!isKey || value != GLFW.GLFW_KEY_ENTER) return false;
+
             awaitingKeyRelease = false;
             return false;
         }
