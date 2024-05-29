@@ -74,6 +74,7 @@ public class Modules extends System<Modules> {
 
     private final List<Module> active = new ArrayList<>();
     private Module moduleToBind;
+    private boolean awaitingKeyRelease = false;
 
     public Modules() {
         super("modules");
@@ -220,6 +221,10 @@ public class Modules extends System<Modules> {
         this.moduleToBind = moduleToBind;
     }
 
+    public void awaitKeyRelease() {
+        this.awaitingKeyRelease = true;
+    }
+
     public boolean isBinding() {
         return moduleToBind != null;
     }
@@ -236,6 +241,11 @@ public class Modules extends System<Modules> {
 
     private boolean onBinding(boolean isKey, int value, int modifiers) {
         if (!isBinding()) return false;
+
+        if (awaitingKeyRelease) {
+            awaitingKeyRelease = false;
+            return false;
+        }
 
         if (moduleToBind.keybind.canBindTo(isKey, value, modifiers)) {
             moduleToBind.keybind.set(isKey, value, modifiers);
