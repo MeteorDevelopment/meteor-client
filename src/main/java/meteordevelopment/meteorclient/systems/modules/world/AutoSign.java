@@ -30,6 +30,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 import java.util.Arrays;
 import java.util.List;
 
@@ -155,7 +156,7 @@ public class AutoSign extends Module {
         return list;
     }
 
-    private boolean signPlaced = false;
+    private BlockPos signPlaced = null;
     private boolean signUpdated = false;
     private boolean frontToWrite;
     private boolean backToWrite;
@@ -177,9 +178,12 @@ public class AutoSign extends Module {
             // as we already received restartInteraction packet
             // but the expected packet was not reset by onOpenScreen
             // we cant apply back sign
+            expectedPacket = 0;
             backToWrite = false;
-            signPlaced = false;
-            warning("It seems like that this server does not support sign editing, disabling back sign writing is recommended.");
+            signPlaced = null;
+            if (backEnabled.get()) {
+                warning("It seems like that this server does not support sign editing, disabling back sign writing is recommended.");
+            }
         }
     }
 
@@ -189,15 +193,15 @@ public class AutoSign extends Module {
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
 
-        if (!signPlaced) {
-            signPlaced = true;
+        if (signPlaced == null) {
+            signPlaced = sign.getPos();
             frontToWrite = frontEnabled.get();
             backToWrite = backEnabled.get();
         }
 
         if (frontToWrite) {
             boolean updated = writeSign(sign, true);
-            if (!signUpdated && updated) {
+            if (updated) {
                 signUpdated = true;
             }
             frontToWrite = false;
@@ -206,8 +210,12 @@ public class AutoSign extends Module {
                 restartInteraction(sign);
             }
         } else if (backToWrite) {
+            // check if second sign interaction is for the same sign initially placed
+            if (!signPlaced.equals(sign.getPos())) {
+                warning("It seems like that this server does not support sign editing, disabling back sign writing is recommended.");
+            }
             boolean updated = writeSign(sign, false);
-            if (!signUpdated && updated) {
+            if (updated) {
                 signUpdated = true;
             }
             backToWrite = false;
@@ -218,11 +226,11 @@ public class AutoSign extends Module {
         }
 
         if (!frontToWrite && !backToWrite) {
-            signPlaced = false;
+            signPlaced = null;
         }
 
         // Cancel GUI only when something was updated
-        if (signUpdated || signPlaced) {
+        if (signUpdated || signPlaced != null) {
             signUpdated = false;
             event.cancel();
         }
@@ -263,6 +271,9 @@ public class AutoSign extends Module {
     }
 
     // Try a new sign interaction
+    // We can only improve chances, that this interaction triggers sign edit
+    // Since in the end the server decides, what to do with this interaction (as far as I know...)
+    // (if it allows sign edit or as example instead places a block)
     private void restartInteraction(SignBlockEntity sign) {
 
         // If sign was placed with offhand
@@ -281,10 +292,6 @@ public class AutoSign extends Module {
 
         // expectedPacket shenanigans are used to identify if server accepted the sign edit
         expectedPacket = 1;
-
-        // We can only improve chances, that this interaction triggers sign edit
-        // Since in the end the server decides, what to do with this interaction (as far as I know...)
-        // (if it allows sign edit or as example instead places a block)
         mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, bhr, 0));
 
         if (wasSneaking) {
