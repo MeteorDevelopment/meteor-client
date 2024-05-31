@@ -37,6 +37,13 @@ public class Sprint extends Module {
         .build()
     );
 
+    private final Setting<Boolean> keepSprint = sgGeneral.add(new BoolSetting.Builder()
+        .name("keep-sprint")
+        .description("Whether to keep sprinting after attacking an entity.")
+        .defaultValue(false)
+        .build()
+    );
+
     public Sprint() {
         super(Categories.Movement, "sprint", "Automatically sprints.");
     }
@@ -59,5 +66,9 @@ public class Sprint extends Module {
             }
             case Rage -> sprint();
         }
+    }
+
+    public boolean stopSprinting() {
+        return !isActive() || !keepSprint.get();
     }
 }
