@@ -11,12 +11,16 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.LivingEntityMoveEvent;
 import meteordevelopment.meteorclient.events.entity.player.JumpVelocityMultiplierEvent;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
+import meteordevelopment.meteorclient.mixininterface.ICamera;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
 import meteordevelopment.meteorclient.systems.modules.movement.*;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
+import meteordevelopment.meteorclient.systems.modules.render.FreeLook;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -24,6 +28,7 @@ import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShader
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
@@ -176,5 +181,30 @@ public abstract class EntityMixin {
     @ModifyReturnValue(method = "bypassesLandingEffects", at = @At("RETURN"))
     private boolean cancelBounce(boolean original) {
         return Modules.get().get(NoFall.class).cancelBounce() || original;
+    }
+
+    @Inject(method = "changeLookDirection", at = @At("HEAD"), cancellable = true)
+    private void updateChangeLookDirection(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
+        if ((Object) this != mc.player) return;
+
+        Freecam freecam = Modules.get().get(Freecam.class);
+        FreeLook freeLook = Modules.get().get(FreeLook.class);
+
+        if (freecam.isActive()) {
+            freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
+            ci.cancel();
+        }
+        else if (Modules.get().isActive(HighwayBuilder.class)) {
+            Camera camera = mc.gameRenderer.getCamera();
+            ((ICamera) camera).setRot(camera.getYaw() + cursorDeltaX * 0.15, camera.getPitch() + cursorDeltaY * 0.15);
+            ci.cancel();
+        }
+        else if (freeLook.cameraMode()) {
+            freeLook.cameraYaw += cursorDeltaX / freeLook.sensitivity.get().floatValue();
+            freeLook.cameraPitch += cursorDeltaY / freeLook.sensitivity.get().floatValue();
+
+            if (Math.abs(freeLook.cameraPitch) > 90.0F) freeLook.cameraPitch = freeLook.cameraPitch > 0.0F ? 90.0F : -90.0F;
+            ci.cancel();
+        }
     }
 }

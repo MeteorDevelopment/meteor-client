@@ -74,6 +74,7 @@ public class Modules extends System<Modules> {
 
     private final List<Module> active = new ArrayList<>();
     private Module moduleToBind;
+    private boolean awaitingKeyRelease = false;
 
     public Modules() {
         super("modules");
@@ -220,6 +221,14 @@ public class Modules extends System<Modules> {
         this.moduleToBind = moduleToBind;
     }
 
+    /***
+     * @see meteordevelopment.meteorclient.commands.commands.BindCommand
+     * For ensuring we don't instantly bind the module to the enter key.
+     */
+    public void awaitKeyRelease() {
+        this.awaitingKeyRelease = true;
+    }
+
     public boolean isBinding() {
         return moduleToBind != null;
     }
@@ -236,6 +245,13 @@ public class Modules extends System<Modules> {
 
     private boolean onBinding(boolean isKey, int value, int modifiers) {
         if (!isBinding()) return false;
+
+        if (awaitingKeyRelease) {
+            if (!isKey || value != GLFW.GLFW_KEY_ENTER) return false;
+
+            awaitingKeyRelease = false;
+            return false;
+        }
 
         if (moduleToBind.keybind.canBindTo(isKey, value, modifiers)) {
             moduleToBind.keybind.set(isKey, value, modifiers);

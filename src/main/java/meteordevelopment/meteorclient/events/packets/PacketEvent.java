@@ -27,12 +27,13 @@ public class PacketEvent {
     public static class Send extends Cancellable {
         private static final Send INSTANCE = new Send();
 
-        // overwriting this will overwrite the packet being sent
         public Packet<?> packet;
+        public ClientConnection connection;
 
-        public static Send get(Packet<?> packet) {
+        public static Send get(Packet<?> packet, ClientConnection connection) {
             INSTANCE.setCancelled(false);
             INSTANCE.packet = packet;
+            INSTANCE.connection = connection;
             return INSTANCE;
         }
     }
@@ -41,9 +42,11 @@ public class PacketEvent {
         private static final Sent INSTANCE = new Sent();
 
         public Packet<?> packet;
+        public ClientConnection connection;
 
-        public static Sent get(Packet<?> packet) {
+        public static Sent get(Packet<?> packet, ClientConnection connection) {
             INSTANCE.packet = packet;
+            INSTANCE.connection = connection;
             return INSTANCE;
         }
     }

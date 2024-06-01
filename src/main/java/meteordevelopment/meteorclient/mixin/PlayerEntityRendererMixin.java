@@ -30,7 +30,7 @@ public abstract class PlayerEntityRendererMixin {
         Chams chams = Modules.get().get(Chams.class);
 
         if (chams.isActive() && chams.hand.get()) {
-            Identifier texture = chams.handTexture.get() ? player.playerListEntry.getSkinTextures().texture() : Chams.BLANK;
+            Identifier texture = chams.handTexture.get() ? player.getSkinTextures().texture() : Chams.BLANK;
             args.set(1, vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(texture)));
         }
     }

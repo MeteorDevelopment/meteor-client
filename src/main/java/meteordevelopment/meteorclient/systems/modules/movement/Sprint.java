@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -21,15 +22,27 @@ public class Sprint extends Module {
         Rage
     }
 
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+    public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("speed-mode")
         .description("What mode of sprinting.")
         .defaultValue(Mode.Strict)
         .build()
     );
 
-    // Removed whenStationary as it was just Rage sprint
+    public final Setting<Boolean> jumpFix = sgGeneral.add(new BoolSetting.Builder()
+        .name("jump-fix")
+        .description("Whether to correct jumping directions.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Rage)
+        .build()
+    );
 
+    private final Setting<Boolean> keepSprint = sgGeneral.add(new BoolSetting.Builder()
+        .name("keep-sprint")
+        .description("Whether to keep sprinting after attacking an entity.")
+        .defaultValue(false)
+        .build()
+    );
 
     public Sprint() {
         super(Categories.Movement, "sprint", "Automatically sprints.");
@@ -49,11 +62,13 @@ public class Sprint extends Module {
     private void onTick(TickEvent.Post event) {
         switch (mode.get()) {
             case Strict -> {
-                if (mc.player.forwardSpeed > 0) {
-                    sprint();
-                }
+                if (mc.player.forwardSpeed > 0) sprint();
             }
             case Rage -> sprint();
-            }
         }
+    }
+
+    public boolean stopSprinting() {
+        return !isActive() || !keepSprint.get();
+    }
 }
