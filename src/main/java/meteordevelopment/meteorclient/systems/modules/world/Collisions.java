@@ -113,6 +113,6 @@ public class Collisions extends Module {
     }
 
     public boolean ignoreBorder() {
-        return  isActive() && ignoreBorder.get();
+        return isActive() && ignoreBorder.get();
     }
 }
