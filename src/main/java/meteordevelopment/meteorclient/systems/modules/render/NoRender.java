@@ -269,6 +269,13 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noMapContent = sgWorld.add(new BoolSetting.Builder()
+        .name("map-content")
+        .description("Disable rendering of maps.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<BannerRenderMode> bannerRender = sgWorld.add(new EnumSetting.Builder<BannerRenderMode>()
         .name("banners")
         .description("Changes rendering of banners.")
@@ -515,6 +522,10 @@ public class NoRender extends Module {
 
     public boolean noMapMarkers() {
         return isActive() && noMapMarkers.get();
+    }
+
+    public boolean noMapContent() {
+        return isActive() && noMapContent.get();
     }
 
     public BannerRenderMode getBannerRenderMode() {
