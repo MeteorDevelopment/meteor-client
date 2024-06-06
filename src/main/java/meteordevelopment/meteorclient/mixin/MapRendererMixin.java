@@ -27,6 +27,6 @@ public abstract class MapRendererMixin {
 
     @Inject(method = "draw(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ZI)V", at = @At("HEAD"), cancellable = true)
     private void onDraw(MatrixStack matrices, VertexConsumerProvider vertexConsumers, boolean hidePlayerIcons, int light, CallbackInfo ci) {
-        if (Modules.get().get(NoRender.class).noMapContent()) ci.cancel();
+        if (Modules.get().get(NoRender.class).noMapContents()) ci.cancel();
     }
 }
