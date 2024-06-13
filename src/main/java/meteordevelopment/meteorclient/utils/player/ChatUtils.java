@@ -38,8 +38,16 @@ public class ChatUtils {
         PREFIX = Text.empty()
             .setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))
             .append("[")
-            .append(Text.literal("Meteor").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(MeteorClient.ADDON.color.getPacked()))))
+            .append(Text.literal("Meteor").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(Config.get().chatFeedbackPrefixColor.get().getPacked()))))
             .append("] ");
+    }
+
+    public static void changePrefixColor(int color) {
+        PREFIX = Text.empty()
+            .setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))
+            .append("[")
+            .append(Text.literal("Meteor").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)))
+            .append("] "));
     }
 
     public static Text getMeteorPrefix() {

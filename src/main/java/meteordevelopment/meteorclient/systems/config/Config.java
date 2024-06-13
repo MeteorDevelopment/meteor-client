@@ -118,6 +118,14 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<SettingColor> chatFeedbackPrefixColor = sgChat.add(new ColorSetting.Builder()
+        .name("chat-feedback-prefix-color")
+        .description("The color of [Meteor] when chat feedback is given")
+        .defaultValue(new SettingColor(145,61,226))
+        .visible(chatFeedback::get)
+        .build()
+    );
+
     // Misc
 
     public final Setting<Integer> rotationHoldTicks = sgMisc.add(new IntSetting.Builder()
