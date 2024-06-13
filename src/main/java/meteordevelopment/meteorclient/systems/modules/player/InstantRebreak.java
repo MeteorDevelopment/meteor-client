@@ -23,7 +23,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-public class InstaMine extends Module {
+public class InstantRebreak extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -84,8 +84,8 @@ public class InstaMine extends Module {
     private int ticks;
     private Direction direction;
 
-    public InstaMine() {
-        super(Categories.Player, "insta-mine", "Instantly re-breaks blocks in the same position.");
+    public InstantRebreak() {
+        super(Categories.Player, "instant-rebreak", "Instantly re-breaks blocks in the same position.");
     }
 
     @Override

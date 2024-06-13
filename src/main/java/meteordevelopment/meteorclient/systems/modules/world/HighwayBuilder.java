@@ -16,7 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
 import meteordevelopment.meteorclient.systems.modules.player.AutoEat;
 import meteordevelopment.meteorclient.systems.modules.player.AutoGap;
 import meteordevelopment.meteorclient.systems.modules.player.AutoTool;
-import meteordevelopment.meteorclient.systems.modules.player.InstaMine;
+import meteordevelopment.meteorclient.systems.modules.player.InstantRebreak;
 import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
 import meteordevelopment.meteorclient.utils.misc.MBlockPos;
 import meteordevelopment.meteorclient.utils.player.CustomPlayerInput;
@@ -239,20 +239,20 @@ public class HighwayBuilder extends Module {
         .build()
     );
 
-    private final Setting<Boolean> instamineEchests = sgInventory.add(new BoolSetting.Builder()
-        .name("instamine-echests")
-        .description("Whether or not to use the instamine exploit to break echests.")
+    private final Setting<Boolean> rebreakEchests = sgInventory.add(new BoolSetting.Builder()
+        .name("instantly-rebreak-echests")
+        .description("Whether or not to use the instant rebreak exploit to break echests.")
         .defaultValue(false)
         .visible(mineEnderChests::get)
         .build()
     );
 
-    private final Setting<Integer> instamineDelay = sgInventory.add(new IntSetting.Builder()
-        .name("instamine-delay")
-        .description("Delay between instamine attempts.")
+    private final Setting<Integer> rebreakTimer = sgInventory.add(new IntSetting.Builder()
+        .name("rebreak-delay")
+        .description("Delay between rebreak attempts.")
         .defaultValue(0)
         .sliderMax(20)
-        .visible(() -> mineEnderChests.get() && instamineEchests.get())
+        .visible(() -> mineEnderChests.get() && rebreakEchests.get())
         .build()
     );
 
@@ -371,7 +371,7 @@ public class HighwayBuilder extends Module {
         if (blocksPerTick.get() > 1 && rotation.get().mine) warning("With rotations enabled, you can break at most 1 block per tick.");
         if (placementsPerTick.get() > 1 && rotation.get().place) warning("With rotations enabled, you can place at most 1 block per tick.");
 
-        if (Modules.get().get(InstaMine.class).isActive()) warning("It's recommended to disable the InstaMine module and instead use 'instamine-echests' to avoid errors.");
+        if (Modules.get().get(InstantRebreak.class).isActive()) warning("It's recommended to disable the Instant Rebreak module and instead use the 'instantly-rebreak-echests' setting to avoid errors.");
     }
 
     @Override
@@ -758,7 +758,7 @@ public class HighwayBuilder extends Module {
             private int minimumObsidian;
             private boolean first, primed;
             private boolean stopTimerEnabled;
-            private int stopTimer, moveTimer, instamineTimer;
+            private int stopTimer, moveTimer, rebreakTimer;
 
             @Override
             protected void start(HighwayBuilder b) {
@@ -856,14 +856,14 @@ public class HighwayBuilder extends Module {
 
                     InvUtils.swap(slot, false);
 
-                    if (b.instamineEchests.get() && primed) {
-                        if (instamineTimer > 0) {
-                            instamineTimer--;
+                    if (b.rebreakEchests.get() && primed) {
+                        if (rebreakTimer > 0) {
+                            rebreakTimer--;
                             return;
                         }
 
                         PlayerActionC2SPacket p = new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, bp, BlockUtils.getDirection(bp));
-                        instamineTimer = b.instamineDelay.get();
+                        rebreakTimer = b.rebreakTimer.get();
 
                         if (b.rotation.get().mine) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> b.mc.getNetworkHandler().sendPacket(p));
                         else b.mc.getNetworkHandler().sendPacket(p);
