@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.prompts.YesNoPrompt;
@@ -42,9 +41,8 @@ public class ConfigTab extends Tab {
             settings.onActivated();
 
             onClosed(() -> {
-                String prefix = Config.get().prefix.get();
-
                 ChatUtils.changePrefixColor(Config.get().chatFeedbackPrefixColor.get().getPacked());
+                String prefix = Config.get().prefix.get();
 
                 if (prefix.isBlank()) {
                     YesNoPrompt.create(theme, this.parent)
