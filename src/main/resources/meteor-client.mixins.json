@@ -149,7 +149,7 @@
     "RegistriesMixin",
     "ReloadStateAccessor",
     "RenderLayersMixin",
-    "RenderTickCounterMixin",
+    "RenderTickCounterDynamicMixin",
     "ResourceReloadLoggerAccessor",
     "ScreenMixin",
     "SectionedEntityCacheAccessor",

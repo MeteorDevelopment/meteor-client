@@ -8,8 +8,8 @@ package meteordevelopment.meteorclient.utils.misc;
 import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.util.Identifier;
 
-public class MeteorIdentifier extends Identifier {
+public class MeteorIdentifier {
     public MeteorIdentifier(String path) {
-        super(MeteorClient.MOD_ID, path);
+        Identifier.of(MeteorClient.MOD_ID, path);
     }
 }

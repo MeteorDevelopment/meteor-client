@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
 import meteordevelopment.meteorclient.utils.notebot.NotebotUtils;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
-import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -89,7 +89,7 @@ public class SongDecoders {
             }
 
             if (notebot.mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
-                Instrument newInstrument = notebot.getMappedInstrument(note.getInstrument());
+                NoteBlockInstrument newInstrument = notebot.getMappedInstrument(note.getInstrument());
                 if (newInstrument != null) {
                     note.setInstrument(newInstrument);
                 }

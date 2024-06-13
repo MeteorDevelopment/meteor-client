@@ -71,7 +71,7 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            Enchantment enchantment = Registries.ENCHANTMENT.get(new Identifier(tagI.asString()));
+            Enchantment enchantment = Registries.ENCHANTMENT.get(Identifier.of(tagI.asString()));
             if (enchantment != null) get().add(enchantment);
         }
 

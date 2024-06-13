@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.renderer.GL;
 import net.minecraft.client.gl.VertexBuffer;
-import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BuiltBuffer;
 import net.minecraft.client.render.VertexFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,7 +22,7 @@ public abstract class VertexBufferMixin {
     @Shadow private int indexBufferId;
 
     @Inject(method = "uploadIndexBuffer", at = @At("RETURN"))
-    private void onConfigureIndexBuffer(BufferBuilder.DrawParameters parameters, ByteBuffer vertexBuffer, CallbackInfoReturnable<VertexFormat> info) {
+    private void onConfigureIndexBuffer(BuiltBuffer.DrawParameters parameters, ByteBuffer vertexBuffer, CallbackInfoReturnable<VertexFormat> info) {
         if (info.getReturnValue() == null) GL.CURRENT_IBO = this.indexBufferId;
         else GL.CURRENT_IBO = ((ShapeIndexBufferAccessor) info.getReturnValue()).getId();
     }

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class BlockListSettingScreen extends LeftRightListSettingScreen<Block> {
-    private static final Identifier ID = new Identifier("minecraft", "");
+    private static final Identifier ID = Identifier.of("minecraft", "");
 
     public BlockListSettingScreen(GuiTheme theme, Setting<List<Block>> setting) {
         super(theme, "Select Blocks", setting, setting.get(), Registries.BLOCK);

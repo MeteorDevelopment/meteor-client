@@ -46,7 +46,7 @@ public class ItemSetting extends Setting<Item> {
 
     @Override
     public Item load(NbtCompound tag) {
-        value = Registries.ITEM.get(new Identifier(tag.getString("value")));
+        value = Registries.ITEM.get(Identifier.of(tag.getString("value")));
 
         if (filter != null && !filter.test(value)) {
             for (Item item : Registries.ITEM) {
