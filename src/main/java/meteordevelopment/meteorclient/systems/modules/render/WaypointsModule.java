@@ -57,6 +57,15 @@ public class WaypointsModule extends Module {
         .build()
     );
 
+    private final Setting<Integer> waypointFadeDistance = sgGeneral.add(new IntSetting.Builder()
+        .name("waypoint-fade-distance")
+        .description("The distance to a waypoint at which it begins to start fading.")
+        .defaultValue(20)
+        .sliderRange(0, 100)
+        .min(0)
+        .build()
+    );
+
     private final Setting<Integer> maxDeathPositions = sgDeathPosition.add(new IntSetting.Builder()
         .name("max-death-positions")
         .description("The amount of death positions to save, 0 to disable")
@@ -103,8 +112,8 @@ public class WaypointsModule extends Module {
             double distToCenter = pos.distance(center);
             double a = 1;
 
-            if (dist < 20) {
-                a = (dist - 10) / 10;
+            if (dist < waypointFadeDistance.get()) {
+                a = (dist - (waypointFadeDistance.get() / 2d)) / (waypointFadeDistance.get() / 2d);
                 if (a < 0.01) continue;
             }
 
