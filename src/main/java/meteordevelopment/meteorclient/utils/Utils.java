@@ -154,7 +154,7 @@ public class Utils {
                 : itemStack.getEnchantments().getEnchantments();
 
             for (RegistryEntry<Enchantment> itemEnchantment : itemEnchantments) {
-                enchantments.put(itemEnchantment.value(), itemStack.getEnchantments().getLevel(itemEnchantment.value()));
+                enchantments.put(itemEnchantment.value(), itemStack.getEnchantments().getLevel(itemEnchantment));
             }
         }
     }
@@ -249,8 +249,8 @@ public class Utils {
             if (block instanceof ShulkerBoxBlock shulkerBlock) {
                 DyeColor dye = shulkerBlock.getColor();
                 if (dye == null) return WHITE;
-                final float[] colors = dye.getColorComponents();
-                return new Color(colors[0], colors[1], colors[2], 1f);
+                final int color = dye.getEntityColor();
+                return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 1f);
             }
         }
         return WHITE;
@@ -513,7 +513,7 @@ public class Utils {
         return item instanceof ExperienceBottleItem || item instanceof BowItem || item instanceof CrossbowItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem || item instanceof SplashPotionItem || item instanceof LingeringPotionItem || item instanceof FishingRodItem || item instanceof TridentItem;
     }
 
-    public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
+    public static void addEnchantment(ItemStack itemStack, RegistryEntry<Enchantment> enchantment, int level) {
         ItemEnchantmentsComponent.Builder b = new ItemEnchantmentsComponent.Builder(EnchantmentHelper.getEnchantments(itemStack));
         b.add(enchantment, level);
 

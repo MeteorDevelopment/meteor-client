@@ -92,7 +92,7 @@ public class EnchantCommand extends Command {
         ItemStack itemStack = tryGetItemStack();
 
         RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);
-        Utils.addEnchantment(itemStack, enchantment.value(), level.applyAsInt(enchantment.value()));
+        Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
 
         syncItem();
     }

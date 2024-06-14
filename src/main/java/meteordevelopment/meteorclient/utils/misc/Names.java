@@ -72,7 +72,7 @@ public class Names {
     }
 
     public static String get(Enchantment enchantment) {
-        return enchantmentNames.computeIfAbsent(enchantment, enchantment1 -> StringHelper.stripTextFormat(I18n.translate(enchantment1.getTranslationKey())));
+        return enchantmentNames.computeIfAbsent(enchantment, enchantment1 -> StringHelper.stripTextFormat(enchantment.description().getString()));
     }
 
     public static String get(EntityType<?> entityType) {

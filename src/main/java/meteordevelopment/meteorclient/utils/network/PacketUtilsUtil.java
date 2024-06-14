@@ -20,7 +20,7 @@ public class PacketUtilsUtil {
     private static final String packetRegistryClass = """
     private static class PacketRegistry extends SimpleRegistry<Class<? extends Packet<?>>> {
         public PacketRegistry() {
-            super(RegistryKey.ofRegistry(new MeteorIdentifier("packets")), Lifecycle.stable());
+            super(RegistryKey.ofRegistry(MeteorClient.identifier("packets")), Lifecycle.stable());
         }
 
         @Override
@@ -183,7 +183,7 @@ public class PacketUtilsUtil {
             //   Write imports
             writer.write("import com.mojang.datafixers.util.Pair;\n");
             writer.write("import com.mojang.serialization.Lifecycle;\n");
-            writer.write("import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;\n");
+            writer.write("import meteordevelopment.meteorclient.MeteorClient;\n");
             writer.write("import net.minecraft.network.packet.Packet;\n");
             writer.write("import net.minecraft.registry.Registry;\n");
             writer.write("import net.minecraft.registry.RegistryKey;\n");
