@@ -225,7 +225,7 @@ public class CombatHud extends HudElement {
                 (int) (y + (66 * scale.get())),
                 (int) (30 * scale.get()),
                 0,
-                -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.getYaw() - playerEntity.prevYaw) * mc.getTickDelta()),
+                -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.getYaw() - playerEntity.prevYaw) * mc.getRenderTickCounter().getTickDelta(true)),
                 -playerEntity.getPitch(),
                 playerEntity
             );

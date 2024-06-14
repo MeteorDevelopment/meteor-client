@@ -52,13 +52,13 @@ public abstract class ItemStackMixin {
         return (bt.isActive() && bt.canPlaceOn.get()) || original;
     }
 
-    @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;contains(Lnet/minecraft/component/DataComponentType;)Z", ordinal = 0))
+    @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;contains(Lnet/minecraft/component/ComponentType;)Z", ordinal = 0))
     private boolean modifyContainsTooltip(boolean original) {
         BetterTooltips bt = Modules.get().get(BetterTooltips.class);
         return !(bt.isActive() && bt.tooltip.get()) && original;
     }
 
-    @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;contains(Lnet/minecraft/component/DataComponentType;)Z", ordinal = 3))
+    @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;contains(Lnet/minecraft/component/ComponentType;)Z", ordinal = 3))
     private boolean modifyContainsAdditional(boolean original) {
         BetterTooltips bt = Modules.get().get(BetterTooltips.class);
         return !(bt.isActive() && bt.additional.get()) && original;

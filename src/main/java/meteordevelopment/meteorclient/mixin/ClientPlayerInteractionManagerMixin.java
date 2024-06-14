@@ -183,7 +183,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         if (BlockUtils.breaking) info.cancel();
     }
 
-    @ModifyArgs(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket$Full;<init>(DDDFFZ)V"))
+    @ModifyArgs(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;sendSequencedPacket(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V"))
     private void onInteractItem(Args args) {
         if (Rotations.rotating) {
             args.set(3, Rotations.serverYaw);

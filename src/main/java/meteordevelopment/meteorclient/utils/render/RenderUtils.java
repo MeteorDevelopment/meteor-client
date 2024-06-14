@@ -87,7 +87,7 @@ public class RenderUtils {
         Entity cameraEntity = MinecraftClient.getInstance().getCameraEntity();
 
         if (cameraEntity instanceof PlayerEntity playerEntity) {
-            float f = MinecraftClient.getInstance().getTickDelta();
+            float f = mc.getRenderTickCounter().getTickDelta(true);
             float g = playerEntity.horizontalSpeed - playerEntity.prevHorizontalSpeed;
             float h = -(playerEntity.horizontalSpeed + g * f);
             float i = MathHelper.lerp(f, playerEntity.prevStrideDistance, playerEntity.strideDistance);
