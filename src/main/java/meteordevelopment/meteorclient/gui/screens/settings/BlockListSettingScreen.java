@@ -19,7 +19,7 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class BlockListSettingScreen extends LeftRightListSettingScreen<Block> {
+public class BlockListSettingScreen extends RegistryListSettingScreen<Block> {
     private static final Identifier ID = Identifier.of("minecraft", "");
 
     public BlockListSettingScreen(GuiTheme theme, Setting<List<Block>> setting) {

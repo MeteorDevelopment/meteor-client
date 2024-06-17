@@ -7,10 +7,7 @@ package meteordevelopment.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.VertexSorter;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
@@ -20,6 +17,7 @@ import meteordevelopment.meteorclient.settings.StatusEffectAmplifierMapSetting;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
+import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.PeekScreen;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -46,6 +44,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.DyeColor;
@@ -145,28 +144,58 @@ public class Utils {
         return BlockEntityIterator::new;
     }
 
-    public static void getEnchantments(ItemStack itemStack, Object2IntMap<Enchantment> enchantments) {
+    public static void getEnchantments(ItemStack itemStack, Object2IntMap<RegistryEntry<Enchantment>> enchantments) {
         enchantments.clear();
 
         if (!itemStack.isEmpty()) {
-            Set<RegistryEntry<Enchantment>> itemEnchantments = itemStack.getItem() == Items.ENCHANTED_BOOK
-                ? itemStack.get(DataComponentTypes.STORED_ENCHANTMENTS).getEnchantments()
-                : itemStack.getEnchantments().getEnchantments();
+            Set<Object2IntMap.Entry<RegistryEntry<Enchantment>>> itemEnchantments = itemStack.getItem() == Items.ENCHANTED_BOOK
+                ? itemStack.get(DataComponentTypes.STORED_ENCHANTMENTS).getEnchantmentEntries()
+                : itemStack.getEnchantments().getEnchantmentEntries();
 
-            for (RegistryEntry<Enchantment> itemEnchantment : itemEnchantments) {
-                enchantments.put(itemEnchantment.value(), itemStack.getEnchantments().getLevel(itemEnchantment));
+            for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : itemEnchantments) {
+                enchantments.put(entry.getKey(), entry.getIntValue());
             }
         }
     }
 
-    public static boolean hasEnchantments(ItemStack itemStack, Enchantment... enchantments) {
-        if (itemStack.isEmpty()) return false;
-
-        Object2IntMap<Enchantment> itemEnchantments = new Object2IntArrayMap<>();
+    public static int getEnchantmentLevel(ItemStack itemStack, RegistryKey<Enchantment> enchantment) {
+        if (itemStack.isEmpty()) return 0;
+        Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
         getEnchantments(itemStack, itemEnchantments);
-        for (Enchantment enchantment : enchantments) if (!itemEnchantments.containsKey(enchantment)) return false;
+        return getEnchantmentLevel(itemEnchantments, enchantment);
+    }
 
+    public static int getEnchantmentLevel(Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments, RegistryKey<Enchantment> enchantment) {
+        for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : Object2IntMaps.fastIterable(itemEnchantments)) {
+            if (entry.getKey().matchesKey(enchantment)) return entry.getIntValue();
+        }
+        return 0;
+    }
+
+    @SafeVarargs
+    public static boolean hasEnchantments(ItemStack itemStack, RegistryKey<Enchantment>... enchantments) {
+        if (itemStack.isEmpty()) return false;
+        Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
+        getEnchantments(itemStack, itemEnchantments);
+
+        for (RegistryKey<Enchantment> enchantment : enchantments) {
+            if (!hasEnchantment(itemEnchantments, enchantment)) return false;
+        }
         return true;
+    }
+
+    public static boolean hasEnchantment(ItemStack itemStack, RegistryKey<Enchantment> enchantmentKey) {
+        if (itemStack.isEmpty()) return false;
+        Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
+        getEnchantments(itemStack, itemEnchantments);
+        return hasEnchantment(itemEnchantments, enchantmentKey);
+    }
+
+    private static boolean hasEnchantment(Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments, RegistryKey<Enchantment> enchantmentKey) {
+        for (RegistryEntry<Enchantment> enchantment : itemEnchantments.keySet()) {
+            if (enchantment.matchesKey(enchantmentKey)) return true;
+        }
+        return false;
     }
 
     public static int getRenderDistance() {
@@ -268,13 +297,8 @@ public class Utils {
         return new Reference2IntArrayMap<>(StatusEffectAmplifierMapSetting.EMPTY_STATUS_EFFECT_MAP);
     }
 
-    public static String getEnchantSimpleName(Enchantment enchantment, int length) {
-        String name;
-        if (enchantment.description().getContent() instanceof TranslatableTextContent content) {
-            name = content.getKey();
-        } else {
-            name = enchantment.description().getString();
-        }
+    public static String getEnchantSimpleName(RegistryEntry<Enchantment> enchantment, int length) {
+        String name = Names.get(enchantment);
         return name.length() > length ? name.substring(0, length) : name;
     }
 

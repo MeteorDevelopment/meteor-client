@@ -17,15 +17,11 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 
 import java.util.function.ToIntFunction;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EnchantCommand extends Command {
     private static final SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(Text.literal("You must be in creative mode to use this."));
@@ -100,11 +96,11 @@ public class EnchantCommand extends Command {
     private void all(boolean onlyPossible, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        for (Enchantment enchantment : Registries.ENCHANTMENT) {
-            if (!onlyPossible || enchantment.isAcceptableItem(itemStack)) {
-                Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment));
-            }
-        }
+        REGISTRY_ACCESS.getOptionalWrapper(RegistryKeys.ENCHANTMENT).ifPresent(registry -> {
+            registry.streamEntries().forEach(enchantment -> {
+                Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
+            });
+        });
 
         syncItem();
     }

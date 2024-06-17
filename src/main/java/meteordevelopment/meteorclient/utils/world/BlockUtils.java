@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.InstantRebreak;
 import meteordevelopment.meteorclient.utils.PreInit;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -374,7 +375,7 @@ public class BlockUtils {
         if (speed > 1) {
             ItemStack tool = mc.player.getInventory().getStack(slot);
 
-            int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, tool);
+            int efficiency = Utils.getEnchantmentLevel(tool, Enchantments.EFFICIENCY);
 
             if (efficiency > 0 && !tool.isEmpty()) speed += efficiency * efficiency + 1;
         }
@@ -394,7 +395,7 @@ public class BlockUtils {
             speed *= k;
         }
 
-        if (mc.player.isSubmergedIn(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(mc.player)) {
+        if (mc.player.isSubmergedIn(FluidTags.WATER) /*fixme && !EnchantmentHelper.hasAquaAffinity(mc.player)*/) {
             speed /= 5.0F;
         }
 

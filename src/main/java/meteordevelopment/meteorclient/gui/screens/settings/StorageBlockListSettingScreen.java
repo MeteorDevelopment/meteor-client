@@ -15,7 +15,7 @@ import net.minecraft.item.Items;
 
 import java.util.List;
 
-public class StorageBlockListSettingScreen extends LeftRightListSettingScreen<BlockEntityType<?>> {
+public class StorageBlockListSettingScreen extends RegistryListSettingScreen<BlockEntityType<?>> {
     public StorageBlockListSettingScreen(GuiTheme theme, Setting<List<BlockEntityType<?>>> setting) {
         super(theme, "Select Storage Blocks", setting, setting.get(), StorageBlockListSetting.REGISTRY);
     }

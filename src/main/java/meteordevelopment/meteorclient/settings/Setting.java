@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,6 +152,7 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return Objects.hash(name);
     }
 
+    @Nullable
     public static <T> T parseId(Registry<T> registry, String name) {
         name = name.trim();
 

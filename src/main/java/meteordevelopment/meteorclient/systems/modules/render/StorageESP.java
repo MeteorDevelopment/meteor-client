@@ -49,6 +49,7 @@ public class StorageESP extends Module {
         .build()
     );
 
+    //todo add decorated pot
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
         .name("storage-blocks")
         .description("Select the storage blocks to display.")

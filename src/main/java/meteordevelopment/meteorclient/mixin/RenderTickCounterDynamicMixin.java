@@ -20,8 +20,8 @@ public abstract class RenderTickCounterDynamicMixin {
     @Shadow
     private float lastFrameDuration;
 
-    @Inject(method = "beginRenderTick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/RenderTickCounter$Dynamic;prevTimeMillis:J", opcode = Opcodes.PUTFIELD))
+    @Inject(method = "beginRenderTick(J)I", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/RenderTickCounter$Dynamic;prevTimeMillis:J", opcode = Opcodes.PUTFIELD))
     private void onBeingRenderTick(long a, CallbackInfoReturnable<Integer> info) {
-        lastFrameDuration *= Modules.get().get(Timer.class).getMultiplier();
+        lastFrameDuration *= (float) Modules.get().get(Timer.class).getMultiplier();
     }
 }

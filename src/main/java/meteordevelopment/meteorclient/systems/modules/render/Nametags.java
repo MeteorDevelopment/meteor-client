@@ -5,6 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -33,7 +36,9 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
@@ -182,7 +187,7 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Setting<List<Enchantment>> shownEnchantments = sgPlayers.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<RegistryKey<Enchantment>>> shownEnchantments = sgPlayers.add(new EnchantmentListSetting.Builder()
         .name("shown-enchantments")
         .description("The enchantments that are shown on nametags.")
         .visible(() -> displayItems.get() && displayEnchants.get())
@@ -485,8 +490,8 @@ public class Nametags extends Module {
 
                     int size = 0;
                     for (RegistryEntry<Enchantment> enchantment : enchantments.getEnchantments()) {
-                        if (!shownEnchantments.get().contains(enchantment.value())) continue;
-                        String enchantName = Utils.getEnchantSimpleName(enchantment.value(), enchantLength.get()) + " " + enchantments.getLevel(enchantment.value());
+                        if (enchantment.getKey().isPresent() && !shownEnchantments.get().contains(enchantment.getKey().get())) continue;
+                        String enchantName = Utils.getEnchantSimpleName(enchantment, enchantLength.get()) + " " + enchantments.getLevel(enchantment);
                         itemWidths[i] = Math.max(itemWidths[i], (text.getWidth(enchantName, shadow) / 2));
                         size++;
                     }
@@ -527,11 +532,11 @@ public class Nametags extends Module {
                     text.begin(0.5 * enchantTextScale.get(), false, true);
 
                     ItemEnchantmentsComponent enchantments = EnchantmentHelper.getEnchantments(stack);
-                    Map<Enchantment, Integer> enchantmentsToShow = new HashMap<>();
+                    Object2IntMap<RegistryEntry<Enchantment>> enchantmentsToShow = new Object2IntOpenHashMap<>();
 
                     for (RegistryEntry<Enchantment> enchantment : enchantments.getEnchantments()) {
-                        if (shownEnchantments.get().contains(enchantment.value())) {
-                            enchantmentsToShow.put(enchantment.value(), enchantments.getLevel(enchantment.value()));
+                        if (enchantment.matches(shownEnchantments.get()::contains)) {
+                            enchantmentsToShow.put(enchantment, enchantments.getLevel(enchantment));
                         }
                     }
 
@@ -545,11 +550,11 @@ public class Nametags extends Module {
 
                     double enchantX;
 
-                    for (Enchantment enchantment : enchantmentsToShow.keySet()) {
-                        String enchantName = Utils.getEnchantSimpleName(enchantment, enchantLength.get()) + " " + enchantmentsToShow.get(enchantment);
+                    for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : Object2IntMaps.fastIterable(enchantmentsToShow)) {
+                        String enchantName = Utils.getEnchantSimpleName(entry.getKey(), enchantLength.get()) + " " + entry.getIntValue();
 
                         Color enchantColor = WHITE;
-                        if (enchantment.isCursed()) enchantColor = RED;
+                        if (entry.getKey().isIn(EnchantmentTags.CURSE)) enchantColor = RED;
 
                         enchantX = switch (enchantPos.get()) {
                             case Above -> x + (aW / 2) - (text.getWidth(enchantName, shadow) / 2);
