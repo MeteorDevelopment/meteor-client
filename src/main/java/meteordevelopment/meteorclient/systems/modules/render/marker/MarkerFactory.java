@@ -22,6 +22,7 @@ public class MarkerFactory {
         factories = new HashMap<>();
         factories.put(CuboidMarker.type, CuboidMarker::new);
         factories.put(Sphere2dMarker.type, Sphere2dMarker::new);
+        factories.put(Sphere3dMarker.type, Sphere3dMarker::new);
 
         names = new String[factories.size()];
         int i = 0;
