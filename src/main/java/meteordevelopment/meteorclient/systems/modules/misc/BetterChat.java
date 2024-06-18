@@ -23,7 +23,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
-import meteordevelopment.meteorclient.utils.misc.text.TextVisitor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
@@ -222,7 +221,7 @@ public class BetterChat extends Module {
     );
 
     private static final Pattern antiSpamRegex = Pattern.compile(" \\(([0-9]+)\\)$");
-    private static final Pattern antiClearRegex = Pattern.compile("\\\\n(\\\\n|\\s)+\\\\n");
+    private static final Pattern antiClearRegex = Pattern.compile("\\\\n(\\\\n|\\s)*\\\\n");
     private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
     private static final Pattern usernameRegex = Pattern.compile("^(?:<[0-9]{2}:[0-9]{2}>\\s)?<(.*?)>.*");
 
@@ -240,10 +239,10 @@ public class BetterChat extends Module {
     }
 
     @EventHandler
-        private void onMessageReceive(ReceiveMessageEvent event) {
-            Text message = event.getMessage();
+    private void onMessageReceive(ReceiveMessageEvent event) {
+        Text message = event.getMessage();
 
-            if (filterRegex.get()) {
+        if (filterRegex.get()) {
             String messageString = message.getString();
             for (Pattern pattern : filterRegexList) {
                 if (pattern.matcher(messageString).find()) {
@@ -254,22 +253,13 @@ public class BetterChat extends Module {
         }
 
         if (antiClear.get()) {
-            String messageString = message.getString();
-            if (antiClearRegex.matcher(messageString).matches()) {
-                MutableText newMessage = Text.empty();
-                TextVisitor.visit(message, (text, style, string) -> {
-                    Matcher antiClearMatcher = antiClearRegex.matcher(string);
-                    if (antiClearMatcher.matches()) {
-                        // assume literal text content
-                        newMessage.append(Text.literal(antiClearMatcher.replaceAll("\n\n")).setStyle(style));
-                    } else {
-                        newMessage.append(text.copyContentOnly().setStyle(style));
-                    }
+            // more than two \n behind each other will be reduced to only two \n
+            String jsonString = Text.Serialization.toJsonString(message, mc.player.getRegistryManager());
 
-                    return Optional.empty();
-                }, Style.EMPTY);
-                message = newMessage;
-            }
+            Matcher antiClearMatcher = antiClearRegex.matcher(jsonString);
+            String replacedString = antiClearMatcher.replaceAll("\n\n");
+
+            message = Text.Serialization.fromJson(replacedString, mc.player.getRegistryManager());
         }
 
         if (antiSpam.get()) {
