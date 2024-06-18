@@ -51,9 +51,9 @@ public abstract class CameraMixin implements ICamera {
     }
 
     @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
-    private void onClipToSpace(float desiredCameraDistance, CallbackInfoReturnable<Double> info) {
+    private void onClipToSpace(float desiredCameraDistance, CallbackInfoReturnable<Float> info) {
         if (Modules.get().get(CameraTweaks.class).clip()) {
-            info.setReturnValue((double) desiredCameraDistance);
+            info.setReturnValue(desiredCameraDistance);
         }
     }
 

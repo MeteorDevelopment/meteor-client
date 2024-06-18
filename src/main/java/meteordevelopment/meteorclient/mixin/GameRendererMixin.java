@@ -71,12 +71,10 @@ public abstract class GameRendererMixin {
     @Unique
     private final MatrixStack matrices = new MatrixStack();
 
-    // FIXME: unsure
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 1) Matrix4f matrix4f2, @Local(ordinal = 1) float tickDelta) {
+    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 1) Matrix4f matrix4f2, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
         if (!Utils.canUpdate()) return;
 
-        MatrixStack matrixStack = new MatrixStack();
         client.getProfiler().push(MeteorClient.MOD_ID + "_render");
 
         // Create renderer and event
