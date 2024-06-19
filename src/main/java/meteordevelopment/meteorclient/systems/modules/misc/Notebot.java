@@ -36,7 +36,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.enums.Instrument;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.sound.SoundEvents;
@@ -780,9 +779,7 @@ public class Notebot extends Module {
                     if (blockState.getBlock() != Blocks.NOTE_BLOCK) continue;
 
                     // Copied from ServerPlayNetworkHandler#onPlayerInteractBlock
-                    Vec3d vec3d2 = Vec3d.ofCenter(pos);
-                    double sqDist = mc.player.getEyePos().squaredDistanceTo(vec3d2);
-                    if (sqDist > mc.player.getAttributeValue(EntityAttributes.PLAYER_BLOCK_INTERACTION_RANGE)) continue;
+                    if (!mc.player.canInteractWithBlockAt(pos, 1)) continue;
 
                     if (!isValidScanSpot(pos)) continue;
 
@@ -790,7 +787,6 @@ public class Notebot extends Module {
                     scannedNoteblocks.put(note, pos);
                 }
             }
-
         }
     }
 
