@@ -34,7 +34,6 @@ public class Sphere3dMarker extends BaseMarker {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
-    private final SettingGroup sgKeybinding = settings.createGroup("Keybinding");
 
     private final Setting<BlockPos> center = sgGeneral.add(new BlockPosSetting.Builder()
         .name("center")
