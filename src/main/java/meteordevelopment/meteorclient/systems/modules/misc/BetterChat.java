@@ -262,7 +262,7 @@ public class BetterChat extends Module {
                 MutableText newMessage = Text.empty();
                 TextVisitor.visit(message, (text, style, string) -> {
                     Matcher antiClearMatcher = antiClearRegex.matcher(string);
-                    if (antiClearMatcher.matches()) {
+                    if (antiClearMatcher.find()) {
                         // assume literal text content
                         newMessage.append(Text.literal(antiClearMatcher.replaceAll("\n\n")).setStyle(style));
                     } else {
