@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.misc.text;
 
+import net.minecraft.text.PlainTextContent;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
@@ -27,18 +29,21 @@ public interface TextVisitor<T> {
     }
 
     /**
-     * Collapses the tree of {@link Text} siblings into a one dimensional LIFO {@link Queue}
+     * Collapses the tree of {@link Text} siblings into a one dimensional FIFO {@link Queue}. To match the behaviours of
+     * the {@link Text#visit(StringVisitable.Visitor)} and {@link Text#visit(StringVisitable.StyledVisitor, Style)}
+     * methods, texts with empty contents (created from {@link Text#empty()}) are ignored but their siblings are still
+     * processed.
      * @param text the text
      * @return the text and its siblings in the order they appear when rendered.
      */
-    static Queue<Text> collectSiblings(Text text) {
-        Queue<Text> queue = new ArrayDeque<>();
+    static ArrayDeque<Text> collectSiblings(Text text) {
+        ArrayDeque<Text> queue = new ArrayDeque<>();
         collectSiblings(text, queue);
         return queue;
     }
 
     private static void collectSiblings(Text text, Queue<Text> queue) {
-        queue.add(text);
+        if (!(text.getContent() instanceof PlainTextContent ptc) || !ptc.string().isEmpty()) queue.add(text);
         for (Text sibling : text.getSiblings()) {
             collectSiblings(sibling, queue);
         }
