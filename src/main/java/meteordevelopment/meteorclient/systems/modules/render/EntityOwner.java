@@ -6,10 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
-import meteordevelopment.meteorclient.mixin.ProjectileEntityAccessor;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
-import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -22,10 +20,8 @@ import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
 import org.joml.Vector3d;
 
 import java.util.HashMap;
@@ -43,13 +39,6 @@ public class EntityOwner extends Module {
         .description("The scale of the text.")
         .defaultValue(1)
         .min(0)
-        .build()
-    );
-
-    private final Setting<Boolean> projectiles = sgGeneral.add(new BoolSetting.Builder()
-        .name("projectiles")
-        .description("Display owner names of projectiles.")
-        .defaultValue(false)
         .build()
     );
 
@@ -71,8 +60,6 @@ public class EntityOwner extends Module {
             UUID ownerUuid;
 
             if (entity instanceof TameableEntity tameable) ownerUuid = tameable.getOwnerUuid();
-            else if (entity instanceof AbstractHorseEntity horse) ownerUuid = horse.getOwnerUuid();
-            else if (entity instanceof ProjectileEntity && projectiles.get()) ownerUuid = ((ProjectileEntityAccessor) entity).getOwnerUuid();
             else continue;
 
             if (ownerUuid != null) {
@@ -116,7 +103,7 @@ public class EntityOwner extends Module {
         String name = uuidToName.get(uuid);
         if (name != null) return name;
 
-        // Makes a HTTP request to Mojang API
+        // Makes an HTTP request to Mojang API
         MeteorExecutor.execute(() -> {
             if (isActive()) {
                 ProfileResponse res = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString().replace("-", "")).sendJson(ProfileResponse.class);

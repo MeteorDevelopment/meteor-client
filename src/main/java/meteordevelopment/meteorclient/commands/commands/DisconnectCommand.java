@@ -13,9 +13,6 @@ import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class DisconnectCommand extends Command {
     public DisconnectCommand() {
         super("disconnect", "Disconnect from the server", "dc");

@@ -33,8 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 public class NotebotCommand extends Command {
     private final static SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(Text.literal("Invalid song."));
     private final static DynamicCommandExceptionType INVALID_PATH = new DynamicCommandExceptionType(object -> Text.literal("'%s' is not a valid path.".formatted(object)));
