@@ -19,9 +19,6 @@ import net.minecraft.command.argument.Vec3ArgumentType;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class WaypointCommand extends Command {
     public WaypointCommand() {
         super("waypoint", "Manages waypoints.", "wp");

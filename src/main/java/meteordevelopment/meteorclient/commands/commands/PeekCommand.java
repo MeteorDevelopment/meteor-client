@@ -13,9 +13,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class PeekCommand extends Command {
     private static final ItemStack[] ITEMS = new ItemStack[27];
     private static final SimpleCommandExceptionType NOT_HOLDING_SHULKER_BOX = new SimpleCommandExceptionType(Text.literal("You must be holding a storage block with items in it."));
