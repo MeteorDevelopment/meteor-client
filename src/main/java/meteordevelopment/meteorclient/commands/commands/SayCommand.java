@@ -21,9 +21,6 @@ import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 
 import java.time.Instant;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class SayCommand extends Command {
     public SayCommand() {
         super("say", "Sends messages in chat.");

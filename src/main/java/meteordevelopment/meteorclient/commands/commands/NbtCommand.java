@@ -34,9 +34,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class NbtCommand extends Command {
     private static final DynamicCommandExceptionType MALFORMED_ITEM_EXCEPTION = new DynamicCommandExceptionType(
         error -> Text.stringifiedTranslatable("arguments.item.malformed", error)

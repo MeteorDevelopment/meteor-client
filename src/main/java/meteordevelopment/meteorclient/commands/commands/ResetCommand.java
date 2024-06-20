@@ -17,8 +17,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 public class ResetCommand extends Command {
 
     public ResetCommand() {

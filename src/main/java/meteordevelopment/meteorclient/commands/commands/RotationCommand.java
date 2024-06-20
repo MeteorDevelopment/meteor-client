@@ -13,9 +13,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class RotationCommand extends Command {
     public RotationCommand() {
         super("rotation", "Modifies your rotation.");

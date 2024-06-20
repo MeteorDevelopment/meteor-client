@@ -15,8 +15,6 @@ import net.minecraft.command.CommandSource;
 
 import java.util.ArrayList;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 public class ToggleCommand extends Command {
     public ToggleCommand() {
         super("toggle", "Toggles a module.", "t");

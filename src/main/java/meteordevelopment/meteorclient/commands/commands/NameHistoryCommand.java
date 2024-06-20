@@ -24,9 +24,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class NameHistoryCommand extends Command {
     public NameHistoryCommand() {
         super("name-history", "Provides a list of a players previous names from the laby.net api.", "history", "names");
