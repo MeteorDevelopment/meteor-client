@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
 package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
