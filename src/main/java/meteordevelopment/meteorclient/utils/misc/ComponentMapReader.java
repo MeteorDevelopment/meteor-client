@@ -18,7 +18,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.component.ComponentMap;
-import net.minecraft.component.DataComponentType;
+import net.minecraft.component.ComponentType;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringNbtReader;
@@ -88,11 +88,11 @@ public class ComponentMapReader {
 
             reader.expect('[');
             suggestor = this::suggestComponentType;
-            Set<DataComponentType<?>> set = new ReferenceArraySet<>();
+            Set<ComponentType<?>> set = new ReferenceArraySet<>();
 
             while(reader.canRead() && reader.peek() != ']') {
                 reader.skipWhitespace();
-                DataComponentType<?> dataComponentType = readComponentType(reader);
+                ComponentType<?> dataComponentType = readComponentType(reader);
                 if (!set.add(dataComponentType)) {
                     throw REPEATED_COMPONENT_EXCEPTION.create(dataComponentType);
                 }
@@ -123,13 +123,13 @@ public class ComponentMapReader {
             return builder.build();
         }
 
-        public static DataComponentType<?> readComponentType(StringReader reader) throws CommandSyntaxException {
+        public static ComponentType<?> readComponentType(StringReader reader) throws CommandSyntaxException {
             if (!reader.canRead()) {
                 throw COMPONENT_EXPECTED_EXCEPTION.createWithContext(reader);
             } else {
                 int i = reader.getCursor();
                 Identifier identifier = Identifier.fromCommandInput(reader);
-                DataComponentType<?> dataComponentType = Registries.DATA_COMPONENT_TYPE.get(identifier);
+                ComponentType<?> dataComponentType = Registries.DATA_COMPONENT_TYPE.get(identifier);
                 if (dataComponentType != null && !dataComponentType.shouldSkipSerialization()) {
                     return dataComponentType;
                 } else {
@@ -142,7 +142,7 @@ public class ComponentMapReader {
         private CompletableFuture<Suggestions> suggestComponentType(SuggestionsBuilder builder) {
             String string = builder.getRemaining().toLowerCase(Locale.ROOT);
             CommandSource.forEachMatching(Registries.DATA_COMPONENT_TYPE.getEntrySet(), string, entry -> entry.getKey().getValue(), entry -> {
-                DataComponentType<?> dataComponentType = entry.getValue();
+                ComponentType<?> dataComponentType = entry.getValue();
                 if (dataComponentType.getCodec() != null) {
                     Identifier identifier = entry.getKey().getValue();
                     builder.suggest(identifier.toString() + "=");
@@ -151,7 +151,7 @@ public class ComponentMapReader {
             return builder.buildFuture();
         }
 
-        private <T> void readComponentValue(StringReader reader, ComponentMap.Builder builder, DataComponentType<T> type) throws CommandSyntaxException {
+        private <T> void readComponentValue(StringReader reader, ComponentMap.Builder builder, ComponentType<T> type) throws CommandSyntaxException {
             int i = reader.getCursor();
             NbtElement nbtElement = new StringNbtReader(reader).parseElement();
             DataResult<T> dataResult = type.getCodecOrThrow().parse(this.nbtOps, nbtElement);
