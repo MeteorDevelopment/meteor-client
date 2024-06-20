@@ -26,12 +26,12 @@ import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Unit;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -129,8 +129,21 @@ public class NbtCommand extends Command {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack != ItemStack.EMPTY) {
                 ComponentMap components = stack.getComponents();
-                return CommandSource.suggestMatching(components.getTypes().stream().map(Registries.DATA_COMPONENT_TYPE::getEntry).map(RegistryEntry::getIdAsString), suggestionsBuilder);
+                String remaining = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
+
+                CommandSource.forEachMatching(components.getTypes().stream().map(Registries.DATA_COMPONENT_TYPE::getEntry).toList(), remaining, entry -> {
+                    if (entry.getKey().isPresent()) return entry.getKey().get().getValue();
+                    return null;
+                }, entry -> {
+                    DataComponentType<?> dataComponentType = entry.value();
+                    if (dataComponentType.getCodec() != null) {
+                        if (entry.getKey().isPresent()) {
+                            suggestionsBuilder.suggest(entry.getKey().get().getValue().toString());
+                        }
+                    }
+                });
             }
+
             return suggestionsBuilder.buildFuture();
         })));
 
