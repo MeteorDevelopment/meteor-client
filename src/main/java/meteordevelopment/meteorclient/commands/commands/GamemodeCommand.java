@@ -10,9 +10,6 @@ import meteordevelopment.meteorclient.commands.Command;
 import net.minecraft.command.CommandSource;
 import net.minecraft.world.GameMode;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class GamemodeCommand extends Command {
     public GamemodeCommand() {
         super("gamemode", "Changes your gamemode client-side.", "gm");
