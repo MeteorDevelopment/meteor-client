@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.player.AutoEat;
 import meteordevelopment.meteorclient.systems.modules.player.AutoGap;
 import meteordevelopment.meteorclient.systems.modules.player.AutoTool;
 import meteordevelopment.meteorclient.systems.modules.player.InstantRebreak;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
 import meteordevelopment.meteorclient.utils.misc.MBlockPos;
 import meteordevelopment.meteorclient.utils.player.CustomPlayerInput;
@@ -33,7 +34,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.input.Input;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
@@ -1065,7 +1065,7 @@ public class HighwayBuilder extends Module {
 
             for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
                 double score = AutoTool.getScore(b.mc.player.getInventory().getStack(i), blockState, false, false, AutoTool.EnchantPreference.None, itemStack -> {
-                    if (noSilkTouch && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) != 0) return false;
+                    if (noSilkTouch && Utils.hasEnchantment(itemStack, Enchantments.SILK_TOUCH)) return false;
                     return !b.dontBreakTools.get() || itemStack.getMaxDamage() - itemStack.getDamage() > 1;
                 });
 

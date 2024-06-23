@@ -25,7 +25,7 @@ import org.lwjgl.glfw.GLFW;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PeekScreen extends ShulkerBoxScreen {
-    private final Identifier TEXTURE = new Identifier("textures/gui/container/shulker_box.png");
+    private final Identifier TEXTURE = Identifier.of("textures/gui/container/shulker_box.png");
     private final ItemStack[] contents;
     private final ItemStack storageBlock;
 

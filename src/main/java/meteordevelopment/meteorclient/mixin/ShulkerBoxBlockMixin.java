@@ -8,9 +8,10 @@ package meteordevelopment.meteorclient.mixin;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.client.item.TooltipType;
+
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

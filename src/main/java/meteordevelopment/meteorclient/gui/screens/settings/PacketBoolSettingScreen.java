@@ -15,7 +15,7 @@ import net.minecraft.network.packet.Packet;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class PacketBoolSettingScreen extends LeftRightListSettingScreen<Class<? extends Packet<?>>> {
+public class PacketBoolSettingScreen extends RegistryListSettingScreen<Class<? extends Packet<?>>> {
     public PacketBoolSettingScreen(GuiTheme theme, Setting<Set<Class<? extends Packet<?>>>> setting) {
         super(theme, "Select Packets", setting, setting.get(), PacketUtils.REGISTRY);
     }

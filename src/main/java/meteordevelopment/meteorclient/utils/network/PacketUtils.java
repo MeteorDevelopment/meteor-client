@@ -7,7 +7,9 @@ package meteordevelopment.meteorclient.utils.network;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -24,11 +26,11 @@ import java.util.stream.Stream;
 public class PacketUtils {
     public static final Registry<Class<? extends Packet<?>>> REGISTRY = new PacketRegistry();
 
-    private static final Map<Class<? extends Packet<?>>, String> S2C_PACKETS = new HashMap<>();
-    private static final Map<Class<? extends Packet<?>>, String> C2S_PACKETS = new HashMap<>();
+    private static final Map<Class<? extends Packet<?>>, String> S2C_PACKETS = new Reference2ObjectOpenHashMap<>();
+    private static final Map<Class<? extends Packet<?>>, String> C2S_PACKETS = new Reference2ObjectOpenHashMap<>();
 
-    private static final Map<String, Class<? extends Packet<?>>> S2C_PACKETS_R = new HashMap<>();
-    private static final Map<String, Class<? extends Packet<?>>> C2S_PACKETS_R = new HashMap<>();
+    private static final Map<String, Class<? extends Packet<?>>> S2C_PACKETS_R = new Object2ReferenceOpenHashMap<>();
+    private static final Map<String, Class<? extends Packet<?>>> C2S_PACKETS_R = new Object2ReferenceOpenHashMap<>();
 
     static {
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket.class, "ClientStatusC2SPacket");
@@ -37,10 +39,10 @@ public class PacketUtils {
         C2S_PACKETS_R.put("PlayerInteractItemC2SPacket", net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.login.EnterConfigurationC2SPacket.class, "EnterConfigurationC2SPacket");
         C2S_PACKETS_R.put("EnterConfigurationC2SPacket", net.minecraft.network.packet.c2s.login.EnterConfigurationC2SPacket.class);
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class, "SelectMerchantTradeC2SPacket");
-        C2S_PACKETS_R.put("SelectMerchantTradeC2SPacket", net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.class, "PlayerActionC2SPacket");
         C2S_PACKETS_R.put("PlayerActionC2SPacket", net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class, "SelectMerchantTradeC2SPacket");
+        C2S_PACKETS_R.put("SelectMerchantTradeC2SPacket", net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket.class, "CommandExecutionC2SPacket");
         C2S_PACKETS_R.put("CommandExecutionC2SPacket", net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.RenameItemC2SPacket.class, "RenameItemC2SPacket");
@@ -246,10 +248,10 @@ public class PacketUtils {
         S2C_PACKETS_R.put("CooldownUpdateS2CPacket", net.minecraft.network.packet.s2c.play.CooldownUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket.class, "OpenScreenS2CPacket");
         S2C_PACKETS_R.put("OpenScreenS2CPacket", net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket.class, "EntityAnimationS2CPacket");
-        S2C_PACKETS_R.put("EntityAnimationS2CPacket", net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket.class, "ExperienceOrbSpawnS2CPacket");
         S2C_PACKETS_R.put("ExperienceOrbSpawnS2CPacket", net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket.class, "EntityAnimationS2CPacket");
+        S2C_PACKETS_R.put("EntityAnimationS2CPacket", net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerAbilitiesS2CPacket.class, "PlayerAbilitiesS2CPacket");
         S2C_PACKETS_R.put("PlayerAbilitiesS2CPacket", net.minecraft.network.packet.s2c.play.PlayerAbilitiesS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.config.ResetChatS2CPacket.class, "ResetChatS2CPacket");
@@ -260,8 +262,6 @@ public class PacketUtils {
         S2C_PACKETS_R.put("EntitiesDestroyS2CPacket", net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket.class, "PlayerRemoveS2CPacket");
         S2C_PACKETS_R.put("PlayerRemoveS2CPacket", net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.UnlockRecipesS2CPacket.class, "UnlockRecipesS2CPacket");
-        S2C_PACKETS_R.put("UnlockRecipesS2CPacket", net.minecraft.network.packet.s2c.play.UnlockRecipesS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.LightUpdateS2CPacket.class, "LightUpdateS2CPacket");
         S2C_PACKETS_R.put("LightUpdateS2CPacket", net.minecraft.network.packet.s2c.play.LightUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.OverlayMessageS2CPacket.class, "OverlayMessageS2CPacket");
@@ -296,14 +296,16 @@ public class PacketUtils {
         S2C_PACKETS_R.put("DeathMessageS2CPacket", net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.MapUpdateS2CPacket.class, "MapUpdateS2CPacket");
         S2C_PACKETS_R.put("MapUpdateS2CPacket", net.minecraft.network.packet.s2c.play.MapUpdateS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket.class, "BlockEntityUpdateS2CPacket");
-        S2C_PACKETS_R.put("BlockEntityUpdateS2CPacket", net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket.class, "ScreenHandlerSlotUpdateS2CPacket");
         S2C_PACKETS_R.put("ScreenHandlerSlotUpdateS2CPacket", net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket.class, "BlockEntityUpdateS2CPacket");
+        S2C_PACKETS_R.put("BlockEntityUpdateS2CPacket", net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket.class, "PlayerSpawnPositionS2CPacket");
         S2C_PACKETS_R.put("PlayerSpawnPositionS2CPacket", net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket.class, "EntityStatusEffectS2CPacket");
         S2C_PACKETS_R.put("EntityStatusEffectS2CPacket", net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.CustomReportDetailsS2CPacket.class, "CustomReportDetailsS2CPacket");
+        S2C_PACKETS_R.put("CustomReportDetailsS2CPacket", net.minecraft.network.packet.s2c.common.CustomReportDetailsS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ClearTitleS2CPacket.class, "ClearTitleS2CPacket");
         S2C_PACKETS_R.put("ClearTitleS2CPacket", net.minecraft.network.packet.s2c.play.ClearTitleS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.login.LoginCompressionS2CPacket.class, "LoginCompressionS2CPacket");
@@ -334,10 +336,14 @@ public class PacketUtils {
         S2C_PACKETS_R.put("EntityDamageS2CPacket", net.minecraft.network.packet.s2c.play.EntityDamageS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket.class, "ChatMessageS2CPacket");
         S2C_PACKETS_R.put("ChatMessageS2CPacket", net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.ServerLinksS2CPacket.class, "ServerLinksS2CPacket");
+        S2C_PACKETS_R.put("ServerLinksS2CPacket", net.minecraft.network.packet.s2c.common.ServerLinksS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.KeepAliveS2CPacket.class, "KeepAliveS2CPacket");
         S2C_PACKETS_R.put("KeepAliveS2CPacket", net.minecraft.network.packet.s2c.common.KeepAliveS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.OpenWrittenBookS2CPacket.class, "OpenWrittenBookS2CPacket");
         S2C_PACKETS_R.put("OpenWrittenBookS2CPacket", net.minecraft.network.packet.s2c.play.OpenWrittenBookS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChangeUnlockedRecipesS2CPacket.class, "ChangeUnlockedRecipesS2CPacket");
+        S2C_PACKETS_R.put("ChangeUnlockedRecipesS2CPacket", net.minecraft.network.packet.s2c.play.ChangeUnlockedRecipesS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.ResourcePackRemoveS2CPacket.class, "ResourcePackRemoveS2CPacket");
         S2C_PACKETS_R.put("ResourcePackRemoveS2CPacket", net.minecraft.network.packet.s2c.common.ResourcePackRemoveS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket.class, "PlaySoundFromEntityS2CPacket");
@@ -463,7 +469,7 @@ public class PacketUtils {
 
     private static class PacketRegistry extends SimpleRegistry<Class<? extends Packet<?>>> {
         public PacketRegistry() {
-            super(RegistryKey.ofRegistry(new MeteorIdentifier("packets")), Lifecycle.stable());
+            super(RegistryKey.ofRegistry(MeteorClient.identifier("packets")), Lifecycle.stable());
         }
 
         @Override

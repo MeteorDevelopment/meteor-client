@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvent;
@@ -168,7 +168,7 @@ public class NotebotCommand extends Command {
                 List<Note> notes = entry.getValue();
 
                 for (var note : notes) {
-                    Instrument instrument = note.getInstrument();
+                    NoteBlockInstrument instrument = note.getInstrument();
                     int noteLevel = note.getNoteLevel();
 
                     file.write(String.format("%d:%d:%d\n", tick, noteLevel, instrument.ordinal()));
@@ -202,7 +202,7 @@ public class NotebotCommand extends Command {
             return null;
         }
 
-        Instrument instrument = getInstrumentFromSound(soundPacket.getSound().value());
+        NoteBlockInstrument instrument = getInstrumentFromSound(soundPacket.getSound().value());
         if (instrument == null) {
             error("Can't find the instrument from sound! Sound: " + soundPacket.getSound().value());
             return null;
@@ -211,40 +211,40 @@ public class NotebotCommand extends Command {
         return new Note(instrument, noteLevel);
     }
 
-    private Instrument getInstrumentFromSound(SoundEvent sound) {
+    private NoteBlockInstrument getInstrumentFromSound(SoundEvent sound) {
         String path = sound.getId().getPath();
         if (path.contains("harp"))
-            return Instrument.HARP;
+            return NoteBlockInstrument.HARP;
         else if (path.contains("basedrum"))
-            return Instrument.BASEDRUM;
+            return NoteBlockInstrument.BASEDRUM;
         else if (path.contains("snare"))
-            return Instrument.SNARE;
+            return NoteBlockInstrument.SNARE;
         else if (path.contains("hat"))
-            return Instrument.HAT;
+            return NoteBlockInstrument.HAT;
         else if (path.contains("bass"))
-            return Instrument.BASS;
+            return NoteBlockInstrument.BASS;
         else if (path.contains("flute"))
-            return Instrument.FLUTE;
+            return NoteBlockInstrument.FLUTE;
         else if (path.contains("bell"))
-            return Instrument.BELL;
+            return NoteBlockInstrument.BELL;
         else if (path.contains("guitar"))
-            return Instrument.GUITAR;
+            return NoteBlockInstrument.GUITAR;
         else if (path.contains("chime"))
-            return Instrument.CHIME;
+            return NoteBlockInstrument.CHIME;
         else if (path.contains("xylophone"))
-            return Instrument.XYLOPHONE;
+            return NoteBlockInstrument.XYLOPHONE;
         else if (path.contains("iron_xylophone"))
-            return Instrument.IRON_XYLOPHONE;
+            return NoteBlockInstrument.IRON_XYLOPHONE;
         else if (path.contains("cow_bell"))
-            return Instrument.COW_BELL;
+            return NoteBlockInstrument.COW_BELL;
         else if (path.contains("didgeridoo"))
-            return Instrument.DIDGERIDOO;
+            return NoteBlockInstrument.DIDGERIDOO;
         else if (path.contains("bit"))
-            return Instrument.BIT;
+            return NoteBlockInstrument.BIT;
         else if (path.contains("banjo"))
-            return Instrument.BANJO;
+            return NoteBlockInstrument.BANJO;
         else if (path.contains("pling"))
-            return Instrument.PLING;
+            return NoteBlockInstrument.PLING;
         return null;
     }
 }

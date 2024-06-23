@@ -13,7 +13,7 @@ import net.minecraft.screen.ScreenHandlerType;
 
 import java.util.List;
 
-public class ScreenHandlerSettingScreen extends LeftRightListSettingScreen<ScreenHandlerType<?>> {
+public class ScreenHandlerSettingScreen extends RegistryListSettingScreen<ScreenHandlerType<?>> {
     public ScreenHandlerSettingScreen(GuiTheme theme, Setting<List<ScreenHandlerType<?>>> setting) {
         super(theme, "Select Screen Handlers", setting, setting.get(), Registries.SCREEN_HANDLER);
     }

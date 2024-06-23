@@ -85,7 +85,7 @@ public class NbtCommand extends Command {
                 dataResult.getOrThrow(MALFORMED_ITEM_EXCEPTION::create);
 
                 ComponentChanges.Builder changesBuilder = ComponentChanges.builder();
-                Set<DataComponentType<?>> types = stackComponents.getTypes();
+                Set<ComponentType<?>> types = stackComponents.getTypes();
 
                 //set changes
                 for (Component<?> entry : components) {
@@ -94,7 +94,7 @@ public class NbtCommand extends Command {
                 }
 
                 //remove the rest
-                for (DataComponentType<?> type : types) {
+                for (ComponentType<?> type : types) {
                     changesBuilder.remove(type);
                 }
 
@@ -111,9 +111,9 @@ public class NbtCommand extends Command {
 
             if (validBasic(stack)) {
                 @SuppressWarnings("unchecked")
-                RegistryKey<DataComponentType<?>> componentTypeKey = (RegistryKey<DataComponentType<?>>) ctx.getArgument("component", RegistryKey.class);
+                RegistryKey<ComponentType<?>> componentTypeKey = (RegistryKey<ComponentType<?>>) ctx.getArgument("component", RegistryKey.class);
 
-                DataComponentType<?> componentType = Registries.DATA_COMPONENT_TYPE.get(componentTypeKey);
+                ComponentType<?> componentType = Registries.DATA_COMPONENT_TYPE.get(componentTypeKey);
 
                 ComponentMapImpl components = (ComponentMapImpl) stack.getComponents();
                 components.applyChanges(ComponentChanges.builder().remove(componentType).build());
@@ -132,7 +132,7 @@ public class NbtCommand extends Command {
                     if (entry.getKey().isPresent()) return entry.getKey().get().getValue();
                     return null;
                 }, entry -> {
-                    DataComponentType<?> dataComponentType = entry.value();
+                    ComponentType<?> dataComponentType = entry.value();
                     if (dataComponentType.getCodec() != null) {
                         if (entry.getKey().isPresent()) {
                             suggestionsBuilder.suggest(entry.getKey().get().getValue().toString());
