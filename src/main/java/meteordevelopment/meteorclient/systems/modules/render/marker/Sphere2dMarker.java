@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.render.marker;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -14,22 +16,12 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
-public class Sphere2dMarker extends BaseMarker {
-    private static class Block {
-        public final int x, y, z;
-        public int excludeDir;
-
-        public Block(int x, int y, int z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-    }
-
+public class Sphere2dMarker extends AbstractSphereMarker {
     public static final String type = "Sphere-2D";
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -60,6 +52,14 @@ public class Sphere2dMarker extends BaseMarker {
         .min(0)
         .noSlider()
         .onChanged(l -> dirty = true)
+        .build()
+    );
+
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+        .name("mode")
+        .description("What mode to use for this marker.")
+        .defaultValue(Mode.Hollow)
+        .onChanged(r -> dirty = true)
         .build()
     );
 
@@ -125,8 +125,9 @@ public class Sphere2dMarker extends BaseMarker {
         .build()
     );
 
-    private final List<Block> blocks = new ArrayList<>();
-    private boolean dirty = true, calculating;
+    private volatile List<RenderBlock> blocks = List.of();
+    private volatile @Nullable Future<?> task = null;
+    private boolean dirty = true;
 
     public Sphere2dMarker() {
         super(type);
@@ -134,13 +135,11 @@ public class Sphere2dMarker extends BaseMarker {
 
     @Override
     protected void render(Render3DEvent event) {
-        if (dirty && !calculating) calcCircle();
+        if (dirty) calcCircle();
 
-        synchronized (blocks) {
-            for (Block block : blocks) {
-                if (!limitRenderRange.get() || PlayerUtils.isWithin(block.x, block.y, block.z, renderRange.get())) {
-                    event.renderer.box(block.x, block.y, block.z, block.x + 1, block.y + 1, block.z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), block.excludeDir);
-                }
+        for (RenderBlock block : blocks) {
+            if (!limitRenderRange.get() || PlayerUtils.isWithin(block.x, block.y, block.z, renderRange.get())) {
+                event.renderer.box(block.x, block.y, block.z, block.x + 1, block.y + 1, block.z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), block.excludeDir);
             }
         }
     }
@@ -151,73 +150,80 @@ public class Sphere2dMarker extends BaseMarker {
     }
 
     private void calcCircle() {
-        calculating = true;
-        blocks.clear();
+        dirty = false;
+
+        if (task != null) {
+            task.cancel(true);
+            task = null;
+        }
 
         Runnable action = () -> {
-            int cX = center.get().getX();
-            int cY = center.get().getY();
-            int cZ = center.get().getZ();
-
-            int rSq = radius.get() * radius.get();
-            int dY = -radius.get() + layer.get();
-
-            // Calculate 1 octant and transform,mirror,flip the rest
-            int dX = 0;
-            while (true) {
-                int dZ = (int) Math.round(Math.sqrt(rSq - (dX * dX + dY * dY)));
-
-                synchronized (blocks) {
-                    // First and second octant
-                    add(cX + dX, cY + dY, cZ + dZ);
-                    add(cX + dZ, cY + dY, cZ + dX);
-
-                    // Fifth and sixth octant
-                    add(cX - dX, cY + dY, cZ - dZ);
-                    add(cX - dZ, cY + dY, cZ - dX);
-
-                    // Third and fourth octant
-                    add(cX + dX, cY + dY, cZ - dZ);
-                    add(cX + dZ, cY + dY, cZ - dX);
-
-                    // Seventh and eighth octant
-                    add(cX - dX, cY + dY, cZ + dZ);
-                    add(cX - dZ, cY + dY, cZ + dX);
-                }
-
-
-                // Stop when we reach the midpoint
-                if (dX >= dZ) break;
-                dX++;
-            }
-
-            // Calculate connected blocks
-            synchronized (blocks) {
-                for (Block block : blocks) {
-                    for (Block b : blocks) {
-                        if (b == block) continue;
-
-                        if (b.x == block.x + 1 && b.z == block.z) block.excludeDir |= Dir.EAST;
-                        if (b.x == block.x - 1 && b.z == block.z) block.excludeDir |= Dir.WEST;
-                        if (b.x == block.x && b.z == block.z + 1) block.excludeDir |= Dir.SOUTH;
-                        if (b.x == block.x && b.z == block.z - 1) block.excludeDir |= Dir.NORTH;
-                    }
-                }
-            }
-
-            dirty = false;
-            calculating = false;
+            blocks = switch (mode.get()) {
+                case Full -> filledCircle(center.get(), radius.get(), layer.get());
+                case Hollow -> hollowCircle(center.get(), radius.get(), layer.get());
+            };
+            task = null;
         };
 
         if (radius.get() <= 50) action.run();
-        else MeteorExecutor.execute(action);
+        else {
+            task = MeteorExecutor.executeFuture(action);
+        }
     }
 
-    private void add(int x, int y, int z) {
-        for (Block b : blocks) {
-            if (b.x == x && b.y == y && b.z == z) return;
+    private static List<RenderBlock> hollowCircle(BlockPos center, int r, int layer) {
+        int dY = -r + layer;
+
+        ObjectOpenHashSet<RenderBlock> renderBlocks = new ObjectOpenHashSet<>();
+
+        computeCircle(renderBlocks, center, dY, r);
+        cullInnerFaces(renderBlocks);
+
+        return new ObjectArrayList<>(renderBlocks);
+    }
+
+    private static List<RenderBlock> filledCircle(BlockPos center, int r, int layer) {
+        ObjectOpenHashSet<RenderBlock> renderBlocks = new ObjectOpenHashSet<>();
+
+        int rSq = r * r;
+        int dY = -r + layer;
+        int dYSq = dY * dY;
+
+        for (int dX = 0; dX <= r; dX++) {
+            int dXSq = dX * dX;
+            for (int dZ = 0; dZ <= r; dZ++) {
+                int dZSq = dZ * dZ;
+                if (dXSq + dYSq + dZSq <= rSq) {
+                    renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY() + dY, center.getZ() + dZ));
+                    renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY() + dY, center.getZ() + dZ));
+                    renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY() + dY, center.getZ() - dZ));
+                    renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY() + dY, center.getZ() - dZ));
+                }
+            }
         }
 
-        blocks.add(new Block(x, y, z));
+        cullInnerFaces(renderBlocks);
+
+        return new ObjectArrayList<>(renderBlocks);
+    }
+
+    private static void cullInnerFaces(ObjectOpenHashSet<RenderBlock> renderBlocks) {
+        for (RenderBlock block : renderBlocks) {
+            int x = block.x;
+            int y = block.y;
+            int z = block.z;
+
+            @Nullable RenderBlock east = renderBlocks.get(new RenderBlock(x + 1, y, z));
+            if (east != null) {
+                block.excludeDir |= Dir.EAST;
+                east.excludeDir |= Dir.WEST;
+            }
+
+            @Nullable RenderBlock south = renderBlocks.get(new RenderBlock(x, y, z + 1));
+            if (south != null) {
+                block.excludeDir |= Dir.SOUTH;
+                south.excludeDir |= Dir.NORTH;
+            }
+        }
     }
 }
