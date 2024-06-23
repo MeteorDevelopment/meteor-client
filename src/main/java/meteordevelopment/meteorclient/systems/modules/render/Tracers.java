@@ -5,6 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import it.unimi.dsi.fastutil.ints.AbstractIntSet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import java.util.List;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -24,7 +27,10 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec2f;
 import org.joml.Vector2f;
 import org.joml.Vector3d;
@@ -35,6 +41,7 @@ import java.util.Set;
 
 public class Tracers extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgItems = settings.createGroup("Items");
     private final SettingGroup sgAppearance = settings.createGroup("Appearance");
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
@@ -70,6 +77,43 @@ public class Tracers extends Module {
         .name("show-invisible")
         .description("Shows invisible entities.")
         .defaultValue(true)
+        .build()
+    );
+
+    // items
+    private final Setting<Boolean> filterItems = sgItems.add(new BoolSetting.Builder()
+         .name("filter-items")
+         .description("Only draw tracers for specific items types.")
+         .defaultValue(false)
+         .build()
+    );
+
+    private final Setting<ListMode> shownItemFilterType = sgItems.add(new EnumSetting.Builder<ListMode>()
+        .name("selection-mode")
+        .description("Shown item filter mode")
+        .defaultValue(ListMode.None)
+        .visible(filterItems::get)
+        .build()
+    );
+
+    private final AbstractIntSet shownItemIds = new IntOpenHashSet();
+    private final Setting<List<Item>> shownItems = sgItems.add(new ItemListSetting.Builder()
+        .name("item-selection")
+        .description("Select items to draw tracers for.")
+        .defaultValue()
+        .onChanged(items -> {
+            shownItemIds.clear();
+            shownItemIds.addAll(items.stream().map(Item::getRawId).toList());
+        })
+        .visible(() -> filterItems.get() && shownItemFilterType.get() != ListMode.None)
+        .build()
+    );
+
+    private final Setting<Boolean> alwaysShowNamed = sgItems.add(new BoolSetting.Builder()
+        .name("always-show-named")
+        .description("Display for named items regardless of being included in list.")
+        .defaultValue(false)
+        .visible(filterItems::get)
         .build()
     );
 
@@ -217,8 +261,25 @@ public class Tracers extends Module {
         super(Categories.Render, "tracers", "Displays tracer lines to specified entities.");
     }
 
+    private boolean shouldBeIgnored(ItemStack stack) {
+        boolean showCustomNamed = stack.hasCustomName() && alwaysShowNamed.get();
+
+        boolean showInList = !filterItems.get()
+            || (shownItemFilterType.get() == ListMode.Whitelist && shownItemIds.contains(Item.getRawId(stack.getItem())))
+            || (shownItemFilterType.get() == ListMode.Blacklist && !shownItemIds.contains(Item.getRawId(stack.getItem())));
+
+        return !showCustomNamed && !showInList;
+    }
+
     private boolean shouldBeIgnored(Entity entity) {
-        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType()) || (ignoreSelf.get() && entity == mc.player) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity);
+        return !PlayerUtils.isWithin(entity, maxDist.get())
+            || (!Modules.get().isActive(Freecam.class) && entity == mc.player)
+            || !entities.get().contains(entity.getType())
+            || (ignoreSelf.get() && entity == mc.player)
+            || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity))
+            || (!showInvis.get() && entity.isInvisible())
+            || !EntityUtils.isInRenderDistance(entity)
+            || (entity instanceof ItemEntity && shouldBeIgnored(((ItemEntity) entity).getStack()));
     }
 
     private Color getEntityColor(Entity entity) {
@@ -371,5 +432,11 @@ public class Tracers extends Module {
     @Override
     public String getInfoString() {
         return Integer.toString(count);
+    }
+
+    public enum ListMode {
+        Whitelist,
+        Blacklist,
+        None
     }
 }
