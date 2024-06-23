@@ -19,7 +19,7 @@ import net.minecraft.registry.Registries;
 import java.util.List;
 import java.util.Optional;
 
-public class StatusEffectListSettingScreen extends LeftRightListSettingScreen<StatusEffect> {
+public class StatusEffectListSettingScreen extends RegistryListSettingScreen<StatusEffect> {
     public StatusEffectListSettingScreen(GuiTheme theme, Setting<List<StatusEffect>> setting) {
         super(theme, "Select Effects", setting, setting.get(), Registries.STATUS_EFFECT);
     }

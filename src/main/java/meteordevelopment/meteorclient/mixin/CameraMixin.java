@@ -12,8 +12,8 @@ import meteordevelopment.meteorclient.systems.modules.render.FreeLook;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
+import net.minecraft.block.enums.CameraSubmersionType;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.CameraSubmersionType;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.BlockView;
@@ -46,12 +46,12 @@ public abstract class CameraMixin implements ICamera {
     }
 
     @ModifyVariable(method = "clipToSpace", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private double modifyClipToSpace(double d) {
-        return (Modules.get().get(Freecam.class).isActive() ? 0 : Modules.get().get(CameraTweaks.class).getDistance());
+    private float modifyClipToSpace(float d) {
+        return (Modules.get().get(Freecam.class).isActive() ? 0 : (float) Modules.get().get(CameraTweaks.class).getDistance());
     }
 
     @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
-    private void onClipToSpace(double desiredCameraDistance, CallbackInfoReturnable<Double> info) {
+    private void onClipToSpace(float desiredCameraDistance, CallbackInfoReturnable<Float> info) {
         if (Modules.get().get(CameraTweaks.class).clip()) {
             info.setReturnValue(desiredCameraDistance);
         }

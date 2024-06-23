@@ -9,7 +9,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
-import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -57,7 +57,7 @@ public class TextSongDecoder extends SongDecoder {
                 continue;
             }
 
-            Note note = new Note(Instrument.values()[type], val);
+            Note note = new Note(NoteBlockInstrument.values()[type], val);
             notesMap.put(key, note);
         }
         return new Song(notesMap, title, author);

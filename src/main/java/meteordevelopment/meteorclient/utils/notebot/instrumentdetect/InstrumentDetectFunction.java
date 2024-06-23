@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.utils.notebot.instrumentdetect;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.util.math.BlockPos;
 
 public interface InstrumentDetectFunction {
@@ -17,5 +17,5 @@ public interface InstrumentDetectFunction {
      * @param blockPos Noteblock position
      * @return Detected instrument
      */
-    Instrument detectInstrument(BlockState noteBlock, BlockPos blockPos);
+    NoteBlockInstrument detectInstrument(BlockState noteBlock, BlockPos blockPos);
 }

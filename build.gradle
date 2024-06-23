@@ -1,5 +1,5 @@
 plugins {
-    id "fabric-loom" version "1.6-SNAPSHOT"
+    id "fabric-loom" version "1.7-SNAPSHOT"
     id "maven-publish"
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
@@ -74,7 +74,7 @@ dependencies {
     library "org.reflections:reflections:${project.reflections_version}"
     library("io.netty:netty-handler-proxy:${project.netty_version}") { transitive = false }
     library("io.netty:netty-codec-socks:${project.netty_version}") { transitive = false }
-    library "de.florianmichael:WaybackAuthLib:1.0.0"
+    library "de.florianmichael:WaybackAuthLib:${project.waybackauthlib_version}"
 
     // Launch sub project
     shadow project(":launch")

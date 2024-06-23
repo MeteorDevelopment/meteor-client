@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.renderer;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.operations.TextOperation;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
@@ -14,7 +15,6 @@ import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.PostInit;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.ByteTexture;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -68,12 +68,12 @@ public class GuiRenderer {
 
     @PostInit
     public static void init() {
-        CIRCLE = addTexture(new MeteorIdentifier("textures/icons/gui/circle.png"));
-        TRIANGLE = addTexture(new MeteorIdentifier("textures/icons/gui/triangle.png"));
-        EDIT = addTexture(new MeteorIdentifier("textures/icons/gui/edit.png"));
-        RESET = addTexture(new MeteorIdentifier("textures/icons/gui/reset.png"));
-        FAVORITE_NO = addTexture(new MeteorIdentifier("textures/icons/gui/favorite_no.png"));
-        FAVORITE_YES = addTexture(new MeteorIdentifier("textures/icons/gui/favorite_yes.png"));
+        CIRCLE = addTexture(MeteorClient.identifier("textures/icons/gui/circle.png"));
+        TRIANGLE = addTexture(MeteorClient.identifier("textures/icons/gui/triangle.png"));
+        EDIT = addTexture(MeteorClient.identifier("textures/icons/gui/edit.png"));
+        RESET = addTexture(MeteorClient.identifier("textures/icons/gui/reset.png"));
+        FAVORITE_NO = addTexture(MeteorClient.identifier("textures/icons/gui/favorite_no.png"));
+        FAVORITE_YES = addTexture(MeteorClient.identifier("textures/icons/gui/favorite_yes.png"));
 
         TEXTURE = TEXTURE_PACKER.pack();
     }

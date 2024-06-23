@@ -10,22 +10,23 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 
-import java.util.List;
+import java.util.Set;
 
-public class EnchantmentListSettingScreen extends LeftRightListSettingScreen<Enchantment> {
-    public EnchantmentListSettingScreen(GuiTheme theme, Setting<List<Enchantment>> setting) {
-        super(theme, "Select Enchantments", setting, setting.get(), Registries.ENCHANTMENT);
+public class EnchantmentListSettingScreen extends DynamicRegistryListSettingScreen<Enchantment> {
+    public EnchantmentListSettingScreen(GuiTheme theme, Setting<Set<RegistryKey<Enchantment>>> setting) {
+        super(theme, "Select Enchantments", setting, setting.get(), RegistryKeys.ENCHANTMENT);
     }
 
     @Override
-    protected WWidget getValueWidget(Enchantment value) {
+    protected WWidget getValueWidget(RegistryKey<Enchantment> value) {
         return theme.label(getValueName(value));
     }
 
     @Override
-    protected String getValueName(Enchantment value) {
+    protected String getValueName(RegistryKey<Enchantment> value) {
         return Names.get(value);
     }
 }

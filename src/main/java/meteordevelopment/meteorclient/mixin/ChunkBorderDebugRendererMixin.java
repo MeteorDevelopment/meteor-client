@@ -29,7 +29,7 @@ public abstract class ChunkBorderDebugRendererMixin {
         Freecam freecam = Modules.get().get(Freecam.class);
         if (!freecam.isActive()) return chunkPos;
 
-        float delta = client.getTickDelta();
+        float delta = client.getRenderTickCounter().getTickDelta(true);
 
         return new ChunkPos(
             ChunkSectionPos.getSectionCoord(MathHelper.floor(freecam.getX(delta))),

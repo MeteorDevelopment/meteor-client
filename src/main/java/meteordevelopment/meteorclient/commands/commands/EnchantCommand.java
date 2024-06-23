@@ -17,7 +17,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
@@ -89,7 +88,7 @@ public class EnchantCommand extends Command {
         ItemStack itemStack = tryGetItemStack();
 
         RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);
-        Utils.addEnchantment(itemStack, enchantment.value(), level.applyAsInt(enchantment.value()));
+        Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
 
         syncItem();
     }
@@ -97,11 +96,11 @@ public class EnchantCommand extends Command {
     private void all(boolean onlyPossible, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        for (Enchantment enchantment : Registries.ENCHANTMENT) {
-            if (!onlyPossible || enchantment.isAcceptableItem(itemStack)) {
-                Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment));
-            }
-        }
+        REGISTRY_ACCESS.getOptionalWrapper(RegistryKeys.ENCHANTMENT).ifPresent(registry -> {
+            registry.streamEntries().forEach(enchantment -> {
+                Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
+            });
+        });
 
         syncItem();
     }

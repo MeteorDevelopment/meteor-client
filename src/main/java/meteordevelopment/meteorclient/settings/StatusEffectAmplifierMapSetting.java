@@ -77,7 +77,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Reference2IntMap<St
 
         NbtCompound valueTag = tag.getCompound("value");
         for (String key : valueTag.getKeys()) {
-            StatusEffect statusEffect = Registries.STATUS_EFFECT.get(new Identifier(key));
+            StatusEffect statusEffect = Registries.STATUS_EFFECT.get(Identifier.of(key));
             if (statusEffect != null) get().put(statusEffect, valueTag.getInt(key));
         }
 
