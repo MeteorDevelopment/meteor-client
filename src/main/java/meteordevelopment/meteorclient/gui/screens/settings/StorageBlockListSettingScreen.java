@@ -43,23 +43,24 @@ public class StorageBlockListSettingScreen extends RegistryListSettingScreen<Blo
         return STORAGE_BLOCK_ENTITY_MAP.getOrDefault(value, UNKNOWN).left();
     }
 
-    private static Field findFieldObject(Class<?> clazz, Predicate<Field> condition) {
-        Field[] fields = clazz.getDeclaredFields();
+    private static Field findFieldObject(Field[] fields, Predicate<Field> condition) {
         for (Field field : fields) if (condition.test(field)) return field;
         return null;
     }
 
     static {
+        Field[] BlockEntityFields = BlockEntityType.class.getDeclaredFields();
+        Field[] ItemsFields = Items.class.getDeclaredFields();
         for (BlockEntityType<?> block : StorageBlockListSetting.STORAGE_BLOCKS) {
             try {
-                Field nameField = findFieldObject(BlockEntityType.class, field -> {
+                Field nameField = findFieldObject(BlockEntityFields, field -> {
                     try {
                         return field.getType() == BlockEntityType.class && field.get(null) == block;
                     } catch (IllegalAccessException ignored) {}
                     return false;
                 });
                 if (nameField == null) continue;
-                Field itemField = findFieldObject(Items.class, field -> {
+                Field itemField = findFieldObject(ItemsFields, field -> {
                     if (field.getType() == Item.class) return field.getName().equals(nameField.getName());
                     return false;
                 });
