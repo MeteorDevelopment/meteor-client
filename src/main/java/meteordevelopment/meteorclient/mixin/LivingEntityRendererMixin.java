@@ -97,7 +97,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     // Player chams
 
-    @ModifyArgs(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;scale(FFF)V"))
+    @ModifyArgs(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;scale(FFF)V", ordinal = 1))
     private void modifyScale(Args args, T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
         Chams module = Modules.get().get(Chams.class);
         if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity)) return;
@@ -115,10 +115,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
         if (module.ignoreSelf.get() && livingEntity == mc.player) return;
 
         Color color = PlayerUtils.getPlayerColor(((PlayerEntity) livingEntity), module.playersColor.get());
-        args.set(4, color.r / 255f);
-        args.set(5, color.g / 255f);
-        args.set(6, color.b / 255f);
-        args.set(7, module.playersColor.get().a / 255f);
+        args.set(4, color.getPacked());
     }
 
     @Redirect(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getRenderLayer(Lnet/minecraft/entity/LivingEntity;ZZZ)Lnet/minecraft/client/render/RenderLayer;"))
