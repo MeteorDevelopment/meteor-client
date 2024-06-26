@@ -1,0 +1,17 @@
+*.DS_Store
+.gradle
+.settings
+.project
+.classpath
+build
+out
+run
+bin
+logs
+.github/devbuilds/node_modules
+*.iws
+*.ipr
+*.iml
+.idea/*
+!.idea/copyright/*
+!.idea/scopes/*

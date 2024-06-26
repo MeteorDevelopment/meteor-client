@@ -1,0 +1,181 @@
+plugins {
+    id "fabric-loom" version "1.6-SNAPSHOT"
+    id "maven-publish"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+}
+
+base {
+    archivesBaseName = project.archives_base_name
+    version = project.mod_version + (project.hasProperty("devbuild") ? ("-" + project.findProperty("devbuild")) : "")
+    group = project.maven_group
+}
+
+repositories {
+    maven {
+        name = "meteor-maven"
+        url = "https://maven.meteordev.org/releases"
+    }
+    maven {
+        name = "meteor-maven-snapshots"
+        url = "https://maven.meteordev.org/snapshots"
+    }
+    maven {
+        name = "modrinth"
+        url = "https://api.modrinth.com/maven"
+
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
+        name = "vram"
+        url = "https://maven.vram.io//"
+    }
+    maven {
+        name = "ViaVersion"
+        url = "https://repo.viaversion.com"
+    }
+    mavenCentral()
+}
+
+configurations {
+    // include mods
+    modImplementation.extendsFrom(modInclude)
+    include.extendsFrom(modInclude)
+
+    // include libraries
+    implementation.extendsFrom(library)
+    shadow.extendsFrom(library)
+}
+
+dependencies {
+    // Fabric
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modInclude fabricApi.module("fabric-resource-loader-v0", project.fapi_version)
+
+    // Compat fixes
+    modCompileOnly fabricApi.module("fabric-renderer-indigo", project.fapi_version)
+    modCompileOnly("maven.modrinth:sodium:${project.sodium_version}") { transitive = false }
+    modCompileOnly("maven.modrinth:lithium:${project.lithium_version}") { transitive = false }
+    modCompileOnly("maven.modrinth:iris:${project.iris_version}") { transitive = false }
+    //modCompileOnly("io.vram:canvas-fabric-mc119:1.0.+") { transitive = false } // TODO: 1.19.3
+    modCompileOnly("maven.modrinth:indium:${project.indium_version}") { transitive = false }
+    modCompileOnly("de.florianmichael:ViaFabricPlus:${project.viafabricplus_version}") { transitive = false }
+
+    // Baritone (https://github.com/MeteorDevelopment/baritone)
+    modCompileOnly "meteordevelopment:baritone:${project.baritone_version}-SNAPSHOT"
+
+    // Libraries
+    library "meteordevelopment:orbit:${project.orbit_version}"
+    library "meteordevelopment:starscript:${project.starscript_version}"
+    library "meteordevelopment:discord-ipc:${project.discordipc_version}"
+    library "org.reflections:reflections:${project.reflections_version}"
+    library("io.netty:netty-handler-proxy:${project.netty_version}") { transitive = false }
+    library("io.netty:netty-codec-socks:${project.netty_version}") { transitive = false }
+    library "de.florianmichael:WaybackAuthLib:1.0.0"
+
+    // Launch sub project
+    shadow project(":launch")
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")
+}
+
+afterEvaluate {
+    migrateMappings.configure {
+        outputDir = project.file("src/main/java")
+    }
+}
+
+tasks {
+    processResources {
+        def propertyMap = [
+            "version"          : project.version,
+            "devbuild"         : project.findProperty("devbuild") ?: "",
+            "commit"           : project.findProperty("commit") ?: "",
+            "minecraft_version": project.minecraft_version,
+            "loader_version"   : project.loader_version
+        ]
+
+        inputs.properties(propertyMap)
+        filesMatching("fabric.mod.json") {
+            expand(propertyMap)
+        }
+    }
+
+    jar {
+        from("LICENSE") {
+            rename { "${it}_${project.base.archivesBaseName}" }
+        }
+
+        manifest {
+            attributes("Main-Class": "meteordevelopment.meteorclient.Main")
+        }
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    shadowJar {
+        configurations = [project.configurations.shadow]
+
+        from("LICENSE") {
+            rename { "${it}_${project.base.archivesBaseName}" }
+        }
+
+        dependencies {
+            exclude {
+                it.moduleGroup == "org.slf4j"
+            }
+        }
+    }
+
+    remapJar {
+        dependsOn shadowJar
+        inputFile.set(shadowJar.archiveFile)
+    }
+
+    javadoc {
+        options.addStringOption("Xdoclint:none", "-quiet")
+        options.encoding = "UTF-8"
+    }
+
+    build {
+        dependsOn javadocJar
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = "meteor-client"
+            version = project.hasProperty("devbuild") ? (project.mod_version + "-SNAPSHOT") : project.mod_version
+
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = "meteor-maven"
+            url = project.hasProperty("devbuild") ? "https://maven.meteordev.org/snapshots" : "https://maven.meteordev.org/releases"
+
+            credentials {
+                username = System.getenv("MAVEN_METEOR_ALIAS")
+                password = System.getenv("MAVEN_METEOR_TOKEN")
+            }
+
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+}

@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "meteordevelopment.meteorclient.mixin.canvas",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "meteordevelopment.meteorclient.MixinPlugin",
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "meteordevelopment.meteorclient.mixin.indigo",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "meteordevelopment.meteorclient.MixinPlugin",
+  "client": [
+    "AbstractBlockRenderContextMixin",
+    "AoCalculatorMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

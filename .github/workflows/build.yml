@@ -1,0 +1,61 @@
+name: Dev Build
+
+concurrency:
+  group: "build"
+  cancel-in-progress: false
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - run: chmod +x gradlew
+
+      - name: Set up Node JS
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+
+      - name: Get current dev build number
+        id: dev-build
+        run: |
+          cd .github/devbuilds
+          npm install
+          node get_number.js >> $GITHUB_OUTPUT
+
+      - name: Build
+        run: ./gradlew build -Pcommit=${{ github.sha }} -Pdevbuild=${{ steps.dev-build.outputs.number }}
+
+      - name: Webhook Failure
+        if: ${{ failure() }}
+        run: |
+          cd .github/devbuilds
+          npm start ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} false
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
+
+      - name: Publish
+        run: ./gradlew publish -Pcommit=${{ github.sha }} -Pdevbuild=${{ steps.dev-build.outputs.number }}
+        env:
+          MAVEN_METEOR_ALIAS: ${{ secrets.MAVEN_METEOR_ALIAS }}
+          MAVEN_METEOR_TOKEN: ${{ secrets.MAVEN_METEOR_TOKEN }}
+
+      - name: Upload file & Discord webhook
+        run: |
+          cd .github/devbuilds
+          npm start ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} true
+        env:
+          SERVER_TOKEN: ${{ secrets.SERVER_TOKEN }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
