@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -12,12 +14,17 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
+import net.minecraft.registry.entry.RegistryEntry;
 
 public class ChestSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -25,7 +32,14 @@ public class ChestSwap extends Module {
     private final Setting<Chestplate> chestplate = sgGeneral.add(new EnumSetting.Builder<Chestplate>()
         .name("chestplate")
         .description("Which type of chestplate to swap to.")
-        .defaultValue(Chestplate.PreferNetherite)
+        .defaultValue(Chestplate.Best)
+        .build()
+    );
+
+    private final Setting<Boolean> enchants = sgGeneral.add(new BoolSetting.Builder()
+        .name("enchantments")
+        .description("Whether to handle enchantments when swapping chestplate.")
+        .defaultValue(true)
         .build()
     );
 
@@ -72,47 +86,43 @@ public class ChestSwap extends Module {
 
     private boolean equipChestplate() {
         int bestSlot = -1;
-        boolean breakLoop = false;
-
+        int score = 0;
         for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
-            Item item = mc.player.getInventory().main.get(i).getItem();
+            ItemStack itemStack = mc.player.getInventory().main.get(i);
 
-            switch (chestplate.get()) {
-                case Diamond:
-                    if (item == Items.DIAMOND_CHESTPLATE) {
-                        bestSlot = i;
-                        breakLoop = true;
-                    }
-                    break;
-                case Netherite:
-                    if (item == Items.NETHERITE_CHESTPLATE) {
-                        bestSlot = i;
-                        breakLoop = true;
-                    }
-                    break;
-                case PreferDiamond:
-                    if (item == Items.DIAMOND_CHESTPLATE) {
-                        bestSlot = i;
-                        breakLoop = true;
-                    } else if (item == Items.NETHERITE_CHESTPLATE) {
-                        bestSlot = i;
-                    }
-                    break;
-                case PreferNetherite:
-                    if (item == Items.DIAMOND_CHESTPLATE) {
-                        bestSlot = i;
-                    } else if (item == Items.NETHERITE_CHESTPLATE) {
-                        bestSlot = i;
-                        breakLoop = true;
-                    }
-                    break;
+            if (chestplate.get().item == itemStack.getItem() || (chestplate.get() == Chestplate.Best && itemStack.getItem() instanceof ArmorItem armor && armor.getSlotType() == EquipmentSlot.CHEST)) {
+                int newScore = getScore(itemStack);
+
+                if (newScore > score) {
+                    score = newScore;
+                    bestSlot = i;
+                }
             }
-
-            if (breakLoop) break;
         }
 
         if (bestSlot != -1) equip(bestSlot);
         return bestSlot != -1;
+    }
+
+    // modified AutoArmor getScore
+    private int getScore(ItemStack itemStack) {
+        if (itemStack.isEmpty()) return 0;
+
+        int score = 0;
+        Object2IntMap<RegistryEntry<Enchantment>> enchantments = new Object2IntOpenHashMap<>();
+        Utils.getEnchantments(itemStack, enchantments);
+        if (enchants.get()) {
+            score += Utils.getEnchantmentLevel(enchantments, Enchantments.PROTECTION);
+            score += Utils.getEnchantmentLevel(enchantments, Enchantments.BLAST_PROTECTION);
+            score += Utils.getEnchantmentLevel(enchantments, Enchantments.FIRE_PROTECTION);
+            score += Utils.getEnchantmentLevel(enchantments, Enchantments.PROJECTILE_PROTECTION);
+            score += Utils.getEnchantmentLevel(enchantments, Enchantments.UNBREAKING);
+            score += 2 * Utils.getEnchantmentLevel(enchantments, Enchantments.MENDING);
+        }
+        score += itemStack.getItem() instanceof ArmorItem armorItem ? armorItem.getProtection() : 0;
+        score += itemStack.getItem() instanceof ArmorItem armorItem ? (int) armorItem.getToughness() : 0;
+
+        return score;
     }
 
     private void equipElytra() {
@@ -141,9 +151,17 @@ public class ChestSwap extends Module {
     }
 
     public enum Chestplate {
-        Diamond,
-        Netherite,
-        PreferDiamond,
-        PreferNetherite
+        Leather(Items.LEATHER_CHESTPLATE),
+        Chainmail(Items.CHAINMAIL_CHESTPLATE),
+        Gold(Items.GOLDEN_CHESTPLATE),
+        Iron(Items.IRON_CHESTPLATE),
+        Diamond(Items.DIAMOND_CHESTPLATE),
+        Netherite(Items.NETHERITE_CHESTPLATE),
+        Best(null);
+
+        final Item item;
+        Chestplate(Item item) {
+            this.item = item;
+        }
     }
 }
