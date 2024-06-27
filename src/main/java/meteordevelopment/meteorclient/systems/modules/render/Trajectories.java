@@ -110,7 +110,9 @@ public class Trajectories extends Module {
     }
 
     private boolean itemFilter(Item item) {
-        return item instanceof BowItem || item instanceof CrossbowItem || item instanceof FishingRodItem || item instanceof TridentItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem || item instanceof ExperienceBottleItem || item instanceof ThrowablePotionItem;
+        return item instanceof RangedWeaponItem || item instanceof FishingRodItem || item instanceof TridentItem ||
+            item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem ||
+            item instanceof ExperienceBottleItem || item instanceof ThrowablePotionItem || item instanceof WindChargeItem;
     }
 
     private List<Item> getDefaultItems() {
