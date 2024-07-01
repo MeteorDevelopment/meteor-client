@@ -112,6 +112,27 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return NO_SUGGESTIONS;
     }
 
+    public NbtCompound getValueNBT() {
+        NbtCompound tag = new NbtCompound();
+        tag.putString("type", getClass().getName());
+        save(tag);
+        return tag;
+    }
+
+    public static <T> Setting<T> fromValueNBT(NbtCompound tag) {
+        try {
+            Class<?> builderClass = Class.forName(tag.getString("type") + "$Builder");
+
+            SettingBuilder<?, ?, ?> builder = (SettingBuilder<?, ?, ?>) builderClass.newInstance();
+            Setting<?> instance = (Setting<?>) builder.build();
+            instance.load(tag);
+
+            return (Setting<T>) instance;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     protected abstract NbtCompound save(NbtCompound tag);
 
     @Override
