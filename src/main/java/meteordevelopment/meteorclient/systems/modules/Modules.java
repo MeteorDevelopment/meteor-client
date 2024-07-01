@@ -284,7 +284,7 @@ public class Modules extends System<Modules> {
         if (mc.currentScreen != null || Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
 
         for (Module module : moduleInstances.values()) {
-            if (module.keybind.matches(isKey, value, modifiers) && (isPress || module.toggleOnBindRelease)) {
+            if (module.keybind.matches(isKey, value, modifiers) && (isPress || (module.toggleOnBindRelease && module.isActive()))) {
                 module.toggle();
                 module.sendToggledMsg();
             }
