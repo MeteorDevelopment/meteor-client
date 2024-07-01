@@ -15,8 +15,10 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
+import net.minecraft.client.network.PlayerListEntry;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Spam extends Module {
@@ -76,7 +78,14 @@ public class Spam extends Module {
         .build()
     );
 
-    private int messageI, timer;
+    private final Setting<Boolean> PMspam = sgGeneral.add(new BoolSetting.Builder()
+        .name("PMspam")
+        .description("Parses the player list and /msg them")
+        .defaultValue(false)
+        .build()
+    );
+
+    private int messageI, timer, playerIndex = 0;
 
     public Spam() {
         super(Categories.Misc, "spam", "Spams specified messages in chat.");
@@ -115,6 +124,23 @@ public class Spam extends Module {
             }
 
             String text = messages.get().get(i);
+
+            if (PMspam.get()) {
+                List<PlayerListEntry> playerNames = new ArrayList<>(mc.getNetworkHandler().getPlayerList());
+
+                if (!playerNames.isEmpty()) {
+                    if (playerIndex >= playerNames.size()) playerIndex = 0;
+
+                    // Exclude our name     // TODO: Friends name
+                    if (playerNames.get(playerIndex).getProfile().getName().equals(mc.getSession().getUsername()) && playerNames.size() != 1) playerIndex++;
+
+                    if (playerIndex >= playerNames.size()) playerIndex = 0;
+                    // Get player name by index and remove "color formatting" symbols in it:    /msg cleanName text
+                    text = "/msg " + playerNames.get(playerIndex).getProfile().getName().replaceAll("§", "") + " " + text;
+                    playerIndex++;
+                }
+            }
+
             if (bypass.get()) {
                 text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
             }
