@@ -15,8 +15,7 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class Font {
     public ByteTexture texture;
@@ -76,31 +75,18 @@ public class Font {
         // Load character data into charMap
         for (int i = 0; i < cdata.capacity(); i++) {
             STBTTPackedchar packedChar = cdata.get(i);
-
-            float ipw = 1f / size; // pixel width and height
-            float iph = 1f / size;
-
-            charMap.put(i + 32, new CharData(
-                packedChar.xoff(),
-                packedChar.yoff(),
-                packedChar.xoff2(),
-                packedChar.yoff2(),
-                packedChar.x0() * ipw,
-                packedChar.y0() * iph,
-                packedChar.x1() * ipw,
-                packedChar.y1() * iph,
-                packedChar.xadvance()
-            ));
+                putCharData(i+32,packedChar);
         }
 
         // Create texture
         createTexture();
     }
 
-    private void loadCharacter(ArrayList<Integer> codePoints) {
+    private void loadCharacter(List<Integer> codePoints) {
         for (Integer codePoint : codePoints) {
             loadCharacter(codePoint);
         }
+        // Re-create texture
         createTexture();
     }
 
@@ -118,7 +104,10 @@ public class Font {
         STBTruetype.stbtt_PackFontRanges(packContext, buffer, 0, packRange);
 
         STBTTPackedchar packedChar = cdata.get(0);
-
+        putCharData(codePoint,packedChar);
+        packedChars.put(codePoint, packedChar);
+    }
+    private void putCharData(int codePoint, STBTTPackedchar packedChar){
         float ipw = 1f / size; // pixel width and height
         float iph = 1f / size;
 
@@ -133,11 +122,6 @@ public class Font {
             packedChar.y1() * iph,
             packedChar.xadvance()
         ));
-
-        packedChars.put(codePoint, packedChar);
-
-        // Re-create texture
-        //createTexture();
     }
 
     private void createTexture() {
@@ -146,7 +130,7 @@ public class Font {
 
     public double getWidth(String string, int length) {
         double width = 0;
-        ArrayList<Integer> charPoints = null;
+        List<Integer> charPoints = null;
 
         for (int i = 0; i < length; i++) {
             int cp = string.charAt(i);
@@ -171,13 +155,11 @@ public class Font {
 
     public double render(Mesh mesh, String string, double x, double y, Color color, double scale) {
         y += ascent * this.scale * scale;
-        ArrayList<Integer> charPoints = null;
+        List<Integer> charPoints = null;
         for (int i = 0; i < string.length(); i++) {
             int cp = string.charAt(i);
             CharData c = charMap.get(cp);
             if (c == null) {
-//                loadCharacter(cp);
-//                c = charMap.get(cp);
                 if (charPoints == null) charPoints = new ArrayList<>();
                 charPoints.add(cp);
                 continue;
