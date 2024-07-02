@@ -1,10 +1,13 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
 package meteordevelopment.meteorclient.renderer.text;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.renderer.Mesh;
 import meteordevelopment.meteorclient.utils.render.ByteTexture;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.texture.AbstractTexture;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.*;
 import org.lwjgl.system.MemoryStack;
@@ -26,7 +29,7 @@ public class Font {
     private final STBTTFontinfo fontInfo;
     private final ByteBuffer bitmap;
     private final STBTTPackContext packContext;
-    private final Map<Integer, STBTTPackedchar> packedChars = new HashMap<>();
+    private final Int2ObjectOpenHashMap<STBTTPackedchar> packedChars = new Int2ObjectOpenHashMap<>();
 
     public Font(ByteBuffer buffer, int height) {
         this.buffer = buffer;
