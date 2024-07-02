@@ -17,6 +17,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Font {
     public ByteTexture texture;
     private final int height;
@@ -30,6 +31,11 @@ public class Font {
     private final ByteBuffer bitmap;
     private final STBTTPackContext packContext;
     private final Int2ObjectOpenHashMap<STBTTPackedchar> packedChars = new Int2ObjectOpenHashMap<>();
+
+    private  long loadTimer = 0;
+    private int loadCount=0;
+    private final int loadSpeedLimit = 9;
+    //The number of string that can be loaded per 100ms
 
     public Font(ByteBuffer buffer, int height) {
         this.buffer = buffer;
@@ -75,7 +81,7 @@ public class Font {
         // Load character data into charMap
         for (int i = 0; i < cdata.capacity(); i++) {
             STBTTPackedchar packedChar = cdata.get(i);
-                putCharData(i+32,packedChar);
+            putCharData(i + 32, packedChar);
         }
 
         // Create texture
@@ -83,11 +89,18 @@ public class Font {
     }
 
     private void loadCharacter(List<Integer> codePoints) {
+        if (System.currentTimeMillis()-loadTimer>100){
+            loadTimer = System.currentTimeMillis();
+            loadCount =0;
+        }
+        if (loadCount>=loadSpeedLimit)return;
+        //Limit the load speed to avoid blocking the rendering thread
         for (Integer codePoint : codePoints) {
             loadCharacter(codePoint);
         }
         // Re-create texture
         createTexture();
+        loadCount++;
     }
 
     private void loadCharacter(int codePoint) {
@@ -104,13 +117,13 @@ public class Font {
         STBTruetype.stbtt_PackFontRanges(packContext, buffer, 0, packRange);
 
         STBTTPackedchar packedChar = cdata.get(0);
-        putCharData(codePoint,packedChar);
+        putCharData(codePoint, packedChar);
         packedChars.put(codePoint, packedChar);
     }
-    private void putCharData(int codePoint, STBTTPackedchar packedChar){
+
+    private void putCharData(int codePoint, STBTTPackedchar packedChar) {
         float ipw = 1f / size; // pixel width and height
         float iph = 1f / size;
-
         charMap.put(codePoint, new CharData(
             packedChar.xoff(),
             packedChar.yoff(),
@@ -140,7 +153,6 @@ public class Font {
                 charPoints.add(cp);
                 continue;
             }
-
             width += c.xAdvance;
         }
         if (charPoints != null) {
@@ -153,6 +165,7 @@ public class Font {
         return height;
     }
 
+
     public double render(Mesh mesh, String string, double x, double y, Color color, double scale) {
         y += ascent * this.scale * scale;
         List<Integer> charPoints = null;
@@ -164,7 +177,6 @@ public class Font {
                 charPoints.add(cp);
                 continue;
             }
-
             mesh.quad(
                 mesh.vec2(x + c.x0 * scale, y + c.y0 * scale).vec2(c.u0, c.v0).color(color).next(),
                 mesh.vec2(x + c.x0 * scale, y + c.y1 * scale).vec2(c.u0, c.v1).color(color).next(),
