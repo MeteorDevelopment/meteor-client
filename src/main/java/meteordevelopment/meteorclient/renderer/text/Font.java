@@ -14,6 +14,7 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,6 +97,13 @@ public class Font {
         createTexture();
     }
 
+    private void loadCharacter(ArrayList<Integer> codePoints) {
+        for (Integer codePoint : codePoints) {
+            loadCharacter(codePoint);
+        }
+        createTexture();
+    }
+
     private void loadCharacter(int codePoint) {
         if (packedChars.containsKey(codePoint)) return;
 
@@ -129,27 +137,31 @@ public class Font {
         packedChars.put(codePoint, packedChar);
 
         // Re-create texture
-        createTexture();
+        //createTexture();
     }
 
     private void createTexture() {
-        texture = new ByteTexture(size, size, bitmap, ByteTexture.Format.A, ByteTexture.Filter.Linear, ByteTexture.Filter.Linear);
+        texture.upload(size, size, bitmap, ByteTexture.Format.A, ByteTexture.Filter.Linear, ByteTexture.Filter.Linear);
     }
 
     public double getWidth(String string, int length) {
         double width = 0;
+        ArrayList<Integer> charPoints = null;
 
         for (int i = 0; i < length; i++) {
             int cp = string.charAt(i);
             CharData c = charMap.get(cp);
             if (c == null) {
-                loadCharacter(cp);
-                c = charMap.get(cp);
+                if (charPoints == null) charPoints = new ArrayList<>();
+                charPoints.add(cp);
+                continue;
             }
 
             width += c.xAdvance;
         }
-
+        if (charPoints != null) {
+            loadCharacter(charPoints);
+        }
         return width;
     }
 
@@ -159,13 +171,16 @@ public class Font {
 
     public double render(Mesh mesh, String string, double x, double y, Color color, double scale) {
         y += ascent * this.scale * scale;
-
+        ArrayList<Integer> charPoints = null;
         for (int i = 0; i < string.length(); i++) {
             int cp = string.charAt(i);
             CharData c = charMap.get(cp);
             if (c == null) {
-                loadCharacter(cp);
-                c = charMap.get(cp);
+//                loadCharacter(cp);
+//                c = charMap.get(cp);
+                if (charPoints == null) charPoints = new ArrayList<>();
+                charPoints.add(cp);
+                continue;
             }
 
             mesh.quad(
@@ -177,9 +192,13 @@ public class Font {
 
             x += c.xAdvance * scale;
         }
-
+        if (charPoints != null) {
+            loadCharacter(charPoints);
+        }
         return x;
     }
 
-    private record CharData(float x0, float y0, float x1, float y1, float u0, float v0, float u1, float v1, float xAdvance) {}
+    private record CharData(float x0, float y0, float x1, float y1, float u0, float v0, float u1, float v1,
+                            float xAdvance) {
+    }
 }
