@@ -52,7 +52,7 @@ public abstract class ChatInputSuggestorMixin {
             }
 
             int cursor = textField.getCursor();
-            if (cursor >= 1 && (this.window == null || !this.completingSuggestions)) {
+            if (cursor >= length && (this.window == null || !this.completingSuggestions)) {
                 this.pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(this.parse, cursor);
                 this.pendingSuggestions.thenRun(() -> {
                     if (this.pendingSuggestions.isDone()) {
