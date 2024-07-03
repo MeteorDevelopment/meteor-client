@@ -34,7 +34,7 @@ public class Font {
 
     private  long loadTimer = 0;
     private int loadCount=0;
-    private final int loadSpeedLimit = 9;
+    private final int loadSpeedLimit = 7;
     //The number of string that can be loaded per 100ms
 
     public Font(ByteBuffer buffer, int height) {
@@ -104,7 +104,7 @@ public class Font {
     }
 
     private void loadCharacter(int codePoint) {
-        if (packedChars.containsKey(codePoint)) return;
+        if (charMap.containsKey(codePoint)) return;
 
         STBTTPackedchar.Buffer cdata = STBTTPackedchar.create(1);
 
@@ -143,20 +143,16 @@ public class Font {
 
     public double getWidth(String string, int length) {
         double width = 0;
-        List<Integer> charPoints = null;
-
+        if (tryLoadString(string)) {
+            return width;
+        }
         for (int i = 0; i < length; i++) {
             int cp = string.charAt(i);
             CharData c = charMap.get(cp);
             if (c == null) {
-                if (charPoints == null) charPoints = new ArrayList<>();
-                charPoints.add(cp);
                 continue;
             }
             width += c.xAdvance;
-        }
-        if (charPoints != null) {
-            loadCharacter(charPoints);
         }
         return width;
     }
@@ -164,17 +160,33 @@ public class Font {
     public int getHeight() {
         return height;
     }
+    private boolean tryLoadString(String s){
+        boolean isLoading = false;
+        List<Integer> charPoints = null;
+        for (int i = 0; i < s.length(); i++) {
+            int cp = s.charAt(i);
+            CharData c = charMap.get(cp);
+            if (c==null){
+                if (charPoints == null) charPoints = new ArrayList<>();
+                charPoints.add(cp);
+                isLoading  = true;
+            }
+        }
+        if (charPoints != null) {
+            loadCharacter(charPoints);
+        }
+        return isLoading;
+    }
 
 
     public double render(Mesh mesh, String string, double x, double y, Color color, double scale) {
+        if (tryLoadString(string))return x;
+
         y += ascent * this.scale * scale;
-        List<Integer> charPoints = null;
         for (int i = 0; i < string.length(); i++) {
             int cp = string.charAt(i);
             CharData c = charMap.get(cp);
             if (c == null) {
-                if (charPoints == null) charPoints = new ArrayList<>();
-                charPoints.add(cp);
                 continue;
             }
             mesh.quad(
@@ -185,9 +197,6 @@ public class Font {
             );
 
             x += c.xAdvance * scale;
-        }
-        if (charPoints != null) {
-            loadCharacter(charPoints);
         }
         return x;
     }
