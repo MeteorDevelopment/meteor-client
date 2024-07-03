@@ -76,6 +76,14 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    private final Setting<Boolean> pauseInCreative = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-in-creative")
+        .description("Pauses middle click open while the player is in creative mode.")
+        .defaultValue(true)
+        .visible(middleClickOpen::get)
+        .build()
+    );
+
     // Previews
 
     private final Setting<Boolean> shulkers = sgPreviews.add(new BoolSetting.Builder()
@@ -438,7 +446,8 @@ public class BetterTooltips extends Module {
     }
 
     public boolean middleClickOpen() {
-        return isActive() && middleClickOpen.get();
+        return (isActive() && middleClickOpen.get())
+            && (!pauseInCreative.get() || !mc.player.isInCreativeMode());
     }
 
     public boolean previewShulkers() {
