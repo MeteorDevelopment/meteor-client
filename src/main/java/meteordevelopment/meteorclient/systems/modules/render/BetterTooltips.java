@@ -78,7 +78,7 @@ public class BetterTooltips extends Module {
 
     private final Setting<Boolean> pauseInCreative = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-in-creative")
-        .description("Pauses while player is in creative mode.")
+        .description("Pauses middle click open while the player is in creative mode.")
         .defaultValue(true)
         .visible(middleClickOpen::get)
         .build()
