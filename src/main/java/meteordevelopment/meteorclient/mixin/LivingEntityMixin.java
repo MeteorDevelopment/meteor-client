@@ -27,30 +27,21 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Map;
-
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
-    @Shadow
-    @Final
-    private Map<StatusEffect, StatusEffectInstance> activeStatusEffects;
-
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
     }
@@ -132,7 +123,7 @@ public abstract class LivingEntityMixin extends Entity {
         if ((Object) this != mc.player) return original;
 
         Sprint s = Modules.get().get(Sprint.class);
-        if (!s.isActive() || s.mode.get() != Sprint.Mode.Rage || !s.jumpFix.get()) return original;
+        if (!s.rageSprint() || !s.jumpFix.get()) return original;
 
         float forward = Math.signum(mc.player.input.movementForward);
         float strafe = 90 * Math.signum(mc.player.input.movementSideways);

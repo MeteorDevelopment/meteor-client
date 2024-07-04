@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DamageEvent;
@@ -103,8 +104,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     @ModifyExpressionValue(method = "canStartSprinting", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isWalking()Z"))
     private boolean modifyIsWalking(boolean original) {
-        boolean rage = Modules.get().isActive(Sprint.class) && Modules.get().get(Sprint.class).mode.get() == Sprint.Mode.Rage;
-        if (!rage) return original;
+        if (!Modules.get().get(Sprint.class).rageSprint()) return original;
 
         float forwards = Math.abs(input.movementSideways);
         float sideways = Math.abs(input.movementForward);
@@ -114,10 +114,14 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     @ModifyExpressionValue(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/input/Input;hasForwardMovement()Z"))
     private boolean modifyMovement(boolean original) {
-        boolean rage = Modules.get().isActive(Sprint.class) && Modules.get().get(Sprint.class).mode.get() == Sprint.Mode.Rage;
-        if (!rage) return original;
+        if (!Modules.get().get(Sprint.class).rageSprint()) return original;
 
         return Math.abs(input.movementSideways) > 1.0E-5F || Math.abs(input.movementForward) > 1.0E-5F;
+    }
+
+    @WrapWithCondition(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;setSprinting(Z)V", ordinal = 3))
+    private boolean wrapSetSprinting(ClientPlayerEntity instance, boolean b) {
+        return !Modules.get().get(Sprint.class).rageSprint();
     }
 
     // Rotations
