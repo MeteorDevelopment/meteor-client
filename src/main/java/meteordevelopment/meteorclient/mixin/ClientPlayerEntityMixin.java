@@ -10,6 +10,7 @@ import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
+import meteordevelopment.meteorclient.events.entity.player.PlayerTickMovementEvent;
 import meteordevelopment.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.*;
@@ -92,6 +93,13 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     private boolean isSneaking(boolean sneaking) {
         return Modules.get().get(Sneak.class).doPacket() || Modules.get().get(NoSlow.class).airStrict() || sneaking;
     }
+
+    @Inject(method = "tickMovement", at = @At("HEAD"))
+    private void preTickMovement(CallbackInfo ci) {
+        MeteorClient.EVENT_BUS.post(PlayerTickMovementEvent.get());
+    }
+
+    // Sprint
 
     @ModifyExpressionValue(method = "canStartSprinting", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isWalking()Z"))
     private boolean modifyIsWalking(boolean original) {
