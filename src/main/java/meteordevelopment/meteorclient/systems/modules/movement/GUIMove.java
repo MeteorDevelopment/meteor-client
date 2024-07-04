@@ -6,9 +6,9 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.entity.player.PlayerTickMovementEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
 import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
@@ -63,7 +63,7 @@ public class GUIMove extends Module {
         .build()
     );
 
-    private final Setting<Boolean> sprint = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> sprint = sgGeneral.add(new BoolSetting.Builder()
         .name("sprint")
         .description("Allows you to sprint while in GUIs.")
         .defaultValue(true)
@@ -87,7 +87,7 @@ public class GUIMove extends Module {
         .min(0)
         .build()
     );
-    
+
     public GUIMove() {
         super(Categories.Movement, "gui-move", "Allows you to perform various actions while in GUIs.");
     }
@@ -112,7 +112,7 @@ public class GUIMove extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
+    private void onPlayerMoveEvent(PlayerTickMovementEvent event) {
         if (skip()) return;
         if (screens.get() == Screens.GUI && !(mc.currentScreen instanceof WidgetScreen)) return;
         if (screens.get() == Screens.Inventory && mc.currentScreen instanceof WidgetScreen) return;
@@ -125,7 +125,6 @@ public class GUIMove extends Module {
         if (jump.get()) set(mc.options.jumpKey, Input.isPressed(mc.options.jumpKey));
         if (sneak.get()) set(mc.options.sneakKey, Input.isPressed(mc.options.sneakKey));
         if (sprint.get()) set(mc.options.sprintKey, Input.isPressed(mc.options.sprintKey));
-
     }
 
     @EventHandler
