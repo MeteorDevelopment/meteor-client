@@ -130,10 +130,12 @@ public class Modules extends System<Modules> {
     }
 
     @SuppressWarnings("unchecked")
+    @Nullable
     public <T extends Module> T get(Class<T> klass) {
         return (T) moduleInstances.get(klass);
     }
 
+    @Nullable
     public Module get(String name) {
         for (Module module : moduleInstances.values()) {
             if (module.name.equalsIgnoreCase(name)) return module;
