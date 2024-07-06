@@ -205,8 +205,8 @@ public class AutoEat extends Module {
             for (Class<? extends Module> klass : AURAS) {
                 Module module = Modules.get().get(klass);
 
-                if (wasAura.contains(klass) && !module.isActive()) {
-                    module.toggle();
+                if (wasAura.contains(klass)) {
+                    module.enable();
                 }
             }
         }
