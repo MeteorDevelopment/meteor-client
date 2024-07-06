@@ -108,6 +108,7 @@
     "ItemEnchantmentsComponentMixin",
     "ItemEntityMixin",
     "ItemEntityRendererMixin",
+    "ItemGroupsMixin",
     "ItemMixin",
     "ItemRendererMixin",
     "ItemStackAccessor",
