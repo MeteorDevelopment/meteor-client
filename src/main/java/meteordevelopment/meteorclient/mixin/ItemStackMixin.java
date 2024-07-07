@@ -33,8 +33,8 @@ public abstract class ItemStackMixin {
     @ModifyReturnValue(method = "getTooltip", at = @At("RETURN"))
     private List<Text> onGetTooltip(List<Text> original) {
         if (Utils.canUpdate()) {
-            ItemStackTooltipEvent event = MeteorClient.EVENT_BUS.post(ItemStackTooltipEvent.get((ItemStack) (Object) this, original));
-            return event.list;
+            ItemStackTooltipEvent event = MeteorClient.EVENT_BUS.post(new ItemStackTooltipEvent((ItemStack) (Object) this, original));
+            return event.list();
         }
 
         return original;
