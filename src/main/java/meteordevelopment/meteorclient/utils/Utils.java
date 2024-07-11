@@ -52,7 +52,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.Chunk;
-import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Range;
 import org.joml.Matrix4f;
@@ -481,19 +481,13 @@ public class Utils {
 
     public static byte[] readBytes(InputStream in) {
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-            byte[] buffer = new byte[256];
-            int read;
-            while ((read = in.read(buffer)) > 0) out.write(buffer, 0, read);
-
-            in.close();
-            return out.toByteArray();
+            return in.readAllBytes();
         } catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error reading from stream.", e);
+            return new byte[0];
+        } finally {
+            IOUtils.closeQuietly(in);
         }
-
-        return new byte[0];
     }
 
     public static boolean canUpdate() {
