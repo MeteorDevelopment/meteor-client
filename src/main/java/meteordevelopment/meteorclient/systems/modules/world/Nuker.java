@@ -253,9 +253,8 @@ public class Nuker extends Module {
     private int timer;
     private int noBlockTimer;
 
-    private BlockPos.Mutable pos1 = new BlockPos.Mutable(); // Rendering for cubes
-    private BlockPos.Mutable pos2 = new BlockPos.Mutable();
-    private Box box;
+    private final BlockPos.Mutable pos1 = new BlockPos.Mutable(); // Rendering for cubes
+    private final BlockPos.Mutable pos2 = new BlockPos.Mutable();
     int maxh = 0;
     int maxv = 0;
 
@@ -272,11 +271,16 @@ public class Nuker extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (enableRenderBounding.get()){
+        if (enableRenderBounding.get()) {
             // Render bounding box if cube and should break stuff
             if (shape.get() != Shape.Sphere && mode.get() != Mode.Smash) {
-                box = new Box(pos1.toCenterPos(), pos2.toCenterPos());
-                event.renderer.box(box, sideColorBox.get(), lineColorBox.get(), shapeModeBox.get(), 0);
+                int minX = Math.min(pos1.getX(), pos2.getX());
+                int minY = Math.min(pos1.getY(), pos2.getY());
+                int minZ = Math.min(pos1.getZ(), pos2.getZ());
+                int maxX = Math.max(pos1.getX(), pos2.getX());
+                int maxY = Math.max(pos1.getY(), pos2.getY());
+                int maxZ = Math.max(pos1.getZ(), pos2.getZ());
+                event.renderer.box(minX, minY, minZ, maxX, maxY, maxZ, sideColorBox.get(), lineColorBox.get(), shapeModeBox.get(), 0);
             }
         }
     }
@@ -341,7 +345,7 @@ public class Nuker extends Module {
         if (mode.get() == Mode.Flatten){
             pos1.setY((int) Math.floor(pY));
         }
-        box = new Box(pos1.toCenterPos(), pos2.toCenterPos());
+        Box box = new Box(pos1.toCenterPos(), pos2.toCenterPos());
 
         // Find blocks to break
         BlockIterator.register(Math.max((int) Math.ceil(range.get()+1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
