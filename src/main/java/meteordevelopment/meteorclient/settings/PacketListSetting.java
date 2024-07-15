@@ -16,17 +16,22 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.PacketType;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class PacketListSetting extends Setting<Set<PacketType<? extends Packet<?>>>> {
-    public final Predicate<PacketType<? extends Packet<?>>> filter;
+    private final Predicate<PacketType<? extends Packet<?>>> filter;
 
     public PacketListSetting(String name, String description, Set<PacketType<? extends Packet<?>>> defaultValue, Consumer<Set<PacketType<? extends Packet<?>>>> onChanged, Consumer<Setting<Set<PacketType<? extends Packet<?>>>>> onModuleActivated, Predicate<PacketType<? extends Packet<?>>> filter, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.filter = filter;
+    }
+
+    public boolean filter(PacketType<? extends Packet<?>> packetType) {
+        return filter == null || filter.test(packetType);
     }
 
     @Override
@@ -42,7 +47,7 @@ public class PacketListSetting extends Setting<Set<PacketType<? extends Packet<?
         try {
             for (String value : values) {
                 PacketType<? extends Packet<?>> packet = PacketUtils.getPacket(value.trim());
-                if (packet != null && (filter == null || filter.test(packet))) packets.add(packet);
+                if (packet != null && filter(packet)) packets.add(packet);
             }
         } catch (Exception ignored) {}
 
@@ -56,7 +61,7 @@ public class PacketListSetting extends Setting<Set<PacketType<? extends Packet<?
 
     @Override
     public Iterable<String> getSuggestions() {
-        return PacketUtils.getPacketNames();
+        return PacketUtils.getPacketEntries().stream().filter(entry -> this.filter(entry.getKey())).map(Map.Entry::getValue).toList();
     }
 
     @Override

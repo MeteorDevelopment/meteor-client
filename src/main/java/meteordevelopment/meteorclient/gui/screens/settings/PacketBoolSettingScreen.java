@@ -14,7 +14,6 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.PacketType;
 
 import java.util.Set;
-import java.util.function.Predicate;
 
 public class PacketBoolSettingScreen extends RegistryListSettingScreen<PacketType<? extends Packet<?>>> {
     public PacketBoolSettingScreen(GuiTheme theme, Setting<Set<PacketType<? extends Packet<?>>>> setting) {
@@ -23,10 +22,7 @@ public class PacketBoolSettingScreen extends RegistryListSettingScreen<PacketTyp
 
     @Override
     protected boolean includeValue(PacketType<? extends Packet<?>> value) {
-        Predicate<PacketType<? extends Packet<?>>> filter = ((PacketListSetting) setting).filter;
-
-        if (filter == null) return true;
-        return filter.test(value);
+        return ((PacketListSetting) setting).filter(value);
     }
 
     @Override

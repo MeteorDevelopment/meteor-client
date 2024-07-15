@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.utils.network;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.network.NetworkSide;
@@ -96,6 +97,10 @@ public class PacketUtils {
 
     public static Collection<String> getPacketNames() {
         return PACKET_MAPPINGS.values();
+    }
+
+    public static Set<Reference2ObjectMap.Entry<PacketType<? extends Packet<?>>, String>> getPacketEntries() {
+        return PACKET_MAPPINGS.reference2ObjectEntrySet();
     }
 
     private static class PacketRegistry extends SimpleRegistry<PacketType<? extends Packet<?>>> {
