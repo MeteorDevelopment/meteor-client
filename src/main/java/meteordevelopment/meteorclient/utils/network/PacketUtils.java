@@ -88,6 +88,7 @@ public class PacketUtils {
      */
     @Nullable
     public static PacketType<? extends Packet<?>> getPacket(String name) {
+        if (name.startsWith("minecraft:")) name = name.substring(10);
         return PACKET_MAPPINGS_R.get(name);
     }
 
