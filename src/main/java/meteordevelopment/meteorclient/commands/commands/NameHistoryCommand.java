@@ -36,11 +36,14 @@ public class NameHistoryCommand extends Command {
                 PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.get(context);
                 UUID uuid = lookUpTarget.getProfile().getId();
 
-                NameHistory history = Http.get("https://laby.net/api/v2/user/" + uuid + "/get-profile").sendJson(NameHistory.class);
+                NameHistory history = Http.get("https://laby.net/api/v2/user/" + uuid + "/get-profile")
+                    .exceptionHandler(e -> error("There was an error fetching that users name history."))
+                    .sendJson(NameHistory.class);
 
-                if (history == null || history.username_history == null || history.username_history.length == 0) {
-                    error("There was an error fetching that users name history.");
+                if (history == null) {
                     return;
+                } else if (history.username_history == null || history.username_history.length == 0) {
+                    error("There was an error fetching that users name history.");
                 }
 
                 String name = lookUpTarget.getProfile().getName();
