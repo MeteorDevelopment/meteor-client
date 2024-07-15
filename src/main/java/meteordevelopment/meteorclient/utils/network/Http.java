@@ -19,6 +19,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Date;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class Http {
@@ -42,6 +43,7 @@ public class Http {
     public static class Request {
         private final HttpRequest.Builder builder;
         private Method method;
+        private Consumer<Exception> exceptionHandler = Exception::printStackTrace;
 
         private Request(Method method, String url) {
             try {
@@ -96,6 +98,16 @@ public class Http {
             return this;
         }
 
+        public Request ignoreExceptions() {
+            exceptionHandler = e -> {};
+            return this;
+        }
+
+        public Request exceptionHandler(Consumer<Exception> exceptionHandler) {
+            this.exceptionHandler = exceptionHandler;
+            return this;
+        }
+
         private <T> HttpResponse<T> _sendResponse(String accept, HttpResponse.BodyHandler<T> responseBodyHandler) {
             builder.header("Accept", accept);
             if (method != null) builder.method(method.name(), HttpRequest.BodyPublishers.noBody());
@@ -105,8 +117,8 @@ public class Http {
             try {
                 return CLIENT.send(request, responseBodyHandler);
             } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-                return new FailedHttpResponse<>(request);
+                exceptionHandler.accept(e);
+                return new FailedHttpResponse<>(request, e);
             }
         }
 
