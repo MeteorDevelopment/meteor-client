@@ -47,15 +47,19 @@ public class Capes {
 
         MeteorExecutor.execute(() -> {
             // Cape owners
-            Stream<String> lines = Http.get(CAPE_OWNERS_URL).sendLines();
-            if (lines != null) lines.forEach(s -> {
-                String[] split = s.split(" ");
+            Stream<String> lines = Http.get(CAPE_OWNERS_URL)
+                .exceptionHandler(e -> MeteorClient.LOG.error("Could not load capes: " + e.getMessage()))
+                .sendLines();
+            if (lines != null) {
+                lines.forEach(s -> {
+                    String[] split = s.split(" ");
 
-                if (split.length >= 2) {
-                    OWNERS.put(UUID.fromString(split[0]), split[1]);
-                    if (!TEXTURES.containsKey(split[1])) TEXTURES.put(split[1], new Cape(split[1]));
-                }
-            });
+                    if (split.length >= 2) {
+                        OWNERS.put(UUID.fromString(split[0]), split[1]);
+                        if (!TEXTURES.containsKey(split[1])) TEXTURES.put(split[1], new Cape(split[1]));
+                    }
+                });
+            } else return;
 
             // Capes
             lines = Http.get(CAPES_URL).sendLines();
