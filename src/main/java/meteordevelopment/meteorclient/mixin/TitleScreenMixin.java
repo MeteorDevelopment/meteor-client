@@ -42,7 +42,9 @@ public abstract class TitleScreenMixin extends Screen {
                 MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
                 MeteorExecutor.execute(() -> {
-                    String res = Http.get("https://meteorclient.com/api/stats").sendString();
+                    String res = Http.get("https://meteorclient.com/api/stats")
+                        .exceptionHandler(e -> MeteorClient.LOG.error("Could not fetch version information."))
+                        .sendString();
                     if (res == null) return;
 
                     Version latestVer = new Version(JsonParser.parseString(res).getAsJsonObject().get("version").getAsString());
