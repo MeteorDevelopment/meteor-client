@@ -10,15 +10,4 @@ import net.minecraft.text.Text;
 
 import java.util.List;
 
-public class ItemStackTooltipEvent {
-    private static final ItemStackTooltipEvent INSTANCE = new ItemStackTooltipEvent();
-
-    public ItemStack itemStack;
-    public List<Text> list;
-
-    public static ItemStackTooltipEvent get(ItemStack itemStack, List<Text> list) {
-        INSTANCE.itemStack = itemStack;
-        INSTANCE.list = list;
-        return INSTANCE;
-    }
-}
+public record ItemStackTooltipEvent(ItemStack itemStack, List<Text> list) {}

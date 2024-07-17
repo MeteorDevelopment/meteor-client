@@ -72,7 +72,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            ParticleType<?> particleType = Registries.PARTICLE_TYPE.get(new Identifier(tagI.asString()));
+            ParticleType<?> particleType = Registries.PARTICLE_TYPE.get(Identifier.of(tagI.asString()));
             if (particleType != null) get().add(particleType);
         }
 

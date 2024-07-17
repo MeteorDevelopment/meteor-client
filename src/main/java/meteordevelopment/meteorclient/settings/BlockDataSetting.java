@@ -59,7 +59,7 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
 
         NbtCompound valueTag = tag.getCompound("value");
         for (String key : valueTag.getKeys()) {
-            get().put(Registries.BLOCK.get(new Identifier(key)), defaultData.get().copy().fromTag(valueTag.getCompound(key)));
+            get().put(Registries.BLOCK.get(Identifier.of(key)), defaultData.get().copy().fromTag(valueTag.getCompound(key)));
         }
 
         return get();

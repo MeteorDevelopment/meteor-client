@@ -28,7 +28,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class MeteorToast implements Toast {
     public static final int TITLE_COLOR = Color.fromRGBA(145, 61, 226, 255);
     public static final int TEXT_COLOR = Color.fromRGBA(220, 220, 220, 255);
-    private static final Identifier TEXTURE = new Identifier("textures/gui/sprites/toast/advancement.png");
+    private static final Identifier TEXTURE = Identifier.of("textures/gui/sprites/toast/advancement.png");
 
     private ItemStack icon;
     private Text title, text;

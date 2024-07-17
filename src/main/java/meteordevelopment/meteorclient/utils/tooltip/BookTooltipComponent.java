@@ -16,7 +16,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class BookTooltipComponent implements TooltipComponent, MeteorTooltipData {
-    private static final Identifier TEXTURE_BOOK_BACKGROUND = new Identifier("textures/gui/book.png");
+    private static final Identifier TEXTURE_BOOK_BACKGROUND = Identifier.of("textures/gui/book.png");
 
     private final Text page;
 

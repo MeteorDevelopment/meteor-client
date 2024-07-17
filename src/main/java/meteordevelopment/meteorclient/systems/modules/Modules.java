@@ -35,7 +35,6 @@ import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -285,7 +284,7 @@ public class Modules extends System<Modules> {
         if (mc.currentScreen != null || Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
 
         for (Module module : moduleInstances.values()) {
-            if (module.keybind.matches(isKey, value, modifiers) && (isPress || module.toggleOnBindRelease)) {
+            if (module.keybind.matches(isKey, value, modifiers) && (isPress || (module.toggleOnBindRelease && module.isActive()))) {
                 module.toggle();
                 module.sendToggledMsg();
             }
@@ -591,7 +590,7 @@ public class Modules extends System<Modules> {
 
     public static class ModuleRegistry extends SimpleRegistry<Module> {
         public ModuleRegistry() {
-            super(RegistryKey.ofRegistry(new MeteorIdentifier("modules")), Lifecycle.stable());
+            super(RegistryKey.ofRegistry(MeteorClient.identifier("modules")), Lifecycle.stable());
         }
 
         @Override

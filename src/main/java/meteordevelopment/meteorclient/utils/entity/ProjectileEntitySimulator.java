@@ -37,6 +37,9 @@ public class ProjectileEntitySimulator {
     private double gravity;
     private double airDrag, waterDrag;
 
+
+    // held items
+
     public boolean set(Entity user, ItemStack itemStack, double simulated, boolean accurate, double tickDelta) {
         Item item = itemStack.getItem();
 
@@ -67,6 +70,10 @@ public class ProjectileEntitySimulator {
         }
         else if (item instanceof ThrowablePotionItem) {
             set(user, -20, 0.5, simulated, 0.05, 0.8, accurate, tickDelta);
+        }
+        else if (item instanceof WindChargeItem) {
+            set(user, 0, 1.5, simulated, 0, 1.0, accurate, tickDelta);
+            this.airDrag = 1.0;
         }
         else {
             return false;
@@ -111,6 +118,9 @@ public class ProjectileEntitySimulator {
         this.airDrag = 0.99;
         this.waterDrag = waterDrag;
     }
+
+
+    // fired projectiles
 
     public boolean set(Entity entity, boolean accurate) {
         // skip entities in ground

@@ -584,7 +584,7 @@ public class MeteorStarscript {
 
     public static Identifier popIdentifier(Starscript ss, String errorMessage) {
         try {
-            return new Identifier(ss.popString(errorMessage));
+            return Identifier.of(ss.popString(errorMessage));
         }
         catch (InvalidIdentifierException e) {
             ss.error(e.getMessage());

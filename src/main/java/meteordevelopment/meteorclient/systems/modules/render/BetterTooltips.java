@@ -21,7 +21,7 @@ import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.ComponentMap;
+import net.minecraft.block.entity.BeehiveBlockEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.component.type.BannerPatternsComponent.Layer;
@@ -33,7 +33,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.*;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.RawFilteredPair;
@@ -59,6 +58,7 @@ public class BetterTooltips extends Module {
         .name("display-when")
         .description("When to display previews.")
         .defaultValue(DisplayWhen.Keybind)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -67,6 +67,7 @@ public class BetterTooltips extends Module {
         .description("The bind for keybind mode.")
         .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
         .visible(() -> displayWhen.get() == DisplayWhen.Keybind)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -77,12 +78,21 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    private final Setting<Boolean> pauseInCreative = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-in-creative")
+        .description("Pauses middle click open while the player is in creative mode.")
+        .defaultValue(true)
+        .visible(middleClickOpen::get)
+        .build()
+    );
+
     // Previews
 
     private final Setting<Boolean> shulkers = sgPreviews.add(new BoolSetting.Builder()
         .name("containers")
         .description("Shows a preview of a containers when hovering over it in an inventory.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -98,6 +108,7 @@ public class BetterTooltips extends Module {
         .name("echests")
         .description("Shows a preview of your echest when hovering over it in an inventory.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -105,6 +116,7 @@ public class BetterTooltips extends Module {
         .name("maps")
         .description("Shows a preview of a map when hovering over it in an inventory.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -122,6 +134,7 @@ public class BetterTooltips extends Module {
         .name("books")
         .description("Shows contents of a book when hovering over it in an inventory.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -129,6 +142,7 @@ public class BetterTooltips extends Module {
         .name("banners")
         .description("Shows banners' patterns when hovering over it in an inventory. Also works with shields.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -136,6 +150,7 @@ public class BetterTooltips extends Module {
         .name("entities-in-buckets")
         .description("Shows entities in buckets when hovering over it in an inventory.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -145,6 +160,7 @@ public class BetterTooltips extends Module {
         .name("byte-size")
         .description("Displays an item's size in bytes in the tooltip.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -152,6 +168,7 @@ public class BetterTooltips extends Module {
         .name("status-effects")
         .description("Adds list of status effects to tooltips of food items.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -159,6 +176,7 @@ public class BetterTooltips extends Module {
         .name("beehive")
         .description("Displays information about a beehive or bee nest.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -227,6 +245,8 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    private boolean updateTooltips = false;
+
     public BetterTooltips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
     }
@@ -235,36 +255,34 @@ public class BetterTooltips extends Module {
     private void appendTooltip(ItemStackTooltipEvent event) {
         // Status effects
         if (statusEffects.get()) {
-            if (event.itemStack.getItem() == Items.SUSPICIOUS_STEW) {
-                SuspiciousStewEffectsComponent stewEffectsComponent = event.itemStack.get(DataComponentTypes.SUSPICIOUS_STEW_EFFECTS);
+            if (event.itemStack().getItem() == Items.SUSPICIOUS_STEW) {
+                SuspiciousStewEffectsComponent stewEffectsComponent = event.itemStack().get(DataComponentTypes.SUSPICIOUS_STEW_EFFECTS);
                 if (stewEffectsComponent != null) {
                     for (StewEffect effectTag : stewEffectsComponent.effects()) {
                         StatusEffectInstance effect = new StatusEffectInstance(effectTag.effect(), effectTag.duration(), 0);
-                        event.list.add(1, getStatusText(effect));
+                        event.list().add(1, getStatusText(effect));
                     }
                 }
             } else {
-                FoodComponent food = event.itemStack.get(DataComponentTypes.FOOD);
+                FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
                 if (food != null) {
-                    food.effects().forEach(e -> event.list.add(1, getStatusText(e.effect())));
+                    food.effects().forEach(e -> event.list().add(1, getStatusText(e.effect())));
                 }
             }
         }
 
         //Beehive
         if (beehive.get()) {
-            if (event.itemStack.getItem() == Items.BEEHIVE || event.itemStack.getItem() == Items.BEE_NEST) {
-                ComponentMap components = event.itemStack.getComponents();
-                BlockStateComponent blockStateComponent = components.get(DataComponentTypes.BLOCK_STATE);
+            if (event.itemStack().getItem() == Items.BEEHIVE || event.itemStack().getItem() == Items.BEE_NEST) {
+                BlockStateComponent blockStateComponent = event.itemStack().get(DataComponentTypes.BLOCK_STATE);
                 if (blockStateComponent != null) {
                     String level = blockStateComponent.properties().get("honey_level");
-                    event.list.add(1, Text.literal(String.format("%sHoney level: %s%s%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
+                    event.list().add(1, Text.literal(String.format("%sHoney level: %s%s%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
                 }
 
-                NbtComponent nbtComponent = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
-                if (nbtComponent != null) {
-                    NbtList beesTag = nbtComponent.copyNbt().getList("Bees", 10);
-                    event.list.add(1, Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, beesTag.size(), Formatting.GRAY)));
+                List<BeehiveBlockEntity.BeeData> bees = event.itemStack().get(DataComponentTypes.BEES);
+                if (bees != null) {
+                    event.list().add(1, Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, bees.size(), Formatting.GRAY)));
                 }
             }
         }
@@ -272,7 +290,7 @@ public class BetterTooltips extends Module {
         // Item size tooltip
         if (byteSize.get()) {
             try {
-                event.itemStack.encode(mc.player.getRegistryManager()).write(ByteCountDataOutput.INSTANCE);
+                event.itemStack().encode(mc.player.getRegistryManager()).write(ByteCountDataOutput.INSTANCE);
 
                 int byteCount = ByteCountDataOutput.INSTANCE.getCount();
                 String count;
@@ -282,24 +300,24 @@ public class BetterTooltips extends Module {
                 if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
                 else count = String.format("%d bytes", byteCount);
 
-                event.list.add(Text.literal(count).formatted(Formatting.GRAY));
+                event.list().add(Text.literal(count).formatted(Formatting.GRAY));
             } catch (Exception e) {
-                event.list.add(Text.literal("Error getting bytes.").formatted(Formatting.RED));
+                event.list().add(Text.literal("Error getting bytes.").formatted(Formatting.RED));
             }
         }
 
         // Hold to preview tooltip
-        if ((shulkers.get() && !previewShulkers() && Utils.hasItems(event.itemStack))
-            || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
-            || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
-            || (event.itemStack.getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
-            || (event.itemStack.getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
-            || (event.itemStack.getItem() instanceof EntityBucketItem && entitiesInBuckets.get() && !previewEntities())
-            || (event.itemStack.getItem() instanceof BannerItem && banners.get() && !previewBanners())
-            || (event.itemStack.getItem() instanceof BannerPatternItem && banners.get() && !previewBanners())
-            || (event.itemStack.getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
-            event.list.add(Text.literal(""));
-            event.list.add(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
+        if ((shulkers.get() && !previewShulkers() && Utils.hasItems(event.itemStack()))
+            || (event.itemStack().getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
+            || (event.itemStack().getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
+            || (event.itemStack().getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
+            || (event.itemStack().getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
+            || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get() && !previewEntities())
+            || (event.itemStack().getItem() instanceof BannerItem && banners.get() && !previewBanners())
+            || (event.itemStack().getItem() instanceof BannerPatternItem && banners.get() && !previewBanners())
+            || (event.itemStack().getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
+            event.list().add(Text.literal(""));
+            event.list().add(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
         }
     }
 
@@ -441,7 +459,8 @@ public class BetterTooltips extends Module {
     }
 
     public boolean middleClickOpen() {
-        return isActive() && middleClickOpen.get();
+        return (isActive() && middleClickOpen.get())
+            && (!pauseInCreative.get() || !mc.player.isInCreativeMode());
     }
 
     public boolean previewShulkers() {
@@ -474,6 +493,15 @@ public class BetterTooltips extends Module {
 
     private boolean isPressed() {
         return (keybind.get().isPressed() && displayWhen.get() == DisplayWhen.Keybind) || displayWhen.get() == DisplayWhen.Always;
+    }
+
+    public boolean updateTooltips() {
+        if (updateTooltips && isActive()) {
+            updateTooltips = false;
+            return true;
+        }
+
+        return false;
     }
 
     public enum DisplayWhen {

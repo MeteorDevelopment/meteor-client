@@ -56,7 +56,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     public Friend get(String name) {
         for (Friend friend : friends) {
-            if (friend.name.equals(name)) {
+            if (friend.name.equalsIgnoreCase(name)) {
                 return friend;
             }
         }

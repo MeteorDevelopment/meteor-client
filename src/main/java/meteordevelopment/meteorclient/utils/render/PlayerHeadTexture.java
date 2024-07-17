@@ -2,8 +2,8 @@ package meteordevelopment.meteorclient.utils.render;
 
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.Texture;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.network.Http;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
@@ -67,7 +67,7 @@ public class PlayerHeadTexture extends Texture {
     }
 
     public PlayerHeadTexture() {
-        try (InputStream inputStream = mc.getResourceManager().getResource(new MeteorIdentifier("textures/steve.png")).get().getInputStream()) {
+        try (InputStream inputStream = mc.getResourceManager().getResource(MeteorClient.identifier("textures/steve.png")).get().getInputStream()) {
             ByteBuffer data = TextureUtil.readResource(inputStream);
             data.rewind();
 

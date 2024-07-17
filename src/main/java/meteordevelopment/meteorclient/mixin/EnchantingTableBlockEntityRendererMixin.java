@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(EnchantingTableBlockEntityRenderer.class)
 public abstract class EnchantingTableBlockEntityRendererMixin {
-    @WrapWithCondition(method = "render(Lnet/minecraft/block/entity/EnchantingTableBlockEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/BookModel;renderBook(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V"))
-    private boolean onRenderBookModelRenderProxy(BookModel model, MatrixStack matrixStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+    @WrapWithCondition(method = "render(Lnet/minecraft/block/entity/EnchantingTableBlockEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/BookModel;renderBook(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;III)V"))
+    private boolean onRenderBookModelRenderProxy(BookModel instance, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int i) {
         return !Modules.get().get(NoRender.class).noEnchTableBook();
     }
 }

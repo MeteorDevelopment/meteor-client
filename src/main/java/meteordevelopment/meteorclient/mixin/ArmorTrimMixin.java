@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ArmorTrim.class)
-public class ArmorTrimMixin {
+public abstract class ArmorTrimMixin {
     @ModifyExpressionValue(method = "appendTooltip", at = @At(value = "FIELD", target = "Lnet/minecraft/item/trim/ArmorTrim;showInTooltip:Z"))
     private boolean modifyShowInTooltip(boolean original) {
         BetterTooltips bt = Modules.get().get(BetterTooltips.class);
