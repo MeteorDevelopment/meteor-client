@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -22,7 +23,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 
 public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -137,7 +140,15 @@ public class AutoLog extends Module {
     }
 
     private void disconnect(String reason) {
-        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal("[AutoLog] " + reason)));
+        MutableText text = Text.literal("[AutoLog] " + reason);
+        AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
+
+        if (autoReconnect.isActive()) {
+            text.append(Text.literal("\n\nINFO - AutoReconnect was disabled").withColor(Colors.GRAY));
+            autoReconnect.toggle();
+        }
+
+        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(text));
     }
 
     private class StaticListener {
