@@ -157,7 +157,7 @@ public class NoFall extends Module {
 
         // Bucket mode
         else if (mode.get() == Mode.Place) {
-            PlacedItem placedItem1 = autoDimension.get() && PlayerUtils.getDimension() == Dimension.Nether ? PlacedItem.PowderSnow : placedItem.get();
+            PlacedItem placedItem1 = autoDimension.get() && PlayerUtils.getDimension() == Dimension.Nether && placedItem.get() == PlacedItem.Bucket ? PlacedItem.PowderSnow : placedItem.get();
             if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
                 Item item = placedItem1.item;
 
