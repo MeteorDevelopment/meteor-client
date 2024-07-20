@@ -178,7 +178,7 @@ public class NoFall extends Module {
                 timer++;
                 if (mc.player.getBlockStateAtPos().getBlock() == placedItem1.block) {
                     useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos, true);
-                } else if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == placedItem1.block) {
+                } else if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == placedItem1.block) { //check if the block is still there
                     useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos.down(), true);
                 }
             }
