@@ -178,6 +178,8 @@ public class NoFall extends Module {
                 timer++;
                 if (mc.player.getBlockStateAtPos().getBlock() == placedItem1.block) {
                     useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos, true);
+                } else if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == Blocks.POWDER_SNOW && mc.player.fallDistance==0 && placedItem1.block==Blocks.POWDER_SNOW){ //check if the powder snow block is still there and the player is on the ground
+                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos.down(), true);
                 }
             }
         }
