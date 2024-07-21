@@ -22,7 +22,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.TntMinecartEntity;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -78,33 +77,6 @@ public class AutoLog extends Module {
         .build()
     );
 
-    private final Setting<Boolean> TNTCartLog = sgGeneral.add(new BoolSetting.Builder()
-        .name("TNT-Minecart-nearby")
-        .description("Disconnects when a certain number of TNT Minecarts appears near you.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Integer> rangeTNTcart = sgGeneral.add(new IntSetting.Builder() //range for TNT Minecart
-        .name("range-for-TNT-minecart")
-        .description("How close a TNT Minecart has to be to you before you disconnect.")
-        .defaultValue(5)
-        .range(1, 32)
-        .sliderMax(16)
-        .visible(TNTCartLog::get)
-        .build()
-    );
-
-    private final Setting<Integer> numOfTNTminecart = sgGeneral.add(new IntSetting.Builder() //Number of TNT Minecart
-        .name("No-of-TNT-minecart")
-        .description("How many TNT Minecarts have to be near you before you disconnect.")
-        .defaultValue(2)
-        .range(1, 24)
-        .sliderMax(10)
-        .visible(TNTCartLog::get)
-        .build()
-    );
-
     private final Setting<Boolean> smartToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("smart-toggle")
         .description("Disables Auto Log after a low-health logout. WILL re-enable once you heal.")
@@ -143,10 +115,8 @@ public class AutoLog extends Module {
             if (toggleOff.get()) this.toggle();
         }
 
-        if (!onlyTrusted.get() && !instantDeath.get() && !crystalLog.get() && !TNTCartLog.get())
-            return; // only check all entities if needed
 
-        int tntMinecartCount = 0;
+        if (!onlyTrusted.get() && !instantDeath.get() && !crystalLog.get()) return; // only check all entities if needed
 
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity player && player.getUuid() != mc.player.getUuid()) {
@@ -165,18 +135,6 @@ public class AutoLog extends Module {
             if (crystalLog.get() && entity instanceof EndCrystalEntity && PlayerUtils.isWithin(entity, range.get())) {
                 disconnect("End Crystal appeared within specified range.");
                 if (toggleOff.get()) this.toggle();
-            }
-
-            if (TNTCartLog.get() && entity instanceof TntMinecartEntity) {
-                if (PlayerUtils.isWithin(entity, rangeTNTcart.get())) {
-                    tntMinecartCount++;
-                }
-                if (tntMinecartCount >= numOfTNTminecart.get()) {
-                    disconnect("Too many TNT Minecarts within specified range.");
-                    if (toggleOff.get())
-                        this.toggle();
-                    break;
-                }
             }
         }
     }
