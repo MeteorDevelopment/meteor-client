@@ -76,7 +76,7 @@ public class AutoLog extends Module {
     );
 
     private final Setting<Boolean> totalCount = sgEntities.add(new BoolSetting.Builder()
-        .name("total-count")
+        .name("total-the-count")
         .description("Whether total number of all selected entities or each entity.")
         .defaultValue(false)
         .visible(() -> !entities.get().isEmpty())
@@ -86,7 +86,7 @@ public class AutoLog extends Module {
         .name("total-count")
         .description("Total number of all selected entities combined have to be near you before you disconnect.")
         .defaultValue(10)
-        .range(1, Integer.MAX_VALUE)
+        .min(1)
         .sliderMax(32)
         .visible(() -> totalCount.get() && !entities.get().isEmpty())
         .build()
@@ -96,7 +96,7 @@ public class AutoLog extends Module {
         .name("each-count")
         .description("Minimum number of each entity have to be near you before you disconnect.")
         .defaultValue(2)
-        .range(1, Integer.MAX_VALUE)
+        .min(1)
         .sliderMax(16)
         .visible(() -> !totalCount.get() && !entities.get().isEmpty())
         .build()
@@ -106,7 +106,7 @@ public class AutoLog extends Module {
         .name("range")
         .description("How close an entity has to be to you before you disconnect.")
         .defaultValue(5)
-        .range(1, 128)
+        .min(1)
         .sliderMax(16)
         .visible(() -> !entities.get().isEmpty())
         .build()
@@ -185,7 +185,9 @@ public class AutoLog extends Module {
             for (Entity entity : mc.world.getEntities()) {
                 if (PlayerUtils.isWithin(entity, range.get()) && entities.get().contains(entity.getType())) {
                     totalEntities++;
-                    entityCounts.put(entity.getType(), entityCounts.getOrDefault(entity.getType(), 0) + 1);
+                    if (!totalCount.get()) {
+                        entityCounts.put(entity.getType(), entityCounts.getOrDefault(entity.getType(), 0) + 1);
+                    }
                 }
             }
 
