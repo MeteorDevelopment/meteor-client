@@ -26,15 +26,17 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgEntities = settings.createGroup("Entities");
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
         .name("health")
@@ -66,43 +68,43 @@ public class AutoLog extends Module {
         .build()
     );
 
-    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder() //Player chooses the entity from a list
+    private final Setting<Set<EntityType<?>>> entities = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select specific entities.")
         .defaultValue(EntityType.END_CRYSTAL)
         .build()
     );
 
-    private final Setting<Boolean> TotalCount = sgGeneral.add(new BoolSetting.Builder() //Allows player to select whether the number of enitites will be for each type or all selected combined
-        .name("Total the Entities")
-        .description("Whether total number of all selected entites or each entity")
+    private final Setting<Boolean> totalCount = sgEntities.add(new BoolSetting.Builder()
+        .name("total-count")
+        .description("Whether total number of all selected entities or each entity.")
         .defaultValue(false)
         .visible(() -> !entities.get().isEmpty())
         .build());
 
-    private final Setting<Integer> TotCount = sgGeneral.add(new IntSetting.Builder() //Number of all total combined Entities
-        .name("Total Count")
-        .description("Total number of all selected entites combined have to be near you before you disconnect.")
+    private final Setting<Integer> totCount = sgEntities.add(new IntSetting.Builder()
+        .name("total-count")
+        .description("Total number of all selected entities combined have to be near you before you disconnect.")
         .defaultValue(10)
-        .range(1, 96)
+        .range(1, Integer.MAX_VALUE)
         .sliderMax(32)
-        .visible(() -> TotalCount.get() && !entities.get().isEmpty())
+        .visible(() -> totalCount.get() && !entities.get().isEmpty())
         .build()
     );
 
-    private final Setting<Integer> EachCount = sgGeneral.add(new IntSetting.Builder() //Number of each type of selected Entity
-        .name("Each Count")
+    private final Setting<Integer> eachCount = sgEntities.add(new IntSetting.Builder()
+        .name("each-count")
         .description("Minimum number of each entity have to be near you before you disconnect.")
         .defaultValue(2)
-        .range(1, 96)
+        .range(1, Integer.MAX_VALUE)
         .sliderMax(16)
-        .visible(() -> !TotalCount.get() && !entities.get().isEmpty())
+        .visible(() -> !totalCount.get() && !entities.get().isEmpty())
         .build()
     );
 
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder() //range for selected entity
-        .name("Range")
-        .description("How close a entity has to be to you before you disconnect.")
+    private final Setting<Integer> range = sgEntities.add(new IntSetting.Builder()
+        .name("range")
+        .description("How close an entity has to be to you before you disconnect.")
         .defaultValue(5)
         .range(1, 128)
         .sliderMax(16)
@@ -124,6 +126,10 @@ public class AutoLog extends Module {
         .build()
     );
 
+    //Declaring variables outside the loop for better efficiency
+    private final Object2IntMap<EntityType<?>> entityCounts = new Object2IntOpenHashMap<>();
+    private int totalEntities = 0;
+
     public AutoLog() {
         super(Categories.Combat, "auto-log", "Automatically disconnects you when certain requirements are met.");
     }
@@ -143,7 +149,8 @@ public class AutoLog extends Module {
             }
         }
 
-        if (smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()){
+        if (smart.get() && playerHealth + mc.player.getAbsorptionAmount()
+            - PlayerUtils.possibleHealthReductions() < health.get()) {
             disconnect("Health was going to be lower than " + health.get() + ".");
             if (toggleOff.get()) this.toggle();
         }
@@ -168,25 +175,32 @@ public class AutoLog extends Module {
             }
         }
 
-        if (!entities.get().isEmpty()) { // Check if the entities list is not empty
-            int totalEntities = 0;
-            Map<EntityType<?>, Integer> entityCounts = new HashMap<>();
+        // Entities detection Logic
+        if (!entities.get().isEmpty()) {
+            // Reset totalEntities count and clear the entityCounts map
+            totalEntities = 0;
+            entityCounts.clear();
 
-            for (Entity entity : mc.world.getEntities()) { // Iterate through all entities in the world
-                if (PlayerUtils.isWithin(entity, range.get()) && entities.get().contains(entity.getType())) { // Check if the entity is within the specified range and is in the selected entities list
+            // Iterate through all entities in the world and count the ones that match the selected types and are within range
+            for (Entity entity : mc.world.getEntities()) {
+                if (PlayerUtils.isWithin(entity, range.get()) && entities.get().contains(entity.getType())) {
                     totalEntities++;
-                    entityCounts.put(entity.getType(), entityCounts.getOrDefault(entity.getType(), 0) + 1); // Increment the count for the entity type
+                    entityCounts.put(entity.getType(), entityCounts.getOrDefault(entity.getType(), 0) + 1);
                 }
             }
 
-            if (TotalCount.get() && totalEntities >= TotCount.get()) { // Check if the total count of entities exceeds the limit
+            if (totalCount.get() && totalEntities >= totCount.get()) {
                 disconnect("Total number of selected entities within range exceeded the limit.");
-                if (toggleOff.get()) this.toggle();
-            } else if (!TotalCount.get()) { // Check if the count of each entity type exceeds the limit
-                for (Map.Entry<EntityType<?>, Integer> entry : entityCounts.entrySet()) {
-                    if (entry.getValue() >= EachCount.get()) {
-                        disconnect("Number of " + entry.getKey().getName().getString() + " within range exceeded the limit.");
-                        if (toggleOff.get()) this.toggle();
+                if (toggleOff.get())
+                    this.toggle();
+            } else if (!totalCount.get()) {
+                // Check if the count of each entity type exceeds the specified limit
+                for (Object2IntMap.Entry<EntityType<?>> entry : entityCounts.object2IntEntrySet()) {
+                    if (entry.getIntValue() >= eachCount.get()) {
+                        disconnect("Number of " + entry.getKey().getName().getString()
+                            + " within range exceeded the limit.");
+                        if (toggleOff.get())
+                            this.toggle();
                         break;
                     }
                 }
