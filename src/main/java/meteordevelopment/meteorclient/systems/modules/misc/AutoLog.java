@@ -66,21 +66,21 @@ public class AutoLog extends Module {
         .build()
     );
 
-    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder() //Player chooses the entity from a list
         .name("entities")
         .description("Select specific entities.")
         .defaultValue(EntityType.END_CRYSTAL)
         .build()
     );
 
-    private final Setting<Boolean> TotalCount = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> TotalCount = sgGeneral.add(new BoolSetting.Builder() //Allows player to select whether the number of enitites will be for each type or all selected combined
         .name("Total the Entities")
         .description("Whether total number of all selected entites or each entity")
         .defaultValue(false)
         .visible(() -> !entities.get().isEmpty())
         .build());
 
-    private final Setting<Integer> TotCount = sgGeneral.add(new IntSetting.Builder() //Number of TNT Minecart
+    private final Setting<Integer> TotCount = sgGeneral.add(new IntSetting.Builder() //Number of all total combined Entities
         .name("Total Count")
         .description("Total number of all selected entites combined have to be near you before you disconnect.")
         .defaultValue(10)
@@ -90,7 +90,7 @@ public class AutoLog extends Module {
         .build()
     );
 
-    private final Setting<Integer> EachCount = sgGeneral.add(new IntSetting.Builder() //Number of TNT Minecart
+    private final Setting<Integer> EachCount = sgGeneral.add(new IntSetting.Builder() //Number of each type of selected Entity
         .name("Each Count")
         .description("Minimum number of each entity have to be near you before you disconnect.")
         .defaultValue(2)
@@ -100,7 +100,7 @@ public class AutoLog extends Module {
         .build()
     );
 
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder() //range for TNT Minecart
+    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder() //range for selected entity
         .name("Range")
         .description("How close a entity has to be to you before you disconnect.")
         .defaultValue(5)
@@ -168,21 +168,21 @@ public class AutoLog extends Module {
             }
         }
 
-        if (!entities.get().isEmpty()) {
+        if (!entities.get().isEmpty()) { // Check if the entities list is not empty
             int totalEntities = 0;
             Map<EntityType<?>, Integer> entityCounts = new HashMap<>();
 
-            for (Entity entity : mc.world.getEntities()) {
-                if (PlayerUtils.isWithin(entity, range.get()) && entities.get().contains(entity.getType())) {
+            for (Entity entity : mc.world.getEntities()) { // Iterate through all entities in the world
+                if (PlayerUtils.isWithin(entity, range.get()) && entities.get().contains(entity.getType())) { // Check if the entity is within the specified range and is in the selected entities list
                     totalEntities++;
-                    entityCounts.put(entity.getType(), entityCounts.getOrDefault(entity.getType(), 0) + 1);
+                    entityCounts.put(entity.getType(), entityCounts.getOrDefault(entity.getType(), 0) + 1); // Increment the count for the entity type
                 }
             }
 
-            if (TotalCount.get() && totalEntities >= TotCount.get()) {
+            if (TotalCount.get() && totalEntities >= TotCount.get()) { // Check if the total count of entities exceeds the limit
                 disconnect("Total number of selected entities within range exceeded the limit.");
                 if (toggleOff.get()) this.toggle();
-            } else if (!TotalCount.get()) {
+            } else if (!TotalCount.get()) { // Check if the count of each entity type exceeds the limit
                 for (Map.Entry<EntityType<?>, Integer> entry : entityCounts.entrySet()) {
                     if (entry.getValue() >= EachCount.get()) {
                         disconnect("Number of " + entry.getKey().getName().getString() + " within range exceeded the limit.");
