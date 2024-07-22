@@ -5,9 +5,14 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Map;
+
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.EntityTypeListSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -20,6 +25,7 @@ import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
@@ -60,20 +66,47 @@ public class AutoLog extends Module {
         .build()
     );
 
-    private final Setting<Boolean> crystalLog = sgGeneral.add(new BoolSetting.Builder()
-        .name("crystal-nearby")
-        .description("Disconnects when a crystal appears near you.")
-        .defaultValue(false)
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+        .name("entities")
+        .description("Select specific entities.")
+        .defaultValue(EntityType.END_CRYSTAL)
         .build()
     );
 
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-        .name("range")
-        .description("How close a crystal has to be to you before you disconnect.")
-        .defaultValue(4)
-        .range(1, 10)
-        .sliderMax(5)
-        .visible(crystalLog::get)
+    private final Setting<Boolean> TotalCount = sgGeneral.add(new BoolSetting.Builder()
+        .name("Total the Entities")
+        .description("Whether total number of all selected entites or each entity")
+        .defaultValue(false)
+        .visible(() -> !entities.get().isEmpty())
+        .build());
+
+    private final Setting<Integer> TotCount = sgGeneral.add(new IntSetting.Builder() //Number of TNT Minecart
+        .name("Total Count")
+        .description("Total number of all selected entites combined have to be near you before you disconnect.")
+        .defaultValue(10)
+        .range(1, 96)
+        .sliderMax(32)
+        .visible(() -> TotalCount.get() && !entities.get().isEmpty())
+        .build()
+    );
+
+    private final Setting<Integer> EachCount = sgGeneral.add(new IntSetting.Builder() //Number of TNT Minecart
+        .name("Each Count")
+        .description("Minimum number of each entity have to be near you before you disconnect.")
+        .defaultValue(2)
+        .range(1, 96)
+        .sliderMax(16)
+        .visible(() -> !TotalCount.get() && !entities.get().isEmpty())
+        .build()
+    );
+
+    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder() //range for TNT Minecart
+        .name("Range")
+        .description("How close a entity has to be to you before you disconnect.")
+        .defaultValue(5)
+        .range(1, 128)
+        .sliderMax(16)
+        .visible(() -> !entities.get().isEmpty())
         .build()
     );
 
@@ -115,26 +148,48 @@ public class AutoLog extends Module {
             if (toggleOff.get()) this.toggle();
         }
 
-
-        if (!onlyTrusted.get() && !instantDeath.get() && !crystalLog.get()) return; // only check all entities if needed
+        if (!onlyTrusted.get() && !instantDeath.get() && entities.get().isEmpty())
+            return; // only check all entities if needed
 
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity player && player.getUuid() != mc.player.getUuid()) {
                 if (onlyTrusted.get() && player != mc.player && !Friends.get().isFriend(player)) {
-                        disconnect("A non-trusted player appeared in your render distance.");
-                        if (toggleOff.get()) this.toggle();
-                        break;
-                }
-                if (instantDeath.get() && PlayerUtils.isWithin(entity, 8) && DamageUtils.getAttackDamage(player, mc.player)
-                        > playerHealth + mc.player.getAbsorptionAmount()) {
-                    disconnect("Anti-32k measures.");
+                    disconnect("A non-trusted player appeared in your render distance.");
                     if (toggleOff.get()) this.toggle();
                     break;
                 }
+                if (instantDeath.get() && PlayerUtils.isWithin(entity, 8) && DamageUtils.getAttackDamage(player, mc.player)
+                    > playerHealth + mc.player.getAbsorptionAmount()) {
+                    disconnect("Anti-32k measures.");
+                    if (toggleOff.get())
+                        this.toggle();
+                    break;
+                }
             }
-            if (crystalLog.get() && entity instanceof EndCrystalEntity && PlayerUtils.isWithin(entity, range.get())) {
-                disconnect("End Crystal appeared within specified range.");
+        }
+
+        if (!entities.get().isEmpty()) {
+            int totalEntities = 0;
+            Map<EntityType<?>, Integer> entityCounts = new HashMap<>();
+
+            for (Entity entity : mc.world.getEntities()) {
+                if (PlayerUtils.isWithin(entity, range.get()) && entities.get().contains(entity.getType())) {
+                    totalEntities++;
+                    entityCounts.put(entity.getType(), entityCounts.getOrDefault(entity.getType(), 0) + 1);
+                }
+            }
+
+            if (TotalCount.get() && totalEntities >= TotCount.get()) {
+                disconnect("Total number of selected entities within range exceeded the limit.");
                 if (toggleOff.get()) this.toggle();
+            } else if (!TotalCount.get()) {
+                for (Map.Entry<EntityType<?>, Integer> entry : entityCounts.entrySet()) {
+                    if (entry.getValue() >= EachCount.get()) {
+                        disconnect("Number of " + entry.getKey().getName().getString() + " within range exceeded the limit.");
+                        if (toggleOff.get()) this.toggle();
+                        break;
+                    }
+                }
             }
         }
     }
@@ -157,11 +212,11 @@ public class AutoLog extends Module {
             if (isActive()) disableHealthListener();
 
             else if (Utils.canUpdate()
-                    && !mc.player.isDead()
-                    && mc.player.getHealth() > health.get()) {
+                && !mc.player.isDead()
+                && mc.player.getHealth() > health.get()) {
                 toggle();
                 disableHealthListener();
-           }
+            }
         }
     }
 
