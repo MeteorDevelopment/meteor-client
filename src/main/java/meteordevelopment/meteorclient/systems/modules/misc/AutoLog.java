@@ -70,35 +70,35 @@ public class AutoLog extends Module {
 
     private final Setting<Set<EntityType<?>>> entities = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entities")
-        .description("Select specific entities.")
+        .description("Disconnects when a specified entity is present within a specified range.")
         .defaultValue(EntityType.END_CRYSTAL)
         .build()
     );
 
-    private final Setting<Boolean> totalCount = sgEntities.add(new BoolSetting.Builder()
-        .name("total-the-count")
-        .description("Whether total number of all selected entities or each entity.")
-        .defaultValue(false)
+    private final Setting<Boolean> useTotalCount = sgEntities.add(new BoolSetting.Builder()
+        .name("use-total-count")
+        .description("Toggle between counting the total number of all selected entities or each entity individually.")
+        .defaultValue(true)
         .visible(() -> !entities.get().isEmpty())
         .build());
 
-    private final Setting<Integer> totCount = sgEntities.add(new IntSetting.Builder()
-        .name("total-count")
-        .description("Total number of all selected entities combined have to be near you before you disconnect.")
+    private final Setting<Integer> combinedEntityThreshold = sgEntities.add(new IntSetting.Builder()
+        .name("combined-entity-threshold")
+        .description("The minimum total number of selected entities that must be near you before disconnection occurs.")
         .defaultValue(10)
         .min(1)
         .sliderMax(32)
-        .visible(() -> totalCount.get() && !entities.get().isEmpty())
+        .visible(() -> useTotalCount.get() && !entities.get().isEmpty())
         .build()
     );
 
-    private final Setting<Integer> eachCount = sgEntities.add(new IntSetting.Builder()
-        .name("each-count")
-        .description("Minimum number of each entity have to be near you before you disconnect.")
+    private final Setting<Integer> individualEntityThreshold = sgEntities.add(new IntSetting.Builder()
+        .name("individual-entity-threshold")
+        .description("The minimum number of entities individually that must be near you before disconnection occurs.")
         .defaultValue(2)
         .min(1)
         .sliderMax(16)
-        .visible(() -> !totalCount.get() && !entities.get().isEmpty())
+        .visible(() -> !useTotalCount.get() && !entities.get().isEmpty())
         .build()
     );
 
@@ -185,20 +185,20 @@ public class AutoLog extends Module {
             for (Entity entity : mc.world.getEntities()) {
                 if (PlayerUtils.isWithin(entity, range.get()) && entities.get().contains(entity.getType())) {
                     totalEntities++;
-                    if (!totalCount.get()) {
+                    if (!useTotalCount.get()) {
                         entityCounts.put(entity.getType(), entityCounts.getOrDefault(entity.getType(), 0) + 1);
                     }
                 }
             }
 
-            if (totalCount.get() && totalEntities >= totCount.get()) {
+            if (useTotalCount.get() && totalEntities >= combinedEntityThreshold.get()) {
                 disconnect("Total number of selected entities within range exceeded the limit.");
                 if (toggleOff.get())
                     this.toggle();
-            } else if (!totalCount.get()) {
+            } else if (!useTotalCount.get()) {
                 // Check if the count of each entity type exceeds the specified limit
                 for (Object2IntMap.Entry<EntityType<?>> entry : entityCounts.object2IntEntrySet()) {
-                    if (entry.getIntValue() >= eachCount.get()) {
+                    if (entry.getIntValue() >= individualEntityThreshold.get()) {
                         disconnect("Number of " + entry.getKey().getName().getString()
                             + " within range exceeded the limit.");
                         if (toggleOff.get())
