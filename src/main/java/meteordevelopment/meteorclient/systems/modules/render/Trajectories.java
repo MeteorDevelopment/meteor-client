@@ -46,6 +46,14 @@ public class Trajectories extends Module {
         .build()
     );
 
+    private final Setting<Boolean> preRender = sgGeneral.add(new BoolSetting.Builder() // Render the trajectory
+        // beforehand
+        .name("Pre-render")
+        .description("Calculates and renders trajectories for Bow and Crossbow even before charging them")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> otherPlayers = sgGeneral.add(new BoolSetting.Builder()
         .name("other-players")
         .description("Calculates trajectories for other players.")
@@ -147,14 +155,15 @@ public class Trajectories extends Module {
         }
 
         // Calculate paths
-        if (!simulator.set(player, itemStack, 0, accurate.get(), tickDelta)) return;
+        //Added one more parameter to the set method
+        if (!simulator.set(player, itemStack, preRender.get(), 0, accurate.get(), tickDelta)) return;
         getEmptyPath().calculate();
 
         if (itemStack.getItem() instanceof CrossbowItem && Utils.hasEnchantment(itemStack, Enchantments.MULTISHOT)) {
-            if (!simulator.set(player, itemStack, MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // left multishot arrow
+            if (!simulator.set(player, itemStack, preRender.get(), MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // left multishot arrow
             getEmptyPath().calculate();
 
-            if (!simulator.set(player, itemStack, -MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // right multishot arrow
+            if (!simulator.set(player, itemStack, preRender.get(), -MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // right multishot arrow
             getEmptyPath().calculate();
         }
     }

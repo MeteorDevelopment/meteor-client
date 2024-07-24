@@ -40,12 +40,15 @@ public class ProjectileEntitySimulator {
 
     // held items
 
-    public boolean set(Entity user, ItemStack itemStack, double simulated, boolean accurate, double tickDelta) {
+    public boolean set(Entity user, ItemStack itemStack, boolean prerender, double simulated, boolean accurate, double tickDelta) {
         Item item = itemStack.getItem();
 
         if (item instanceof BowItem) {
             double charge = BowItem.getPullProgress(mc.player.getItemUseTime());
-            if (charge <= 0) return false;
+            if (charge <= 0 && !prerender)
+                return false;
+            else if (charge == 0 && prerender)
+                charge = 1; // render fully charged bow
 
             set(user, 0, charge * 3, simulated, 0.05000000074505806, 0.6, accurate, tickDelta);
         }
