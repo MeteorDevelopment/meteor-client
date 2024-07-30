@@ -386,7 +386,7 @@ public class Nuker extends Module {
         BlockIterator.after(() -> {
             // Sort blocks
             if (sortMode.get() == SortMode.TopDown)
-                blocks.sort(Comparator.comparingDouble(value -> -1*value.getY()));
+                blocks.sort(Comparator.comparingDouble(value -> -value.getY()));
             else if (sortMode.get() != SortMode.None)
                 blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
 
