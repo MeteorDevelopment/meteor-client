@@ -353,7 +353,7 @@ public class Nuker extends Module {
 
         // Find blocks to break
         BlockIterator.register(Math.max((int) Math.ceil(range.get()+1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
-        // Check for air, unbreakable blocks and distance
+            // Check for air, unbreakable blocks and distance
             switch (shape.get()) {
                 case Sphere -> {
                     if (Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5) > rangeSq) return;
@@ -366,7 +366,7 @@ public class Nuker extends Module {
                 }
             }
 
-        if (!BlockUtils.canBreak(blockPos, blockState)) return;
+            if (!BlockUtils.canBreak(blockPos, blockState)) return;
 
             // Flatten
             if (mode.get() == Mode.Flatten && blockPos.getY() < Math.floor(mc.player.getY())) return;
@@ -475,7 +475,7 @@ public class Nuker extends Module {
     }
 
     public static int chebyshevDist(int x1, int y1, int z1, int x2, int y2, int z2) {
-        // Gets the largest X, Y or Z difference, manhattan style
+        // Gets the largest X, Y or Z difference, chebyshev distant
         int dX = Math.abs(x2 - x1);
         int dY = Math.abs(y2 - y1);
         int dZ = Math.abs(z2 - z1);
