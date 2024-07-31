@@ -36,7 +36,7 @@ public class FriendArgumentType implements ArgumentType<String> {
     private FriendArgumentType() {}
 
     @Override
-    public String parse(StringReader reader) throws CommandSyntaxException {
+    public String parse(StringReader reader) {
         String argument = reader.getRemaining();
         reader.setCursor(reader.getTotalLength());
         return argument;
