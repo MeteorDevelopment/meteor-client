@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.events.game;
 
-public class WindowResizedEvent {
-    private static final WindowResizedEvent INSTANCE = new WindowResizedEvent();
+public class ResolutionChangedEvent {
+    private static final ResolutionChangedEvent INSTANCE = new ResolutionChangedEvent();
 
-    public static WindowResizedEvent get() {
+    public static ResolutionChangedEvent get() {
         return INSTANCE;
     }
 }
