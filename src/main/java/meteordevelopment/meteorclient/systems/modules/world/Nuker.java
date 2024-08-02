@@ -334,11 +334,11 @@ public class Nuker extends Module {
                     pos1.set(pX_ - (range_left.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - (range_forward.get()+1)); // down
                     pos2.set(pX_ + range_right.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_back.get()); // up
                 }
-                 case 3 -> {
+                case 3 -> {
                     pX_ += 1;
                     pos1.set(pX_ - (range_back.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - range_left.get()); // down
                     pos2.set(pX_ + range_forward.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_right.get()+1); // up
-                 }
+                }
             }
 
             // get largest horizontal
@@ -475,7 +475,7 @@ public class Nuker extends Module {
     }
 
     public static int chebyshevDist(int x1, int y1, int z1, int x2, int y2, int z2) {
-        // Gets the largest X, Y or Z difference, chebyshev distant
+        // Gets the largest X, Y or Z difference, chebyshev distance
         int dX = Math.abs(x2 - x1);
         int dY = Math.abs(y2 - y1);
         int dZ = Math.abs(z2 - z1);
