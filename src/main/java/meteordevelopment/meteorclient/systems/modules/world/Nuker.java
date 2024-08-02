@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -309,50 +308,50 @@ public class Nuker extends Module {
 
         if (shape.get() == Shape.UniformCube) {
             pX_ += 1; // weired position stuff
-            pos1.set(pX_ - r, pY - r + 1, pZ - r+1); // down
-            pos2.set(pX_ + r-1, pY + r, pZ + r); // up
+            pos1.set(pX_ - r, pY - r + 1, pZ - r + 1); // down
+            pos2.set(pX_ + r - 1, pY + r, pZ + r); // up
         } else {
             int direction = Math.round((mc.player.getRotationClient().y % 360) / 90);
             direction = Math.floorMod(direction, 4);
 
             // direction == 1
-            pos1.set(pX_ - (range_forward.get()), Math.ceil(pY) - range_down.get(), pZ_ - range_right.get()); // down
-            pos2.set(pX_ + range_back.get()+1, Math.ceil(pY + range_up.get() + 1), pZ_ + range_left.get()+1); // up
+            pos1.set(pX_ - range_forward.get(), Math.ceil(pY) - range_down.get(), pZ_ - range_right.get()); // down
+            pos2.set(pX_ + range_back.get() + 1, Math.ceil(pY + range_up.get() + 1), pZ_ + range_left.get() + 1); // up
 
             // Only change me if you want to mess with 3D rotations:
             // I messed with it
-            switch(direction) {
+            switch (direction) {
                 case 0 -> {
                     pZ_ += 1;
                     pX_ += 1;
-                    pos1.set(pX_ - (range_right.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - (range_back.get()+1)); // down
+                    pos1.set(pX_ - (range_right.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - (range_back.get() + 1)); // down
                     pos2.set(pX_ + range_left.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_forward.get()); // up
                 }
                 case 2 -> {
                     pX_ += 1;
                     pZ_ += 1;
-                    pos1.set(pX_ - (range_left.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - (range_forward.get()+1)); // down
+                    pos1.set(pX_ - (range_left.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - (range_forward.get() + 1)); // down
                     pos2.set(pX_ + range_right.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_back.get()); // up
                 }
                 case 3 -> {
                     pX_ += 1;
-                    pos1.set(pX_ - (range_back.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - range_left.get()); // down
-                    pos2.set(pX_ + range_forward.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_right.get()+1); // up
+                    pos1.set(pX_ - (range_back.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - range_left.get()); // down
+                    pos2.set(pX_ + range_forward.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_right.get() + 1); // up
                 }
             }
 
             // get largest horizontal
-            maxh = 1 + Math.max(Math.max(Math.max(range_back.get(),range_right.get()),range_forward.get()),range_left.get());
+            maxh = 1 + Math.max(Math.max(Math.max(range_back.get(), range_right.get()), range_forward.get()), range_left.get());
             maxv = 1 + Math.max(range_up.get(), range_down.get());
         }
 
-        if (mode.get() == Mode.Flatten){
+        if (mode.get() == Mode.Flatten) {
             pos1.setY((int) Math.floor(pY));
         }
         Box box = new Box(pos1.toCenterPos(), pos2.toCenterPos());
 
         // Find blocks to break
-        BlockIterator.register(Math.max((int) Math.ceil(range.get()+1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
+        BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
             // Check for air, unbreakable blocks and distance
             switch (shape.get()) {
                 case Sphere -> {
