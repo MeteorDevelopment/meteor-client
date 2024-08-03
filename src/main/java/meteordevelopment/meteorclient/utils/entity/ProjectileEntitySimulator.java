@@ -243,6 +243,7 @@ public class ProjectileEntitySimulator {
             ((IVec3d) pos3d).set(hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z);
         }
 
+        // Vanilla uses the current and next positions to check collisions, we use the previous and current positions
         Box box = new Box(prevPos3d.x - (width / 2f), prevPos3d.y, prevPos3d.z - (width / 2f), prevPos3d.x + (width / 2f), prevPos3d.y + height, prevPos3d.z + (width / 2f))
             .stretch(velocity.x, velocity.y, velocity.z).expand(1.0D);
         HitResult hitResult2 = ProjectileUtil.getEntityCollision(
