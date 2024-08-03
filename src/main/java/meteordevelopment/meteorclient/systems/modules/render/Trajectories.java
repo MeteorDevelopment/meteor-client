@@ -109,7 +109,7 @@ public class Trajectories extends Module {
     	.name("position-box-size")
     	.description("The size of the box drawn at the simulated positions.")
     	.defaultValue(0.02)
-        .sliderRange(0.1, 0.01)
+        .sliderRange(0.01, 0.1)
         .visible(renderPositionBox::get)
     	.build()
     );
