@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.ArrayList;
@@ -21,16 +22,21 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
 
         values = (T[]) defaultValue.getDeclaringClass().getEnumConstants();
         suggestions = new ArrayList<>(values.length);
-        for (T value : values) suggestions.add(value.toString());
+        for (T value : values) suggestions.add(Utils.formatEnumName(value.toString()));
+    }
+
+    public String getDropdownValue() {
+        return suggestions.get(get().ordinal());
+    }
+
+    public T fromDropdown(String str) {
+        return parseImpl(str);
     }
 
     @Override
     protected T parseImpl(String str) {
-        for (T possibleValue : values) {
-            if (str.equalsIgnoreCase(possibleValue.toString())) return possibleValue;
-        }
-
-        return null;
+        int index = suggestions.indexOf(str);
+        return index == -1 ? null : values[index];
     }
 
     @Override
