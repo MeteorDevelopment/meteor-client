@@ -23,7 +23,7 @@ import java.util.Optional;
  *
  * @author Crosby
  */
-public record FailedHttpResponse<T>(HttpRequest request) implements HttpResponse<T> {
+public record FailedHttpResponse<T>(HttpRequest request, Exception exception) implements HttpResponse<T> {
     @Override
     public int statusCode() {
         return Http.BAD_REQUEST;

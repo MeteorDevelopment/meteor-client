@@ -27,7 +27,7 @@ public class WaypointCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("list").executes(context -> {
-            if (Waypoints.get().waypoints.isEmpty()) error("No created waypoints.");
+            if (Waypoints.get().isEmpty()) error("No created waypoints.");
             else {
                 info(Formatting.WHITE + "Created Waypoints:");
                 for (Waypoint waypoint : Waypoints.get()) {

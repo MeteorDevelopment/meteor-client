@@ -246,7 +246,7 @@ public class Modules extends System<Modules> {
         if (!isBinding()) return false;
 
         if (awaitingKeyRelease) {
-            if (!isKey || value != GLFW.GLFW_KEY_ENTER) return false;
+            if (!isKey || (value != GLFW.GLFW_KEY_ENTER && value != GLFW.GLFW_KEY_KP_ENTER)) return false;
 
             awaitingKeyRelease = false;
             return false;
