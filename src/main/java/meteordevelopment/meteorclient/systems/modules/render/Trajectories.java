@@ -99,8 +99,8 @@ public class Trajectories extends Module {
     );
 
     private final Setting<Boolean> renderPositionBox = sgRender.add(new BoolSetting.Builder()
-        .name("render-position-box") // todo i have no idea what to name this setting, also write a better description
-        .description("Render each simulated position of the projectile along its trajectory.")
+        .name("render-position-boxes")
+        .description("Renders the actual position the projectile will be at each tick along it's trajectory.")
         .defaultValue(false)
         .build()
     );
@@ -109,7 +109,7 @@ public class Trajectories extends Module {
     	.name("position-box-size")
     	.description("The size of the box drawn at the simulated positions.")
     	.defaultValue(0.02)
-        .range(0.1, 0.005)
+        .sliderRange(0.1, 0.01)
         .visible(renderPositionBox::get)
     	.build()
     );

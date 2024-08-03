@@ -238,17 +238,15 @@ public class ProjectileEntitySimulator {
     }
 
     private HitResult getCollision() {
-        Vec3d vec3d3 = prevPos3d;
-
-        HitResult hitResult = mc.world.raycast(new RaycastContext(vec3d3, pos3d, RaycastContext.ShapeType.COLLIDER, waterDrag == 0 ? RaycastContext.FluidHandling.ANY : RaycastContext.FluidHandling.NONE, simulatingEntity));
+        HitResult hitResult = mc.world.raycast(new RaycastContext(prevPos3d, pos3d, RaycastContext.ShapeType.COLLIDER, waterDrag == 0 ? RaycastContext.FluidHandling.ANY : RaycastContext.FluidHandling.NONE, simulatingEntity));
         if (hitResult.getType() != HitResult.Type.MISS) {
             ((IVec3d) pos3d).set(hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z);
         }
 
+        Box box = new Box(prevPos3d.x - (width / 2f), prevPos3d.y, prevPos3d.z - (width / 2f), prevPos3d.x + (width / 2f), prevPos3d.y + height, prevPos3d.z + (width / 2f))
+            .stretch(velocity.x, velocity.y, velocity.z).expand(1.0D);
         HitResult hitResult2 = ProjectileUtil.getEntityCollision(
-            mc.world, simulatingEntity, vec3d3, pos3d,
-            new Box(pos.x - (width / 2f), pos.y, pos.z - (width / 2f), pos.x + (width / 2f), pos.y + height, pos.z + (width / 2f)).stretch(velocity.x, velocity.y, velocity.z).expand(1.0D),
-            entity -> !entity.isSpectator() && entity.isAlive() && entity.canHit()
+            mc.world, simulatingEntity == mc.player ? null : simulatingEntity, prevPos3d, pos3d, box, entity -> !entity.isSpectator() && entity.isAlive() && entity.canHit()
         );
         if (hitResult2 != null) {
             hitResult = hitResult2;
