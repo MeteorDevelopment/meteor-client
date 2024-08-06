@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 
 public class EntityTypeListSetting extends Setting<Set<EntityType<?>>> {
     public final Predicate<EntityType<?>> filter;
-    private static List<String> suggestions;
+    private List<String> suggestions;
     private final static List<String> groups = List.of("animal", "wateranimal", "monster", "ambient", "misc");
 
     public EntityTypeListSetting(String name, String description, Set<EntityType<?>> defaultValue, Consumer<Set<EntityType<?>>> onChanged, Consumer<Setting<Set<EntityType<?>>>> onModuleActivated, IVisible visible, Predicate<EntityType<?>> filter) {
@@ -51,7 +51,9 @@ public class EntityTypeListSetting extends Setting<Set<EntityType<?>>> {
                     String lowerValue = value.trim().toLowerCase();
                     if (!groups.contains(lowerValue)) continue;
 
-                    Registries.ENTITY_TYPE.forEach(entityType -> {
+                    for (EntityType<?> entityType : Registries.ENTITY_TYPE) {
+                        if (filter != null && !filter.test(entityType)) continue;
+
                         switch (lowerValue) {
                             case "animal" -> {
                                 if (entityType.getSpawnGroup() == SpawnGroup.CREATURE) entities.add(entityType);
@@ -72,7 +74,7 @@ public class EntityTypeListSetting extends Setting<Set<EntityType<?>>> {
                                 if (entityType.getSpawnGroup() == SpawnGroup.MISC) entities.add(entityType);
                             }
                         }
-                    });
+                    }
                 }
             }
         } catch (Exception ignored) {}
@@ -89,7 +91,9 @@ public class EntityTypeListSetting extends Setting<Set<EntityType<?>>> {
     public List<String> getSuggestions() {
         if (suggestions == null) {
             suggestions = new ArrayList<>(groups);
-            Registries.ENTITY_TYPE.getIds().forEach(id -> suggestions.add(id.toString()));
+            for (EntityType<?> entityType : Registries.ENTITY_TYPE) {
+                if (filter == null || filter.test(entityType)) suggestions.add(Registries.ENTITY_TYPE.getId(entityType).toString());
+            }
         }
 
         return suggestions;
