@@ -98,7 +98,9 @@ public class EnchantCommand extends Command {
 
         REGISTRY_ACCESS.getOptionalWrapper(RegistryKeys.ENCHANTMENT).ifPresent(registry -> {
             registry.streamEntries().forEach(enchantment -> {
-                Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
+                if (!onlyPossible || enchantment.value().isAcceptableItem(itemStack)) {
+                    Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
+                }
             });
         });
 
