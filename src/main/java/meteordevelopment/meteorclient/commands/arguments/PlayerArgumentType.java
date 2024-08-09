@@ -40,7 +40,8 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
 
     @Override
     public PlayerEntity parse(StringReader reader) throws CommandSyntaxException {
-        String argument = reader.readString();
+        String argument = reader.getRemaining();
+        reader.setCursor(reader.getTotalLength());
         PlayerEntity playerEntity = null;
 
         for (PlayerEntity p : mc.world.getPlayers()) {
