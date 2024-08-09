@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -14,6 +15,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
@@ -23,11 +25,19 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 public class ESP extends Module {
@@ -105,6 +115,13 @@ public class ESP extends Module {
         .build()
     );
 
+    private final Setting<List<Item>> ignoredItems = sgGeneral.add(new ItemListSetting.Builder()
+        .name("ignored-items")
+        .description("Items to ignore.")
+        .defaultValue(Items.AIR)
+        .build()
+    );
+
     // Colors
 
     public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
@@ -178,10 +195,28 @@ public class ESP extends Module {
     private final Vector3d pos2 = new Vector3d();
     private final Vector3d pos = new Vector3d();
 
-    private int count;
+    private final List<Entity> entityList = new ArrayList<>();
 
     public ESP() {
         super(Categories.Render, "esp", "Renders entities through walls.");
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        entityList.clear();
+
+        boolean freecamNotActive = !Modules.get().isActive(Freecam.class);
+        boolean notThirdPerson = mc.options.getPerspective().isFirstPerson();
+        Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
+
+        for (Entity entity : mc.world.getEntities()) {
+            EntityType<?> type = entity.getType();
+            if (shouldSkip(entity)) continue;
+
+            entityList.add(entity);
+        }
+
+        entityList.sort(Comparator.comparing(e -> e.squaredDistanceTo(cameraPos)));
     }
 
     // Box
@@ -190,13 +225,8 @@ public class ESP extends Module {
     private void onRender3D(Render3DEvent event) {
         if (mode.get() == Mode._2D) return;
 
-        count = 0;
-
-        for (Entity entity : mc.world.getEntities()) {
-            if (shouldSkip(entity)) continue;
-
+        for (Entity entity : entityList) {
             if (mode.get() == Mode.Box || mode.get() == Mode.Wireframe) drawBoundingBox(event, entity);
-            count++;
         }
     }
 
@@ -226,11 +256,8 @@ public class ESP extends Module {
         if (mode.get() != Mode._2D) return;
 
         Renderer2D.COLOR.begin();
-        count = 0;
 
-        for (Entity entity : mc.world.getEntities()) {
-            if (shouldSkip(entity)) continue;
-
+        for (Entity entity : entityList) {
             Box box = entity.getBoundingBox();
 
             double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
@@ -271,8 +298,6 @@ public class ESP extends Module {
                 Renderer2D.COLOR.line(pos1.x, pos1.y, pos2.x, pos1.y, lineColor);
                 Renderer2D.COLOR.line(pos1.x, pos2.y, pos2.x, pos2.y, lineColor);
             }
-
-            count++;
         }
 
         Renderer2D.COLOR.render(null);
@@ -301,6 +326,7 @@ public class ESP extends Module {
         if (!entities.get().contains(entity.getType())) return true;
         if (entity == mc.player && ignoreSelf.get()) return true;
         if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
+        if (entity.getType() == EntityType.ITEM && ignoredItems.get().contains(((ItemEntity) entity).getStack().getItem())) return true;
         return !EntityUtils.isInRenderDistance(entity);
     }
 
@@ -343,7 +369,7 @@ public class ESP extends Module {
 
     @Override
     public String getInfoString() {
-        return Integer.toString(count);
+        return Integer.toString(entityList.size());
     }
 
     public boolean isShader() {
@@ -365,5 +391,20 @@ public class ESP extends Module {
         public String toString() {
             return this == _2D ? "2D" : super.toString();
         }
+    }
+
+    public ArrayList<ItemStack> getItems() {
+        ArrayList<ItemStack> items = new ArrayList<>();
+
+        for (Entity entity : entityList) {
+            EntityType<?> type = entity.getType();
+            if (type == EntityType.ITEM && !ignoredItems.get().contains(((ItemEntity) entity).getStack().getItem())) {
+                items.add(((ItemEntity) entity).getStack());
+            }
+        }
+
+        items.sort(Comparator.comparing((ItemStack itemStack) -> itemStack.getName().getString())
+            .thenComparing(Comparator.comparingInt(ItemStack::getCount).reversed()));
+        return items;
     }
 }
