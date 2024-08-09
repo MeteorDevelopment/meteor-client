@@ -27,6 +27,7 @@ public class BungeeCordSpoof extends Module {
             .defaultValue("")
             .filter((text, c) -> {
                 if (text.length() > 32) return false;
+                // UUID must be without dashes
                 if (c == '-') return false;
                 return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
             })

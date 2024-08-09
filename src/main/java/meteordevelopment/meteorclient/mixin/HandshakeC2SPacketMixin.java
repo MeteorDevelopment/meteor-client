@@ -44,6 +44,7 @@ public class HandshakeC2SPacketMixin {
                     currentUuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + MinecraftClient.getInstance().getSession().getUsername()).getBytes(Charsets.UTF_8));
                 }
 
+                // UUID must be without dashes
                 uuid = currentUuid.toString().replace("-", "");
             }
 
