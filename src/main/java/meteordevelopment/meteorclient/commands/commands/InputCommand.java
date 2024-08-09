@@ -29,7 +29,8 @@ public class InputCommand extends Command {
         mc.options.jumpKey, "jump",
         mc.options.sneakKey, "sneak",
         mc.options.useKey, "use",
-        mc.options.attackKey, "attack"
+        mc.options.attackKey, "attack",
+        mc.options.sprintKey, "sprint"
     );
 
     public InputCommand() {
