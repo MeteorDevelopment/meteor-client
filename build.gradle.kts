@@ -41,8 +41,8 @@ configurations {
     // modImplementation.configure { extendsFrom(modInclude) } TODO
     // include.configure { extendsFrom(modInclude) } TODO
 
-     implementation.configure { extendsFrom(library) } TODO
-     shadow.configure { extendsFrom(library) } TODO
+     // implementation.configure { extendsFrom(library) } TODO
+     // shadow.configure { extendsFrom(library) } TODO
 }
 
 dependencies {
