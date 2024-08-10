@@ -45,10 +45,10 @@ dependencies {
 
     // Compat fixes
     modCompileOnly(fabricApi.module("fabric-renderer-indigo", project.property("fapi_version").toString()))
-    modCompileOnly("maven.modrinth.sodium:${project.property("sodium_version")}") { isTransitive = false }
-    modCompileOnly("maven.modrinth.lithium:${project.property("lithium_version")}") { isTransitive = false }
-    modCompileOnly("maven.modrinth.iris:${project.property("iris_version")}") { isTransitive = false }
-    modCompileOnly("maven.modrinth.indium:${project.property("indium_version")}") { isTransitive = false }
+    modCompileOnly("maven.modrinth:sodium:${project.property("sodium_version")}") { isTransitive = false }
+    modCompileOnly("maven.modrinth:lithium:${project.property("lithium_version")}") { isTransitive = false }
+    modCompileOnly("maven.modrinth:iris:${project.property("iris_version")}") { isTransitive = false }
+    modCompileOnly("maven.modrinth:indium:${project.property("indium_version")}") { isTransitive = false }
     modCompileOnly("de.florianmichael:ViaFabricPlus:${project.property("viafabricplus_version")}") { isTransitive = false }
 
     // Baritone
