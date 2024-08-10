@@ -142,23 +142,6 @@ public class Config extends System<Config> {
         .build()
     );
 
-    public final Setting<Boolean> heuristicCombatUtils = sgMisc.add(new BoolSetting.Builder()
-            .name("heuristic-damage-utils")
-            .description("Spends extra computation time in order to make combat-related calculations more accurate at the expense of framerate.")
-            .defaultValue(true)
-            .build()
-    );
-
-    public final Setting<Integer> heuristicDepth = sgMisc.add(new IntSetting.Builder()
-            .name("heuristic-depth")
-            .description("The amount of extra computation time to give, in an exponential scale.")
-            .defaultValue(4)
-            .min(2)
-            .sliderRange(2, 5)
-            .visible(heuristicCombatUtils::get)
-            .build()
-    );
-
     public List<String> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {
