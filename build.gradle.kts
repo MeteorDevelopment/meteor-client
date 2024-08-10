@@ -34,7 +34,6 @@ repositories {
     maven("https://repo.viaversion.com") {
         name = "viaversion"
     }
-    mavenCentral()
 }
 
 dependencies {
@@ -87,10 +86,9 @@ loom {
 }
 
 afterEvaluate {
-    // TODO figure this out
-    // migrateMappings.configure {
-    //     outputDir = project.file("src/main/java")
-    // }
+    tasks.migrateMappings.configure {
+        setOutputDir("src/main/java")
+    }
 }
 
 tasks {
