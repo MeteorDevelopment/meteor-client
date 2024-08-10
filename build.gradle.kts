@@ -22,7 +22,7 @@ repositories {
     maven("https://maven.meteordev.org/snapshots") {
         name = "meteor-maven-snapshots"
     }
-    maven("https://maven.bawnorton.com/releases") {
+    maven("https://api.modrinth.com/maven") {
         name = "modrinth"
         content {
             includeGroup("maven.modrinth")
@@ -37,14 +37,6 @@ repositories {
     mavenCentral()
 }
 
-configurations {
-    // modImplementation.configure { extendsFrom(modInclude) } TODO
-    // include.configure { extendsFrom(modInclude) } TODO
-
-     // implementation.configure { extendsFrom(library) } TODO
-     // shadow.configure { extendsFrom(library) } TODO
-}
-
 dependencies {
     // Fabric
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
@@ -54,24 +46,37 @@ dependencies {
 
     // Compat fixes
     modCompileOnly(fabricApi.module("fabric-renderer-indigo", project.property("fapi_version").toString()))
-    modCompileOnly("maven.modrinth.sodium:${project.property("sodium_version").toString()}") { isTransitive = false }
-    modCompileOnly("maven.modrinth.lithium:${project.property("lithium_version").toString()}") { isTransitive = false }
-    modCompileOnly("maven.modrinth.iris:${project.property("iris_version").toString()}") { isTransitive = false }
-    modCompileOnly("maven.modrinth.indium:${project.property("indium_version").toString()}") { isTransitive = false }
-    modCompileOnly("de.florianmichael:ViaFabricPlus:${project.property("viafabricplus_version").toString()}") { isTransitive = false }
+    modCompileOnly("maven.modrinth.sodium:${project.property("sodium_version")}") { isTransitive = false }
+    modCompileOnly("maven.modrinth.lithium:${project.property("lithium_version")}") { isTransitive = false }
+    modCompileOnly("maven.modrinth.iris:${project.property("iris_version")}") { isTransitive = false }
+    modCompileOnly("maven.modrinth.indium:${project.property("indium_version")}") { isTransitive = false }
+    modCompileOnly("de.florianmichael:ViaFabricPlus:${project.property("viafabricplus_version")}") { isTransitive = false }
 
     // Baritone
-    modCompileOnly("meteordevelopment:baritone:${project.property("baritone_version").toString()}")
+    modCompileOnly("meteordevelopment:baritone:${project.property("baritone_version")}")
 
     // Libraries
 
-    // library "meteordevelopment:orbit:${project.orbit_version}" TODO
-    // library "meteordevelopment:starscript:${project.starscript_version}" TODO
-    // library "meteordevelopment:discord-ipc:${project.discordipc_version}" TODO
-    // library "org.reflections:reflections:${project.reflections_version}" TODO
-    // library("io.netty:netty-handler-proxy:${project.netty_version}") { transitive = false } TODO
-    // library("io.netty:netty-codec-socks:${project.netty_version}") { transitive = false } TODO
-    // library "de.florianmichael:WaybackAuthLib:${project.waybackauthlib_version}" TODO
+    implementation("meteordevelopment:orbit:${project.property("orbit_version")}")
+    shadow("meteordevelopment:orbit:${project.property("orbit_version")}")
+
+    implementation("meteordevelopment:starscript:${project.property("starscript_version")}")
+    shadow("meteordevelopment:starscript:${project.property("starscript_version")}")
+
+    implementation("meteordevelopment:discord-ipc:${project.property("discordipc_version")}")
+    shadow("meteordevelopment:discord-ipc:${project.property("discordipc_version")}")
+
+    implementation("org.reflections:reflections:${project.property("reflections_version")}")
+    shadow("org.reflections:reflections:${project.property("reflections_version")}")
+
+    implementation("io.netty:netty-handler-proxy:${project.property("netty_version")}") { isTransitive = false }
+    shadow("io.netty:netty-handler-proxy:${project.property("netty_version")}") { isTransitive = false }
+
+    implementation("io.netty:netty-codec-socks:${project.property("netty_version")}") { isTransitive = false }
+    shadow("io.netty:netty-codec-socks:${project.property("netty_version")}") { isTransitive = false }
+
+    implementation("de.florianmichael:WaybackAuthLib:${project.property("waybackauthlib_version")}")
+    shadow("de.florianmichael:WaybackAuthLib:${project.property("waybackauthlib_version")}")
 
     // Launch sub project
     shadow(project(":launch"))
@@ -82,7 +87,6 @@ loom {
 }
 
 afterEvaluate {
-
     // TODO figure this out
     // migrateMappings.configure {
     //     outputDir = project.file("src/main/java")
@@ -153,7 +157,7 @@ tasks {
     }
 
     build {
-        // dependsOn(javadocJar) TODO
+        dependsOn("javadocJar")
     }
 }
 
