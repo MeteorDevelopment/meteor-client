@@ -6,12 +6,13 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-val devBuild: String = (project.findProperty("devbuild") ?: "").toString()
+var devBuild: String = (project.findProperty("devbuild") ?: "").toString()
 val commit: String = (project.findProperty("commit") ?: "").toString()
 
 base {
     archivesName = project.property("archives_base_name").toString()
-    version = "${project.property("mod_version").toString()}-$devBuild"
+    version = project.property("mod_version").toString()
+    if (devBuild.isNotEmpty()) version = "$version-$devBuild"
     group = project.property("maven_group").toString()
 }
 
