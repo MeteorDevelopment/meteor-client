@@ -42,7 +42,7 @@ dependencies {
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
-    include(fabricApi.module("fabric-resource-loader-v0", project.property("fapi_version").toString()))
+    modImplementation(fabricApi.module("fabric-resource-loader-v0", project.property("fapi_version").toString()))
 
     // Compat fixes
     modCompileOnly(fabricApi.module("fabric-renderer-indigo", project.property("fapi_version").toString()))
