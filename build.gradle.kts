@@ -1,5 +1,3 @@
-import java.net.URI
-
 plugins {
     id("fabric-loom") version "1.7-SNAPSHOT"
     id("maven-publish")
@@ -172,11 +170,8 @@ publishing {
     }
 
     repositories {
-        maven {
+        maven(if (project.hasProperty("devbuild")) "https://maven.meteordev.org/snapshots" else "https://maven.meteordev.org/releases") {
             name = "meteor-maven"
-            url = if (project.hasProperty("devbuild"))
-                URI("https://maven.meteordev.org/snapshots")
-            else URI("https://maven.meteordev.org/releases")
 
             credentials {
                 username = System.getenv("MAVEN_METEOR_ALIAS")
