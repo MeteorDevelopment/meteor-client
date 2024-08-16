@@ -4,7 +4,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-var devBuild: String = (project.findProperty("devbuild") ?: "").toString()
+val devBuild: String = (project.findProperty("devbuild") ?: "").toString()
 val commit: String = (project.findProperty("commit") ?: "").toString()
 
 base {
