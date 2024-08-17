@@ -20,8 +20,8 @@ public abstract class AbstractBlockRenderContextMixin {
     @Shadow
     protected BlockRenderInfo blockInfo;
 
-    @Inject(method = "renderQuad(Llink/infra/indium/renderer/mesh/MutableQuadViewImpl;Z)V", at = @At(value = "INVOKE", target = "Llink/infra/indium/renderer/render/AbstractBlockRenderContext;bufferQuad(Llink/infra/indium/renderer/mesh/MutableQuadViewImpl;Lme/jellysquid/mods/sodium/client/render/chunk/terrain/material/Material;)V"), cancellable = true)
-    private void onBufferQuad(MutableQuadViewImpl quad, boolean isVanilla, CallbackInfo ci) {
+    @Inject(method = "renderQuad", at = @At(value = "INVOKE", target = "Llink/infra/indium/renderer/render/AbstractBlockRenderContext;bufferQuad(Llink/infra/indium/renderer/mesh/MutableQuadViewImpl;Lme/jellysquid/mods/sodium/client/render/chunk/terrain/material/Material;)V"), cancellable = true)
+    private void onBufferQuad(MutableQuadViewImpl quad, CallbackInfo ci) {
         int alpha = Xray.getAlpha(blockInfo.blockState, blockInfo.blockPos);
 
         if (alpha == 0) ci.cancel();
