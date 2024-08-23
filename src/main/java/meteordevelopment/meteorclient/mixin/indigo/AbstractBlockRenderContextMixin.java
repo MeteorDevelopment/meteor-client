@@ -22,7 +22,7 @@ public abstract class AbstractBlockRenderContextMixin {
     @Final @Shadow(remap = false) protected BlockRenderInfo blockInfo;
 
     @Inject(method = "renderQuad", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/impl/client/indigo/renderer/render/AbstractBlockRenderContext;bufferQuad(Lnet/fabricmc/fabric/impl/client/indigo/renderer/mesh/MutableQuadViewImpl;Lnet/minecraft/client/render/VertexConsumer;)V"), cancellable = true)
-    private void onBufferQuad(MutableQuadViewImpl quad, boolean isVanilla, CallbackInfo ci) {
+    private void onBufferQuad(MutableQuadViewImpl quad, CallbackInfo ci) {
         int alpha = Xray.getAlpha(blockInfo.blockState, blockInfo.blockPos);
 
         if (alpha == 0) ci.cancel();

@@ -8,8 +8,8 @@
     "MeshVertexConsumerMixin",
     "SodiumBlockOcclusionCacheMixin",
     "SodiumBlockRendererMixin",
-    "SodiumFluidRendererMixin",
-    "SodiumBiomeColorCacheMixin"
+    "SodiumFluidRendererImplMixin",
+    "SodiumFluidRendererImplDefaultRenderContextMixin"
   ],
   "injectors": {
     "defaultRequire": 1
