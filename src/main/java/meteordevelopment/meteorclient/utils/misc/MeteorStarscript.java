@@ -387,6 +387,7 @@ public class MeteorStarscript {
         if (argCount != 1) ss.error("player.get_item() requires 1 argument, got %d.", argCount);
 
         int i = (int) ss.popNumber("First argument to player.get_item() needs to be a number.");
+        if (i < 0 || i > 35) ss.error("First argument to player.get_item() needs to be between 0 and 35 (inclusive).", i);
         return mc.player != null ? wrap(mc.player.getInventory().getStack(i)) : Value.null_();
     }
 
