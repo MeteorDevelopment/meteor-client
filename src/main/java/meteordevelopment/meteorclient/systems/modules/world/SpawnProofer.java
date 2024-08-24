@@ -96,8 +96,10 @@ public class SpawnProofer extends Module {
         // Find spawn locations
         for (BlockPos.Mutable blockPos : spawns) spawnPool.free(blockPos);
         spawns.clear();
+
+        int lightLevel = newMobSpawnLightLevel.get() ? 0 : 7;
         BlockIterator.register(range.get(), range.get(), (blockPos, blockState) -> {
-            BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos, newMobSpawnLightLevel.get());
+            BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos, blockState, lightLevel);
 
             if ((spawn == BlockUtils.MobSpawn.Always && (mode.get() == Mode.Always || mode.get() == Mode.Both)) ||
                     spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
@@ -135,7 +137,7 @@ public class SpawnProofer extends Module {
 
                 // Find lowest light level
                 int lowestLightLevel = 16;
-                BlockPos.Mutable selectedBlockPos = spawns.get(0);
+                BlockPos.Mutable selectedBlockPos = spawns.getFirst();
 
                 for (BlockPos blockPos : spawns) {
                     int lightLevel = mc.world.getLightLevel(blockPos);
@@ -148,7 +150,7 @@ public class SpawnProofer extends Module {
                 BlockUtils.place(selectedBlockPos, block, rotate.get(), -50, false);
             }
             else {
-                BlockUtils.place(spawns.get(0), block, rotate.get(), -50, false);
+                BlockUtils.place(spawns.getFirst(), block, rotate.get(), -50, false);
             }
         }
 
@@ -165,7 +167,10 @@ public class SpawnProofer extends Module {
             block instanceof AbstractPressurePlateBlock ||
             block instanceof TransparentBlock ||
             block instanceof TripwireBlock ||
-            block instanceof CarpetBlock;
+            block instanceof CarpetBlock ||
+            block instanceof LeverBlock ||
+            block instanceof AbstractRedstoneGateBlock ||
+            block instanceof AbstractRailBlock;
     }
 
     private boolean isLightSource(Block block) {

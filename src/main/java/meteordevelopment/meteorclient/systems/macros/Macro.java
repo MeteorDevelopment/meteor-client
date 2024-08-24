@@ -29,7 +29,6 @@ public class Macro implements ISerializable<Macro> {
     public Setting<String> name = sgGeneral.add(new StringSetting.Builder()
         .name("name")
         .description("The name of the macro.")
-        .defaultValue("")
         .build()
     );
 
@@ -55,8 +54,8 @@ public class Macro implements ISerializable<Macro> {
         fromTag((NbtCompound) tag);
     }
 
-    public boolean onAction(boolean isKey, int value) {
-        if (!keybind.get().matches(isKey, value) || mc.currentScreen != null) return false;
+    public boolean onAction(boolean isKey, int value, int modifiers) {
+        if (!keybind.get().matches(isKey, value, modifiers) || mc.currentScreen != null) return false;
         return onAction();
     }
 

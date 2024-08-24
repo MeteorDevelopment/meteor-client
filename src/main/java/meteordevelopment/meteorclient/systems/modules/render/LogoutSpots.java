@@ -212,12 +212,12 @@ public class LogoutSpots extends Module {
             y = entity.getY();
             z = entity.getZ() - halfWidth;
 
-            xWidth = entity.getBoundingBox().getXLength();
-            zWidth = entity.getBoundingBox().getZLength();
-            height = entity.getBoundingBox().getYLength();
+            xWidth = entity.getBoundingBox().getLengthX();
+            zWidth = entity.getBoundingBox().getLengthZ();
+            height = entity.getBoundingBox().getLengthY();
 
             uuid = entity.getUuid();
-            name = entity.getEntityName();
+            name = entity.getName().getString();
             health = Math.round(entity.getHealth() + entity.getAbsorptionAmount());
             maxHealth = Math.round(entity.getMaxHealth() + entity.getAbsorptionAmount());
 

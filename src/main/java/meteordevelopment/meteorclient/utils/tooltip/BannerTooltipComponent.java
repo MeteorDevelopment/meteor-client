@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import net.minecraft.block.entity.BannerBlockEntity;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.DiffuseLighting;
@@ -14,9 +14,9 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.BannerItem;
 import net.minecraft.item.ItemStack;
 
@@ -47,8 +47,9 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
         DiffuseLighting.disableGuiDepthLighting();
+        MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.translate(x + 8, y + 8, 0);
 
@@ -60,20 +61,18 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
         matrices.translate(2.5, 8.5, 0);
         matrices.scale(5, 5, 5);
         VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
-        this.bannerField.pitch = 0f;
-        this.bannerField.pivotY = -32f;
+        bannerField.pitch = 0f;
+        bannerField.pivotY = -32f;
         BannerBlockEntityRenderer.renderCanvas(
             matrices,
             immediate,
             0xF000F0,
             OverlayTexture.DEFAULT_UV,
-            this.bannerField,
+            bannerField,
             ModelLoader.BANNER_BASE,
             true,
-            BannerBlockEntity.getPatternsFromNbt(
-                ((BannerItem) this.banner.getItem()).getColor(),
-                BannerBlockEntity.getPatternListNbt(this.banner)
-            )
+            ((BannerItem) banner.getItem()).getColor(),
+            banner.get(DataComponentTypes.BANNER_PATTERNS)
         );
         matrices.pop();
         matrices.pop();

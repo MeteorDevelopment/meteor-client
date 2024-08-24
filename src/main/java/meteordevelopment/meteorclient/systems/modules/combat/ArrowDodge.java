@@ -119,7 +119,7 @@ public class ArrowDodge extends Module {
                 UUID owner = ((ProjectileEntityAccessor) e).getOwnerUuid();
                 if (owner != null && owner.equals(mc.player.getUuid())) continue;
             }
-            if (!simulator.set(e, accurate.get(), 0.5D)) continue;
+            if (!simulator.set(e, accurate.get())) continue;
             for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
                 points.add(vec3s.get().set(simulator.pos));
                 if (simulator.tick() != null) break;

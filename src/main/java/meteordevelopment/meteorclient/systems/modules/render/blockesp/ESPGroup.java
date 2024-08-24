@@ -73,9 +73,9 @@ public class ESPGroup {
         Set<ESPBlock> remainingBlocks = new ObjectOpenHashSet<>(blocks);
         Queue<ESPBlock> blocksToCheck = new ArrayDeque<>();
 
-        blocksToCheck.offer(blocks.get(0));
-        remainingBlocks.remove(blocks.get(0));
-        neighbours.remove(blocks.get(0));
+        blocksToCheck.offer(blocks.getFirst());
+        remainingBlocks.remove(blocks.getFirst());
+        neighbours.remove(blocks.getFirst());
 
         loop: {
             while (!blocksToCheck.isEmpty()) {
@@ -96,7 +96,7 @@ public class ESPGroup {
             }
         }
 
-        if (neighbours.size() > 0) {
+        if (!neighbours.isEmpty()) {
             ESPGroup group = blockEsp.newGroup(this.block);
             group.blocks.ensureCapacity(remainingBlocks.size());
 

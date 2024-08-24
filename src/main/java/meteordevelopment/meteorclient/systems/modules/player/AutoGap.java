@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -28,6 +28,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.entry.RegistryEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -195,9 +196,9 @@ public class AutoGap extends Module {
 
         // Pause baritone
         wasBaritone = false;
-        if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
+        if (pauseBaritone.get() && PathManagers.get().isPathing()) {
             wasBaritone = true;
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+            PathManagers.get().pause();
         }
     }
 
@@ -228,7 +229,7 @@ public class AutoGap extends Module {
 
         // Resume baritone
         if (pauseBaritone.get() && wasBaritone) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+            PathManagers.get().resume();
         }
     }
 
@@ -250,7 +251,7 @@ public class AutoGap extends Module {
     }
 
     private boolean shouldEatPotions() {
-        Map<StatusEffect, StatusEffectInstance> effects = mc.player.getActiveStatusEffects();
+        Map<RegistryEntry<StatusEffect>, StatusEffectInstance> effects = mc.player.getActiveStatusEffects();
 
         // Regeneration
         if (potionsRegeneration.get() && !effects.containsKey(StatusEffects.REGENERATION)) return true;

@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.screens.EditBookTitleAndAuthorScreen;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -20,6 +21,8 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,7 +36,7 @@ import java.util.Base64;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(BookScreen.class)
-public class BookScreenMixin extends Screen {
+public abstract class BookScreenMixin extends Screen {
     @Shadow
     private BookScreen.Contents contents;
 
@@ -63,7 +66,17 @@ public class BookScreenMixin extends Screen {
                         e.printStackTrace();
                     }
 
-                    GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
+                    String encoded = Base64.getEncoder().encodeToString(bytes.array);
+
+                    @SuppressWarnings("resource")
+                    long available = MemoryStack.stackGet().getPointer();
+                    long size = MemoryUtil.memLengthUTF8(encoded, true);
+
+                    if (size > available) {
+                        ChatUtils.error("Could not copy to clipboard: Out of memory.");
+                    } else {
+                        GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), encoded);
+                    }
                 })
                 .position(4, 4)
                 .size(120, 20)

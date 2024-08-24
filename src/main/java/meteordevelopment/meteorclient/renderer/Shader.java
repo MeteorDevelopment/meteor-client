@@ -9,7 +9,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import org.apache.commons.io.IOUtils;
 import org.joml.Matrix4f;
@@ -59,10 +58,9 @@ public class Shader {
 
     private String read(String path) {
         try {
-            return IOUtils.toString(mc.getResourceManager().getResource(new MeteorIdentifier("shaders/" + path)).get().getInputStream(), StandardCharsets.UTF_8);
+            return IOUtils.toString(mc.getResourceManager().getResource(MeteorClient.identifier("shaders/" + path)).get().getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            e.printStackTrace();
-            return "";
+            throw new IllegalStateException("Could not read shader '" + path + "'", e);
         }
     }
 
@@ -105,6 +103,6 @@ public class Shader {
 
     public void setDefaults() {
         set("u_Proj", RenderSystem.getProjectionMatrix());
-        set("u_ModelView", RenderSystem.getModelViewStack().peek().getPositionMatrix());
+        set("u_ModelView", RenderSystem.getModelViewStack());
     }
 }

@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.render.BlockBreakingInfo;
+import net.minecraft.entity.player.BlockBreakingInfo;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.shape.VoxelShape;
@@ -129,14 +129,14 @@ public class BreakIndicators extends Module {
 
     private void renderBlock(Render3DEvent event, Box orig, BlockPos pos, double shrinkFactor, double progress) {
         Box box = orig.shrink(
-            orig.getXLength() * shrinkFactor,
-            orig.getYLength() * shrinkFactor,
-            orig.getZLength() * shrinkFactor
+            orig.getLengthX() * shrinkFactor,
+            orig.getLengthY() * shrinkFactor,
+            orig.getLengthZ() * shrinkFactor
         );
 
-        double xShrink = (orig.getXLength() * shrinkFactor) / 2;
-        double yShrink = (orig.getYLength() * shrinkFactor) / 2;
-        double zShrink = (orig.getZLength() * shrinkFactor) / 2;
+        double xShrink = (orig.getLengthX() * shrinkFactor) / 2;
+        double yShrink = (orig.getLengthY() * shrinkFactor) / 2;
+        double zShrink = (orig.getLengthZ() * shrinkFactor) / 2;
 
         double x1 = pos.getX() + box.minX + xShrink;
         double y1 = pos.getY() + box.minY + yShrink;

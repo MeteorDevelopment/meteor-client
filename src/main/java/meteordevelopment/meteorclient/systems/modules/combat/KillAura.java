@@ -5,10 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
-import baritone.api.BaritoneAPI;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -31,12 +30,9 @@ import net.minecraft.entity.Tameable;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
+import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
@@ -45,6 +41,7 @@ import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class KillAura extends Module {
@@ -57,7 +54,7 @@ public class KillAura extends Module {
     private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
         .name("weapon")
         .description("Only attacks an entity when a specified weapon is in your hand.")
-        .defaultValue(Weapon.Both)
+        .defaultValue(Weapon.All)
         .build()
     );
 
@@ -106,7 +103,7 @@ public class KillAura extends Module {
 
     // Targeting
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Entities to attack.")
         .onlyAttackable()
@@ -149,10 +146,10 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> ignoreBabies = sgTargeting.add(new BoolSetting.Builder()
-        .name("ignore-babies")
-        .description("Whether or not to attack baby variants of the entity.")
-        .defaultValue(true)
+    private final Setting<EntityAge> mobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAge>()
+        .name("mob-age-filter")
+        .description("Determines the age of the mobs to target (baby, adult, or both).")
+        .defaultValue(EntityAge.Adult)
         .build()
     );
 
@@ -233,10 +230,10 @@ public class KillAura extends Module {
         .build()
     );
 
-    CrystalAura ca = Modules.get().get(CrystalAura.class);
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
+    public boolean attacking;
 
     public KillAura() {
         super(Categories.Combat, "kill-aura", "Attacks specified entities around you.");
@@ -245,6 +242,7 @@ public class KillAura extends Module {
     @Override
     public void onDeactivate() {
         targets.clear();
+        attacking = false;
     }
 
     @EventHandler
@@ -253,7 +251,7 @@ public class KillAura extends Module {
         if (pauseOnUse.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) return;
         if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
         if (TickRate.INSTANCE.getTimeSinceLastTick() >= 1f && pauseOnLag.get()) return;
-        if (pauseOnCA.get() && ca.isActive() && ca.kaTimer > 0) return;
+        if (pauseOnCA.get() && Modules.get().get(CrystalAura.class).isActive() && Modules.get().get(CrystalAura.class).kaTimer > 0) return;
 
         if (onlyOnLook.get()) {
             Entity targeted = mc.targetedEntity;
@@ -269,20 +267,23 @@ public class KillAura extends Module {
         }
 
         if (targets.isEmpty()) {
+            attacking = false;
             if (wasPathing) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+                PathManagers.get().resume();
                 wasPathing = false;
             }
             return;
         }
 
-        Entity primary = targets.get(0);
+        Entity primary = targets.getFirst();
 
         if (autoSwitch.get()) {
             Predicate<ItemStack> predicate = switch (weapon.get()) {
                 case Axe -> stack -> stack.getItem() instanceof AxeItem;
                 case Sword -> stack -> stack.getItem() instanceof SwordItem;
-                case Both -> stack -> stack.getItem() instanceof AxeItem || stack.getItem() instanceof SwordItem;
+                case Mace -> stack -> stack.getItem() instanceof MaceItem;
+                case Trident -> stack -> stack.getItem() instanceof TridentItem;
+                case All -> stack -> stack.getItem() instanceof AxeItem || stack.getItem() instanceof SwordItem || stack.getItem() instanceof MaceItem || stack.getItem() instanceof TridentItem;
                 default -> o -> true;
             };
             FindItemResult weaponResult = InvUtils.findInHotbar(predicate);
@@ -297,9 +298,10 @@ public class KillAura extends Module {
 
         if (!itemInHand()) return;
 
+        attacking = true;
         if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
-        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+        if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
+            PathManagers.get().pause();
             wasPathing = true;
         }
 
@@ -327,7 +329,7 @@ public class KillAura extends Module {
 
     private boolean entityCheck(Entity entity) {
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
-        if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+        if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
 
         Box hitbox = entity.getBoundingBox();
         if (!PlayerUtils.isWithin(
@@ -337,7 +339,7 @@ public class KillAura extends Module {
             range.get()
         )) return false;
 
-        if (!entities.get().getBoolean(entity.getType())) return false;
+        if (!entities.get().contains(entity.getType())) return false;
         if (ignoreNamed.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
         if (ignoreTamed.get()) {
@@ -347,17 +349,23 @@ public class KillAura extends Module {
             ) return false;
         }
         if (ignorePassive.get()) {
-            if (entity instanceof EndermanEntity enderman && !enderman.isAngryAt(mc.player)) return false;
-            if (entity instanceof ZombifiedPiglinEntity piglin && !piglin.isAngryAt(mc.player)) return false;
+            if (entity instanceof EndermanEntity enderman && !enderman.isAngry()) return false;
+            if (entity instanceof ZombifiedPiglinEntity piglin && !piglin.isAttacking()) return false;
             if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
-            if (entity instanceof LlamaEntity llama && !llama.isAttacking()) return false;
         }
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
             if (shieldMode.get() == ShieldMode.Ignore && player.blockedByShield(mc.world.getDamageSources().playerAttack(mc.player))) return false;
         }
-        return !(entity instanceof AnimalEntity animal) || !ignoreBabies.get() || !animal.isBaby();
+        if (entity instanceof AnimalEntity animal) {
+            return switch (mobAgeFilter.get()) {
+                case Baby -> animal.isBaby();
+                case Adult -> !animal.isBaby();
+                case Both -> true;
+            };
+        }
+        return true;
     }
 
     private boolean delayCheck() {
@@ -392,13 +400,15 @@ public class KillAura extends Module {
         return switch (weapon.get()) {
             case Axe -> mc.player.getMainHandStack().getItem() instanceof AxeItem;
             case Sword -> mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            case Both -> mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            case Mace -> mc.player.getMainHandStack().getItem() instanceof MaceItem;
+            case Trident -> mc.player.getMainHandStack().getItem() instanceof TridentItem;
+            case All -> mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof MaceItem || mc.player.getMainHandStack().getItem() instanceof TridentItem;
             default -> true;
         };
     }
 
     public Entity getTarget() {
-        if (!targets.isEmpty()) return targets.get(0);
+        if (!targets.isEmpty()) return targets.getFirst();
         return null;
     }
 
@@ -411,7 +421,9 @@ public class KillAura extends Module {
     public enum Weapon {
         Sword,
         Axe,
-        Both,
+        Mace,
+        Trident,
+        All,
         Any
     }
 
@@ -425,5 +437,11 @@ public class KillAura extends Module {
         Ignore,
         Break,
         None
+    }
+
+    public enum EntityAge {
+        Baby,
+        Adult,
+        Both
     }
 }

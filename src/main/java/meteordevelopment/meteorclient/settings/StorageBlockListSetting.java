@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.settings;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.ObjectIterators;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
+import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -30,7 +30,24 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
-    public static final BlockEntityType<?>[] STORAGE_BLOCKS = { BlockEntityType.FURNACE, BlockEntityType.CHEST, BlockEntityType.TRAPPED_CHEST, BlockEntityType.ENDER_CHEST, BlockEntityType.DISPENSER, BlockEntityType.DROPPER, BlockEntityType.HOPPER, BlockEntityType.SHULKER_BOX, BlockEntityType.BARREL, BlockEntityType.SMOKER, BlockEntityType.BLAST_FURNACE, BlockEntityType.CAMPFIRE };
+    public static final BlockEntityType<?>[] STORAGE_BLOCKS = new BlockEntityType[]{
+        BlockEntityType.BARREL,
+        BlockEntityType.BLAST_FURNACE,
+        BlockEntityType.BREWING_STAND,
+        BlockEntityType.CAMPFIRE,
+        BlockEntityType.CHEST,
+        BlockEntityType.CHISELED_BOOKSHELF,
+        BlockEntityType.CRAFTER,
+        BlockEntityType.DISPENSER,
+        BlockEntityType.DECORATED_POT,
+        BlockEntityType.DROPPER,
+        BlockEntityType.ENDER_CHEST,
+        BlockEntityType.FURNACE,
+        BlockEntityType.HOPPER,
+        BlockEntityType.SHULKER_BOX,
+        BlockEntityType.SMOKER,
+        BlockEntityType.TRAPPED_CHEST,
+    };
 
     public static final Registry<BlockEntityType<?>> REGISTRY = new SRegistry();
 
@@ -86,7 +103,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            BlockEntityType<?> type = Registries.BLOCK_ENTITY_TYPE.get(new Identifier(tagI.asString()));
+            BlockEntityType<?> type = Registries.BLOCK_ENTITY_TYPE.get(Identifier.of(tagI.asString()));
             if (type != null) get().add(type);
         }
 
@@ -110,7 +127,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
     private static class SRegistry extends SimpleRegistry<BlockEntityType<?>> {
         public SRegistry() {
-            super(RegistryKey.ofRegistry(new MeteorIdentifier("storage-blocks")), Lifecycle.stable());
+            super(RegistryKey.ofRegistry(MeteorClient.identifier("storage-blocks")), Lifecycle.stable());
         }
 
         @Override
@@ -143,11 +160,6 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         @Nullable
         @Override
         public BlockEntityType<?> get(@Nullable Identifier id) {
-            return null;
-        }
-
-        @Override
-        public Lifecycle getEntryLifecycle(BlockEntityType<?> object) {
             return null;
         }
 

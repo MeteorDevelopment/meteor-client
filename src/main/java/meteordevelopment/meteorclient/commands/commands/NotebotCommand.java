@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
@@ -17,7 +18,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvent;
@@ -32,10 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 public class NotebotCommand extends Command {
     private final static SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(Text.literal("Invalid song."));
+    private final static DynamicCommandExceptionType INVALID_PATH = new DynamicCommandExceptionType(object -> Text.literal("'%s' is not a valid path.".formatted(object)));
 
     int ticks = -1;
     private final Map<Integer, List<Note>> song = new HashMap<>(); // tick -> notes
@@ -123,10 +123,14 @@ public class NotebotCommand extends Command {
 
         builder.then(literal("record").then(literal("save").then(argument("name", StringArgumentType.greedyString()).executes(ctx -> {
             String name = ctx.getArgument("name", String.class);
-            if (name == null || name.equals("")) {
-                throw INVALID_SONG.create();
+            if (name == null || name.isEmpty()) {
+                throw INVALID_PATH.create(name);
             }
-            Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt", name));
+            Path notebotFolder = MeteorClient.FOLDER.toPath().resolve("notebot");
+            Path path = notebotFolder.resolve(String.format("%s.txt", name)).normalize();
+            if (!path.startsWith(notebotFolder)) {
+                throw INVALID_PATH.create(path);
+            }
             saveRecording(path);
             return SINGLE_SUCCESS;
         }))));
@@ -151,7 +155,7 @@ public class NotebotCommand extends Command {
     }
 
     private void saveRecording(Path path) {
-        if (song.size() < 1) {
+        if (song.isEmpty()) {
             MeteorClient.EVENT_BUS.unsubscribe(this);
             return;
         }
@@ -164,7 +168,7 @@ public class NotebotCommand extends Command {
                 List<Note> notes = entry.getValue();
 
                 for (var note : notes) {
-                    Instrument instrument = note.getInstrument();
+                    NoteBlockInstrument instrument = note.getInstrument();
                     int noteLevel = note.getNoteLevel();
 
                     file.write(String.format("%d:%d:%d\n", tick, noteLevel, instrument.ordinal()));
@@ -198,7 +202,7 @@ public class NotebotCommand extends Command {
             return null;
         }
 
-        Instrument instrument = getInstrumentFromSound(soundPacket.getSound().value());
+        NoteBlockInstrument instrument = getInstrumentFromSound(soundPacket.getSound().value());
         if (instrument == null) {
             error("Can't find the instrument from sound! Sound: " + soundPacket.getSound().value());
             return null;
@@ -207,40 +211,40 @@ public class NotebotCommand extends Command {
         return new Note(instrument, noteLevel);
     }
 
-    private Instrument getInstrumentFromSound(SoundEvent sound) {
+    private NoteBlockInstrument getInstrumentFromSound(SoundEvent sound) {
         String path = sound.getId().getPath();
         if (path.contains("harp"))
-            return Instrument.HARP;
+            return NoteBlockInstrument.HARP;
         else if (path.contains("basedrum"))
-            return Instrument.BASEDRUM;
+            return NoteBlockInstrument.BASEDRUM;
         else if (path.contains("snare"))
-            return Instrument.SNARE;
+            return NoteBlockInstrument.SNARE;
         else if (path.contains("hat"))
-            return Instrument.HAT;
+            return NoteBlockInstrument.HAT;
         else if (path.contains("bass"))
-            return Instrument.BASS;
+            return NoteBlockInstrument.BASS;
         else if (path.contains("flute"))
-            return Instrument.FLUTE;
+            return NoteBlockInstrument.FLUTE;
         else if (path.contains("bell"))
-            return Instrument.BELL;
+            return NoteBlockInstrument.BELL;
         else if (path.contains("guitar"))
-            return Instrument.GUITAR;
+            return NoteBlockInstrument.GUITAR;
         else if (path.contains("chime"))
-            return Instrument.CHIME;
+            return NoteBlockInstrument.CHIME;
         else if (path.contains("xylophone"))
-            return Instrument.XYLOPHONE;
+            return NoteBlockInstrument.XYLOPHONE;
         else if (path.contains("iron_xylophone"))
-            return Instrument.IRON_XYLOPHONE;
+            return NoteBlockInstrument.IRON_XYLOPHONE;
         else if (path.contains("cow_bell"))
-            return Instrument.COW_BELL;
+            return NoteBlockInstrument.COW_BELL;
         else if (path.contains("didgeridoo"))
-            return Instrument.DIDGERIDOO;
+            return NoteBlockInstrument.DIDGERIDOO;
         else if (path.contains("bit"))
-            return Instrument.BIT;
+            return NoteBlockInstrument.BIT;
         else if (path.contains("banjo"))
-            return Instrument.BANJO;
+            return NoteBlockInstrument.BANJO;
         else if (path.contains("pling"))
-            return Instrument.PLING;
+            return NoteBlockInstrument.PLING;
         return null;
     }
 }

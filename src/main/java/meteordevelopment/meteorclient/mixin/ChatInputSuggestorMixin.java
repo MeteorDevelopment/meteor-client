@@ -23,6 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.concurrent.CompletableFuture;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 @Mixin(ChatInputSuggestor.class)
 public abstract class ChatInputSuggestorMixin {
     @Shadow private ParseResults<CommandSource> parse;
@@ -46,11 +48,11 @@ public abstract class ChatInputSuggestorMixin {
             reader.setCursor(reader.getCursor() + length);
 
             if (this.parse == null) {
-                this.parse = Commands.DISPATCHER.parse(reader, Commands.COMMAND_SOURCE);
+                this.parse = Commands.DISPATCHER.parse(reader, mc.getNetworkHandler().getCommandSource());
             }
 
             int cursor = textField.getCursor();
-            if (cursor >= 1 && (this.window == null || !this.completingSuggestions)) {
+            if (cursor >= length && (this.window == null || !this.completingSuggestions)) {
                 this.pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(this.parse, cursor);
                 this.pendingSuggestions.thenRun(() -> {
                     if (this.pendingSuggestions.isDone()) {

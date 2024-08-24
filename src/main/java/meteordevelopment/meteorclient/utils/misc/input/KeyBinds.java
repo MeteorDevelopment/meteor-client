@@ -18,6 +18,9 @@ public class KeyBinds {
     public static KeyBinding OPEN_GUI = new KeyBinding("key.meteor-client.open-gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, CATEGORY);
     public static KeyBinding OPEN_COMMANDS = new KeyBinding("key.meteor-client.open-commands", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_PERIOD, CATEGORY);
 
+    private KeyBinds() {
+    }
+
     public static KeyBinding[] apply(KeyBinding[] binds) {
         // Add category
         Map<String, Integer> categories = KeyBindingAccessor.getCategoryOrderMap();
@@ -37,9 +40,5 @@ public class KeyBinds {
         newBinds[binds.length + 1] = OPEN_COMMANDS;
 
         return newBinds;
-    }
-
-    public static int getKey(KeyBinding bind) {
-        return ((KeyBindingAccessor) bind).getKey().getCode();
     }
 }

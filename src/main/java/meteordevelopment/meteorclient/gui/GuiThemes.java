@@ -26,6 +26,9 @@ public class GuiThemes {
     private static final List<GuiTheme> themes = new ArrayList<>();
     private static GuiTheme theme;
 
+    private GuiThemes() {
+    }
+
     @PreInit
     public static void init() {
         add(new MeteorGuiTheme());
@@ -35,7 +38,7 @@ public class GuiThemes {
     public static void postInit() {
         if (FILE.exists()) {
             try {
-                NbtCompound tag = NbtIo.read(FILE);
+                NbtCompound tag = NbtIo.read(FILE.toPath());
 
                 if (tag != null) select(tag.getString("currentTheme"));
             } catch (IOException e) {
@@ -82,7 +85,7 @@ public class GuiThemes {
                 File file = new File(THEMES_FOLDER, get().name + ".nbt");
 
                 if (file.exists()) {
-                    NbtCompound tag = NbtIo.read(file);
+                    NbtCompound tag = NbtIo.read(file.toPath());
                     if (tag != null) get().fromTag(tag);
                 }
             } catch (IOException e) {
@@ -116,7 +119,7 @@ public class GuiThemes {
                 NbtCompound tag = get().toTag();
 
                 THEMES_FOLDER.mkdirs();
-                NbtIo.write(tag, new File(THEMES_FOLDER, get().name + ".nbt"));
+                NbtIo.write(tag, new File(THEMES_FOLDER, get().name + ".nbt").toPath());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -129,7 +132,7 @@ public class GuiThemes {
             tag.putString("currentTheme", get().name);
 
             FOLDER.mkdirs();
-            NbtIo.write(tag, FILE);
+            NbtIo.write(tag, FILE.toPath());
         } catch (IOException e) {
             e.printStackTrace();
         }

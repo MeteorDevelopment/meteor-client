@@ -63,7 +63,7 @@ public abstract class WMultiLabel extends WLabel {
             }
         }
 
-        if (sb.length() > 0) lines.add(sb.toString());
+        if (!sb.isEmpty()) lines.add(sb.toString());
 
         width = maxLineWidth;
         height = theme.textHeight(title) * lines.size();

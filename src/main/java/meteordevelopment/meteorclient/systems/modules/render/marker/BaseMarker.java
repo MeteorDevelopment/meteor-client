@@ -24,14 +24,12 @@ public abstract class BaseMarker implements ISerializable<BaseMarker> {
     public final Setting<String> name = sgBase.add(new StringSetting.Builder()
         .name("name")
         .description("Custom name for this marker.")
-        .defaultValue("")
         .build()
     );
 
     protected final Setting<String> description = sgBase.add(new StringSetting.Builder()
         .name("description")
         .description("Custom description for this marker.")
-        .defaultValue("")
         .build()
     );
 

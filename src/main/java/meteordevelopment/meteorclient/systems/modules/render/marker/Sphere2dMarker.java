@@ -105,6 +105,7 @@ public class Sphere2dMarker extends BaseMarker {
 
     // Keybinding
 
+    @SuppressWarnings("unused")
     private final Setting<Keybind> nextLayerKey = sgKeybinding.add(new KeybindSetting.Builder()
         .name("next-layer-keybind")
         .description("Keybind to increment layer")
@@ -114,6 +115,7 @@ public class Sphere2dMarker extends BaseMarker {
         .build()
     );
 
+    @SuppressWarnings("unused")
     private final Setting<Keybind> prevLayerKey = sgKeybinding.add(new KeybindSetting.Builder()
         .name("prev-layer-keybind")
         .description("Keybind to increment layer")

@@ -5,9 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
-import baritone.api.BaritoneAPI;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -28,6 +27,8 @@ import net.minecraft.item.ArrowItem;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.Set;
+
 public class BowAimbot extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -40,7 +41,7 @@ public class BowAimbot extends Module {
         .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Entities to attack.")
         .onlyAttackable()
@@ -92,13 +93,13 @@ public class BowAimbot extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (!PlayerUtils.isAlive() || !itemInHand()) return;
-        if (!InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
+        if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
 
         target = TargetUtils.get(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
-            if (!entities.get().getBoolean(entity.getType())) return false;
+            if (!entities.get().contains(entity.getType())) return false;
             if (!nametagged.get() && entity.hasCustomName()) return false;
             if (!PlayerUtils.canSeeEntity(entity)) return false;
             if (entity instanceof PlayerEntity) {
@@ -110,15 +111,15 @@ public class BowAimbot extends Module {
 
         if (target == null) {
             if (wasPathing) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+                PathManagers.get().resume();
                 wasPathing = false;
             }
             return;
         }
 
         if (mc.options.useKey.isPressed() && itemInHand()) {
-            if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+            if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
+                PathManagers.get().pause();
                 wasPathing = true;
             }
             aim(event.tickDelta);

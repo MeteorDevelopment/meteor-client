@@ -19,11 +19,14 @@ import java.util.*;
  * Some utilities for {@link Text}
  */
 public class TextUtils {
+    private TextUtils() {
+    }
+
     public static List<ColoredText> toColoredTextList(Text text) {
-        Stack<ColoredText> stack = new Stack<>();
+        Deque<ColoredText> stack = new ArrayDeque<>();
         List<ColoredText> coloredTexts = new ArrayList<>();
         preOrderTraverse(text, stack, coloredTexts);
-        coloredTexts.removeIf(e -> e.getText().isEmpty());
+        coloredTexts.removeIf(e -> e.text().isEmpty());
         return coloredTexts;
     }
 
@@ -70,12 +73,12 @@ public class TextUtils {
         Object2IntMap<Color> colorCount = new Object2IntOpenHashMap<>();
 
         for (ColoredText coloredText : coloredTexts) {
-            if (colorCount.containsKey(coloredText.getColor())) {
+            if (colorCount.containsKey(coloredText.color())) {
                 // Since color was already catalogued, simply update the record by adding the length of the new text segment to the old one
-                colorCount.put(coloredText.getColor(), colorCount.getInt(coloredText.getColor()) + coloredText.getText().length());
+                colorCount.put(coloredText.color(), colorCount.getInt(coloredText.color()) + coloredText.text().length());
             } else {
                 // Add new entry to the hashmap
-                colorCount.put(coloredText.getColor(), coloredText.getText().length());
+                colorCount.put(coloredText.color(), coloredText.text().length());
             }
         }
 
@@ -90,7 +93,7 @@ public class TextUtils {
      * @param stack        An empty stack. This is used by the recursive algorithm to keep track of the parents of the current iteration
      * @param coloredTexts The list of colored text to return
      */
-    private static void preOrderTraverse(Text text, Stack<ColoredText> stack, List<ColoredText> coloredTexts) {
+    private static void preOrderTraverse(Text text, Deque<ColoredText> stack, List<ColoredText> coloredTexts) {
         if (text == null)
             return;
 
@@ -105,12 +108,12 @@ public class TextUtils {
         // and with no color, use the default of white.
         Color textColor;
         if (mcTextColor == null) {
-            if (stack.empty())
+            if (stack.isEmpty())
                 // No color defined, use default white
                 textColor = new Color(255, 255, 255);
             else
                 // Use parent color
-                textColor = stack.peek().getColor();
+                textColor = stack.peek().color();
         } else {
             // Has a color defined, so use that
             textColor = new Color((text.getStyle().getColor().getRgb()) | 0xFF000000); // Sets alpha to max. Some damn reason Color's packed ctor is in ARGB format, not RGBA

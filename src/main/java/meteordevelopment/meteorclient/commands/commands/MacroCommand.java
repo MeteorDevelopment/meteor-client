@@ -11,8 +11,6 @@ import meteordevelopment.meteorclient.commands.arguments.MacroArgumentType;
 import meteordevelopment.meteorclient.systems.macros.Macro;
 import net.minecraft.command.CommandSource;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 public class MacroCommand extends Command {
     public MacroCommand() {
         super("macro", "Allows you to execute macros.");

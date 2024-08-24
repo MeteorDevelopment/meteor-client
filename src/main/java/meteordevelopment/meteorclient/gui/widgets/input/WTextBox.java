@@ -13,9 +13,9 @@ import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -277,17 +277,15 @@ public abstract class WTextBox extends WWidget {
             int addedChars = 0;
 
             StringBuilder sb = new StringBuilder(text.length() + clipboard.length());
-            sb.append(text, 0, cursor);
+            sb.append(text);
 
             for (int i = 0; i < clipboard.length(); i++) {
                 char c = clipboard.charAt(i);
-                if (filter.filter(text, c)) {
-                    sb.append(c);
+                if (filter.filter(sb.toString(), c)) {
+                    sb.insert(cursor + addedChars, c);
                     addedChars++;
                 }
             }
-
-            sb.append(text, cursor, text.length());
 
             text = sb.toString();
             cursor += addedChars;
@@ -319,8 +317,8 @@ public abstract class WTextBox extends WWidget {
             return true;
         }
         else if (key == GLFW_KEY_DELETE) {
-            if (cursor < text.length()) {
-                if (cursor == selectionStart && cursor == selectionEnd) {
+            if (cursor == selectionStart && cursor == selectionEnd) {
+                if (cursor < text.length()) {
                     String preText = text;
 
                     int count = mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)
@@ -333,11 +331,10 @@ public abstract class WTextBox extends WWidget {
 
                     if (!text.equals(preText)) runAction();
                 }
-                else {
-                    clearSelection();
-                }
             }
-
+            else {
+                clearSelection();
+            }
             return true;
         }
         else if (key == GLFW_KEY_LEFT) {
@@ -606,7 +603,7 @@ public abstract class WTextBox extends WWidget {
             textStart += cursor - (textStart + maxTextWidth());
         }
 
-        textStart = Utils.clamp(textStart, 0, Math.max(textWidth() - maxTextWidth(), 0));
+        textStart = MathHelper.clamp(textStart, 0, Math.max(textWidth() - maxTextWidth(), 0));
 
         onCursorChanged();
 
@@ -614,7 +611,7 @@ public abstract class WTextBox extends WWidget {
         completions = renderer.getCompletions(text, this.cursor);
         completionsStart = 0;
         completionsW = null;
-        if (completions != null && completions.size() > 0) createCompletions(0);
+        if (completions != null && !completions.isEmpty()) createCompletions(0);
     }
     protected void onCursorChanged() {}
 
@@ -661,7 +658,7 @@ public abstract class WTextBox extends WWidget {
     public void set(String text) {
         this.text = text;
 
-        cursor = Utils.clamp(cursor, 0, text.length());
+        cursor = MathHelper.clamp(cursor, 0, text.length());
         selectionStart = cursor;
         selectionEnd = cursor;
 

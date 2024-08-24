@@ -6,11 +6,8 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.utils.misc.FakeClientPlayer;
-import meteordevelopment.meteorclient.utils.network.Capes;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,13 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(AbstractClientPlayerEntity.class)
-public class AbstractClientPlayerEntityMixin {
-    @Inject(method = "getCapeTexture", at = @At("HEAD"), cancellable = true)
-    private void onGetCapeTexture(CallbackInfoReturnable<Identifier> info) {
-        Identifier id = Capes.get((PlayerEntity) (Object) this);
-        if (id != null) info.setReturnValue(id);
-    }
-
+public abstract class AbstractClientPlayerEntityMixin {
     // Player model rendering in main menu
 
     @Inject(method = "getPlayerListEntry", at = @At("HEAD"), cancellable = true)

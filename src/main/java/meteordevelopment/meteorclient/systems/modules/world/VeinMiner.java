@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import com.google.common.collect.Sets;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -37,7 +36,7 @@ public class VeinMiner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
-    private final Set<Vec3i> blockNeighbours = Sets.newHashSet(
+    private final Set<Vec3i> blockNeighbours = Set.of(
         new Vec3i(1, -1, 1), new Vec3i(0, -1, 1), new Vec3i(-1, -1, 1),
         new Vec3i(1, -1, 0), new Vec3i(0, -1, 0), new Vec3i(-1, -1, 0),
         new Vec3i(1, -1, -1), new Vec3i(0, -1, -1), new Vec3i(-1, -1, -1),
@@ -56,14 +55,14 @@ public class VeinMiner extends Module {
     private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Which blocks to select.")
-        .defaultValue(Blocks.STONE, Blocks.DIRT, Blocks.GRASS)
+        .defaultValue(Blocks.STONE, Blocks.DIRT, Blocks.GRASS_BLOCK)
         .build()
     );
 
     private final Setting<ListMode> mode = sgGeneral.add(new EnumSetting.Builder<ListMode>()
         .name("mode")
         .description("Selection mode.")
-        .defaultValue(ListMode.Whitelist)
+        .defaultValue(ListMode.Blacklist)
         .build()
     );
 
@@ -180,12 +179,12 @@ public class VeinMiner extends Module {
         blocks.removeIf(MyBlock::shouldRemove);
 
         if (!blocks.isEmpty()) {
-            if (tick < delay.get() && !blocks.get(0).mining) {
+            if (tick < delay.get() && !blocks.getFirst().mining) {
                 tick++;
                 return;
             }
             tick = 0;
-            blocks.get(0).mine();
+            blocks.getFirst().mine();
         }
     }
 
@@ -217,7 +216,7 @@ public class VeinMiner extends Module {
         }
 
         public boolean shouldRemove() {
-            return mc.world.getBlockState(blockPos).getBlock() != originalBlock || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.interactionManager.getReachDistance();
+            return mc.world.getBlockState(blockPos).getBlock() != originalBlock || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.player.getBlockInteractionRange();
         }
 
         public void mine() {
@@ -260,7 +259,7 @@ public class VeinMiner extends Module {
         if (depth<=0) return;
         if (foundBlockPositions.contains(pos)) return;
         foundBlockPositions.add(pos);
-        if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.interactionManager.getReachDistance()) return;
+        if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.player.getBlockInteractionRange()) return;
         for(Vec3i neighbourOffset: blockNeighbours) {
             BlockPos neighbour = pos.add(neighbourOffset);
             if (mc.world.getBlockState(neighbour).getBlock().asItem() == item) {

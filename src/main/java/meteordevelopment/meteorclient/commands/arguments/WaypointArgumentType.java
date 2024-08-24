@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class WaypointArgumentType implements ArgumentType<String> {
+    private static final WaypointArgumentType GREEDY = new WaypointArgumentType(true);
+    private static final WaypointArgumentType QUOTED = new WaypointArgumentType(false);
     private static final DynamicCommandExceptionType NO_SUCH_WAYPOINT = new DynamicCommandExceptionType(name -> Text.literal("Waypoint with name '" + name + "' doesn't exist."));
     private final boolean greedyString;
 
@@ -31,11 +33,11 @@ public class WaypointArgumentType implements ArgumentType<String> {
     }
 
     public static WaypointArgumentType create() {
-        return new WaypointArgumentType(true);
+        return GREEDY;
     }
 
     public static WaypointArgumentType create(boolean greedy) {
-        return new WaypointArgumentType(greedy);
+        return greedy ? GREEDY : QUOTED;
     }
 
     public static Waypoint get(CommandContext<?> context) {

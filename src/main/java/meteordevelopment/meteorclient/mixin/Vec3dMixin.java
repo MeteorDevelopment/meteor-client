@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Vec3d.class)
-public class Vec3dMixin implements IVec3d {
+public abstract class Vec3dMixin implements IVec3d {
     @Shadow @Final @Mutable public double x;
     @Shadow @Final @Mutable public double y;
     @Shadow @Final @Mutable public double z;

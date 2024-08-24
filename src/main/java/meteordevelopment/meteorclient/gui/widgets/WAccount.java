@@ -6,11 +6,13 @@
 package meteordevelopment.meteorclient.gui.widgets;
 
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.gui.screens.accounts.AccountInfoScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
+import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
@@ -18,7 +20,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class WAccount extends WHorizontalList {
     public Runnable refreshScreenAction;
-
     private final WidgetScreen screen;
     private final Account<?> account;
 
@@ -42,6 +43,12 @@ public abstract class WAccount extends WHorizontalList {
         // Type
         WLabel label = add(theme.label("(" + account.getType() + ")")).expandCellX().right().widget();
         label.color = accountTypeColor();
+
+        // Info
+        if (account instanceof TokenAccount) {
+            WButton info = add(theme.button("Info")).widget();
+            info.action = () -> mc.setScreen(new AccountInfoScreen(theme, account));
+        }
 
         // Login
         WButton login = add(theme.button("Login")).widget();

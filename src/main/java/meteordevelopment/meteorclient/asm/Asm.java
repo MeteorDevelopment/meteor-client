@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.asm;
 
 import meteordevelopment.meteorclient.asm.transformers.CanvasWorldRendererTransformer;
 import meteordevelopment.meteorclient.asm.transformers.GameRendererTransformer;
+import meteordevelopment.meteorclient.asm.transformers.PacketInflaterTransformer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -41,6 +42,7 @@ public class Asm {
         INSTANCE = new Asm(System.getProperty("meteor.asm.export") != null);
         INSTANCE.add(new GameRendererTransformer());
         INSTANCE.add(new CanvasWorldRendererTransformer());
+        INSTANCE.add(new PacketInflaterTransformer());
     }
 
     private void add(AsmTransformer transformer) {

@@ -12,21 +12,24 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import static net.minecraft.nbt.StringNbtReader.EXPECTED_VALUE;
 
 public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
-    private static final Collection<String> EXAMPLES = Arrays.asList("{foo:bar}", "{foo:[aa, bb],bar:15}");
+    private static final CompoundNbtTagArgumentType INSTANCE = new CompoundNbtTagArgumentType();
+    private static final Collection<String> EXAMPLES = List.of("{foo:bar}", "{foo:[aa, bb],bar:15}");
 
     public static CompoundNbtTagArgumentType create() {
-        return new CompoundNbtTagArgumentType();
+        return INSTANCE;
     }
 
     public static NbtCompound get(CommandContext<?> context) {
         return context.getArgument("nbt", NbtCompound.class);
     }
+
+    private CompoundNbtTagArgumentType() {}
 
     @Override
     public NbtCompound parse(StringReader reader) throws CommandSyntaxException {
@@ -50,8 +53,8 @@ public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
         reader.expect('}');
         b.append('}');
         return StringNbtReader.parse(b.toString()
-                .replace("$", "\u00a7")
-                .replace("\u00a7\u00a7", "$")
+                .replace("$", "§")
+                .replace("§§", "$")
         );
     }
 

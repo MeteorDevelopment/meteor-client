@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.GoalXZ;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,6 +17,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -27,6 +26,7 @@ import meteordevelopment.meteorclient.utils.render.MeteorToast;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.*;
 import net.minecraft.item.Items;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
 import java.io.*;
@@ -48,7 +48,7 @@ public class StashFinder extends Module {
     );
 
     private final Setting<Integer> minimumStorageCount = sgGeneral.add(new IntSetting.Builder()
-        .name("minimum-storage-cont")
+        .name("minimum-storage-count")
         .description("The minimum amount of storage blocks in a chunk to record the chunk.")
         .defaultValue(4)
         .min(1)
@@ -94,13 +94,13 @@ public class StashFinder extends Module {
     @EventHandler
     private void onChunkData(ChunkDataEvent event) {
         // Check the distance.
-        double chunkXAbs = Math.abs(event.chunk.getPos().x * 16);
-        double chunkZAbs = Math.abs(event.chunk.getPos().z * 16);
+        double chunkXAbs = Math.abs(event.chunk().getPos().x * 16);
+        double chunkZAbs = Math.abs(event.chunk().getPos().z * 16);
         if (Math.sqrt(chunkXAbs * chunkXAbs + chunkZAbs * chunkZAbs) < minimumDistance.get()) return;
 
-        Chunk chunk = new Chunk(event.chunk.getPos());
+        Chunk chunk = new Chunk(event.chunk().getPos());
 
-        for (BlockEntity blockEntity : event.chunk.getBlockEntities().values()) {
+        for (BlockEntity blockEntity : event.chunk().getBlockEntities().values()) {
             if (!storageBlocks.get().contains(blockEntity.getType())) continue;
 
             if (blockEntity instanceof ChestBlockEntity) chunk.chests++;
@@ -133,8 +133,6 @@ public class StashFinder extends Module {
                 }
             }
         }
-
-        ChunkDataEvent.returnChunkDataEvent(event);
     }
 
     @Override
@@ -148,7 +146,7 @@ public class StashFinder extends Module {
         WButton clear = list.add(theme.button("Clear")).widget();
 
         WTable table = new WTable();
-        if (chunks.size() > 0) list.add(table);
+        if (!chunks.isEmpty()) list.add(table);
 
         clear.action = () -> {
             chunks.clear();
@@ -170,7 +168,7 @@ public class StashFinder extends Module {
             open.action = () -> mc.setScreen(new ChunkScreen(theme, chunk));
 
             WButton gotoBtn = table.add(theme.button("Goto")).widget();
-            gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
+            gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(chunk.x, 0, chunk.z), true);
 
             WMinus delete = table.add(theme.minus()).widget();
             delete.action = () -> {

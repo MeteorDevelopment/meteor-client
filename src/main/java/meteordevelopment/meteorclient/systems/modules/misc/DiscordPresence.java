@@ -25,13 +25,13 @@ import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.starscript.Script;
 import net.minecraft.client.gui.screen.*;
+import net.minecraft.client.gui.screen.multiplayer.AddServerScreen;
+import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
+import net.minecraft.client.gui.screen.multiplayer.DirectConnectScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.option.*;
 import net.minecraft.client.gui.screen.pack.PackScreen;
-import net.minecraft.client.gui.screen.world.CreateWorldScreen;
-import net.minecraft.client.gui.screen.world.EditGameRulesScreen;
-import net.minecraft.client.gui.screen.world.EditWorldScreen;
-import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.gui.screen.world.*;
 import net.minecraft.client.realms.gui.screen.RealmsScreen;
 import net.minecraft.util.Pair;
 import net.minecraft.util.Util;
@@ -208,7 +208,7 @@ public class DiscordPresence extends Module {
         if (Utils.canUpdate()) {
             // Line 1
             if (line1Ticks >= line1UpdateDelay.get() || forceUpdate) {
-                if (line1Scripts.size() > 0) {
+                if (!line1Scripts.isEmpty()) {
                     int i = Utils.random(0, line1Scripts.size());
                     if (line1SelectMode.get() == SelectMode.Sequential) {
                         if (line1I >= line1Scripts.size()) line1I = 0;
@@ -225,7 +225,7 @@ public class DiscordPresence extends Module {
 
             // Line 2
             if (line2Ticks >= line2UpdateDelay.get() || forceUpdate) {
-                if (line2Scripts.size() > 0) {
+                if (!line2Scripts.isEmpty()) {
                     int i = Utils.random(0, line2Scripts.size());
                     if (line2SelectMode.get() == SelectMode.Sequential) {
                         if (line2I >= line2Scripts.size()) line2I = 0;

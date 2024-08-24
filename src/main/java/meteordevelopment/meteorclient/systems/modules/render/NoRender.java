@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ParticleEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -18,6 +17,7 @@ import net.minecraft.particle.ParticleType;
 import net.minecraft.particle.ParticleTypes;
 
 import java.util.List;
+import java.util.Set;
 
 public class NoRender extends Module {
     private final SettingGroup sgOverlay = settings.createGroup("Overlay");
@@ -137,6 +137,12 @@ public class NoRender extends Module {
     private final Setting<Boolean> noCrosshair = sgHUD.add(new BoolSetting.Builder()
         .name("crosshair")
         .description("Disables rendering of the crosshair.")
+        .defaultValue(false)
+        .build()
+    );
+    private final Setting<Boolean> noTitle = sgHUD.add(new BoolSetting.Builder()
+        .name("title")
+        .description("Disables rendering of the title.")
         .defaultValue(false)
         .build()
     );
@@ -263,6 +269,13 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noMapContents = sgWorld.add(new BoolSetting.Builder()
+        .name("map-contents")
+        .description("Disable rendering of maps.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<BannerRenderMode> bannerRender = sgWorld.add(new EnumSetting.Builder<BannerRenderMode>()
         .name("banners")
         .description("Changes rendering of banners.")
@@ -290,9 +303,17 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noTextureRotations = sgWorld.add(new BoolSetting.Builder()
+        .name("texture-rotations")
+        .description("Changes texture rotations and model offsets to use a random value instead of the block position.")
+        .defaultValue(false)
+        .onChanged(b -> mc.worldRenderer.reload())
+        .build()
+    );
+
     // Entity
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Disables rendering of selected entities.")
         .build()
@@ -428,6 +449,9 @@ public class NoRender extends Module {
     public boolean noCrosshair() {
         return isActive() && noCrosshair.get();
     }
+    public boolean noTitle() {
+        return isActive() && noTitle.get();
+    }
 
     public boolean noHeldItemName() {
         return isActive() && noHeldItemName.get();
@@ -500,6 +524,10 @@ public class NoRender extends Module {
         return isActive() && noMapMarkers.get();
     }
 
+    public boolean noMapContents() {
+        return isActive() && noMapContents.get();
+    }
+
     public BannerRenderMode getBannerRenderMode() {
         if (!isActive()) return BannerRenderMode.Everything;
         else return bannerRender.get();
@@ -520,14 +548,18 @@ public class NoRender extends Module {
         return isActive() && noBarrierInvis.get();
     }
 
+    public boolean noTextureRotations() {
+        return isActive() && noTextureRotations.get();
+    }
+
     // Entity
 
     public boolean noEntity(Entity entity) {
-        return isActive() && entities.get().getBoolean(entity.getType());
+        return isActive() && entities.get().contains(entity.getType());
     }
 
     public boolean noEntity(EntityType<?> entity) {
-        return isActive() && entities.get().getBoolean(entity);
+        return isActive() && entities.get().contains(entity);
     }
 
     public boolean getDropSpawnPacket() {

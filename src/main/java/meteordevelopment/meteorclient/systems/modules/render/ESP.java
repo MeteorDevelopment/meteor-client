@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -28,6 +27,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Vector3d;
+
+import java.util.Set;
 
 public class ESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -73,6 +74,7 @@ public class ESP extends Module {
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .description("How the shapes are rendered.")
+        .visible(() -> mode.get() != Mode.Glow)
         .defaultValue(ShapeMode.Both)
         .build()
     );
@@ -80,7 +82,7 @@ public class ESP extends Module {
     public final Setting<Double> fillOpacity = sgGeneral.add(new DoubleSetting.Builder()
         .name("fill-opacity")
         .description("The opacity of the shape fill.")
-        .visible(() -> shapeMode.get() != ShapeMode.Lines)
+        .visible(() -> shapeMode.get() != ShapeMode.Lines && mode.get() != Mode.Glow)
         .defaultValue(0.3)
         .range(0, 1)
         .sliderMax(1)
@@ -96,7 +98,7 @@ public class ESP extends Module {
         .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select specific entities.")
         .defaultValue(EntityType.PLAYER)
@@ -296,14 +298,14 @@ public class ESP extends Module {
     // Utils
 
     public boolean shouldSkip(Entity entity) {
-        if (!entities.get().getBoolean(entity.getType())) return true;
+        if (!entities.get().contains(entity.getType())) return true;
         if (entity == mc.player && ignoreSelf.get()) return true;
         if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
         return !EntityUtils.isInRenderDistance(entity);
     }
 
     public Color getColor(Entity entity) {
-        if (!entities.get().getBoolean(entity.getType())) return null;
+        if (!entities.get().contains(entity.getType())) return null;
 
         double alpha = getFadeAlpha(entity);
         if (alpha == 0) return null;
@@ -313,10 +315,10 @@ public class ESP extends Module {
     }
 
     private double getFadeAlpha(Entity entity) {
-        double dist = PlayerUtils.distanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ() + entity.getWidth() / 2);
+        double dist = PlayerUtils.squaredDistanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ() + entity.getWidth() / 2);
         double fadeDist = Math.pow(fadeDistance.get(), 2);
         double alpha = 1;
-        if (dist <= fadeDist) alpha = (float) (dist / fadeDist);
+        if (dist <= fadeDist * fadeDist) alpha = (float) (Math.sqrt(dist) / fadeDist);
         if (alpha <= 0.075) alpha = 0;
         return alpha;
     }
@@ -348,11 +350,16 @@ public class ESP extends Module {
         return isActive() && mode.get() == Mode.Shader;
     }
 
+    public boolean isGlow() {
+        return isActive() && mode.get() == Mode.Glow;
+    }
+
     public enum Mode {
         Box,
         Wireframe,
         _2D,
-        Shader;
+        Shader,
+        Glow;
 
         @Override
         public String toString() {

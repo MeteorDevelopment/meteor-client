@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.renderer;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.operations.TextOperation;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
@@ -14,13 +15,14 @@ import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.PostInit;
-import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.ByteTexture;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +60,7 @@ public class GuiRenderer {
     public WWidget tooltipWidget;
     private double tooltipAnimProgress;
 
-    private MatrixStack matrices;
+    private DrawContext drawContext;
 
     public static GuiTexture addTexture(Identifier id) {
         return TEXTURE_PACKER.add(id);
@@ -66,27 +68,25 @@ public class GuiRenderer {
 
     @PostInit
     public static void init() {
-        CIRCLE = addTexture(new MeteorIdentifier("textures/icons/gui/circle.png"));
-        TRIANGLE = addTexture(new MeteorIdentifier("textures/icons/gui/triangle.png"));
-        EDIT = addTexture(new MeteorIdentifier("textures/icons/gui/edit.png"));
-        RESET = addTexture(new MeteorIdentifier("textures/icons/gui/reset.png"));
-        FAVORITE_NO = addTexture(new MeteorIdentifier("textures/icons/gui/favorite_no.png"));
-        FAVORITE_YES = addTexture(new MeteorIdentifier("textures/icons/gui/favorite_yes.png"));
+        CIRCLE = addTexture(MeteorClient.identifier("textures/icons/gui/circle.png"));
+        TRIANGLE = addTexture(MeteorClient.identifier("textures/icons/gui/triangle.png"));
+        EDIT = addTexture(MeteorClient.identifier("textures/icons/gui/edit.png"));
+        RESET = addTexture(MeteorClient.identifier("textures/icons/gui/reset.png"));
+        FAVORITE_NO = addTexture(MeteorClient.identifier("textures/icons/gui/favorite_no.png"));
+        FAVORITE_YES = addTexture(MeteorClient.identifier("textures/icons/gui/favorite_yes.png"));
 
         TEXTURE = TEXTURE_PACKER.pack();
     }
 
-    public void begin(MatrixStack matrices) {
-        this.matrices = matrices;
+    public void begin(DrawContext drawContext) {
+        this.drawContext = drawContext;
 
         GL.enableBlend();
         GL.enableScissorTest();
         scissorStart(0, 0, getWindowWidth(), getWindowHeight());
     }
 
-    public void end(MatrixStack matrices) {
-        this.matrices = matrices;
-
+    public void end() {
         scissorEnd();
 
         for (Runnable task : postTasks) task.run();
@@ -104,24 +104,24 @@ public class GuiRenderer {
         r.end();
         rTex.end();
 
-        r.render(matrices);
+        r.render(drawContext.getMatrices());
 
         GL.bindTexture(TEXTURE.getGlId());
-        rTex.render(matrices);
+        rTex.render(drawContext.getMatrices());
 
         // Normal text
         theme.textRenderer().begin(theme.scale(1));
         for (TextOperation text : texts) {
             if (!text.title) text.run(textPool);
         }
-        theme.textRenderer().end(matrices);
+        theme.textRenderer().end(drawContext.getMatrices());
 
         // Title text
         theme.textRenderer().begin(theme.scale(1.25));
         for (TextOperation text : texts) {
             if (text.title) text.run(textPool);
         }
-        theme.textRenderer().end(matrices);
+        theme.textRenderer().end(drawContext.getMatrices());
 
         texts.clear();
     }
@@ -155,9 +155,9 @@ public class GuiRenderer {
         scissorPool.free(scissor);
     }
 
-    public boolean renderTooltip(double mouseX, double mouseY, double delta, MatrixStack matrices) {
+    public boolean renderTooltip(DrawContext drawContext, double mouseX, double mouseY, double delta) {
         tooltipAnimProgress += (tooltip != null ? 1 : -1) * delta * 14;
-        tooltipAnimProgress = Utils.clamp(tooltipAnimProgress, 0, 1);
+        tooltipAnimProgress = MathHelper.clamp(tooltipAnimProgress, 0, 1);
 
         boolean toReturn = false;
 
@@ -171,9 +171,9 @@ public class GuiRenderer {
 
             setAlpha(tooltipAnimProgress);
 
-            begin(matrices);
+            begin(drawContext);
             tooltipWidget.render(this, mouseX, mouseY, delta);
-            end(matrices);
+            end();
 
             setAlpha(1);
 
@@ -231,12 +231,16 @@ public class GuiRenderer {
             rTex.end();
 
             texture.bind();
-            rTex.render(matrices);
+            rTex.render(drawContext.getMatrices());
         });
     }
 
     public void post(Runnable task) {
         scissorStack.peek().postTasks.add(task);
+    }
+
+    public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
+        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay);
     }
 
     public void absolutePost(Runnable task) {

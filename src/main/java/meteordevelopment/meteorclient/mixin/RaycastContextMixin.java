@@ -16,12 +16,12 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(RaycastContext.class)
-public class RaycastContextMixin implements IRaycastContext {
+public abstract class RaycastContextMixin implements IRaycastContext {
     @Shadow @Final @Mutable private Vec3d start;
     @Shadow @Final @Mutable private Vec3d end;
     @Shadow @Final @Mutable private RaycastContext.ShapeType shapeType;
     @Shadow @Final @Mutable private RaycastContext.FluidHandling fluid;
-    @Shadow @Final @Mutable private ShapeContext entityPosition;
+    @Shadow @Final @Mutable private ShapeContext shapeContext;
 
     @Override
     public void set(Vec3d start, Vec3d end, RaycastContext.ShapeType shapeType, RaycastContext.FluidHandling fluidHandling, Entity entity) {
@@ -29,6 +29,6 @@ public class RaycastContextMixin implements IRaycastContext {
         this.end = end;
         this.shapeType = shapeType;
         this.fluid = fluidHandling;
-        this.entityPosition = ShapeContext.of(entity);
+        this.shapeContext = ShapeContext.of(entity);
     }
 }

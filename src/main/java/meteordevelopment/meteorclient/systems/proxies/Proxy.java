@@ -23,7 +23,6 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<String> name = sgGeneral.add(new StringSetting.Builder()
         .name("name")
         .description("The name of the proxy.")
-        .defaultValue("")
         .build()
     );
 
@@ -37,7 +36,6 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<String> address = sgGeneral.add(new StringSetting.Builder()
         .name("address")
         .description("The ip address of the proxy.")
-        .defaultValue("")
         .filter(Utils::ipFilter)
         .build()
     );
@@ -64,14 +62,12 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<String> username = sgOptional.add(new StringSetting.Builder()
         .name("username")
         .description("The username of the proxy.")
-        .defaultValue("")
         .build()
     );
 
     public Setting<String> password = sgOptional.add(new StringSetting.Builder()
         .name("password")
         .description("The password of the proxy.")
-        .defaultValue("")
         .visible(() -> type.get().equals(ProxyType.Socks5))
         .build()
     );

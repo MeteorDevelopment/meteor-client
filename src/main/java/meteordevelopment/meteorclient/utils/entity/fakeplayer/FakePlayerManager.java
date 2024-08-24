@@ -17,13 +17,16 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class FakePlayerManager {
     private static final List<FakePlayerEntity> ENTITIES = new ArrayList<>();
 
+    private FakePlayerManager() {
+    }
+
     public static List<FakePlayerEntity> getFakePlayers() {
         return ENTITIES;
     }
 
     public static FakePlayerEntity get(String name) {
         for (FakePlayerEntity fp : ENTITIES) {
-            if (fp.getEntityName().equals(name)) return fp;
+            if (fp.getName().getString().equals(name)) return fp;
         }
 
         return null;
@@ -39,7 +42,7 @@ public class FakePlayerManager {
 
     public static void remove(FakePlayerEntity fp) {
         ENTITIES.removeIf(fp1 -> {
-            if (fp1.getEntityName().equals(fp.getEntityName())) {
+            if (fp1.getName().getString().equals(fp.getName().getString())) {
                 fp1.despawn();
                 return true;
             }

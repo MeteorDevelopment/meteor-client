@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FluidRenderer.class)
-public class FluidRendererMixin {
+public abstract class FluidRendererMixin {
     @Unique private final ThreadLocal<Integer> alphas = new ThreadLocal<>();
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
@@ -43,7 +43,7 @@ public class FluidRendererMixin {
     }
 
     @Inject(method = "vertex", at = @At("HEAD"), cancellable = true)
-    private void onVertex(VertexConsumer vertexConsumer, double x, double y, double z, float red, float green, float blue, float u, float v, int light, CallbackInfo info) {
+    private void onVertex(VertexConsumer vertexConsumer, float x, float y, float z, float red, float green, float blue, float u, float v, int light, CallbackInfo info) {
         int alpha = alphas.get();
 
         if (alpha == -2) {
@@ -58,7 +58,7 @@ public class FluidRendererMixin {
     }
 
     @Unique
-    private void vertex(VertexConsumer vertexConsumer, double x, double y, double z, int red, int green, int blue, int alpha, float u, float v, int light) {
-        vertexConsumer.vertex(x, y, z).color(red, green, blue, alpha).texture(u, v).light(light).normal(0.0f, 1.0f, 0.0f).next();
+    private void vertex(VertexConsumer vertexConsumer, float x, float y, float z, int red, int green, int blue, int alpha, float u, float v, int light) {
+        vertexConsumer.vertex(x, y, z).color(red, green, blue, alpha).texture(u, v).light(light).normal(0.0f, 1.0f, 0.0f);
     }
 }

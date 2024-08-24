@@ -152,15 +152,20 @@ public class Freecam extends Module {
         Utils.set(pos, mc.gameRenderer.getCamera().getPos());
         Utils.set(prevPos, mc.gameRenderer.getCamera().getPos());
 
+        if (mc.options.getPerspective() == Perspective.THIRD_PERSON_FRONT) {
+            yaw += 180;
+            pitch *= -1;
+        }
+
         prevYaw = yaw;
         prevPitch = pitch;
 
-        forward = false;
-        backward = false;
-        right = false;
-        left = false;
-        up = false;
-        down = false;
+        forward = mc.options.forwardKey.isPressed();
+        backward = mc.options.backKey.isPressed();
+        right = mc.options.rightKey.isPressed();
+        left = mc.options.leftKey.isPressed();
+        up = mc.options.jumpKey.isPressed();
+        down = mc.options.sneakKey.isPressed();
 
         unpress();
         if (reloadChunks.get()) mc.worldRenderer.reload();
@@ -171,7 +176,7 @@ public class Freecam extends Module {
         if (reloadChunks.get()) mc.worldRenderer.reload();
         mc.options.setPerspective(perspective);
         if (staticView.get()) {
-            mc.options.getFovEffectScale().setValue((double)fovScale);
+            mc.options.getFovEffectScale().setValue(fovScale);
             mc.options.getBobView().setValue(bobView);
         }
     }
@@ -343,7 +348,7 @@ public class Freecam extends Module {
 
     @EventHandler(priority = EventPriority.LOW)
     private void onMouseScroll(MouseScrollEvent event) {
-        if (speedScrollSensitivity.get() > 0) {
+        if (speedScrollSensitivity.get() > 0 && mc.currentScreen == null) {
             speedValue += event.value * 0.25 * (speedScrollSensitivity.get() * speedValue);
             if (speedValue < 0.1) speedValue = 0.1;
 
@@ -377,7 +382,7 @@ public class Freecam extends Module {
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event)  {
         if (event.packet instanceof DeathMessageS2CPacket packet) {
-            Entity entity = mc.world.getEntityById(packet.getEntityId());
+            Entity entity = mc.world.getEntityById(packet.playerId());
             if (entity == mc.player && toggleOnDeath.get()) {
                 toggle();
                 info("Toggled off because you died.");

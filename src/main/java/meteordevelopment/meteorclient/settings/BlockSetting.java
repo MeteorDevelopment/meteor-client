@@ -46,7 +46,7 @@ public class BlockSetting extends Setting<Block> {
 
     @Override
     protected Block load(NbtCompound tag) {
-        value = Registries.BLOCK.get(new Identifier(tag.getString("value")));
+        value = Registries.BLOCK.get(Identifier.of(tag.getString("value")));
 
         if (filter != null && !filter.test(value)) {
             for (Block block : Registries.BLOCK) {

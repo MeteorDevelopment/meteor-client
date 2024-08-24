@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.hud;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
@@ -51,6 +52,13 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         .build()
     );
 
+    private final Setting<Boolean> hideInMenus = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-in-menus")
+        .description("Hides the meteor hud when in inventory screens or game menus.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Double> textScale = sgGeneral.add(new DoubleSetting.Builder()
         .name("text-scale")
         .description("Scale of text if not overridden by the element.")
@@ -86,6 +94,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     );
 
     // Keybindings
+    @SuppressWarnings("unused")
     private final Setting<Keybind> keybind = sgKeybind.add(new KeybindSetting.Builder()
         .name("bind")
         .defaultValue(Keybind.none())
@@ -199,12 +208,13 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (Utils.isLoading()) return;
-        if (!(active || HudEditorScreen.isOpen())) return;
 
         if (resetToDefaultElements) {
             resetToDefaultElementsImpl();
             resetToDefaultElements = false;
         }
+
+        if (!(active || HudEditorScreen.isOpen())) return;
 
         for (HudElement element : elements) {
             if (element.isActive()) element.tick(HudRenderer.INSTANCE);
@@ -214,9 +224,11 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     @EventHandler
     private void onRender(Render2DEvent event) {
         if (Utils.isLoading()) return;
-        if (!(active && ((!mc.options.hudHidden && !mc.options.debugEnabled) || HudEditorScreen.isOpen()))) return;
 
-        HudRenderer.INSTANCE.begin();
+        if (!active || shouldHideHud()) return;
+        if ((mc.options.hudHidden || mc.inGameHud.getDebugHud().shouldShowDebugHud()) && !HudEditorScreen.isOpen()) return;
+
+        HudRenderer.INSTANCE.begin(event.drawContext);
 
         for (HudElement element : elements) {
             element.updatePos();
@@ -225,6 +237,10 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         }
 
         HudRenderer.INSTANCE.end();
+    }
+
+    private boolean shouldHideHud() {
+        return hideInMenus.get() && mc.currentScreen != null && !(mc.currentScreen instanceof WidgetScreen);
     }
 
     @EventHandler

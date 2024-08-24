@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.BlockActivateEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
@@ -22,6 +23,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class EChestMemory {
     public static final DefaultedList<ItemStack> ITEMS = DefaultedList.ofSize(27, ItemStack.EMPTY);
     private static int echestOpenedState;
+    private static boolean isKnown = false;
+
+    private EChestMemory() {
+    }
 
     @PreInit
     public static void init() {
@@ -49,7 +54,18 @@ public class EChestMemory {
         for (int i = 0; i < 27; i++) {
             ITEMS.set(i, inv.getStack(i));
         }
+        isKnown = true;
 
         echestOpenedState = 0;
+    }
+
+    @EventHandler
+    private static void onLeaveEvent(GameLeftEvent event) {
+        ITEMS.clear();
+        isKnown = false;
+    }
+
+    public static boolean isKnown() {
+        return isKnown;
     }
 }

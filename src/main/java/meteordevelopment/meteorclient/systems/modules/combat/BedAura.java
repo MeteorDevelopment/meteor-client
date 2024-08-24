@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
@@ -258,10 +259,10 @@ public class BedAura extends Module {
 
                 BlockPos centerPos = target.getBlockPos().up(i);
 
-                double headSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos));
-                double offsetSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos.offset(dir.toDirection())));
+                float headSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos));
+                float offsetSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos.offset(dir.toDirection())));
 
-                if (mc.world.getBlockState(centerPos).getMaterial().isReplaceable()
+                if (mc.world.getBlockState(centerPos).isReplaceable()
                     && BlockUtils.canPlace(centerPos.offset(dir.toDirection()))
                     && DamageUtils.bedDamage(target, Utils.vec3d(centerPos)) >= minDamage.get()
                     && offsetSelfDamage < maxSelfDamage.get()
@@ -324,7 +325,7 @@ public class BedAura extends Module {
         boolean wasSneaking = mc.player.isSneaking();
         if (wasSneaking) mc.player.setSneaking(false);
 
-        mc.interactionManager.interactBlock(mc.player, Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, pos, false));
+        mc.interactionManager.interactBlock(mc.player, Hand.OFF_HAND, new BlockHitResult(Vec3d.ofCenter(pos), Direction.UP, pos, false));
 
         mc.player.setSneaking(wasSneaking);
     }

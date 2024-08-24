@@ -5,18 +5,22 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.LivingEntityMoveEvent;
 import meteordevelopment.meteorclient.events.entity.player.JumpVelocityMultiplierEvent;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
+import meteordevelopment.meteorclient.mixininterface.ICamera;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
-import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
-import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
-import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
+import meteordevelopment.meteorclient.systems.modules.movement.*;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
+import meteordevelopment.meteorclient.systems.modules.render.FreeLook;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -24,18 +28,14 @@ import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShader
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
@@ -48,15 +48,9 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Shadow public World world;
 
-    @Shadow public abstract BlockPos getBlockPos();
-    @Shadow protected abstract BlockPos getVelocityAffectingPos();
-
-    @Redirect(method = "updateMovementInFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/fluid/FluidState;getVelocity(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/math/Vec3d;"))
-    private Vec3d updateMovementInFluidFluidStateGetVelocity(FluidState state, BlockView world, BlockPos pos) {
-        Vec3d vec = state.getVelocity(world, pos);
-
+    @ModifyExpressionValue(method = "updateMovementInFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/fluid/FluidState;getVelocity(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/math/Vec3d;"))
+    private Vec3d updateMovementInFluidFluidStateGetVelocity(Vec3d vec) {
         Velocity velocity = Modules.get().get(Velocity.class);
         if ((Object) this == mc.player && velocity.isActive() && velocity.liquids.get()) {
             vec = vec.multiply(velocity.getHorizontal(velocity.liquidsHorizontal), velocity.getVertical(velocity.liquidsVertical), velocity.getHorizontal(velocity.liquidsHorizontal));
@@ -67,18 +61,37 @@ public abstract class EntityMixin {
 
     @Inject(method = "isTouchingWater", at = @At(value = "HEAD"), cancellable = true)
     private void isTouchingWater(CallbackInfoReturnable<Boolean> info) {
+        if ((Object) this == mc.player && Modules.get().get(Flight.class).isActive()) info.setReturnValue(false);
         if ((Object) this == mc.player && Modules.get().get(NoSlow.class).fluidDrag()) info.setReturnValue(false);
     }
 
     @Inject(method = "isInLava", at = @At(value = "HEAD"), cancellable = true)
     private void isInLava(CallbackInfoReturnable<Boolean> info) {
+        if ((Object) this == mc.player && Modules.get().get(Flight.class).isActive()) info.setReturnValue(false);
         if ((Object) this == mc.player && Modules.get().get(NoSlow.class).fluidDrag()) info.setReturnValue(false);
     }
 
-    @Redirect(method = "updateSwimming", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSubmergedInWater()Z"))
-    private boolean isSubmergedInWater(Entity entity) {
-        if (entity == mc.player && Modules.get().get(NoSlow.class).fluidDrag()) return false;
-        return entity.isSubmergedInWater();
+    @Inject(method = "onBubbleColumnSurfaceCollision", at = @At("HEAD"))
+    private void onBubbleColumnSurfaceCollision(CallbackInfo info) {
+        Jesus jesus = Modules.get().get(Jesus.class);
+        if ((Object) this == mc.player && jesus.isActive()) {
+            jesus.isInBubbleColumn = true;
+        }
+    }
+
+    @Inject(method = "onBubbleColumnCollision", at = @At("HEAD"))
+    private void onBubbleColumnCollision(CallbackInfo info) {
+        Jesus jesus = Modules.get().get(Jesus.class);
+        if ((Object) this == mc.player && jesus.isActive()) {
+            jesus.isInBubbleColumn = true;
+        }
+    }
+
+    @ModifyExpressionValue(method = "updateSwimming", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSubmergedInWater()Z"))
+    private boolean isSubmergedInWater(boolean submerged) {
+        if ((Object) this == mc.player && Modules.get().get(NoSlow.class).fluidDrag()) return false;
+        if ((Object) this == mc.player && Modules.get().get(Flight.class).isActive()) return false;
+        return submerged;
     }
 
     @ModifyArgs(method = "pushAwayFrom(Lnet/minecraft/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;addVelocity(DDD)V"))
@@ -98,16 +111,14 @@ public abstract class EntityMixin {
         }
     }
 
-    @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)
-    private void onGetJumpVelocityMultiplier(CallbackInfoReturnable<Float> info) {
+    @ModifyReturnValue(method = "getJumpVelocityMultiplier", at = @At("RETURN"))
+    private float onGetJumpVelocityMultiplier(float original) {
         if ((Object) this == mc.player) {
-            float f = world.getBlockState(getBlockPos()).getBlock().getJumpVelocityMultiplier();
-            float g = world.getBlockState(getVelocityAffectingPos()).getBlock().getJumpVelocityMultiplier();
-            float a = f == 1.0D ? g : f;
-
             JumpVelocityMultiplierEvent event = MeteorClient.EVENT_BUS.post(JumpVelocityMultiplierEvent.get());
-            info.setReturnValue(a * event.multiplier);
+            return (original * event.multiplier);
         }
+
+        return original;
     }
 
     @Inject(method = "move", at = @At("HEAD"))
@@ -136,11 +147,12 @@ public abstract class EntityMixin {
         return blockState.getBlock();
     }
 
-    @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
-    private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-        if (!Utils.canUpdate()) return;
+    @ModifyReturnValue(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("RETURN"))
+    private boolean isInvisibleToCanceller(boolean original) {
+        if (!Utils.canUpdate()) return original;
         ESP esp = Modules.get().get(ESP.class);
-        if (Modules.get().get(NoRender.class).noInvisibility() || esp.isActive() && !esp.shouldSkip((Entity) (Object) this)) info.setReturnValue(false);
+        if (Modules.get().get(NoRender.class).noInvisibility() || esp.isActive() && !esp.shouldSkip((Entity) (Object) this)) return false;
+        return original;
     }
 
     @Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)
@@ -166,8 +178,33 @@ public abstract class EntityMixin {
         }
     }
 
-    @Inject(method = "bypassesLandingEffects", at = @At("RETURN"), cancellable = true)
-    private void cancelBounce(CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(Modules.get().get(NoFall.class).cancelBounce() || cir.getReturnValue());
+    @ModifyReturnValue(method = "bypassesLandingEffects", at = @At("RETURN"))
+    private boolean cancelBounce(boolean original) {
+        return Modules.get().get(NoFall.class).cancelBounce() || original;
+    }
+
+    @Inject(method = "changeLookDirection", at = @At("HEAD"), cancellable = true)
+    private void updateChangeLookDirection(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
+        if ((Object) this != mc.player) return;
+
+        Freecam freecam = Modules.get().get(Freecam.class);
+        FreeLook freeLook = Modules.get().get(FreeLook.class);
+
+        if (freecam.isActive()) {
+            freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
+            ci.cancel();
+        }
+        else if (Modules.get().isActive(HighwayBuilder.class)) {
+            Camera camera = mc.gameRenderer.getCamera();
+            ((ICamera) camera).setRot(camera.getYaw() + cursorDeltaX * 0.15, camera.getPitch() + cursorDeltaY * 0.15);
+            ci.cancel();
+        }
+        else if (freeLook.cameraMode()) {
+            freeLook.cameraYaw += cursorDeltaX / freeLook.sensitivity.get().floatValue();
+            freeLook.cameraPitch += cursorDeltaY / freeLook.sensitivity.get().floatValue();
+
+            if (Math.abs(freeLook.cameraPitch) > 90.0F) freeLook.cameraPitch = freeLook.cameraPitch > 0.0F ? 90.0F : -90.0F;
+            ci.cancel();
+        }
     }
 }

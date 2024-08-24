@@ -5,17 +5,18 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Identifier;
+
+import java.util.Set;
 
 public class Chams extends Module {
     private final SettingGroup sgThroughWalls = settings.createGroup("Through Walls");
@@ -25,7 +26,7 @@ public class Chams extends Module {
 
     // Through walls
 
-    public final Setting<Object2BooleanMap<EntityType<?>>> entities = sgThroughWalls.add(new EntityTypeListSetting.Builder()
+    public final Setting<Set<EntityType<?>>> entities = sgThroughWalls.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select entities to show through walls.")
         .build()
@@ -214,14 +215,14 @@ public class Chams extends Module {
         .build()
     );
 
-    public static final Identifier BLANK = new MeteorIdentifier("textures/blank.png");
+    public static final Identifier BLANK = MeteorClient.identifier("textures/blank.png");
 
     public Chams() {
         super(Categories.Render, "chams", "Tweaks rendering of entities.");
     }
 
     public boolean shouldRender(Entity entity) {
-        return isActive() && !isShader() && entities.get().getBoolean(entity.getType()) && (entity != mc.player || ignoreSelfDepth.get());
+        return isActive() && !isShader() && entities.get().contains(entity.getType()) && (entity != mc.player || ignoreSelfDepth.get());
     }
 
     public boolean isShader() {

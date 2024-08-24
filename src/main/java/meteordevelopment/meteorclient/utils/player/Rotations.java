@@ -38,6 +38,9 @@ public class Rotations {
     private static boolean sentLastRotation;
     public static boolean rotating = false;
 
+    private Rotations() {
+    }
+
     @PreInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Rotations.class);

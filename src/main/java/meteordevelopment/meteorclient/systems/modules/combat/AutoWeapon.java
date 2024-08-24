@@ -12,8 +12,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EntityGroup;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
@@ -51,7 +50,7 @@ public class AutoWeapon extends Module {
         InvUtils.swap(getBestWeapon(EntityUtils.getGroup(event.entity)), false);
     }
 
-    private int getBestWeapon(EntityGroup group) {
+    private int getBestWeapon(EntityType<?> group) {
         int slotS = mc.player.getInventory().selectedSlot;
         int slotA = mc.player.getInventory().selectedSlot;
         double damageS = 0;
@@ -62,14 +61,14 @@ public class AutoWeapon extends Module {
             ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.getItem() instanceof SwordItem swordItem
                 && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
-                currentDamageS = swordItem.getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(stack, group) + 2;
+                currentDamageS = swordItem.getMaterial().getAttackDamage() /*fixme + EnchantmentHelper.getAttackDamage(stack, group)*/ + 2;
                 if (currentDamageS > damageS) {
                     damageS = currentDamageS;
                     slotS = i;
                 }
             } else if (stack.getItem() instanceof AxeItem axeItem
                 && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
-                currentDamageA = axeItem.getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(stack, group) + 2;
+                currentDamageA = axeItem.getMaterial().getAttackDamage() /*fixme + EnchantmentHelper.getAttackDamage(stack, group)*/ + 2;
                 if (currentDamageA > damageA) {
                     damageA = currentDamageA;
                     slotA = i;
