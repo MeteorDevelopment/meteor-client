@@ -35,6 +35,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.vehicle.TntMinecartEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -57,7 +58,7 @@ public class Nametags extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select entities to draw nametags on.")
-        .defaultValue(EntityType.PLAYER, EntityType.ITEM)
+        .defaultValue(EntityType.PLAYER, EntityType.ITEM, EntityType.ITEM_FRAME, EntityType.TNT, EntityType.TNT_MINECART)
         .build()
     );
 
@@ -297,7 +298,7 @@ public class Nametags extends Module {
     private final List<Entity> entityList = new ArrayList<>();
 
     public Nametags() {
-        super(Categories.Render, "nametags", "Displays customizable nametags above players.");
+        super(Categories.Render, "nametags", "Displays customizable nametags above players, items and other entities.");
     }
 
     private static String ticksToTime(int ticks) {
@@ -358,7 +359,8 @@ public class Nametags extends Module {
                 else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getStack(), shadow);
                 else if (type == EntityType.ITEM_FRAME)
                     renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack(), shadow);
-                else if (type == EntityType.TNT) renderTntNametag((TntEntity) entity, shadow);
+                else if (type == EntityType.TNT) renderTntNametag(ticksToTime(((TntEntity) entity).getFuse()), shadow);
+                else if (type == EntityType.TNT_MINECART) renderTntNametag(ticksToTime(((TntMinecartEntity) entity).getFuseTicks()), shadow);
                 else if (entity instanceof LivingEntity) renderGenericNametag((LivingEntity) entity, shadow);
             }
         }
@@ -577,6 +579,8 @@ public class Nametags extends Module {
     }
 
     private void renderNametagItem(ItemStack stack, boolean shadow) {
+        if (stack.isEmpty()) return;
+
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
@@ -644,11 +648,9 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private void renderTntNametag(TntEntity entity, boolean shadow) {
+    private void renderTntNametag(String fuseText, boolean shadow) {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
-
-        String fuseText = ticksToTime(entity.getFuse());
 
         double width = text.getWidth(fuseText, shadow);
         double heightDown = text.getHeight(shadow);
