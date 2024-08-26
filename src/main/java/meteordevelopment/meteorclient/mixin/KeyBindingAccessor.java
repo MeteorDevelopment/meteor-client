@@ -19,4 +19,10 @@ public interface KeyBindingAccessor {
 
     @Accessor("boundKey")
     InputUtil.Key getKey();
+
+    @Accessor("timesPressed")
+    int meteor$getTimesPressed();
+
+    @Accessor("timesPressed")
+    void meteor$setTimesPressed(int timesPressed);
 }

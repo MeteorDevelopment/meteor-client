@@ -15,7 +15,7 @@ public class WDoubleEdit extends WHorizontalList {
     private final double min, max;
     private final double sliderMin, sliderMax;
 
-    public int decimalPlaces = 3;
+    public int decimalPlaces;
     public boolean noSlider = false;
     public boolean small = false;
 
@@ -53,7 +53,11 @@ public class WDoubleEdit extends WHorizontalList {
             else if (textBox.get().equals("-")) value = -0;
             else if (textBox.get().equals(".")) value = 0;
             else if (textBox.get().equals("-.")) value = 0;
-            else value = Double.parseDouble(textBox.get());
+            else {
+                try {
+                    value = Double.parseDouble(textBox.get());
+                } catch (NumberFormatException ignored) {}
+            }
 
             double preValidationValue = value;
 
@@ -114,8 +118,7 @@ public class WDoubleEdit extends WHorizontalList {
         if (this.value == v) return;
 
         if (v < min) this.value = min;
-        else if (v > max) this.value = max;
-        else this.value = v;
+        else this.value = Math.min(v, max);
 
         if (this.value == v) {
             textBox.set(valueString());

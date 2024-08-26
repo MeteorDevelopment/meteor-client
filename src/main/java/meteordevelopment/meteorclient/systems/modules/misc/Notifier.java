@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -46,6 +47,24 @@ public class Notifier extends Module {
         .name("totem-pops")
         .description("Notifies you when a player pops a totem.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> totemsDistanceCheck = sgTotemPops.add(new BoolSetting.Builder()
+        .name("distance-check")
+        .description("Limits the distance in which the pops are recognized.")
+        .defaultValue(false)
+        .visible(totemPops::get)
+        .build()
+    );
+
+    private final Setting<Integer> totemsDistance = sgTotemPops.add(new IntSetting.Builder()
+        .name("player-radius")
+        .description("The radius in which to log totem pops.")
+        .defaultValue(30)
+        .sliderRange(1, 50)
+        .range(1, 100)
+        .visible(() -> totemPops.get() && totemsDistanceCheck.get())
         .build()
     );
 
@@ -245,6 +264,9 @@ public class Notifier extends Module {
         synchronized (totemPopMap) {
             int pops = totemPopMap.getOrDefault(entity.getUuid(), 0);
             totemPopMap.put(entity.getUuid(), ++pops);
+
+            double distance = PlayerUtils.distanceTo(entity);
+            if (totemsDistanceCheck.get() && distance > totemsDistance.get()) return;
 
             ChatUtils.sendMsg(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
         }
