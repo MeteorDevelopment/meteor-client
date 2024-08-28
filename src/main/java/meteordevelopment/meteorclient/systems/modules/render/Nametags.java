@@ -360,7 +360,8 @@ public class Nametags extends Module {
                 else if (type == EntityType.ITEM_FRAME)
                     renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack(), shadow);
                 else if (type == EntityType.TNT) renderTntNametag(ticksToTime(((TntEntity) entity).getFuse()), shadow);
-                else if (type == EntityType.TNT_MINECART) renderTntNametag(ticksToTime(((TntMinecartEntity) entity).getFuseTicks()), shadow);
+                else if (type == EntityType.TNT_MINECART && ((TntMinecartEntity) entity).isPrimed())
+                    renderTntNametag(ticksToTime(((TntMinecartEntity) entity).getFuseTicks()), shadow);
                 else if (entity instanceof LivingEntity) renderGenericNametag((LivingEntity) entity, shadow);
             }
         }
