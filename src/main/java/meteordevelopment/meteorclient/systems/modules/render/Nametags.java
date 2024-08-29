@@ -58,7 +58,7 @@ public class Nametags extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select entities to draw nametags on.")
-        .defaultValue(EntityType.PLAYER, EntityType.ITEM, EntityType.ITEM_FRAME, EntityType.TNT, EntityType.TNT_MINECART)
+        .defaultValue(EntityType.PLAYER, EntityType.ITEM)
         .build()
     );
 
@@ -362,7 +362,8 @@ public class Nametags extends Module {
                 else if (type == EntityType.TNT) renderTntNametag(ticksToTime(((TntEntity) entity).getFuse()), shadow);
                 else if (type == EntityType.TNT_MINECART && ((TntMinecartEntity) entity).isPrimed())
                     renderTntNametag(ticksToTime(((TntMinecartEntity) entity).getFuseTicks()), shadow);
-                else if (entity instanceof LivingEntity) renderGenericNametag((LivingEntity) entity, shadow);
+                else if (entity instanceof LivingEntity) renderGenericLivingNametag((LivingEntity) entity, shadow);
+                else renderGenericNametag(entity, shadow);
             }
         }
     }
@@ -609,7 +610,7 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private void renderGenericNametag(LivingEntity entity, boolean shadow) {
+    private void renderGenericLivingNametag(LivingEntity entity, boolean shadow) {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
@@ -644,6 +645,29 @@ public class Nametags extends Module {
 
         hX = text.render(nameText, hX, hY, nameColor.get(), shadow);
         text.render(healthText, hX, hY, healthColor, shadow);
+        text.end();
+
+        NametagUtils.end();
+    }
+
+    private void renderGenericNametag(Entity entity, boolean shadow) {
+        TextRenderer text = TextRenderer.get();
+        NametagUtils.begin(pos);
+
+        //Name
+        String nameText = entity.getType().getName().getString();
+
+        double nameWidth = text.getWidth(nameText, shadow);
+        double heightDown = text.getHeight(shadow);
+        double widthHalf = nameWidth / 2;
+
+        drawBg(-widthHalf, -heightDown, nameWidth, heightDown);
+
+        text.beginBig();
+        double hX = -widthHalf;
+        double hY = -heightDown;
+
+        text.render(nameText, hX, hY, nameColor.get(), shadow);
         text.end();
 
         NametagUtils.end();
