@@ -5,11 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import com.google.gson.JsonParseException;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
-import meteordevelopment.meteorclient.events.game.SectionVisibleEvent;
 import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
 import meteordevelopment.meteorclient.mixin.EntityAccessor;
 import meteordevelopment.meteorclient.mixin.EntityBucketItemAccessor;
@@ -23,28 +21,25 @@ import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.entity.BannerPattern;
-import net.minecraft.block.entity.BannerPatterns;
+import net.minecraft.block.entity.BeehiveBlockEntity;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.*;
+import net.minecraft.component.type.BannerPatternsComponent.Layer;
+import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.Bucketable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.RawFilteredPair;
 import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.collection.DefaultedList;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -63,6 +58,7 @@ public class BetterTooltips extends Module {
         .name("display-when")
         .description("When to display previews.")
         .defaultValue(DisplayWhen.Keybind)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -71,13 +67,22 @@ public class BetterTooltips extends Module {
         .description("The bind for keybind mode.")
         .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
         .visible(() -> displayWhen.get() == DisplayWhen.Keybind)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
     private final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
         .name("middle-click-open")
-        .description("Opens a GUI window with the inventory of the storage block when you middle click the item.")
+        .description("Opens a GUI window with the inventory of the storage block or book when you middle click the item.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> pauseInCreative = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-in-creative")
+        .description("Pauses middle click open while the player is in creative mode.")
+        .defaultValue(true)
+        .visible(middleClickOpen::get)
         .build()
     );
 
@@ -87,6 +92,7 @@ public class BetterTooltips extends Module {
         .name("containers")
         .description("Shows a preview of a containers when hovering over it in an inventory.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -102,6 +108,7 @@ public class BetterTooltips extends Module {
         .name("echests")
         .description("Shows a preview of your echest when hovering over it in an inventory.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -109,6 +116,7 @@ public class BetterTooltips extends Module {
         .name("maps")
         .description("Shows a preview of a map when hovering over it in an inventory.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -126,6 +134,7 @@ public class BetterTooltips extends Module {
         .name("books")
         .description("Shows contents of a book when hovering over it in an inventory.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -133,6 +142,7 @@ public class BetterTooltips extends Module {
         .name("banners")
         .description("Shows banners' patterns when hovering over it in an inventory. Also works with shields.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -140,6 +150,7 @@ public class BetterTooltips extends Module {
         .name("entities-in-buckets")
         .description("Shows entities in buckets when hovering over it in an inventory.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -149,6 +160,7 @@ public class BetterTooltips extends Module {
         .name("byte-size")
         .description("Displays an item's size in bytes in the tooltip.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -156,6 +168,7 @@ public class BetterTooltips extends Module {
         .name("status-effects")
         .description("Adds list of status effects to tooltips of food items.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
@@ -163,59 +176,76 @@ public class BetterTooltips extends Module {
         .name("beehive")
         .description("Displays information about a beehive or bee nest.")
         .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
         .build()
     );
 
     //Hide flags
 
-    private final Setting<Boolean> enchantments = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> tooltip = sgHideFlags.add(new BoolSetting.Builder()
+        .name("tooltip")
+        .description("Show the tooltip when it's hidden.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Boolean> enchantments = sgHideFlags.add(new BoolSetting.Builder()
         .name("enchantments")
         .description("Show enchantments when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> modifiers = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> modifiers = sgHideFlags.add(new BoolSetting.Builder()
         .name("modifiers")
         .description("Show item modifiers when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> unbreakable = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> unbreakable = sgHideFlags.add(new BoolSetting.Builder()
         .name("unbreakable")
         .description("Show \"Unbreakable\" tag when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> canDestroy = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> canDestroy = sgHideFlags.add(new BoolSetting.Builder()
         .name("can-destroy")
         .description("Show \"CanDestroy\" tag when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> canPlaceOn = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> canPlaceOn = sgHideFlags.add(new BoolSetting.Builder()
         .name("can-place-on")
         .description("Show \"CanPlaceOn\" tag when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> additional = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> additional = sgHideFlags.add(new BoolSetting.Builder()
         .name("additional")
         .description("Show potion effects, firework status, book author, etc when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> dye = sgHideFlags.add(new BoolSetting.Builder()
+    public final Setting<Boolean> dye = sgHideFlags.add(new BoolSetting.Builder()
         .name("dye")
         .description("Show dyed item tags when it's hidden.")
         .defaultValue(false)
         .build()
     );
+
+    public final Setting<Boolean> upgrades = sgHideFlags.add(new BoolSetting.Builder()
+        .name("armor-trim")
+        .description("Show armor trims when it's hidden.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private boolean updateTooltips = false;
 
     public BetterTooltips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
@@ -225,56 +255,34 @@ public class BetterTooltips extends Module {
     private void appendTooltip(ItemStackTooltipEvent event) {
         // Status effects
         if (statusEffects.get()) {
-            if (event.itemStack.getItem() == Items.SUSPICIOUS_STEW) {
-                NbtCompound tag = event.itemStack.getNbt();
-
-                if (tag != null) {
-                    NbtList effects = tag.getList("effects", 10);
-
-                    if (effects != null) {
-                        for (int i = 0; i < effects.size(); i++) {
-                            NbtCompound effectTag = effects.getCompound(i);
-                            byte effectId = effectTag.getByte("EffectId");
-                            int effectDuration = effectTag.contains("EffectDuration") ? effectTag.getInt("EffectDuration") : 160;
-                            StatusEffect type = Registries.STATUS_EFFECT.get(effectId);
-
-                            if (type != null) {
-                                StatusEffectInstance effect = new StatusEffectInstance(type, effectDuration, 0);
-                                event.list.add(1, getStatusText(effect));
-                            }
-                        }
+            if (event.itemStack().getItem() == Items.SUSPICIOUS_STEW) {
+                SuspiciousStewEffectsComponent stewEffectsComponent = event.itemStack().get(DataComponentTypes.SUSPICIOUS_STEW_EFFECTS);
+                if (stewEffectsComponent != null) {
+                    for (StewEffect effectTag : stewEffectsComponent.effects()) {
+                        StatusEffectInstance effect = new StatusEffectInstance(effectTag.effect(), effectTag.duration(), 0);
+                        event.list().add(1, getStatusText(effect));
                     }
                 }
-            }
-            else if (event.itemStack.getItem().isFood()) {
-                FoodComponent food = event.itemStack.getItem().getFoodComponent();
-
+            } else {
+                FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
                 if (food != null) {
-                    food.getStatusEffects().forEach((e) -> {
-                        StatusEffectInstance effect = e.getFirst();
-                        event.list.add(1, getStatusText(effect));
-                    });
+                    food.effects().forEach(e -> event.list().add(1, getStatusText(e.effect())));
                 }
             }
         }
 
         //Beehive
         if (beehive.get()) {
-            if (event.itemStack.getItem() == Items.BEEHIVE || event.itemStack.getItem() == Items.BEE_NEST) {
-                NbtCompound tag = event.itemStack.getNbt();
+            if (event.itemStack().getItem() == Items.BEEHIVE || event.itemStack().getItem() == Items.BEE_NEST) {
+                BlockStateComponent blockStateComponent = event.itemStack().get(DataComponentTypes.BLOCK_STATE);
+                if (blockStateComponent != null) {
+                    String level = blockStateComponent.properties().get("honey_level");
+                    event.list().add(1, Text.literal(String.format("%sHoney level: %s%s%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
+                }
 
-                if (tag != null) {
-                    NbtCompound blockStateTag = tag.getCompound("BlockStateTag");
-                    if (blockStateTag != null) {
-                        int level = blockStateTag.getInt("honey_level");
-                        event.list.add(1, Text.literal(String.format("%sHoney level: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
-                    }
-
-                    NbtCompound blockEntityTag = tag.getCompound("BlockEntityTag");
-                    if (blockEntityTag != null) {
-                        NbtList beesTag = blockEntityTag.getList("Bees", 10);
-                        event.list.add(1, Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, beesTag.size(), Formatting.GRAY)));
-                    }
+                List<BeehiveBlockEntity.BeeData> bees = event.itemStack().get(DataComponentTypes.BEES);
+                if (bees != null) {
+                    event.list().add(1, Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, bees.size(), Formatting.GRAY)));
                 }
             }
         }
@@ -282,7 +290,7 @@ public class BetterTooltips extends Module {
         // Item size tooltip
         if (byteSize.get()) {
             try {
-                event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
+                event.itemStack().encode(mc.player.getRegistryManager()).write(ByteCountDataOutput.INSTANCE);
 
                 int byteCount = ByteCountDataOutput.INSTANCE.getCount();
                 String count;
@@ -292,24 +300,24 @@ public class BetterTooltips extends Module {
                 if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
                 else count = String.format("%d bytes", byteCount);
 
-                event.list.add(Text.literal(count).formatted(Formatting.GRAY));
-            } catch (IOException e) {
-                e.printStackTrace();
+                event.list().add(Text.literal(count).formatted(Formatting.GRAY));
+            } catch (Exception e) {
+                event.list().add(Text.literal("Error getting bytes.").formatted(Formatting.RED));
             }
         }
 
         // Hold to preview tooltip
-        if ((shulkers.get() && !previewShulkers() && Utils.hasItems(event.itemStack))
-            || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
-            || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
-            || (event.itemStack.getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
-            || (event.itemStack.getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
-            || (event.itemStack.getItem() instanceof EntityBucketItem && entitiesInBuckets.get() && !previewEntities())
-            || (event.itemStack.getItem() instanceof BannerItem && banners.get() && !previewBanners())
-            || (event.itemStack.getItem() instanceof BannerPatternItem && banners.get()  && !previewBanners())
-            || (event.itemStack.getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
-            event.list.add(Text.literal(""));
-            event.list.add(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
+        if ((shulkers.get() && !previewShulkers() && Utils.hasItems(event.itemStack()))
+            || (event.itemStack().getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
+            || (event.itemStack().getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
+            || (event.itemStack().getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
+            || (event.itemStack().getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
+            || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get() && !previewEntities())
+            || (event.itemStack().getItem() instanceof BannerItem && banners.get() && !previewBanners())
+            || (event.itemStack().getItem() instanceof BannerPatternItem && banners.get() && !previewBanners())
+            || (event.itemStack().getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
+            event.list().add(Text.literal(""));
+            event.list().add(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
         }
     }
 
@@ -317,22 +325,22 @@ public class BetterTooltips extends Module {
     private void getTooltipData(TooltipDataEvent event) {
         // Container preview
         if (previewShulkers() && Utils.hasItems(event.itemStack)) {
-            NbtCompound compoundTag = event.itemStack.getSubNbt("BlockEntityTag");
-            DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
-            Inventories.readNbt(compoundTag, itemStacks);
+            ItemStack[] itemStacks = new ItemStack[27];
+            Utils.getItemsInContainerItem(event.itemStack, itemStacks);
             event.tooltipData = new ContainerTooltipComponent(itemStacks, Utils.getShulkerColor(event.itemStack));
         }
 
         // EChest preview
         else if (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest()) {
-            event.tooltipData = EChestMemory.isKnown() ? new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR)
+            event.tooltipData = EChestMemory.isKnown()
+                ? new ContainerTooltipComponent(EChestMemory.ITEMS.toArray(new ItemStack[27]), ECHEST_COLOR)
                 : new TextTooltipComponent(Text.literal("Unknown ender chest inventory.").formatted(Formatting.DARK_RED));
         }
 
         // Map preview
         else if (event.itemStack.getItem() == Items.FILLED_MAP && previewMaps()) {
-            Integer mapId = FilledMapItem.getMapId(event.itemStack);
-            if (mapId != null) event.tooltipData = new MapTooltipComponent(mapId);
+            MapIdComponent mapIdComponent = event.itemStack.get(DataComponentTypes.MAP_ID);
+            if (mapIdComponent != null) event.tooltipData = new MapTooltipComponent(mapIdComponent.id());
         }
 
         // Book preview
@@ -344,14 +352,12 @@ public class BetterTooltips extends Module {
         // Banner preview
         else if (event.itemStack.getItem() instanceof BannerItem && previewBanners()) {
             event.tooltipData = new BannerTooltipComponent(event.itemStack);
-        }
-        else if (event.itemStack.getItem() instanceof BannerPatternItem patternItem && previewBanners()) {
-            boolean present = Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).isPresent() && Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().size() != 0;
-
-            RegistryEntry<BannerPattern> bannerPattern = (present ? Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().get(0) : null);
-            if (bannerPattern != null) event.tooltipData = new BannerTooltipComponent(createBannerFromPattern(bannerPattern));
-        }
-        else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
+        } else if (event.itemStack.getItem() instanceof BannerPatternItem && previewBanners()) {
+            BannerPatternsComponent bannerPatternsComponent = event.itemStack.get(DataComponentTypes.BANNER_PATTERNS);
+            if (bannerPatternsComponent != null) {
+                event.tooltipData = new BannerTooltipComponent(createBannerFromLayers(bannerPatternsComponent.layers()));
+            }
+        } else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
             ItemStack banner = createBannerFromShield(event.itemStack);
             if (banner != null) event.tooltipData = new BannerTooltipComponent(banner);
         }
@@ -361,36 +367,24 @@ public class BetterTooltips extends Module {
             EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).getEntityType();
             Entity entity = type.create(mc.world);
             if (entity != null) {
-                ((Bucketable) entity).copyDataFromNbt(event.itemStack.getOrCreateNbt());
+                ((Bucketable) entity).copyDataFromNbt(event.itemStack.get(DataComponentTypes.BUCKET_ENTITY_DATA).copyNbt());
                 ((EntityAccessor) entity).setInWater(true);
                 event.tooltipData = new EntityTooltipComponent(entity);
             }
         }
     }
 
-    @EventHandler
-    private void onSectionVisible(SectionVisibleEvent event) {
-        if (enchantments.get() && event.section == ItemStack.TooltipSection.ENCHANTMENTS ||
-            modifiers.get() && event.section == ItemStack.TooltipSection.MODIFIERS ||
-            unbreakable.get() && event.section == ItemStack.TooltipSection.UNBREAKABLE ||
-            canDestroy.get() && event.section == ItemStack.TooltipSection.CAN_DESTROY ||
-            canPlaceOn.get() && event.section == ItemStack.TooltipSection.CAN_PLACE ||
-            additional.get() && event.section == ItemStack.TooltipSection.ADDITIONAL ||
-            dye.get() && event.section == ItemStack.TooltipSection.DYE)
-            event.visible = true;
-    }
+    public void applyCompactShulkerTooltip(ItemStack shulkerItem, List<Text> tooltip) {
+        NbtComponent nbtComponent = shulkerItem.get(DataComponentTypes.BLOCK_ENTITY_DATA);
 
-    public void applyCompactShulkerTooltip(ItemStack stack, List<Text> tooltip) {
-        NbtCompound tag = stack.getSubNbt("BlockEntityTag");
-
-        if (tag != null) {
-            if (tag.contains("LootTable", 8)) {
+        if (nbtComponent != null) {
+            if (nbtComponent.contains("LootTable")) {
                 tooltip.add(Text.literal("???????"));
             }
 
-            if (tag.contains("Items", 9)) {
+            if (nbtComponent.contains("Items")) {
                 DefaultedList<ItemStack> items = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                Inventories.readNbt(tag, items);
+                Inventories.readNbt(nbtComponent.copyNbt(), items, DynamicRegistryManager.EMPTY);
 
                 Object2IntMap<Item> counts = new Object2IntOpenHashMap<>();
 
@@ -418,56 +412,55 @@ public class BetterTooltips extends Module {
         MutableText text = Text.translatable(effect.getTranslationKey());
         if (effect.getAmplifier() != 0) {
             text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
-        }
-        else {
+        } else {
             text.append(String.format(" (%s)", StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
         }
 
-        if (effect.getEffectType().isBeneficial()) return text.formatted(Formatting.BLUE);
+        if (effect.getEffectType().value().isBeneficial()) return text.formatted(Formatting.BLUE);
         return text.formatted(Formatting.RED);
     }
 
-    private Text getFirstPage(ItemStack stack) {
-        NbtCompound tag = stack.getNbt();
-        if (tag == null) return null;
+    private Text getFirstPage(ItemStack bookItem) {
+        if (bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT) != null) {
+            List<RawFilteredPair<String>> pages = bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT).pages();
 
-        NbtList pages = tag.getList("pages", 8);
-        if (pages.size() < 1) return null;
-        if (stack.getItem() == Items.WRITABLE_BOOK) return Text.literal(pages.getString(0));
-
-        try {
-            return Text.Serialization.fromLenientJson(pages.getString(0));
-        } catch (JsonParseException e) {
-            return Text.literal("Invalid book data");
+            if (pages.isEmpty()) return null;
+            return Text.literal(pages.getFirst().get(false));
         }
+        else if (bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null) {
+            List<RawFilteredPair<Text>> pages = bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).pages();
+            if (pages.isEmpty()) return null;
+
+            return pages.getFirst().get(false);
+        }
+
+        return null;
     }
 
-    private ItemStack createBannerFromPattern(RegistryEntry<BannerPattern> pattern) {
-        ItemStack itemStack = new ItemStack(Items.GRAY_BANNER);
-        NbtCompound nbt = itemStack.getOrCreateSubNbt("BlockEntityTag");
-        NbtList listNbt = new BannerPattern.Patterns().add(BannerPatterns.BASE, DyeColor.BLACK).add(pattern, DyeColor.WHITE).toNbt();
-        nbt.put("Patterns", listNbt);
-        return itemStack;
-    }
-
-    private ItemStack createBannerFromShield(ItemStack item) {
-        if (!item.hasNbt()
-            || !item.getNbt().contains("BlockEntityTag")
-            || !item.getNbt().getCompound("BlockEntityTag").contains("Base"))
-            return null;
-        NbtList listNbt = new BannerPattern.Patterns().add(BannerPatterns.BASE, ShieldItem.getColor(item)).toNbt();
-        NbtCompound nbt = item.getOrCreateSubNbt("BlockEntityTag");
+    private ItemStack createBannerFromLayers(List<Layer> pattern) {
         ItemStack bannerItem = new ItemStack(Items.GRAY_BANNER);
-        NbtCompound bannerTag = bannerItem.getOrCreateSubNbt("BlockEntityTag");
-        bannerTag.put("Patterns", listNbt);
-        if (!nbt.contains("Patterns")) return bannerItem;
-        NbtList shieldPatterns = nbt.getList("Patterns", NbtElement.COMPOUND_TYPE);
-        listNbt.addAll(shieldPatterns);
+        BannerPatternsComponent bannerPatterns = bannerItem.get(DataComponentTypes.BANNER_PATTERNS);
+        bannerPatterns.layers().addAll(pattern);
+        bannerItem.set(DataComponentTypes.BANNER_PATTERNS, bannerPatterns);
+        return bannerItem;
+    }
+
+    private ItemStack createBannerFromShield(ItemStack shieldItem) {
+        if (!shieldItem.getComponents().isEmpty()
+            || shieldItem.get(DataComponentTypes.BLOCK_ENTITY_DATA) == null
+            || shieldItem.get(DataComponentTypes.BASE_COLOR) == null)
+            return null;
+        ItemStack bannerItem = new ItemStack(Items.GRAY_BANNER);
+        BannerPatternsComponent bannerPatternsComponent = bannerItem.get(DataComponentTypes.BANNER_PATTERNS);
+        BannerPatternsComponent shieldPatternsComponent = shieldItem.get(DataComponentTypes.BANNER_PATTERNS);
+        if (shieldPatternsComponent == null) return bannerItem;
+        bannerPatternsComponent.layers().addAll(shieldPatternsComponent.layers());
         return bannerItem;
     }
 
     public boolean middleClickOpen() {
-        return isActive() && middleClickOpen.get();
+        return (isActive() && middleClickOpen.get())
+            && (!pauseInCreative.get() || !mc.player.isInCreativeMode());
     }
 
     public boolean previewShulkers() {
@@ -500,6 +493,15 @@ public class BetterTooltips extends Module {
 
     private boolean isPressed() {
         return (keybind.get().isPressed() && displayWhen.get() == DisplayWhen.Keybind) || displayWhen.get() == DisplayWhen.Always;
+    }
+
+    public boolean updateTooltips() {
+        if (updateTooltips && isActive()) {
+            updateTooltips = false;
+            return true;
+        }
+
+        return false;
     }
 
     public enum DisplayWhen {

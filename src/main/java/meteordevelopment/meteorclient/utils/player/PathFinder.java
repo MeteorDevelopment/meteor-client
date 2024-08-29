@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PathFinder {
-    private final static int PATH_AHEAD = 3;
-    private final static int QUAD_1 = 1, QUAD_2 = 2, SOUTH = 0, NORTH = 180;
+    private static final int PATH_AHEAD = 3;
+    private static final int QUAD_1 = 1, QUAD_2 = 2, SOUTH = 0, NORTH = 180;
     private final ArrayList<PathBlock> path = new ArrayList<>(PATH_AHEAD);
     private Entity target;
     private PathBlock currentPathBlock;

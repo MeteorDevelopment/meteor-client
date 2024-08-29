@@ -33,6 +33,7 @@ public class Blink extends Module {
         .build()
     );
 
+    @SuppressWarnings("unused")
     private final Setting<Keybind> cancelBlink = sgGeneral.add(new KeybindSetting.Builder()
         .name("cancel-blink")
         .description("Cancels sending packets and sends you back to your original position.")
@@ -84,7 +85,7 @@ public class Blink extends Module {
         if (!(event.packet instanceof PlayerMoveC2SPacket p)) return;
         event.cancel();
 
-        PlayerMoveC2SPacket prev = packets.size() == 0 ? null : packets.get(packets.size() - 1);
+        PlayerMoveC2SPacket prev = packets.isEmpty() ? null : packets.getLast();
 
         if (prev != null &&
                 p.isOnGround() == prev.isOnGround() &&

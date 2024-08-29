@@ -6,14 +6,13 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
-import meteordevelopment.meteorclient.systems.modules.movement.Flight;
-import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
-import meteordevelopment.meteorclient.systems.modules.movement.Scaffold;
+import meteordevelopment.meteorclient.systems.modules.movement.*;
+import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
@@ -25,6 +24,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -110,5 +110,25 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         float speed = Modules.get().get(Flight.class).getOffGroundSpeed();
         if (speed != -1) info.setReturnValue(speed);
+    }
+
+    @WrapWithCondition(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V"))
+    private boolean keepSprint$setVelocity(PlayerEntity instance, Vec3d vec3d) {
+        return Modules.get().get(Sprint.class).stopSprinting();
+    }
+
+    @WrapWithCondition(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;setSprinting(Z)V"))
+    private boolean keepSprint$setSprinting(PlayerEntity instance, boolean b) {
+        return Modules.get().get(Sprint.class).stopSprinting();
+    }
+
+    @ModifyReturnValue(method = "getBlockInteractionRange", at = @At("RETURN"))
+    private double modifyBlockInteractionRange(double original) {
+        return Modules.get().get(Reach.class).blockReach();
+    }
+
+    @ModifyReturnValue(method = "getEntityInteractionRange", at = @At("RETURN"))
+    private double modifyEntityInteractionRange(double original) {
+        return Modules.get().get(Reach.class).entityReach();
     }
 }

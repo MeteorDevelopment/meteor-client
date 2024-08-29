@@ -26,7 +26,10 @@ import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.player.*;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -38,6 +41,8 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -53,6 +58,7 @@ import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -135,6 +141,14 @@ public class CrystalAura extends Module {
         .defaultValue(180)
         .range(1, 180)
         .visible(rotate::get)
+        .build()
+    );
+
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+        .name("entities")
+        .description("Entities to attack.")
+        .onlyAttackable()
+        .defaultValue(EntityType.PLAYER, EntityType.WARDEN, EntityType.WITHER)
         .build()
     );
 
@@ -541,7 +555,7 @@ public class CrystalAura extends Module {
     private Item mainItem, offItem;
 
     private int breakTimer, placeTimer, switchTimer, ticksPassed;
-    private final List<PlayerEntity> targets = new ArrayList<>();
+    private final List<LivingEntity> targets = new ArrayList<>();
 
     private final Vec3d vec3d = new Vec3d(0, 0, 0);
     private final Vec3d playerEyePos = new Vec3d(0, 0, 0);
@@ -565,7 +579,7 @@ public class CrystalAura extends Module {
 
     private double serverYaw;
 
-    private PlayerEntity bestTarget;
+    private LivingEntity bestTarget;
     private double bestTargetDamage;
     private int bestTargetTimer;
 
@@ -685,7 +699,7 @@ public class CrystalAura extends Module {
         // Find targets, break and place
         findTargets();
 
-        if (targets.size() > 0) {
+        if (!targets.isEmpty()) {
             if (!didRotateThisTick) doBreak();
             if (!didRotateThisTick) doPlace();
         }
@@ -1105,7 +1119,7 @@ public class CrystalAura extends Module {
         if (forceFacePlace.get().isPressed()) return true;
 
         // Checks if the provided crystal position should face place to any target
-        for (PlayerEntity target : targets) {
+        for (LivingEntity target : targets) {
             if (EntityUtils.getTotalHealth(target) <= facePlaceHealth.get()) return true;
 
             for (ItemStack itemStack : target.getArmorItems()) {
@@ -1144,11 +1158,11 @@ public class CrystalAura extends Module {
         return !PlayerUtils.isWithin(vec3d, (place ? placeRange : breakRange).get());
     }
 
-    private PlayerEntity getNearestTarget() {
-        PlayerEntity nearestTarget = null;
+    private LivingEntity getNearestTarget() {
+        LivingEntity nearestTarget = null;
         double nearestDistance = Double.MAX_VALUE;
 
-        for (PlayerEntity target : targets) {
+        for (LivingEntity target : targets) {
             double distance = PlayerUtils.squaredDistanceTo(target);
 
             if (distance < nearestDistance) {
@@ -1164,11 +1178,11 @@ public class CrystalAura extends Module {
         float damage = 0;
 
         if (fast) {
-            PlayerEntity target = getNearestTarget();
+            LivingEntity target = getNearestTarget();
             if (!(smartDelay.get() && breaking && target.hurtTime > 0)) damage = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), obsidianPos);
         }
         else {
-            for (PlayerEntity target : targets) {
+            for (LivingEntity target : targets) {
                 if (smartDelay.get() && breaking && target.hurtTime > 0) continue;
 
                 float dmg = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), obsidianPos);
@@ -1189,29 +1203,40 @@ public class CrystalAura extends Module {
 
     @Override
     public String getInfoString() {
-        return bestTarget != null && bestTargetTimer > 0 ? bestTarget.getGameProfile().getName() : null;
+        return bestTarget != null && bestTargetTimer > 0 ? EntityUtils.getName(bestTarget) : null;
     }
 
     private void findTargets() {
         targets.clear();
 
-        // Players
-        for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player.getAbilities().creativeMode || player == mc.player) continue;
-            if (!player.isAlive() || !Friends.get().shouldAttack(player)) continue;
-            if (player.squaredDistanceTo(mc.player) > Math.pow(targetRange.get(), 2)) continue;
+        // Living Entities
+        for (Entity entity : mc.world.getEntities()) {
+            // Ignore non-living
+            if (!(entity instanceof LivingEntity livingEntity)) continue;
 
-            if (ignoreNakeds.get()) {
-                if (player.getOffHandStack().isEmpty()
-                    && player.getMainHandStack().isEmpty()
-                    && player.getInventory().armor.get(0).isEmpty()
-                    && player.getInventory().armor.get(1).isEmpty()
-                    && player.getInventory().armor.get(2).isEmpty()
-                    && player.getInventory().armor.get(3).isEmpty()
-                ) continue;
+            // Player
+            if (livingEntity instanceof PlayerEntity player) {
+                if (player.getAbilities().creativeMode || livingEntity == mc.player) continue;
+                if (!player.isAlive() || !Friends.get().shouldAttack(player)) continue;
+
+                if (ignoreNakeds.get()) {
+                    if (player.getOffHandStack().isEmpty()
+                        && player.getMainHandStack().isEmpty()
+                        && player.getInventory().armor.get(0).isEmpty()
+                        && player.getInventory().armor.get(1).isEmpty()
+                        && player.getInventory().armor.get(2).isEmpty()
+                        && player.getInventory().armor.get(3).isEmpty()
+                    ) continue;
+                }
             }
 
-            targets.add(player);
+            // Animals, water animals, monsters, bats, misc
+            if (!(entities.get().contains(livingEntity.getType()))) continue;
+
+            // Close enough to damage
+            if (livingEntity.squaredDistanceTo(mc.player) > targetRange.get() * targetRange.get()) continue;
+
+            targets.add(livingEntity);
         }
     }
 

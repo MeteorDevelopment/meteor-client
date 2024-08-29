@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Slot.class)
-public class SlotMixin implements ISlot {
+public abstract class SlotMixin implements ISlot {
     @Shadow public int id;
     @Shadow @Final private int index;
 

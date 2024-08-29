@@ -14,14 +14,16 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
-import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.*;
+import net.minecraft.registry.tag.BlockTags;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -189,33 +191,32 @@ public class AutoTool extends Module {
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
-        if (!itemStack.isSuitableFor(state) && !(itemStack.getItem() instanceof SwordItem && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock)) && !(itemStack.getItem() instanceof ShearsItem && (state.getBlock() instanceof LeavesBlock))) return -1;
+        if (!itemStack.isSuitableFor(state) && !(itemStack.getItem() instanceof SwordItem && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock)) && !(itemStack.getItem() instanceof ShearsItem && state.getBlock() instanceof LeavesBlock || state.isIn(BlockTags.WOOL))) return -1;
 
         if (silkTouchEnderChest
             && state.getBlock() == Blocks.ENDER_CHEST
-            && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
+            && !Utils.hasEnchantments(itemStack, Enchantments.SILK_TOUCH)) {
             return -1;
         }
 
         if (fortuneOre
             && isFortunable(state.getBlock())
-            && EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack) == 0) {
+            && !Utils.hasEnchantments(itemStack, Enchantments.FORTUNE)) {
             return -1;
         }
 
         double score = 0;
 
         score += itemStack.getMiningSpeedMultiplier(state) * 1000;
-        score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
-        score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
-        score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
+        score += Utils.getEnchantmentLevel(itemStack, Enchantments.UNBREAKING);
+        score += Utils.getEnchantmentLevel(itemStack, Enchantments.EFFICIENCY);
+        score += Utils.getEnchantmentLevel(itemStack, Enchantments.MENDING);
 
-        if (enchantPreference == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
-        if (enchantPreference == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
+        if (enchantPreference == EnchantPreference.Fortune) score += Utils.getEnchantmentLevel(itemStack, Enchantments.FORTUNE);
+        if (enchantPreference == EnchantPreference.SilkTouch) score += Utils.getEnchantmentLevel(itemStack, Enchantments.SILK_TOUCH);
 
         if (itemStack.getItem() instanceof SwordItem item && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
-            score += 9000 + (item.getMaterial().getMiningLevel() * 1000);
-
+            score += 9000 + (item.getComponents().get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
 
         return score;
     }
@@ -226,6 +227,7 @@ public class AutoTool extends Module {
     public static boolean isTool(ItemStack itemStack) {
         return isTool(itemStack.getItem());
     }
+
 
     private static boolean isFortunable(Block block) {
         if (block == Blocks.ANCIENT_DEBRIS) return false;

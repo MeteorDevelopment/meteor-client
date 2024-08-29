@@ -24,7 +24,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.render.BlockBreakingInfo;
+import net.minecraft.entity.player.BlockBreakingInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
@@ -397,7 +397,7 @@ public class Surround extends Module {
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event)  {
         if (event.packet instanceof DeathMessageS2CPacket packet) {
-            Entity entity = mc.world.getEntityById(packet.getEntityId());
+            Entity entity = mc.world.getEntityById(packet.playerId());
             if (entity == mc.player && toggleOnDeath.get()) {
                 toggle();
                 info("Toggled off because you died.");

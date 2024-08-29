@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import it.unimi.dsi.fastutil.chars.Char2CharOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
@@ -21,18 +22,15 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
+import meteordevelopment.meteorclient.utils.misc.text.TextVisitor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
@@ -40,6 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -109,6 +108,13 @@ public class BetterChat extends Module {
         .min(1)
         .sliderMin(1)
         .visible(antiSpam::get)
+        .build()
+    );
+
+    private final Setting<Boolean> antiClear = sgFilter.add(new BoolSetting.Builder()
+        .name("anti-clear")
+        .description("Prevents servers from clearing chat.")
+        .defaultValue(true)
         .build()
     );
 
@@ -219,6 +225,7 @@ public class BetterChat extends Module {
     );
 
     private static final Pattern antiSpamRegex = Pattern.compile(" \\(([0-9]+)\\)$");
+    private static final Pattern antiClearRegex = Pattern.compile("\\n(\\n|\\s)+\\n");
     private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
     private static final Pattern usernameRegex = Pattern.compile("^(?:<[0-9]{2}:[0-9]{2}>\\s)?<(.*?)>.*");
 
@@ -246,6 +253,25 @@ public class BetterChat extends Module {
                     event.cancel();
                     return;
                 }
+            }
+        }
+
+        if (antiClear.get()) {
+            String messageString = message.getString();
+            if (antiClearRegex.matcher(messageString).find()) {
+                MutableText newMessage = Text.empty();
+                TextVisitor.visit(message, (text, style, string) -> {
+                    Matcher antiClearMatcher = antiClearRegex.matcher(string);
+                    if (antiClearMatcher.find()) {
+                        // assume literal text content
+                        newMessage.append(Text.literal(antiClearMatcher.replaceAll("\n\n")).setStyle(style));
+                    } else {
+                        newMessage.append(text.copyContentOnly().setStyle(style));
+                    }
+
+                    return Optional.empty();
+                }, Style.EMPTY);
+                message = newMessage;
             }
         }
 
@@ -362,8 +388,8 @@ public class BetterChat extends Module {
     }
 
     static {
-        registerCustomHead("[Meteor]", new MeteorIdentifier("textures/icons/chat/meteor.png"));
-        registerCustomHead("[Baritone]", new MeteorIdentifier("textures/icons/chat/baritone.png"));
+        registerCustomHead("[Meteor]", MeteorClient.identifier("textures/icons/chat/meteor.png"));
+        registerCustomHead("[Baritone]", MeteorClient.identifier("textures/icons/chat/baritone.png"));
     }
 
     public int modifyChatWidth(int width) {

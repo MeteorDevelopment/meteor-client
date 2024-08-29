@@ -1,12 +1,14 @@
 plugins {
-    id "fabric-loom" version "1.5-SNAPSHOT"
+    id "fabric-loom" version "1.7-SNAPSHOT"
     id "maven-publish"
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
-archivesBaseName = project.archives_base_name
-version = project.mod_version + (project.hasProperty("devbuild") ? ("-" + project.findProperty("devbuild")) : "")
-group = project.maven_group
+base {
+    archivesBaseName = project.archives_base_name
+    version = project.mod_version + (project.hasProperty("devbuild") ? ("-" + project.findProperty("devbuild")) : "")
+    group = project.maven_group
+}
 
 repositories {
     maven {
@@ -28,6 +30,10 @@ repositories {
     maven {
         name = "vram"
         url = "https://maven.vram.io//"
+    }
+    maven {
+        name = "ViaVersion"
+        url = "https://repo.viaversion.com"
     }
     mavenCentral()
 }
@@ -55,7 +61,7 @@ dependencies {
     modCompileOnly("maven.modrinth:lithium:${project.lithium_version}") { transitive = false }
     modCompileOnly("maven.modrinth:iris:${project.iris_version}") { transitive = false }
     //modCompileOnly("io.vram:canvas-fabric-mc119:1.0.+") { transitive = false } // TODO: 1.19.3
-    modCompileOnly("maven.modrinth:indium:${project.indium_version}") { transitive = false }
+    modCompileOnly("de.florianmichael:ViaFabricPlus:${project.viafabricplus_version}") { transitive = false }
 
     // Baritone (https://github.com/MeteorDevelopment/baritone)
     modCompileOnly "meteordevelopment:baritone:${project.baritone_version}-SNAPSHOT"
@@ -67,7 +73,7 @@ dependencies {
     library "org.reflections:reflections:${project.reflections_version}"
     library("io.netty:netty-handler-proxy:${project.netty_version}") { transitive = false }
     library("io.netty:netty-codec-socks:${project.netty_version}") { transitive = false }
-    library "de.florianmichael:WaybackAuthLib:1.0.0"
+    library "de.florianmichael:WaybackAuthLib:${project.waybackauthlib_version}"
 
     // Launch sub project
     shadow project(":launch")
@@ -83,65 +89,67 @@ afterEvaluate {
     }
 }
 
-shadowJar {
-    configurations = [project.configurations.shadow]
+tasks {
+    processResources {
+        def propertyMap = [
+            "version"          : project.version,
+            "devbuild"         : project.findProperty("devbuild") ?: "",
+            "commit"           : project.findProperty("commit") ?: "",
+            "minecraft_version": project.minecraft_version,
+            "loader_version"   : project.loader_version
+        ]
 
-    dependencies {
-        exclude {
-            it.moduleGroup == "org.slf4j"
+        inputs.properties(propertyMap)
+        filesMatching("fabric.mod.json") {
+            expand(propertyMap)
         }
     }
-}
 
-processResources {
-    def propertyMap = [
-        "version"          : project.version,
-        "devbuild"         : project.findProperty("devbuild") ?: "",
-        "commit"           : project.findProperty("commit") ?: "",
-        "minecraft_version": project.minecraft_version,
-        "loader_version"   : project.loader_version
-    ]
+    jar {
+        from("LICENSE") {
+            rename { "${it}_${project.base.archivesBaseName}" }
+        }
 
-    inputs.properties(propertyMap)
-    filesMatching("fabric.mod.json") {
-        expand(propertyMap)
-    }
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${archivesBaseName}" }
+        manifest {
+            attributes("Main-Class": "meteordevelopment.meteorclient.Main")
+        }
     }
 
-    manifest {
-        attributes("Main-Class": "meteordevelopment.meteorclient.Main")
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+
+        withSourcesJar()
+        withJavadocJar()
     }
-}
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    shadowJar {
+        configurations = [project.configurations.shadow]
 
-    withSourcesJar()
-}
+        from("LICENSE") {
+            rename { "${it}_${project.base.archivesBaseName}" }
+        }
 
-remapJar {
-    dependsOn shadowJar
-    inputFile.set(shadowJar.archiveFile)
-}
+        dependencies {
+            exclude {
+                it.moduleGroup == "org.slf4j"
+            }
+        }
+    }
 
-javadoc {
-    options.addStringOption("Xdoclint:none", "-quiet")
-    options.encoding = "UTF-8"
-}
+    remapJar {
+        dependsOn shadowJar
+        inputFile.set(shadowJar.archiveFile)
+    }
 
-tasks.register("javadocJar", Jar) {
-    from javadoc
-    archiveClassifier.set("javadoc")
-}
+    javadoc {
+        options.addStringOption("Xdoclint:none", "-quiet")
+        options.encoding = "UTF-8"
+    }
 
-build {
-    dependsOn javadocJar
+    build {
+        dependsOn javadocJar
+    }
 }
 
 publishing {

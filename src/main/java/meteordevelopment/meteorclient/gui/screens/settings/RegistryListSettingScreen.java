@@ -23,7 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
+public abstract class RegistryListSettingScreen<T> extends WindowScreen {
     protected final Setting<?> setting;
     protected final Collection<T> collection;
     private final Registry<T> registry;
@@ -33,7 +33,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
 
     private WTable table;
 
-    public LeftRightListSettingScreen(GuiTheme theme, String title, Setting<?> setting, Collection<T> collection, Registry<T> registry) {
+    public RegistryListSettingScreen(GuiTheme theme, String title, Setting<?> setting, Collection<T> collection, Registry<T> registry) {
         super(theme, title);
 
         this.registry = registry;
@@ -73,7 +73,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
             if (v != null) addValue(registry, v);
         });
 
-        if (left.cells.size() > 0) table.add(theme.verticalSeparator()).expandWidgetY();
+        if (!left.cells.isEmpty()) table.add(theme.verticalSeparator()).expandWidgetY();
 
         // Right (selected)
         abc(pairs -> {
@@ -132,7 +132,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
         if (!filterText.isEmpty()) values.sort(Comparator.comparingInt(value -> -value.getRight()));
         for (Pair<T, Integer> pair : values) forEach.accept(pair.getLeft());
 
-        if (table.cells.size() > 0) cell.expandX();
+        if (!table.cells.isEmpty()) cell.expandX();
 
         return table;
     }

@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.nbt.NbtCompound;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -76,7 +77,7 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
     }
 
     @Override
-    public Iterator<Profile> iterator() {
+    public @NotNull Iterator<Profile> iterator() {
         return profiles.iterator();
     }
 

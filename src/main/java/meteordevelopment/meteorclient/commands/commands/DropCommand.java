@@ -17,9 +17,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class DropCommand extends Command {
     private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(Text.literal("Can't drop items while in spectator."));
     private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(Text.literal("Could not find an item with that name!"));

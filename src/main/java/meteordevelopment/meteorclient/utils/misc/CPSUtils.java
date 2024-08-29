@@ -17,6 +17,9 @@ public class CPSUtils {
     private static int secondsClicking;
     private static long lastTime;
 
+    private CPSUtils() {
+    }
+
     @PreInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(CPSUtils.class);

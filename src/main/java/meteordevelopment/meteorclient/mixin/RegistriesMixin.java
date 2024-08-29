@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 
 @Mixin(Registries.class)
 public abstract class RegistriesMixin {
-    @Redirect(method = "create(Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/registry/MutableRegistry;Lnet/minecraft/registry/Registries$Initializer;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/registry/MutableRegistry;", at = @At(value = "INVOKE", target = "Lnet/minecraft/Bootstrap;ensureBootstrapped(Ljava/util/function/Supplier;)V"))
+    @Redirect(method = "create(Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/registry/MutableRegistry;Lnet/minecraft/registry/Registries$Initializer;)Lnet/minecraft/registry/MutableRegistry;", at = @At(value = "INVOKE", target = "Lnet/minecraft/Bootstrap;ensureBootstrapped(Ljava/util/function/Supplier;)V"))
     private static void ignoreBootstrap(Supplier<String> callerGetter) {
         // nothing
     }

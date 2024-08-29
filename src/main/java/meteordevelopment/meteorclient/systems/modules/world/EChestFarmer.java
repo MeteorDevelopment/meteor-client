@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -21,7 +22,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -153,7 +153,7 @@ public class EChestFarmer extends Module {
 
             for (int i = 0; i < 9; i++) {
                 ItemStack itemStack = mc.player.getInventory().getStack(i);
-                if (EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) > 0) continue;
+                if (Utils.hasEnchantment(itemStack, Enchantments.SILK_TOUCH)) continue;
 
                 double score = itemStack.getMiningSpeedMultiplier(Blocks.ENDER_CHEST.getDefaultState());
 
@@ -187,7 +187,7 @@ public class EChestFarmer extends Module {
     private void onRender(Render3DEvent event) {
         if (target == null || !render.get() || Modules.get().get(PacketMine.class).isMiningBlock(target)) return;
 
-        Box box = SHAPE.getBoundingBoxes().get(0);
+        Box box = SHAPE.getBoundingBoxes().getFirst();
         event.renderer.box(target.getX() + box.minX, target.getY() + box.minY, target.getZ() + box.minZ, target.getX() + box.maxX, target.getY() + box.maxY, target.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }

@@ -168,7 +168,7 @@ public class Freecam extends Module {
         if (reloadChunks.get()) mc.worldRenderer.reload();
         mc.options.setPerspective(perspective);
         if (staticView.get()) {
-            mc.options.getFovEffectScale().setValue((double)fovScale);
+            mc.options.getFovEffectScale().setValue(fovScale);
             mc.options.getBobView().setValue(bobView);
         }
     }
@@ -374,7 +374,7 @@ public class Freecam extends Module {
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event)  {
         if (event.packet instanceof DeathMessageS2CPacket packet) {
-            Entity entity = mc.world.getEntityById(packet.getEntityId());
+            Entity entity = mc.world.getEntityById(packet.playerId());
             if (entity == mc.player && toggleOnDeath.get()) {
                 toggle();
                 info("Toggled off because you died.");

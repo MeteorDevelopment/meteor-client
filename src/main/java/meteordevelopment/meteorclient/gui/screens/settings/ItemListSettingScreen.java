@@ -15,7 +15,7 @@ import net.minecraft.registry.Registries;
 
 import java.util.function.Predicate;
 
-public class ItemListSettingScreen extends LeftRightListSettingScreen<Item> {
+public class ItemListSettingScreen extends RegistryListSettingScreen<Item> {
     public ItemListSettingScreen(GuiTheme theme, ItemListSetting setting) {
         super(theme, "Select Items", setting, setting.get(), Registries.ITEM);
     }

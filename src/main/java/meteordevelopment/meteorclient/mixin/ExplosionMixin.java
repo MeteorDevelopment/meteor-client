@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(Explosion.class)
-public class ExplosionMixin implements IExplosion {
+public abstract class ExplosionMixin implements IExplosion {
     @Shadow @Final @Mutable private World world;
     @Shadow @Final @Mutable @Nullable private Entity entity;
 

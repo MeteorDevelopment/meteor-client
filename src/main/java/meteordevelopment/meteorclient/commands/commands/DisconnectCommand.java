@@ -5,19 +5,13 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DisconnectCommand extends Command {
     public DisconnectCommand() {

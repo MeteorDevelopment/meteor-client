@@ -78,6 +78,6 @@ public abstract class DisconnectedScreenMixin extends Screen {
     @Unique
     private void tryConnecting() {
         var lastServer = Modules.get().get(AutoReconnect.class).lastServerConnection;
-        ConnectScreen.connect(new TitleScreen(), mc, lastServer.left(), lastServer.right(), false);
+        ConnectScreen.connect(new TitleScreen(), mc, lastServer.left(), lastServer.right(), false, null);
     }
 }

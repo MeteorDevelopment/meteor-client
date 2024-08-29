@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 
 public class FontUtils {
+    private FontUtils() {
+    }
 
     public static FontInfo getSysFontInfo(File file) {
         return getFontInfo(stream(file));

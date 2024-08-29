@@ -74,6 +74,7 @@ public class ESP extends Module {
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .description("How the shapes are rendered.")
+        .visible(() -> mode.get() != Mode.Glow)
         .defaultValue(ShapeMode.Both)
         .build()
     );
@@ -81,7 +82,7 @@ public class ESP extends Module {
     public final Setting<Double> fillOpacity = sgGeneral.add(new DoubleSetting.Builder()
         .name("fill-opacity")
         .description("The opacity of the shape fill.")
-        .visible(() -> shapeMode.get() != ShapeMode.Lines)
+        .visible(() -> shapeMode.get() != ShapeMode.Lines && mode.get() != Mode.Glow)
         .defaultValue(0.3)
         .range(0, 1)
         .sliderMax(1)
@@ -349,11 +350,16 @@ public class ESP extends Module {
         return isActive() && mode.get() == Mode.Shader;
     }
 
+    public boolean isGlow() {
+        return isActive() && mode.get() == Mode.Glow;
+    }
+
     public enum Mode {
         Box,
         Wireframe,
         _2D,
-        Shader;
+        Shader,
+        Glow;
 
         @Override
         public String toString() {

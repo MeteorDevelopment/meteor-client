@@ -156,8 +156,8 @@ public class SelfTrap extends Module {
 
             findPlacePos(currentBlock);
 
-            if (delay >= delaySetting.get() && placePositions.size() > 0) {
-                BlockPos blockPos = placePositions.get(placePositions.size() - 1);
+            if (delay >= delaySetting.get() && !placePositions.isEmpty()) {
+                BlockPos blockPos = placePositions.getLast();
 
                 if (BlockUtils.place(blockPos, itemResult, rotate.get(), 50)) {
                     placePositions.remove(blockPos);

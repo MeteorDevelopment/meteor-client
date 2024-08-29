@@ -5,16 +5,16 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
-import meteordevelopment.meteorclient.events.game.SectionVisibleEvent;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
@@ -31,13 +31,37 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
     @ModifyReturnValue(method = "getTooltip", at = @At("RETURN"))
-    private List<Text> onGetTooltip(List<Text> original, PlayerEntity player, TooltipContext context) {
+    private List<Text> onGetTooltip(List<Text> original) {
         if (Utils.canUpdate()) {
-            ItemStackTooltipEvent event = MeteorClient.EVENT_BUS.post(ItemStackTooltipEvent.get((ItemStack) (Object) this, original));
-            return event.list;
+            ItemStackTooltipEvent event = MeteorClient.EVENT_BUS.post(new ItemStackTooltipEvent((ItemStack) (Object) this, original));
+            return event.list();
         }
 
         return original;
+    }
+
+    @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/BlockPredicatesChecker;showInTooltip()Z", ordinal = 0))
+    private boolean modifyCanBreakText(boolean original) {
+        BetterTooltips bt = Modules.get().get(BetterTooltips.class);
+        return (bt.isActive() && bt.canDestroy.get()) || original;
+    }
+
+    @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/BlockPredicatesChecker;showInTooltip()Z", ordinal = 1))
+    private boolean modifyCanPlaceText(boolean original) {
+        BetterTooltips bt = Modules.get().get(BetterTooltips.class);
+        return (bt.isActive() && bt.canPlaceOn.get()) || original;
+    }
+
+    @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;contains(Lnet/minecraft/component/ComponentType;)Z", ordinal = 0))
+    private boolean modifyContainsTooltip(boolean original) {
+        BetterTooltips bt = Modules.get().get(BetterTooltips.class);
+        return !(bt.isActive() && bt.tooltip.get()) && original;
+    }
+
+    @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;contains(Lnet/minecraft/component/ComponentType;)Z", ordinal = 3))
+    private boolean modifyContainsAdditional(boolean original) {
+        BetterTooltips bt = Modules.get().get(BetterTooltips.class);
+        return !(bt.isActive() && bt.additional.get()) && original;
     }
 
     @Inject(method = "finishUsing", at = @At("HEAD"))
@@ -54,9 +78,9 @@ public abstract class ItemStackMixin {
         }
     }
 
-    @ModifyReturnValue(method = "isSectionVisible", at = @At("RETURN"))
-    private static boolean onSectionVisible(boolean original, int flags, ItemStack.TooltipSection tooltipSection) {
-        SectionVisibleEvent event = MeteorClient.EVENT_BUS.post(SectionVisibleEvent.get(tooltipSection, original));
-        return event.visible;
+    @ModifyExpressionValue(method = "appendAttributeModifiersTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/type/AttributeModifiersComponent;showInTooltip()Z"))
+    private boolean modifyShowInTooltip(boolean original) {
+        BetterTooltips bt = Modules.get().get(BetterTooltips.class);
+        return (bt.isActive() && bt.modifiers.get()) || original;
     }
 }

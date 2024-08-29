@@ -37,6 +37,9 @@ public class GL {
     public static int CURRENT_IBO;
     private static int prevIbo;
 
+    private GL() {
+    }
+
     @PreInit
     public static void init() {
         if (FabricLoader.getInstance().isModLoaded("canvas")) changeBufferRenderer = false;

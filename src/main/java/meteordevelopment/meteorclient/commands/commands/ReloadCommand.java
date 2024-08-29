@@ -15,8 +15,6 @@ import meteordevelopment.meteorclient.utils.network.Capes;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.command.CommandSource;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 public class ReloadCommand extends Command {
     public ReloadCommand() {
         super("reload", "Reloads many systems.");

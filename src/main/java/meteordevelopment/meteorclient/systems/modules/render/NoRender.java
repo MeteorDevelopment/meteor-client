@@ -140,6 +140,12 @@ public class NoRender extends Module {
         .defaultValue(false)
         .build()
     );
+    private final Setting<Boolean> noTitle = sgHUD.add(new BoolSetting.Builder()
+        .name("title")
+        .description("Disables rendering of the title.")
+        .defaultValue(false)
+        .build()
+    );
 
     private final Setting<Boolean> noHeldItemName = sgHUD.add(new BoolSetting.Builder()
         .name("held-item-name")
@@ -259,6 +265,13 @@ public class NoRender extends Module {
     private final Setting<Boolean> noMapMarkers = sgWorld.add(new BoolSetting.Builder()
         .name("map-markers")
         .description("Disables markers on maps.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> noMapContents = sgWorld.add(new BoolSetting.Builder()
+        .name("map-contents")
+        .description("Disable rendering of maps.")
         .defaultValue(false)
         .build()
     );
@@ -436,6 +449,9 @@ public class NoRender extends Module {
     public boolean noCrosshair() {
         return isActive() && noCrosshair.get();
     }
+    public boolean noTitle() {
+        return isActive() && noTitle.get();
+    }
 
     public boolean noHeldItemName() {
         return isActive() && noHeldItemName.get();
@@ -506,6 +522,10 @@ public class NoRender extends Module {
 
     public boolean noMapMarkers() {
         return isActive() && noMapMarkers.get();
+    }
+
+    public boolean noMapContents() {
+        return isActive() && noMapContents.get();
     }
 
     public BannerRenderMode getBannerRenderMode() {

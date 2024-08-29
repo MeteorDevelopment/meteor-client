@@ -9,7 +9,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.player.InstantRebreak;
 import meteordevelopment.meteorclient.utils.PreInit;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -34,7 +37,6 @@ import net.minecraft.block.StairsBlock;
 import net.minecraft.block.TrapdoorBlock;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
@@ -54,6 +56,9 @@ import net.minecraft.world.World;
 public class BlockUtils {
     public static boolean breaking;
     private static boolean breakingThisTick;
+
+    private BlockUtils() {
+    }
 
     @PreInit
     public static void init() {
@@ -162,6 +167,10 @@ public class BlockUtils {
     }
 
     public static Direction getPlaceSide(BlockPos blockPos) {
+        Vec3d lookVec = blockPos.toCenterPos().subtract(mc.player.getEyePos());
+        double bestRelevancy = -Double.MAX_VALUE;
+        Direction bestSide = null;
+
         for (Direction side : Direction.values()) {
             BlockPos neighbor = blockPos.offset(side);
             BlockState state = mc.world.getBlockState(neighbor);
@@ -172,15 +181,20 @@ public class BlockUtils {
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;
 
-            return side;
+            double relevancy = side.getAxis().choose(lookVec.getX(), lookVec.getY(), lookVec.getZ()) * side.getDirection().offset();
+            if (relevancy > bestRelevancy) {
+                bestRelevancy = relevancy;
+                bestSide = side;
+            }
         }
 
-        return null;
+        return bestSide;
     }
 
     public static Direction getClosestPlaceSide(BlockPos blockPos) {
         return getClosestPlaceSide(blockPos, mc.player.getEyePos());
     }
+
     public static Direction getClosestPlaceSide(BlockPos blockPos, Vec3d pos) {
         Direction closestSide = null;
         double closestDistance = Double.MAX_VALUE;
@@ -228,7 +242,11 @@ public class BlockUtils {
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field and we don't want it to change when it has been stored in a field somewhere
         BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
-
+        InstantRebreak ir = Modules.get().get(InstantRebreak.class);
+        if (ir != null && ir.isActive() && ir.blockPos.equals(pos) && ir.shouldMine()) {
+            ir.sendPacket();
+            return true;
+        }
         if (mc.interactionManager.isBreakingBlock())
             mc.interactionManager.updateBlockBreakingProgress(pos, getDirection(blockPos));
         else mc.interactionManager.attackBlock(pos, getDirection(blockPos));
@@ -276,6 +294,10 @@ public class BlockUtils {
     public static boolean isClickable(Block block) {
         return block instanceof CraftingTableBlock
             || block instanceof AnvilBlock
+            || block instanceof LoomBlock
+            || block instanceof CartographyTableBlock
+            || block instanceof GrindstoneBlock
+            || block instanceof StonecutterBlock
             || block instanceof ButtonBlock
             || block instanceof AbstractPressurePlateBlock
             || block instanceof BlockWithEntity
@@ -363,7 +385,7 @@ public class BlockUtils {
         if (speed > 1) {
             ItemStack tool = mc.player.getInventory().getStack(slot);
 
-            int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, tool);
+            int efficiency = Utils.getEnchantmentLevel(tool, Enchantments.EFFICIENCY);
 
             if (efficiency > 0 && !tool.isEmpty()) speed += efficiency * efficiency + 1;
         }
@@ -383,7 +405,7 @@ public class BlockUtils {
             speed *= k;
         }
 
-        if (mc.player.isSubmergedIn(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(mc.player)) {
+        if (mc.player.isSubmergedIn(FluidTags.WATER) /*fixme && !EnchantmentHelper.hasAquaAffinity(mc.player)*/) {
             speed /= 5.0F;
         }
 

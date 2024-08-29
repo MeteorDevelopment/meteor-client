@@ -28,6 +28,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.entry.RegistryEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -250,7 +251,7 @@ public class AutoGap extends Module {
     }
 
     private boolean shouldEatPotions() {
-        Map<StatusEffect, StatusEffectInstance> effects = mc.player.getActiveStatusEffects();
+        Map<RegistryEntry<StatusEffect>, StatusEffectInstance> effects = mc.player.getActiveStatusEffects();
 
         // Regeneration
         if (potionsRegeneration.get() && !effects.containsKey(StatusEffects.REGENERATION)) return true;

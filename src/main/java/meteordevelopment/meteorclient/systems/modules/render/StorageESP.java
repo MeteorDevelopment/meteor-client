@@ -5,7 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.renderer.*;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -20,16 +25,22 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
+import net.minecraft.util.math.Direction;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
 
 public class StorageESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgOpened = settings.createGroup("Opened Rendering");
+    private final Set<BlockPos> interactedBlocks = new HashSet<>();
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
@@ -141,6 +152,21 @@ public class StorageESP extends Module {
         .build()
     );
 
+    private final Setting<Boolean> hideOpened = sgOpened.add(new BoolSetting.Builder()
+        .name("hide-opened")
+        .description("Hides opened containers.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<SettingColor> openedColor = sgOpened.add(new ColorSetting.Builder()
+        .name("opened-color")
+        .description("Optional setting to change colors of opened chests, as opposed to not rendering. Disabled at zero opacity.")
+        .defaultValue(new SettingColor(203, 90, 203, 0)) /// TRANSPARENT BY DEFAULT.
+        .build()
+    );
+
+
     private final Color lineColor = new Color(0, 0, 0, 0);
     private final Color sideColor = new Color(0, 0, 0, 0);
     private boolean render;
@@ -166,7 +192,7 @@ public class StorageESP extends Module {
         else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
         else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
         else if (blockEntity instanceof EnderChestBlockEntity) lineColor.set(enderChest.get());
-        else if (blockEntity instanceof AbstractFurnaceBlockEntity || blockEntity instanceof DispenserBlockEntity || blockEntity instanceof HopperBlockEntity) lineColor.set(other.get());
+        else if (blockEntity instanceof AbstractFurnaceBlockEntity || blockEntity instanceof BrewingStandBlockEntity || blockEntity instanceof ChiseledBookshelfBlockEntity || blockEntity instanceof CrafterBlockEntity || blockEntity instanceof DispenserBlockEntity || blockEntity instanceof DecoratedPotBlockEntity || blockEntity instanceof HopperBlockEntity) lineColor.set(other.get());
         else return;
 
         render = true;
@@ -177,6 +203,42 @@ public class StorageESP extends Module {
         }
     }
 
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        WVerticalList list = theme.verticalList();
+
+        // Button to Clear Interacted Blocks
+        WButton clear = list.add(theme.button("Clear Rendering Cache")).expandX().widget();
+
+        clear.action = () -> {
+            interactedBlocks.clear();
+        };
+
+        return list;
+    }
+
+    @EventHandler
+    private void onBlockInteract(InteractBlockEvent event) {
+        BlockPos pos = event.result.getBlockPos();
+        BlockEntity blockEntity = mc.world.getBlockEntity(pos);
+
+        if (blockEntity == null) return;
+
+        interactedBlocks.add(pos);
+        if (blockEntity instanceof ChestBlockEntity chestBlockEntity) {
+            BlockState state = chestBlockEntity.getCachedState();
+            ChestType chestType = state.get(ChestBlock.CHEST_TYPE);
+
+            if (chestType == ChestType.LEFT || chestType == ChestType.RIGHT) {
+                // It's part of a double chest
+                Direction facing = state.get(ChestBlock.FACING);
+                BlockPos otherPartPos = pos.offset(chestType == ChestType.LEFT ? facing.rotateYClockwise() : facing.rotateYCounterclockwise());
+
+                interactedBlocks.add(otherPartPos);
+            }
+        }
+    }
+
     @EventHandler
     private void onRender(Render3DEvent event) {
         count = 0;
@@ -184,7 +246,19 @@ public class StorageESP extends Module {
         if (mode.get() == Mode.Shader) mesh.begin();
 
         for (BlockEntity blockEntity : Utils.blockEntities()) {
+            // Check if the block has been interacted with (opened)
+            boolean interacted = interactedBlocks.contains(blockEntity.getPos());
+            if (interacted && hideOpened.get()) continue;  // Skip rendering if "hideOpened" is true
+
             getBlockEntityColor(blockEntity);
+
+            // Set the color to openedColor if its alpha is greater than 0
+            if (interacted && openedColor.get().a > 0) {
+                // openedColor takes precedence.
+                lineColor.set(openedColor.get());
+                sideColor.set(openedColor.get());
+                sideColor.a = fillOpacity.get(); // Maintain fill opacity setting for consistency
+            }
 
             if (render) {
                 double dist = PlayerUtils.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
@@ -211,9 +285,9 @@ public class StorageESP extends Module {
                 count++;
             }
         }
-
         if (mode.get() == Mode.Shader) PostProcessShaders.STORAGE_OUTLINE.endRender(() -> mesh.render(event.matrices));
     }
+
 
     private void renderBox(Render3DEvent event, BlockEntity blockEntity) {
         double x1 = blockEntity.getPos().getX();

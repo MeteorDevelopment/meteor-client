@@ -233,7 +233,7 @@ public class Scaffold extends Module {
 
             blockPosArray.sort(Comparator.comparingDouble((blockPos) -> blockPos.getSquaredDistance(targetBlock)));
 
-            bp.set(blockPosArray.get(0));
+            bp.set(blockPosArray.getFirst());
         }
 
         if (airPlace.get()) {

@@ -10,15 +10,13 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.command.CommandSource;
+import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class PeekCommand extends Command {
     private static final ItemStack[] ITEMS = new ItemStack[27];
-    private static final SimpleCommandExceptionType NOT_HOLDING_SHULKER_BOX = new SimpleCommandExceptionType(Text.literal("You must be holding a storage block with items in it."));
+    private static final SimpleCommandExceptionType CANT_PEEK = new SimpleCommandExceptionType(Text.literal("You must be holding a storage block or looking at an item frame."));
 
     public PeekCommand() {
         super("peek", "Lets you see what's inside storage block items.");
@@ -29,7 +27,10 @@ public class PeekCommand extends Command {
         builder.executes(context -> {
             if (Utils.openContainer(mc.player.getMainHandStack(), ITEMS, true)) return SINGLE_SUCCESS;
             else if (Utils.openContainer(mc.player.getOffHandStack(), ITEMS, true)) return SINGLE_SUCCESS;
-            else throw NOT_HOLDING_SHULKER_BOX.create();
+            else if (mc.targetedEntity instanceof ItemFrameEntity &&
+                Utils.openContainer(((ItemFrameEntity) mc.targetedEntity).getHeldItemStack(), ITEMS, true)
+            ) return SINGLE_SUCCESS;
+            else throw CANT_PEEK.create();
         });
     }
 }

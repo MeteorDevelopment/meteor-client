@@ -41,7 +41,7 @@ public class Tracers extends Module {
     public enum TracerStyle {
         Lines,
         Offscreen
-    };
+    }
 
     // General
 
@@ -305,7 +305,7 @@ public class Tracers extends Module {
             Vector2f newPoint = new Vector2f(screenCenter.x + distanceOffscreen.get() * (float) Math.cos(angleYawRad),
                 screenCenter.y + distanceOffscreen.get() * (float) Math.sin(angleYawRad));
 
-            Vector2f trianglePoints[] = {
+            Vector2f[] trianglePoints = {
                 new Vector2f(newPoint.x - sizeOffscreen.get(), newPoint.y - sizeOffscreen.get()),
                 new Vector2f(newPoint.x + sizeOffscreen.get() * 0.73205f, newPoint.y),
                 new Vector2f(newPoint.x - sizeOffscreen.get(), newPoint.y + sizeOffscreen.get())

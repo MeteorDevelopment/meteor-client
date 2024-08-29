@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.settings.StatusEffectAmplifierMapSetting;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
+import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.PeekScreen;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -32,22 +33,26 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.resource.ResourceReloadLogger;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.Chunk;
-import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Range;
 import org.joml.Matrix4f;
@@ -58,9 +63,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Random;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -78,6 +83,9 @@ public class Utils {
     public static double frameTime;
     public static Screen screenToOpen;
     public static VertexSorter vertexSorter;
+
+    private Utils() {
+    }
 
     @PreInit
     public static void init() {
@@ -135,28 +143,58 @@ public class Utils {
         return BlockEntityIterator::new;
     }
 
-    public static void getEnchantments(ItemStack itemStack, Object2IntMap<Enchantment> enchantments) {
+    public static void getEnchantments(ItemStack itemStack, Object2IntMap<RegistryEntry<Enchantment>> enchantments) {
         enchantments.clear();
 
         if (!itemStack.isEmpty()) {
-            NbtList listTag = itemStack.getItem() == Items.ENCHANTED_BOOK ? EnchantedBookItem.getEnchantmentNbt(itemStack) : itemStack.getEnchantments();
+            Set<Object2IntMap.Entry<RegistryEntry<Enchantment>>> itemEnchantments = itemStack.getItem() == Items.ENCHANTED_BOOK
+                ? itemStack.get(DataComponentTypes.STORED_ENCHANTMENTS).getEnchantmentEntries()
+                : itemStack.getEnchantments().getEnchantmentEntries();
 
-            for (int i = 0; i < listTag.size(); ++i) {
-                NbtCompound tag = listTag.getCompound(i);
-
-                Registries.ENCHANTMENT.getOrEmpty(Identifier.tryParse(tag.getString("id"))).ifPresent((enchantment) -> enchantments.put(enchantment, tag.getInt("lvl")));
+            for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : itemEnchantments) {
+                enchantments.put(entry.getKey(), entry.getIntValue());
             }
         }
     }
 
-    public static boolean hasEnchantments(ItemStack itemStack, Enchantment... enchantments) {
-        if (itemStack.isEmpty()) return false;
-
-        Object2IntMap<Enchantment> itemEnchantments = new Object2IntArrayMap<>();
+    public static int getEnchantmentLevel(ItemStack itemStack, RegistryKey<Enchantment> enchantment) {
+        if (itemStack.isEmpty()) return 0;
+        Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
         getEnchantments(itemStack, itemEnchantments);
-        for (Enchantment enchantment : enchantments) if (!itemEnchantments.containsKey(enchantment)) return false;
+        return getEnchantmentLevel(itemEnchantments, enchantment);
+    }
 
+    public static int getEnchantmentLevel(Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments, RegistryKey<Enchantment> enchantment) {
+        for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : Object2IntMaps.fastIterable(itemEnchantments)) {
+            if (entry.getKey().matchesKey(enchantment)) return entry.getIntValue();
+        }
+        return 0;
+    }
+
+    @SafeVarargs
+    public static boolean hasEnchantments(ItemStack itemStack, RegistryKey<Enchantment>... enchantments) {
+        if (itemStack.isEmpty()) return false;
+        Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
+        getEnchantments(itemStack, itemEnchantments);
+
+        for (RegistryKey<Enchantment> enchantment : enchantments) {
+            if (!hasEnchantment(itemEnchantments, enchantment)) return false;
+        }
         return true;
+    }
+
+    public static boolean hasEnchantment(ItemStack itemStack, RegistryKey<Enchantment> enchantmentKey) {
+        if (itemStack.isEmpty()) return false;
+        Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments = new Object2IntArrayMap<>();
+        getEnchantments(itemStack, itemEnchantments);
+        return hasEnchantment(itemEnchantments, enchantmentKey);
+    }
+
+    private static boolean hasEnchantment(Object2IntMap<RegistryEntry<Enchantment>> itemEnchantments, RegistryKey<Enchantment> enchantmentKey) {
+        for (RegistryEntry<Enchantment> enchantment : itemEnchantments.keySet()) {
+            if (enchantment.matchesKey(enchantmentKey)) return true;
+        }
+        return false;
     }
 
     public static int getRenderDistance() {
@@ -207,17 +245,26 @@ public class Utils {
         }
 
         Arrays.fill(items, ItemStack.EMPTY);
-        NbtCompound nbt = itemStack.getNbt();
+        ComponentMap components = itemStack.getComponents();
 
-        if (nbt != null && nbt.contains("BlockEntityTag")) {
-            NbtCompound nbt2 = nbt.getCompound("BlockEntityTag");
+        if (components.contains(DataComponentTypes.CONTAINER)) {
+            ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) components.get(DataComponentTypes.CONTAINER));
+            DefaultedList<ItemStack> stacks = container.getStacks();
+
+            for (int i = 0; i < stacks.size(); i++) {
+                if (i >= 0 && i < items.length) items[i] = stacks.get(i);
+            }
+        }
+        else if (components.contains(DataComponentTypes.BLOCK_ENTITY_DATA)) {
+            NbtComponent nbt2 = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
 
             if (nbt2.contains("Items")) {
-                NbtList nbt3 = (NbtList) nbt2.get("Items");
+                NbtList nbt3 = (NbtList) nbt2.getNbt().get("Items");
 
                 for (int i = 0; i < nbt3.size(); i++) {
                     int slot = nbt3.getCompound(i).getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
-                    if (slot >= 0 && slot < items.length) items[slot] = ItemStack.fromNbt(nbt3.getCompound(i));
+                    // now NPEs when mc.world == null
+                    if (slot >= 0 && slot < items.length) items[slot] = ItemStack.fromNbtOrEmpty(mc.player.getRegistryManager(), nbt3.getCompound(i));
                 }
             }
         }
@@ -230,15 +277,18 @@ public class Utils {
             if (block instanceof ShulkerBoxBlock shulkerBlock) {
                 DyeColor dye = shulkerBlock.getColor();
                 if (dye == null) return WHITE;
-                final float[] colors = dye.getColorComponents();
-                return new Color(colors[0], colors[1], colors[2], 1f);
+                final int color = dye.getEntityColor();
+                return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 1f);
             }
         }
         return WHITE;
     }
 
     public static boolean hasItems(ItemStack itemStack) {
-        NbtCompound compoundTag = itemStack.getSubNbt("BlockEntityTag");
+        ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) itemStack.get(DataComponentTypes.CONTAINER));
+        if (container != null && !container.getStacks().isEmpty()) return true;
+
+        NbtCompound compoundTag = itemStack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).getNbt();
         return compoundTag != null && compoundTag.contains("Items", 9);
     }
 
@@ -246,8 +296,9 @@ public class Utils {
         return new Reference2IntArrayMap<>(StatusEffectAmplifierMapSetting.EMPTY_STATUS_EFFECT_MAP);
     }
 
-    public static String getEnchantSimpleName(Enchantment enchantment, int length) {
-        return I18n.translate(enchantment.getTranslationKey()).substring(0, length);
+    public static String getEnchantSimpleName(RegistryEntry<Enchantment> enchantment, int length) {
+        String name = Names.get(enchantment);
+        return name.length() > length ? name.substring(0, length) : name;
     }
 
     public static boolean searchTextDefault(String text, String filter, boolean caseSensitive) {
@@ -294,9 +345,9 @@ public class Utils {
         // Find best route
         for (int i = 1; i <= textLength; i++) {
             for (int j = 1; j <= filterLength; j++) {
-                int sCost = d[i-1][j-1] + (from.charAt(i-1) == to.charAt(j-1) ? 0 : subCost);
-                int dCost = d[i-1][j] + delCost;
-                int iCost = d[i][j-1] + insCost;
+                int sCost = d[i - 1][j - 1] + (from.charAt(i - 1) == to.charAt(j - 1) ? 0 : subCost);
+                int dCost = d[i - 1][j] + delCost;
+                int iCost = d[i][j - 1] + insCost;
                 d[i][j] = Math.min(Math.min(dCost, iCost), sCost);
             }
         }
@@ -430,19 +481,13 @@ public class Utils {
 
     public static byte[] readBytes(InputStream in) {
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-            byte[] buffer = new byte[256];
-            int read;
-            while ((read = in.read(buffer)) > 0) out.write(buffer, 0, read);
-
-            in.close();
-            return out.toByteArray();
+            return in.readAllBytes();
         } catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error reading from stream.", e);
+            return new byte[0];
+        } finally {
+            IOUtils.closeQuietly(in);
         }
-
-        return new byte[0];
     }
 
     public static boolean canUpdate() {
@@ -485,60 +530,19 @@ public class Utils {
         return item instanceof ExperienceBottleItem || item instanceof BowItem || item instanceof CrossbowItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem || item instanceof SplashPotionItem || item instanceof LingeringPotionItem || item instanceof FishingRodItem || item instanceof TridentItem;
     }
 
-    public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
-        NbtCompound tag = itemStack.getOrCreateNbt();
-        NbtList listTag;
+    public static void addEnchantment(ItemStack itemStack, RegistryEntry<Enchantment> enchantment, int level) {
+        ItemEnchantmentsComponent.Builder b = new ItemEnchantmentsComponent.Builder(EnchantmentHelper.getEnchantments(itemStack));
+        b.add(enchantment, level);
 
-        // Get list tag
-        if (!tag.contains("Enchantments", 9)) {
-            listTag = new NbtList();
-            tag.put("Enchantments", listTag);
-        } else {
-            listTag = tag.getList("Enchantments", 10);
-        }
-
-        // Check if item already has the enchantment and modify the level
-        String enchId = Registries.ENCHANTMENT.getId(enchantment).toString();
-
-        for (NbtElement _t : listTag) {
-            NbtCompound t = (NbtCompound) _t;
-
-            if (t.getString("id").equals(enchId)) {
-                t.putShort("lvl", (short) level);
-                return;
-            }
-        }
-
-        // Add the enchantment if it doesn't already have it
-        NbtCompound enchTag = new NbtCompound();
-        enchTag.putString("id", enchId);
-        enchTag.putShort("lvl", (short) level);
-
-        listTag.add(enchTag);
+        EnchantmentHelper.set(itemStack, b.build());
     }
 
     public static void clearEnchantments(ItemStack itemStack) {
-        NbtCompound nbt = itemStack.getNbt();
-        if (nbt != null) nbt.remove("Enchantments");
+        EnchantmentHelper.apply(itemStack, components -> components.remove(a -> true));
     }
 
     public static void removeEnchantment(ItemStack itemStack, Enchantment enchantment) {
-        NbtCompound nbt = itemStack.getNbt();
-        if (nbt == null) return;
-
-        if (!nbt.contains("Enchantments", 9)) return;
-        NbtList list = nbt.getList("Enchantments", 10);
-
-        String enchId = Registries.ENCHANTMENT.getId(enchantment).toString();
-
-        for (Iterator<NbtElement> it = list.iterator(); it.hasNext();) {
-            NbtCompound ench = (NbtCompound) it.next();
-
-            if (ench.getString("id").equals(enchId)) {
-                it.remove();
-                break;
-            }
-        }
+        EnchantmentHelper.apply(itemStack, components -> components.remove(enchantment1 -> enchantment1.value().equals(enchantment)));
     }
 
     public static Color lerp(Color first, Color second, @Range(from = 0, to = 1) float v) {
@@ -561,8 +565,7 @@ public class Utils {
 
         try {
             port = Integer.parseInt(full.substring(full.lastIndexOf(':') + 1, full.length() - 1));
-        }
-        catch (NumberFormatException ignored) {
+        } catch (NumberFormatException ignored) {
             port = -1;
         }
 
@@ -614,6 +617,6 @@ public class Utils {
 
     public static boolean ipFilter(String text, char character) {
         if (text.contains(":") && character == ':') return false;
-        return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.';
+        return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.' || character == '-';
     }
 }

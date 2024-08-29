@@ -5,14 +5,13 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.item.ItemStack;
@@ -24,8 +23,8 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class InventoryHud extends HudElement {
     public static final HudElementInfo<InventoryHud> INFO = new HudElementInfo<>(Hud.GROUP, "inventory", "Displays your inventory.", InventoryHud::new);
 
-    private static final Identifier TEXTURE = new MeteorIdentifier("textures/container.png");
-    private static final Identifier TEXTURE_TRANSPARENT = new MeteorIdentifier("textures/container-transparent.png");
+    private static final Identifier TEXTURE = MeteorClient.identifier("textures/container.png");
+    private static final Identifier TEXTURE_TRANSPARENT = MeteorClient.identifier("textures/container-transparent.png");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

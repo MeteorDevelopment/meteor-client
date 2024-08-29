@@ -12,11 +12,14 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.mixin.MapRendererAccessor;
 import net.minecraft.client.render.MapRenderer;
 import net.minecraft.command.CommandSource;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.map.MapState;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
@@ -28,9 +31,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class SaveMapCommand extends Command {
     private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(Text.literal("You must be holding a filled map."));
@@ -79,11 +79,11 @@ public class SaveMapCommand extends Command {
         }));
     }
 
-    private void saveMap(ItemStack map, MapState state, String path, int scale) {
+    private void saveMap(@NotNull ItemStack map, MapState state, String path, int scale) {
         //this is horrible code but it somehow works
 
         MapRenderer mapRenderer = mc.gameRenderer.getMapRenderer();
-        MapRenderer.MapTexture texture = ((MapRendererAccessor) mapRenderer).invokeGetMapTexture(FilledMapItem.getMapId(map), state);
+        MapRenderer.MapTexture texture = ((MapRendererAccessor) mapRenderer).invokeGetMapTexture(map.get(DataComponentTypes.MAP_ID), state);
 
         int[] data = texture.texture.getImage().makePixelArray();
         BufferedImage image = new BufferedImage(128, 128, 2);
@@ -104,17 +104,14 @@ public class SaveMapCommand extends Command {
         }
     }
 
-    private MapState getMapState() {
+    private @Nullable MapState getMapState() {
         ItemStack map = getMap();
         if (map == null) return null;
 
-        MapState state = FilledMapItem.getMapState(FilledMapItem.getMapId(map), mc.world);
-        if (state == null) return null;
-
-        return state;
+        return FilledMapItem.getMapState(map.get(DataComponentTypes.MAP_ID), mc.world);
     }
 
-    private String getPath() {
+    private @Nullable String getPath() {
         String path = TinyFileDialogs.tinyfd_saveFileDialog("Save image", null, filters, null);
         if (path == null) return null;
         if (!path.endsWith(".png")) path += ".png";
@@ -122,7 +119,7 @@ public class SaveMapCommand extends Command {
         return path;
     }
 
-    private ItemStack getMap() {
+    private @Nullable ItemStack getMap() {
         ItemStack itemStack = mc.player.getMainHandStack();
         if (itemStack.getItem() == Items.FILLED_MAP) return itemStack;
 

@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(TitleScreen.class)
-public class TitleScreenMixin extends Screen {
+public abstract class TitleScreenMixin extends Screen {
     public TitleScreenMixin(Text title) {
         super(title);
     }
@@ -42,7 +42,9 @@ public class TitleScreenMixin extends Screen {
                 MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
                 MeteorExecutor.execute(() -> {
-                    String res = Http.get("https://meteorclient.com/api/stats").sendString();
+                    String res = Http.get("https://meteorclient.com/api/stats")
+                        .exceptionHandler(e -> MeteorClient.LOG.error("Could not fetch version information."))
+                        .sendString();
                     if (res == null) return;
 
                     Version latestVer = new Version(JsonParser.parseString(res).getAsJsonObject().get("version").getAsString());

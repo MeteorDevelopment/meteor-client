@@ -20,6 +20,9 @@ public class InvUtils {
     private static final Action ACTION = new Action();
     public static int previousSlot = -1;
 
+    private InvUtils() {
+    }
+
     // Predicates
 
     public static boolean testInMainHand(Predicate<ItemStack> predicate) {
@@ -155,7 +158,7 @@ public class InvUtils {
         else if (!swapBack) previousSlot = -1;
 
         mc.player.getInventory().selectedSlot = slot;
-        ((IClientPlayerInteractionManager) mc.interactionManager).syncSelected();
+        ((IClientPlayerInteractionManager) mc.interactionManager).meteor$syncSelected();
         return true;
     }
 
@@ -212,7 +215,8 @@ public class InvUtils {
 
         private boolean isRecursive = false;
 
-        private Action() {}
+        private Action() {
+        }
 
         // From
 
@@ -306,8 +310,8 @@ public class InvUtils {
             }
 
             if (type != null && from != -1 && to != -1) {
-               click(from);
-               if (two) click(to);
+                click(from);
+                if (two) click(to);
             }
 
             SlotActionType preType = type;

@@ -5,12 +5,31 @@
 
 package meteordevelopment.meteorclient.addons;
 
-public record GithubRepo(String owner, String name, String branch) {
+import meteordevelopment.meteorclient.utils.network.Http;
+
+import javax.annotation.Nullable;
+
+public record GithubRepo(String owner, String name, String branch, @Nullable String accessToken) {
+    public GithubRepo(String owner, String name, @Nullable String accessToken) {
+        this(owner, name, "master", accessToken);
+    }
+
     public GithubRepo(String owner, String name) {
-        this(owner, name, "master");
+        this(owner, name, "master", null);
     }
 
     public String getOwnerName() {
         return owner + "/" + name;
+    }
+
+    public void authenticate(Http.Request request) {
+        if (this.accessToken != null && !this.accessToken.isBlank()) {
+            request.bearer(this.accessToken);
+        } else {
+            String personalAuthToken = System.getenv("meteor.github.authorization");
+            if (personalAuthToken != null && !personalAuthToken.isBlank()) {
+                request.bearer(personalAuthToken);
+            }
+        }
     }
 }

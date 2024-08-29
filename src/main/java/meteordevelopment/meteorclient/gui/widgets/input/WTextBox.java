@@ -277,17 +277,15 @@ public abstract class WTextBox extends WWidget {
             int addedChars = 0;
 
             StringBuilder sb = new StringBuilder(text.length() + clipboard.length());
-            sb.append(text, 0, cursor);
+            sb.append(text);
 
             for (int i = 0; i < clipboard.length(); i++) {
                 char c = clipboard.charAt(i);
-                if (filter.filter(text, c)) {
-                    sb.append(c);
+                if (filter.filter(sb.toString(), c)) {
+                    sb.insert(cursor + addedChars, c);
                     addedChars++;
                 }
             }
-
-            sb.append(text, cursor, text.length());
 
             text = sb.toString();
             cursor += addedChars;
@@ -319,24 +317,24 @@ public abstract class WTextBox extends WWidget {
             return true;
         }
         else if (key == GLFW_KEY_DELETE) {
-                if (cursor == selectionStart && cursor == selectionEnd) {
-                    if (cursor < text.length()) {
-                        String preText = text;
+            if (cursor == selectionStart && cursor == selectionEnd) {
+                if (cursor < text.length()) {
+                    String preText = text;
 
-                        int count = mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)
-                            ? text.length() - cursor
-                            : (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT))
-                            ? countToNextSpace(false)
-                            : 1;
+                    int count = mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)
+                        ? text.length() - cursor
+                        : (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT))
+                        ? countToNextSpace(false)
+                        : 1;
 
-                        text = text.substring(0, cursor) + text.substring(cursor + count);
+                    text = text.substring(0, cursor) + text.substring(cursor + count);
 
-                        if (!text.equals(preText)) runAction();
-                    }
+                    if (!text.equals(preText)) runAction();
                 }
-                else {
-                    clearSelection();
-                }
+            }
+            else {
+                clearSelection();
+            }
             return true;
         }
         else if (key == GLFW_KEY_LEFT) {
@@ -613,7 +611,7 @@ public abstract class WTextBox extends WWidget {
         completions = renderer.getCompletions(text, this.cursor);
         completionsStart = 0;
         completionsW = null;
-        if (completions != null && completions.size() > 0) createCompletions(0);
+        if (completions != null && !completions.isEmpty()) createCompletions(0);
     }
     protected void onCursorChanged() {}
 

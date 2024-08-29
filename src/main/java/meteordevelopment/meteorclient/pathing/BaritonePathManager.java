@@ -178,8 +178,8 @@ public class BaritonePathManager implements IPathManager {
         }
 
         public void tick() {
-            if (timer > 20) {
-                timer = 0;
+            if (timer <= 0) {
+                timer = 20;
 
                 Vec3d pos = mc.player.getPos();
                 float theta = (float) Math.toRadians(yaw);
@@ -188,7 +188,7 @@ public class BaritonePathManager implements IPathManager {
                 z = (int) Math.floor(pos.z + (double) MathHelper.cos(theta) * 100);
             }
 
-            timer++;
+            timer--;
         }
 
         public boolean isInGoal(int x, int y, int z) {

@@ -7,32 +7,37 @@ package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.datafixers.util.Pair;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.command.CommandSource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class InputCommand extends Command {
     private static final List<KeypressHandler> activeHandlers = new ArrayList<>();
 
-    private static final Map<KeyBinding, String> keys = Map.of(
-        mc.options.forwardKey, "forwards",
-        mc.options.backKey, "backwards",
-        mc.options.leftKey, "left",
-        mc.options.rightKey, "right",
-        mc.options.jumpKey, "jump",
-        mc.options.sneakKey, "sneak",
-        mc.options.useKey, "use",
-        mc.options.attackKey, "attack"
+    private static final List<Pair<KeyBinding, String>> holdKeys = List.of(
+        new Pair<>(mc.options.forwardKey, "forwards"),
+        new Pair<>(mc.options.backKey, "backwards"),
+        new Pair<>(mc.options.leftKey, "left"),
+        new Pair<>(mc.options.rightKey, "right"),
+        new Pair<>(mc.options.jumpKey, "jump"),
+        new Pair<>(mc.options.sneakKey, "sneak"),
+        new Pair<>(mc.options.sprintKey, "sprint"),
+        new Pair<>(mc.options.useKey, "use"),
+        new Pair<>(mc.options.attackKey, "attack")
+    );
+
+    private static final List<Pair<KeyBinding, String>> pressKeys = List.of(
+        new Pair<>(mc.options.swapHandsKey, "swap"),
+        new Pair<>(mc.options.dropKey, "drop")
     );
 
     public InputCommand() {
@@ -41,14 +46,32 @@ public class InputCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        for (Map.Entry<KeyBinding, String> keyBinding : keys.entrySet()) {
-            builder.then(literal(keyBinding.getValue())
+        for (Pair<KeyBinding, String> keyBinding : holdKeys) {
+            builder.then(literal(keyBinding.getSecond())
                 .then(argument("ticks", IntegerArgumentType.integer(1))
                     .executes(context -> {
-                        activeHandlers.add(new KeypressHandler(keyBinding.getKey(), context.getArgument("ticks", Integer.class)));
+                        activeHandlers.add(new KeypressHandler(keyBinding.getFirst(), context.getArgument("ticks", Integer.class)));
                         return SINGLE_SUCCESS;
                     })
                 )
+            );
+        }
+
+        for (Pair<KeyBinding, String> keyBinding : pressKeys) {
+            builder.then(literal(keyBinding.getSecond())
+                .executes(context -> {
+                    press(keyBinding.getFirst());
+                    return SINGLE_SUCCESS;
+                })
+            );
+        }
+
+        for (KeyBinding keyBinding : mc.options.hotbarKeys) {
+            builder.then(literal(keyBinding.getTranslationKey().substring(4))
+                .executes(context -> {
+                    press(keyBinding);
+                    return SINGLE_SUCCESS;
+                })
             );
         }
 
@@ -68,7 +91,7 @@ public class InputCommand extends Command {
                 info("Active keypress handlers: ");
                 for (int i = 0; i < activeHandlers.size(); i++) {
                     KeypressHandler handler = activeHandlers.get(i);
-                    info("(highlight)%d(default) - (highlight)%s %d(default) ticks left out of (highlight)%d(default).", i, keys.get(handler.key), handler.ticks, handler.totalTicks);
+                    info("(highlight)%d(default) - (highlight)%s %d(default) ticks left out of (highlight)%d(default).", i, I18n.translate(handler.key.getTranslationKey()), handler.ticks, handler.totalTicks);
                 }
             }
             return SINGLE_SUCCESS;
@@ -84,6 +107,11 @@ public class InputCommand extends Command {
             }
             return SINGLE_SUCCESS;
         })));
+    }
+
+    private static void press(KeyBinding keyBinding) {
+        KeyBindingAccessor accessor = (KeyBindingAccessor) keyBinding;
+        accessor.meteor$setTimesPressed(accessor.meteor$getTimesPressed() + 1);
     }
 
     private static class KeypressHandler {

@@ -16,7 +16,7 @@ accessible   class   net/minecraft/client/model/ModelPart$Quad
 accessible   class   net/minecraft/client/model/ModelPart$Vertex
 accessible   field   net/minecraft/client/model/ModelPart$Cuboid sides [Lnet/minecraft/client/model/ModelPart$Quad;
 accessible   method  net/minecraft/client/render/entity/PlayerEntityRenderer getArmPose (Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/client/render/entity/model/BipedEntityModel$ArmPose;
-accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer setupTransforms (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;FFF)V
+accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer setupTransforms (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;FFFF)V
 accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer scale (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;F)V
 accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer getAnimationProgress (Lnet/minecraft/entity/LivingEntity;F)F
 
@@ -75,3 +75,5 @@ accessible   field   net/minecraft/item/ItemGroups INVENTORY Lnet/minecraft/regi
 
 accessible   field   net/minecraft/client/render/item/ItemRenderer TRIDENT Lnet/minecraft/client/util/ModelIdentifier;
 accessible   field   net/minecraft/client/render/item/ItemRenderer SPYGLASS Lnet/minecraft/client/util/ModelIdentifier;
+
+accessible   class   net/minecraft/entity/effect/StatusEffect$EffectAttributeModifierCreator

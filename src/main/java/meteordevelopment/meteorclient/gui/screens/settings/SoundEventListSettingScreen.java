@@ -14,7 +14,7 @@ import net.minecraft.sound.SoundEvent;
 
 import java.util.List;
 
-public class SoundEventListSettingScreen extends LeftRightListSettingScreen<SoundEvent> {
+public class SoundEventListSettingScreen extends RegistryListSettingScreen<SoundEvent> {
     public SoundEventListSettingScreen(GuiTheme theme, Setting<List<SoundEvent>> setting) {
         super(theme, "Select Sounds", setting, setting.get(), Registries.SOUND_EVENT);
     }

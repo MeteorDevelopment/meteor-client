@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.utils.network;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
-import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
@@ -34,6 +33,9 @@ public class Capes {
     private static final List<Cape> TO_RETRY = new ArrayList<>();
     private static final List<Cape> TO_REMOVE = new ArrayList<>();
 
+    private Capes() {
+    }
+
     @PreInit(dependencies = MeteorExecutor.class)
     public static void init() {
         OWNERS.clear();
@@ -45,15 +47,19 @@ public class Capes {
 
         MeteorExecutor.execute(() -> {
             // Cape owners
-            Stream<String> lines = Http.get(CAPE_OWNERS_URL).sendLines();
-            if (lines != null) lines.forEach(s -> {
-                String[] split = s.split(" ");
+            Stream<String> lines = Http.get(CAPE_OWNERS_URL)
+                .exceptionHandler(e -> MeteorClient.LOG.error("Could not load capes: " + e.getMessage()))
+                .sendLines();
+            if (lines != null) {
+                lines.forEach(s -> {
+                    String[] split = s.split(" ");
 
-                if (split.length >= 2) {
-                    OWNERS.put(UUID.fromString(split[0]), split[1]);
-                    if (!TEXTURES.containsKey(split[1])) TEXTURES.put(split[1], new Cape(split[1]));
-                }
-            });
+                    if (split.length >= 2) {
+                        OWNERS.put(UUID.fromString(split[0]), split[1]);
+                        if (!TEXTURES.containsKey(split[1])) TEXTURES.put(split[1], new Cape(split[1]));
+                    }
+                });
+            } else return;
 
             // Capes
             lines = Http.get(CAPES_URL).sendLines();
@@ -98,7 +104,7 @@ public class Capes {
             Cape cape = TEXTURES.get(capeName);
             if (cape == null) return null;
 
-            if (cape.isDownloaded()) return cape;
+            if (cape.isDownloaded()) return cape.getIdentifier();
 
             cape.download();
             return null;
@@ -107,10 +113,11 @@ public class Capes {
         return null;
     }
 
-    private static class Cape extends MeteorIdentifier {
+    private static class Cape {
         private static int COUNT = 0;
 
         private final String name;
+        private final Identifier identifier;
 
         private boolean downloaded;
         private boolean downloading;
@@ -120,9 +127,12 @@ public class Capes {
         private int retryTimer;
 
         public Cape(String name) {
-            super("capes/" + COUNT++);
-
+            this.identifier = MeteorClient.identifier("capes/" + COUNT++);
             this.name = name;
+        }
+
+        public Identifier getIdentifier() {
+            return identifier;
         }
 
         public void download() {
@@ -162,7 +172,7 @@ public class Capes {
         }
 
         public void register() {
-            mc.getTextureManager().registerTexture(this, new NativeImageBackedTexture(img));
+            mc.getTextureManager().registerTexture(identifier, new NativeImageBackedTexture(img));
             img = null;
 
             downloading = false;

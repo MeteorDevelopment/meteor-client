@@ -15,11 +15,11 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 
 import java.util.List;
@@ -67,7 +67,7 @@ public class AutoSmelter extends Module {
     }
 
     private boolean smeltableItemFilter(Item item) {
-        return mc.world != null && mc.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SimpleInventory(item.getDefaultStack()), mc.world).isPresent();
+        return mc.world != null && mc.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SingleStackRecipeInput(item.getDefaultStack()), mc.world).isPresent();
     }
 
     public void tick(AbstractFurnaceScreenHandler c) {
@@ -85,7 +85,7 @@ public class AutoSmelter extends Module {
     }
 
     private void insertItems(AbstractFurnaceScreenHandler c) {
-        ItemStack inputItemStack = c.slots.get(0).getStack();
+        ItemStack inputItemStack = c.slots.getFirst().getStack();
         if (!inputItemStack.isEmpty()) return;
 
         int slot = -1;

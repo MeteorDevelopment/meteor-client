@@ -32,6 +32,9 @@ public class SlotUtils {
     public static final int ARMOR_START = 36;
     public static final int ARMOR_END = 39;
 
+    private SlotUtils() {
+    }
+
     public static int indexToId(int i) {
         if (mc.player == null) return -1;
         ScreenHandler handler = mc.player.currentScreenHandler;
@@ -140,12 +143,10 @@ public class SlotUtils {
             int strength = llamaEntity.getStrength();
             if (isHotbar(i)) return (2 + 3 * strength) + 28 + i;
             if (isMain(i)) return (2 + 3 * strength) + 1 + (i - 9);
-        }
-        else if (entity instanceof HorseEntity || entity instanceof SkeletonHorseEntity || entity instanceof ZombieHorseEntity) {
+        } else if (entity instanceof HorseEntity || entity instanceof SkeletonHorseEntity || entity instanceof ZombieHorseEntity) {
             if (isHotbar(i)) return 29 + i;
             if (isMain(i)) return 2 + (i - 9);
-        }
-        else if (entity instanceof AbstractDonkeyEntity abstractDonkeyEntity) {
+        } else if (entity instanceof AbstractDonkeyEntity abstractDonkeyEntity) {
             boolean chest = abstractDonkeyEntity.hasChest();
             if (isHotbar(i)) return (chest ? 44 : 29) + i;
             if (isMain(i)) return (chest ? 17 : 2) + (i - 9);

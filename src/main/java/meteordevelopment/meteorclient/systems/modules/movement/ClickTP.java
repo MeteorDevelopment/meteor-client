@@ -49,7 +49,7 @@ public class ClickTP extends Module {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
                 Direction side = ((BlockHitResult) hitResult).getSide();
 
-                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, (BlockHitResult) hitResult) != ActionResult.PASS) return;
 
                 BlockState state = mc.world.getBlockState(pos);
 

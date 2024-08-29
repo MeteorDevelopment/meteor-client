@@ -24,7 +24,6 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -71,14 +70,6 @@ public class NoFall extends Module {
         .description("Centers the player and reduces movement when using bucket or air place mode.")
         .defaultValue(true)
         .visible(() -> mode.get() != Mode.Packet)
-        .build()
-    );
-
-    private final Setting<Boolean> autoDimension = sgGeneral.add(new BoolSetting.Builder()
-        .name("auto-dimension")
-        .description("Use powder snow bucket in nether.")
-        .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Place)
         .build()
     );
 
@@ -157,7 +148,7 @@ public class NoFall extends Module {
 
         // Bucket mode
         else if (mode.get() == Mode.Place) {
-            PlacedItem placedItem1 = autoDimension.get() && PlayerUtils.getDimension() == Dimension.Nether ? PlacedItem.PowderSnow : placedItem.get();
+            PlacedItem placedItem1 = mc.world.getDimension().ultrawarm() && placedItem.get() == PlacedItem.Bucket ? PlacedItem.PowderSnow : placedItem.get();
             if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
                 Item item = placedItem1.item;
 
@@ -187,6 +178,8 @@ public class NoFall extends Module {
                 timer++;
                 if (mc.player.getBlockStateAtPos().getBlock() == placedItem1.block) {
                     useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos, true);
+                } else if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == Blocks.POWDER_SNOW && mc.player.fallDistance==0 && placedItem1.block==Blocks.POWDER_SNOW){ //check if the powder snow block is still there and the player is on the ground
+                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos.down(), true);
                 }
             }
         }

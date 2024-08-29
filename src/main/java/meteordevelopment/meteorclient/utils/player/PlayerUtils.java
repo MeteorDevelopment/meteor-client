@@ -21,6 +21,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -42,6 +43,9 @@ public class PlayerUtils {
     private static final Vec3d horizontalVelocity = new Vec3d(0, 0, 0);
 
     private static final Color color = new Color();
+
+    private PlayerUtils() {
+    }
 
     public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
         if (Friends.get().isFriend(entity)) {
@@ -135,7 +139,7 @@ public class PlayerUtils {
 
     public static boolean shouldPause(boolean ifBreaking, boolean ifEating, boolean ifDrinking) {
         if (ifBreaking && mc.interactionManager.isBreakingBlock()) return true;
-        if (ifEating && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()))) return true;
+        if (ifEating && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().getComponents().contains(DataComponentTypes.FOOD) || mc.player.getOffHandStack().getItem().getComponents().contains(DataComponentTypes.FOOD)))) return true;
         return ifDrinking && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem() instanceof PotionItem || mc.player.getOffHandStack().getItem() instanceof PotionItem));
     }
 
@@ -227,6 +231,10 @@ public class PlayerUtils {
         return damageTaken;
     }
 
+    public static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
+        return Math.sqrt(squaredDistance(x1, y1, z1, x2, y2, z2));
+    }
+
     public static double distanceTo(Entity entity) {
         return distanceTo(entity.getX(), entity.getY(), entity.getZ());
     }
@@ -256,9 +264,9 @@ public class PlayerUtils {
     }
 
     public static double squaredDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
-        float f = (float) (x1 - x2);
-        float g = (float) (y1 - y2);
-        float h = (float) (z1 - z2);
+        double f = x1 - x2;
+        double g = y1 - y2;
+        double h = z1 - z2;
         return org.joml.Math.fma(f, f, org.joml.Math.fma(g, g, h * h));
     }
 
@@ -324,7 +332,7 @@ public class PlayerUtils {
     }
 
     public static boolean isWithinReach(double x, double y, double z) {
-        return squaredDistance(mc.player.getX(), mc.player.getEyeY(), mc.player.getZ(), x, y, z) <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
+        return squaredDistance(mc.player.getX(), mc.player.getEyeY(), mc.player.getZ(), x, y, z) <= mc.player.getBlockInteractionRange() * mc.player.getBlockInteractionRange();
     }
 
     public static Dimension getDimension() {

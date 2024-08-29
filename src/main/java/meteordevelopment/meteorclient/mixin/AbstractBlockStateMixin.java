@@ -10,13 +10,15 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import java.util.Random;
 
 @Mixin(AbstractBlock.AbstractBlockState.class)
-public class AbstractBlockStateMixin {
+public abstract class AbstractBlockStateMixin {
+    @Unique
     private static final Random RANDOM = new Random();
 
     @ModifyVariable(method = "getModelOffset", at = @At("HEAD"), argsOnly = true)
