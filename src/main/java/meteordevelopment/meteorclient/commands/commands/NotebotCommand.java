@@ -5,10 +5,19 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.NotebotSongArgumentType;
@@ -24,14 +33,6 @@ import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class NotebotCommand extends Command {
     private final static SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(Text.literal("Invalid song."));
@@ -162,20 +163,19 @@ public class NotebotCommand extends Command {
         try {
             MeteorClient.EVENT_BUS.unsubscribe(this);
 
-            FileWriter file = new FileWriter(path.toFile());
-            for (var entry : song.entrySet()) {
-                int tick = entry.getKey();
-                List<Note> notes = entry.getValue();
+            try (FileWriter file = new FileWriter(path.toFile())) {
+                for (var entry : song.entrySet()) {
+                    int tick = entry.getKey();
+                    List<Note> notes = entry.getValue();
 
-                for (var note : notes) {
-                    NoteBlockInstrument instrument = note.getInstrument();
-                    int noteLevel = note.getNoteLevel();
+                    for (var note : notes) {
+                        NoteBlockInstrument instrument = note.getInstrument();
+                        int noteLevel = note.getNoteLevel();
 
-                    file.write(String.format("%d:%d:%d\n", tick, noteLevel, instrument.ordinal()));
+                        file.write(String.format("%d:%d:%d\n", tick, noteLevel, instrument.ordinal()));
+                    }
                 }
             }
-
-            file.close();
             info("Song saved.");
         } catch (IOException e) {
             info("Couldn't create the file.");

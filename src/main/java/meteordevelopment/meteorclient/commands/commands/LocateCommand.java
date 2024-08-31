@@ -69,7 +69,8 @@ public class LocateCommand extends Command {
         Blocks.PURPUR_SLAB,
         Blocks.PURPUR_STAIRS,
         Blocks.END_STONE_BRICKS,
-        Blocks.END_ROD
+        Blocks.END_ROD,
+        Blocks.MAGENTA_STAINED_GLASS
     );
 
     public LocateCommand() {

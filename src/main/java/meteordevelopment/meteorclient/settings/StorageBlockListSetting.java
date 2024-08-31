@@ -47,6 +47,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         BlockEntityType.SHULKER_BOX,
         BlockEntityType.SMOKER,
         BlockEntityType.TRAPPED_CHEST,
+        BlockEntityType.Lectern,
     };
 
     public static final Registry<BlockEntityType<?>> REGISTRY = new SRegistry();
