@@ -32,7 +32,7 @@ public class EnchantmentListSetting extends Setting<Set<RegistryKey<Enchantment>
     public void resetImpl() {
         value = new ObjectOpenHashSet<>(defaultValue);
     }
-
+    //ench means enchantment.
     @Override
     protected Set<RegistryKey<Enchantment>> parseImpl(String str) {
         String[] values = str.split(",");

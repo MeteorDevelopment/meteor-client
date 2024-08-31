@@ -72,7 +72,7 @@ public abstract class Command {
     public List<String> getAliases() {
         return aliases;
     }
-
+    @override
     public String toString() {
         return Config.get().prefix.get() + name;
     }

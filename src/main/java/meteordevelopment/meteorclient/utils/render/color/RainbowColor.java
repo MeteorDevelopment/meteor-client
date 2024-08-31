@@ -2,7 +2,7 @@
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
  */
-
+//jeb_
 package meteordevelopment.meteorclient.utils.render.color;
 
 public class RainbowColor extends Color {
