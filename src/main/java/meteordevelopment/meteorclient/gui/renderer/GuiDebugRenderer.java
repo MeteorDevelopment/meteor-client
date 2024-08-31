@@ -35,8 +35,8 @@ public class GuiDebugRenderer {
     private void renderWidget(WWidget widget) {
         lineBox(widget.x, widget.y, widget.width, widget.height, WIDGET_COLOR);
 
-        if (widget instanceof WContainer) {
-            for (Cell<?> cell : ((WContainer) widget).cells) {
+        if (widget instanceof WContainer wContainer) {
+            for (Cell<?> cell : wContainer.cells) {
                 lineBox(cell.x, cell.y, cell.width, cell.height, CELL_COLOR);
                 renderWidget(cell.widget());
             }

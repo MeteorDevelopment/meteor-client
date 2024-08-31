@@ -5,8 +5,13 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
-import baritone.api.BaritoneAPI;
+import java.util.List;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+
+import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -34,9 +39,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class LocateCommand extends Command {
     private Vec3d firstStart;
@@ -47,7 +49,8 @@ public class LocateCommand extends Command {
     private final List<Block> netherFortressBlocks = List.of(
         Blocks.NETHER_BRICKS,
         Blocks.NETHER_BRICK_FENCE,
-        Blocks.NETHER_WART
+        Blocks.NETHER_WART,
+        Blocks.CRACKED_NETHER_BRICKS
     );
 
     private final List<Block> monumentBlocks = List.of(

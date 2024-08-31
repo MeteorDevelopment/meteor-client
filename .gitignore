@@ -15,3 +15,5 @@ logs
 .idea/*
 !.idea/copyright/*
 !.idea/scopes/*
+
+.fake
