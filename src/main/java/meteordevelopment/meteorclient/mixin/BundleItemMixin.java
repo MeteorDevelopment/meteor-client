@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(BundleItem.class)
-public class BundleItemMixin {
+public abstract class BundleItemMixin {
     @ModifyExpressionValue(method = "getTooltipData", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;contains(Lnet/minecraft/component/ComponentType;)Z", ordinal = 0))
     private boolean modifyContains1(boolean original) {
         BetterTooltips bt = Modules.get().get(BetterTooltips.class);
