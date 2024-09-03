@@ -231,7 +231,8 @@ public class AutoEat extends Module {
     }
 
     public boolean shouldEat() {
-        boolean health = mc.player.getHealth() <= healthThreshold.get();
+        //The player should not try to eat when full even if the health is low.
+        boolean health = mc.player.getHealth() <= healthThreshold.get() && mc.player.getHungerManager().getFoodLevel() != 20;
         boolean hunger = mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
 
         return thresholdMode.get().test(health, hunger);
