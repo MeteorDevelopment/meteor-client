@@ -184,7 +184,8 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor"
+    "YggdrasilMinecraftSessionServiceAccessor",
+    "HandshakeC2SPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1
