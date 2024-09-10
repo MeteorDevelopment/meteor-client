@@ -187,7 +187,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
         @Override
         public void remove() {
-            Iterator.super.remove();
+            it.remove();
             save();
         }
     }
