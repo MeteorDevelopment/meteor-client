@@ -430,11 +430,13 @@ public class Modules extends System<Modules> {
     private void initPlayer() {
         add(new AntiHunger());
         add(new AutoEat());
+        add(new AutoClicker());
         add(new AutoFish());
         add(new AutoGap());
         add(new AutoMend());
         add(new AutoReplenish());
         add(new AutoTool());
+        add(new BreakDelay());
         add(new ChestSwap());
         add(new EXPThrower());
         add(new FakePlayer());
@@ -443,12 +445,11 @@ public class Modules extends System<Modules> {
         add(new InstantRebreak());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
-        add(new BreakDelay());
+        add(new Multitask());
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
         add(new OffhandCrash());
-        add(new PacketMine());
         add(new Portals());
         add(new PotionSaver());
         add(new PotionSpoof());
@@ -538,7 +539,6 @@ public class Modules extends System<Modules> {
     private void initWorld() {
         add(new AirPlace());
         add(new Ambience());
-        add(new Collisions());
         add(new AutoBreed());
         add(new AutoBrewer());
         add(new AutoMount());
@@ -547,18 +547,20 @@ public class Modules extends System<Modules> {
         add(new AutoSign());
         add(new AutoSmelter());
         add(new BuildHeight());
+        add(new Collisions());
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new Flamethrower());
+        add(new HighwayBuilder());
         add(new LiquidFiller());
         add(new MountBypass());
         add(new NoGhostBlocks());
         add(new Nuker());
+        add(new PacketMine());
         add(new StashFinder());
         add(new SpawnProofer());
         add(new Timer());
         add(new VeinMiner());
-        add(new HighwayBuilder());
 
         if (BaritoneUtils.IS_AVAILABLE) {
             add(new Excavator());
@@ -569,7 +571,6 @@ public class Modules extends System<Modules> {
     private void initMisc() {
         add(new Swarm());
         add(new AntiPacketKick());
-        add(new AutoClicker());
         add(new AutoLog());
         add(new AutoReconnect());
         add(new AutoRespawn());
@@ -577,15 +578,15 @@ public class Modules extends System<Modules> {
         add(new BetterChat());
         add(new BookBot());
         add(new DiscordPresence());
+        add(new InventoryTweaks());
         add(new MessageAura());
         add(new NameProtect());
         add(new Notebot());
         add(new Notifier());
         add(new PacketCanceller());
+        add(new ServerSpoof());
         add(new SoundBlocker());
         add(new Spam());
-        add(new ServerSpoof());
-        add(new InventoryTweaks());
     }
 
     public static class ModuleRegistry extends SimpleRegistry<Module> {
