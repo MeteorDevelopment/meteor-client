@@ -79,6 +79,7 @@ public class Spam extends Module {
     private final Setting<Integer> autoSplitDelay = sgGeneral.add(new IntSetting.Builder()
         .name("split-delay")
         .description("The delay between split messages in ticks.")
+        .visible(autoSplitMessages::get)
         .defaultValue(20)
         .min(0)
         .sliderMax(200)
@@ -92,9 +93,9 @@ public class Spam extends Module {
         .build()
     );
 
-    private final Setting<Boolean> lowercase = sgGeneral.add(new BoolSetting.Builder()
-        .name("lowercase")
-        .description("Should bypass include uppercase characters?")
+    private final Setting<Boolean> uppercase = sgGeneral.add(new BoolSetting.Builder()
+        .name("include-uppercase-characters")
+        .description("Whether the bypass text should include uppercase characters.")
         .visible(bypass::get)
         .defaultValue(true)
         .build()
@@ -109,7 +110,8 @@ public class Spam extends Module {
         .build()
     );
 
-    private int messageI, timer, splitDelay;
+    private int messageI, timer, splitNum;
+    private String text;
 
     public Spam() {
         super(Categories.Misc, "spam", "Spams specified messages in chat.");
@@ -118,8 +120,8 @@ public class Spam extends Module {
     @Override
     public void onActivate() {
         timer = delay.get();
-        splitDelay = delay.get();
         messageI = 0;
+        splitNum = 0;
     }
 
     @EventHandler
@@ -139,46 +141,45 @@ public class Spam extends Module {
         if (messages.get().isEmpty()) return;
 
         if (timer <= 0) {
-            int i;
-            if (random.get()) {
-                i = Utils.random(0, messages.get().size());
-            } else {
-                if (messageI >= messages.get().size()) messageI = 0;
-                i = messageI++;
-
-            }
-
-            String text = messages.get().get(i);
-            if (bypass.get()) {
-                if (!lowercase.get()) {
-                    text += " " + RandomStringUtils.randomAlphabetic(length.get());
+            if (text == null) {
+                int i;
+                if (random.get()) {
+                    i = Utils.random(0, messages.get().size());
                 } else {
-                    text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
+                    if (messageI >= messages.get().size()) messageI = 0;
+                    i = messageI++;
+                }
+
+                text = messages.get().get(i);
+                if (bypass.get()) {
+                    String bypass = RandomStringUtils.randomAlphabetic(length.get());
+                    if (!uppercase.get()) bypass = bypass.toLowerCase();
+
+                    text += " " + bypass;
                 }
             }
 
-            if (autoSplitMessages.get()) {
-                if (text.length() >= splitLength.get()) {
-                        int chunkSize = splitLength.get();
-                        int length = text.length();
-                        // For every substring of text larger than the split length, send that chunk
-                        for (int a = 0; a < length; a += chunkSize) {
-                            int end = Math.min(a + chunkSize, length);
-                            String chunk = text.substring(a, end);
-                            if (splitDelay <= 0) {
-                                ChatUtils.sendPlayerMsg(chunk);
-                                splitDelay = autoSplitDelay.get();
-                            } else {
-                                splitDelay--;
-                            }
-                        }
-                } else {
-                    ChatUtils.sendPlayerMsg(text);
+            if (autoSplitMessages.get() && text.length() > splitLength.get()) {
+                // the number of individual messages the whole text needs to be broken into
+                double length = text.length();
+                int splits = (int) Math.ceil(length / splitLength.get());
+
+                // determine which chunk we need to send
+                int start = splitNum * splitLength.get();
+                int end = Math.min(start + splitLength.get(), text.length());
+                ChatUtils.sendPlayerMsg(text.substring(start, end));
+
+                splitNum = ++splitNum % splits;
+                timer = autoSplitDelay.get();
+                if (splitNum == 0) { // equals zero when all chunks are sent
                     timer = delay.get();
+                    text = null;
                 }
             } else {
+                if (text.length() > 256) text = text.substring(0, 256); // prevent kick
                 ChatUtils.sendPlayerMsg(text);
                 timer = delay.get();
+                text = null;
             }
         } else {
             timer--;
