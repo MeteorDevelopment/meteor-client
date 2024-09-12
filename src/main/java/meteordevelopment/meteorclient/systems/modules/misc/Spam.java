@@ -45,7 +45,6 @@ public class Spam extends Module {
         .build()
     );
 
-
     private final Setting<Boolean> disableOnDisconnect = sgGeneral.add(new BoolSetting.Builder()
         .name("disable-on-disconnect")
         .description("Disables spam when you are disconnected from a server.")
@@ -60,10 +59,44 @@ public class Spam extends Module {
         .build()
     );
 
+    private final Setting<Boolean> autoSplitMessages = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-split-messages")
+        .description("Automatically split up large messages after a certain length")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> splitLength = sgGeneral.add(new IntSetting.Builder()
+        .name("split-length")
+        .description("The length after which to split messages in chat")
+        .visible(autoSplitMessages::get)
+        .defaultValue(256)
+        .min(1)
+        .sliderMax(256)
+        .build()
+    );
+
+    private final Setting<Integer> autoSplitDelay = sgGeneral.add(new IntSetting.Builder()
+        .name("split-delay")
+        .description("The delay between split messages in ticks.")
+        .defaultValue(20)
+        .min(0)
+        .sliderMax(200)
+        .build()
+    );
+
     private final Setting<Boolean> bypass = sgGeneral.add(new BoolSetting.Builder()
         .name("bypass")
         .description("Add random text at the end of the message to try to bypass anti spams.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> lowercase = sgGeneral.add(new BoolSetting.Builder()
+        .name("lowercase")
+        .description("Should bypass include uppercase characters?")
+        .visible(bypass::get)
+        .defaultValue(true)
         .build()
     );
 
@@ -76,7 +109,7 @@ public class Spam extends Module {
         .build()
     );
 
-    private int messageI, timer;
+    private int messageI, timer, splitDelay;
 
     public Spam() {
         super(Categories.Misc, "spam", "Spams specified messages in chat.");
@@ -85,6 +118,7 @@ public class Spam extends Module {
     @Override
     public void onActivate() {
         timer = delay.get();
+        splitDelay = delay.get();
         messageI = 0;
     }
 
@@ -108,21 +142,45 @@ public class Spam extends Module {
             int i;
             if (random.get()) {
                 i = Utils.random(0, messages.get().size());
-            }
-            else {
+            } else {
                 if (messageI >= messages.get().size()) messageI = 0;
                 i = messageI++;
+
             }
 
             String text = messages.get().get(i);
             if (bypass.get()) {
-                text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
+                if (!lowercase.get()) {
+                    text += " " + RandomStringUtils.randomAlphabetic(length.get());
+                } else {
+                    text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
+                }
             }
 
-            ChatUtils.sendPlayerMsg(text);
-            timer = delay.get();
-        }
-        else {
+            if (autoSplitMessages.get()) {
+                if (text.length() >= splitLength.get()) {
+                        int chunkSize = splitLength.get();
+                        int length = text.length();
+                        // For every substring of text larger than the split length, send that chunk
+                        for (int a = 0; a < length; a += chunkSize) {
+                            int end = Math.min(a + chunkSize, length);
+                            String chunk = text.substring(a, end);
+                            if (splitDelay <= 0) {
+                                ChatUtils.sendPlayerMsg(chunk);
+                                splitDelay = autoSplitDelay.get();
+                            } else {
+                                splitDelay--;
+                            }
+                        }
+                } else {
+                    ChatUtils.sendPlayerMsg(text);
+                    timer = delay.get();
+                }
+            } else {
+                ChatUtils.sendPlayerMsg(text);
+                timer = delay.get();
+            }
+        } else {
             timer--;
         }
     }
