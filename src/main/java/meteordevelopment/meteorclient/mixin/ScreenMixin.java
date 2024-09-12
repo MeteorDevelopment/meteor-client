@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -30,8 +31,8 @@ import static net.minecraft.client.util.InputUtil.*;
 
 @Mixin(value = Screen.class, priority = 500) // needs to be before baritone
 public abstract class ScreenMixin {
-    @Inject(method = "renderBackground", at = @At("HEAD"), cancellable = true)
-    private void onRenderBackground(CallbackInfo info) {
+    @Inject(method = "renderInGameBackground", at = @At("HEAD"), cancellable = true)
+    private void onRenderInGameBackground(CallbackInfo info) {
         if (Utils.canUpdate() && Modules.get().get(NoRender.class).noGuiBackground())
             info.cancel();
     }
@@ -51,7 +52,7 @@ public abstract class ScreenMixin {
                 Commands.dispatch(style.getClickEvent().getValue().substring(Config.get().prefix.get().length()));
                 cir.setReturnValue(true);
             } catch (CommandSyntaxException e) {
-                e.printStackTrace();
+                MeteorClient.LOG.error("Failed to run command", e);
             }
         }
     }
