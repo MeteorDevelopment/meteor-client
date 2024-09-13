@@ -33,6 +33,8 @@ public abstract class FoliageColorsMixin {
 
     @Unique
     private static int getModifiedColor(int original) {
+        if (Modules.get() == null) return original;
+
         Ambience ambience = Modules.get().get(Ambience.class);
         if (ambience.isActive() && ambience.customFoliageColor.get()) {
             return ambience.foliageColor.get().getPacked();
