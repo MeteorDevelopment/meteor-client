@@ -346,8 +346,9 @@ public class PlayerUtils {
     }
 
     public static GameMode getGameMode() {
+        if (mc.player == null) return null;
         PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
-        if (playerListEntry == null) return GameMode.SPECTATOR;
+        if (playerListEntry == null) return null;
         return playerListEntry.getGameMode();
     }
 
