@@ -57,6 +57,13 @@ public class Sprint extends Module {
         .build()
     );
 
+    private final Setting<Boolean> unsprintInWater = sgGeneral.add(new BoolSetting.Builder()
+        .name("unsprint-in-water")
+        .description("Whether to stop sprinting when in water.")
+        .defaultValue(true)
+        .build()
+    );
+
     public Sprint() {
         super(Categories.Movement, "sprint", "Automatically sprints.");
     }
@@ -91,6 +98,8 @@ public class Sprint extends Module {
     }
 
     public boolean shouldSprint() {
+        if (unsprintInWater.get() && (mc.player.isTouchingWater() || mc.player.isSubmergedInWater())) return false;
+
         boolean strictSprint = mc.player.forwardSpeed > 1.0E-5F
             && ((ClientPlayerEntityAccessor) mc.player).invokeCanSprint()
             && (!mc.player.horizontalCollision || mc.player.collidedSoftly)
