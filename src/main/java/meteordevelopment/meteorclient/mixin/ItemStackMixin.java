@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -32,7 +33,8 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public abstract class ItemStackMixin {
     @ModifyReturnValue(method = "getTooltip", at = @At("RETURN"))
     private List<Text> onGetTooltip(List<Text> original) {
-        if (Utils.canUpdate()) {
+        if (Utils.canUpdate()) { // getTooltip can return List.of(), which is immutable. Prevents crash in BetterTooltips.
+            if (original.isEmpty()) original = new ArrayList<>();
             ItemStackTooltipEvent event = MeteorClient.EVENT_BUS.post(new ItemStackTooltipEvent((ItemStack) (Object) this, original));
             return event.list();
         }
