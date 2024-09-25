@@ -292,6 +292,32 @@ public class BetterChat extends Module {
         event.setMessage(message);
     }
 
+    @EventHandler
+    private void onMessageSend(SendMessageEvent event) {
+        String message = event.message;
+
+        if (annoy.get()) message = applyAnnoy(message);
+
+        if (fancy.get()) message = applyFancy(message);
+
+        message = getPrefix() + message + getSuffix();
+
+        if (coordsProtection.get() && containsCoordinates(message)) {
+            MutableText warningMessage = Text.literal("It looks like there are coordinates in your message! ");
+
+            MutableText sendButton = getSendButton(message);
+            warningMessage.append(sendButton);
+
+            ChatUtils.sendMsg(warningMessage);
+
+            event.cancel();
+            return;
+        }
+
+        event.message = message;
+    }
+
+    // Anti Spam
 
     private Text appendAntiSpam(Text text) {
         String textString = text.getString();
@@ -349,29 +375,17 @@ public class BetterChat extends Module {
         return returnText;
     }
 
-    @EventHandler
-    private void onMessageSend(SendMessageEvent event) {
-        String message = event.message;
+    public void removeLine(int index) {
+        if (index >= lines.size()) {
+            if (antiSpam.get()) {
+                error("Issue detected with the anti-spam system! Likely a compatibility issue with another mod. Disabling anti-spam to protect chat integrity.");
+                antiSpam.set(false);
+            }
 
-        if (annoy.get()) message = applyAnnoy(message);
-
-        if (fancy.get()) message = applyFancy(message);
-
-        message = getPrefix() + message + getSuffix();
-
-        if (coordsProtection.get() && containsCoordinates(message)) {
-            MutableText warningMessage = Text.literal("It looks like there are coordinates in your message! ");
-
-            MutableText sendButton = getSendButton(message);
-            warningMessage.append(sendButton);
-
-            ChatUtils.sendMsg(warningMessage);
-
-            event.cancel();
             return;
         }
 
-        event.message = message;
+        lines.removeInt(index);
     }
 
     // Player Heads

@@ -116,7 +116,7 @@ public abstract class ChatHudMixin implements IChatHud {
             for (int i = messages.size() - 1; i > -1; i--) {
                 if (((IChatHudLine) (Object) messages.get(i)).meteor$getId() == nextId && nextId != 0) {
                     messages.remove(i);
-                    Modules.get().get(BetterChat.class).lines.removeInt(i);
+                    getBetterChat().removeLine(i);
                 }
             }
 

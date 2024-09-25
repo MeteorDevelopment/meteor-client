@@ -83,6 +83,9 @@ public class WBlockPosEdit extends WHorizontalList {
             set(event.result.getBlockPos());
             newValueCheck();
 
+            clear();
+            init();
+
             clicking = false;
             event.cancel();
             MeteorClient.EVENT_BUS.unsubscribe(this);
