@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
-    private static final Class<? extends Module>[] AURAS = new Class[]{KillAura.class, CrystalAura.class, CreeperAura.class, BedAura.class};
+    private static final Class<? extends Module>[] AURAS = new Class[]{KillAura.class, CrystalAura.class, AnchorAura.class, CreeperAura.class, BedAura.class};
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgThreshold = settings.createGroup("Threshold");
