@@ -31,6 +31,7 @@ import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
+import meteordevelopment.meteorclient.systems.modules.world.CreeperAura;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -415,6 +416,7 @@ public class Modules extends System<Modules> {
         add(new BowSpam());
         add(new Burrow());
         add(new Criticals());
+        add(new CreeperAura());
         add(new CrystalAura());
         add(new Hitboxes());
         add(new HoleFiller());
