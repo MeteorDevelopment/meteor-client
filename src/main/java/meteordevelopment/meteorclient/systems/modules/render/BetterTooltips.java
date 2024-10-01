@@ -254,14 +254,10 @@ public class BetterTooltips extends Module {
     @EventHandler
     private void appendTooltip(ItemStackTooltipEvent event) {
         // Hide hidden (empty) tooltips unless the tooltip hide flag setting is true.
-        // If the tooltip is empty, adjust insertIndex downward to avoid throwing IndexOutOfBoundsException.
-        int insertIndex = 1;
         if (!tooltip.get() && event.list().isEmpty()) {
             // Hold-to-preview tooltip text is always added when needed.
             appendHoldToPreviewTooltipText(event);
             return;
-        } else if (event.list().isEmpty()) {
-            insertIndex = 0;
         }
 
         // Status effects
@@ -271,13 +267,13 @@ public class BetterTooltips extends Module {
                 if (stewEffectsComponent != null) {
                     for (StewEffect effectTag : stewEffectsComponent.effects()) {
                         StatusEffectInstance effect = new StatusEffectInstance(effectTag.effect(), effectTag.duration(), 0);
-                        event.list().add(insertIndex, getStatusText(effect));
+                        event.appendStart(getStatusText(effect));
                     }
                 }
             } else {
                 FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
                 if (food != null) {
-                    food.effects().forEach(e -> event.list().add(event.list().isEmpty() ? 0 : 1, getStatusText(e.effect())));
+                    food.effects().forEach(e -> event.appendStart(getStatusText(e.effect())));
                 }
             }
         }
@@ -288,12 +284,12 @@ public class BetterTooltips extends Module {
                 BlockStateComponent blockStateComponent = event.itemStack().get(DataComponentTypes.BLOCK_STATE);
                 if (blockStateComponent != null) {
                     String level = blockStateComponent.properties().get("honey_level");
-                    event.list().add(insertIndex, Text.literal(String.format("%sHoney level: %s%s%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
+                    event.appendStart(Text.literal(String.format("%sHoney level: %s%s%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
                 }
 
                 List<BeehiveBlockEntity.BeeData> bees = event.itemStack().get(DataComponentTypes.BEES);
                 if (bees != null) {
-                    event.list().add(insertIndex, Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, bees.size(), Formatting.GRAY)));
+                    event.appendStart(Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, bees.size(), Formatting.GRAY)));
                 }
             }
         }
@@ -311,9 +307,9 @@ public class BetterTooltips extends Module {
                 if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
                 else count = String.format("%d bytes", byteCount);
 
-                event.list().add(Text.literal(count).formatted(Formatting.GRAY));
+                event.appendEnd(Text.literal(count).formatted(Formatting.GRAY));
             } catch (Exception e) {
-                event.list().add(Text.literal("Error getting bytes.").formatted(Formatting.RED));
+                event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
             }
         }
 
@@ -418,8 +414,8 @@ public class BetterTooltips extends Module {
             || (event.itemStack().getItem() instanceof BannerItem && banners.get() && !previewBanners())
             || (event.itemStack().getItem() instanceof BannerPatternItem && banners.get() && !previewBanners())
             || (event.itemStack().getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
-            event.list().add(Text.literal(""));
-            event.list().add(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
+            event.appendEnd(Text.literal(""));
+            event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
         }
     }
 
