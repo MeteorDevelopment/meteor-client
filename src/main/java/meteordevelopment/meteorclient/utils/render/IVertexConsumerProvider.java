@@ -8,5 +8,5 @@ package meteordevelopment.meteorclient.utils.render;
 import net.minecraft.client.render.VertexConsumerProvider;
 
 public interface IVertexConsumerProvider extends VertexConsumerProvider {
-    void setOffset(double offsetX, double offsetY, double offsetZ);
+    void setOffset(int offsetX, int offsetY, int offsetZ);
 }

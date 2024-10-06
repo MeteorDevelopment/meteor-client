@@ -40,7 +40,7 @@ public class SimpleBlockRenderer {
         vertexConsumerProvider.setOffset(0, 0, 0);
     }
 
-    public static void render(BlockPos pos, BlockState state, IVertexConsumerProvider consumerProvider) {
+    public static void render(BlockPos pos, BlockState state, VertexConsumerProvider consumerProvider) {
         if (state.getRenderType() != BlockRenderType.MODEL) return;
 
         VertexConsumer consumer = consumerProvider.getBuffer(RenderLayer.getSolid());
@@ -51,9 +51,8 @@ public class SimpleBlockRenderer {
         float offsetY = (float) offset.y;
         float offsetZ = (float) offset.z;
 
-        //noinspection ForLoopReplaceableByForEach
-        for (int i = 0; i < DIRECTIONS.length; i++) {
-            List<BakedQuad> list = model.getQuads(state, DIRECTIONS[i], RANDOM);
+        for (Direction direction : DIRECTIONS) {
+            List<BakedQuad> list = model.getQuads(state, direction, RANDOM);
             if (!list.isEmpty()) renderQuads(list, offsetX, offsetY, offsetZ, consumer);
         }
 
@@ -62,9 +61,8 @@ public class SimpleBlockRenderer {
     }
 
     private static void renderQuads(List<BakedQuad> quads, float offsetX, float offsetY, float offsetZ, VertexConsumer consumer) {
-        //noinspection ForLoopReplaceableByForEach
-        for (int i = 0; i < quads.size(); i++) {
-            IBakedQuad quad = (IBakedQuad) quads.get(i);
+        for (BakedQuad bakedQuad : quads) {
+            IBakedQuad quad = (IBakedQuad) bakedQuad;
 
             for (int j = 0; j < 4; j++) {
                 float x = quad.meteor$getX(j);
