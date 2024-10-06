@@ -27,18 +27,18 @@ public class MeshVertexConsumerProvider implements IVertexConsumerProvider {
     }
 
     @Override
-    public void setOffset(float offsetX, float offsetY, float offsetZ) {
+    public void setOffset(double offsetX, double offsetY, double offsetZ) {
         vertexConsumer.setOffset(offsetX, offsetY, offsetZ);
     }
 
     public static class MeshVertexConsumer implements VertexConsumer {
         private final Mesh mesh;
 
-        private float offsetX, offsetY, offsetZ;
+        private double offsetX, offsetY, offsetZ;
 
-        private final float[] xs = new float[4];
-        private final float[] ys = new float[4];
-        private final float[] zs = new float[4];
+        private final double[] xs = new double[4];
+        private final double[] ys = new double[4];
+        private final double[] zs = new double[4];
         private final Color color = new Color();
 
         private int i;
@@ -47,7 +47,7 @@ public class MeshVertexConsumerProvider implements IVertexConsumerProvider {
             this.mesh = mesh;
         }
 
-        public void setOffset(float offsetX, float offsetY, float offsetZ) {
+        public void setOffset(double offsetX, double offsetY, double offsetZ) {
             this.offsetX = offsetX;
             this.offsetY = offsetY;
             this.offsetZ = offsetZ;

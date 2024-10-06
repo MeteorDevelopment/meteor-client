@@ -32,24 +32,24 @@ public class SimpleBlockRenderer {
     }
 
     public static void renderWithBlockEntity(BlockEntity blockEntity, float tickDelta, IVertexConsumerProvider vertexConsumerProvider) {
+        vertexConsumerProvider.setOffset(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ());
         SimpleBlockRenderer.render(blockEntity.getPos(), blockEntity.getCachedState(), vertexConsumerProvider);
 
-        vertexConsumerProvider.setOffset(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ());
         BlockEntityRenderer<BlockEntity> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
         if (renderer != null && blockEntity.hasWorld() && blockEntity.getType().supports(blockEntity.getCachedState())) renderer.render(blockEntity, tickDelta, MATRICES, vertexConsumerProvider, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
         vertexConsumerProvider.setOffset(0, 0, 0);
     }
 
-    public static void render(BlockPos pos, BlockState state, VertexConsumerProvider consumerProvider) {
+    public static void render(BlockPos pos, BlockState state, IVertexConsumerProvider consumerProvider) {
         if (state.getRenderType() != BlockRenderType.MODEL) return;
 
         VertexConsumer consumer = consumerProvider.getBuffer(RenderLayer.getSolid());
         BakedModel model = mc.getBlockRenderManager().getModel(state);
         Vec3d offset = state.getModelOffset(mc.world, pos);
 
-        float offsetX = (float) (pos.getX() + offset.x);
-        float offsetY = (float) (pos.getY() + offset.y);
-        float offsetZ = (float) (pos.getZ() + offset.z);
+        float offsetX = (float) offset.x;
+        float offsetY = (float) offset.y;
+        float offsetZ = (float) offset.z;
 
         //noinspection ForLoopReplaceableByForEach
         for (int i = 0; i < DIRECTIONS.length; i++) {
