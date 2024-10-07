@@ -190,6 +190,10 @@ public class ElytraFlightMode {
         }
     }
 
+    public void zeroAcceleration() {
+        acceleration = 0;
+    }
+
     protected double getSpeed() {
         return elytraFly.acceleration.get() ? acceleration : elytraFly.horizontalSpeed.get();
     }
