@@ -24,21 +24,19 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.BeehiveBlockEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
-import net.minecraft.component.type.BannerPatternsComponent.Layer;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.Bucketable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.item.*;
-import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.RawFilteredPair;
 import net.minecraft.text.Text;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.collection.DefaultedList;
 
 import java.util.Comparator;
 import java.util.List;
@@ -100,7 +98,6 @@ public class BetterTooltips extends Module {
         .name("compact-shulker-tooltip")
         .description("Compacts the lines of the shulker tooltip.")
         .defaultValue(true)
-        .visible(shulkers::get)
         .build()
     );
 
@@ -246,6 +243,7 @@ public class BetterTooltips extends Module {
     );
 
     private boolean updateTooltips = false;
+    private static final ItemStack[] ITEMS = new ItemStack[27];
 
     public BetterTooltips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
@@ -321,9 +319,8 @@ public class BetterTooltips extends Module {
     private void getTooltipData(TooltipDataEvent event) {
         // Container preview
         if (previewShulkers() && Utils.hasItems(event.itemStack)) {
-            ItemStack[] itemStacks = new ItemStack[27];
-            Utils.getItemsInContainerItem(event.itemStack, itemStacks);
-            event.tooltipData = new ContainerTooltipComponent(itemStacks, Utils.getShulkerColor(event.itemStack));
+            Utils.getItemsInContainerItem(event.itemStack, ITEMS);
+            event.tooltipData = new ContainerTooltipComponent(ITEMS, Utils.getShulkerColor(event.itemStack));
         }
 
         // EChest preview
@@ -348,14 +345,12 @@ public class BetterTooltips extends Module {
         // Banner preview
         else if (event.itemStack.getItem() instanceof BannerItem && previewBanners()) {
             event.tooltipData = new BannerTooltipComponent(event.itemStack);
-        } else if (event.itemStack.getItem() instanceof BannerPatternItem && previewBanners()) {
-            BannerPatternsComponent bannerPatternsComponent = event.itemStack.get(DataComponentTypes.BANNER_PATTERNS);
-            if (bannerPatternsComponent != null) {
-                event.tooltipData = new BannerTooltipComponent(createBannerFromLayers(bannerPatternsComponent.layers()));
-            }
+        } else if (event.itemStack.getItem() instanceof BannerPatternItem bannerPatternItem && previewBanners()) {
+            event.tooltipData = new BannerTooltipComponent(DyeColor.GRAY, createBannerPatternsComponent(bannerPatternItem));
         } else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
-            ItemStack banner = createBannerFromShield(event.itemStack);
-            if (banner != null) event.tooltipData = new BannerTooltipComponent(banner);
+            if (event.itemStack.get(DataComponentTypes.BASE_COLOR) != null || !event.itemStack.getOrDefault(DataComponentTypes.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT).layers().isEmpty()) {
+                event.tooltipData = createBannerFromShield(event.itemStack);
+            }
         }
 
         // Fish peek
@@ -371,35 +366,30 @@ public class BetterTooltips extends Module {
     }
 
     public void applyCompactShulkerTooltip(ItemStack shulkerItem, List<Text> tooltip) {
-        NbtComponent nbtComponent = shulkerItem.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+        if (shulkerItem.contains(DataComponentTypes.CONTAINER_LOOT)) {
+            tooltip.add(Text.literal("???????"));
+        }
 
-        if (nbtComponent != null) {
-            if (nbtComponent.contains("LootTable")) {
-                tooltip.add(Text.literal("???????"));
+        if (Utils.hasItems(shulkerItem)) {
+            Utils.getItemsInContainerItem(shulkerItem, ITEMS);
+
+            Object2IntMap<Item> counts = new Object2IntOpenHashMap<>();
+
+            for (ItemStack item : ITEMS) {
+                if (item.isEmpty()) continue;
+
+                int count = counts.getInt(item.getItem());
+                counts.put(item.getItem(), count + item.getCount());
             }
 
-            if (nbtComponent.contains("Items")) {
-                DefaultedList<ItemStack> items = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                Inventories.readNbt(nbtComponent.copyNbt(), items, DynamicRegistryManager.EMPTY);
+            counts.keySet().stream().sorted(Comparator.comparingInt(value -> -counts.getInt(value))).limit(5).forEach(item -> {
+                MutableText mutableText = item.getName().copyContentOnly();
+                mutableText.append(Text.literal(" x").append(String.valueOf(counts.getInt(item))).formatted(Formatting.GRAY));
+                tooltip.add(mutableText);
+            });
 
-                Object2IntMap<Item> counts = new Object2IntOpenHashMap<>();
-
-                for (ItemStack item : items) {
-                    if (item.isEmpty()) continue;
-
-                    int count = counts.getInt(item.getItem());
-                    counts.put(item.getItem(), count + item.getCount());
-                }
-
-                counts.keySet().stream().sorted(Comparator.comparingInt(value -> -counts.getInt(value))).limit(5).forEach(item -> {
-                    MutableText mutableText = item.getName().copyContentOnly();
-                    mutableText.append(Text.literal(" x").append(String.valueOf(counts.getInt(item))).formatted(Formatting.GRAY));
-                    tooltip.add(mutableText);
-                });
-
-                if (counts.size() > 5) {
-                    tooltip.add((Text.translatable("container.shulkerBox.more", counts.size() - 5)).formatted(Formatting.ITALIC));
-                }
+            if (counts.size() > 5) {
+                tooltip.add((Text.translatable("container.shulkerBox.more", counts.size() - 5)).formatted(Formatting.ITALIC));
             }
         }
     }
@@ -451,25 +441,15 @@ public class BetterTooltips extends Module {
         return null;
     }
 
-    private ItemStack createBannerFromLayers(List<Layer> pattern) {
-        ItemStack bannerItem = new ItemStack(Items.GRAY_BANNER);
-        BannerPatternsComponent bannerPatterns = bannerItem.get(DataComponentTypes.BANNER_PATTERNS);
-        bannerPatterns.layers().addAll(pattern);
-        bannerItem.set(DataComponentTypes.BANNER_PATTERNS, bannerPatterns);
-        return bannerItem;
+    private BannerPatternsComponent createBannerPatternsComponent(BannerPatternItem item) {
+        // I can't imagine getting the banner pattern from a banner pattern item would fail without some serious messing around
+        return new BannerPatternsComponent.Builder().add(mc.player.getRegistryManager().getWrapperOrThrow(RegistryKeys.BANNER_PATTERN).getOrThrow(item.getPattern()).get(0), DyeColor.WHITE).build();
     }
 
-    private ItemStack createBannerFromShield(ItemStack shieldItem) {
-        if (!shieldItem.getComponents().isEmpty()
-            || shieldItem.get(DataComponentTypes.BLOCK_ENTITY_DATA) == null
-            || shieldItem.get(DataComponentTypes.BASE_COLOR) == null)
-            return null;
-        ItemStack bannerItem = new ItemStack(Items.GRAY_BANNER);
-        BannerPatternsComponent bannerPatternsComponent = bannerItem.get(DataComponentTypes.BANNER_PATTERNS);
-        BannerPatternsComponent shieldPatternsComponent = shieldItem.get(DataComponentTypes.BANNER_PATTERNS);
-        if (shieldPatternsComponent == null) return bannerItem;
-        bannerPatternsComponent.layers().addAll(shieldPatternsComponent.layers());
-        return bannerItem;
+    private BannerTooltipComponent createBannerFromShield(ItemStack shieldItem) {
+        DyeColor dyeColor2 = shieldItem.getOrDefault(DataComponentTypes.BASE_COLOR, DyeColor.WHITE);
+        BannerPatternsComponent bannerPatternsComponent = shieldItem.getOrDefault(DataComponentTypes.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT);
+        return new BannerTooltipComponent(dyeColor2, bannerPatternsComponent);
     }
 
     public boolean middleClickOpen() {
