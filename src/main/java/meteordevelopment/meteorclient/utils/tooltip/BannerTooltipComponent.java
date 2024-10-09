@@ -17,17 +17,28 @@ import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.BannerPatternsComponent;
 import net.minecraft.item.BannerItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DyeColor;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BannerTooltipComponent implements MeteorTooltipData, TooltipComponent {
-    private final ItemStack banner;
+    private final DyeColor color;
+    private final BannerPatternsComponent patterns;
     private final ModelPart bannerField;
 
+    // should only be used when the ItemStack is a banner
     public BannerTooltipComponent(ItemStack banner) {
-        this.banner = banner;
+        this.color = ((BannerItem) banner.getItem()).getColor();
+        this.patterns = banner.getOrDefault(DataComponentTypes.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT);
+        this.bannerField = mc.getEntityModelLoader().getModelPart(EntityModelLayers.BANNER).getChild("flag");
+    }
+
+    public BannerTooltipComponent(DyeColor color, BannerPatternsComponent patterns) {
+        this.color = color;
+        this.patterns = patterns;
         this.bannerField = mc.getEntityModelLoader().getModelPart(EntityModelLayers.BANNER).getChild("flag");
     }
 
@@ -71,8 +82,8 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
             bannerField,
             ModelLoader.BANNER_BASE,
             true,
-            ((BannerItem) banner.getItem()).getColor(),
-            banner.get(DataComponentTypes.BANNER_PATTERNS)
+            color,
+            patterns
         );
         matrices.pop();
         matrices.pop();
