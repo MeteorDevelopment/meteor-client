@@ -256,7 +256,7 @@ public class BetterTooltips extends Module {
         // Hide hidden (empty) tooltips unless the tooltip hide flag setting is true.
         if (!tooltip.get() && event.list().isEmpty()) {
             // Hold-to-preview tooltip text is always added when needed.
-            appendHoldToPreviewTooltipText(event);
+            appendPreviewTooltipText(event, false);
             return;
         }
 
@@ -314,7 +314,7 @@ public class BetterTooltips extends Module {
         }
 
         // Hold to preview tooltip
-        appendHoldToPreviewTooltipText(event);
+        appendPreviewTooltipText(event, true);
     }
 
     @EventHandler
@@ -404,17 +404,20 @@ public class BetterTooltips extends Module {
         }
     }
 
-    private void appendHoldToPreviewTooltipText(ItemStackTooltipEvent event) {
-        if ((shulkers.get() && !previewShulkers() && Utils.hasItems(event.itemStack()))
-            || (event.itemStack().getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
-            || (event.itemStack().getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
-            || (event.itemStack().getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
-            || (event.itemStack().getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
-            || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get() && !previewEntities())
-            || (event.itemStack().getItem() instanceof BannerItem && banners.get() && !previewBanners())
-            || (event.itemStack().getItem() instanceof BannerPatternItem && banners.get() && !previewBanners())
-            || (event.itemStack().getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
-            event.appendEnd(Text.literal(""));
+    private void appendPreviewTooltipText(ItemStackTooltipEvent event, boolean spacer) {
+        if (!isPressed() && (
+            shulkers.get() && Utils.hasItems(event.itemStack())
+            || (event.itemStack().getItem() == Items.ENDER_CHEST && echest.get())
+            || (event.itemStack().getItem() == Items.FILLED_MAP && maps.get())
+            || (event.itemStack().getItem() == Items.WRITABLE_BOOK && books.get())
+            || (event.itemStack().getItem() == Items.WRITTEN_BOOK && books.get())
+            || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get())
+            || (event.itemStack().getItem() instanceof BannerItem && banners.get())
+            || (event.itemStack().getItem() instanceof BannerPatternItem && banners.get())
+            || (event.itemStack().getItem() == Items.SHIELD && banners.get())
+        )) {
+            // we don't want to add the spacer if the tooltip is hidden
+            if (spacer) event.appendEnd(Text.literal(""));
             event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
         }
     }
