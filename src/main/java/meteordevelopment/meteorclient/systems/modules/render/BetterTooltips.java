@@ -253,6 +253,13 @@ public class BetterTooltips extends Module {
 
     @EventHandler
     private void appendTooltip(ItemStackTooltipEvent event) {
+        // Hide hidden (empty) tooltips unless the tooltip hide flag setting is true.
+        if (!tooltip.get() && event.list().isEmpty()) {
+            // Hold-to-preview tooltip text is always added when needed.
+            appendPreviewTooltipText(event, false);
+            return;
+        }
+
         // Status effects
         if (statusEffects.get()) {
             if (event.itemStack().getItem() == Items.SUSPICIOUS_STEW) {
@@ -260,13 +267,13 @@ public class BetterTooltips extends Module {
                 if (stewEffectsComponent != null) {
                     for (StewEffect effectTag : stewEffectsComponent.effects()) {
                         StatusEffectInstance effect = new StatusEffectInstance(effectTag.effect(), effectTag.duration(), 0);
-                        event.list().add(1, getStatusText(effect));
+                        event.appendStart(getStatusText(effect));
                     }
                 }
             } else {
                 FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
                 if (food != null) {
-                    food.effects().forEach(e -> event.list().add(1, getStatusText(e.effect())));
+                    food.effects().forEach(e -> event.appendStart(getStatusText(e.effect())));
                 }
             }
         }
@@ -277,12 +284,12 @@ public class BetterTooltips extends Module {
                 BlockStateComponent blockStateComponent = event.itemStack().get(DataComponentTypes.BLOCK_STATE);
                 if (blockStateComponent != null) {
                     String level = blockStateComponent.properties().get("honey_level");
-                    event.list().add(1, Text.literal(String.format("%sHoney level: %s%s%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
+                    event.appendStart(Text.literal(String.format("%sHoney level: %s%s%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
                 }
 
                 List<BeehiveBlockEntity.BeeData> bees = event.itemStack().get(DataComponentTypes.BEES);
                 if (bees != null) {
-                    event.list().add(1, Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, bees.size(), Formatting.GRAY)));
+                    event.appendStart(Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, bees.size(), Formatting.GRAY)));
                 }
             }
         }
@@ -300,25 +307,14 @@ public class BetterTooltips extends Module {
                 if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
                 else count = String.format("%d bytes", byteCount);
 
-                event.list().add(Text.literal(count).formatted(Formatting.GRAY));
+                event.appendEnd(Text.literal(count).formatted(Formatting.GRAY));
             } catch (Exception e) {
-                event.list().add(Text.literal("Error getting bytes.").formatted(Formatting.RED));
+                event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
             }
         }
 
         // Hold to preview tooltip
-        if ((shulkers.get() && !previewShulkers() && Utils.hasItems(event.itemStack()))
-            || (event.itemStack().getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
-            || (event.itemStack().getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
-            || (event.itemStack().getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
-            || (event.itemStack().getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
-            || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get() && !previewEntities())
-            || (event.itemStack().getItem() instanceof BannerItem && banners.get() && !previewBanners())
-            || (event.itemStack().getItem() instanceof BannerPatternItem && banners.get() && !previewBanners())
-            || (event.itemStack().getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
-            event.list().add(Text.literal(""));
-            event.list().add(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
-        }
+        appendPreviewTooltipText(event, true);
     }
 
     @EventHandler
@@ -405,6 +401,24 @@ public class BetterTooltips extends Module {
                     tooltip.add((Text.translatable("container.shulkerBox.more", counts.size() - 5)).formatted(Formatting.ITALIC));
                 }
             }
+        }
+    }
+
+    private void appendPreviewTooltipText(ItemStackTooltipEvent event, boolean spacer) {
+        if (!isPressed() && (
+            shulkers.get() && Utils.hasItems(event.itemStack())
+            || (event.itemStack().getItem() == Items.ENDER_CHEST && echest.get())
+            || (event.itemStack().getItem() == Items.FILLED_MAP && maps.get())
+            || (event.itemStack().getItem() == Items.WRITABLE_BOOK && books.get())
+            || (event.itemStack().getItem() == Items.WRITTEN_BOOK && books.get())
+            || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get())
+            || (event.itemStack().getItem() instanceof BannerItem && banners.get())
+            || (event.itemStack().getItem() instanceof BannerPatternItem && banners.get())
+            || (event.itemStack().getItem() == Items.SHIELD && banners.get())
+        )) {
+            // we don't want to add the spacer if the tooltip is hidden
+            if (spacer) event.appendEnd(Text.literal(""));
+            event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
         }
     }
 
