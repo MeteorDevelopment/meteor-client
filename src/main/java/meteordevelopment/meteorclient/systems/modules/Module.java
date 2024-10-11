@@ -27,12 +27,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public abstract class Module implements ISerializable<Module>, Comparable<Module> {
-    protected final MinecraftClient mc;
+    protected static final MinecraftClient mc = MinecraftClient.getInstance();
 
     public final Category category;
     public final String name;
     public final String title;
     public final String description;
+    public final String[] aliases;
     public final Color color;
 
     public final MeteorAddon addon;
@@ -49,12 +50,13 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public boolean chatFeedback = true;
     public boolean favorite = false;
 
-    public Module(Category category, String name, String description) {
-        this.mc = MinecraftClient.getInstance();
+    public Module(Category category, String name, String description, String... aliases) {
+        if (name.contains(" ")) MeteorClient.LOG.warn("Module '{}' contains invalid characters in its name making it incompatible with Meteor Client commands.", name);
         this.category = category;
         this.name = name;
         this.title = Utils.nameToTitle(name);
         this.description = description;
+        this.aliases = aliases;
         this.color = Color.fromHsv(Utils.random(0.0, 360.0), 0.35, 1);
 
         String classname = this.getClass().getName();
