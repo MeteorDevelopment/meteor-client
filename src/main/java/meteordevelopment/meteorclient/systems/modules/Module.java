@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Settings;
@@ -33,6 +34,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public final String description;
     public final Color color;
 
+    public MeteorAddon addon = MeteorClient.ADDON;
     public final Settings settings = new Settings();
 
     private boolean active;

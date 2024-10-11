@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -99,6 +100,8 @@ public class ModuleScreen extends WindowScreen {
         active.action = () -> {
             if (module.isActive() != active.checked) module.toggle();
         };
+
+        if (module.addon != MeteorClient.ADDON) bottom.add(theme.label("From: " + module.addon.name)).right().widget();
     }
 
     @Override
