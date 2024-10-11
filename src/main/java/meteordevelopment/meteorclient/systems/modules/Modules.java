@@ -121,6 +121,7 @@ public class Modules extends System<Modules> {
         return CATEGORIES;
     }
 
+    @Deprecated(forRemoval = true)
     public static Category getCategoryByHash(int hash) {
         for (Category category : CATEGORIES) {
             if (category.hashCode() == hash) return category;
@@ -174,6 +175,10 @@ public class Modules extends System<Modules> {
 
         for (Module module : this.moduleInstances.values()) {
             int score = Utils.searchLevenshteinDefault(module.title, text, false);
+            for (String alias : module.aliases) {
+                int aliasScore = Utils.searchLevenshteinDefault(alias, text, false);
+                if (aliasScore < score) score = aliasScore;
+            }
             modules.put(module, modules.getOrDefault(module, 0) + score);
         }
 
