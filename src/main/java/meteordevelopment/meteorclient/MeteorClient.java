@@ -97,7 +97,6 @@ public class MeteorClient implements ClientModInitializer {
         AddonManager.init();
 
         // Register event handlers
-        EVENT_BUS.registerLambdaFactory(ADDON.getPackage() , (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
         AddonManager.ADDONS.forEach(addon -> {
             try {
                 EVENT_BUS.registerLambdaFactory(addon.getPackage(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
@@ -122,7 +121,7 @@ public class MeteorClient implements ClientModInitializer {
         EVENT_BUS.subscribe(this);
 
         // Initialise addons
-        AddonManager.initialiseAddons();
+        AddonManager.ADDONS.forEach(MeteorAddon::onInitialize);
 
         // Sort modules after addons have added their own
         Modules.get().sortModules();

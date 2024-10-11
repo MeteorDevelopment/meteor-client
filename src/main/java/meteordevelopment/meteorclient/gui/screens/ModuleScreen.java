@@ -94,14 +94,17 @@ public class ModuleScreen extends WindowScreen {
         // Bottom
         WHorizontalList bottom = add(theme.horizontalList()).expandX().widget();
 
-        //   Active
+        // Active
         bottom.add(theme.label("Active: "));
         active = bottom.add(theme.checkbox(module.isActive())).expandCellX().widget();
         active.action = () -> {
             if (module.isActive() != active.checked) module.toggle();
         };
 
-        if (module.addon != MeteorClient.ADDON) bottom.add(theme.label("From: " + module.addon.name)).right().widget();
+        if (module.addon != null && module.addon != MeteorClient.ADDON) {
+            bottom.add(theme.label("From: ")).right().widget();
+            bottom.add(theme.label(module.addon.name).color(theme.textSecondaryColor())).right().widget();
+        }
     }
 
     @Override

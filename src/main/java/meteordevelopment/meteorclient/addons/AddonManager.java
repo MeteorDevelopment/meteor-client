@@ -16,7 +16,6 @@ import java.util.List;
 
 public class AddonManager {
     public static final List<MeteorAddon> ADDONS = new ArrayList<>();
-    public static MeteorAddon currentAddon;
 
     public static void init() {
         // Meteor pseudo addon
@@ -59,6 +58,8 @@ public class AddonManager {
             for (Person author : metadata.getAuthors()) {
                 MeteorClient.ADDON.authors[i++] = author.getName();
             }
+
+            ADDONS.add(MeteorClient.ADDON);
         }
 
         // Addons
@@ -87,20 +88,5 @@ public class AddonManager {
 
             ADDONS.add(addon);
         }
-}
-
-    /**
-     *  currentAddon is used to allow us to track where any modules, commands, etc. being initialised are coming from.
-     *  Assumes everything the addon wants to initialise happens within {@link MeteorAddon#onInitialize()}, which should
-     *  really always be the case.
-     *  @see meteordevelopment.meteorclient.systems.modules.Modules#add(meteordevelopment.meteorclient.systems.modules.Module)
-     */
-    public static void initialiseAddons() {
-        ADDONS.forEach(meteorAddon -> {
-            currentAddon = meteorAddon;
-            currentAddon.onInitialize();
-        });
-
-        currentAddon = null;
     }
 }

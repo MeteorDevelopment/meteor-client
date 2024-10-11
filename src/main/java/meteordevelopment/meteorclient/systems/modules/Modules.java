@@ -9,7 +9,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
@@ -396,11 +395,6 @@ public class Modules extends System<Modules> {
 
         // Register color settings for the module
         module.settings.registerColorSettings(module);
-
-        // set the addon if applicable
-        if (AddonManager.currentAddon != null) {
-            module.addon = AddonManager.currentAddon;
-        }
     }
 
     private void initCombat() {
