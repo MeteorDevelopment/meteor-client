@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.RenderTickCounter;
@@ -149,6 +150,11 @@ public abstract class GameRendererMixin {
     @ModifyExpressionValue(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
     private float applyCameraTransformationsMathHelperLerpProxy(float original) {
         return Modules.get().get(NoRender.class).noNausea() ? 0 : original;
+    }
+
+    @Inject(method = "renderNausea", at = @At("HEAD"), cancellable = true)
+    private void onRenderNausea(DrawContext context, float distortionStrength, CallbackInfo ci) {
+        if (Modules.get().get(NoRender.class).noNausea()) ci.cancel();
     }
 
     // Freecam
