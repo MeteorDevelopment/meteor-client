@@ -11,10 +11,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.RegistryEntryReferenceArgumentType;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKeys;
@@ -33,7 +33,7 @@ public class EnchantCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("one").then(argument("enchantment", RegistryEntryReferenceArgumentType.registryEntry(REGISTRY_ACCESS, RegistryKeys.ENCHANTMENT))
+        builder.then(literal("one").then(argument("enchantment", RegistryEntryReferenceArgumentType.enchantment())
             .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
                 one(context, enchantment -> context.getArgument("level", Integer.class));
                 return SINGLE_SUCCESS;
@@ -74,9 +74,9 @@ public class EnchantCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("remove").then(argument("enchantment", RegistryEntryReferenceArgumentType.registryEntry(REGISTRY_ACCESS, RegistryKeys.ENCHANTMENT)).executes(context -> {
+        builder.then(literal("remove").then(argument("enchantment", RegistryEntryReferenceArgumentType.enchantment()).executes(context -> {
             ItemStack itemStack = tryGetItemStack();
-            RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);
+            RegistryEntry.Reference<Enchantment> enchantment = RegistryEntryReferenceArgumentType.getEnchantment(context, "enchantment");
             Utils.removeEnchantment(itemStack, enchantment.value());
 
             syncItem();
@@ -87,7 +87,7 @@ public class EnchantCommand extends Command {
     private void one(CommandContext<CommandSource> context, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);
+        RegistryEntry.Reference<Enchantment> enchantment = RegistryEntryReferenceArgumentType.getEnchantment(context, "enchantment");
         Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
 
         syncItem();
@@ -96,7 +96,7 @@ public class EnchantCommand extends Command {
     private void all(boolean onlyPossible, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        REGISTRY_ACCESS.getOptionalWrapper(RegistryKeys.ENCHANTMENT).ifPresent(registry -> {
+        mc.getNetworkHandler().getRegistryManager().getOptionalWrapper(RegistryKeys.ENCHANTMENT).ifPresent(registry -> {
             registry.streamEntries().forEach(enchantment -> {
                 if (!onlyPossible || enchantment.value().isAcceptableItem(itemStack)) {
                     Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
