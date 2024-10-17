@@ -142,6 +142,13 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<Boolean> moduleAliases = sgMisc.add(new BoolSetting.Builder()
+        .name("search-module-aliases")
+        .description("Whether or not module aliases will be used in the module search bar.")
+        .defaultValue(true)
+        .build()
+    );
+
     public List<String> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {
