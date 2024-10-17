@@ -63,6 +63,18 @@ public class Xray extends Module {
             if (isActive()) mc.worldRenderer.reload();
         })
         .build());
+    
+    private final Setting<Integer> exposedOnlyDistance = sgGeneral.add(new IntSetting.Builder()
+            .name("exposed-only-distance")
+            .description("Specify the distance of opeque blocks for ore to be considered as exposed.")
+            .defaultValue(1)
+            .min(1)
+            .max(10)
+            .visible(exposedOnly::get)
+            .onChanged(onChanged -> {
+                if (isActive()) mc.worldRenderer.reload();
+            })
+            .build());
 
     public Xray() {
         super(Categories.Render, "xray", "Only renders specified blocks. Good for mining.");
@@ -105,14 +117,14 @@ public class Xray extends Module {
         if (!returns && !isBlocked(state.getBlock(), pos)) {
             BlockPos adjPos = pos.offset(facing);
             BlockState adjState = view.getBlockState(adjPos);
-            return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || BlockUtils.isExposed(adjPos);
+            return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || BlockUtils.isExposed(adjPos, exposedOnlyDistance.get());
         }
 
         return returns;
     }
 
     public boolean isBlocked(Block block, BlockPos blockPos) {
-        return !(blocks.get().contains(block) && (!exposedOnly.get() || (blockPos == null || BlockUtils.isExposed(blockPos))));
+        return !(blocks.get().contains(block) && (!exposedOnly.get() || (blockPos == null || BlockUtils.isExposed(blockPos, exposedOnlyDistance.get()))));
     }
 
     public static int getAlpha(BlockState state, BlockPos pos) {
