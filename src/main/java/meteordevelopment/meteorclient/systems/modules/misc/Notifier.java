@@ -20,16 +20,20 @@ import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.collection.ArrayListDeque;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.*;
@@ -40,6 +44,7 @@ public class Notifier extends Module {
     private final SettingGroup sgTotemPops = settings.createGroup("Totem Pops");
     private final SettingGroup sgVisualRange = settings.createGroup("Visual Range");
     private final SettingGroup sgPearl = settings.createGroup("Pearl");
+    private final SettingGroup sgJoinsLeaves = settings.createGroup("Joins/Leaves");
 
     // Totem Pops
 
@@ -156,9 +161,36 @@ public class Notifier extends Module {
         .build()
     );
 
+    // Joins/Leaves
+
+    private final Setting<JoinLeaveModes> joinsLeavesMode = sgJoinsLeaves.add(new EnumSetting.Builder<JoinLeaveModes>()
+        .name("player-joins-leaves")
+        .description("How to handle player join/leave notifications.")
+        .defaultValue(JoinLeaveModes.None)
+        .build()
+    );
+
+    private final Setting<Integer> notificationDelay = sgJoinsLeaves.add(new IntSetting.Builder()
+        .name("notification-delay")
+        .description("How long to wait in ticks before posting the next join/leave notification in your chat.")
+        .range(0, 1000)
+        .sliderRange(0, 100)
+        .defaultValue(0)
+        .build()
+    );
+
+    private final Setting<Boolean> simpleNotifications = sgJoinsLeaves.add(new BoolSetting.Builder()
+        .name("simple-notifications")
+        .description("Display join/leave notifications without a prefix, to reduce chat clutter.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private int timer;
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
     private final Map<Integer, Vec3d> pearlStartPosMap = new HashMap<>();
+    private final ArrayListDeque<Text> messageQueue = new ArrayListDeque<>();
 
     private final Random random = new Random();
 
@@ -229,7 +261,7 @@ public class Notifier extends Module {
         }
     }
 
-    // Totem Pops
+    // Totem Pops && Joins/Leaves
 
     @Override
     public void onActivate() {
@@ -238,15 +270,34 @@ public class Notifier extends Module {
         pearlStartPosMap.clear();
     }
 
+    @Override
+    public void onDeactivate() {
+        timer = 0;
+        messageQueue.clear();
+    }
+
     @EventHandler
     private void onGameJoin(GameJoinedEvent event) {
+        timer = 0;
         totemPopMap.clear();
         chatIdMap.clear();
+        messageQueue.clear();
         pearlStartPosMap.clear();
     }
 
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
+        switch (event.packet) {
+            case PlayerListS2CPacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Joins) -> {
+                if (packet.getActions().contains(PlayerListS2CPacket.Action.ADD_PLAYER)) {
+                    createJoinNotifications(packet);
+                }
+            }
+            case PlayerRemoveS2CPacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Leaves) ->
+                createLeaveNotification(packet);
+            default -> {}
+        }
+
         if (!totemPops.get()) return;
         if (!(event.packet instanceof EntityStatusS2CPacket p)) return;
 
@@ -274,6 +325,27 @@ public class Notifier extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (!joinsLeavesMode.get().equals(JoinLeaveModes.None) && !messageQueue.isEmpty()) {
+            ++timer;
+            if (timer >= notificationDelay.get()) {
+                timer = 0;
+                if (notificationDelay.get() <= 0) {
+                    while (!messageQueue.isEmpty()) {
+                        if (simpleNotifications.get()) {
+                            mc.player.sendMessage(messageQueue.removeFirst());
+                        } else {
+                            ChatUtils.sendMsg(messageQueue.removeFirst());
+                        }
+
+                    }
+                } else if (simpleNotifications.get()) {
+                    mc.player.sendMessage(messageQueue.removeFirst());
+                } else {
+                    ChatUtils.sendMsg(messageQueue.removeFirst());
+                }
+            }
+        }
+
         if (!totemPops.get()) return;
         synchronized (totemPopMap) {
             for (PlayerEntity player : mc.world.getPlayers()) {
@@ -293,9 +365,58 @@ public class Notifier extends Module {
         return chatIdMap.computeIfAbsent(entity.getUuid(), value -> random.nextInt());
     }
 
+    private void createJoinNotifications(PlayerListS2CPacket packet) {
+        for (PlayerListS2CPacket.Entry entry : packet.getPlayerAdditionEntries()) {
+            if (entry.profile() != null) {
+                if (simpleNotifications.get()) {
+                    messageQueue.addLast(Text.literal(
+                        Formatting.GRAY + "["
+                            + Formatting.GREEN + "+"
+                            + Formatting.GRAY + "] "
+                            + entry.profile().getName()
+                    ));
+                } else {
+                    messageQueue.addLast(Text.literal(
+                        Formatting.WHITE
+                            + entry.profile().getName()
+                            + Formatting.GRAY + " joined."
+                    ));
+                }
+            }
+        }
+    }
+
+    private void createLeaveNotification(PlayerRemoveS2CPacket packet) {
+        if (mc.getNetworkHandler() == null) return;
+
+        for (UUID id : packet.profileIds()) {
+            PlayerListEntry toRemove = mc.getNetworkHandler().getPlayerListEntry(id);
+            if (toRemove != null) {
+                if (simpleNotifications.get()) {
+                    messageQueue.addLast(Text.literal(
+                        Formatting.GRAY + "["
+                            + Formatting.RED + "-"
+                            + Formatting.GRAY + "] "
+                            + toRemove.getProfile().getName()
+                    ));
+                } else {
+                    messageQueue.addLast(Text.literal(
+                        Formatting.WHITE
+                            + toRemove.getProfile().getName()
+                            + Formatting.GRAY + " left."
+                    ));
+                }
+            }
+        }
+    }
+
     public enum Event {
         Spawn,
         Despawn,
         Both
+    }
+
+    public enum JoinLeaveModes {
+        None, Joins, Leaves, Both
     }
 }
