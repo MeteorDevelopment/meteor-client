@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.events.entity.EntityAddedEvent;
 import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
@@ -27,6 +26,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
@@ -190,7 +191,6 @@ public class Notifier extends Module {
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
     private final Map<Integer, Vec3d> pearlStartPosMap = new HashMap<>();
     private final ArrayListDeque<Text> messageQueue = new ArrayListDeque<>();
-    private final ObjectArrayList<PlayerListEntry> cachedPlayerList = new ObjectArrayList<>();
 
     private final Random random = new Random();
 
@@ -274,7 +274,6 @@ public class Notifier extends Module {
     public void onDeactivate() {
         timer = 0;
         messageQueue.clear();
-        cachedPlayerList.clear();
     }
 
     @EventHandler
@@ -284,11 +283,21 @@ public class Notifier extends Module {
         chatIdMap.clear();
         messageQueue.clear();
         pearlStartPosMap.clear();
-        cachedPlayerList.clear();
     }
 
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
+        switch (event.packet) {
+            case PlayerListS2CPacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Joins) -> {
+                if (packet.getActions().contains(PlayerListS2CPacket.Action.ADD_PLAYER)) {
+                    createJoinNotifications(packet);
+                }
+            }
+            case PlayerRemoveS2CPacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Leaves) ->
+                createLeaveNotification(packet);
+            default -> {}
+        }
+
         if (!totemPops.get()) return;
         if (!(event.packet instanceof EntityStatusS2CPacket p)) return;
 
@@ -316,47 +325,23 @@ public class Notifier extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!joinsLeavesMode.get().equals(JoinLeaveModes.None) && mc.getNetworkHandler() != null) {
-            Collection<PlayerListEntry> currentPlayerList = mc.getNetworkHandler().getPlayerList();
-
-            if (cachedPlayerList.isEmpty()) {
-                cachedPlayerList.addAll(currentPlayerList);
-            } else {
-                if (joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Joins)) {
-                    currentPlayerList
-                        .stream()
-                        .filter(player -> !cachedPlayerList.contains(player))
-                        .forEach(this::createJoinNotification);
-                }
-                if (joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Leaves)) {
-                    cachedPlayerList
-                        .stream()
-                        .filter(player -> !currentPlayerList.contains(player))
-                        .forEach(this::createLeaveNotification);
-                }
-
-                cachedPlayerList.clear();
-                cachedPlayerList.addAll(currentPlayerList);
-            }
-
-            if (!messageQueue.isEmpty()) {
-                ++timer;
-                if (timer >= notificationDelay.get()) {
-                    timer = 0;
-                    if (notificationDelay.get() <= 0) {
-                        while (!messageQueue.isEmpty()) {
-                            if (simpleNotifications.get()) {
-                                mc.player.sendMessage(messageQueue.removeFirst());
-                            } else {
-                                ChatUtils.sendMsg(messageQueue.removeFirst());
-                            }
-
+        if (!joinsLeavesMode.get().equals(JoinLeaveModes.None) && !messageQueue.isEmpty()) {
+            ++timer;
+            if (timer >= notificationDelay.get()) {
+                timer = 0;
+                if (notificationDelay.get() <= 0) {
+                    while (!messageQueue.isEmpty()) {
+                        if (simpleNotifications.get()) {
+                            mc.player.sendMessage(messageQueue.removeFirst());
+                        } else {
+                            ChatUtils.sendMsg(messageQueue.removeFirst());
                         }
-                    } else if (simpleNotifications.get()) {
-                        mc.player.sendMessage(messageQueue.removeFirst());
-                    } else {
-                        ChatUtils.sendMsg(messageQueue.removeFirst());
+
                     }
+                } else if (simpleNotifications.get()) {
+                    mc.player.sendMessage(messageQueue.removeFirst());
+                } else {
+                    ChatUtils.sendMsg(messageQueue.removeFirst());
                 }
             }
         }
@@ -380,37 +365,48 @@ public class Notifier extends Module {
         return chatIdMap.computeIfAbsent(entity.getUuid(), value -> random.nextInt());
     }
 
-    private void createJoinNotification(PlayerListEntry player) {
-        if (simpleNotifications.get()) {
-            messageQueue.addLast(Text.literal(
-                Formatting.GRAY + "["
-                    + Formatting.GREEN + "+"
-                    + Formatting.GRAY + "] "
-                    + player.getProfile().getName()
-            ));
-        } else {
-            messageQueue.addLast(Text.literal(
-                Formatting.WHITE
-                    + player.getProfile().getName()
-                    + Formatting.GRAY + " joined."
-            ));
+    private void createJoinNotifications(PlayerListS2CPacket packet) {
+        for (PlayerListS2CPacket.Entry entry : packet.getPlayerAdditionEntries()) {
+            if (entry.profile() != null) {
+                if (simpleNotifications.get()) {
+                    messageQueue.addLast(Text.literal(
+                        Formatting.GRAY + "["
+                            + Formatting.GREEN + "+"
+                            + Formatting.GRAY + "] "
+                            + entry.profile().getName()
+                    ));
+                } else {
+                    messageQueue.addLast(Text.literal(
+                        Formatting.WHITE
+                            + entry.profile().getName()
+                            + Formatting.GRAY + " joined."
+                    ));
+                }
+            }
         }
     }
 
-    private void createLeaveNotification(PlayerListEntry player) {
-        if (simpleNotifications.get()) {
-            messageQueue.addLast(Text.literal(
-                Formatting.GRAY + "["
-                    + Formatting.RED + "-"
-                    + Formatting.GRAY + "] "
-                    + player.getProfile().getName()
-            ));
-        } else {
-            messageQueue.addLast(Text.literal(
-                Formatting.WHITE
-                    + player.getProfile().getName()
-                    + Formatting.GRAY + " left."
-            ));
+    private void createLeaveNotification(PlayerRemoveS2CPacket packet) {
+        if (mc.getNetworkHandler() == null) return;
+
+        for (UUID id : packet.profileIds()) {
+            PlayerListEntry toRemove = mc.getNetworkHandler().getPlayerListEntry(id);
+            if (toRemove != null) {
+                if (simpleNotifications.get()) {
+                    messageQueue.addLast(Text.literal(
+                        Formatting.GRAY + "["
+                            + Formatting.RED + "-"
+                            + Formatting.GRAY + "] "
+                            + toRemove.getProfile().getName()
+                    ));
+                } else {
+                    messageQueue.addLast(Text.literal(
+                        Formatting.WHITE
+                            + toRemove.getProfile().getName()
+                            + Formatting.GRAY + " left."
+                    ));
+                }
+            }
         }
     }
 
