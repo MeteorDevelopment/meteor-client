@@ -34,7 +34,7 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
         return null;
     }
 
-    public <T> Setting<T> add(Setting<T> setting) {
+    public <T extends Setting<?>> T add(T setting) {
         settings.add(setting);
 
         return setting;

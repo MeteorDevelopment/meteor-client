@@ -27,7 +27,7 @@ public class WaspCommand extends Command {
         AutoWasp wasp = Modules.get().get(AutoWasp.class);
 
         builder.then(literal("reset").executes(context -> {
-            if (wasp.isActive()) wasp.toggle();
+            wasp.disable();
             return SINGLE_SUCCESS;
         }));
 
@@ -37,7 +37,7 @@ public class WaspCommand extends Command {
             if (player == mc.player) throw CANT_WASP_SELF.create();
 
             wasp.target = player;
-            if (!wasp.isActive()) wasp.toggle();
+            wasp.enable();
             info(player.getName().getString() + " set as target.");
             return SINGLE_SUCCESS;
         }));
