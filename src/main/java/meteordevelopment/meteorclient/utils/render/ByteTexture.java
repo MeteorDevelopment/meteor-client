@@ -39,7 +39,7 @@ public class ByteTexture extends AbstractTexture {
         upload(width, height, buffer, format, filterMin, filterMag);
     }
 
-    private void upload(int width, int height, ByteBuffer buffer, Format format, Filter filterMin, Filter filterMag) {
+    public void upload(int width, int height, ByteBuffer buffer, Format format, Filter filterMin, Filter filterMag) {
         bindTexture();
 
         glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
