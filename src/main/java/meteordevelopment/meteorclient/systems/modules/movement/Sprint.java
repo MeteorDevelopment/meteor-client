@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 
@@ -78,7 +79,7 @@ public class Sprint extends Module {
         if (shouldSprint()) mc.player.setSprinting(true);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     private void onPacketSend(PacketEvent.Send event) {
         if (!unsprintOnHit.get() || !(event.packet instanceof IPlayerInteractEntityC2SPacket packet) || packet.getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
