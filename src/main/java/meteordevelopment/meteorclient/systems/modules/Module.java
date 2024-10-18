@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public abstract class Module implements ISerializable<Module>, Comparable<Module> {
-    protected static final MinecraftClient mc = MinecraftClient.getInstance();
+    protected final MinecraftClient mc;
 
     public final Category category;
     public final String name;
@@ -52,6 +52,8 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public Module(Category category, String name, String description, String... aliases) {
         if (name.contains(" ")) MeteorClient.LOG.warn("Module '{}' contains invalid characters in its name making it incompatible with Meteor Client commands.", name);
+
+        this.mc = MinecraftClient.getInstance();
         this.category = category;
         this.name = name;
         this.title = Utils.nameToTitle(name);
@@ -68,6 +70,10 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         }
 
         this.addon = null;
+    }
+
+    public Module(Category category, String name, String desc) {
+        this(category, name, desc, new String[0]);
     }
 
     public WWidget getWidget(GuiTheme theme) {
