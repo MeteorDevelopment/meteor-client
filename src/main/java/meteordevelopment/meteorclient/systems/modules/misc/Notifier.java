@@ -221,10 +221,8 @@ public class Notifier extends Module {
             }
         }
 
-        if (pearl.get()) {
-            if (event.entity instanceof EnderPearlEntity pearlEntity) {
-                pearlStartPosMap.put(pearlEntity.getId(), new Vec3d(pearlEntity.getX(), pearlEntity.getY(), pearlEntity.getZ()));
-            }
+        if (pearl.get() && event.entity instanceof EnderPearlEntity pearlEntity) {
+            pearlStartPosMap.put(pearlEntity.getId(), new Vec3d(pearlEntity.getX(), pearlEntity.getY(), pearlEntity.getZ()));
         }
     }
 
@@ -379,7 +377,6 @@ public class Notifier extends Module {
                         + Formatting.GRAY + " joined."
                 ));
             }
-
         }
     }
 
