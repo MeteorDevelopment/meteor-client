@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.entity.EntityAddedEvent;
 import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -182,11 +183,12 @@ public class Notifier extends Module {
     private final Setting<Boolean> simpleNotifications = sgJoinsLeaves.add(new BoolSetting.Builder()
         .name("simple-notifications")
         .description("Display join/leave notifications without a prefix, to reduce chat clutter.")
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 
     private int timer;
+    private boolean loginPacket = true;
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
     private final Map<Integer, Vec3d> pearlStartPosMap = new HashMap<>();
@@ -220,8 +222,8 @@ public class Notifier extends Module {
         }
 
         if (pearl.get()) {
-            if (event.entity instanceof EnderPearlEntity pearl) {
-                pearlStartPosMap.put(pearl.getId(), new Vec3d(pearl.getX(), pearl.getY(), pearl.getZ()));
+            if (event.entity instanceof EnderPearlEntity pearlEntity) {
+                pearlStartPosMap.put(pearlEntity.getId(), new Vec3d(pearlEntity.getX(), pearlEntity.getY(), pearlEntity.getZ()));
             }
         }
     }
@@ -286,59 +288,53 @@ public class Notifier extends Module {
     }
 
     @EventHandler
+    private void onGameLeave(GameLeftEvent event) {
+        loginPacket = true;
+    }
+
+    @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
         switch (event.packet) {
             case PlayerListS2CPacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Joins) -> {
+                if (loginPacket) {
+                    loginPacket = false;
+                    return;
+                }
+
                 if (packet.getActions().contains(PlayerListS2CPacket.Action.ADD_PLAYER)) {
                     createJoinNotifications(packet);
                 }
             }
             case PlayerRemoveS2CPacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Leaves) ->
                 createLeaveNotification(packet);
+
+            case EntityStatusS2CPacket packet when totemPops.get() && packet.getStatus() == 35 && packet.getEntity(mc.world) instanceof PlayerEntity entity -> {
+                if ((entity.equals(mc.player) && totemsIgnoreOwn.get())
+                    || (Friends.get().isFriend(entity) && totemsIgnoreOthers.get())
+                    || (!Friends.get().isFriend(entity) && totemsIgnoreFriends.get())
+                ) return;
+
+                synchronized (totemPopMap) {
+                    int pops = totemPopMap.getOrDefault(entity.getUuid(), 0);
+                    totemPopMap.put(entity.getUuid(), ++pops);
+
+                    double distance = PlayerUtils.distanceTo(entity);
+                    if (totemsDistanceCheck.get() && distance > totemsDistance.get()) return;
+
+                    ChatUtils.sendMsg(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+                }
+            }
             default -> {}
-        }
-
-        if (!totemPops.get()) return;
-        if (!(event.packet instanceof EntityStatusS2CPacket p)) return;
-
-        if (p.getStatus() != 35) return;
-
-        Entity entity = p.getEntity(mc.world);
-
-        if (!(entity instanceof PlayerEntity)) return;
-
-        if ((entity.equals(mc.player) && totemsIgnoreOwn.get())
-            || (Friends.get().isFriend(((PlayerEntity) entity)) && totemsIgnoreOthers.get())
-            || (!Friends.get().isFriend(((PlayerEntity) entity)) && totemsIgnoreFriends.get())
-        ) return;
-
-        synchronized (totemPopMap) {
-            int pops = totemPopMap.getOrDefault(entity.getUuid(), 0);
-            totemPopMap.put(entity.getUuid(), ++pops);
-
-            double distance = PlayerUtils.distanceTo(entity);
-            if (totemsDistanceCheck.get() && distance > totemsDistance.get()) return;
-
-            ChatUtils.sendMsg(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!joinsLeavesMode.get().equals(JoinLeaveModes.None) && !messageQueue.isEmpty()) {
-            ++timer;
-            if (timer >= notificationDelay.get()) {
+        if (joinsLeavesMode.get() != JoinLeaveModes.None) {
+            timer++;
+            while (timer >= notificationDelay.get() && !messageQueue.isEmpty()) {
                 timer = 0;
-                if (notificationDelay.get() <= 0) {
-                    while (!messageQueue.isEmpty()) {
-                        if (simpleNotifications.get()) {
-                            mc.player.sendMessage(messageQueue.removeFirst());
-                        } else {
-                            ChatUtils.sendMsg(messageQueue.removeFirst());
-                        }
-
-                    }
-                } else if (simpleNotifications.get()) {
+                if (simpleNotifications.get()) {
                     mc.player.sendMessage(messageQueue.removeFirst());
                 } else {
                     ChatUtils.sendMsg(messageQueue.removeFirst());
@@ -367,22 +363,23 @@ public class Notifier extends Module {
 
     private void createJoinNotifications(PlayerListS2CPacket packet) {
         for (PlayerListS2CPacket.Entry entry : packet.getPlayerAdditionEntries()) {
-            if (entry.profile() != null) {
-                if (simpleNotifications.get()) {
-                    messageQueue.addLast(Text.literal(
-                        Formatting.GRAY + "["
-                            + Formatting.GREEN + "+"
-                            + Formatting.GRAY + "] "
-                            + entry.profile().getName()
-                    ));
-                } else {
-                    messageQueue.addLast(Text.literal(
-                        Formatting.WHITE
-                            + entry.profile().getName()
-                            + Formatting.GRAY + " joined."
-                    ));
-                }
+            if (entry.profile() == null) continue;
+
+            if (simpleNotifications.get()) {
+                messageQueue.addLast(Text.literal(
+                    Formatting.GRAY + "["
+                        + Formatting.GREEN + "+"
+                        + Formatting.GRAY + "] "
+                        + entry.profile().getName()
+                ));
+            } else {
+                messageQueue.addLast(Text.literal(
+                    Formatting.WHITE
+                        + entry.profile().getName()
+                        + Formatting.GRAY + " joined."
+                ));
             }
+
         }
     }
 
@@ -391,21 +388,21 @@ public class Notifier extends Module {
 
         for (UUID id : packet.profileIds()) {
             PlayerListEntry toRemove = mc.getNetworkHandler().getPlayerListEntry(id);
-            if (toRemove != null) {
-                if (simpleNotifications.get()) {
-                    messageQueue.addLast(Text.literal(
-                        Formatting.GRAY + "["
-                            + Formatting.RED + "-"
-                            + Formatting.GRAY + "] "
-                            + toRemove.getProfile().getName()
-                    ));
-                } else {
-                    messageQueue.addLast(Text.literal(
-                        Formatting.WHITE
-                            + toRemove.getProfile().getName()
-                            + Formatting.GRAY + " left."
-                    ));
-                }
+            if (toRemove == null) continue;
+
+            if (simpleNotifications.get()) {
+                messageQueue.addLast(Text.literal(
+                    Formatting.GRAY + "["
+                        + Formatting.RED + "-"
+                        + Formatting.GRAY + "] "
+                        + toRemove.getProfile().getName()
+                ));
+            } else {
+                messageQueue.addLast(Text.literal(
+                    Formatting.WHITE
+                        + toRemove.getProfile().getName()
+                        + Formatting.GRAY + " left."
+                ));
             }
         }
     }
