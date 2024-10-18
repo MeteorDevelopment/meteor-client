@@ -40,7 +40,8 @@ public class PlayerListEntryArgumentType implements ArgumentType<PlayerListEntry
 
     @Override
     public PlayerListEntry parse(StringReader reader) throws CommandSyntaxException {
-        String argument = reader.readString();
+        String argument = reader.getRemaining();
+        reader.setCursor(reader.getTotalLength());
         PlayerListEntry playerListEntry = null;
 
         for (PlayerListEntry p : mc.getNetworkHandler().getPlayerList()) {
