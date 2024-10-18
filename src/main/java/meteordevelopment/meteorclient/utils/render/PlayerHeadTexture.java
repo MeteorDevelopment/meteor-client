@@ -20,8 +20,6 @@ import java.nio.IntBuffer;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PlayerHeadTexture extends Texture {
-    private boolean needsRotate;
-
     public PlayerHeadTexture(String url) {
         BufferedImage skin;
         try {
@@ -32,38 +30,33 @@ public class PlayerHeadTexture extends Texture {
         }
 
         byte[] head = new byte[8 * 8 * 3];
-        int[] pixel = new int[4];
+        int[] pixels = new int[8 * 8 * 4];
 
-        int i = 0;
-        for (int x = 8; x < 16; x++) {
-            for (int y = 8; y < 16; y++) {
-                skin.getData().getPixel(x, y, pixel);
+        skin.getData().getPixels(8, 8, 8, 8, pixels);
 
-                for (int j = 0; j < 3; j++) {
-                    head[i] = (byte) pixel[j];
-                    i++;
-                }
-            }
+        for (int i = 0; i < 8 * 8; i++) {
+            int inputIndex = i * 4;
+            int outputIndex = i * 3;
+
+            head[outputIndex] = (byte) pixels[inputIndex];
+            head[outputIndex + 1] = (byte) pixels[inputIndex + 1];
+            head[outputIndex + 2] = (byte) pixels[inputIndex + 2];
         }
 
-        i = 0;
-        for (int x = 40; x < 48; x++) {
-            for (int y = 8; y < 16; y++) {
-                skin.getData().getPixel(x, y, pixel);
+        skin.getData().getPixels(40, 8, 8, 8, pixels);
 
-                if (pixel[3] != 0) {
-                    for (int j = 0; j < 3; j++) {
-                        head[i] = (byte) pixel[j];
-                        i++;
-                    }
-                }
-                else i += 3;
+        for (int i = 0; i < 8 * 8; i++) {
+            int inputIndex = i * 4;
+            int outputIndex = i * 3;
+
+            if (pixels[inputIndex + 3] != 0) {
+                head[outputIndex] = (byte) pixels[inputIndex];
+                head[outputIndex + 1] = (byte) pixels[inputIndex + 1];
+                head[outputIndex + 2] = (byte) pixels[inputIndex + 2];
             }
         }
 
         upload(BufferUtils.createByteBuffer(head.length).put(head));
-
-        needsRotate = true;
     }
 
     public PlayerHeadTexture() {
@@ -91,9 +84,5 @@ public class PlayerHeadTexture extends Texture {
         Runnable action = () -> upload(8, 8, data, Texture.Format.RGB, Texture.Filter.Nearest, Texture.Filter.Nearest, false);
         if (RenderSystem.isOnRenderThread()) action.run();
         else RenderSystem.recordRenderCall(action::run);
-    }
-
-    public boolean needsRotate() {
-        return needsRotate;
     }
 }
