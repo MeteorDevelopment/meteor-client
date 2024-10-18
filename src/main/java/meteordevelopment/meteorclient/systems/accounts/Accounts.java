@@ -73,18 +73,14 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
             AccountType type = AccountType.valueOf(t.getString("type"));
 
             try {
-                Account<?> account = switch (type) {
+                return switch (type) {
                     case Cracked ->     new CrackedAccount(null).fromTag(t);
                     case Microsoft ->   new MicrosoftAccount(null).fromTag(t);
                     case TheAltening -> new TheAlteningAccount(null).fromTag(t);
                 };
-
-                if (account.fetchInfo()) return account;
             } catch (NbtException e) {
                 return null;
             }
-
-            return null;
         }));
 
         return this;
