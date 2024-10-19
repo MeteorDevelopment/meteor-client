@@ -79,7 +79,7 @@ public class NbtCommand extends Command {
 
             if (validBasic(stack)) {
                 ComponentMap components = ComponentMapArgumentType.getComponentMap(ctx, "component");
-                ComponentMapImpl stackComponents = (ComponentMapImpl) stack.getComponents();
+                MergedComponentMap stackComponents = (MergedComponentMap) stack.getComponents();
 
                 DataResult<Unit> dataResult = ItemStack.validateComponents(components);
                 dataResult.getOrThrow(MALFORMED_ITEM_EXCEPTION::create);
@@ -115,7 +115,7 @@ public class NbtCommand extends Command {
 
                 ComponentType<?> componentType = Registries.DATA_COMPONENT_TYPE.get(componentTypeKey);
 
-                ComponentMapImpl components = (ComponentMapImpl) stack.getComponents();
+                MergedComponentMap components = (MergedComponentMap) stack.getComponents();
                 components.applyChanges(ComponentChanges.builder().remove(componentType).build());
 
                 setStack(stack);

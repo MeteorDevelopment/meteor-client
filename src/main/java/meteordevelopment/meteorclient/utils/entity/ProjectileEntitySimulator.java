@@ -127,7 +127,7 @@ public class ProjectileEntitySimulator {
 
     public boolean set(Entity entity, boolean accurate) {
         // skip entities in ground
-        if (entity instanceof ProjectileInGroundAccessor ppe && ppe.getInGround()) return false;
+        if (entity instanceof ProjectileInGroundAccessor ppe && ppe.invokeIsInGround()) return false;
 
         if (entity instanceof ArrowEntity) {
             set(entity, 0.05, 0.6, accurate);

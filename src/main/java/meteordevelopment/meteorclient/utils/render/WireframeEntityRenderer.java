@@ -57,8 +57,7 @@ public class WireframeEntityRenderer {
         matrices.push();
         matrices.scale((float) scale, (float) scale, (float) scale);
 
-        EntityRenderer<?> entityRenderer = mc.getEntityRenderDispatcher().getRenderer(entity);
-
+        EntityRenderer<? extends Entity, ?> entityRenderer = mc.getEntityRenderDispatcher().getRenderer(entity);
         // LivingEntityRenderer
         if (entityRenderer instanceof LivingEntityRenderer renderer) {
             LivingEntity livingEntity = (LivingEntity) entity;

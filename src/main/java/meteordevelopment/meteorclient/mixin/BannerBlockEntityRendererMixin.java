@@ -16,7 +16,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
-import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.render.model.ModelBaker;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import org.spongepowered.asm.mixin.Final;
@@ -66,7 +66,7 @@ public abstract class BannerBlockEntityRendererMixin {
         matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(h));
         matrixStack.push();
         matrixStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-        VertexConsumer vertexConsumer = ModelLoader.BANNER_BASE.getVertexConsumer(vertexConsumerProvider, RenderLayer::getEntitySolid);
+        VertexConsumer vertexConsumer = ModelBaker.BANNER_BASE.getVertexConsumer(vertexConsumerProvider, RenderLayer::getEntitySolid);
         this.pillar.render(matrixStack, vertexConsumer, i, j);
         matrixStack.pop();
         matrixStack.pop();
@@ -82,7 +82,7 @@ public abstract class BannerBlockEntityRendererMixin {
         matrixStack.translate(0.0D, -0.3125D, -0.4375D);
         matrixStack.push();
         matrixStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-        VertexConsumer vertexConsumer = ModelLoader.BANNER_BASE.getVertexConsumer(vertexConsumerProvider, RenderLayer::getEntitySolid);
+        VertexConsumer vertexConsumer = ModelBaker.BANNER_BASE.getVertexConsumer(vertexConsumerProvider, RenderLayer::getEntitySolid);
         this.crossbar.render(matrixStack, vertexConsumer, i, j);
         matrixStack.pop();
         matrixStack.pop();

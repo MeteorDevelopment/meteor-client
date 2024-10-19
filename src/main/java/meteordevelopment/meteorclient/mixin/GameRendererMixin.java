@@ -33,6 +33,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.profiler.Profilers;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -77,7 +78,7 @@ public abstract class GameRendererMixin {
     private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 1) Matrix4f matrix4f2, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
         if (!Utils.canUpdate()) return;
 
-        client.getProfiler().push(MeteorClient.MOD_ID + "_render");
+        Profilers.get().push(MeteorClient.MOD_ID + "_render");
 
         // Create renderer and event
 
@@ -114,7 +115,7 @@ public abstract class GameRendererMixin {
         RenderSystem.getModelViewStack().popMatrix();
         RenderSystem.applyModelViewMatrix();
 
-        client.getProfiler().pop();
+        Profilers.get().pop();
     }
 
     @Inject(method = "renderWorld", at = @At("TAIL"))

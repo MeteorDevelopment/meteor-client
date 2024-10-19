@@ -72,24 +72,24 @@ public class PlayerUtils {
         double velZ = 0;
 
         boolean a = false;
-        if (mc.player.input.pressingForward) {
+        if (mc.player.input.playerInput.forward()) {
             velX += forward.x / 20 * bps;
             velZ += forward.z / 20 * bps;
             a = true;
         }
-        if (mc.player.input.pressingBack) {
+        if (mc.player.input.playerInput.backward()) {
             velX -= forward.x / 20 * bps;
             velZ -= forward.z / 20 * bps;
             a = true;
         }
 
         boolean b = false;
-        if (mc.player.input.pressingRight) {
+        if (mc.player.input.playerInput.right()) {
             velX += right.x / 20 * bps;
             velZ += right.z / 20 * bps;
             b = true;
         }
-        if (mc.player.input.pressingLeft) {
+        if (mc.player.input.playerInput.left()) {
             velX -= right.x / 20 * bps;
             velZ -= right.z / 20 * bps;
             b = true;
@@ -108,7 +108,7 @@ public class PlayerUtils {
         double x = MathHelper.floor(mc.player.getX()) + 0.5;
         double z = MathHelper.floor(mc.player.getZ()) + 0.5;
         mc.player.setPosition(x, mc.player.getY(), z);
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround(), mc.player.horizontalCollision));
     }
 
     public static boolean canSeeEntity(Entity entity) {

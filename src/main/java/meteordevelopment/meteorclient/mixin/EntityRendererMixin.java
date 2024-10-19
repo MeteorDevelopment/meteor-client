@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import meteordevelopment.meteorclient.mixininterface.IEntityRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.systems.modules.render.Nametags;
@@ -16,27 +15,24 @@ import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShader
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.LightType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityRenderer.class)
-public abstract class EntityRendererMixin<T extends Entity> implements IEntityRenderer {
-    @Shadow
-    public abstract Identifier getTexture(Entity entity);
+public abstract class EntityRendererMixin<T extends Entity, S extends EntityRenderState> {
 
     @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)
-    private void onRenderLabel(T entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float tickDelta, CallbackInfo ci) {
+    private void onRenderLabel(S state, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         if (PostProcessShaders.rendering) ci.cancel();
         if (Modules.get().get(NoRender.class).noNametags()) ci.cancel();
         if (!(entity instanceof PlayerEntity)) return;
@@ -58,10 +54,5 @@ public abstract class EntityRendererMixin<T extends Entity> implements IEntityRe
     @ModifyReturnValue(method = "getBlockLight", at = @At("RETURN"))
     private int onGetBlockLight(int original) {
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.BLOCK), original);
-    }
-
-    @Override
-    public Identifier getTextureInterface(Entity entity) {
-        return getTexture(entity);
     }
 }

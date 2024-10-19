@@ -26,7 +26,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ElytraItem;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -358,7 +357,7 @@ public class ElytraFly extends Module {
             enableGroundListener();
         }
 
-        if (mc.player.isFallFlying() && instaDrop.get()) {
+        if (mc.player.isGliding() && instaDrop.get()) {
             enableInstaDropListener();
         }
 
@@ -367,11 +366,11 @@ public class ElytraFly extends Module {
 
     @EventHandler
     private void onPlayerMove(PlayerMoveEvent event) {
-        if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem)) return;
+        if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).contains(DataComponentTypes.GLIDER))) return;
 
         currentMode.autoTakeoff();
 
-        if (mc.player.isFallFlying()) {
+        if (mc.player.isGliding()) {
 
             if (flightMode.get() != ElytraFlightModes.Bounce) {
                 currentMode.velX = 0;
@@ -413,7 +412,7 @@ public class ElytraFly extends Module {
             }
         }
 
-        if (noCrash.get() && mc.player.isFallFlying() && flightMode.get() != ElytraFlightModes.Bounce) {
+        if (noCrash.get() && mc.player.isGliding() && flightMode.get() != ElytraFlightModes.Bounce) {
             Vec3d lookAheadPos = mc.player.getPos().add(mc.player.getVelocity().normalize().multiply(crashLookAhead.get()));
             RaycastContext raycastContext = new RaycastContext(mc.player.getPos(), new Vec3d(lookAheadPos.getX(), mc.player.getY(), lookAheadPos.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
             BlockHitResult hitResult = mc.world.raycast(raycastContext);
@@ -422,7 +421,7 @@ public class ElytraFly extends Module {
             }
         }
 
-        if (autoHover.get() && mc.player.input.sneaking && !Modules.get().get(Freecam.class).isActive() && mc.player.isFallFlying() && flightMode.get() != ElytraFlightModes.Bounce) {
+        if (autoHover.get() && mc.player.input.playerInput.sneak() && !Modules.get().get(Freecam.class).isActive() && mc.player.isGliding() && flightMode.get() != ElytraFlightModes.Bounce) {
             BlockState underState = mc.world.getBlockState(mc.player.getBlockPos().down());
             Block under = underState.getBlock();
             BlockState under2State = mc.world.getBlockState(mc.player.getBlockPos().down().down());
@@ -445,14 +444,13 @@ public class ElytraFly extends Module {
                 if (mc.player.getPos().y <= mc.player.getBlockPos().down().getY() + 1.34f) {
                     ((IVec3d)event.movement).set(event.movement.x, 0, event.movement.z);
                     mc.player.setSneaking(false);
-                    mc.player.input.sneaking = false;
                 }
             }
         }
     }
 
     public boolean canPacketEfly() {
-        return isActive() && flightMode.get() == ElytraFlightModes.Packet && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem && !mc.player.isOnGround();
+        return isActive() && flightMode.get() == ElytraFlightModes.Packet && mc.player.getEquippedStack(EquipmentSlot.CHEST).contains(DataComponentTypes.GLIDER) && !mc.player.isOnGround();
     }
 
     @EventHandler
@@ -514,9 +512,9 @@ public class ElytraFly extends Module {
     private class StaticInstaDropListener {
         @EventHandler
         private void onInstadropTick(TickEvent.Post event) {
-            if (mc.player != null && mc.player.isFallFlying()) {
+            if (mc.player != null && mc.player.isGliding()) {
                 mc.player.setVelocity(0, 0, 0);
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
             } else {
                 disableInstaDropListener();
             }

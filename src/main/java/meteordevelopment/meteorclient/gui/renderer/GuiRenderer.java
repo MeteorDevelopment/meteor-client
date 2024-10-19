@@ -106,7 +106,7 @@ public class GuiRenderer {
 
         r.render(drawContext.getMatrices());
 
-        GL.bindTexture(TEXTURE.getGlId());
+        GL.getTexture(TEXTURE.getGlId());
         rTex.render(drawContext.getMatrices());
 
         // Normal text

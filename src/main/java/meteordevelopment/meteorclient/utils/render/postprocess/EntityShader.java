@@ -15,7 +15,7 @@ public abstract class EntityShader extends PostProcessShader {
         WorldRenderer worldRenderer = mc.worldRenderer;
         WorldRendererAccessor wra = (WorldRendererAccessor) worldRenderer;
         prevBuffer = worldRenderer.getEntityOutlinesFramebuffer();
-        wra.setEntityOutlinesFramebuffer(framebuffer);
+        wra.setEntityOutlineFramebuffer(framebuffer);
     }
 
     @Override
@@ -24,7 +24,7 @@ public abstract class EntityShader extends PostProcessShader {
 
         WorldRenderer worldRenderer = mc.worldRenderer;
         WorldRendererAccessor wra = (WorldRendererAccessor) worldRenderer;
-        wra.setEntityOutlinesFramebuffer(prevBuffer);
+        wra.setEntityOutlineFramebuffer(prevBuffer);
         prevBuffer = null;
     }
 

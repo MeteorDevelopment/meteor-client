@@ -25,6 +25,6 @@ public class SoundEventListSettingScreen extends RegistryListSettingScreen<Sound
 
     @Override
     protected String getValueName(SoundEvent value) {
-        return value.getId().getPath();
+        return value.id().getPath();
     }
 }

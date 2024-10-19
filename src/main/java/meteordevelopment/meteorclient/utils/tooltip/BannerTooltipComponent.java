@@ -14,7 +14,7 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
-import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.render.model.ModelBaker;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BannerPatternsComponent;
@@ -48,8 +48,8 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public int getHeight() {
-        return 32 * 5 - 2;
+    public int getHeight(TextRenderer textRenderer) {
+        return 32 * 5 -2;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
         DiffuseLighting.disableGuiDepthLighting();
         MatrixStack matrices = context.getMatrices();
         matrices.push();
@@ -80,7 +80,7 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
             0xF000F0,
             OverlayTexture.DEFAULT_UV,
             bannerField,
-            ModelLoader.BANNER_BASE,
+            ModelBaker.BANNER_BASE,
             true,
             color,
             patterns

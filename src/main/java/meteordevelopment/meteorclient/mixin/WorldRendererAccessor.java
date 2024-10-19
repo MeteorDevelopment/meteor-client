@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(WorldRenderer.class)
 public interface WorldRendererAccessor {
     @Accessor
-    void setEntityOutlinesFramebuffer(Framebuffer framebuffer);
+    void setEntityOutlineFramebuffer(Framebuffer framebuffer);
 
     @Accessor("blockBreakingInfos")
     Int2ObjectMap<BlockBreakingInfo> getBlockBreakingInfos();

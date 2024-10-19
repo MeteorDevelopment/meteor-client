@@ -5,9 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import java.util.HashMap;
 import java.util.Set;
-import java.util.Map;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;

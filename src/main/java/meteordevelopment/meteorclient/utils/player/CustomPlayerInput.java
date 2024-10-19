@@ -6,25 +6,23 @@
 package meteordevelopment.meteorclient.utils.player;
 
 import net.minecraft.client.input.Input;
+import net.minecraft.util.PlayerInput;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class CustomPlayerInput extends Input {
     @Override
     public void tick(boolean slowDown, float f) {
-        movementForward = pressingForward == pressingBack ? 0.0F : (pressingForward ? 1.0F : -1.0F);
-        movementSideways = pressingLeft == pressingRight ? 0.0F : (pressingLeft ? 1.0F : -1.0F);
+        movementForward = mc.player.input.playerInput.forward() == mc.player.input.playerInput.backward() ? 0.0F : (mc.player.input.playerInput.forward() ? 1.0F : -1.0F);
+        movementSideways = mc.player.input.playerInput.left() == mc.player.input.playerInput.right() ? 0.0F : (mc.player.input.playerInput.left() ? 1.0F : -1.0F);
 
-        if (sneaking) {
+        if (mc.player.isSneaking()) {
             movementForward *= 0.3;
             movementSideways *= 0.3;
         }
     }
 
     public void stop() {
-        pressingForward = false;
-        pressingBack = false;
-        pressingRight = false;
-        pressingLeft = false;
-        jumping = false;
-        sneaking = false;
+        mc.player.input.playerInput = PlayerInput.DEFAULT;
     }
 }

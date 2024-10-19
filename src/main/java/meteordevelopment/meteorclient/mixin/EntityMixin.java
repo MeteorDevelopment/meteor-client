@@ -189,7 +189,7 @@ public abstract class EntityMixin {
         if ((Object) this != mc.player) return;
 
         if (Modules.get().get(ElytraFly.class).canPacketEfly()) {
-            info.setReturnValue(EntityPose.FALL_FLYING);
+            info.setReturnValue(EntityPose.GLIDING);
         }
     }
 

@@ -111,7 +111,7 @@ public class NoFall extends Module {
 
 
         if (!Modules.get().isActive(Flight.class)) {
-            if (mc.player.isFallFlying()) return;
+            if (mc.player.isGliding()) return;
             if (mc.player.getVelocity().y > -0.5) return;
             ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
         } else {

@@ -78,7 +78,7 @@ public class HudRenderer {
                 FontHolder fontHolder = it.next();
 
                 if (fontHolder.visited) {
-                    GL.bindTexture(fontHolder.font.texture.getGlId());
+                    GL.getTexture(fontHolder.font.texture.getGlId());
                     fontHolder.getMesh().render(null);
                 }
                 else {
@@ -117,7 +117,7 @@ public class HudRenderer {
     }
 
     public void texture(Identifier id, double x, double y, double width, double height, Color color) {
-        GL.bindTexture(id);
+        GL.getTexture(id);
 
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);

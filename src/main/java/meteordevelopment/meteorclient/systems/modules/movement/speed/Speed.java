@@ -113,7 +113,7 @@ public class Speed extends Module {
 
     @EventHandler
     private void onPlayerMove(PlayerMoveEvent event) {
-        if (event.type != MovementType.SELF || mc.player.isFallFlying() || mc.player.isClimbing() || mc.player.getVehicle() != null) return;
+        if (event.type != MovementType.SELF || mc.player.isGliding() || mc.player.isClimbing() || mc.player.getVehicle() != null) return;
         if (!whenSneaking.get() && mc.player.isSneaking()) return;
         if (vanillaOnGround.get() && !mc.player.isOnGround() && speedMode.get() == SpeedModes.Vanilla) return;
         if (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava())) return;
@@ -127,7 +127,7 @@ public class Speed extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.player.isFallFlying() || mc.player.isClimbing() || mc.player.getVehicle() != null) return;
+        if (mc.player.isGliding() || mc.player.isClimbing() || mc.player.getVehicle() != null) return;
         if (!whenSneaking.get() && mc.player.isSneaking()) return;
         if (vanillaOnGround.get() && !mc.player.isOnGround() && speedMode.get() == SpeedModes.Vanilla) return;
         if (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava())) return;

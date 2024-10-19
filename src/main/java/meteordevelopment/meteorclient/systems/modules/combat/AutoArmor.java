@@ -16,10 +16,10 @@ import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKey;
@@ -151,7 +151,7 @@ public class AutoArmor extends Module {
     }
 
     private int getItemSlotId(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ElytraItem) return 2;
+        if (itemStack.contains(DataComponentTypes.GLIDER)) return 2;
         return ((ArmorItem) itemStack.getItem()).getSlotType().getEntitySlotId();
     }
 

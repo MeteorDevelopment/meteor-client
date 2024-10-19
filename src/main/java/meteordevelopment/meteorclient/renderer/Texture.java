@@ -66,7 +66,7 @@ public class Texture {
     }
 
     public void bind(int slot) {
-        GL.bindTexture(id, slot);
+        GL.getTexture(id, slot);
     }
     public void bind() {
         bind(0);

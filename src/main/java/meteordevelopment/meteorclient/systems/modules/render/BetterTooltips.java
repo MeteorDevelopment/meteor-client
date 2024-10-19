@@ -28,9 +28,11 @@ import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.Bucketable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.*;
+import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.RawFilteredPair;
@@ -269,9 +271,13 @@ public class BetterTooltips extends Module {
                     }
                 }
             } else {
-                FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
-                if (food != null) {
-                    food.effects().forEach(e -> event.appendStart(getStatusText(e.effect())));
+                ConsumableComponent consumable = event.itemStack().get(DataComponentTypes.CONSUMABLE);
+                if (consumable != null) {
+                    consumable.onConsumeEffects().stream()
+                        .filter(ApplyEffectsConsumeEffect.class::isInstance)
+                        .map(ApplyEffectsConsumeEffect.class::cast)
+                        .flatMap(apply -> apply.effects().stream())
+                        .forEach(effect -> event.appendStart(getStatusText(effect)));
                 }
             }
         }
@@ -295,7 +301,7 @@ public class BetterTooltips extends Module {
         // Item size tooltip
         if (byteSize.get()) {
             try {
-                event.itemStack().encode(mc.player.getRegistryManager()).write(ByteCountDataOutput.INSTANCE);
+                event.itemStack().toNbt(mc.player.getRegistryManager()).write(ByteCountDataOutput.INSTANCE);
 
                 int byteCount = ByteCountDataOutput.INSTANCE.getCount();
                 String count;
@@ -356,7 +362,7 @@ public class BetterTooltips extends Module {
         // Fish peek
         else if (event.itemStack.getItem() instanceof EntityBucketItem bucketItem && previewEntities()) {
             EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).getEntityType();
-            Entity entity = type.create(mc.world);
+            Entity entity = type.create(mc.world, SpawnReason.NATURAL);
             if (entity != null) {
                 ((Bucketable) entity).copyDataFromNbt(event.itemStack.get(DataComponentTypes.BUCKET_ENTITY_DATA).copyNbt());
                 ((EntityAccessor) entity).setInWater(true);
@@ -397,14 +403,14 @@ public class BetterTooltips extends Module {
     private void appendPreviewTooltipText(ItemStackTooltipEvent event, boolean spacer) {
         if (!isPressed() && (
             shulkers.get() && Utils.hasItems(event.itemStack())
-            || (event.itemStack().getItem() == Items.ENDER_CHEST && echest.get())
-            || (event.itemStack().getItem() == Items.FILLED_MAP && maps.get())
-            || (event.itemStack().getItem() == Items.WRITABLE_BOOK && books.get())
-            || (event.itemStack().getItem() == Items.WRITTEN_BOOK && books.get())
-            || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get())
-            || (event.itemStack().getItem() instanceof BannerItem && banners.get())
-            || (event.itemStack().getItem() instanceof BannerPatternItem && banners.get())
-            || (event.itemStack().getItem() == Items.SHIELD && banners.get())
+                || (event.itemStack().getItem() == Items.ENDER_CHEST && echest.get())
+                || (event.itemStack().getItem() == Items.FILLED_MAP && maps.get())
+                || (event.itemStack().getItem() == Items.WRITABLE_BOOK && books.get())
+                || (event.itemStack().getItem() == Items.WRITTEN_BOOK && books.get())
+                || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get())
+                || (event.itemStack().getItem() instanceof BannerItem && banners.get())
+                || (event.itemStack().getItem() instanceof BannerPatternItem && banners.get())
+                || (event.itemStack().getItem() == Items.SHIELD && banners.get())
         )) {
             // we don't want to add the spacer if the tooltip is hidden
             if (spacer) event.appendEnd(Text.literal(""));
@@ -430,8 +436,7 @@ public class BetterTooltips extends Module {
 
             if (pages.isEmpty()) return null;
             return Text.literal(pages.getFirst().get(false));
-        }
-        else if (bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null) {
+        } else if (bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null) {
             List<RawFilteredPair<Text>> pages = bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).pages();
             if (pages.isEmpty()) return null;
 
@@ -443,7 +448,7 @@ public class BetterTooltips extends Module {
 
     private BannerPatternsComponent createBannerPatternsComponent(BannerPatternItem item) {
         // I can't imagine getting the banner pattern from a banner pattern item would fail without some serious messing around
-        return new BannerPatternsComponent.Builder().add(mc.player.getRegistryManager().getWrapperOrThrow(RegistryKeys.BANNER_PATTERN).getOrThrow(item.getPattern()).get(0), DyeColor.WHITE).build();
+        return new BannerPatternsComponent.Builder().add(mc.player.getRegistryManager().getOrThrow(RegistryKeys.BANNER_PATTERN).getOrThrow(item.getPattern()).get(0), DyeColor.WHITE).build();
     }
 
     private BannerTooltipComponent createBannerFromShield(ItemStack shieldItem) {
