@@ -15,14 +15,13 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.json.Transformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.item.ModelTransformationMode;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
@@ -53,16 +52,18 @@ public class ItemPhysics extends Module {
         MatrixStack matrices = event.matrixStack;
         matrices.push();
 
-        ItemStack itemStack = event.itemEntity.getStack();
-        BakedModel model = getModel(event.itemEntity);
+        ItemStack itemStack = event.itemEntityRenderState.stack;
+        BakedModel model = event.itemEntityRenderState.model;
+        if (model == null) return;
         ModelInfo info = getInfo(model);
 
-        random.setSeed(event.itemEntity.getId() * 2365798L);
+        random.setSeed(itemStack.isEmpty() ? 187 : Item.getRawId(itemStack.getItem()) + itemStack.getDamage());
 
         applyTransformation(matrices, model);
         matrices.translate(0, info.offsetY, 0);
-        offsetInWater(matrices, event.itemEntity);
-        preventZFighting(matrices, event.itemEntity);
+        // todo
+        // offsetInWater(matrices, event.itemEntity);
+        // preventZFighting(matrices, event.itemEntity);
 
         if (info.flat) {
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
@@ -157,16 +158,6 @@ public class ItemPhysics extends Module {
         offset = Math.min(offset * Math.max(1, distance), 0.01f); // Ensure distance is at least 1 and that final offset is not bigger than 0.01
 
         matrices.translate(0, offset, 0);
-    }
-
-    private BakedModel getModel(ItemEntity entity) {
-        ItemStack itemStack = entity.getStack();
-
-        // Mojang be like
-        if (itemStack.isOf(Items.TRIDENT)) return mc.getItemRenderer().getModels().getModelManager().getModel(ItemRenderer.TRIDENT);
-        if (itemStack.isOf(Items.SPYGLASS)) return mc.getItemRenderer().getModels().getModelManager().getModel(ItemRenderer.SPYGLASS);
-
-        return mc.getItemRenderer().getModel(itemStack, entity.getWorld(), null, entity.getId());
     }
 
     private ModelInfo getInfo(BakedModel model) {

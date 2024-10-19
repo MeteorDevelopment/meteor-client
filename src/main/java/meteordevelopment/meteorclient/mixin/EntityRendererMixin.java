@@ -13,10 +13,8 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.client.render.Frustum;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,19 +23,18 @@ import net.minecraft.world.LightType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin<T extends Entity, S extends EntityRenderState> {
 
-    @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)
-    private void onRenderLabel(S state, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-        if (PostProcessShaders.rendering) ci.cancel();
-        if (Modules.get().get(NoRender.class).noNametags()) ci.cancel();
+    @Inject(method = "getDisplayName", at = @At("HEAD"), cancellable = true)
+    private void onRenderLabel(T entity, CallbackInfoReturnable<Text> cir) {
+        if (PostProcessShaders.rendering) cir.cancel();
+        if (Modules.get().get(NoRender.class).noNametags()) cir.cancel();
         if (!(entity instanceof PlayerEntity)) return;
         if (Modules.get().get(Nametags.class).playerNametags() && !(EntityUtils.getGameMode((PlayerEntity) entity) == null && Modules.get().get(Nametags.class).excludeBots()))
-            ci.cancel();
+            cir.cancel();
     }
 
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)

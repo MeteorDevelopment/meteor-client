@@ -17,8 +17,10 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -152,7 +154,7 @@ public class AutoArmor extends Module {
 
     private int getItemSlotId(ItemStack itemStack) {
         if (itemStack.contains(DataComponentTypes.GLIDER)) return 2;
-        return ((ArmorItem) itemStack.getItem()).getSlotType().getEntitySlotId();
+        return itemStack.get(DataComponentTypes.EQUIPPABLE).slot().getEntitySlotId();
     }
 
     private int getScore(ItemStack itemStack) {
@@ -174,8 +176,21 @@ public class AutoArmor extends Module {
         score += Utils.getEnchantmentLevel(enchantments, Enchantments.PROJECTILE_PROTECTION);
         score += Utils.getEnchantmentLevel(enchantments, Enchantments.UNBREAKING);
         score += 2 * Utils.getEnchantmentLevel(enchantments, Enchantments.MENDING);
-        score += itemStack.getItem() instanceof ArmorItem armorItem ? armorItem.getProtection() : 0;
-        score += itemStack.getItem() instanceof ArmorItem armorItem ? (int) armorItem.getToughness() : 0;
+
+        if (itemStack.contains(DataComponentTypes.ATTRIBUTE_MODIFIERS)) {
+            AttributeModifiersComponent component = itemStack.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+            for (AttributeModifiersComponent.Entry modifier : component.modifiers()) {
+                if (modifier.attribute() == EntityAttributes.ARMOR || modifier.attribute() == EntityAttributes.ARMOR_TOUGHNESS) {
+                    double e = modifier.modifier().value();
+
+                    score += (int) switch (modifier.modifier().operation()) {
+                        case ADD_VALUE -> e;
+                        case ADD_MULTIPLIED_BASE -> e * mc.player.getAttributeBaseValue(modifier.attribute());
+                        case ADD_MULTIPLIED_TOTAL -> e * score;
+                    };
+                }
+            }
+        }
 
         return score;
     }

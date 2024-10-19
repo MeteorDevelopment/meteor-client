@@ -65,24 +65,15 @@ public abstract class EndCrystalEntityRendererMixin {
 
     // Bounce
     @Redirect(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EndCrystalEntityRenderer;getYOffset(F)F"))
-    private float getYOff(float f) {
+    private float getYOff(float age) {
         Chams module = Modules.get().get(Chams.class);
-        if (!module.isActive() || !module.crystals.get()) return getYOffset(f);
+        if (!module.isActive() || !module.crystals.get()) return getYOffset(age);
 
-        float f = (float) crystal.endCrystalAge + tickDelta;
-        float g = MathHelper.sin(f * 0.2F) / 2.0F + 0.5F;
+        float g = MathHelper.sin(age * 0.2F) / 2.0F + 0.5F;
         g = (g * g + g) * 0.4F * module.crystalsBounce.get().floatValue();
         return g - 1.4F;
     }
 
-    // Rotation speed
-    @ModifyArgs(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/RotationAxis;rotationDegrees(F)Lorg/joml/Quaternionf;"))
-    private void modifySpeed(Args args) {
-        Chams module = Modules.get().get(Chams.class);
-        if (!module.isActive() || !module.crystals.get()) return;
-
-        args.set(0, ((float) args.get(0)) * module.crystalsRotationSpeed.get().floatValue());
-    }
 
     // Core
     @Redirect(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EndCrystalEntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V", ordinal = 3))
