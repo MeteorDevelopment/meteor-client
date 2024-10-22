@@ -134,7 +134,7 @@ public class DamageUtils {
      * @see PlayerEntity#attack(Entity)
      */
     public static float getAttackDamage(LivingEntity attacker, LivingEntity target) {
-        float itemDamage = (float) attacker.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        float itemDamage = (float) attacker.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
         DamageSource damageSource = attacker instanceof PlayerEntity player ? mc.world.getDamageSources().playerAttack(player) : mc.world.getDamageSources().mobAttack(attacker);
 
         // Get enchant damage
@@ -202,7 +202,7 @@ public class DamageUtils {
         }
 
         // Armor reduction
-        damage = DamageUtil.getDamageLeft(entity, damage, damageSource, getArmor(entity), (float) entity.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft(entity, damage, damageSource, getArmor(entity), (float) entity.getAttributeValue(EntityAttributes.ARMOR_TOUGHNESS));
 
         // Resistance reduction
         damage = resistanceReduction(entity, damage);
@@ -214,7 +214,7 @@ public class DamageUtils {
     }
 
     private static float getArmor(LivingEntity entity) {
-        return (float) Math.floor(entity.getAttributeValue(EntityAttributes.GENERIC_ARMOR));
+        return (float) Math.floor(entity.getAttributeValue(EntityAttributes.ARMOR));
     }
 
     /**
