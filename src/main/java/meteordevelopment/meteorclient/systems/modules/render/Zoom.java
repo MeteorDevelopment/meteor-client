@@ -97,7 +97,7 @@ public class Zoom extends Module {
         mc.options.smoothCameraEnabled = cinematic.get();
 
         if (!cinematic.get()) {
-            mc.options.getMouseSensitivity().setValue(preMouseSensitivity / Math.max(value() * 0.5, 1));
+            mc.options.getMouseSensitivity().setValue(preMouseSensitivity / Math.max(getScaling() * 0.5, 1));
         }
 
         if (time == 0) {
@@ -133,13 +133,13 @@ public class Zoom extends Module {
 
     @EventHandler
     private void onGetFov(GetFovEvent event) {
-        event.fov /= value();
+        event.fov /= getScaling();
 
         if (lastFov != event.fov) mc.worldRenderer.scheduleTerrainUpdate();
         lastFov = event.fov;
     }
 
-    private double value() {
+    public double getScaling() {
         double delta = time < 0.5 ? 4 * time * time * time : 1 - Math.pow(-2 * time + 2, 3) / 2; // Ease in out cubic
         return MathHelper.lerp(delta, 1, value);
     }
