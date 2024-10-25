@@ -107,7 +107,7 @@ public class WaypointsModule extends Module {
 
             // Continue if this waypoint should not be rendered
             if (dist > waypoint.maxVisible.get()) continue;
-            if (!NametagUtils.to2D(pos, 1)) continue;
+            if (!NametagUtils.to2D(pos, waypoint.scale.get() - 0.2)) continue;
 
             // Calculate alpha and distance to center of the screen
             double distToCenter = pos.distance(center);
@@ -119,7 +119,6 @@ public class WaypointsModule extends Module {
             }
 
             // Render
-            NametagUtils.scale = waypoint.scale.get() - 0.2;
             NametagUtils.begin(pos);
 
             // Render icon
@@ -129,7 +128,7 @@ public class WaypointsModule extends Module {
             if (distToCenter <= textRenderDist) {
                 // Setup text rendering
                 int preTextA = TEXT.a;
-                TEXT.a *= a;
+                TEXT.a *= (int) a;
                 text.begin();
 
                 // Render name
