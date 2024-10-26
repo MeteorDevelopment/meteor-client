@@ -5,12 +5,18 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.StatusEffectInstanceAccessor;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.orbit.EventHandler;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.registry.Registries;
 import net.minecraft.world.LightType;
 
 public class Fullbright extends Module {
@@ -62,6 +68,9 @@ public class Fullbright extends Module {
     @Override
     public void onDeactivate() {
         if (mode.get() == Mode.Luminance) mc.worldRenderer.reload();
+        else if (mode.get() == Mode.Potion && mc.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffects.NIGHT_VISION.value()))) {
+            mc.player.removeStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffects.NIGHT_VISION.value()));
+        }
     }
 
     public int getLuminance(LightType type) {
@@ -73,8 +82,20 @@ public class Fullbright extends Module {
         return isActive() && mode.get() == Mode.Gamma;
     }
 
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (mc.player == null) return;
+        if (mc.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffects.NIGHT_VISION.value()))) {
+            StatusEffectInstance instance = mc.player.getStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffects.NIGHT_VISION.value()));
+            if (instance != null && instance.getDuration() < 1000) ((StatusEffectInstanceAccessor) instance).setDuration(1000);
+        } else {
+            mc.player.addStatusEffect(new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(StatusEffects.NIGHT_VISION.value()), 1000, 0));
+        }
+    }
+
     public enum Mode {
         Gamma,
+        Potion,
         Luminance
     }
 }
