@@ -333,7 +333,7 @@ public class Notifier extends Module {
             while (timer >= notificationDelay.get() && !messageQueue.isEmpty()) {
                 timer = 0;
                 if (simpleNotifications.get()) {
-                    mc.player.sendMessage(messageQueue.removeFirst());
+                    mc.player.sendMessage(messageQueue.removeFirst(), false);
                 } else {
                     ChatUtils.sendMsg(messageQueue.removeFirst());
                 }

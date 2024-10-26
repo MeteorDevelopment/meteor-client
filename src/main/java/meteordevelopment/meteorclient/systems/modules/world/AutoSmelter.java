@@ -14,16 +14,13 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.input.SingleStackRecipeInput;
+import net.minecraft.recipe.RecipePropertySet;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 
 import java.util.List;
-import java.util.Map;
 
 public class AutoSmelter extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -53,21 +50,18 @@ public class AutoSmelter extends Module {
         .build()
     );
 
-    private Map<Item, Integer> fuelTimeMap;
-
     public AutoSmelter() {
         super(Categories.World, "auto-smelter", "Automatically smelts items from your inventory");
     }
 
     private boolean fuelItemFilter(Item item) {
-        if (!Utils.canUpdate() && fuelTimeMap == null) return false;
+        if (!Utils.canUpdate()) return false;
 
-        if (fuelTimeMap == null) fuelTimeMap = AbstractFurnaceBlockEntity.createFuelTimeMap();
-        return fuelTimeMap.containsKey(item);
+        return mc.getNetworkHandler().getFuelRegistry().getFuelItems().contains(item);
     }
 
     private boolean smeltableItemFilter(Item item) {
-        return mc.world != null && mc.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SingleStackRecipeInput(item.getDefaultStack()), mc.world).isPresent();
+        return mc.world != null && mc.world.getRecipeManager().getPropertySet(RecipePropertySet.FURNACE_INPUT).canUse(item.getDefaultStack());
     }
 
     public void tick(AbstractFurnaceScreenHandler c) {

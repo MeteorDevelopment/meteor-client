@@ -23,6 +23,90 @@ public class CustomPlayerInput extends Input {
     }
 
     public void stop() {
-        mc.player.input.playerInput = PlayerInput.DEFAULT;
+        this.playerInput = PlayerInput.DEFAULT;
+    }
+
+    public void forward(boolean bool) {
+        this.playerInput = new PlayerInput(
+            bool,
+            this.playerInput.backward(),
+            this.playerInput.left(),
+            this.playerInput.right(),
+            this.playerInput.jump(),
+            this.playerInput.sneak(),
+            this.playerInput.sprint()
+        );
+    }
+
+    public void backward(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            bool,
+            this.playerInput.left(),
+            this.playerInput.right(),
+            this.playerInput.jump(),
+            this.playerInput.sneak(),
+            this.playerInput.sprint()
+        );
+    }
+
+    public void left(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            this.playerInput.backward(),
+            bool,
+            this.playerInput.right(),
+            this.playerInput.jump(),
+            this.playerInput.sneak(),
+            this.playerInput.sprint()
+        );
+    }
+
+    public void right(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            this.playerInput.backward(),
+            this.playerInput.left(),
+            bool,
+            this.playerInput.jump(),
+            this.playerInput.sneak(),
+            this.playerInput.sprint()
+        );
+    }
+
+    public void jump(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            this.playerInput.backward(),
+            this.playerInput.left(),
+            this.playerInput.right(),
+            bool,
+            this.playerInput.sneak(),
+            this.playerInput.sprint()
+        );
+    }
+
+    public void sneak(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            this.playerInput.backward(),
+            this.playerInput.left(),
+            this.playerInput.right(),
+            this.playerInput.jump(),
+            bool,
+            this.playerInput.sprint()
+        );
+    }
+
+    public void sprint(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            this.playerInput.backward(),
+            this.playerInput.left(),
+            this.playerInput.right(),
+            this.playerInput.jump(),
+            this.playerInput.sneak(),
+            bool
+        );
     }
 }

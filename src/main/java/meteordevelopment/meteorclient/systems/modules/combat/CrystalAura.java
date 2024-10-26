@@ -861,9 +861,9 @@ public class CrystalAura extends Module {
     }
 
     private boolean isValidWeaknessItem(ItemStack itemStack) {
-        if (!(itemStack.getItem() instanceof ToolItem) || itemStack.getItem() instanceof HoeItem) return false;
+        if (!(itemStack.getItem() instanceof MiningToolItem) || itemStack.getItem() instanceof HoeItem) return false;
 
-        ToolMaterial material = ((ToolItem) itemStack.getItem()).getMaterial();
+        ToolMaterial material = ((MiningToolItem) itemStack.getItem()).getMaterial();
         return material == ToolMaterials.DIAMOND || material == ToolMaterials.NETHERITE;
     }
 

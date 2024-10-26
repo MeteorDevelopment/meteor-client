@@ -86,7 +86,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
         VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
         entity.age = mc.player.age;
         entity.setCustomNameVisible(false);
-        entityRenderDispatcher.render(entity, 0, 0, 0, 0.f, 1.f, matrices, immediate, 15728880);
+        entityRenderDispatcher.render(entity, 0, 0, 0, 1.f, matrices, immediate, 15728880);
         immediate.draw();
         entityRenderDispatcher.setRenderShadows(true);
         matrices.pop();

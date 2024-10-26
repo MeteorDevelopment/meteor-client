@@ -222,7 +222,7 @@ public class AutoTool extends Module {
     }
 
     public static boolean isTool(Item item) {
-        return item instanceof ToolItem || item instanceof ShearsItem;
+        return item instanceof MiningToolItem || item instanceof ShearsItem;
     }
     public static boolean isTool(ItemStack itemStack) {
         return isTool(itemStack.getItem());
