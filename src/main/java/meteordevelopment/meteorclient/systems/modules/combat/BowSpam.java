@@ -67,7 +67,6 @@ public class BowSpam extends Module {
             if (!isBow) return;
 
             if (mc.player.getItemUseTime() >= charge.get()) {
-                mc.player.stopUsingItem();
                 mc.interactionManager.stopUsingItem(mc.player);
             } else {
                 setPressed(true);
