@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.mixin.ProjectileInGroundAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MissHitResult;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ChargedProjectilesComponent;
 import net.minecraft.entity.Entity;
@@ -44,7 +45,7 @@ public class ProjectileEntitySimulator {
 
     // held items
 
-    public boolean set(Entity user, ItemStack itemStack, double simulated, boolean accurate, double tickDelta) {
+    public boolean set(Entity user, ItemStack itemStack, double simulated, boolean accurate, float tickDelta) {
         Item item = itemStack.getItem();
 
         switch (item) {
@@ -82,11 +83,19 @@ public class ProjectileEntitySimulator {
         return true;
     }
 
-    public void set(Entity user, double roll, double speed, double simulated, double gravity, double waterDrag, boolean accurate, double tickDelta, EntityType<?> type) {
+    public void set(Entity user, double roll, double speed, double simulated, double gravity, double waterDrag, boolean accurate, float tickDelta, EntityType<?> type) {
         Utils.set(pos, user, tickDelta).add(0, user.getEyeHeight(user.getPose()), 0);
 
-        double yaw = MathHelper.lerp(tickDelta, user.prevYaw, user.getYaw());
-        double pitch = MathHelper.lerp(tickDelta, user.prevPitch, user.getPitch());
+        double yaw;
+        double pitch;
+
+        if (user == mc.player && Rotations.rotating) {
+            yaw = Rotations.serverYaw;
+            pitch = Rotations.serverPitch;
+        } else {
+            yaw = user.getYaw(tickDelta);
+            pitch = user.getPitch(tickDelta);
+        }
 
         double x, y, z;
 
@@ -178,9 +187,17 @@ public class ProjectileEntitySimulator {
         this.height = entity.getHeight();
     }
 
-    public void setFishingBobber(Entity user, double tickDelta) {
-        double yaw = MathHelper.lerp(tickDelta, user.prevYaw, user.getYaw());
-        double pitch = MathHelper.lerp(tickDelta, user.prevPitch, user.getPitch());
+    public void setFishingBobber(Entity user, float tickDelta) {
+        double yaw;
+        double pitch;
+
+        if (user == mc.player && Rotations.rotating) {
+            yaw = Rotations.serverYaw;
+            pitch = Rotations.serverPitch;
+        } else {
+            yaw = user.getYaw(tickDelta);
+            pitch = user.getPitch(tickDelta);
+        }
 
         double h = Math.cos(-yaw * 0.017453292F - 3.1415927F);
         double i = Math.sin(-yaw * 0.017453292F - 3.1415927F);
