@@ -293,14 +293,12 @@ public class Jesus extends Module {
     private boolean waterShouldBeSolid() {
         if (EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR || mc.player.getAbilities().flying) return false;
 
-
         if (mc.player.getVehicle() != null) {
             EntityType<?> vehicle = mc.player.getVehicle().getType();
             if (vehicle == EntityType.BOAT || vehicle == EntityType.CHEST_BOAT) return false;
         }
 
         if (Modules.get().get(Flight.class).isActive()) return false;
-
 
         if (dipIfBurning.get() && mc.player.isOnFire()) return false;
 
