@@ -128,8 +128,11 @@
     "MinecraftClientAccessor",
     "MinecraftClientMixin",
     "MinecraftServerAccessor",
+    "MiningToolItemMixin",
     "MobSpawnerBlockEntityRendererMixin",
     "MouseMixin",
+    "MultiPhaseMixin",
+    "MultiPhaseParametersMixin",
     "MultiplayerScreenMixin",
     "MutableTextMixin",
     "PacketByteBufMixin",
@@ -186,8 +189,7 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor",
-    "MiningToolItemMixin"
+    "YggdrasilMinecraftSessionServiceAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

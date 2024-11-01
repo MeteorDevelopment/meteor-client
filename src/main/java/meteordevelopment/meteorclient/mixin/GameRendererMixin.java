@@ -43,7 +43,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
@@ -73,8 +72,8 @@ public abstract class GameRendererMixin {
     @Unique
     private final MatrixStack matrices = new MatrixStack();
 
-    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 1) Matrix4f matrix4f2, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
+    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
+    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 2) Matrix4f matrix4f3, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
         if (!Utils.canUpdate()) return;
 
         Profilers.get().push(MeteorClient.MOD_ID + "_render");
@@ -87,11 +86,11 @@ public abstract class GameRendererMixin {
         // Call utility classes
 
         RenderUtils.updateScreenCenter();
-        NametagUtils.onRender(matrix4f2);
+        NametagUtils.onRender(matrix4f3);
 
         // Update model view matrix
 
-        RenderSystem.getModelViewStack().pushMatrix().mul(matrix4f2);
+        RenderSystem.getModelViewStack().pushMatrix().mul(matrix4f3);
 
         matrices.push();
 
