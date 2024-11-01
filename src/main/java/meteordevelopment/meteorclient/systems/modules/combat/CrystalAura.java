@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IBox;
+import meteordevelopment.meteorclient.mixininterface.IMiningToolItem;
 import meteordevelopment.meteorclient.mixininterface.IRaycastContext;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -861,10 +862,10 @@ public class CrystalAura extends Module {
     }
 
     private boolean isValidWeaknessItem(ItemStack itemStack) {
-        if (!(itemStack.getItem() instanceof MiningToolItem) || itemStack.getItem() instanceof HoeItem) return false;
+        if (!(itemStack.getItem() instanceof IMiningToolItem) || itemStack.getItem() instanceof HoeItem) return false;
 
-        ToolMaterial material = ((MiningToolItem) itemStack.getItem()).getMaterial();
-        return material == ToolMaterials.DIAMOND || material == ToolMaterials.NETHERITE;
+        ToolMaterial material = ((IMiningToolItem) itemStack.getItem()).meteor$getMaterial();
+        return material == ToolMaterial.DIAMOND || material == ToolMaterial.NETHERITE;
     }
 
     private void attackCrystal(Entity entity) {

@@ -186,7 +186,8 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor"
+    "YggdrasilMinecraftSessionServiceAccessor",
+    "MiningToolItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1
