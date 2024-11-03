@@ -85,6 +85,7 @@
     "EntityMixin",
     "EntityRenderDispatcherMixin",
     "EntityRendererMixin",
+    "EntityRenderStateMixin",
     "EntityTrackingSectionAccessor",
     "EntityVelocityUpdateS2CPacketAccessor",
     "ExplosionS2CPacketMixin",

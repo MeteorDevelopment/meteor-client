@@ -142,51 +142,11 @@ public class Chams extends Module {
         .build()
     );
 
-    public final Setting<Boolean> renderCore = sgCrystals.add(new BoolSetting.Builder()
-        .name("render-core")
-        .description("Enables rendering of the core of the crystal.")
-        .defaultValue(false)
-        .visible(crystals::get)
-        .build()
-    );
-
-    public final Setting<SettingColor> crystalsCoreColor = sgCrystals.add(new ColorSetting.Builder()
-        .name("core-color")
-        .description("The color of the core of the crystal.")
+    public final Setting<SettingColor> crystalsColor = sgCrystals.add(new ColorSetting.Builder()
+        .name("crystal-color")
+        .description("The color of the of the crystal.")
         .defaultValue(new SettingColor(198, 135, 254, 255))
-        .visible(() -> crystals.get() && renderCore.get())
-        .build()
-    );
-
-    public final Setting<Boolean> renderFrame1 = sgCrystals.add(new BoolSetting.Builder()
-        .name("render-inner-frame")
-        .description("Enables rendering of the inner frame of the crystal.")
-        .defaultValue(true)
         .visible(crystals::get)
-        .build()
-    );
-
-    public final Setting<SettingColor> crystalsFrame1Color = sgCrystals.add(new ColorSetting.Builder()
-        .name("inner-frame-color")
-        .description("The color of the inner frame of the crystal.")
-        .defaultValue(new SettingColor(198, 135, 254, 255))
-        .visible(() -> crystals.get() && renderFrame1.get())
-        .build()
-    );
-
-    public final Setting<Boolean> renderFrame2 = sgCrystals.add(new BoolSetting.Builder()
-        .name("render-outer-frame")
-        .description("Enables rendering of the outer frame of the crystal.")
-        .defaultValue(true)
-        .visible(crystals::get)
-        .build()
-    );
-
-    public final Setting<SettingColor> crystalsFrame2Color = sgCrystals.add(new ColorSetting.Builder()
-        .name("outer-frame-color")
-        .description("The color of the outer frame of the crystal.")
-        .defaultValue(new SettingColor(198, 135, 254, 255))
-        .visible(() -> crystals.get() && renderFrame2.get())
         .build()
     );
 

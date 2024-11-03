@@ -76,7 +76,8 @@ public abstract class WorldRendererMixin {
 
     // Entity Shaders
 
-    @Inject(method = "render", at = @At("HEAD"))
+    // TODO: update
+    /*@Inject(method = "render", at = @At("HEAD"))
     private void onRenderHead(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
         PostProcessShaders.beginRender();
     }
@@ -105,7 +106,7 @@ public abstract class WorldRendererMixin {
     @Inject(method = "renderMain", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
     private void onRender(FrameGraphBuilder frameGraphBuilder, Frustum frustum, Camera camera, Matrix4f positionMatrix, Matrix4f projectionMatrix, Fog fog, boolean renderBlockOutline, boolean hasEntitiesToRender, RenderTickCounter renderTickCounter, Profiler profiler, CallbackInfo ci) {
         PostProcessShaders.endRender();
-    }
+    }*/
 
     @ModifyExpressionValue(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;hasOutline(Lnet/minecraft/entity/Entity;)Z"))
     private boolean shouldMobGlow(boolean original, @Local Entity entity) {

@@ -5,27 +5,47 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
-import meteordevelopment.meteorclient.systems.modules.render.HandView;
-import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerEntityRenderer.class)
 public abstract class PlayerEntityRendererMixin {
-    @ModifyArgs(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V", ordinal = 0))
+    // Chams
+
+    @Unique
+    private Chams chams;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void init$chams(CallbackInfo info) {
+        chams = Modules.get().get(Chams.class);
+    }
+
+    // Chams - Player scale
+
+    @Inject(method = "updateRenderState(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;F)V", at = @At("RETURN"))
+    private void updateRenderState$scale(AbstractClientPlayerEntity player, PlayerEntityRenderState state, float f, CallbackInfo info) {
+        if (!chams.isActive() || !chams.players.get()) return;
+        if (chams.ignoreSelf.get() && player == MeteorClient.mc.player) return;
+
+        float v = chams.playersScale.get().floatValue();
+        state.baseScale *= v;
+
+        //noinspection DataFlowIssue
+        ((IVec3d) state.nameLabelPos).setY(state.nameLabelPos.y + (player.getHeight() * v - player.getHeight()));
+    }
+
+    // TODO: update
+    /*@ModifyArgs(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V", ordinal = 0))
     private void modifyRenderLayer(Args args, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, ModelPart arm, ModelPart sleeve) {
         Chams chams = Modules.get().get(Chams.class);
 
@@ -59,5 +79,5 @@ public abstract class PlayerEntityRendererMixin {
         } else {
             modelPart.render(matrices, vertices, light, overlay);
         }
-    }
+    }*/
 }
