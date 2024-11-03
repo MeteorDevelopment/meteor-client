@@ -5,17 +5,11 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Map;
-
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.EntityTypeListSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -31,8 +25,9 @@ import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.minecraft.util.Formatting;
+
+import java.util.Set;
 
 public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -40,7 +35,7 @@ public class AutoLog extends Module {
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
         .name("health")
-        .description("Automatically disconnects when health is lower or equal to this value.")
+        .description("Automatically disconnects when health is lower or equal to this value. Set to 0 to disable.")
         .defaultValue(6)
         .range(0, 19)
         .sliderMax(19)
@@ -49,7 +44,7 @@ public class AutoLog extends Module {
 
     private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
         .name("smart")
-        .description("Disconnects when you're about to take enough damage to kill you.")
+        .description("Disconnects when it detects you're about to take enough damage to set you under the 'health' setting.")
         .defaultValue(true)
         .build()
     );
@@ -67,6 +62,22 @@ public class AutoLog extends Module {
         .defaultValue(false)
         .build()
     );
+
+    private final Setting<Boolean> smartToggle = sgGeneral.add(new BoolSetting.Builder()
+        .name("smart-toggle")
+        .description("Disables Auto Log after a low-health logout. WILL re-enable once you heal.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> toggleOff = sgGeneral.add(new BoolSetting.Builder()
+        .name("toggle-off")
+        .description("Disables Auto Log after usage.")
+        .defaultValue(true)
+        .build()
+    );
+
+    // Entities
 
     private final Setting<Set<EntityType<?>>> entities = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entities")
@@ -112,23 +123,8 @@ public class AutoLog extends Module {
         .build()
     );
 
-    private final Setting<Boolean> smartToggle = sgGeneral.add(new BoolSetting.Builder()
-        .name("smart-toggle")
-        .description("Disables Auto Log after a low-health logout. WILL re-enable once you heal.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> toggleOff = sgGeneral.add(new BoolSetting.Builder()
-        .name("toggle-off")
-        .description("Disables Auto Log after usage.")
-        .defaultValue(true)
-        .build()
-    );
-
     //Declaring variables outside the loop for better efficiency
     private final Object2IntMap<EntityType<?>> entityCounts = new Object2IntOpenHashMap<>();
-    private int totalEntities = 0;
 
     public AutoLog() {
         super(Categories.Combat, "auto-log", "Automatically disconnects you when certain requirements are met.");
@@ -143,14 +139,14 @@ public class AutoLog extends Module {
         }
         if (playerHealth <= health.get()) {
             disconnect("Health was lower than " + health.get() + ".");
-            if(smartToggle.get()) {
-                this.toggle();
+            if (smartToggle.get()) {
+                if (isActive()) this.toggle();
                 enableHealthListener();
+                return;
             }
         }
 
-        if (smart.get() && playerHealth + mc.player.getAbsorptionAmount()
-            - PlayerUtils.possibleHealthReductions() < health.get()) {
+        if (smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()) {
             disconnect("Health was going to be lower than " + health.get() + ".");
             if (toggleOff.get()) this.toggle();
         }
@@ -161,16 +157,16 @@ public class AutoLog extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity player && player.getUuid() != mc.player.getUuid()) {
                 if (onlyTrusted.get() && player != mc.player && !Friends.get().isFriend(player)) {
-                    disconnect("A non-trusted player appeared in your render distance.");
+                    disconnect(Text.literal("Non-trusted player '" + Formatting.RED + player.getName().getString() + Formatting.WHITE + "' appeared in your render distance."));
                     if (toggleOff.get()) this.toggle();
-                    break;
+                    return;
                 }
+
                 if (instantDeath.get() && PlayerUtils.isWithin(entity, 8) && DamageUtils.getAttackDamage(player, mc.player)
                     > playerHealth + mc.player.getAbsorptionAmount()) {
                     disconnect("Anti-32k measures.");
-                    if (toggleOff.get())
-                        this.toggle();
-                    break;
+                    if (toggleOff.get()) this.toggle();
+                    return;
                 }
             }
         }
@@ -178,7 +174,7 @@ public class AutoLog extends Module {
         // Entities detection Logic
         if (!entities.get().isEmpty()) {
             // Reset totalEntities count and clear the entityCounts map
-            totalEntities = 0;
+            int totalEntities = 0;
             entityCounts.clear();
 
             // Iterate through all entities in the world and count the ones that match the selected types and are within range
@@ -193,17 +189,15 @@ public class AutoLog extends Module {
 
             if (useTotalCount.get() && totalEntities >= combinedEntityThreshold.get()) {
                 disconnect("Total number of selected entities within range exceeded the limit.");
-                if (toggleOff.get())
-                    this.toggle();
-            } else if (!useTotalCount.get()) {
+                if (toggleOff.get()) this.toggle();
+            }
+            else if (!useTotalCount.get()) {
                 // Check if the count of each entity type exceeds the specified limit
                 for (Object2IntMap.Entry<EntityType<?>> entry : entityCounts.object2IntEntrySet()) {
                     if (entry.getIntValue() >= individualEntityThreshold.get()) {
-                        disconnect("Number of " + entry.getKey().getName().getString()
-                            + " within range exceeded the limit.");
-                        if (toggleOff.get())
-                            this.toggle();
-                        break;
+                        disconnect("Number of " + entry.getKey().getName().getString() + " within range exceeded the limit.");
+                        if (toggleOff.get()) this.toggle();
+                        return;
                     }
                 }
             }
@@ -211,9 +205,14 @@ public class AutoLog extends Module {
     }
 
     private void disconnect(String reason) {
-        MutableText text = Text.literal("[AutoLog] " + reason);
-        AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
+        disconnect(Text.literal(reason));
+    }
 
+    private void disconnect(Text reason) {
+        MutableText text = Text.literal("[AutoLog] ");
+        text.append(reason);
+
+        AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
         if (autoReconnect.isActive()) {
             text.append(Text.literal("\n\nINFO - AutoReconnect was disabled").withColor(Colors.GRAY));
             autoReconnect.toggle();
@@ -230,6 +229,7 @@ public class AutoLog extends Module {
             else if (Utils.canUpdate()
                 && !mc.player.isDead()
                 && mc.player.getHealth() > health.get()) {
+                info("Player health greater than minimum, re-enabling module.");
                 toggle();
                 disableHealthListener();
             }
