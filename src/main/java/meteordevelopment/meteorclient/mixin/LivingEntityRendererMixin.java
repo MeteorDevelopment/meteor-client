@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -31,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
+import static org.lwjgl.opengl.GL11C.*;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> {
@@ -40,26 +42,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
     private Entity hasLabelGetCameraEntityProxy(Entity cameraEntity) {
         return Modules.get().isActive(Freecam.class) ? null : cameraEntity;
     }
-
-    //3rd Person Rotation
-
-    /*@ModifyVariable(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", ordinal = 2, at = @At(value = "STORE", ordinal = 0))
-    public float changeYaw(float oldValue, LivingEntity entity) {
-        if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
-        return oldValue;
-    }
-
-    @ModifyVariable(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", ordinal = 3, at = @At(value = "STORE", ordinal = 0))
-    public float changeHeadYaw(float oldValue, LivingEntity entity) {
-        if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
-        return oldValue;
-    }
-
-    @ModifyVariable(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", ordinal = 5, at = @At(value = "STORE", ordinal = 3))
-    public float changePitch(float oldValue, LivingEntity entity) {
-        if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverPitch;
-        return oldValue;
-    }*/
 
     // Player model rendering in main menu
 
@@ -104,15 +86,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         return RenderLayer.getItemEntityTranslucentCull(Chams.BLANK);
     }
 
-    // Through walls chams
+    // Chams - Through walls
 
-    // TODO: update
-    /*
     @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("HEAD"), cancellable = true)
-    private void renderHead(S livingEntityRenderState, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        if (Modules.get().get(NoRender.class).noDeadEntities() && livingEntity.isDead()) ci.cancel();
+    private void render$Head(S state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo info) {
+        Entity entity = ((IEntityRenderState) state).meteor$getEntity();
+        if (!(entity instanceof LivingEntity livingEntity)) return;
 
-        Chams chams = Modules.get().get(Chams.class);
+        if (Modules.get().get(NoRender.class).noDeadEntities() && livingEntity.isDead()) info.cancel();
 
         if (chams.isActive() && chams.shouldRender(livingEntity)) {
             glEnable(GL_POLYGON_OFFSET_FILL);
@@ -121,13 +102,13 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
     }
 
     @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("TAIL"))
-    private void renderTail(S livingEntityRenderState, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        Chams chams = Modules.get().get(Chams.class);
+    private void render$Tail(S state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo info) {
+        Entity entity = ((IEntityRenderState) state).meteor$getEntity();
+        if (!(entity instanceof LivingEntity livingEntity)) return;
 
         if (chams.isActive() && chams.shouldRender(livingEntity)) {
             glPolygonOffset(1.0f, 1100000.0f);
             glDisable(GL_POLYGON_OFFSET_FILL);
         }
     }
-    */
 }
