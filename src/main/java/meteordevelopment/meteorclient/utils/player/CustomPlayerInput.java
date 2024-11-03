@@ -14,8 +14,8 @@ public class CustomPlayerInput extends Input {
         movementSideways = pressingLeft == pressingRight ? 0.0F : (pressingLeft ? 1.0F : -1.0F);
 
         if (sneaking) {
-            movementForward *= 0.3;
-            movementSideways *= 0.3;
+            movementForward *= 0.3f;
+            movementSideways *= 0.3f;
         }
     }
 

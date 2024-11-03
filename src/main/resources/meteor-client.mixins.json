@@ -157,6 +157,7 @@
     "ServerResourcePackLoaderMixin",
     "ShapeIndexBufferAccessor",
     "ShulkerBoxBlockMixin",
+    "ShulkerBoxScreenHandlerAccessor",
     "SignBlockEntityRendererMixin",
     "SimpleEntityLookupAccessor",
     "SimpleOptionMixin",
