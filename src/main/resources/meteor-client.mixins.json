@@ -87,7 +87,6 @@
     "EntityRendererMixin",
     "EntityTrackingSectionAccessor",
     "EntityVelocityUpdateS2CPacketAccessor",
-    "ExplosionImplMixin",
     "ExplosionS2CPacketMixin",
     "FileCacheAccessor",
     "FireworkRocketEntityMixin",

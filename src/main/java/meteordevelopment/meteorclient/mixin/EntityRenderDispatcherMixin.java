@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexConsumer;
@@ -50,6 +51,18 @@ public abstract class EntityRenderDispatcherMixin {
     private static void onRenderHitbox(MatrixStack matrices, VertexConsumer vertices, Entity entity, float tickDelta, float red, float green, float blue, CallbackInfo ci, Box box) {
         double v = Modules.get().get(Hitboxes.class).getEntityValue(entity);
         if (v != 0) ((IBox) box).expand(v);
+    }
+
+    // RenderUtils.currentlyRenderingEntity
+
+    @Inject(method = "render(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/render/entity/EntityRenderer;)V", at =  @At("HEAD"))
+    private <E extends Entity, S extends EntityRenderState> void onRenderHead(E entity, double x, double y, double z, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, EntityRenderer<? super E, S> renderer, CallbackInfo info) {
+        RenderUtils.currentlyRenderingEntity = entity;
+    }
+
+    @Inject(method = "render(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/render/entity/EntityRenderer;)V", at =  @At("RETURN"))
+    private <E extends Entity, S extends EntityRenderState> void onRenderReturn(E entity, double x, double y, double z, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, EntityRenderer<? super E, S> renderer, CallbackInfo info) {
+        RenderUtils.currentlyRenderingEntity = null;
     }
 
     // Player model rendering in main menu

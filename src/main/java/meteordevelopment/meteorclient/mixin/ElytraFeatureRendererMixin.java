@@ -7,12 +7,13 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import meteordevelopment.meteorclient.utils.network.Capes;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.render.entity.feature.ElytraFeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.state.BipedEntityRenderState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,9 +26,11 @@ public abstract class ElytraFeatureRendererMixin<S extends BipedEntityRenderStat
 
     @ModifyExpressionValue(method = "render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/render/entity/state/BipedEntityRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/feature/ElytraFeatureRenderer;getTexture(Lnet/minecraft/client/render/entity/state/BipedEntityRenderState;)Lnet/minecraft/util/Identifier;"))
     private Identifier modifyCapeTexture(Identifier original) {
-        if (!(livingEntity instanceof AbstractClientPlayerEntity playerEntity)) return original;
+        if (RenderUtils.currentlyRenderingEntity instanceof PlayerEntity player) {
+            Identifier id = Capes.get(player);
+            return id == null ? original : id;
+        }
 
-        Identifier id = Capes.get(playerEntity);
-        return id == null ? original : id;
+        return original;
     }
 }
