@@ -2,7 +2,6 @@ package meteordevelopment.meteorclient.utils.render.postprocess;
 
 import meteordevelopment.meteorclient.mixin.WorldRendererAccessor;
 import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.render.OutlineVertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -29,6 +28,6 @@ public abstract class EntityShader extends PostProcessShader {
     }
 
     public void endRender() {
-        endRender(() -> ((OutlineVertexConsumerProvider) vertexConsumerProvider).draw());
+        endRender(() -> vertexConsumerProvider.draw());
     }
 }

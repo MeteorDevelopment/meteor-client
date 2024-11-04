@@ -50,8 +50,8 @@ public abstract class PlayerEntityRendererMixin {
         float v = chams.playersScale.get().floatValue();
         state.baseScale *= v;
 
-        //noinspection DataFlowIssue
-        ((IVec3d) state.nameLabelPos).setY(state.nameLabelPos.y + (player.getHeight() * v - player.getHeight()));
+        if (state.nameLabelPos != null)
+            ((IVec3d) state.nameLabelPos).setY(state.nameLabelPos.y + (player.getHeight() * v - player.getHeight()));
     }
 
     // Chams - Hand Texture
@@ -82,7 +82,7 @@ public abstract class PlayerEntityRendererMixin {
 
     @Inject(method = "updateRenderState(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;F)V", at = @At("RETURN"))
     private void updateRenderState$rotations(AbstractClientPlayerEntity player, PlayerEntityRenderState state, float f, CallbackInfo info) {
-        if (Rotations.rotationTimer < 10 && ((IEntityRenderState) state).meteor$getEntity() == MeteorClient.mc.player) {
+        if (Rotations.rotating && ((IEntityRenderState) state).meteor$getEntity() == MeteorClient.mc.player) {
             state.bodyYaw = Rotations.serverYaw;
             state.pitch = Rotations.serverPitch;
         }

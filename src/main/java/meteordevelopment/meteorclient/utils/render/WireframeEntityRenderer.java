@@ -20,6 +20,7 @@ import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 public class WireframeEntityRenderer {
     private static final MatrixStack matrices = new MatrixStack();
@@ -50,6 +51,11 @@ public class WireframeEntityRenderer {
         //noinspection unchecked
         var renderer = (EntityRenderer<Entity, EntityRenderState>) MeteorClient.mc.getEntityRenderDispatcher().getRenderer(entity);
         var state = renderer.getAndUpdateRenderState(entity, event.tickDelta);
+
+        Vec3d entityOffset = renderer.getPositionOffset(state);
+        offsetX += entityOffset.x;
+        offsetY += entityOffset.y;
+        offsetZ += entityOffset.z;
 
         matrices.push();
         matrices.scale((float) scale, (float) scale, (float) scale);

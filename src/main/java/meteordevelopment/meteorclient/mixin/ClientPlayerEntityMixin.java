@@ -123,7 +123,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.get());
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V", ordinal = 0))
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V", ordinal = 1))
     private void onTickHasVehicleBeforeSendPackets(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.get());
     }

@@ -95,7 +95,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
         if (Modules.get().get(NoRender.class).noDeadEntities() && livingEntity.isDead()) info.cancel();
 
-        if (chams.isActive() && chams.shouldRender(livingEntity)) {
+        if (chams.shouldRender(entity)) {
             glEnable(GL_POLYGON_OFFSET_FILL);
             glPolygonOffset(1.0f, -1100000.0f);
         }
@@ -106,7 +106,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         Entity entity = ((IEntityRenderState) state).meteor$getEntity();
         if (!(entity instanceof LivingEntity livingEntity)) return;
 
-        if (chams.isActive() && chams.shouldRender(livingEntity)) {
+        if (chams.shouldRender(livingEntity)) {
             glPolygonOffset(1.0f, 1100000.0f);
             glDisable(GL_POLYGON_OFFSET_FILL);
         }

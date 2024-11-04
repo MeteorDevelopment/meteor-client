@@ -149,8 +149,8 @@ public class PopChams extends Module {
             int preLineA = lineColor.get().a;
 
             if (fadeOut.get()) {
-                sideColor.get().a *= 1 - timer / renderTime.get();
-                lineColor.get().a *= 1 - timer / renderTime.get();
+                sideColor.get().a *= (int) (1 - timer / renderTime.get());
+                lineColor.get().a *= (int) (1 - timer / renderTime.get());
             }
 
             // Render

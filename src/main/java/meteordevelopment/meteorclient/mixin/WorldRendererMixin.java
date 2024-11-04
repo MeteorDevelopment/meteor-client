@@ -5,6 +5,11 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -18,7 +23,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.LightType;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,12 +34,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
-import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
@@ -76,8 +74,8 @@ public abstract class WorldRendererMixin {
 
     // Entity Shaders
 
-    // TODO: update
-    /*@Inject(method = "render", at = @At("HEAD"))
+    // TODO: fix shader rendering
+    @Inject(method = "render", at = @At("HEAD"))
     private void onRenderHead(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
         PostProcessShaders.beginRender();
     }
@@ -103,10 +101,10 @@ public abstract class WorldRendererMixin {
         }
     }
 
-    @Inject(method = "renderMain", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
-    private void onRender(FrameGraphBuilder frameGraphBuilder, Frustum frustum, Camera camera, Matrix4f positionMatrix, Matrix4f projectionMatrix, Fog fog, boolean renderBlockOutline, boolean hasEntitiesToRender, RenderTickCounter renderTickCounter, Profiler profiler, CallbackInfo ci) {
+    @Inject(method = "method_62214", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
+    private void onRender(CallbackInfo ci) {
         PostProcessShaders.endRender();
-    }*/
+    }
 
     @ModifyExpressionValue(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;hasOutline(Lnet/minecraft/entity/Entity;)Z"))
     private boolean shouldMobGlow(boolean original, @Local Entity entity) {

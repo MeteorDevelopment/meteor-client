@@ -29,6 +29,7 @@ public class Chams extends Module {
     public final Setting<Set<EntityType<?>>> entities = sgThroughWalls.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select entities to show through walls.")
+        .onlyAttackable()
         .build()
     );
 
@@ -182,7 +183,7 @@ public class Chams extends Module {
     }
 
     public boolean shouldRender(Entity entity) {
-        return isActive() && !isShader() && entities.get().contains(entity.getType()) && (entity != mc.player || ignoreSelfDepth.get());
+        return isActive() && !isShader() && entities.get().contains(entity.getType()) && (entity != mc.player || !ignoreSelfDepth.get());
     }
 
     public boolean isShader() {
