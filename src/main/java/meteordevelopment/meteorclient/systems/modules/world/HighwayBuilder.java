@@ -1370,7 +1370,7 @@ public class HighwayBuilder extends Module {
                             // wait for the screen to be properly loaded
                             if (screen.getScreenHandler().syncId != b.syncId) return;
 
-                            Inventory inv = ((ShulkerBoxScreenHandlerAccessor) screen.getScreenHandler()).getInventory();
+                            Inventory inv = ((ShulkerBoxScreenHandlerAccessor) screen.getScreenHandler()).meteor$getInventory();
 
                             if (restockItems(b, inv)) {
                                 delayTimer = b.inventoryDelay.get();
