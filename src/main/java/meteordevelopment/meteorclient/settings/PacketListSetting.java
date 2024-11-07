@@ -5,44 +5,49 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.utils.network.PacketUtils;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.network.NetworkSide;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.PacketType;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> {
-    public final Predicate<Class<? extends Packet<?>>> filter;
-    private static List<String> suggestions;
+public class PacketListSetting extends Setting<Set<PacketType<? extends Packet<?>>>> {
+    private final Predicate<PacketType<? extends Packet<?>>> filter;
 
-    public PacketListSetting(String name, String description, Set<Class<? extends Packet<?>>> defaultValue, Consumer<Set<Class<? extends Packet<?>>>> onChanged, Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated, Predicate<Class<? extends Packet<?>>> filter, IVisible visible) {
+    public PacketListSetting(String name, String description, Set<PacketType<? extends Packet<?>>> defaultValue, Consumer<Set<PacketType<? extends Packet<?>>>> onChanged, Consumer<Setting<Set<PacketType<? extends Packet<?>>>>> onModuleActivated, Predicate<PacketType<? extends Packet<?>>> filter, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.filter = filter;
     }
 
-    @Override
-    public void resetImpl() {
-        value = new ObjectOpenHashSet<>(defaultValue);
+    public boolean filter(PacketType<? extends Packet<?>> packetType) {
+        return filter == null || filter.test(packetType);
     }
 
     @Override
-    protected Set<Class<? extends Packet<?>>> parseImpl(String str) {
+    public void resetImpl() {
+        value = new ReferenceOpenHashSet<>(defaultValue);
+    }
+
+    @Override
+    protected Set<PacketType<? extends Packet<?>>> parseImpl(String str) {
         String[] values = str.split(",");
-        Set<Class<? extends Packet<?>>> packets = new ObjectOpenHashSet<>(values.length);
+        Set<PacketType<? extends Packet<?>>> packets = new ReferenceOpenHashSet<>(values.length);
 
         try {
             for (String value : values) {
-                Class<? extends Packet<?>> packet = PacketUtils.getPacket(value.trim());
-                if (packet != null && (filter == null || filter.test(packet))) packets.add(packet);
+                PacketType<? extends Packet<?>> packet = PacketUtils.getPacket(value.trim());
+                if (packet != null && filter(packet)) packets.add(packet);
             }
         } catch (Exception ignored) {}
 
@@ -50,31 +55,19 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     }
 
     @Override
-    protected boolean isValueValid(Set<Class<? extends Packet<?>>> value) {
+    protected boolean isValueValid(Set<PacketType<? extends Packet<?>>> value) {
         return true;
     }
 
     @Override
-    public List<String> getSuggestions() {
-        if (suggestions == null) {
-            suggestions = new ArrayList<>(PacketUtils.getC2SPackets().size() + PacketUtils.getS2CPackets().size());
-
-            for (Class<? extends Packet<?>> packet : PacketUtils.getC2SPackets()) {
-                suggestions.add(PacketUtils.getName(packet));
-            }
-
-            for (Class<? extends Packet<?>> packet : PacketUtils.getS2CPackets()) {
-                suggestions.add(PacketUtils.getName(packet));
-            }
-        }
-
-        return suggestions;
+    public Iterable<String> getSuggestions() {
+        return PacketUtils.getPacketEntries().stream().filter(entry -> this.filter(entry.getKey())).map(Map.Entry::getValue).toList();
     }
 
     @Override
     public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
-        for (Class<? extends Packet<?>> packet : get()) {
+        for (PacketType<? extends Packet<?>> packet : get()) {
             valueTag.add(NbtString.of(PacketUtils.getName(packet)));
         }
         tag.put("value", valueTag);
@@ -83,13 +76,13 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     }
 
     @Override
-    public Set<Class<? extends Packet<?>>> load(NbtCompound tag) {
+    public Set<PacketType<? extends Packet<?>>> load(NbtCompound tag) {
         get().clear();
 
         NbtElement valueTag = tag.get("value");
         if (valueTag instanceof NbtList) {
             for (NbtElement t : (NbtList) valueTag) {
-                Class<? extends Packet<?>> packet = PacketUtils.getPacket(t.asString());
+                PacketType<? extends Packet<?>> packet = PacketUtils.getPacket(t.asString());
                 if (packet != null && (filter == null || filter.test(packet))) get().add(packet);
             }
         }
@@ -97,16 +90,29 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
         return get();
     }
 
-    public static class Builder extends SettingBuilder<Builder, Set<Class<? extends Packet<?>>>, PacketListSetting> {
-        private Predicate<Class<? extends Packet<?>>> filter;
+    public static class Builder extends SettingBuilder<Builder, Set<PacketType<? extends Packet<?>>>, PacketListSetting> {
+        private Predicate<PacketType<? extends Packet<?>>> filter;
 
         public Builder() {
-            super(new ObjectOpenHashSet<>(0));
+            super(Set.of());
         }
 
-        public Builder filter(Predicate<Class<? extends Packet<?>>> filter) {
+        @SafeVarargs
+        public final Builder defaultValue(PacketType<? extends Packet<?>>... defaults) {
+            return defaultValue(new ReferenceOpenHashSet<>(Arrays.asList(defaults)));
+        }
+
+        public Builder filter(Predicate<PacketType<? extends Packet<?>>> filter) {
             this.filter = filter;
             return this;
+        }
+
+        public Builder clientboundOnly() {
+            return filter(type -> type.side() == NetworkSide.CLIENTBOUND);
+        }
+
+        public Builder serverboundOnly() {
+            return filter(type -> type.side() == NetworkSide.SERVERBOUND);
         }
 
         @Override

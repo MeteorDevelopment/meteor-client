@@ -11,30 +11,27 @@ import meteordevelopment.meteorclient.settings.PacketListSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.network.PacketUtils;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.PacketType;
 
 import java.util.Set;
-import java.util.function.Predicate;
 
-public class PacketBoolSettingScreen extends RegistryListSettingScreen<Class<? extends Packet<?>>> {
-    public PacketBoolSettingScreen(GuiTheme theme, Setting<Set<Class<? extends Packet<?>>>> setting) {
+public class PacketBoolSettingScreen extends RegistryListSettingScreen<PacketType<? extends Packet<?>>> {
+    public PacketBoolSettingScreen(GuiTheme theme, Setting<Set<PacketType<? extends Packet<?>>>> setting) {
         super(theme, "Select Packets", setting, setting.get(), PacketUtils.REGISTRY);
     }
 
     @Override
-    protected boolean includeValue(Class<? extends Packet<?>> value) {
-        Predicate<Class<? extends Packet<?>>> filter = ((PacketListSetting) setting).filter;
-
-        if (filter == null) return true;
-        return filter.test(value);
+    protected boolean includeValue(PacketType<? extends Packet<?>> value) {
+        return ((PacketListSetting) setting).filter(value);
     }
 
     @Override
-    protected WWidget getValueWidget(Class<? extends Packet<?>> value) {
+    protected WWidget getValueWidget(PacketType<? extends Packet<?>> value) {
         return theme.label(getValueName(value));
     }
 
     @Override
-    protected String getValueName(Class<? extends Packet<?>> value) {
+    protected String getValueName(PacketType<? extends Packet<?>> value) {
         return PacketUtils.getName(value);
     }
 }
