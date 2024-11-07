@@ -211,7 +211,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     // Interface
 
     @Override
-    public void meteor_client$rightClick() {
+    public void meteor$rightClick() {
         rightClick = true;
     }
 }

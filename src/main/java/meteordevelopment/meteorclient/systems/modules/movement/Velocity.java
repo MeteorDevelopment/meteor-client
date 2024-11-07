@@ -143,7 +143,7 @@ public class Velocity extends Module {
         if (mc.options.jumpKey.isPressed() || mc.options.sneakKey.isPressed()) return;
 
         if ((mc.player.isTouchingWater() || mc.player.isInLava()) && mc.player.getVelocity().y < 0) {
-            ((IVec3d) mc.player.getVelocity()).setY(0);
+            ((IVec3d) mc.player.getVelocity()).meteor$setY(0);
         }
     }
 

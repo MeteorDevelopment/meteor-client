@@ -123,9 +123,9 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
         if (!velocity.explosions.get()) return;
 
         IExplosionS2CPacket explosionPacket = (IExplosionS2CPacket) (Object) packet;
-        explosionPacket.setVelocityX((float) (packet.playerKnockback().orElse(Vec3d.ZERO).x * velocity.getHorizontal(velocity.explosionsHorizontal)));
-        explosionPacket.setVelocityY((float) (packet.playerKnockback().orElse(Vec3d.ZERO).y * velocity.getVertical(velocity.explosionsVertical)));
-        explosionPacket.setVelocityZ((float) (packet.playerKnockback().orElse(Vec3d.ZERO).z * velocity.getHorizontal(velocity.explosionsHorizontal)));
+        explosionPacket.meteor$setVelocityX((float) (packet.playerKnockback().orElse(Vec3d.ZERO).x * velocity.getHorizontal(velocity.explosionsHorizontal)));
+        explosionPacket.meteor$setVelocityY((float) (packet.playerKnockback().orElse(Vec3d.ZERO).y * velocity.getVertical(velocity.explosionsVertical)));
+        explosionPacket.meteor$setVelocityZ((float) (packet.playerKnockback().orElse(Vec3d.ZERO).z * velocity.getHorizontal(velocity.explosionsHorizontal)));
     }
 
     @Inject(method = "onItemPickupAnimation", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getEntityById(I)Lnet/minecraft/entity/Entity;", ordinal = 0))

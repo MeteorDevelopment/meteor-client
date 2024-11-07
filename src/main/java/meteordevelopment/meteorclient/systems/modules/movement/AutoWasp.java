@@ -207,7 +207,7 @@ public class AutoWasp extends Module {
             else yVel = verticalSpeed.get() * Math.signum(yDist);
         }
 
-        ((IVec3d) event.movement).set(xVel, yVel, zVel);
+        ((IVec3d) event.movement).meteor$set(xVel, yVel, zVel);
     }
 
     public enum Action {

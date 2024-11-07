@@ -51,7 +51,7 @@ public abstract class PlayerEntityRendererMixin {
         state.baseScale *= v;
 
         if (state.nameLabelPos != null)
-            ((IVec3d) state.nameLabelPos).setY(state.nameLabelPos.y + (player.getHeight() * v - player.getHeight()));
+            ((IVec3d) state.nameLabelPos).meteor$setY(state.nameLabelPos.y + (player.getHeight() * v - player.getHeight()));
     }
 
     // Chams - Hand Texture

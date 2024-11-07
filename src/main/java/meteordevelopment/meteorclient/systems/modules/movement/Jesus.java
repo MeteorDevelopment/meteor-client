@@ -200,13 +200,13 @@ public class Jesus extends Module {
 
         // Move up in bubble columns
         if (bubbleColumn) {
-            if (mc.options.jumpKey.isPressed() && mc.player.getVelocity().getY() < 0.11) ((IVec3d) mc.player.getVelocity()).setY(0.11);
+            if (mc.options.jumpKey.isPressed() && mc.player.getVelocity().getY() < 0.11) ((IVec3d) mc.player.getVelocity()).meteor$setY(0.11);
             return;
         }
 
         // Move up
         if (mc.player.isTouchingWater() || mc.player.isInLava()) {
-            ((IVec3d) mc.player.getVelocity()).setY(0.11);
+            ((IVec3d) mc.player.getVelocity()).meteor$setY(0.11);
             tickTimer = 0;
             return;
         }
@@ -219,9 +219,9 @@ public class Jesus extends Module {
 
 
         // Simulate jumping out of water
-        if (tickTimer == 0) ((IVec3d) mc.player.getVelocity()).setY(0.30);
+        if (tickTimer == 0) ((IVec3d) mc.player.getVelocity()).meteor$setY(0.30);
         else if (tickTimer == 1 && (blockBelowState == Blocks.WATER.getDefaultState() || blockBelowState == Blocks.LAVA.getDefaultState() || waterLogger))
-            ((IVec3d) mc.player.getVelocity()).setY(0);
+            ((IVec3d) mc.player.getVelocity()).meteor$setY(0);
 
         tickTimer++;
     }

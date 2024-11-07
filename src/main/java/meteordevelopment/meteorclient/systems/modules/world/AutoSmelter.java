@@ -86,7 +86,7 @@ public class AutoSmelter extends Module {
 
         for (int i = 3; i < c.slots.size(); i++) {
             ItemStack item = c.slots.get(i).getStack();
-            if (!((IAbstractFurnaceScreenHandler) c).isItemSmeltable(item)) continue;
+            if (!((IAbstractFurnaceScreenHandler) c).meteor$isItemSmeltable(item)) continue;
             if (!smeltableItems.get().contains(item.getItem())) continue;
             if (!smeltableItemFilter(item.getItem())) continue;
 

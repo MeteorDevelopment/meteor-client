@@ -51,7 +51,7 @@ public abstract class EntityRenderDispatcherMixin {
     @Inject(method = "renderHitbox", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/VertexRendering;drawBox(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;Lnet/minecraft/util/math/Box;FFFF)V", ordinal = 0))
     private static void onRenderHitbox(MatrixStack matrices, VertexConsumer vertices, Entity entity, float tickDelta, float red, float green, float blue, CallbackInfo ci, @Local Box box) {
         double v = Modules.get().get(Hitboxes.class).getEntityValue(entity);
-        if (v != 0) ((IBox) box).expand(v);
+        if (v != 0) ((IBox) box).meteor$expand(v);
     }
 
     // IEntityRenderState

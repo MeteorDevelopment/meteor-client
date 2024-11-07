@@ -23,7 +23,7 @@ public abstract class ExplosionS2CPacketMixin implements IExplosionS2CPacket {
     private Optional<Vec3d> playerKnockback;
 
     @Override
-    public void setVelocityX(float velocity) {
+    public void meteor$setVelocityX(float velocity) {
         if (playerKnockback.isPresent()) {
             Vec3d kb = playerKnockback.get();
             playerKnockback = Optional.of(new Vec3d(velocity, kb.y, kb.z));
@@ -33,7 +33,7 @@ public abstract class ExplosionS2CPacketMixin implements IExplosionS2CPacket {
     }
 
     @Override
-    public void setVelocityY(float velocity) {
+    public void meteor$setVelocityY(float velocity) {
         if (playerKnockback.isPresent()) {
             Vec3d kb = playerKnockback.get();
             playerKnockback = Optional.of(new Vec3d(kb.x, velocity, kb.z));
@@ -43,7 +43,7 @@ public abstract class ExplosionS2CPacketMixin implements IExplosionS2CPacket {
     }
 
     @Override
-    public void setVelocityZ(float velocity) {
+    public void meteor$setVelocityZ(float velocity) {
         if (playerKnockback.isPresent()) {
             Vec3d kb = playerKnockback.get();
             playerKnockback = Optional.of(new Vec3d(kb.x, kb.y, velocity));

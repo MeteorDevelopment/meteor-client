@@ -242,17 +242,17 @@ public class GL {
     // State
 
     public static void saveState() {
-        depthSaved = DEPTH.get();
-        blendSaved = BLEND.get();
-        cullSaved = CULL.get();
-        scissorSaved = SCISSOR.get();
+        depthSaved = DEPTH.meteor$get();
+        blendSaved = BLEND.meteor$get();
+        cullSaved = CULL.meteor$get();
+        scissorSaved = SCISSOR.meteor$get();
     }
 
     public static void restoreState() {
-        DEPTH.set(depthSaved);
-        BLEND.set(blendSaved);
-        CULL.set(cullSaved);
-        SCISSOR.set(scissorSaved);
+        DEPTH.meteor$set(depthSaved);
+        BLEND.meteor$set(blendSaved);
+        CULL.meteor$set(cullSaved);
+        SCISSOR.meteor$set(scissorSaved);
 
         disableLineSmooth();
     }

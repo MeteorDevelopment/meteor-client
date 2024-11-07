@@ -397,12 +397,12 @@ public class ElytraFly extends Module {
             int chunkZ = (int) ((mc.player.getZ() + currentMode.velZ) / 16);
             if (dontGoIntoUnloadedChunks.get()) {
                 if (mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) {
-                    if (flightMode.get() != ElytraFlightModes.Bounce) ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
+                    if (flightMode.get() != ElytraFlightModes.Bounce) ((IVec3d) event.movement).meteor$set(currentMode.velX, currentMode.velY, currentMode.velZ);
                 } else {
                     currentMode.zeroAcceleration();
-                    ((IVec3d) event.movement).set(0, currentMode.velY, 0);
+                    ((IVec3d) event.movement).meteor$set(0, currentMode.velY, 0);
                 }
-            } else if (flightMode.get() != ElytraFlightModes.Bounce) ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
+            } else if (flightMode.get() != ElytraFlightModes.Bounce) ((IVec3d) event.movement).meteor$set(currentMode.velX, currentMode.velY, currentMode.velZ);
 
             if (flightMode.get() != ElytraFlightModes.Bounce) currentMode.onPlayerMove();
         } else {
@@ -417,7 +417,7 @@ public class ElytraFly extends Module {
             RaycastContext raycastContext = new RaycastContext(mc.player.getPos(), new Vec3d(lookAheadPos.getX(), mc.player.getY(), lookAheadPos.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
             BlockHitResult hitResult = mc.world.raycast(raycastContext);
             if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
-                ((IVec3d) event.movement).set(0, currentMode.velY, 0);
+                ((IVec3d) event.movement).meteor$set(0, currentMode.velY, 0);
             }
         }
 
@@ -431,18 +431,18 @@ public class ElytraFly extends Module {
             final boolean under2Collidable = under2.collidable || !under2State.getFluidState().isEmpty();
 
             if (!underCollidable && under2Collidable) {
-                ((IVec3d)event.movement).set(event.movement.x, -0.1f, event.movement.z);
+                ((IVec3d)event.movement).meteor$set(event.movement.x, -0.1f, event.movement.z);
 
                 mc.player.setPitch(MathHelper.clamp(mc.player.getPitch(0), -50.f, 20.f)); // clamp between -50 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
             }
 
             if (underCollidable) {
-                ((IVec3d)event.movement).set(event.movement.x, -0.03f, event.movement.z);
+                ((IVec3d)event.movement).meteor$set(event.movement.x, -0.03f, event.movement.z);
 
                 mc.player.setPitch(MathHelper.clamp(mc.player.getPitch(0), -50.f, 20.f));
 
                 if (mc.player.getPos().y <= mc.player.getBlockPos().down().getY() + 1.34f) {
-                    ((IVec3d)event.movement).set(event.movement.x, 0, event.movement.z);
+                    ((IVec3d)event.movement).meteor$set(event.movement.x, 0, event.movement.z);
                     mc.player.setSneaking(false);
                 }
             }

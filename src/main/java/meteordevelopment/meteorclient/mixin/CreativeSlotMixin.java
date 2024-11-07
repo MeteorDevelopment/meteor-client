@@ -16,12 +16,12 @@ public abstract class CreativeSlotMixin implements ISlot {
     @Shadow @Final Slot slot;
 
     @Override
-    public int getId() {
+    public int meteor$getId() {
         return slot.id;
     }
 
     @Override
-    public int getIndex() {
+    public int meteor$getIndex() {
         return slot.getIndex();
     }
 }

@@ -76,7 +76,7 @@ public class Collisions extends Module {
         int x = (int) (mc.player.getX() + event.movement.x) >> 4;
         int z = (int) (mc.player.getZ() + event.movement.z) >> 4;
         if (unloadedChunks.get() && !mc.world.getChunkManager().isChunkLoaded(x, z)) {
-            ((IVec3d) event.movement).set(0, event.movement.y, 0);
+            ((IVec3d) event.movement).meteor$set(0, event.movement.y, 0);
         }
     }
 

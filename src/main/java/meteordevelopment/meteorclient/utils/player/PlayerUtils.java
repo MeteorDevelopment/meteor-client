@@ -100,7 +100,7 @@ public class PlayerUtils {
             velZ *= diagonal;
         }
 
-        ((IVec3d) horizontalVelocity).setXZ(velX, velZ);
+        ((IVec3d) horizontalVelocity).meteor$setXZ(velX, velZ);
         return horizontalVelocity;
     }
 
@@ -115,11 +115,11 @@ public class PlayerUtils {
         Vec3d vec1 = new Vec3d(0, 0, 0);
         Vec3d vec2 = new Vec3d(0, 0, 0);
 
-        ((IVec3d) vec1).set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
-        ((IVec3d) vec2).set(entity.getX(), entity.getY(), entity.getZ());
+        ((IVec3d) vec1).meteor$set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
+        ((IVec3d) vec2).meteor$set(entity.getX(), entity.getY(), entity.getZ());
         boolean canSeeFeet = mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
-        ((IVec3d) vec2).set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
+        ((IVec3d) vec2).meteor$set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
         boolean canSeeEyes = mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
         return canSeeFeet || canSeeEyes;

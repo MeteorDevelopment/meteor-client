@@ -107,7 +107,6 @@
     "InGameHudMixin",
     "InGameOverlayRendererMixin",
     "ItemEnchantmentsComponentMixin",
-    "ItemEntityMixin",
     "ItemEntityRendererMixin",
     "ItemGroupsMixin",
     "ItemMixin",
