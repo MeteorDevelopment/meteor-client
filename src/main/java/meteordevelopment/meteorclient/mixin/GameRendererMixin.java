@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -32,6 +33,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -42,7 +44,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(GameRenderer.class)
@@ -122,11 +123,12 @@ public abstract class GameRendererMixin {
         MeteorClient.EVENT_BUS.post(RenderAfterWorldEvent.get());
     }
 
-    @Inject(method = "findCrosshairTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/ProjectileUtil;raycast(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/util/hit/EntityHitResult;"), cancellable = true)
-    private void onUpdateTargetedEntity(Entity camera, double blockInteractionRange, double entityInteractionRange, float tickDelta, CallbackInfoReturnable<HitResult> cir, @Local HitResult hitResult) {
-        if (Modules.get().get(NoMiningTrace.class).canWork() && hitResult.getType() == HitResult.Type.BLOCK) {
-            cir.setReturnValue(hitResult);
+    @ModifyReturnValue(method = "findCrosshairTarget", at = @At("RETURN"))
+    private HitResult onUpdateTargetedEntity(HitResult original, @Local HitResult hitResult) {
+        if (Modules.get().get(NoMiningTrace.class).canWork(original instanceof EntityHitResult ehr ? ehr.getEntity() : null) && hitResult.getType() == HitResult.Type.BLOCK) {
+            return hitResult;
         }
+        return original;
     }
 
     @Redirect(method = "findCrosshairTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
