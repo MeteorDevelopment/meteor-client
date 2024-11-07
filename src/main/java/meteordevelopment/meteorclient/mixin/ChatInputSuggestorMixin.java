@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -19,7 +20,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -38,9 +38,9 @@ public abstract class ChatInputSuggestorMixin {
 
     @Inject(method = "refresh",
         at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z", remap = false),
-        cancellable = true,
-        locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onRefresh(CallbackInfo ci, String string, StringReader reader) {
+        cancellable = true
+    )
+    public void onRefresh(CallbackInfo ci, @Local StringReader reader) {
         String prefix = Config.get().prefix.get();
         int length = prefix.length();
 

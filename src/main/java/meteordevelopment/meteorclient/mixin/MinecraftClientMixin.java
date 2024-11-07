@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -34,7 +35,6 @@ import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profilers;
 import org.jetbrains.annotations.Nullable;
@@ -47,7 +47,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -131,8 +130,8 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         if (event.isCancelled()) info.cancel();
     }
 
-    @Inject(method = "doItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isItemEnabled(Lnet/minecraft/resource/featuretoggle/FeatureSet;)Z"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onDoItemUseHand(CallbackInfo ci, Hand[] var1, int var2, int var3, Hand hand, ItemStack itemStack) {
+    @Inject(method = "doItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isItemEnabled(Lnet/minecraft/resource/featuretoggle/FeatureSet;)Z"))
+    private void onDoItemUseHand(CallbackInfo ci, @Local ItemStack itemStack) {
         FastUse fastUse = Modules.get().get(FastUse.class);
         if (fastUse.isActive()) {
             itemUseCooldown = fastUse.getItemUseCooldown(itemStack);

@@ -337,7 +337,7 @@ public class DamageUtils {
     }
 
     /**
-     * @see Explosion#getExposure(Vec3d, Entity)
+     * @see net.minecraft.world.explosion.ExplosionImpl#calculateReceivedDamage(Vec3d, Entity)
      */
     private static float getExposure(Vec3d source, Box box, RaycastFactory raycastFactory) {
         double xDiff = box.maxX - box.minX;
