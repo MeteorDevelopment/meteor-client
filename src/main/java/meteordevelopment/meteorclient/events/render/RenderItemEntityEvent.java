@@ -14,16 +14,16 @@ import net.minecraft.client.util.math.MatrixStack;
 public class RenderItemEntityEvent extends Cancellable {
     private static final RenderItemEntityEvent INSTANCE = new RenderItemEntityEvent();
 
-    public ItemEntityRenderState itemEntityRenderState;
+    public ItemEntityRenderState renderState;
     public float tickDelta;
     public MatrixStack matrixStack;
     public VertexConsumerProvider vertexConsumerProvider;
     public int light;
     public ItemRenderer itemRenderer;
 
-    public static RenderItemEntityEvent get(ItemEntityRenderState itemEntityRenderState, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, ItemRenderer itemRenderer) {
+    public static RenderItemEntityEvent get(ItemEntityRenderState renderState, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, ItemRenderer itemRenderer) {
         INSTANCE.setCancelled(false);
-        INSTANCE.itemEntityRenderState = itemEntityRenderState;
+        INSTANCE.renderState = renderState;
         INSTANCE.tickDelta = tickDelta;
         INSTANCE.matrixStack = matrixStack;
         INSTANCE.vertexConsumerProvider = vertexConsumerProvider;

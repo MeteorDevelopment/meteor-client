@@ -10,6 +10,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import it.unimi.dsi.fastutil.Stack;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import meteordevelopment.meteorclient.mixininterface.IWorldRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -18,6 +21,7 @@ import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShader
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.*;
+import net.minecraft.client.util.Handle;
 import net.minecraft.client.util.ObjectAllocator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
@@ -25,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.LightType;
 import org.joml.Matrix4f;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -36,10 +41,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(WorldRenderer.class)
-public abstract class WorldRendererMixin {
-    @Shadow
-    private Framebuffer entityOutlineFramebuffer;
-
+public abstract class WorldRendererMixin implements IWorldRenderer {
     @Unique private ESP esp;
 
     @Shadow
@@ -74,7 +76,6 @@ public abstract class WorldRendererMixin {
 
     // Entity Shaders
 
-    // TODO: fix shader rendering
     @Inject(method = "render", at = @At("HEAD"))
     private void onRenderHead(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
         PostProcessShaders.beginRender();
@@ -89,15 +90,14 @@ public abstract class WorldRendererMixin {
     @Unique
     private void draw(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, VertexConsumerProvider vertexConsumers, MatrixStack matrices, EntityShader shader, Color color) {
         if (shader.shouldDraw(entity) && !PostProcessShaders.isCustom(vertexConsumers) && color != null) {
-            Framebuffer prevBuffer = this.entityOutlineFramebuffer;
-            this.entityOutlineFramebuffer = shader.framebuffer;
+            meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
             PostProcessShaders.rendering = true;
 
             shader.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
             renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, shader.vertexConsumerProvider);
 
             PostProcessShaders.rendering = false;
-            this.entityOutlineFramebuffer = prevBuffer;
+            meteor$popEntityOutlineFramebuffer();
         }
     }
 
@@ -148,5 +148,41 @@ public abstract class WorldRendererMixin {
         }
 
         return esp;
+    }
+
+    // IWorldRenderer
+
+    @Shadow
+    private Framebuffer entityOutlineFramebuffer;
+
+    @Shadow
+    @Final
+    private DefaultFramebufferSet framebufferSet;
+
+    @Unique
+    private Stack<Framebuffer> framebufferStack;
+
+    @Unique
+    private Stack<Handle<Framebuffer>> framebufferHandleStack;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void init$IWorldRenderer(CallbackInfo info) {
+        framebufferStack = new ObjectArrayList<>();
+        framebufferHandleStack = new ObjectArrayList<>();
+    }
+
+    @Override
+    public void meteor$pushEntityOutlineFramebuffer(Framebuffer framebuffer) {
+        framebufferStack.push(this.entityOutlineFramebuffer);
+        this.entityOutlineFramebuffer = framebuffer;
+
+        framebufferHandleStack.push(this.framebufferSet.entityOutlineFramebuffer);
+        this.framebufferSet.entityOutlineFramebuffer = () -> framebuffer;
+    }
+
+    @Override
+    public void meteor$popEntityOutlineFramebuffer() {
+        this.entityOutlineFramebuffer = framebufferStack.pop();
+        this.framebufferSet.entityOutlineFramebuffer = framebufferHandleStack.pop();
     }
 }

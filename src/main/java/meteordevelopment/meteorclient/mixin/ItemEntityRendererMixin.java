@@ -23,7 +23,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(ItemEntityRenderer.class)
 public abstract class ItemEntityRendererMixin {
-
     @Shadow
     @Final
     private ItemRenderer itemRenderer;

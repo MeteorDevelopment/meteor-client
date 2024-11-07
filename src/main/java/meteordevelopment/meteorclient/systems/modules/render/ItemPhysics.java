@@ -52,8 +52,8 @@ public class ItemPhysics extends Module {
         MatrixStack matrices = event.matrixStack;
         matrices.push();
 
-        ItemStack itemStack = event.itemEntityRenderState.stack;
-        BakedModel model = event.itemEntityRenderState.model;
+        ItemStack itemStack = event.renderState.stack;
+        BakedModel model = event.renderState.model;
         if (model == null) return;
         ModelInfo info = getInfo(model);
 
