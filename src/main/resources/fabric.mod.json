@@ -28,7 +28,6 @@
     "meteor-client-baritone.mixins.json",
     "meteor-client-indigo.mixins.json",
     "meteor-client-sodium.mixins.json",
-    "meteor-client-canvas.mixins.json",
     "meteor-client-lithium.mixins.json",
     "meteor-client-viafabricplus.mixins.json"
   ],
