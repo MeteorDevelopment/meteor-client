@@ -30,17 +30,17 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 
     @Inject(method = "getDisplayName", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(T entity, CallbackInfoReturnable<Text> cir) {
-        if (PostProcessShaders.rendering) cir.cancel();
-        if (Modules.get().get(NoRender.class).noNametags()) cir.cancel();
-        if (!(entity instanceof PlayerEntity)) return;
-        if (Modules.get().get(Nametags.class).playerNametags() && !(EntityUtils.getGameMode((PlayerEntity) entity) == null && Modules.get().get(Nametags.class).excludeBots()))
-            cir.cancel();
+        if (PostProcessShaders.rendering) cir.setReturnValue(null);
+        if (Modules.get().get(NoRender.class).noNametags()) cir.setReturnValue(null);
+        if (!(entity instanceof PlayerEntity player)) return;
+        if (Modules.get().get(Nametags.class).playerNametags() && !(EntityUtils.getGameMode(player) == null && Modules.get().get(Nametags.class).excludeBots()))
+            cir.setReturnValue(null);
     }
 
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
     private void shouldRender(T entity, Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
-        if (Modules.get().get(NoRender.class).noEntity(entity)) cir.cancel();
-        if (Modules.get().get(NoRender.class).noFallingBlocks() && entity instanceof FallingBlockEntity) cir.cancel();
+        if (Modules.get().get(NoRender.class).noEntity(entity)) cir.setReturnValue(false);
+        if (Modules.get().get(NoRender.class).noFallingBlocks() && entity instanceof FallingBlockEntity) cir.setReturnValue(false);
     }
 
     @ModifyReturnValue(method = "getSkyLight", at = @At("RETURN"))
