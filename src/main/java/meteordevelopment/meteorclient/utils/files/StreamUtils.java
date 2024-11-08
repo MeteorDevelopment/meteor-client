@@ -27,7 +27,7 @@ public class StreamUtils {
         try (OutputStream out = new FileOutputStream(to)) {
             in.transferTo(out);
         } catch (IOException e) {
-            MeteorClient.LOG.error("Error writing to file '%s'.".formatted(to.getName()));
+            MeteorClient.LOG.error("Error writing to file '{}'.", to.getName());
         } finally {
             IOUtils.closeQuietly(in);
         }

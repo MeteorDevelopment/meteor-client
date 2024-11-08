@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AutoGap extends Module {
+    @SuppressWarnings("unchecked")
     private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

@@ -165,13 +165,7 @@ public class Burrow extends Module {
         if (!shouldBurrow && instant.get()) blockPos.set(mc.player.getBlockPos());
 
         if (shouldBurrow) {
-            //When automatic was on (and instant was off), this would just always toggle off without trying to burrow.
-/*            if (!mc.player.isOnGround()) {
-                toggle();
-                return;
-            }*/
-
-            if (rotate.get())
+           if (rotate.get())
                 Rotations.rotate(Rotations.getYaw(mc.player.getBlockPos()), Rotations.getPitch(mc.player.getBlockPos()), 50, this::burrow);
             else burrow();
 

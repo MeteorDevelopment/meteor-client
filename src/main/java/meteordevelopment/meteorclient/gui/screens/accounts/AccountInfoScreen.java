@@ -16,7 +16,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class AccountInfoScreen extends WindowScreen {
-    private Account<?> account;
+    private final Account<?> account;
 
     public AccountInfoScreen(GuiTheme theme, Account<?> account) {
         super(theme, account.getUsername() + " details");
