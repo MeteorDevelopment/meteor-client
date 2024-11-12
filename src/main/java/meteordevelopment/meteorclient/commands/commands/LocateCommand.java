@@ -183,22 +183,17 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("stronghold").executes(s -> {
-            if (!BaritoneUtils.IS_AVAILABLE) {
-                error("Locating this structure requires Baritone.");
-                return SINGLE_SUCCESS;
-            }
-
             boolean foundEye = InvUtils.testInHotbar(Items.ENDER_EYE);
 
             if (foundEye) {
-                PathManagers.get().follow(EyeOfEnderEntity.class::isInstance);
+                if (BaritoneUtils.IS_AVAILABLE) PathManagers.get().follow(EyeOfEnderEntity.class::isInstance);
                 firstStart = null;
                 firstEnd = null;
                 secondStart = null;
                 secondEnd = null;
                 MeteorClient.EVENT_BUS.subscribe(this);
                 info("Please throw the first Eye of Ender");
-            } else {
+            } else if (BaritoneUtils.IS_AVAILABLE) {
                 Vec3d coords = findByBlockList(strongholdBlocks);
                 if (coords == null) {
                     error("No stronghold found nearby. You can use (highlight)Ender Eyes(default) for more success.");
@@ -208,7 +203,10 @@ public class LocateCommand extends Command {
                 text.append(ChatUtils.formatCoords(coords));
                 text.append(".");
                 info(text);
+            } else {
+                error("No Eyes of Ender found in hotbar.");
             }
+
             return SINGLE_SUCCESS;
         }));
 
@@ -356,14 +354,16 @@ public class LocateCommand extends Command {
             cancel();
             return;
         }
+
         final double[] start = new double[]{this.secondStart.x, this.secondStart.z, this.secondEnd.x, this.secondEnd.z};
         final double[] end = new double[]{this.firstStart.x, this.firstStart.z, this.firstEnd.x, this.firstEnd.z};
         final double[] intersection = calcIntersection(start, end);
         if (Double.isNaN(intersection[0]) || Double.isNaN(intersection[1]) || Double.isInfinite(intersection[0]) || Double.isInfinite(intersection[1])) {
-            error("Lines are parallel");
+            error("Unable to calculate intersection.");
             cancel();
             return;
         }
+
         MeteorClient.EVENT_BUS.unsubscribe(this);
         Vec3d coords = new Vec3d(intersection[0], 0, intersection[1]);
         MutableText text = Text.literal("Stronghold roughly located at ");

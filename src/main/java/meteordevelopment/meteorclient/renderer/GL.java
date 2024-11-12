@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.renderer;
 import com.mojang.blaze3d.platform.GlStateManager;
 import meteordevelopment.meteorclient.mixin.BufferRendererAccessor;
 import meteordevelopment.meteorclient.mixininterface.ICapabilityTracker;
-import meteordevelopment.meteorclient.utils.PreInit;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import org.joml.Matrix4f;
@@ -32,17 +31,10 @@ public class GL {
 
     private static boolean depthSaved, blendSaved, cullSaved, scissorSaved;
 
-    private static boolean changeBufferRenderer = true;
-
     public static int CURRENT_IBO;
     private static int prevIbo;
 
     private GL() {
-    }
-
-    @PreInit
-    public static void init() {
-        if (FabricLoader.getInstance().isModLoaded("canvas")) changeBufferRenderer = false;
     }
 
     // Generation
@@ -93,7 +85,7 @@ public class GL {
 
     public static void bindVertexArray(int vao) {
         GlStateManager._glBindVertexArray(vao);
-        if (changeBufferRenderer) BufferRendererAccessor.setCurrentVertexBuffer(null);
+        BufferRendererAccessor.setCurrentVertexBuffer(null);
     }
 
     public static void bindVertexBuffer(int vbo) {

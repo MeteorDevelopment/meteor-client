@@ -519,7 +519,7 @@ public class Utils {
     }
 
     public static void rightClick() {
-        ((IMinecraftClient) mc).rightClick();
+        ((IMinecraftClient) mc).meteor_client$rightClick();
     }
 
     public static boolean isShulker(Item item) {

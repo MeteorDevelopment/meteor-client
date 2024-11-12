@@ -28,9 +28,7 @@
     "meteor-client-baritone.mixins.json",
     "meteor-client-indigo.mixins.json",
     "meteor-client-sodium.mixins.json",
-    "meteor-client-canvas.mixins.json",
     "meteor-client-lithium.mixins.json",
-    "meteor-client-indium.mixins.json",
     "meteor-client-viafabricplus.mixins.json"
   ],
   "accessWidener": "meteor-client.accesswidener",
@@ -46,7 +44,7 @@
   },
   "depends": {
     "java": ">=21",
-    "minecraft": ["${minecraft_version}"],
+    "minecraft": ["1.21", "${minecraft_version}"],
     "fabricloader": ">=${loader_version}"
   },
   "breaks": {
@@ -54,7 +52,7 @@
     "feather": "*",
     "origins": "*",
     "wurst": "*",
-    "sodium": "<0.5.8",
+    "sodium": "<0.6.0-beta.2",
     "morechathistory": "*"
   }
 }

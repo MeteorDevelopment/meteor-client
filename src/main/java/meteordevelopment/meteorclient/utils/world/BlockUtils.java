@@ -21,6 +21,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.BlockItem;
@@ -368,6 +369,9 @@ public class BlockUtils {
         }
     }
 
+    /**
+     * @see net.minecraft.entity.player.PlayerEntity#getBlockBreakingSpeed(BlockState)
+     */
     private static double getBlockBreakingSpeed(int slot, BlockState block) {
         double speed = mc.player.getInventory().main.get(slot).getMiningSpeedMultiplier(block);
 
@@ -394,8 +398,8 @@ public class BlockUtils {
             speed *= k;
         }
 
-        if (mc.player.isSubmergedIn(FluidTags.WATER) /*fixme && !EnchantmentHelper.hasAquaAffinity(mc.player)*/) {
-            speed /= 5.0F;
+        if (mc.player.isSubmergedIn(FluidTags.WATER)) {
+            speed *= mc.player.getAttributeValue(EntityAttributes.PLAYER_SUBMERGED_MINING_SPEED);
         }
 
         if (!mc.player.isOnGround()) {

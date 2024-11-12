@@ -32,10 +32,7 @@ import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.MaceItem;
-import net.minecraft.item.SwordItem;
+import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
@@ -285,7 +282,8 @@ public class KillAura extends Module {
                 case Axe -> stack -> stack.getItem() instanceof AxeItem;
                 case Sword -> stack -> stack.getItem() instanceof SwordItem;
                 case Mace -> stack -> stack.getItem() instanceof MaceItem;
-                case All -> stack -> stack.getItem() instanceof AxeItem || stack.getItem() instanceof SwordItem || stack.getItem() instanceof MaceItem;
+                case Trident -> stack -> stack.getItem() instanceof TridentItem;
+                case All -> stack -> stack.getItem() instanceof AxeItem || stack.getItem() instanceof SwordItem || stack.getItem() instanceof MaceItem || stack.getItem() instanceof TridentItem;
                 default -> o -> true;
             };
             FindItemResult weaponResult = InvUtils.findInHotbar(predicate);
@@ -403,7 +401,8 @@ public class KillAura extends Module {
             case Axe -> mc.player.getMainHandStack().getItem() instanceof AxeItem;
             case Sword -> mc.player.getMainHandStack().getItem() instanceof SwordItem;
             case Mace -> mc.player.getMainHandStack().getItem() instanceof MaceItem;
-            case All -> mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof MaceItem;
+            case Trident -> mc.player.getMainHandStack().getItem() instanceof TridentItem;
+            case All -> mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof MaceItem || mc.player.getMainHandStack().getItem() instanceof TridentItem;
             default -> true;
         };
     }
@@ -423,6 +422,7 @@ public class KillAura extends Module {
         Sword,
         Axe,
         Mace,
+        Trident,
         All,
         Any
     }

@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.mixin.sodium;
 
-import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
+import net.caffeinemc.mods.sodium.client.model.light.data.LightDataAccess;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockRenderView;
@@ -28,7 +28,7 @@ public abstract class SodiumLightDataAccessMixin {
     private static final int FULL_LIGHT = 15 | 15 << 4 | 15 << 8;
 
     @Shadow
-    protected BlockRenderView world;
+    protected BlockRenderView level;
     @Shadow @Final
     private BlockPos.Mutable pos;
 
@@ -47,7 +47,7 @@ public abstract class SodiumLightDataAccessMixin {
     @ModifyVariable(method = "compute", at = @At(value = "TAIL"), name = "bl")
     private int compute_modifyBL(int light) {
         if (xray.isActive()) {
-            BlockState state = world.getBlockState(pos);
+            BlockState state = level.getBlockState(pos);
             if (!xray.isBlocked(state.getBlock(), pos)) return FULL_LIGHT;
         }
 

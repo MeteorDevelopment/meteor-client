@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.combat.*;
 import meteordevelopment.meteorclient.systems.modules.misc.*;
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.Swarm;
@@ -121,6 +122,7 @@ public class Modules extends System<Modules> {
         return CATEGORIES;
     }
 
+    @Deprecated(forRemoval = true)
     public static Category getCategoryByHash(int hash) {
         for (Category category : CATEGORIES) {
             if (category.hashCode() == hash) return category;
@@ -174,6 +176,12 @@ public class Modules extends System<Modules> {
 
         for (Module module : this.moduleInstances.values()) {
             int score = Utils.searchLevenshteinDefault(module.title, text, false);
+            if (Config.get().moduleAliases.get()) {
+                for (String alias : module.aliases) {
+                    int aliasScore = Utils.searchLevenshteinDefault(alias, text, false);
+                    if (aliasScore < score) score = aliasScore;
+                }
+            }
             modules.put(module, modules.getOrDefault(module, 0) + score);
         }
 
@@ -246,7 +254,7 @@ public class Modules extends System<Modules> {
         if (!isBinding()) return false;
 
         if (awaitingKeyRelease) {
-            if (!isKey || value != GLFW.GLFW_KEY_ENTER) return false;
+            if (!isKey || (value != GLFW.GLFW_KEY_ENTER && value != GLFW.GLFW_KEY_KP_ENTER)) return false;
 
             awaitingKeyRelease = false;
             return false;
@@ -430,11 +438,13 @@ public class Modules extends System<Modules> {
     private void initPlayer() {
         add(new AntiHunger());
         add(new AutoEat());
+        add(new AutoClicker());
         add(new AutoFish());
         add(new AutoGap());
         add(new AutoMend());
         add(new AutoReplenish());
         add(new AutoTool());
+        add(new BreakDelay());
         add(new ChestSwap());
         add(new EXPThrower());
         add(new FakePlayer());
@@ -443,12 +453,11 @@ public class Modules extends System<Modules> {
         add(new InstantRebreak());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
-        add(new BreakDelay());
+        add(new Multitask());
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
         add(new OffhandCrash());
-        add(new PacketMine());
         add(new Portals());
         add(new PotionSaver());
         add(new PotionSpoof());
@@ -538,7 +547,6 @@ public class Modules extends System<Modules> {
     private void initWorld() {
         add(new AirPlace());
         add(new Ambience());
-        add(new Collisions());
         add(new AutoBreed());
         add(new AutoBrewer());
         add(new AutoMount());
@@ -547,18 +555,20 @@ public class Modules extends System<Modules> {
         add(new AutoSign());
         add(new AutoSmelter());
         add(new BuildHeight());
+        add(new Collisions());
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new Flamethrower());
+        add(new HighwayBuilder());
         add(new LiquidFiller());
         add(new MountBypass());
         add(new NoGhostBlocks());
         add(new Nuker());
+        add(new PacketMine());
         add(new StashFinder());
         add(new SpawnProofer());
         add(new Timer());
         add(new VeinMiner());
-        add(new HighwayBuilder());
 
         if (BaritoneUtils.IS_AVAILABLE) {
             add(new Excavator());
@@ -569,7 +579,6 @@ public class Modules extends System<Modules> {
     private void initMisc() {
         add(new Swarm());
         add(new AntiPacketKick());
-        add(new AutoClicker());
         add(new AutoLog());
         add(new AutoReconnect());
         add(new AutoRespawn());
@@ -577,15 +586,15 @@ public class Modules extends System<Modules> {
         add(new BetterChat());
         add(new BookBot());
         add(new DiscordPresence());
+        add(new InventoryTweaks());
         add(new MessageAura());
         add(new NameProtect());
         add(new Notebot());
         add(new Notifier());
         add(new PacketCanceller());
+        add(new ServerSpoof());
         add(new SoundBlocker());
         add(new Spam());
-        add(new ServerSpoof());
-        add(new InventoryTweaks());
     }
 
     public static class ModuleRegistry extends SimpleRegistry<Module> {

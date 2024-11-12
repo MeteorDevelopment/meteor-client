@@ -12,13 +12,14 @@ import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTarge
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
-import meteordevelopment.meteorclient.events.game.WindowResizedEvent;
+import meteordevelopment.meteorclient.events.game.ResolutionChangedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
+import meteordevelopment.meteorclient.systems.modules.player.Multitask;
 import meteordevelopment.meteorclient.systems.modules.render.UnfocusedCPU;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CPSUtils;
@@ -28,6 +29,7 @@ import meteordevelopment.starscript.Script;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.Window;
@@ -73,6 +75,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow
     private int itemUseCooldown;
+
+    @Shadow
+    @Nullable
+    public ClientPlayerEntity player;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
@@ -163,7 +169,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Inject(method = "onResolutionChanged", at = @At("TAIL"))
     private void onResolutionChanged(CallbackInfo info) {
-        MeteorClient.EVENT_BUS.post(WindowResizedEvent.get());
+        MeteorClient.EVENT_BUS.post(ResolutionChangedEvent.get());
     }
 
     @Inject(method = "getFramerateLimit", at = @At("HEAD"), cancellable = true)
@@ -186,10 +192,35 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         lastTime = time;
     }
 
+    // multitask
+
+    @ModifyExpressionValue(method = "doItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;isBreakingBlock()Z"))
+    private boolean doItemUseModifyIsBreakingBlock(boolean original) {
+        return !Modules.get().isActive(Multitask.class) && original;
+    }
+
+    @ModifyExpressionValue(method = "handleBlockBreaking", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"))
+    private boolean handleBlockBreakingModifyIsUsingItem(boolean original) {
+        return !Modules.get().isActive(Multitask.class) && original;
+    }
+
+    @ModifyExpressionValue(method = "handleInputEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z", ordinal = 0))
+    private boolean handleInputEventsModifyIsUsingItem(boolean original) {
+        return !Modules.get().get(Multitask.class).attackingEntities() && original;
+    }
+
+    @Inject(method = "handleInputEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z", ordinal = 0, shift = At.Shift.BEFORE))
+    private void handleInputEventsInjectStopUsingItem(CallbackInfo info) {
+        if (Modules.get().get(Multitask.class).attackingEntities() && player.isUsingItem()) {
+            if (!options.useKey.isPressed()) interactionManager.stopUsingItem(player);
+            while (options.useKey.wasPressed());
+        }
+    }
+
     // Interface
 
     @Override
-    public void rightClick() {
+    public void meteor_client$rightClick() {
         rightClick = true;
     }
 }

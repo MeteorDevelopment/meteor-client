@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -17,6 +18,7 @@ import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Style;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -29,15 +31,15 @@ import static net.minecraft.client.util.InputUtil.*;
 
 @Mixin(value = Screen.class, priority = 500) // needs to be before baritone
 public abstract class ScreenMixin {
-    @Inject(method = "renderBackground", at = @At("HEAD"), cancellable = true)
-    private void onRenderBackground(CallbackInfo info) {
+    @Inject(method = "renderInGameBackground", at = @At("HEAD"), cancellable = true)
+    private void onRenderInGameBackground(CallbackInfo info) {
         if (Utils.canUpdate() && Modules.get().get(NoRender.class).noGuiBackground())
             info.cancel();
     }
 
     @Inject(method = "handleTextClick", at = @At(value = "HEAD"), cancellable = true)
-    private void onInvalidClickEvent(Style style, CallbackInfoReturnable<Boolean> cir) {
-        if (!(style.getClickEvent() instanceof RunnableClickEvent runnableClickEvent)) return;
+    private void onInvalidClickEvent(@Nullable Style style, CallbackInfoReturnable<Boolean> cir) {
+        if (style == null || !(style.getClickEvent() instanceof RunnableClickEvent runnableClickEvent)) return;
 
         runnableClickEvent.runnable.run();
         cir.setReturnValue(true);
@@ -50,7 +52,7 @@ public abstract class ScreenMixin {
                 Commands.dispatch(style.getClickEvent().getValue().substring(Config.get().prefix.get().length()));
                 cir.setReturnValue(true);
             } catch (CommandSyntaxException e) {
-                e.printStackTrace();
+                MeteorClient.LOG.error("Failed to run command", e);
             }
         }
     }

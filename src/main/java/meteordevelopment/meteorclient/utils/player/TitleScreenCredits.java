@@ -36,7 +36,6 @@ public class TitleScreenCredits {
 
     private static void init() {
         // Add addons
-        add(MeteorClient.ADDON);
         for (MeteorAddon addon : AddonManager.ADDONS) add(addon);
 
         // Sort by width (Meteor always first)

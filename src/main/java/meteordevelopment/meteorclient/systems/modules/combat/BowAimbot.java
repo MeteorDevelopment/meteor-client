@@ -24,6 +24,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArrowItem;
+import net.minecraft.item.BowItem;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.Vec3d;
 
@@ -130,23 +131,16 @@ public class BowAimbot extends Module {
         return InvUtils.testInMainHand(Items.BOW, Items.CROSSBOW);
     }
 
-    private void aim(double tickDelta) {
+    private void aim(float tickDelta) {
         // Velocity based on bow charge.
-        float velocity = (mc.player.getItemUseTime() - mc.player.getItemUseTimeLeft()) / 20f;
-        velocity = (velocity * velocity + velocity * 2) / 3;
-        if (velocity > 1) velocity = 1;
+        float velocity = BowItem.getPullProgress(mc.player.getItemUseTime());
 
         // Positions
-        double posX = target.getPos().getX() + (target.getPos().getX() - target.prevX) * tickDelta;
-        double posY = target.getPos().getY() + (target.getPos().getY() - target.prevY) * tickDelta;
-        double posZ = target.getPos().getZ() + (target.getPos().getZ() - target.prevZ) * tickDelta;
+        Vec3d pos = target.getLerpedPos(tickDelta);
 
-        // Adjusting for hitbox heights
-        posY -= 1.9f - target.getHeight();
-
-        double relativeX = posX - mc.player.getX();
-        double relativeY = posY - mc.player.getY();
-        double relativeZ = posZ - mc.player.getZ();
+        double relativeX = pos.x - mc.player.getX();
+        double relativeY = pos.y + (target.getHeight() / 2) - mc.player.getEyeY();
+        double relativeZ = pos.z - mc.player.getZ();
 
         // Calculate the pitch
         double hDistance = Math.sqrt(relativeX * relativeX + relativeZ * relativeZ);
@@ -159,7 +153,7 @@ public class BowAimbot extends Module {
         if (Float.isNaN(pitch)) {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
         } else {
-            Rotations.rotate(Rotations.getYaw(new Vec3d(posX, posY, posZ)), pitch);
+            Rotations.rotate(Rotations.getYaw(new Vec3d(pos.x, pos.y, pos.z)), pitch);
         }
     }
 

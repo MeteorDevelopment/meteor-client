@@ -83,6 +83,9 @@ public class WBlockPosEdit extends WHorizontalList {
             set(event.result.getBlockPos());
             newValueCheck();
 
+            clear();
+            init();
+
             clicking = false;
             event.cancel();
             MeteorClient.EVENT_BUS.unsubscribe(this);
@@ -128,7 +131,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             if (textBoxX.get().isEmpty()) set(new BlockPos(0, 0, 0));
             else {
-                set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
+                try {
+                    set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
+                } catch (NumberFormatException ignored) {}
             }
             newValueCheck();
         };
@@ -137,7 +142,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             if (textBoxY.get().isEmpty()) set(new BlockPos(0, 0, 0));
             else {
-                set(new BlockPos(value.getX(), Integer.parseInt(textBoxY.get()), value.getZ()));
+                try {
+                    set(new BlockPos(value.getX(), Integer.parseInt(textBoxY.get()), value.getZ()));
+                } catch (NumberFormatException ignored) {}
             }
             newValueCheck();
         };
@@ -146,7 +153,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             if (textBoxZ.get().isEmpty()) set(new BlockPos(0, 0, 0));
             else {
-                set(new BlockPos(value.getX(), value.getY(), Integer.parseInt(textBoxZ.get())));
+                try {
+                    set(new BlockPos(value.getX(), value.getY(), Integer.parseInt(textBoxZ.get())));
+                } catch (NumberFormatException ignored) {}
             }
             newValueCheck();
         };
