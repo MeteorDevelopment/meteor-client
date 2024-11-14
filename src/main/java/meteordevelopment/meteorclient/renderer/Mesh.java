@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
@@ -250,7 +251,11 @@ public class Mesh {
         else GL.disableDepth();
         GL.enableBlend();
         GL.disableCull();
-        GL.enableLineSmooth();
+
+        Config config = Config.get();
+        if (config.smoothLines.get()) {
+            GL.enableLineSmooth();
+        }
 
         if (rendering3D) {
             Matrix4fStack matrixStack = RenderSystem.getModelViewStack();

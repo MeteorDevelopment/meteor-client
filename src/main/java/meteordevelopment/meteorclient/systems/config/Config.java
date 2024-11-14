@@ -31,6 +31,13 @@ public class Config extends System<Config> {
 
     // Visual
 
+    public final Setting<Boolean> smoothLines = sgVisual.add(new BoolSetting.Builder()
+        .name("smooth-lines")
+        .description("Render lines smoothly. Disable if you are experiencing graphical issues.")
+        .defaultValue(true)
+        .build()
+    );
+
     public final Setting<Boolean> customFont = sgVisual.add(new BoolSetting.Builder()
         .name("custom-font")
         .description("Use a custom font.")
