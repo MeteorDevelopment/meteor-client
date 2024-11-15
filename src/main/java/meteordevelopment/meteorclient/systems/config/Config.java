@@ -188,15 +188,15 @@ public class Config extends System<Config> {
         return this;
     }
 
-    private NbtList listToTag(final List<String> list) {
+    private NbtList listToTag(List<String> list) {
         NbtList nbt = new NbtList();
-        for ( final String item : list) nbt.add(NbtString.of(item));
+        for (String item : list) nbt.add(NbtString.of(item));
         return nbt;
     }
 
-    private List<String> listFromTag(final NbtCompound tag, final String key) {
-         final List<String> list = new ArrayList<>();
-        for ( final NbtElement item : tag.getList(key, 8)) list.add(item.asString());
+    private List<String> listFromTag(final NbtCompound tag, String key) {
+        List<String> list = new ArrayList<>();
+        for (NbtElement item : tag.getList(key, 8)) list.add(item.asString());
         return list;
     }
     private enum Icons  {
