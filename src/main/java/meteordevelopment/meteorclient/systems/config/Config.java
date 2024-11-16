@@ -194,7 +194,7 @@ public class Config extends System<Config> {
         return nbt;
     }
 
-    private List<String> listFromTag(final NbtCompound tag, String key) {
+    private List<String> listFromTag(NbtCompound tag, String key) {
         List<String> list = new ArrayList<>();
         for (NbtElement item : tag.getList(key, 8)) list.add(item.asString());
         return list;
