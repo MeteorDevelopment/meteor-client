@@ -61,9 +61,8 @@ public class ItemPhysics extends Module {
 
         applyTransformation(matrices, model);
         matrices.translate(0, info.offsetY, 0);
-        // todo
-        // offsetInWater(matrices, event.itemEntity);
-        // preventZFighting(matrices, event.itemEntity);
+         offsetInWater(matrices, event.itemEntity);
+         preventZFighting(matrices, event.itemEntity);
 
         if (info.flat) {
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
