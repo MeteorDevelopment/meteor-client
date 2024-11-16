@@ -23,33 +23,33 @@ import java.nio.IntBuffer;
 
 public class IconChanger {
 
-    public static void setIcon(final Identifier iconPath) {
+    public static void setIcon(Identifier iconPath) {
         if (iconPath == null){
             try {
                 MeteorClient.mc.getWindow().setIcon(MeteorClient.mc.getDefaultResourcePack(), SharedConstants.getGameVersion().isStable() ? Icons.RELEASE : Icons.SNAPSHOT);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return;
         }
-        final long windowHandle = MinecraftClient.getInstance().getWindow().getHandle();
+        long windowHandle = MinecraftClient.getInstance().getWindow().getHandle();
         setWindowIcon(windowHandle, iconPath);
     }
 
-    private static void setWindowIcon(final long windowHandle, final Identifier iconPath) {
-        try (final MemoryStack stack = MemoryStack.stackPush()) {
-            final IntBuffer w = stack.mallocInt(1);
-            final IntBuffer h = stack.mallocInt(1);
-            final IntBuffer channels = stack.mallocInt(1);
+    private static void setWindowIcon(long windowHandle, Identifier iconPath) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            IntBuffer channels = stack.mallocInt(1);
 
-            final ByteBuffer icon = loadIcon(iconPath, w, h, channels);
+            ByteBuffer icon = loadIcon(iconPath, w, h, channels);
             if (icon != null) {
-                final GLFWImage glfwImage1 = GLFWImage.malloc();
+                GLFWImage glfwImage1 = GLFWImage.malloc();
                 glfwImage1.set(w.get(0), h.get(0), icon);
-                final GLFWImage glfwImage2 = GLFWImage.malloc();
+                GLFWImage glfwImage2 = GLFWImage.malloc();
                 glfwImage2.set(w.get(0), h.get(0), icon);
 
-                final GLFWImage.Buffer icons = GLFWImage.malloc(2);
+                GLFWImage.Buffer icons = GLFWImage.malloc(2);
                 icons.put(0, glfwImage1);
                 icons.put(1, glfwImage2);
 
@@ -64,23 +64,23 @@ public class IconChanger {
         }
     }
 
-    private static ByteBuffer loadIcon(final Identifier path, final IntBuffer w, final IntBuffer h, final IntBuffer channels) {
+    private static ByteBuffer loadIcon(Identifier path, IntBuffer w, IntBuffer h, IntBuffer channels) {
         try {
-            final Resource resource = MeteorClient.mc.getResourceManager().getResource(path).orElseThrow(() -> new IOException("Icon not found: " + path));
-            final InputStream inputStream = resource.getInputStream();
-            final byte[] iconBytes = inputStream.readAllBytes();
-            final ByteBuffer buffer = ByteBuffer.allocateDirect(iconBytes.length).put(iconBytes).flip();
-            final ByteBuffer icon = STBImage.stbi_load_from_memory(buffer, w, h, channels, 4);
+            Resource resource = MeteorClient.mc.getResourceManager().getResource(path).orElseThrow(() -> new IOException("Icon not found: " + path));
+            InputStream inputStream = resource.getInputStream();
+            byte[] iconBytes = inputStream.readAllBytes();
+            ByteBuffer buffer = ByteBuffer.allocateDirect(iconBytes.length).put(iconBytes).flip();
+            ByteBuffer icon = STBImage.stbi_load_from_memory(buffer, w, h, channels, 4);
             if (icon == null) {
                 info("Failed to load image from memory for: " + path + " - " + STBImage.stbi_failure_reason());
             }
             return icon;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
     }
-    private static void info(final String message){
+    private static void info(String message){
         ChatUtils.forceNextPrefixClass(IconChanger.class);
         ChatUtils.info(message);
     }
