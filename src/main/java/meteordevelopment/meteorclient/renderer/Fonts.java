@@ -73,7 +73,7 @@ public class Fonts {
                 throw new RuntimeException("Failed to load default font: " + fontFace, e);
             }
 
-            MeteorClient.LOG.error("Failed to load font: " + fontFace, e);
+            MeteorClient.LOG.error("Failed to load font: {}", fontFace, e);
             load(Fonts.DEFAULT_FONT);
         }
 

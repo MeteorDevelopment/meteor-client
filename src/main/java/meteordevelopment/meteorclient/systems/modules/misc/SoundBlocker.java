@@ -34,7 +34,7 @@ public class SoundBlocker extends Module {
     @EventHandler
     private void onPlaySound(PlaySoundEvent event) {
         for (SoundEvent sound : sounds.get()) {
-            if (sound.getId().equals(event.sound.getId())) {
+            if (sound.id().equals(event.sound.getId())) {
                 event.cancel();
                 break;
             }

@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 
-import java.net.InetSocketAddress;
 import java.util.Objects;
 
 public class Proxy implements ISerializable<Proxy> {
@@ -78,12 +77,7 @@ public class Proxy implements ISerializable<Proxy> {
     }
 
     public boolean resolveAddress() {
-        int port = this.port.get();
-        String address = this.address.get();
-
-        if (port <= 0 || port > 65535 || address == null || address.isBlank()) return false;
-        InetSocketAddress socketAddress = new InetSocketAddress(address, port);
-        return !socketAddress.isUnresolved();
+        return Utils.resolveAddress(this.address.get(), this.port.get());
     }
 
     public static class Builder {

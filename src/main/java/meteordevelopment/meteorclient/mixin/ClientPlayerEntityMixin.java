@@ -9,21 +9,18 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.PlayerTickMovementEvent;
 import meteordevelopment.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.*;
 import meteordevelopment.meteorclient.systems.modules.player.Portals;
-import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.damage.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -79,18 +76,13 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         }
     }
 
-    @Inject(method = "damage", at = @At("HEAD"))
-    private void onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate() && getWorld().isClient && canTakeDamage()) MeteorClient.EVENT_BUS.post(DamageEvent.get(this, source));
-    }
-
     @ModifyExpressionValue(method = "canSprint", at = @At(value = "CONSTANT", args = "floatValue=6.0f"))
     private float onHunger(float constant) {
         if (Modules.get().get(NoSlow.class).hunger()) return -1;
         return constant;
     }
 
-    @ModifyExpressionValue(method = "sendMovementPackets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSneaking()Z"))
+    @ModifyExpressionValue(method = "sendSneakingPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSneaking()Z"))
     private boolean isSneaking(boolean sneaking) {
         return Modules.get().get(Sneak.class).doPacket() || Modules.get().get(NoSlow.class).airStrict() || sneaking;
     }
@@ -131,7 +123,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.get());
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V", ordinal = 0))
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V", ordinal = 1))
     private void onTickHasVehicleBeforeSendPackets(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.get());
     }

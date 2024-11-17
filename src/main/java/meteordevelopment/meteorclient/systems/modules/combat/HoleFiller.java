@@ -326,7 +326,7 @@ public class HoleFiller extends Module {
         if (((AbstractBlockAccessor) mc.world.getBlockState(testPos).getBlock()).isCollidable()) return false;
         testPos.add(0, -1, 0);
 
-        ((IBox) box).set(pos);
+        ((IBox) box).meteor$set(pos);
         if (!mc.world.getOtherEntities(null, box, entity
             -> entity instanceof PlayerEntity
             || entity instanceof TntEntity

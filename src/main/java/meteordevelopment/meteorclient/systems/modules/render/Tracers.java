@@ -211,7 +211,7 @@ public class Tracers extends Module {
     );
 
     private int count;
-    private Instant initTimer = Instant.now();
+    private final Instant initTimer = Instant.now();
 
     public Tracers() {
         super(Categories.Render, "tracers", "Displays tracer lines to specified entities.");

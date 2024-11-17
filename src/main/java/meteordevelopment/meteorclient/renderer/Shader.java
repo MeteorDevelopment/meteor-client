@@ -31,7 +31,7 @@ public class Shader {
 
         String vertError = GL.compileShader(vert);
         if (vertError != null) {
-            MeteorClient.LOG.error("Failed to compile vertex shader (" + vertPath + "): " + vertError);
+            MeteorClient.LOG.error("Failed to compile vertex shader ({}): {}", vertPath, vertError);
             throw new RuntimeException("Failed to compile vertex shader (" + vertPath + "): " + vertError);
         }
 
@@ -40,7 +40,7 @@ public class Shader {
 
         String fragError = GL.compileShader(frag);
         if (fragError != null) {
-            MeteorClient.LOG.error("Failed to compile fragment shader (" + fragPath + "): " + fragError);
+            MeteorClient.LOG.error("Failed to compile fragment shader ({}): {}", fragPath, fragError);
             throw new RuntimeException("Failed to compile fragment shader (" + fragPath + "): " + fragError);
         }
 
@@ -48,7 +48,7 @@ public class Shader {
 
         String programError = GL.linkProgram(id, vert, frag);
         if (programError != null) {
-            MeteorClient.LOG.error("Failed to link program: " + programError);
+            MeteorClient.LOG.error("Failed to link program: {}", programError);
             throw new RuntimeException("Failed to link program: " + programError);
         }
 

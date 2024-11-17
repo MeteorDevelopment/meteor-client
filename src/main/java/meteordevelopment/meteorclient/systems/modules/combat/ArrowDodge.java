@@ -155,8 +155,8 @@ public class ArrowDodge extends Module {
             case Velocity -> mc.player.setVelocity(velX, velY, velZ);
             case Packet -> {
                 Vec3d newPos = mc.player.getPos().add(velX, velY, velZ);
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y, newPos.z, false));
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y - 0.01, newPos.z, true));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y, newPos.z, false, mc.player.horizontalCollision));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y - 0.01, newPos.z, true, mc.player.horizontalCollision));
             }
         }
     }

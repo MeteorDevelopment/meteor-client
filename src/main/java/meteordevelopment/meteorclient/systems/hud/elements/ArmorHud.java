@@ -173,10 +173,10 @@ public class ArmorHud extends HudElement {
     private ItemStack getItem(int i) {
         if (isInEditor()) {
             return switch (i) {
-                default -> Items.NETHERITE_BOOTS.getDefaultStack();
                 case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
                 case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
                 case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
+                default -> Items.NETHERITE_BOOTS.getDefaultStack();
             };
         }
 

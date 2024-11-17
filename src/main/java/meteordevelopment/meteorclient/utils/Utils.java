@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.utils;
 
+import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.systems.VertexSorter;
 import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -82,7 +82,6 @@ public class Utils {
     public static boolean rendering3D = true;
     public static double frameTime;
     public static Screen screenToOpen;
-    public static VertexSorter vertexSorter;
 
     private Utils() {
     }
@@ -210,13 +209,12 @@ public class Utils {
     }
 
     public static void unscaledProjection() {
-        vertexSorter = RenderSystem.getVertexSorting();
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), 0, 1000, 21000), VertexSorter.BY_Z);
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), 0, 1000, 21000), ProjectionType.ORTHOGRAPHIC);
         rendering3D = false;
     }
 
     public static void scaledProjection() {
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor()), (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor()), 0, 1000, 21000), vertexSorter);
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor()), (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor()), 0, 1000, 21000), ProjectionType.PERSPECTIVE);
         rendering3D = true;
     }
 
@@ -519,7 +517,7 @@ public class Utils {
     }
 
     public static void rightClick() {
-        ((IMinecraftClient) mc).meteor_client$rightClick();
+        ((IMinecraftClient) mc).meteor$rightClick();
     }
 
     public static boolean isShulker(Item item) {

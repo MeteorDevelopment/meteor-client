@@ -156,10 +156,10 @@ public class LongJump extends Module {
                     double zDir = Math.sin(Math.toRadians(dir + 90));
 
                     if (!mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, mc.player.getVelocity().y, 0.0)) || mc.player.verticalCollision) {
-                        ((IVec3d) event.movement).setXZ(xDir * 0.29F, zDir * 0.29F);
+                        ((IVec3d) event.movement).meteor$setXZ(xDir * 0.29F, zDir * 0.29F);
                     }
                     if ((event.movement.getY() == .33319999363422365)) {
-                        ((IVec3d) event.movement).setXZ(xDir * vanillaBoostFactor.get(), zDir * vanillaBoostFactor.get());
+                        ((IVec3d) event.movement).meteor$setXZ(xDir * vanillaBoostFactor.get(), zDir * vanillaBoostFactor.get());
                     }
                 }
             }
@@ -180,7 +180,7 @@ public class LongJump extends Module {
                 if (PlayerUtils.isMoving() && (!onJump.get() || mc.options.jumpKey.isPressed()) && !mc.player.isInLava() && !mc.player.isTouchingWater()) {
                     if (stage == 0) moveSpeed = getMoveSpeed() * burstInitialSpeed.get();
                     else if (stage == 1) {
-                         ((IVec3d) event.movement).setY(0.42);
+                         ((IVec3d) event.movement).meteor$setY(0.42);
                          moveSpeed *= burstBoostFactor.get();
                     }
                     else if (stage == 2) {
@@ -191,7 +191,7 @@ public class LongJump extends Module {
 
                     setMoveSpeed(event, moveSpeed = Math.max(getMoveSpeed(), moveSpeed));
                     if (!mc.player.verticalCollision && !mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, mc.player.getVelocity().y, 0.0)) && !mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, -0.4, 0.0))) {
-                        ((IVec3d) event.movement).setY(-0.001);
+                        ((IVec3d) event.movement).meteor$setY(-0.001);
                     }
 
                     stage++;
@@ -284,7 +284,7 @@ public class LongJump extends Module {
         float yaw = mc.player.getYaw();
 
         if (!PlayerUtils.isMoving()) {
-            ((IVec3d) event.movement).setXZ(0, 0);
+            ((IVec3d) event.movement).meteor$setXZ(0, 0);
         }
         else {
             if (forward != 0) {
@@ -298,7 +298,7 @@ public class LongJump extends Module {
 
         double cos = Math.cos(Math.toRadians(yaw + 90));
         double sin = Math.sin(Math.toRadians(yaw + 90));
-        ((IVec3d) event.movement).setXZ((forward * speed * cos) + (strafe * speed * sin), (forward * speed * sin) + (strafe * speed * cos));
+        ((IVec3d) event.movement).meteor$setXZ((forward * speed * cos) + (strafe * speed * sin), (forward * speed * sin) + (strafe * speed * cos));
     }
 
     public enum JumpMode {

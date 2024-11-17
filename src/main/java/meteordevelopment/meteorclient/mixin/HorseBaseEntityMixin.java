@@ -15,7 +15,7 @@ public abstract class HorseBaseEntityMixin implements IHorseBaseEntity {
     @Shadow protected abstract void setHorseFlag(int bitmask, boolean flag);
 
     @Override
-    public void setSaddled(boolean saddled) {
+    public void meteor$setSaddled(boolean saddled) {
         setHorseFlag(4, saddled);
     }
 }

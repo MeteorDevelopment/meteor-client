@@ -209,14 +209,16 @@ public class Flight extends Module {
                     mc.player.getZ(),
                     packet.getYaw(0),
                     packet.getPitch(0),
-                    packet.isOnGround()
+                    packet.isOnGround(),
+                    mc.player.horizontalCollision
                 );
             } else {
                 fullPacket = new PlayerMoveC2SPacket.PositionAndOnGround(
                     mc.player.getX(),
                     mc.player.getY(),
                     mc.player.getZ(),
-                    packet.isOnGround()
+                    packet.isOnGround(),
+                    mc.player.horizontalCollision
                 );
             }
             event.cancel();

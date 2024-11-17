@@ -6,25 +6,107 @@
 package meteordevelopment.meteorclient.utils.player;
 
 import net.minecraft.client.input.Input;
+import net.minecraft.util.PlayerInput;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class CustomPlayerInput extends Input {
     @Override
     public void tick(boolean slowDown, float f) {
-        movementForward = pressingForward == pressingBack ? 0.0F : (pressingForward ? 1.0F : -1.0F);
-        movementSideways = pressingLeft == pressingRight ? 0.0F : (pressingLeft ? 1.0F : -1.0F);
+        movementForward = mc.player.input.playerInput.forward() == mc.player.input.playerInput.backward() ? 0.0F : (mc.player.input.playerInput.forward() ? 1.0F : -1.0F);
+        movementSideways = mc.player.input.playerInput.left() == mc.player.input.playerInput.right() ? 0.0F : (mc.player.input.playerInput.left() ? 1.0F : -1.0F);
 
-        if (sneaking) {
+        if (mc.player.isSneaking()) {
             movementForward *= 0.3;
             movementSideways *= 0.3;
         }
     }
 
     public void stop() {
-        pressingForward = false;
-        pressingBack = false;
-        pressingRight = false;
-        pressingLeft = false;
-        jumping = false;
-        sneaking = false;
+        this.playerInput = PlayerInput.DEFAULT;
+    }
+
+    public void forward(boolean bool) {
+        this.playerInput = new PlayerInput(
+            bool,
+            this.playerInput.backward(),
+            this.playerInput.left(),
+            this.playerInput.right(),
+            this.playerInput.jump(),
+            this.playerInput.sneak(),
+            this.playerInput.sprint()
+        );
+    }
+
+    public void backward(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            bool,
+            this.playerInput.left(),
+            this.playerInput.right(),
+            this.playerInput.jump(),
+            this.playerInput.sneak(),
+            this.playerInput.sprint()
+        );
+    }
+
+    public void left(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            this.playerInput.backward(),
+            bool,
+            this.playerInput.right(),
+            this.playerInput.jump(),
+            this.playerInput.sneak(),
+            this.playerInput.sprint()
+        );
+    }
+
+    public void right(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            this.playerInput.backward(),
+            this.playerInput.left(),
+            bool,
+            this.playerInput.jump(),
+            this.playerInput.sneak(),
+            this.playerInput.sprint()
+        );
+    }
+
+    public void jump(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            this.playerInput.backward(),
+            this.playerInput.left(),
+            this.playerInput.right(),
+            bool,
+            this.playerInput.sneak(),
+            this.playerInput.sprint()
+        );
+    }
+
+    public void sneak(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            this.playerInput.backward(),
+            this.playerInput.left(),
+            this.playerInput.right(),
+            this.playerInput.jump(),
+            bool,
+            this.playerInput.sprint()
+        );
+    }
+
+    public void sprint(boolean bool) {
+        this.playerInput = new PlayerInput(
+            this.playerInput.forward(),
+            this.playerInput.backward(),
+            this.playerInput.left(),
+            this.playerInput.right(),
+            this.playerInput.jump(),
+            this.playerInput.sneak(),
+            bool
+        );
     }
 }

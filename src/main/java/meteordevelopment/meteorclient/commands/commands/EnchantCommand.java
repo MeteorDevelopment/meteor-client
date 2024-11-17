@@ -96,7 +96,7 @@ public class EnchantCommand extends Command {
     private void all(boolean onlyPossible, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        mc.getNetworkHandler().getRegistryManager().getOptionalWrapper(RegistryKeys.ENCHANTMENT).ifPresent(registry -> {
+        mc.getNetworkHandler().getRegistryManager().getOptional(RegistryKeys.ENCHANTMENT).ifPresent(registry -> {
             registry.streamEntries().forEach(enchantment -> {
                 if (!onlyPossible || enchantment.value().isAcceptableItem(itemStack)) {
                     Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));

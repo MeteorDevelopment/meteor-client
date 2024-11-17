@@ -100,7 +100,7 @@ public abstract class CameraMixin implements ICamera {
     }
 
     @Override
-    public void setRot(double yaw, double pitch) {
+    public void meteor$setRot(double yaw, double pitch) {
         setRotation((float) yaw, (float) MathHelper.clamp(pitch, -90, 90));
     }
 }

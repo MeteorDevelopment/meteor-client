@@ -44,7 +44,7 @@
   },
   "depends": {
     "java": ">=21",
-    "minecraft": ["1.21", "${minecraft_version}"],
+    "minecraft": ["1.21.2", "${minecraft_version}"],
     "fabricloader": ">=${loader_version}"
   },
   "breaks": {
@@ -52,7 +52,7 @@
     "feather": "*",
     "origins": "*",
     "wurst": "*",
-    "sodium": "<0.6.0-beta.2",
+    "sodium": "<0.6.0",
     "morechathistory": "*"
   }
 }

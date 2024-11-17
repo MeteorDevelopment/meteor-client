@@ -78,10 +78,14 @@ public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
     private ItemStack getPotionStack(StatusEffect effect) {
         ItemStack potion = Items.POTION.getDefaultStack();
 
-        potion.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(
-            potion.get(DataComponentTypes.POTION_CONTENTS).potion(),
-            Optional.of(effect.getColor()),
-            potion.get(DataComponentTypes.POTION_CONTENTS).customEffects())
+        potion.set(
+            DataComponentTypes.POTION_CONTENTS,
+            new PotionContentsComponent(
+                potion.get(DataComponentTypes.POTION_CONTENTS).potion(),
+                Optional.of(effect.getColor()),
+                potion.get(DataComponentTypes.POTION_CONTENTS).customEffects(),
+                Optional.empty()
+            )
         );
 
         return potion;

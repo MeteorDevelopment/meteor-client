@@ -33,7 +33,7 @@ public class Strafe extends SpeedMode {
             case 1: //Jump
                 if (!PlayerUtils.isMoving() || !mc.player.isOnGround()) break;
 
-                ((IVec3d) event.movement).setY(getHop(0.40123128));
+                ((IVec3d) event.movement).meteor$setY(getHop(0.40123128));
                 speed *= settings.ncpSpeed.get();
                 stage++;
                 break;
@@ -67,7 +67,7 @@ public class Strafe extends SpeedMode {
             velZ = anchor.deltaZ;
         }
 
-        ((IVec3d) event.movement).setXZ(velX, velZ);
+        ((IVec3d) event.movement).meteor$setXZ(velX, velZ);
     }
 
     private Vector2d transformStrafe(double speed) {
