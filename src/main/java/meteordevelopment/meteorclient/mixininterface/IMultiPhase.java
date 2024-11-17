@@ -5,9 +5,8 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.render.RenderLayer;
 
-public interface IEntityRenderer {
-    Identifier getTextureInterface(Entity entity);
+public interface IMultiPhase {
+    RenderLayer.MultiPhaseParameters meteor$getParameters();
 }

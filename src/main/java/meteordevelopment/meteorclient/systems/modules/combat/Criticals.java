@@ -79,9 +79,9 @@ public class Criticals extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
+        if (event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.meteor$getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
             if (mace.get() && mc.player.getMainHandStack().getItem() instanceof MaceItem) {
-                if (mc.player.isFallFlying()) return;
+                if (mc.player.isGliding()) return;
 
                 sendPacket(0);
                 sendPacket(1.501 + extraHeight.get());
@@ -89,7 +89,7 @@ public class Criticals extends Module {
             } else {
                 if (skipCrit()) return;
 
-                Entity entity = packet.getEntity();
+                Entity entity = packet.meteor$getEntity();
 
                 if (!(entity instanceof LivingEntity) || (entity != Modules.get().get(KillAura.class).getTarget() && ka.get()))
                     return;
@@ -111,7 +111,7 @@ public class Criticals extends Module {
                             attackPacket = (PlayerInteractEntityC2SPacket) event.packet;
 
                             if (mode.get() == Mode.Jump) mc.player.jump();
-                            else ((IVec3d) mc.player.getVelocity()).setY(0.25);
+                            else ((IVec3d) mc.player.getVelocity()).meteor$setY(0.25);
                             event.cancel();
                         }
                     }
@@ -152,8 +152,8 @@ public class Criticals extends Module {
         double y = mc.player.getY();
         double z = mc.player.getZ();
 
-        PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false);
-        ((IPlayerMoveC2SPacket) packet).setTag(1337);
+        PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false, mc.player.horizontalCollision);
+        ((IPlayerMoveC2SPacket) packet).meteor$setTag(1337);
 
         mc.player.networkHandler.sendPacket(packet);
     }

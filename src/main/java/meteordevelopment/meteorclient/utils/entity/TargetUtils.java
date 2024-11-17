@@ -51,7 +51,9 @@ public class TargetUtils {
 
         targetList.sort(sortPriority);
         // fast list trimming
-        for (int i = targetList.size() - 1; i >= maxCount; i--) targetList.remove(i);
+        if (targetList.size() > maxCount) {
+            targetList.subList(maxCount, targetList.size()).clear();
+        }
     }
 
     @Nullable

@@ -537,28 +537,28 @@ public class HighwayBuilder extends Module {
                     b.mc.player.setYaw(0);
 
                     if (!isZ) {
-                        b.input.pressingForward = z < 0;
-                        b.input.pressingBack = z > 0;
+                        b.input.forward(z < 0);
+                        b.input.backward(z > 0);
 
                         if (b.mc.player.getZ() < 0) {
-                            boolean forward = b.input.pressingForward;
-                            b.input.pressingForward = b.input.pressingBack;
-                            b.input.pressingBack = forward;
+                            boolean forward = b.input.playerInput.forward();
+                            b.input.forward(b.input.playerInput.backward());
+                            b.input.backward(forward);
                         }
                     }
 
                     if (!isX) {
-                        b.input.pressingRight = x > 0;
-                        b.input.pressingLeft = x < 0;
+                        b.input.right(x > 0);
+                        b.input.left(x < 0);
 
                         if (b.mc.player.getX() < 0) {
-                            boolean right = b.input.pressingRight;
-                            b.input.pressingRight = b.input.pressingLeft;
-                            b.input.pressingLeft = right;
+                            boolean right = b.input.playerInput.right();
+                            b.input.right(b.input.playerInput.left());
+                            b.input.left(right);
                         }
                     }
 
-                    b.input.sneaking = true;
+                    b.input.sneak(true);
                 }
             }
         },
@@ -575,7 +575,7 @@ public class HighwayBuilder extends Module {
             protected void tick(HighwayBuilder b) {
                 checkTasks(b);
 
-                if (b.state == Forward) b.input.pressingForward = true; // Move
+                if (b.state == Forward) b.input.forward(true); // Move
             }
 
             private void checkTasks(HighwayBuilder b) {
@@ -809,7 +809,7 @@ public class HighwayBuilder extends Module {
                 // Move
                 if (moveTimer > 0) {
                     b.mc.player.setYaw(dir.yaw);
-                    b.input.pressingForward = moveTimer > 2;
+                    b.input.forward(moveTimer > 2);
 
                     moveTimer--;
                     return;

@@ -13,9 +13,10 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 
@@ -59,11 +60,11 @@ public class ChestSwap extends Module {
     }
 
     public void swap() {
-        Item currentItem = mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem();
+        ItemStack currentItem = mc.player.getEquippedStack(EquipmentSlot.CHEST);
 
-        if (currentItem == Items.ELYTRA) {
+        if (currentItem.contains(DataComponentTypes.GLIDER)) {
             equipChestplate();
-        } else if (currentItem instanceof ArmorItem && ((ArmorItem) currentItem).getSlotType() == EquipmentSlot.CHEST) {
+        } else if (currentItem.contains(DataComponentTypes.EQUIPPABLE) && currentItem.get(DataComponentTypes.EQUIPPABLE).slot().getEntitySlotId() == EquipmentSlot.CHEST.getEntitySlotId()) {
             equipElytra();
         } else {
             if (!equipChestplate()) equipElytra();
@@ -117,9 +118,9 @@ public class ChestSwap extends Module {
 
     private void equipElytra() {
         for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
-            Item item = mc.player.getInventory().main.get(i).getItem();
+            ItemStack item = mc.player.getInventory().main.get(i);
 
-            if (item == Items.ELYTRA) {
+            if (item.contains(DataComponentTypes.GLIDER)) {
                 equip(i);
                 break;
             }

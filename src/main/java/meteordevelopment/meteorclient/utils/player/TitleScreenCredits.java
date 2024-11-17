@@ -63,12 +63,8 @@ public class TitleScreenCredits {
                             MeteorClient.LOG.info("See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens");
                         }
                     }
-                    case Http.FORBIDDEN -> {
-                        MeteorClient.LOG.warn("Could not fetch updates for addon '%s': Rate-limited by GitHub.".formatted(credit.addon.name));
-                    }
-                    case Http.NOT_FOUND -> {
-                        MeteorClient.LOG.warn("Could not fetch updates for addon '%s': GitHub repository '%s' not found.".formatted(credit.addon.name, repo.getOwnerName()));
-                    }
+                    case Http.FORBIDDEN -> MeteorClient.LOG.warn("Could not fetch updates for addon '{}': Rate-limited by GitHub.", credit.addon.name);
+                    case Http.NOT_FOUND -> MeteorClient.LOG.warn("Could not fetch updates for addon '{}': GitHub repository '{}' not found.", credit.addon.name, repo.getOwnerName());
                     case Http.SUCCESS -> {
                         if (!credit.addon.getCommit().equals(res.body().commit.sha)) {
                             synchronized (credit.text) {

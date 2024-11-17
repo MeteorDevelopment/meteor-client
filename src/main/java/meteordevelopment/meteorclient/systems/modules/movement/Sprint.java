@@ -81,7 +81,7 @@ public class Sprint extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onPacketSend(PacketEvent.Send event) {
-        if (!unsprintOnHit.get() || !(event.packet instanceof IPlayerInteractEntityC2SPacket packet) || packet.getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
+        if (!unsprintOnHit.get() || !(event.packet instanceof IPlayerInteractEntityC2SPacket packet) || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
         mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
         mc.player.setSprinting(false);
@@ -90,7 +90,7 @@ public class Sprint extends Module {
     @EventHandler
     private void onPacketSent(PacketEvent.Sent event) {
         if (!unsprintOnHit.get() || !keepSprint.get()) return;
-        if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet) || packet.getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
+        if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet) || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
         if (shouldSprint() && !mc.player.isSprinting()) {
             mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));

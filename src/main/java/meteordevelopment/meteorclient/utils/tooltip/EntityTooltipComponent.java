@@ -36,7 +36,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public int getHeight() {
+    public int getHeight(TextRenderer textRenderer) {
         return 24;
     }
 
@@ -46,7 +46,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
         MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.translate(15, 2, 0);
@@ -86,7 +86,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
         VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
         entity.age = mc.player.age;
         entity.setCustomNameVisible(false);
-        entityRenderDispatcher.render(entity, 0, 0, 0, 0.f, 1.f, matrices, immediate, 15728880);
+        entityRenderDispatcher.render(entity, 0, 0, 0, 1.f, matrices, immediate, 15728880);
         immediate.draw();
         entityRenderDispatcher.setRenderShadows(true);
         matrices.pop();

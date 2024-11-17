@@ -67,7 +67,7 @@ public class InventorySorter {
         List<MySlot> slots = new ArrayList<>();
 
         for (Slot slot : screen.getScreenHandler().slots) {
-            if (getInvPart(slot) == originInvPart) slots.add(new MySlot(((ISlot) slot).getId(), slot.getStack()));
+            if (getInvPart(slot) == originInvPart) slots.add(new MySlot(((ISlot) slot).meteor$getId(), slot.getStack()));
         }
 
         slots.sort(Comparator.comparingInt(value -> value.id));
@@ -173,9 +173,9 @@ public class InventorySorter {
     }
 
     private InvPart getInvPart(Slot slot) {
-        int i = ((ISlot) slot).getIndex();
+        int i = ((ISlot) slot).meteor$getIndex();
 
-        if (slot.inventory instanceof PlayerInventory && (!(screen instanceof CreativeInventoryScreen) || ((ISlot) slot).getId() > 8)) {
+        if (slot.inventory instanceof PlayerInventory && (!(screen instanceof CreativeInventoryScreen) || ((ISlot) slot).meteor$getId() > 8)) {
             if (SlotUtils.isHotbar(i)) return InvPart.Hotbar;
             else if (SlotUtils.isMain(i)) return InvPart.Player;
         }

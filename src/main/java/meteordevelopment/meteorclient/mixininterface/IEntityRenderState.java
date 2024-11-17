@@ -5,8 +5,10 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.entity.Entity;
 
-public interface IExplosion {
-    void set(Vec3d pos, float power, boolean createFire);
+public interface IEntityRenderState {
+    Entity meteor$getEntity();
+
+    void meteor$setEntity(Entity entity);
 }

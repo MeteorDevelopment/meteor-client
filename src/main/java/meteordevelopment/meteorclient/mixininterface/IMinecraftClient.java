@@ -6,5 +6,5 @@
 package meteordevelopment.meteorclient.mixininterface;
 
 public interface IMinecraftClient {
-    void meteor_client$rightClick();
+    void meteor$rightClick();
 }

@@ -33,7 +33,7 @@ public class Framebuffer {
         bind();
 
         texture = GL.genTexture();
-        GL.bindTexture(texture);
+        GL.getTexture(texture);
         GL.defaultPixelStore();
 
         GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

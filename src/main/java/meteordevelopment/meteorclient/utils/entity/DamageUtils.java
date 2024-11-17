@@ -26,6 +26,7 @@ import net.minecraft.item.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.EntityTypeTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
@@ -73,7 +74,7 @@ public class DamageUtils {
     /**
      * Low level control of parameters without having to reimplement everything, for addon authors who wish to use their
      * own predictions or other systems.
-     * @see net.minecraft.world.explosion.ExplosionBehavior#calculateDamage(Explosion, Entity)
+     * @see net.minecraft.world.explosion.ExplosionBehavior#calculateDamage(Explosion, Entity, float)
      */
     public static float explosionDamage(LivingEntity target, Vec3d targetPos, Box targetBox, Vec3d explosionPos, float power, RaycastFactory raycastFactory) {
         double modDistance = PlayerUtils.distance(targetPos.x, targetPos.y, targetPos.z, explosionPos.x, explosionPos.y, explosionPos.z);
@@ -143,7 +144,7 @@ public class DamageUtils {
      * @see PlayerEntity#attack(Entity)
      */
     public static float getAttackDamage(LivingEntity attacker, LivingEntity target) {
-        float itemDamage = (float) attacker.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        float itemDamage = (float) attacker.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
         DamageSource damageSource = attacker instanceof PlayerEntity player ? mc.world.getDamageSources().playerAttack(player) : mc.world.getDamageSources().mobAttack(attacker);
 
         float damage = modifyAttackDamage(attacker, target, attacker.getWeaponStack(), damageSource, itemDamage);
@@ -151,8 +152,8 @@ public class DamageUtils {
     }
 
     public static float getAttackDamage(LivingEntity attacker, LivingEntity target, ItemStack weapon) {
-        EntityAttributeInstance original = attacker.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-        EntityAttributeInstance copy = new EntityAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE, o -> {});
+        EntityAttributeInstance original = attacker.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
+        EntityAttributeInstance copy = new EntityAttributeInstance(EntityAttributes.ATTACK_DAMAGE, o -> {});
 
         copy.setBaseValue(original.getBaseValue());
         for (EntityAttributeModifier modifier : original.getModifiers()) {
@@ -163,7 +164,7 @@ public class DamageUtils {
         AttributeModifiersComponent attributeModifiers = weapon.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
         if (attributeModifiers != null) {
             attributeModifiers.applyModifiers(EquipmentSlot.MAINHAND, (entry, modifier) -> {
-                if (entry == EntityAttributes.GENERIC_ATTACK_DAMAGE) copy.updateModifier(modifier);
+                if (entry == EntityAttributes.ATTACK_DAMAGE) copy.updateModifier(modifier);
             });
         }
 
@@ -227,7 +228,7 @@ public class DamageUtils {
     // Fall Damage
 
     /**
-     * @see LivingEntity#computeFallDamage(float, float) (float, float, DamageSource)
+     * @see LivingEntity#computeFallDamage(float, float)
      */
     public static float fallDamage(LivingEntity entity) {
         if (entity instanceof PlayerEntity player && player.getAbilities().flying) return 0f;
@@ -255,7 +256,7 @@ public class DamageUtils {
     // Utils
 
     /**
-     * @see LivingEntity#applyDamage(DamageSource, float)
+     * @see LivingEntity#applyDamage(ServerWorld, DamageSource, float)
      */
     public static float calculateReductions(float damage, LivingEntity entity, DamageSource damageSource) {
         if (damageSource.isScaledWithDifficulty()) {
@@ -266,7 +267,7 @@ public class DamageUtils {
         }
 
         // Armor reduction
-        damage = DamageUtil.getDamageLeft(entity, damage, damageSource, getArmor(entity), (float) entity.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft(entity, damage, damageSource, getArmor(entity), (float) entity.getAttributeValue(EntityAttributes.ARMOR_TOUGHNESS));
 
         // Resistance reduction
         damage = resistanceReduction(entity, damage);
@@ -278,7 +279,7 @@ public class DamageUtils {
     }
 
     private static float getArmor(LivingEntity entity) {
-        return (float) Math.floor(entity.getAttributeValue(EntityAttributes.GENERIC_ARMOR));
+        return (float) Math.floor(entity.getAttributeValue(EntityAttributes.ARMOR));
     }
 
     /**
@@ -336,7 +337,7 @@ public class DamageUtils {
     }
 
     /**
-     * @see Explosion#getExposure(Vec3d, Entity)
+     * @see net.minecraft.world.explosion.ExplosionImpl#calculateReceivedDamage(Vec3d, Entity)
      */
     private static float getExposure(Vec3d source, Box box, RaycastFactory raycastFactory) {
         double xDiff = box.maxX - box.minX;

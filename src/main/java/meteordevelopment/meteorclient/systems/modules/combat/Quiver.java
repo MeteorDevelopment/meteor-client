@@ -184,7 +184,7 @@ public class Quiver extends Module {
                 int targetSlot = arrowSlots.getFirst();
                 arrowSlots.removeFirst();
 
-                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround()));
+                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround(), mc.player.horizontalCollision));
                 mc.options.useKey.setPressed(false);
                 mc.interactionManager.stopUsingItem(mc.player);
                 if (targetSlot != 9) InvUtils.move().from(9).to(targetSlot);

@@ -87,7 +87,7 @@ public class AutoTotem extends Module {
         if (totems <= 0) locked = false;
         else if (ticks >= delay.get()) {
             boolean low = mc.player.getHealth() + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions(explosion.get(), fall.get()) <= health.get();
-            boolean ely = elytra.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
+            boolean ely = elytra.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isGliding();
 
             locked = mode.get() == Mode.Strict || (mode.get() == Mode.Smart && (low || ely));
 

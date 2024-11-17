@@ -80,20 +80,15 @@ public class NBSSongDecoder extends SongDecoder {
         double tick = -1;
         while (true) {
             short jumpTicks = readShort(dataInputStream); // jumps till next tick
-            //System.out.println("Jumps to next tick: " + jumpTicks);
             if (jumpTicks == 0) {
                 break;
             }
             tick += jumpTicks * (20f / speed);
-            //System.out.println("Tick: " + tick);
-            short layer = -1;
             while (true) {
                 short jumpLayers = readShort(dataInputStream); // jumps till next layer
                 if (jumpLayers == 0) {
                     break;
                 }
-                layer += jumpLayers;
-                //System.out.println("Layer: " + layer);
                 byte instrument = dataInputStream.readByte();
 
                 byte key = dataInputStream.readByte();
@@ -118,9 +113,6 @@ public class NBSSongDecoder extends SongDecoder {
 
     /**
      * Sets a note at a tick in a song
-     * @param ticks
-     * @param note
-     * @param notesMap
      */
     private static void setNote(int ticks, Note note, Multimap<Integer, Note> notesMap) {
         notesMap.put(ticks, note);

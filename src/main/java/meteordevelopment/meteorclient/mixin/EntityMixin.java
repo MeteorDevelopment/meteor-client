@@ -189,7 +189,7 @@ public abstract class EntityMixin {
         if ((Object) this != mc.player) return;
 
         if (Modules.get().get(ElytraFly.class).canPacketEfly()) {
-            info.setReturnValue(EntityPose.FALL_FLYING);
+            info.setReturnValue(EntityPose.GLIDING);
         }
     }
 
@@ -219,7 +219,7 @@ public abstract class EntityMixin {
         }
         else if (Modules.get().isActive(HighwayBuilder.class)) {
             Camera camera = mc.gameRenderer.getCamera();
-            ((ICamera) camera).setRot(camera.getYaw() + cursorDeltaX * 0.15, camera.getPitch() + cursorDeltaY * 0.15);
+            ((ICamera) camera).meteor$setRot(camera.getYaw() + cursorDeltaX * 0.15, camera.getPitch() + cursorDeltaY * 0.15);
             ci.cancel();
         }
         else if (freeLook.cameraMode()) {

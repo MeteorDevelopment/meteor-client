@@ -11,8 +11,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
-import meteordevelopment.meteorclient.mixin.MapRendererAccessor;
+import meteordevelopment.meteorclient.mixin.MapTextureManagerAccessor;
 import net.minecraft.client.render.MapRenderer;
+import net.minecraft.client.texture.MapTextureManager;
 import net.minecraft.command.CommandSource;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.FilledMapItem;
@@ -70,8 +71,8 @@ public class SaveMapCommand extends Command {
         File path = getPath();
         if (path == null) throw OOPS.create();
 
-        MapRenderer mapRenderer = mc.gameRenderer.getMapRenderer();
-        MapRenderer.MapTexture texture = ((MapRendererAccessor) mapRenderer).invokeGetMapTexture(map.get(DataComponentTypes.MAP_ID), state);
+        MapRenderer mapRenderer = mc.gameRenderer.getClient().getMapRenderer();
+        MapTextureManager.MapTexture texture = ((MapTextureManagerAccessor) mapRenderer).invokeGetMapTexture(map.get(DataComponentTypes.MAP_ID), state);
         if (texture.texture.getImage() == null) throw OOPS.create();
 
         try {
