@@ -9,6 +9,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import meteordevelopment.meteorclient.mixin.BufferRendererAccessor;
 import meteordevelopment.meteorclient.mixininterface.ICapabilityTracker;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.util.Identifier;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
@@ -294,17 +295,17 @@ public class GL {
         glDisable(GL_LINE_SMOOTH);
     }
 
-    public static void getTexture(Identifier id) {
-        GlStateManager._activeTexture(GL_TEXTURE0);
-        mc.getTextureManager().getTexture(id);
+    public static void bindTexture(Identifier id) {
+        AbstractTexture texture = mc.getTextureManager().getTexture(id);
+        bindTexture(texture.getGlId(), 0);
     }
 
-    public static void getTexture(int i, int slot) {
+    public static void bindTexture(int i, int slot) {
         GlStateManager._activeTexture(GL_TEXTURE0 + slot);
         GlStateManager._bindTexture(i);
     }
-    public static void getTexture(int i) {
-        getTexture(i, 0);
+    public static void bindTexture(int i) {
+        bindTexture(i, 0);
     }
 
     public static void resetTextureSlot() {
