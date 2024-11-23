@@ -116,7 +116,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         int preA = color.get().a;
         color.get().a *= a;
 
-        GL.getTexture(texture.getGlId());
+        GL.bindTexture(texture.getGlId());
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, size, size, color.get());
         Renderer2D.TEXTURE.render(null);

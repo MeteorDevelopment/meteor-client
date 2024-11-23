@@ -46,7 +46,7 @@ public abstract class PostProcessShader {
 
         mc.getFramebuffer().beginWrite(false);
 
-        GL.getTexture(framebuffer.getColorAttachment(), 0);
+        GL.bindTexture(framebuffer.getColorAttachment(), 0);
 
         shader.bind();
 

@@ -190,7 +190,7 @@ public class Blur extends Module {
         // Render output
         MinecraftClient.getInstance().getFramebuffer().beginWrite(true);
         shaderPassthrough.bind();
-        GL.getTexture(fbos[0].texture);
+        GL.bindTexture(fbos[0].texture);
         shaderPassthrough.set("uTexture", 0);
         PostProcessRenderer.render();
 
@@ -208,7 +208,7 @@ public class Blur extends Module {
         targetFbo.bind();
         targetFbo.setViewport();
         shader.bind();
-        GL.getTexture(sourceText);
+        GL.bindTexture(sourceText);
         shader.set("uTexture", 0);
         shader.set("uHalfTexelSize", .5 / targetFbo.width, .5 / targetFbo.height);
         shader.set("uOffset", offset);

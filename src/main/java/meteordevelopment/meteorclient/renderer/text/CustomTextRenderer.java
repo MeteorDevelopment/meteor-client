@@ -123,7 +123,7 @@ public class CustomTextRenderer implements TextRenderer {
         if (!scaleOnly) {
             mesh.end();
 
-            GL.getTexture(font.texture.getGlId());
+            GL.bindTexture(font.texture.getGlId());
             mesh.render(matrices);
         }
 
