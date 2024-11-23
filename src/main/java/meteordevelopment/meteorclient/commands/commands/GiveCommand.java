@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
@@ -31,22 +32,24 @@ public class GiveCommand extends Command {
             if (!mc.player.getAbilities().creativeMode) throw NOT_IN_CREATIVE.create();
 
             ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
-            FindItemResult fir = InvUtils.find(ItemStack::isEmpty, 0, 8);
-            if (!fir.found()) throw NO_SPACE.create();
-
-            mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + fir.slot(), item));
+            giveItem(item);
 
             return SINGLE_SUCCESS;
-        }).then(argument("number", IntegerArgumentType.integer()).executes(context -> {
+        }).then(argument("number", IntegerArgumentType.integer(1, 99)).executes(context -> {
             if (!mc.player.getAbilities().creativeMode) throw NOT_IN_CREATIVE.create();
 
-            ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(IntegerArgumentType.getInteger(context, "number"), false);
-            FindItemResult fir = InvUtils.find(ItemStack::isEmpty, 0, 8);
-            if (!fir.found()) throw NO_SPACE.create();
-
-            mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + fir.slot(), item));
+            ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(IntegerArgumentType.getInteger(context, "number"), true);
+            giveItem(item);
 
             return SINGLE_SUCCESS;
         })));
+    }
+
+    private void giveItem(ItemStack item) throws CommandSyntaxException {
+        FindItemResult fir = InvUtils.find(ItemStack::isEmpty, 0, 8);
+        if (!fir.found()) throw NO_SPACE.create();
+
+        mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + fir.slot(), item));
+        mc.player.playerScreenHandler.getSlot(36 + fir.slot()).setStack(item);
     }
 }
