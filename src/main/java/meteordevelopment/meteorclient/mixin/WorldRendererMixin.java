@@ -5,20 +5,31 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import it.unimi.dsi.fastutil.Stack;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import meteordevelopment.meteorclient.mixininterface.IWorldRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.*;
-import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.postprocess.EntityShader;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.*;
+import net.minecraft.client.util.Handle;
+import net.minecraft.client.util.ObjectAllocator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.LightType;
 import org.joml.Matrix4f;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -29,17 +40,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
-import com.llamalad7.mixinextras.sugar.ref.LocalRef;
-
 @Mixin(WorldRenderer.class)
-public abstract class WorldRendererMixin {
-    @Shadow
-    private Framebuffer entityOutlinesFramebuffer;
-
+public abstract class WorldRendererMixin implements IWorldRenderer {
     @Unique private ESP esp;
 
     @Shadow
@@ -51,8 +53,8 @@ public abstract class WorldRendererMixin {
     }
 
     @Inject(method = "drawBlockOutline", at = @At("HEAD"), cancellable = true)
-    private void onDrawHighlightedBlockOutline(MatrixStack matrixStack, VertexConsumer vertexConsumer, Entity entity, double d, double e, double f, BlockPos blockPos, BlockState blockState, CallbackInfo info) {
-        if (Modules.get().isActive(BlockSelection.class)) info.cancel();
+    private void onDrawHighlightedBlockOutline(MatrixStack matrices, VertexConsumer vertexConsumer, Entity entity, double cameraX, double cameraY, double cameraZ, BlockPos pos, BlockState state, int i, CallbackInfo ci) {
+        if (Modules.get().isActive(BlockSelection.class)) ci.cancel();
     }
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;setupTerrain(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;ZZ)V"), index = 3)
@@ -63,8 +65,8 @@ public abstract class WorldRendererMixin {
     // No Render
 
     @Inject(method = "renderWeather", at = @At("HEAD"), cancellable = true)
-    private void onRenderWeather(LightmapTextureManager manager, float f, double d, double e, double g, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noWeather()) info.cancel();
+    private void onRenderWeather(FrameGraphBuilder frameGraphBuilder, LightmapTextureManager lightmapTextureManager, Vec3d pos, float tickDelta, Fog fog, CallbackInfo ci) {
+        if (Modules.get().get(NoRender.class).noWeather()) ci.cancel();
     }
 
 	@Inject(method = "hasBlindnessOrDarkness(Lnet/minecraft/client/render/Camera;)Z", at = @At("HEAD"), cancellable = true)
@@ -75,7 +77,7 @@ public abstract class WorldRendererMixin {
     // Entity Shaders
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void onRenderHead(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+    private void onRenderHead(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
         PostProcessShaders.beginRender();
     }
 
@@ -88,31 +90,30 @@ public abstract class WorldRendererMixin {
     @Unique
     private void draw(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, VertexConsumerProvider vertexConsumers, MatrixStack matrices, EntityShader shader, Color color) {
         if (shader.shouldDraw(entity) && !PostProcessShaders.isCustom(vertexConsumers) && color != null) {
-            Framebuffer prevBuffer = this.entityOutlinesFramebuffer;
-            this.entityOutlinesFramebuffer = shader.framebuffer;
+            meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
             PostProcessShaders.rendering = true;
 
             shader.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
             renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, shader.vertexConsumerProvider);
 
             PostProcessShaders.rendering = false;
-            this.entityOutlinesFramebuffer = prevBuffer;
+            meteor$popEntityOutlineFramebuffer();
         }
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
-    private void onRender(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, Matrix4f matrix4f2, CallbackInfo ci) {
+    @Inject(method = "method_62214", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
+    private void onRender(CallbackInfo ci) {
         PostProcessShaders.endRender();
     }
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;hasOutline(Lnet/minecraft/entity/Entity;)Z"))
+    @ModifyExpressionValue(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;hasOutline(Lnet/minecraft/entity/Entity;)Z"))
     private boolean shouldMobGlow(boolean original, @Local Entity entity) {
         if (!getESP().isGlow() || getESP().shouldSkip(entity)) return original;
 
         return getESP().getColor(entity) != null || original;
     }
 
-    @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;setColor(IIII)V"))
+    @WrapOperation(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;setColor(IIII)V"))
     private void setGlowColor(OutlineVertexConsumerProvider instance, int red, int green, int blue, int alpha, Operation<Void> original, @Local LocalRef<Entity> entity) {
         if (!getESP().isGlow() || getESP().shouldSkip(entity.get())) original.call(instance, red, green, blue, alpha);
         else {
@@ -126,26 +127,6 @@ public abstract class WorldRendererMixin {
     @Inject(method = "onResized", at = @At("HEAD"))
     private void onResized(int width, int height, CallbackInfo info) {
         PostProcessShaders.onResized(width, height);
-    }
-
-    // Ambience
-
-    @Inject(method = "renderEndSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/BufferRenderer;drawWithGlobalProgram(Lnet/minecraft/client/render/BuiltBuffer;)V"))
-    private void onRenderEndSkyDraw(MatrixStack matrices, CallbackInfo info) {
-        Ambience ambience = Modules.get().get(Ambience.class);
-
-        if (ambience.isActive() && ambience.endSky.get() && ambience.customSkyColor.get()) {
-            Color customEndSkyColor = ambience.skyColor();
-
-            Tessellator tessellator = Tessellator.getInstance();
-            BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-            Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-
-            bufferBuilder.vertex(matrix4f, -100.0F, -100.0F, -100.0F).texture(0.0F, 0.0F).color(customEndSkyColor.r, customEndSkyColor.g, customEndSkyColor.b, 255);
-            bufferBuilder.vertex(matrix4f, -100.0F, -100.0F, 100.0F).texture(0.0F, 16.0F).color(customEndSkyColor.r, customEndSkyColor.g, customEndSkyColor.b, 255);
-            bufferBuilder.vertex(matrix4f, 100.0F, -100.0F, 100.0F).texture(16.0F, 16.0F).color(customEndSkyColor.r, customEndSkyColor.g, customEndSkyColor.b, 255);
-            bufferBuilder.vertex(matrix4f, 100.0F, -100.0F, -100.0F).texture(16.0F, 0.0F).color(customEndSkyColor.r, customEndSkyColor.g, customEndSkyColor.b, 255);
-        }
     }
 
     // Fullbright
@@ -167,5 +148,41 @@ public abstract class WorldRendererMixin {
         }
 
         return esp;
+    }
+
+    // IWorldRenderer
+
+    @Shadow
+    private Framebuffer entityOutlineFramebuffer;
+
+    @Shadow
+    @Final
+    private DefaultFramebufferSet framebufferSet;
+
+    @Unique
+    private Stack<Framebuffer> framebufferStack;
+
+    @Unique
+    private Stack<Handle<Framebuffer>> framebufferHandleStack;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void init$IWorldRenderer(CallbackInfo info) {
+        framebufferStack = new ObjectArrayList<>();
+        framebufferHandleStack = new ObjectArrayList<>();
+    }
+
+    @Override
+    public void meteor$pushEntityOutlineFramebuffer(Framebuffer framebuffer) {
+        framebufferStack.push(this.entityOutlineFramebuffer);
+        this.entityOutlineFramebuffer = framebuffer;
+
+        framebufferHandleStack.push(this.framebufferSet.entityOutlineFramebuffer);
+        this.framebufferSet.entityOutlineFramebuffer = () -> framebuffer;
+    }
+
+    @Override
+    public void meteor$popEntityOutlineFramebuffer() {
+        this.entityOutlineFramebuffer = framebufferStack.pop();
+        this.framebufferSet.entityOutlineFramebuffer = framebufferHandleStack.pop();
     }
 }

@@ -48,7 +48,7 @@ public class Capes {
         MeteorExecutor.execute(() -> {
             // Cape owners
             Stream<String> lines = Http.get(CAPE_OWNERS_URL)
-                .exceptionHandler(e -> MeteorClient.LOG.error("Could not load capes: " + e.getMessage()))
+                .exceptionHandler(e -> MeteorClient.LOG.error("Could not load capes: {}",  e.getMessage()))
                 .sendLines();
             if (lines != null) {
                 lines.forEach(s -> {

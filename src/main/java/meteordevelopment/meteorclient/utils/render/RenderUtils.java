@@ -15,9 +15,9 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -56,7 +56,7 @@ public class RenderUtils {
         int scaledY = (int) (y / scale);
 
         drawContext.drawItem(itemStack, scaledX, scaledY);
-        if (overlay) drawContext.drawItemInSlot(mc.textRenderer, itemStack, scaledX, scaledY, countOverride);
+        if (overlay) drawContext.drawStackOverlay(mc.textRenderer, itemStack, scaledX, scaledY, countOverride);
 
         matrices.pop();
     }
@@ -86,15 +86,16 @@ public class RenderUtils {
     private static void bobView(MatrixStack matrices) {
         Entity cameraEntity = MinecraftClient.getInstance().getCameraEntity();
 
-        if (cameraEntity instanceof PlayerEntity playerEntity) {
-            float f = mc.getRenderTickCounter().getTickDelta(true);
-            float g = playerEntity.horizontalSpeed - playerEntity.prevHorizontalSpeed;
-            float h = -(playerEntity.horizontalSpeed + g * f);
-            float i = MathHelper.lerp(f, playerEntity.prevStrideDistance, playerEntity.strideDistance);
+        if (cameraEntity instanceof AbstractClientPlayerEntity abstractClientPlayerEntity) {
+            float tickDelta = mc.getRenderTickCounter().getTickDelta(true);
 
-            matrices.translate(-(MathHelper.sin(h * 3.1415927f) * i * 0.5), Math.abs(MathHelper.cos(h * 3.1415927f) * i), 0);
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(h * 3.1415927f) * i * 3));
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(Math.abs(MathHelper.cos(h * 3.1415927f - 0.2f) * i) * 5));
+            float var7 = abstractClientPlayerEntity.distanceMoved - abstractClientPlayerEntity.lastDistanceMoved;
+            float g = -(abstractClientPlayerEntity.distanceMoved + var7 * tickDelta);
+            float h = MathHelper.lerp(tickDelta, abstractClientPlayerEntity.prevStrideDistance, abstractClientPlayerEntity.strideDistance);
+
+            matrices.translate(MathHelper.sin(g * (float) Math.PI) * h * 0.5F, -Math.abs(MathHelper.cos(g * (float) Math.PI) * h), 0.0F);
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(g * (float) Math.PI) * h * 3f));
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(Math.abs(MathHelper.cos(g * (float) Math.PI - 0.2f) * h) * 5f));
         }
     }
 

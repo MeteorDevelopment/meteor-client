@@ -30,6 +30,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,7 +48,7 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Inject(method = "damage", at = @At("HEAD"))
-    private void onDamageHead(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
+    private void onDamageHead(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (Utils.canUpdate() && getWorld().isClient)
             MeteorClient.EVENT_BUS.post(DamageEvent.get((LivingEntity) (Object) this, source));
     }
@@ -89,8 +90,8 @@ public abstract class LivingEntityMixin extends Entity {
         return Modules.get().get(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : constant;
     }
 
-    @ModifyReturnValue(method = "isFallFlying", at = @At("RETURN"))
-    private boolean isFallFlyingHook(boolean original) {
+    @ModifyReturnValue(method = "isGliding", at = @At("RETURN"))
+    private boolean isGlidingHook(boolean original) {
         if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {
             return true;
         }
@@ -101,7 +102,7 @@ public abstract class LivingEntityMixin extends Entity {
     @Unique
     private boolean previousElytra = false;
 
-    @Inject(method = "isFallFlying", at = @At("TAIL"), cancellable = true)
+    @Inject(method = "isGliding", at = @At("TAIL"), cancellable = true)
     public void recastOnLand(CallbackInfoReturnable<Boolean> cir) {
         boolean elytra = cir.getReturnValue();
         ElytraFly elytraFly = Modules.get().get(ElytraFly.class);

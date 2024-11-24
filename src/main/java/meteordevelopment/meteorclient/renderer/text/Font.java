@@ -23,7 +23,7 @@ public class Font {
     private final float scale;
     private final float ascent;
     private final Int2ObjectOpenHashMap<CharData> charMap = new Int2ObjectOpenHashMap<>();
-    private final static int size = 2048;
+    private static final int size = 2048;
 
     public Font(ByteBuffer buffer, int height) {
         this.height = height;

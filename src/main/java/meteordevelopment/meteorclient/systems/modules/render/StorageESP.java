@@ -210,9 +210,7 @@ public class StorageESP extends Module {
         // Button to Clear Interacted Blocks
         WButton clear = list.add(theme.button("Clear Rendering Cache")).expandX().widget();
 
-        clear.action = () -> {
-            interactedBlocks.clear();
-        };
+        clear.action = interactedBlocks::clear;
 
         return list;
     }

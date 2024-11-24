@@ -84,7 +84,7 @@ public class WaypointCommand extends Command {
     private int addWaypoint(CommandContext<CommandSource> context, boolean withCoords) {
         if (mc.player == null) return -1;
 
-        BlockPos pos = withCoords ? context.getArgument("pos", PosArgument.class).toAbsoluteBlockPos(mc.player.getCommandSource()) : mc.player.getBlockPos().up(2);
+        BlockPos pos = withCoords ? context.getArgument("pos", PosArgument.class).toAbsoluteBlockPos(mc.player.getCommandSource(mc.getServer().getOverworld())) : mc.player.getBlockPos().up(2);
         Waypoint waypoint = new Waypoint.Builder()
             .name(StringArgumentType.getString(context, "waypoint"))
             .pos(pos)

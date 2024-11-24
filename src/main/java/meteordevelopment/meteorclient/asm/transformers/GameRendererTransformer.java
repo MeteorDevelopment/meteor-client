@@ -17,7 +17,7 @@ public class GameRendererTransformer extends AsmTransformer {
     public GameRendererTransformer() {
         super(mapClassName("net/minecraft/class_757"));
 
-        getFovMethod = new MethodInfo("net/minecraft/class_4184", null, new Descriptor("Lnet/minecraft/class_4184;", "F", "Z", "D"), true);
+        getFovMethod = new MethodInfo("net/minecraft/class_4184", null, new Descriptor("Lnet/minecraft/class_4184;", "F", "Z", "F"), true);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class GameRendererTransformer extends AsmTransformer {
 
         //noinspection DataFlowIssue
         for (AbstractInsnNode insn : method.instructions) {
-            if (insn instanceof LdcInsnNode in && in.cst instanceof Double && (double) in.cst == 90) {
+            if (insn instanceof LdcInsnNode in && in.cst instanceof Float && (float) in.cst == 90) {
                 InsnList insns = new InsnList();
                 generateEventCall(insns, new LdcInsnNode(in.cst));
 
@@ -39,14 +39,14 @@ public class GameRendererTransformer extends AsmTransformer {
                 injectionCount++;
             }
             else if (
-                (insn instanceof MethodInsnNode in1 && in1.name.equals("intValue") && insn.getNext() instanceof InsnNode _in && _in.getOpcode() == Opcodes.I2D)
+                (insn instanceof MethodInsnNode in1 && in1.name.equals("intValue") && insn.getNext() instanceof InsnNode _in && _in.getOpcode() == Opcodes.I2F)
                 ||
                 (insn instanceof MethodInsnNode in2 && in2.owner.equals(klass.name) && in2.name.startsWith("redirect") && in2.name.endsWith("getFov")) // Wi Zoom compatibility
             ) {
                 InsnList insns = new InsnList();
 
-                insns.add(new VarInsnNode(Opcodes.DSTORE, method.maxLocals));
-                generateEventCall(insns, new VarInsnNode(Opcodes.DLOAD, method.maxLocals));
+                insns.add(new VarInsnNode(Opcodes.FSTORE, method.maxLocals));
+                generateEventCall(insns, new VarInsnNode(Opcodes.FLOAD, method.maxLocals));
 
                 method.instructions.insert(insn.getNext(), insns);
                 injectionCount++;
@@ -59,9 +59,9 @@ public class GameRendererTransformer extends AsmTransformer {
     private void generateEventCall(InsnList insns, AbstractInsnNode loadPreviousFov) {
         insns.add(new FieldInsnNode(Opcodes.GETSTATIC, "meteordevelopment/meteorclient/MeteorClient", "EVENT_BUS", "Lmeteordevelopment/orbit/IEventBus;"));
         insns.add(loadPreviousFov);
-        insns.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "meteordevelopment/meteorclient/events/render/GetFovEvent", "get", "(D)Lmeteordevelopment/meteorclient/events/render/GetFovEvent;"));
+        insns.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "meteordevelopment/meteorclient/events/render/GetFovEvent", "get", "(F)Lmeteordevelopment/meteorclient/events/render/GetFovEvent;"));
         insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "meteordevelopment/orbit/IEventBus", "post", "(Ljava/lang/Object;)Ljava/lang/Object;"));
         insns.add(new TypeInsnNode(Opcodes.CHECKCAST, "meteordevelopment/meteorclient/events/render/GetFovEvent"));
-        insns.add(new FieldInsnNode(Opcodes.GETFIELD, "meteordevelopment/meteorclient/events/render/GetFovEvent", "fov", "D"));
+        insns.add(new FieldInsnNode(Opcodes.GETFIELD, "meteordevelopment/meteorclient/events/render/GetFovEvent", "fov", "F"));
     }
 }

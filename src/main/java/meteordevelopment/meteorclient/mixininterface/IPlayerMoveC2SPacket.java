@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.mixininterface;
 
 public interface IPlayerMoveC2SPacket {
-    int getTag();
+    int meteor$getTag();
 
-    void setTag(int tag);
+    void meteor$setTag(int tag);
 }

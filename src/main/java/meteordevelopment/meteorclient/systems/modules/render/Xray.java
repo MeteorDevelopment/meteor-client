@@ -24,7 +24,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
 
 import java.util.List;
 
@@ -101,14 +100,16 @@ public class Xray extends Module {
         event.lightLevel = 1;
     }
 
-    public boolean modifyDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, boolean returns) {
-        if (!returns && !isBlocked(state.getBlock(), pos)) {
-            BlockPos adjPos = pos.offset(facing);
-            BlockState adjState = view.getBlockState(adjPos);
-            return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || BlockUtils.isExposed(adjPos);
+    public boolean modifyDrawSide(BlockState state, BlockState otherState, Direction facing, boolean returns) {
+        if (!returns && !isBlocked(state, otherState)) {
+            return otherState.getCullingFace(facing.getOpposite()) != VoxelShapes.fullCube() || otherState.getBlock() != state.getBlock() || !otherState.isOpaque();
         }
 
         return returns;
+    }
+
+    public boolean isBlocked(BlockState state, BlockState otherState) {
+        return !(blocks.get().contains(state.getBlock()) && (!exposedOnly.get() || !otherState.isOpaque()));
     }
 
     public boolean isBlocked(Block block, BlockPos blockPos) {

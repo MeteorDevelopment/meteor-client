@@ -88,7 +88,7 @@ public class Names {
         return enchantmentKeyNames.computeIfAbsent(enchantment, enchantment1 -> Optional.ofNullable(MinecraftClient.getInstance().getNetworkHandler())
             .map(ClientPlayNetworkHandler::getRegistryManager)
             .flatMap(registryManager -> registryManager.getOptional(RegistryKeys.ENCHANTMENT))
-            .flatMap(registry -> registry.getEntry(enchantment))
+            .flatMap(registry -> registry.getEntry(enchantment.getValue()))
             .map(Names::get)
             .orElseGet(() -> {
                 String key = "enchantment." + enchantment1.getValue().toTranslationKey();

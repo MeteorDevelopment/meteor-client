@@ -106,14 +106,14 @@ public class RegistryEntryReferenceArgumentType<T> implements ArgumentType<Regis
         Identifier identifier = Identifier.fromCommandInput(reader);
         RegistryKey<T> registryKey = RegistryKey.of(this.registryRef, identifier);
         return MinecraftClient.getInstance().getNetworkHandler().getRegistryManager()
-            .getWrapperOrThrow(this.registryRef)
+            .getOrThrow(this.registryRef)
             .getOptional(registryKey)
             .orElseThrow(() -> NOT_FOUND_EXCEPTION.createWithContext(reader, identifier, this.registryRef.getValue()));
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestIdentifiers(MinecraftClient.getInstance().getNetworkHandler().getRegistryManager().getWrapperOrThrow(this.registryRef).streamKeys().map(RegistryKey::getValue), builder);
+        return CommandSource.suggestIdentifiers(MinecraftClient.getInstance().getNetworkHandler().getRegistryManager().getOrThrow(this.registryRef).streamKeys().map(RegistryKey::getValue), builder);
     }
 
     @Override

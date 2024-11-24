@@ -24,7 +24,7 @@ public abstract class RaycastContextMixin implements IRaycastContext {
     @Shadow @Final @Mutable private ShapeContext shapeContext;
 
     @Override
-    public void set(Vec3d start, Vec3d end, RaycastContext.ShapeType shapeType, RaycastContext.FluidHandling fluidHandling, Entity entity) {
+    public void meteor$set(Vec3d start, Vec3d end, RaycastContext.ShapeType shapeType, RaycastContext.FluidHandling fluidHandling, Entity entity) {
         this.start = start;
         this.end = end;
         this.shapeType = shapeType;

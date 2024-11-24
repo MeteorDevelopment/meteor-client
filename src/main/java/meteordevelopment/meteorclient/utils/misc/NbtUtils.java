@@ -60,7 +60,7 @@ public class NbtUtils {
             mc.keyboard.setClipboard(Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray()));
             return true;
         } catch (Exception e) {
-            MeteorClient.LOG.error(String.format("Error copying %s NBT to clipboard!", name));
+            MeteorClient.LOG.error("Error copying {} NBT to clipboard!", name);
 
             OkPrompt.create()
                 .title(String.format("Error copying %s NBT to clipboard!", name))

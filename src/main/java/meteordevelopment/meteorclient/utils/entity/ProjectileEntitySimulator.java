@@ -136,7 +136,7 @@ public class ProjectileEntitySimulator {
 
     public boolean set(Entity entity, boolean accurate) {
         // skip entities in ground
-        if (entity instanceof ProjectileInGroundAccessor ppe && ppe.getInGround()) return false;
+        if (entity instanceof ProjectileInGroundAccessor ppe && ppe.invokeIsInGround()) return false;
 
         if (entity instanceof ArrowEntity) {
             set(entity, 0.05, 0.6, accurate);
@@ -221,7 +221,7 @@ public class ProjectileEntitySimulator {
 
     public HitResult tick() {
         // Apply velocity
-        ((IVec3d) prevPos3d).set(pos);
+        ((IVec3d) prevPos3d).meteor$set(pos);
         pos.add(velocity);
 
         // Update velocity
@@ -237,7 +237,7 @@ public class ProjectileEntitySimulator {
         if (!mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) return MissHitResult.INSTANCE;
 
         // Check for collision
-        ((IVec3d) pos3d).set(pos);
+        ((IVec3d) pos3d).meteor$set(pos);
         if (pos3d.equals(prevPos3d)) return MissHitResult.INSTANCE;
 
         HitResult hitResult = getCollision();
@@ -257,7 +257,7 @@ public class ProjectileEntitySimulator {
     private HitResult getCollision() {
         HitResult hitResult = mc.world.raycast(new RaycastContext(prevPos3d, pos3d, RaycastContext.ShapeType.COLLIDER, waterDrag == 0 ? RaycastContext.FluidHandling.ANY : RaycastContext.FluidHandling.NONE, simulatingEntity));
         if (hitResult.getType() != HitResult.Type.MISS) {
-            ((IVec3d) pos3d).set(hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z);
+            ((IVec3d) pos3d).meteor$set(hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z);
         }
 
         // Vanilla uses the current and next positions to check collisions, we use the previous and current positions

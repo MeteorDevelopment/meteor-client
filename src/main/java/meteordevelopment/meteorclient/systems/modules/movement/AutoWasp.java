@@ -15,9 +15,9 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ElytraItem;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.text.Text;
@@ -127,13 +127,13 @@ public class AutoWasp extends Module {
             if (!isActive()) return;
         }
 
-        if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem)) return;
+        if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).contains(DataComponentTypes.GLIDER))) return;
 
         if (incrementJumpTimer) {
             jumpTimer++;
         }
 
-        if (!mc.player.isFallFlying()) {
+        if (!mc.player.isGliding()) {
             if (!incrementJumpTimer) incrementJumpTimer = true;
 
             if (mc.player.isOnGround() && incrementJumpTimer) {
@@ -155,8 +155,8 @@ public class AutoWasp extends Module {
 
     @EventHandler
     private void onMove(PlayerMoveEvent event) {
-        if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem)) return;
-        if (!mc.player.isFallFlying()) return;
+        if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).contains(DataComponentTypes.GLIDER))) return;
+        if (!mc.player.isGliding()) return;
 
         double xVel = 0, yVel = 0, zVel = 0;
 
@@ -207,7 +207,7 @@ public class AutoWasp extends Module {
             else yVel = verticalSpeed.get() * Math.signum(yDist);
         }
 
-        ((IVec3d) event.movement).set(xVel, yVel, zVel);
+        ((IVec3d) event.movement).meteor$set(xVel, yVel, zVel);
     }
 
     public enum Action {

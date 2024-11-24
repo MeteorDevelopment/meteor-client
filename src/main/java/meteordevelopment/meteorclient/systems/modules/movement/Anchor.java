@@ -127,7 +127,7 @@ public class Anchor extends Module {
             deltaX = MathHelper.clamp(holeX - mc.player.getX(), -0.05, 0.05);
             deltaZ = MathHelper.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
 
-            ((IVec3d) mc.player.getVelocity()).set(deltaX, mc.player.getVelocity().y - (pull.get() ? pullSpeed.get() : 0), deltaZ);
+            ((IVec3d) mc.player.getVelocity()).meteor$set(deltaX, mc.player.getVelocity().y - (pull.get() ? pullSpeed.get() : 0), deltaZ);
         }
     }
 

@@ -5,9 +5,10 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.gl.Framebuffer;
 
-public interface IItemEntity {
-    Vec3d getRotation();
-    void setRotation(Vec3d rotation);
+public interface IWorldRenderer {
+    void meteor$pushEntityOutlineFramebuffer(Framebuffer framebuffer);
+
+    void meteor$popEntityOutlineFramebuffer();
 }

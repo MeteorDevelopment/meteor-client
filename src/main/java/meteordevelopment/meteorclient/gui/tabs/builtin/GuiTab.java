@@ -55,7 +55,7 @@ public class GuiTab extends Tab {
             };
 
             WButton reset = add(theme.button("Reset GUI Layout")).widget();
-            reset.action = () -> theme.clearWindowConfigs();
+            reset.action = theme::clearWindowConfigs;
 
             add(theme.settings(theme.settings)).expandX();
         }

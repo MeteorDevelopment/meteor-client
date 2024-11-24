@@ -43,7 +43,7 @@ public abstract class ItemStackMixin {
     @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/BlockPredicatesChecker;showInTooltip()Z", ordinal = 0))
     private boolean modifyCanBreakText(boolean original) {
         BetterTooltips bt = Modules.get().get(BetterTooltips.class);
-        return (bt.isActive() && bt.canDestroy.get()) || original;
+        return (bt.isActive() && bt.canBreak.get()) || original;
     }
 
     @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/BlockPredicatesChecker;showInTooltip()Z", ordinal = 1))
@@ -58,7 +58,7 @@ public abstract class ItemStackMixin {
         return !(bt.isActive() && bt.tooltip.get()) && original;
     }
 
-    @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;contains(Lnet/minecraft/component/ComponentType;)Z", ordinal = 3))
+    @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;contains(Lnet/minecraft/component/ComponentType;)Z", ordinal = 2))
     private boolean modifyContainsAdditional(boolean original) {
         BetterTooltips bt = Modules.get().get(BetterTooltips.class);
         return !(bt.isActive() && bt.additional.get()) && original;
@@ -81,6 +81,6 @@ public abstract class ItemStackMixin {
     @ModifyExpressionValue(method = "appendAttributeModifiersTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/type/AttributeModifiersComponent;showInTooltip()Z"))
     private boolean modifyShowInTooltip(boolean original) {
         BetterTooltips bt = Modules.get().get(BetterTooltips.class);
-        return (bt.isActive() && bt.modifiers.get()) || original;
+        return (bt.isActive() && bt.attributeModifiers.get()) || original;
     }
 }
