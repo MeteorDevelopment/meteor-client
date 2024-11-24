@@ -1,4 +1,15 @@
 {
   "key.meteor-client.open-gui": "Open GUI",
-  "key.meteor-client.open-commands": "Open Commands"
+  "key.meteor-client.open-commands": "Open Commands",
+
+  "modules.better-tooltips.beehive.honey-level": "§7Honey level: §e%s§7.",
+  "modules.better-tooltips.beehive.bees": "§7Bees: §e%d§7.",
+
+  "modules.better-tooltips.kilobytes": "%.2f kb",
+  "modules.better-tooltips.bytes": "%d bytes",
+  "modules.better-tooltips.error-getting-bytes": "§cError getting bytes.",
+
+  "modules.better-tooltips.unknown-inventory": "§4Unknown inventory",
+
+  "modules.better-tooltips.hold-to-preview": "Hold §e%s§r to preview"
 }
