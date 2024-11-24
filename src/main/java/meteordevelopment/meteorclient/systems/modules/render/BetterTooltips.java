@@ -319,7 +319,7 @@ public class BetterTooltips extends Module {
                 if (byteCount >= 1024) count = I18n.translate("modules.better-tooltips.kilobytes", byteCount / (float) 1024);
                 else count = I18n.translate("modules.better-tooltips.bytes", byteCount);
 
-                event.appendEnd(Text.literal(count).formatted(Formatting.GRAY));
+                event.appendEnd(Text.literal(count));
             } catch (Exception e) {
                 event.appendEnd(Text.literal(I18n.translate("modules.better-tooltips.error-getting-bytes")));
             }

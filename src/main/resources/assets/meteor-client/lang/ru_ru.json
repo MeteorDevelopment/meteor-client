@@ -5,8 +5,8 @@
   "modules.better-tooltips.beehive.honey-level": "§7Уровень мёда: §e%s§7.",
   "modules.better-tooltips.beehive.bees": "§7Пчел: §e%d§7.",
 
-  "modules.better-tooltips.kilobytes": "%.2f кб",
-  "modules.better-tooltips.bytes": "%d байт",
+  "modules.better-tooltips.kilobytes": "§7%.2f кб",
+  "modules.better-tooltips.bytes": "§7%d байт",
   "modules.better-tooltips.error-getting-bytes": "§cОшибка при получении байтов.",
 
   "modules.better-tooltips.unknown-inventory": "§4Неизвестный инвентарь",
