@@ -739,8 +739,8 @@ public class HighwayBuilder extends Module {
                     Vec3d vec1 = new Vec3d(0, 0, 0);
                     Vec3d vec2 = new Vec3d(0, 0, 0);
 
-                    ((IVec3d) vec1).set(b.mc.player.getX(), b.mc.player.getY() + b.mc.player.getStandingEyeHeight(), b.mc.player.getZ());
-                    ((IVec3d) vec2).set(entity.getX(), entity.getY(), entity.getZ());
+                    ((IVec3d) vec1).meteor$set(b.mc.player.getX(), b.mc.player.getY() + b.mc.player.getStandingEyeHeight(), b.mc.player.getZ());
+                    ((IVec3d) vec2).meteor$set(entity.getX(), entity.getY(), entity.getZ());
                     return b.mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, b.mc.player)).getType() == HitResult.Type.MISS;
                 }
 
@@ -770,7 +770,7 @@ public class HighwayBuilder extends Module {
                 if (pos.getY() >= startPos.getY()) pos.setY(startPos.getY() - 1);
 
                 if (b.mc.player.getY() > b.start.y - 0.5 && !b.mc.world.getBlockState(pos).isReplaceable()) {
-                    b.input.jumping = false;
+                    b.input.jump(false);
 
                     if (timer > 0) timer--;
                     else {
@@ -784,7 +784,7 @@ public class HighwayBuilder extends Module {
                 if (b.placeTimer > 0) return;
 
                 if (timer < 30) timer = 30;
-                b.input.jumping = true;
+                b.input.jump(true);
 
                 int slot = -1;
                 if (pos.getY() == startPos.down().getY()) {
@@ -1605,8 +1605,8 @@ public class HighwayBuilder extends Module {
                     Vec3d vec1 = new Vec3d(0, 0, 0);
                     Vec3d vec2 = new Vec3d(0, 0, 0);
 
-                    ((IVec3d) vec1).set(b.mc.player.getX(), b.mc.player.getY() + b.mc.player.getStandingEyeHeight(), b.mc.player.getZ());
-                    ((IVec3d) vec2).set(entity.getX(), entity.getY() + 0.5, entity.getZ());
+                    ((IVec3d) vec1).meteor$set(b.mc.player.getX(), b.mc.player.getY() + b.mc.player.getStandingEyeHeight(), b.mc.player.getZ());
+                    ((IVec3d) vec2).meteor$set(entity.getX(), entity.getY() + 0.5, entity.getZ());
                     return b.mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, b.mc.player)).getType() == HitResult.Type.MISS;
                 }, SortPriority.LowestDistance);
 
