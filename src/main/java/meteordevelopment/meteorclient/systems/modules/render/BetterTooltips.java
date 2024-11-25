@@ -296,12 +296,12 @@ public class BetterTooltips extends Module {
                 BlockStateComponent blockStateComponent = event.itemStack().get(DataComponentTypes.BLOCK_STATE);
                 if (blockStateComponent != null) {
                     String level = blockStateComponent.properties().get("honey_level");
-                    event.appendStart(Text.literal(I18n.translate("modules.better-tooltips.beehive.honey-level", level)));
+                    event.appendStart(Text.literal(I18n.translate("modules.meteor-client.better-tooltips.beehive.honey-level", level)));
                 }
 
                 List<BeehiveBlockEntity.BeeData> bees = event.itemStack().get(DataComponentTypes.BEES);
                 if (bees != null) {
-                    event.appendStart(Text.literal(I18n.translate("modules.better-tooltips.beehive.bees", bees.size())));
+                    event.appendStart(Text.literal(I18n.translate("modules.meteor-client.better-tooltips.beehive.bees", bees.size())));
                 }
             }
         }
@@ -316,12 +316,12 @@ public class BetterTooltips extends Module {
 
                 ByteCountDataOutput.INSTANCE.reset();
 
-                if (byteCount >= 1024) count = I18n.translate("modules.better-tooltips.kilobytes", byteCount / (float) 1024);
-                else count = I18n.translate("modules.better-tooltips.bytes", byteCount);
+                if (byteCount >= 1024) count = I18n.translate("modules.meteor-client.better-tooltips.kilobytes", byteCount / (float) 1024);
+                else count = I18n.translate("modules.meteor-client.better-tooltips.bytes", byteCount);
 
                 event.appendEnd(Text.literal(count));
             } catch (Exception e) {
-                event.appendEnd(Text.literal(I18n.translate("modules.better-tooltips.error-getting-bytes")));
+                event.appendEnd(Text.literal(I18n.translate("modules.meteor-client.better-tooltips.error-getting-bytes")));
             }
         }
 
@@ -341,7 +341,7 @@ public class BetterTooltips extends Module {
         else if (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest()) {
             event.tooltipData = EChestMemory.isKnown()
                 ? new ContainerTooltipComponent(EChestMemory.ITEMS.toArray(new ItemStack[27]), ECHEST_COLOR)
-                : new TextTooltipComponent(Text.literal(I18n.translate("modules.better-tooltips.unknown-inventory")));
+                : new TextTooltipComponent(Text.literal(I18n.translate("modules.meteor-client.better-tooltips.unknown-inventory")));
         }
 
         // Map preview
@@ -427,7 +427,7 @@ public class BetterTooltips extends Module {
         )) {
             // we don't want to add the spacer if the tooltip is hidden
             if (spacer) event.appendEnd(Text.literal(""));
-            event.appendEnd(Text.literal(I18n.translate("modules.better-tooltips.hold-to-preview", keybind)));
+            event.appendEnd(Text.literal(I18n.translate("modules.meteor-client.better-tooltips.hold-to-preview", keybind)));
         }
     }
 

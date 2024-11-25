@@ -76,8 +76,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
         if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getScreenHandler())) {
 
-            String steal = I18n.translate("modules.inventory-tweaks.steal");
-            String dump = I18n.translate("modules.inventory-tweaks.dump");
+            String steal = I18n.translate("modules.meteor-client.inventory-tweaks.steal");
+            String dump = I18n.translate("modules.meteor-client.inventory-tweaks.dump");
 
             addDrawableChild(
                 new ButtonWidget.Builder(Text.literal(steal), button -> invTweaks.steal(getScreenHandler()))
