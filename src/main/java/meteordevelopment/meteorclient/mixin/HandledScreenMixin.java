@@ -87,7 +87,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             );
 
             addDrawableChild(
-                new ButtonWidget.Builder(Text.literal(I18n.translate(dump)), button -> invTweaks.dump(getScreenHandler()))
+                new ButtonWidget.Builder(Text.literal(dump), button -> invTweaks.dump(getScreenHandler()))
                     .position(x + steal.length() * 10 + 2, y - 22)
                     .size(dump.length() * 10, 20)
                     .build()
