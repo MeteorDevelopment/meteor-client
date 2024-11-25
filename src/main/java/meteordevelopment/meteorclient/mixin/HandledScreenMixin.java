@@ -75,17 +75,21 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         InventoryTweaks invTweaks = Modules.get().get(InventoryTweaks.class);
 
         if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getScreenHandler())) {
+
+            String steal = I18n.translate("modules.inventory-tweaks.steal");
+            String dump = I18n.translate("modules.inventory-tweaks.dump");
+
             addDrawableChild(
-                new ButtonWidget.Builder(Text.literal(I18n.translate("modules.inventory-tweaks.steal")), button -> invTweaks.steal(getScreenHandler()))
+                new ButtonWidget.Builder(Text.literal(steal), button -> invTweaks.steal(getScreenHandler()))
                     .position(x, y - 22)
-                    .size(40, 20)
+                    .size(steal.length() * 10, 20)
                     .build()
             );
 
             addDrawableChild(
-                new ButtonWidget.Builder(Text.literal(I18n.translate("modules.inventory-tweaks.dump")), button -> invTweaks.dump(getScreenHandler()))
-                    .position(x + 42, y - 22)
-                    .size(40, 20)
+                new ButtonWidget.Builder(Text.literal(I18n.translate(dump)), button -> invTweaks.dump(getScreenHandler()))
+                    .position(x + steal.length() * 10 + 2, y - 22)
+                    .size(I18n.translate(dump).length() * 10, 20)
                     .build()
             );
         }
