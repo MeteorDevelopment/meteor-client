@@ -11,5 +11,8 @@
 
   "modules.better-tooltips.unknown-inventory": "§4Неизвестный инвентарь",
 
-  "modules.better-tooltips.hold-to-preview": "Удерживайте §e%s§r для предпросмотра"
+  "modules.better-tooltips.hold-to-preview": "Удерживайте §e%s§r для предпросмотра",
+
+  "modules.inventory-tweaks.dump": "Положить",
+  "modules.inventory-tweaks.steal": "Взять"
 }

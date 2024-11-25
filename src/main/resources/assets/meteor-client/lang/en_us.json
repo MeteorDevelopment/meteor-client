@@ -11,5 +11,8 @@
 
   "modules.better-tooltips.unknown-inventory": "§4Unknown inventory",
 
-  "modules.better-tooltips.hold-to-preview": "Hold §e%s§r to preview"
+  "modules.better-tooltips.hold-to-preview": "Hold §e%s§r to preview",
+
+  "modules.inventory-tweaks.dump": "Dump",
+  "modules.inventory-tweaks.steal": "Steal"
 }

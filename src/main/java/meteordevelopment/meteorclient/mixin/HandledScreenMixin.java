@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -75,14 +76,14 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
         if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getScreenHandler())) {
             addDrawableChild(
-                new ButtonWidget.Builder(Text.literal("Steal"), button -> invTweaks.steal(getScreenHandler()))
+                new ButtonWidget.Builder(Text.literal(I18n.translate("modules.inventory-tweaks.steal")), button -> invTweaks.steal(getScreenHandler()))
                     .position(x, y - 22)
                     .size(40, 20)
                     .build()
             );
 
             addDrawableChild(
-                new ButtonWidget.Builder(Text.literal("Dump"), button -> invTweaks.dump(getScreenHandler()))
+                new ButtonWidget.Builder(Text.literal(I18n.translate("modules.inventory-tweaks.dump")), button -> invTweaks.dump(getScreenHandler()))
                     .position(x + 42, y - 22)
                     .size(40, 20)
                     .build()
