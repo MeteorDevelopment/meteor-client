@@ -33,13 +33,13 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
     public BannerTooltipComponent(ItemStack banner) {
         this.color = ((BannerItem) banner.getItem()).getColor();
         this.patterns = banner.getOrDefault(DataComponentTypes.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT);
-        this.bannerField = mc.getEntityModelLoader().getModelPart(EntityModelLayers.BANNER).getChild("flag");
+        this.bannerField = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG).getChild("flag");
     }
 
     public BannerTooltipComponent(DyeColor color, BannerPatternsComponent patterns) {
         this.color = color;
         this.patterns = patterns;
-        this.bannerField = mc.getEntityModelLoader().getModelPart(EntityModelLayers.BANNER).getChild("flag");
+        this.bannerField = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG).getChild("flag");
     }
 
     @Override

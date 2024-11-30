@@ -44,7 +44,7 @@
   },
   "depends": {
     "java": ">=21",
-    "minecraft": ["1.21.2", "${minecraft_version}"],
+    "minecraft": ["${minecraft_version}"],
     "fabricloader": ">=${loader_version}"
   },
   "breaks": {

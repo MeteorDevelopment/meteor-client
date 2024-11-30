@@ -7,10 +7,8 @@ package meteordevelopment.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.resource.ResourceManager;
 import org.lwjgl.BufferUtils;
 
-import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
@@ -59,9 +57,6 @@ public class ByteTexture extends AbstractTexture {
         ((Buffer) buffer).rewind();
         glTexImage2D(GL_TEXTURE_2D, 0, format.toOpenGL(), width, height, 0, format.toOpenGL(), GL_UNSIGNED_BYTE, buffer);
     }
-
-    @Override
-    public void load(ResourceManager manager) throws IOException {}
 
     public enum Format {
         A,
