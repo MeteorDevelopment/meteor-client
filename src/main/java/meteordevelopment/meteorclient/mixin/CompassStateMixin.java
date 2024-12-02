@@ -9,7 +9,6 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
-
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.item.property.numeric.CompassState;
 import net.minecraft.entity.Entity;

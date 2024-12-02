@@ -1,5 +1,5 @@
 plugins {
-    id "fabric-loom" version "1.8-SNAPSHOT"
+    id "fabric-loom" version "1.9-SNAPSHOT"
     id "maven-publish"
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
@@ -56,8 +56,7 @@ dependencies {
     modInclude fabricApi.module("fabric-resource-loader-v0", project.fapi_version)
 
     // Compat fixes
-//    TODO: re-enable once Fabric updates this module <-> AoCalculator, AbstractBlockRenderContext
-//    modCompileOnly fabricApi.module("fabric-renderer-indigo", project.fapi_version)
+    modCompileOnly fabricApi.module("fabric-renderer-indigo", project.fapi_version)
     modCompileOnly("maven.modrinth:sodium:${project.sodium_version}") { transitive = false }
     modCompileOnly("maven.modrinth:lithium:${project.lithium_version}") { transitive = false }
     modCompileOnly("maven.modrinth:iris:${project.iris_version}") { transitive = false }
