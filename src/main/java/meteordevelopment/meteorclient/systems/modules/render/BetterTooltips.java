@@ -237,7 +237,7 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    public final Setting<Boolean> jukeboxPlayable = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> jukeboxPlayable = sgHideFlags.add(new BoolSetting.Builder()
         .name("jukebox-playable")
         .description("Show if something is playable in a jukebox when it's hidden.")
         .defaultValue(true)
