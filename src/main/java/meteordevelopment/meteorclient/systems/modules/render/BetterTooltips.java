@@ -103,7 +103,7 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    public final Setting<Boolean> echest = sgPreviews.add(new BoolSetting.Builder()
+    private final Setting<Boolean> echest = sgPreviews.add(new BoolSetting.Builder()
         .name("echests")
         .description("Shows a preview of your echest when hovering over it in an inventory.")
         .defaultValue(true)
