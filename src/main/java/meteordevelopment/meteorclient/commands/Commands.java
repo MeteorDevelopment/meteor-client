@@ -42,6 +42,7 @@ public class Commands {
         add(new FriendsCommand());
         add(new CommandsCommand());
         add(new InventoryCommand());
+        add(new MultitoolCommand());
         add(new NbtCommand());
         add(new NotebotCommand());
         add(new PeekCommand());
