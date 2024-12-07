@@ -34,6 +34,7 @@ public class Commands {
         add(new DismountCommand());
         add(new DisconnectCommand());
         add(new ComponentsCommand());
+        add(new ConfigCommand());
         add(new DamageCommand());
         add(new DropCommand());
         add(new EnchantCommand());
