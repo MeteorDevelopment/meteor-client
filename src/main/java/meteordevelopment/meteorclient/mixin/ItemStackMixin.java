@@ -43,7 +43,7 @@ public abstract class ItemStackMixin {
     @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/BlockPredicatesChecker;showInTooltip()Z", ordinal = 0))
     private boolean modifyCanBreakText(boolean original) {
         BetterTooltips bt = Modules.get().get(BetterTooltips.class);
-        return (bt.isActive() && bt.canDestroy.get()) || original;
+        return (bt.isActive() && bt.canBreak.get()) || original;
     }
 
     @ModifyExpressionValue(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/BlockPredicatesChecker;showInTooltip()Z", ordinal = 1))
@@ -81,6 +81,6 @@ public abstract class ItemStackMixin {
     @ModifyExpressionValue(method = "appendAttributeModifiersTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/type/AttributeModifiersComponent;showInTooltip()Z"))
     private boolean modifyShowInTooltip(boolean original) {
         BetterTooltips bt = Modules.get().get(BetterTooltips.class);
-        return (bt.isActive() && bt.modifiers.get()) || original;
+        return (bt.isActive() && bt.attributeModifiers.get()) || original;
     }
 }

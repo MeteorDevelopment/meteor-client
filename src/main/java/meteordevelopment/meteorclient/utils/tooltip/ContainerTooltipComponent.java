@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -44,15 +43,13 @@ public class ContainerTooltipComponent implements TooltipComponent, MeteorToolti
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-
         // Background
-        RenderSystem.setShaderColor(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE_CONTAINER_BACKGROUND, x, y, 0, 0, 0, 176, 67, 176, 67);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
+        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE_CONTAINER_BACKGROUND, x, y, 0, 0, 176, 67, 176, 67, color.getPacked());
 
-        //Contents
+        // Contents
         int row = 0;
         int i = 0;
+
         for (ItemStack itemStack : items) {
             RenderUtils.drawItem(context, itemStack, x + 8 + i * 18, y + 7 + row * 18, 1, true);
 

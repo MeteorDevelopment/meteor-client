@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import meteordevelopment.meteorclient.MeteorClient;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.mixininterface.IMultiPhase;
 import meteordevelopment.meteorclient.mixininterface.IMultiPhaseParameters;
@@ -21,6 +21,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class WireframeEntityRenderer {
     private static final MatrixStack matrices = new MatrixStack();
@@ -44,13 +46,15 @@ public class WireframeEntityRenderer {
         WireframeEntityRenderer.lineColor = lineColor;
         WireframeEntityRenderer.shapeMode = shapeMode;
 
-        offsetX = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX());
-        offsetY = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY());
-        offsetZ = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ());
+        float tickDelta = mc.world.getTickManager().isFrozen() ? 1 : event.tickDelta;
+
+        offsetX = MathHelper.lerp(tickDelta, entity.lastRenderX, entity.getX());
+        offsetY = MathHelper.lerp(tickDelta, entity.lastRenderY, entity.getY());
+        offsetZ = MathHelper.lerp(tickDelta, entity.lastRenderZ, entity.getZ());
 
         //noinspection unchecked
-        var renderer = (EntityRenderer<Entity, EntityRenderState>) MeteorClient.mc.getEntityRenderDispatcher().getRenderer(entity);
-        var state = renderer.getAndUpdateRenderState(entity, event.tickDelta);
+        var renderer = (EntityRenderer<Entity, EntityRenderState>) mc.getEntityRenderDispatcher().getRenderer(entity);
+        var state = renderer.getAndUpdateRenderState(entity, tickDelta);
 
         Vec3d entityOffset = renderer.getPositionOffset(state);
         offsetX += entityOffset.x;
@@ -65,6 +69,7 @@ public class WireframeEntityRenderer {
 
     private static class MyVertexConsumerProvider implements VertexConsumerProvider {
         public static final MyVertexConsumerProvider INSTANCE = new MyVertexConsumerProvider();
+        private final Object2ObjectOpenHashMap<RenderLayer, MyVertexConsumer> buffers = new Object2ObjectOpenHashMap<>();
 
         @Override
         public VertexConsumer getBuffer(RenderLayer layer) {
@@ -73,13 +78,18 @@ public class WireframeEntityRenderer {
                 return NoopVertexConsumer.INSTANCE;
             }
 
-            return MyVertexConsumer.INSTANCE;
+            MyVertexConsumer vertexConsumer = buffers.get(layer);
+
+            if (vertexConsumer == null) {
+                vertexConsumer = new MyVertexConsumer();
+                buffers.put(layer, vertexConsumer);
+            }
+
+            return vertexConsumer;
         }
     }
 
     private static class MyVertexConsumer implements VertexConsumer {
-        public static final MyVertexConsumer INSTANCE = new MyVertexConsumer();
-
         private final float[] xs = new float[4];
         private final float[] ys = new float[4];
         private final float[] zs = new float[4];
