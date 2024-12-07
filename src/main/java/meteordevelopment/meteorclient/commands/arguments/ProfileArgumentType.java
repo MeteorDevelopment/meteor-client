@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.commands.arguments;
 
 import com.google.common.collect.Streams;
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -15,7 +16,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
-import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,9 +23,9 @@ import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.command.CommandSource.suggestMatching;
 
-public class ProfileArgumentType implements ArgumentType<String> {
+public class ProfileArgumentType implements ArgumentType<Profile> {
     private static final ProfileArgumentType INSTANCE = new ProfileArgumentType();
-    private static final DynamicCommandExceptionType NO_SUCH_PROFILE = new DynamicCommandExceptionType(name -> Text.literal("Profile with name " + name + " doesn't exist."));
+    private static final DynamicCommandExceptionType NO_SUCH_PROFILE = new DynamicCommandExceptionType(name -> new LiteralMessage("Profile with name " + name + " doesn't exist."));
 
     private static final Collection<String> EXAMPLES = List.of("pvp.meteorclient.com", "anarchy");
 
@@ -33,19 +33,23 @@ public class ProfileArgumentType implements ArgumentType<String> {
         return INSTANCE;
     }
 
-    public static Profile get(CommandContext<?> context) {
-        return Profiles.get().get(context.getArgument("profile", String.class));
+    public static <S> Profile get(CommandContext<S> context) {
+        return context.getArgument("profile", Profile.class);
+    }
+
+    public static <S> Profile get(CommandContext<S> context, String name) {
+        return context.getArgument(name, Profile.class);
     }
 
     private ProfileArgumentType() {}
 
     @Override
-    public String parse(StringReader reader) throws CommandSyntaxException {
-        String argument = reader.getRemaining();
-        reader.setCursor(reader.getTotalLength());
-        if (Profiles.get().get(argument) == null) throw NO_SUCH_PROFILE.create(argument);
+    public Profile parse(StringReader reader) throws CommandSyntaxException {
+        String argument = reader.readString();
+        Profile profile = Profiles.get().get(argument);
+        if (profile == null) throw NO_SUCH_PROFILE.create(argument);
 
-        return argument;
+        return profile;
     }
 
     @Override

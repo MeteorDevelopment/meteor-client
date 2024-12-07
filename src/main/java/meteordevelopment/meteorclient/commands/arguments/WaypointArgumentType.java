@@ -22,42 +22,31 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class WaypointArgumentType implements ArgumentType<String> {
-    private static final WaypointArgumentType GREEDY = new WaypointArgumentType(true);
-    private static final WaypointArgumentType QUOTED = new WaypointArgumentType(false);
+public class WaypointArgumentType implements ArgumentType<Waypoint> {
+    private static final WaypointArgumentType INSTANCE = new WaypointArgumentType();
     private static final DynamicCommandExceptionType NO_SUCH_WAYPOINT = new DynamicCommandExceptionType(name -> Text.literal("Waypoint with name '" + name + "' doesn't exist."));
-    private final boolean greedyString;
 
-    private WaypointArgumentType(boolean greedyString) {
-        this.greedyString = greedyString;
-    }
+    private WaypointArgumentType() {}
 
     public static WaypointArgumentType create() {
-        return GREEDY;
+        return INSTANCE;
     }
 
-    public static WaypointArgumentType create(boolean greedy) {
-        return greedy ? GREEDY : QUOTED;
+    public static <S> Waypoint get(CommandContext<S> context) {
+        return context.getArgument("waypoint", Waypoint.class);
     }
 
-    public static Waypoint get(CommandContext<?> context) {
-        return Waypoints.get().get(context.getArgument("waypoint", String.class));
-    }
-
-    public static Waypoint get(CommandContext<?> context, String name) {
-        return Waypoints.get().get(context.getArgument(name, String.class));
+    public static <S> Waypoint get(CommandContext<S> context, String name) {
+        return context.getArgument(name, Waypoint.class);
     }
 
     @Override
-    public String parse(StringReader reader) throws CommandSyntaxException {
-        String argument;
-        if (greedyString) {
-            argument = reader.getRemaining();
-            reader.setCursor(reader.getTotalLength());
-        } else argument = reader.readString();
+    public Waypoint parse(StringReader reader) throws CommandSyntaxException {
+        String argument = reader.readString();
+        Waypoint waypoint = Waypoints.get().get(argument);
+        if (waypoint == null) throw NO_SUCH_WAYPOINT.create(argument);
 
-        if (Waypoints.get().get(argument) == null) throw NO_SUCH_WAYPOINT.create(argument);
-        return argument;
+        return waypoint;
     }
 
     @Override
