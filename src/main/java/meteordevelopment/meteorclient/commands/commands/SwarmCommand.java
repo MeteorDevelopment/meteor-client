@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.Random;
 
 public class SwarmCommand extends Command {
-
     private static final SimpleCommandExceptionType SWARM_NOT_ACTIVE = new SimpleCommandExceptionType(new LiteralMessage("The swarm module must be active to use this command."));
+    private static final SimpleCommandExceptionType NO_PENDING_CONNECTION_EXCEPTION = new SimpleCommandExceptionType(new LiteralMessage("No pending connections."));
     private @Nullable ObjectIntPair<String> pendingConnection;
 
     public SwarmCommand() {
@@ -83,8 +83,7 @@ public class SwarmCommand extends Command {
                 )
                 .then(literal("confirm").executes(ctx -> {
                     if (pendingConnection == null) {
-                        error("No pending swarm connections.");
-                        return SINGLE_SUCCESS;
+                        throw NO_PENDING_CONNECTION_EXCEPTION.create();
                     }
 
                     Swarm swarm = Modules.get().get(Swarm.class);
