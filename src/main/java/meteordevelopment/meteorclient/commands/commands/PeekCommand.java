@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
@@ -12,11 +13,10 @@ import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
 
 public class PeekCommand extends Command {
     private static final ItemStack[] ITEMS = new ItemStack[27];
-    private static final SimpleCommandExceptionType CANT_PEEK = new SimpleCommandExceptionType(Text.literal("You must be holding a storage block or looking at an item frame."));
+    private static final SimpleCommandExceptionType CANT_PEEK = new SimpleCommandExceptionType(new LiteralMessage("You must be holding a storage block or looking at an item frame."));
 
     public PeekCommand() {
         super("peek", "Lets you see what's inside storage block items.");

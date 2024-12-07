@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -24,8 +25,8 @@ import net.minecraft.text.Text;
 import java.util.function.ToIntFunction;
 
 public class EnchantCommand extends Command {
-    private static final SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(Text.literal("You must be in creative mode to use this."));
-    private static final SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(Text.literal("You need to hold some item to enchant."));
+    private static final SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(new LiteralMessage("You must be in creative mode to use this."));
+    private static final SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(new LiteralMessage("You need to hold some item to enchant."));
 
     public EnchantCommand() {
         super("enchant", "Enchants the item in your hand. REQUIRES Creative mode.");

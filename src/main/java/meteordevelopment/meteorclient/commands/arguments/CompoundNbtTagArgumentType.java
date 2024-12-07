@@ -37,22 +37,7 @@ public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
         if (!reader.canRead()) {
             throw EXPECTED_VALUE.createWithContext(reader);
         }
-        StringBuilder b = new StringBuilder();
-        int open = 0;
-        while (reader.canRead()) {
-            if (reader.peek() == '{') {
-                open++;
-            }
-            else if (reader.peek() == '}') {
-                open--;
-            }
-            if (open == 0)
-                break;
-            b.append(reader.read());
-        }
-        reader.expect('}');
-        b.append('}');
-        return StringNbtReader.parse(b.toString()
+        return StringNbtReader.parse(reader.getRemaining()
                 .replace("$", "§")
                 .replace("§§", "$")
         );

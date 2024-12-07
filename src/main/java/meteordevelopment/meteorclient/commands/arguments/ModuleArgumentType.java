@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.commands.arguments;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -15,7 +16,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class ModuleArgumentType implements ArgumentType<Module> {
     private static final ModuleArgumentType INSTANCE = new ModuleArgumentType();
-    private static final DynamicCommandExceptionType NO_SUCH_MODULE = new DynamicCommandExceptionType(name -> Text.literal("Module with name " + name + " doesn't exist."));
+    private static final DynamicCommandExceptionType NO_SUCH_MODULE = new DynamicCommandExceptionType(name -> new LiteralMessage("Module with name " + name + " doesn't exist."));
 
     private static final Collection<String> EXAMPLES = Modules.get().getAll()
             .stream()

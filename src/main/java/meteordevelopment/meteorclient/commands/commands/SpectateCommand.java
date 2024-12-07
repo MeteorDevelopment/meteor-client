@@ -16,8 +16,6 @@ import net.minecraft.text.Text;
 
 public class SpectateCommand extends Command {
 
-    private final StaticListener shiftListener = new StaticListener();
-
     public SpectateCommand() {
         super("spectate", "Allows you to spectate nearby players");
     }
@@ -32,19 +30,16 @@ public class SpectateCommand extends Command {
         builder.then(argument("player", PlayerArgumentType.create()).executes(context -> {
             mc.setCameraEntity(PlayerArgumentType.get(context));
             mc.player.sendMessage(Text.literal("Sneak to un-spectate."), true);
-            MeteorClient.EVENT_BUS.subscribe(shiftListener);
+            MeteorClient.EVENT_BUS.subscribe(this);
             return SINGLE_SUCCESS;
         }));
     }
-
-    private static class StaticListener {
-        @EventHandler
-        private void onKey(KeyEvent event) {
-            if (mc.options.sneakKey.matchesKey(event.key, 0) || mc.options.sneakKey.matchesMouse(event.key)) {
-                mc.setCameraEntity(mc.player);
-                event.cancel();
-                MeteorClient.EVENT_BUS.unsubscribe(this);
-            }
+    @EventHandler
+    private void onKey(KeyEvent event) {
+        if (mc.options.sneakKey.matchesKey(event.key, 0) || mc.options.sneakKey.matchesMouse(event.key)) {
+            mc.setCameraEntity(mc.player);
+            event.cancel();
+            MeteorClient.EVENT_BUS.unsubscribe(this);
         }
     }
 }

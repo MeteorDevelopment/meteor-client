@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -40,7 +41,7 @@ import java.util.Random;
 
 public class SwarmCommand extends Command {
 
-    private final static SimpleCommandExceptionType SWARM_NOT_ACTIVE = new SimpleCommandExceptionType(Text.literal("The swarm module must be active to use this command."));
+    private static final SimpleCommandExceptionType SWARM_NOT_ACTIVE = new SimpleCommandExceptionType(new LiteralMessage("The swarm module must be active to use this command."));
     private @Nullable ObjectIntPair<String> pendingConnection;
 
     public SwarmCommand() {
