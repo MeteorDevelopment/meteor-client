@@ -7,9 +7,14 @@ package meteordevelopment.meteorclient.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.commands.*;
+import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.PostInit;
+import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 
 import java.util.ArrayList;
@@ -19,8 +24,8 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Commands {
-    public static final CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
     public static final List<Command> COMMANDS = new ArrayList<>();
+    public static CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
 
     @PostInit(dependencies = PathManagers.class)
     public static void init() {
@@ -64,11 +69,12 @@ public class Commands {
         add(new LocateCommand());
 
         COMMANDS.sort(Comparator.comparing(Command::getName));
+
+        MeteorClient.EVENT_BUS.subscribe(Commands.class);
     }
 
     public static void add(Command command) {
         COMMANDS.removeIf(existing -> existing.getName().equals(command.getName()));
-        command.registerTo(DISPATCHER);
         COMMANDS.add(command);
     }
 
@@ -84,5 +90,39 @@ public class Commands {
         }
 
         return null;
+    }
+
+    /**
+     * Argument types that rely on Minecraft registries access those registries through a {@link CommandRegistryAccess}
+     * object.
+     * Since dynamic registries are specific to each server, we need to make a new {@link CommandRegistryAccess} object
+     * every time we join a server.
+     * <p>
+     * Annoyingly, we also have to create a new {@link CommandDispatcher} because the command tree needs to be rebuilt
+     * from scratch. This is mainly due to two reasons:
+     * <ol>
+     *     <li>Argument types that access registries do so through a registry wrapper object that is created and cached
+     *         when the argument type objects are created, that is to say when the command tree is built.
+     *         This would cause the registry wrapper objects to become stale after joining another server.
+     *     <li>We can't re-register command nodes to the same {@link CommandDispatcher}, because the node merging that
+     *         happens only registers missing children, it doesn't replace existing ones so the stale argument type
+     *         objects wouldn't get replaced.
+     * </ol>
+     * <p>
+     * Ensuring dynamic registry entries match up perfectly is important, because even if a stale registry has identical
+     * contents to an up-to-date one, registry entries and keys are compared using referential equality, so their
+     * contents would not match.
+     *
+     * @author Crosby
+     */
+    @EventHandler
+    private static void onJoin(GameJoinedEvent event) {
+        ClientPlayNetworkHandler networkHandler = mc.getNetworkHandler();
+        Command.REGISTRY_ACCESS = CommandRegistryAccess.of(networkHandler.getRegistryManager(), networkHandler.getEnabledFeatures());
+
+        DISPATCHER = new CommandDispatcher<>();
+        for (Command command : COMMANDS) {
+            command.registerTo(DISPATCHER);
+        }
     }
 }
