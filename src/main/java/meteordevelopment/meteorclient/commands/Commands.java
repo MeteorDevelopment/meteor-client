@@ -42,7 +42,11 @@ public class Commands {
         add(new FriendsCommand());
         add(new CommandsCommand());
         add(new InventoryCommand());
+        add(new LocateCommand());
+        add(new MacroCommand());
+        add(new ModulesCommand());
         add(new MultitoolCommand());
+        add(new NameHistoryCommand());
         add(new NbtCommand());
         add(new NotebotCommand());
         add(new PeekCommand());
@@ -66,6 +70,7 @@ public class Commands {
         add(new BindCommand());
         add(new FovCommand());
         add(new RotationCommand());
+        add(new TransmogrifyCommand());
         add(new WaypointCommand());
         add(new InputCommand());
         add(new WaspCommand());
