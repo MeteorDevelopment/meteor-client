@@ -71,27 +71,27 @@ public class RegistryEntryReferenceArgumentType<T> implements ArgumentType<Regis
         return STATUS_EFFECT;
     }
 
-    public static RegistryEntry.Reference<Enchantment> getEnchantment(CommandContext<?> context, String name) throws CommandSyntaxException {
+    public static <S> RegistryEntry.Reference<Enchantment> getEnchantment(CommandContext<S> context, String name) throws CommandSyntaxException {
         return getRegistryEntry(context, name, RegistryKeys.ENCHANTMENT);
     }
 
-    public static RegistryEntry.Reference<EntityAttribute> getEntityAttribute(CommandContext<?> context, String name) throws CommandSyntaxException {
+    public static <S> RegistryEntry.Reference<EntityAttribute> getEntityAttribute(CommandContext<S> context, String name) throws CommandSyntaxException {
         return getRegistryEntry(context, name, RegistryKeys.ATTRIBUTE);
     }
 
-    public static RegistryEntry.Reference<Structure> getStructure(CommandContext<?> context, String name) throws CommandSyntaxException {
+    public static <S> RegistryEntry.Reference<Structure> getStructure(CommandContext<S> context, String name) throws CommandSyntaxException {
         return getRegistryEntry(context, name, RegistryKeys.STRUCTURE);
     }
 
-    public static RegistryEntry.Reference<EntityType<?>> getEntityType(CommandContext<?> context, String name) throws CommandSyntaxException {
+    public static <S> RegistryEntry.Reference<EntityType<?>> getEntityType(CommandContext<S> context, String name) throws CommandSyntaxException {
         return getRegistryEntry(context, name, RegistryKeys.ENTITY_TYPE);
     }
 
-    public static RegistryEntry.Reference<StatusEffect> getStatusEffect(CommandContext<?> context, String name) throws CommandSyntaxException {
+    public static <S> RegistryEntry.Reference<StatusEffect> getStatusEffect(CommandContext<S> context, String name) throws CommandSyntaxException {
         return getRegistryEntry(context, name, RegistryKeys.STATUS_EFFECT);
     }
 
-    private static <T> RegistryEntry.Reference<T> getRegistryEntry(CommandContext<?> context, String name, RegistryKey<Registry<T>> registryRef) throws CommandSyntaxException {
+    private static <S, T> RegistryEntry.Reference<T> getRegistryEntry(CommandContext<S> context, String name, RegistryKey<Registry<T>> registryRef) throws CommandSyntaxException {
         RegistryEntry.Reference<T> reference = context.getArgument(name, RegistryEntry.Reference.class);
         RegistryKey<?> registryKey = reference.registryKey();
         if (registryKey.isOf(registryRef)) {

@@ -35,8 +35,12 @@ public class ModuleArgumentType implements ArgumentType<Module> {
         return INSTANCE;
     }
 
-    public static Module get(CommandContext<?> context) {
+    public static <S> Module get(CommandContext<S> context) {
         return context.getArgument("module", Module.class);
+    }
+
+    public static <S> Module get(CommandContext<S> context, String name) {
+        return context.getArgument(name, Module.class);
     }
 
     private ModuleArgumentType() {}

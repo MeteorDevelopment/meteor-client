@@ -32,8 +32,12 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
         return INSTANCE;
     }
 
-    public static PlayerEntity get(CommandContext<?> context) {
+    public static <S> PlayerEntity get(CommandContext<S> context) {
         return context.getArgument("player", PlayerEntity.class);
+    }
+
+    public static <S> PlayerEntity get(CommandContext<S> context, String name) {
+        return context.getArgument(name, PlayerEntity.class);
     }
 
     private PlayerArgumentType() {}

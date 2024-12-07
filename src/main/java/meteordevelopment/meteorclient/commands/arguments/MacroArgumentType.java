@@ -29,8 +29,12 @@ public class MacroArgumentType implements ArgumentType<Macro> {
         return INSTANCE;
     }
 
-    public static Macro get(CommandContext<?> context) {
+    public static <S> Macro get(CommandContext<S> context) {
         return context.getArgument("macro", Macro.class);
+    }
+
+    public static <S> Macro get(CommandContext<S> context, String name) {
+        return context.getArgument(name, Macro.class);
     }
 
     private MacroArgumentType() {}
