@@ -29,18 +29,24 @@ public class Commands {
 
     @PostInit(dependencies = PathManagers.class)
     public static void init() {
-        add(new VClipCommand());
-        add(new HClipCommand());
-        add(new DismountCommand());
-        add(new DisconnectCommand());
+        add(new BindCommand());
+        add(new BindsCommand());
+        add(new CommandsCommand());
         add(new ComponentsCommand());
         add(new ConfigCommand());
         add(new DamageCommand());
+        add(new DisconnectCommand());
+        add(new DismountCommand());
         add(new DropCommand());
         add(new EnchantCommand());
+        add(new EnderChestCommand());
         add(new FakePlayerCommand());
+        add(new FovCommand());
         add(new FriendsCommand());
-        add(new CommandsCommand());
+        add(new GamemodeCommand());
+        add(new GiveCommand());
+        add(new HClipCommand());
+        add(new InputCommand());
         add(new InventoryCommand());
         add(new LocateCommand());
         add(new MacroCommand());
@@ -50,14 +56,13 @@ public class Commands {
         add(new NbtCommand());
         add(new NotebotCommand());
         add(new PeekCommand());
-        add(new EnderChestCommand());
         add(new ProfilesCommand());
         add(new ReloadCommand());
         add(new ResetCommand());
+        add(new RotationCommand());
+        add(new SaveMapCommand());
         add(new SayCommand());
         add(new ServerCommand());
-        add(new SwarmCommand());
-        add(new ToggleCommand());
         add(new SettingCommand());
         add(new SpectateCommand());
         add(new SwarmCommand());
@@ -66,9 +71,6 @@ public class Commands {
         add(new VClipCommand());
         add(new WaspCommand());
         add(new WaypointCommand());
-        add(new InputCommand());
-        add(new WaspCommand());
-        add(new LocateCommand());
 
         COMMANDS.sort(Comparator.comparing(Command::getName));
 
