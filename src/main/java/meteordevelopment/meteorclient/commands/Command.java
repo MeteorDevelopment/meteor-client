@@ -9,6 +9,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -49,14 +50,21 @@ public abstract class Command {
     }
 
     public final void registerTo(CommandDispatcher<CommandSource> dispatcher) {
-        register(dispatcher, name);
-        for (String alias : aliases) register(dispatcher, alias);
+        LiteralArgumentBuilder<CommandSource> builder = literal(name);
+        build(builder);
+        LiteralCommandNode<CommandSource> node = dispatcher.register(builder);
+
+        for (String alias : aliases) registerAlias(dispatcher, node, alias);
     }
 
-    public void register(CommandDispatcher<CommandSource> dispatcher, String name) {
-        LiteralArgumentBuilder<CommandSource> builder = LiteralArgumentBuilder.literal(name);
-        build(builder);
-        dispatcher.register(builder);
+    private void registerAlias(CommandDispatcher<CommandSource> dispatcher, LiteralCommandNode<CommandSource> node, String alias) {
+        LiteralArgumentBuilder<CommandSource> aliasBuilder = literal(alias);
+        if (node.getChildren().isEmpty()) { // apparently redirect nodes break when the target node has no children :/
+            build(aliasBuilder);
+        } else {
+            aliasBuilder.redirect(node);
+        }
+        dispatcher.register(aliasBuilder);
     }
 
     public abstract void build(LiteralArgumentBuilder<CommandSource> builder);
