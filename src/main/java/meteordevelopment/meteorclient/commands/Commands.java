@@ -33,6 +33,7 @@ public class Commands {
         add(new HClipCommand());
         add(new DismountCommand());
         add(new DisconnectCommand());
+        add(new ComponentsCommand());
         add(new DamageCommand());
         add(new DropCommand());
         add(new EnchantCommand());
