@@ -14,44 +14,65 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.commands.ArgumentFunction;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
-public class SettingArgumentType implements ArgumentType<String> {
-    private static final SettingArgumentType INSTANCE = new SettingArgumentType();
+public class SettingArgumentType implements ArgumentType<SettingArgumentType.SettingArgument> {
     private static final DynamicCommandExceptionType NO_SUCH_SETTING = new DynamicCommandExceptionType(name -> Text.literal("No such setting '" + name + "'."));
 
-    public static SettingArgumentType create() {
-        return INSTANCE;
+    private final ArgumentFunction<?, Settings> settingsArgumentFunction;
+
+    private SettingArgumentType(ArgumentFunction<?, Settings> settingsArgumentFunction) {
+        this.settingsArgumentFunction = settingsArgumentFunction;
     }
 
-    public static Setting<?> get(CommandContext<?> context) throws CommandSyntaxException {
-        Module module = context.getArgument("module", Module.class);
-        String settingName = context.getArgument("setting", String.class);
-
-        Setting<?> setting = module.settings.get(settingName);
-        if (setting == null) throw NO_SUCH_SETTING.create(settingName);
-
-        return setting;
+    public static <S> SettingArgumentType create(ArgumentFunction<S, Settings> settingsArgumentFunction) {
+        return new SettingArgumentType(settingsArgumentFunction);
     }
 
-    private SettingArgumentType() {}
+    public static <S> SettingArgumentType createModule(ArgumentFunction<S, Module> moduleArgumentFunction) {
+        return new SettingArgumentType(moduleArgumentFunction.andThen(module -> module.settings));
+    }
+
+    public static <S> Setting<?> get(CommandContext<S> context) throws CommandSyntaxException {
+        return context.getArgument("setting", SettingArgument.class).getSetting(context);
+    }
+
+    public static <S> Setting<?> get(CommandContext<S> context, String name) throws CommandSyntaxException {
+        return context.getArgument(name, SettingArgument.class).getSetting(context);
+    }
 
     @Override
-    public String parse(StringReader reader) throws CommandSyntaxException {
-        return reader.readString();
+    public SettingArgument parse(StringReader reader) throws CommandSyntaxException {
+        return new SettingArgument(reader.readString(), this.settingsArgumentFunction);
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        Stream<String> stream = Streams.stream(context.getArgument("module", Module.class).settings.iterator())
+        try {
+            return CommandSource.suggestMatching(Streams.stream(this.settingsArgumentFunction.uncheckedApply(context).iterator())
                 .flatMap(settings -> Streams.stream(settings.iterator()))
-                .map(setting -> setting.name);
+                .filter(Setting::isVisible)
+                .map(setting -> setting.name), builder);
+        } catch (CommandSyntaxException e) {
+            return Suggestions.empty();
+        }
+    }
 
-        return CommandSource.suggestMatching(stream, builder);
+    public record SettingArgument(String settingName, ArgumentFunction<?, Settings> settingsArgumentFunction) {
+        public <S> Setting<?> getSetting(CommandContext<S> context) throws CommandSyntaxException {
+            Settings settings = this.settingsArgumentFunction().uncheckedApply(context);
+            @Nullable Setting<?> setting = settings.get(this.settingName());
+            if (setting == null) {
+                throw NO_SUCH_SETTING.create(this.settingName());
+            }
+            return setting;
+        }
     }
 }

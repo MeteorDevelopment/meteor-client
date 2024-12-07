@@ -55,7 +55,7 @@ public class SettingCommand extends Command {
         builder.then(
                 argument("module", ModuleArgumentType.create())
                 .then(
-                        argument("setting", SettingArgumentType.create())
+                        argument("setting", SettingArgumentType.createModule(ModuleArgumentType::get))
                         .executes(context -> {
                             // Get setting value
                             Setting<?> setting = SettingArgumentType.get(context);
@@ -65,7 +65,7 @@ public class SettingCommand extends Command {
                             return SINGLE_SUCCESS;
                         })
                         .then(
-                                argument("value", SettingValueArgumentType.create())
+                                argument("value", SettingValueArgumentType.create(SettingArgumentType::get))
                                 .executes(context -> {
                                     // Set setting value
                                     Setting<?> setting = SettingArgumentType.get(context);
