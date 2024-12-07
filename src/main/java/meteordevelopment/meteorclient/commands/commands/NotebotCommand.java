@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.NotebotSongArgumentType;
@@ -22,7 +22,6 @@ import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 
 import java.io.FileWriter;
@@ -34,8 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public class NotebotCommand extends Command {
-    private static final SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(Text.literal("Invalid song."));
-    private static final DynamicCommandExceptionType INVALID_PATH = new DynamicCommandExceptionType(object -> Text.literal("'%s' is not a valid path.".formatted(object)));
+    private static final DynamicCommandExceptionType INVALID_PATH = new DynamicCommandExceptionType(object -> new LiteralMessage("'%s' is not a valid path.".formatted(object)));
 
     int ticks = -1;
     private final Map<Integer, List<Note>> song = new HashMap<>(); // tick -> notes
@@ -85,10 +83,8 @@ public class NotebotCommand extends Command {
             literal("play").then(
                 argument("song", NotebotSongArgumentType.create()).executes(ctx -> {
                     Notebot notebot = Modules.get().get(Notebot.class);
-                    Path songPath = ctx.getArgument("song", Path.class);
-                    if (songPath == null || !songPath.toFile().exists()) {
-                        throw INVALID_SONG.create();
-                    }
+                    Path songPath = NotebotSongArgumentType.get(ctx);
+
                     notebot.loadSong(songPath.toFile());
                     return SINGLE_SUCCESS;
                 })
@@ -99,10 +95,8 @@ public class NotebotCommand extends Command {
             literal("preview").then(
                 argument("song", NotebotSongArgumentType.create()).executes(ctx -> {
                     Notebot notebot = Modules.get().get(Notebot.class);
-                    Path songPath = ctx.getArgument("song", Path.class);
-                    if (songPath == null || !songPath.toFile().exists()) {
-                        throw INVALID_SONG.create();
-                    }
+                    Path songPath = NotebotSongArgumentType.get(ctx);
+
                     notebot.previewSong(songPath.toFile());
                     return SINGLE_SUCCESS;
         })));
