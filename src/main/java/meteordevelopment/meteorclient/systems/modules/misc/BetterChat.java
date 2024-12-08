@@ -225,7 +225,7 @@ public class BetterChat extends Module {
         .build()
     );
 
-    private static final Pattern antiSpamRegex = Pattern.compile(" \\(([0-9]+)\\)$");
+    private static final Pattern antiSpamRegex = Pattern.compile(" \\(([0-9]{1,9})\\)$");
     private static final Pattern antiClearRegex = Pattern.compile("\\n(\\n|\\s)+\\n");
     private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
     private static final Pattern usernameRegex = Pattern.compile("^(?:<[0-9]{2}:[0-9]{2}>\\s)?<(.*?)>.*");
@@ -345,13 +345,7 @@ public class BetterChat extends Module {
                 if (!matcher.find()) continue;
 
                 String group = matcher.group(matcher.groupCount());
-
-                int number;
-                try {
-                    number = Integer.parseInt(group);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
+                int number = Integer.parseInt(group);
 
                 if (stringToCheck.substring(0, matcher.start()).equals(textString)) {
                     messageIndex = i;
