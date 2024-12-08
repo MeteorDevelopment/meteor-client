@@ -9,7 +9,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.HoverEvent;
@@ -56,7 +55,7 @@ public class BindsCommand extends Command {
     }
 
     private MutableText getTooltip(Module module) {
-        MutableText tooltip = Text.literal(Utils.nameToTitle(module.title)).formatted(Formatting.BLUE, Formatting.BOLD).append("\n\n");
+        MutableText tooltip = Text.literal(module.title).formatted(Formatting.BLUE, Formatting.BOLD).append("\n\n");
         tooltip.append(Text.literal(module.description).formatted(Formatting.WHITE));
         return tooltip;
     }

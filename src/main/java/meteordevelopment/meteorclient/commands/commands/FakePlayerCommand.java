@@ -42,10 +42,6 @@ public class FakePlayerCommand extends Command {
             .then(argument("fp", FakePlayerArgumentType.create())
                 .executes(context -> {
                     FakePlayerEntity fp = FakePlayerArgumentType.get(context);
-                    if (fp == null || !FakePlayerManager.contains(fp)) {
-                        error("Couldn't find a Fake Player with that name.");
-                        return SINGLE_SUCCESS;
-                    }
 
                     FakePlayerManager.remove(fp);
                     info("Removed Fake Player %s.".formatted(fp.getName().getString()));
