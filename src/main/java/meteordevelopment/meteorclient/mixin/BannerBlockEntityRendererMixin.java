@@ -77,7 +77,7 @@ public abstract class BannerBlockEntityRendererMixin {
         matrixStack.push();
         BlockState blockState = bannerBlockEntity.getCachedState();
         matrixStack.translate(0.5D, -0.1666666716337204D, 0.5D);
-        float h = -blockState.get(WallBannerBlock.FACING).asRotation();
+        float h = -blockState.get(WallBannerBlock.FACING).getPositiveHorizontalDegrees();
         matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(h));
         matrixStack.translate(0.0D, -0.3125D, -0.4375D);
         matrixStack.push();
