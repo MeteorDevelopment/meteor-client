@@ -345,7 +345,13 @@ public class BetterChat extends Module {
                 if (!matcher.find()) continue;
 
                 String group = matcher.group(matcher.groupCount());
-                int number = Integer.parseInt(group);
+
+                int number;
+                try {
+                    number = Integer.parseInt(group);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
 
                 if (stringToCheck.substring(0, matcher.start()).equals(textString)) {
                     messageIndex = i;
