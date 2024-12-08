@@ -11,11 +11,13 @@ import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.utils.misc.IconChanger;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +86,14 @@ public class Config extends System<Config> {
         .visible(customWindowTitle::get)
         .defaultValue("Minecraft {mc_version} - {meteor.name} {meteor.version}")
         .onChanged(value -> mc.updateWindowTitle())
+        .build()
+    );
+
+    public final Setting<Icons> customWindowIconIcon = sgVisual.add(new EnumSetting.Builder<Icons>()
+        .name("custom-window-icon")
+        .description("The icon used as the window icon")
+        .defaultValue(Icons.Default)
+        .onChanged(value -> IconChanger.setIcon(value.identifier))
         .build()
     );
 
@@ -188,5 +198,20 @@ public class Config extends System<Config> {
         List<String> list = new ArrayList<>();
         for (NbtElement item : tag.getList(key, 8)) list.add(item.asString());
         return list;
+    }
+    private enum Icons  {
+        Meteor(MeteorClient.identifier("textures/meteor.png")),
+        Halloween((MeteorClient.identifier("textures/icons/windowicon/halloween.png"))),
+        Christmas((MeteorClient.identifier("textures/icons/windowicon/christmas.png"))),
+        Default(null);
+
+        private final Identifier identifier;
+        Icons(final net.minecraft.util.Identifier identifier) {
+            this.identifier = identifier;
+
+        }
+        public net.minecraft.util.Identifier getIdentifier() {
+            return identifier;
+        }
     }
 }
