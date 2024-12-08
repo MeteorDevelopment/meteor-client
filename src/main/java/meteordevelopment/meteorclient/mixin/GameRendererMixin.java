@@ -160,7 +160,7 @@ public abstract class GameRendererMixin {
         Freecam freecam = Modules.get().get(Freecam.class);
         boolean highwayBuilder = Modules.get().isActive(HighwayBuilder.class);
 
-        if ((freecam.isActive() || highwayBuilder) && client.getCameraEntity() != null && !freecamSet) {
+        if ((freecam.shouldChangeTarget() || highwayBuilder) && client.getCameraEntity() != null && !freecamSet) {
             info.cancel();
             Entity cameraE = client.getCameraEntity();
 
