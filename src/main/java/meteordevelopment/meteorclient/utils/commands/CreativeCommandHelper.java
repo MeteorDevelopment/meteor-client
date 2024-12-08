@@ -9,7 +9,6 @@ import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -35,6 +34,7 @@ public class CreativeCommandHelper {
         }
 
         mc.player.getInventory().setStack(slot, stack);
-        mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(36 + slot, stack));
+        mc.interactionManager.clickCreativeStack(stack, 36 + slot);
+        mc.player.playerScreenHandler.sendContentUpdates();
     }
 }
