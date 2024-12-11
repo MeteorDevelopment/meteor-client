@@ -164,7 +164,6 @@
     "AbstractSignBlockEntityRendererMixin",
     "SimpleEntityLookupAccessor",
     "SimpleOptionMixin",
-    "SkyRenderingMixin",
     "SlimeBlockMixin",
     "SlotMixin",
     "SoundSystemMixin",

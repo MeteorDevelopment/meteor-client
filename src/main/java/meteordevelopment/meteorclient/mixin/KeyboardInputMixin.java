@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(KeyboardInput.class)
 public abstract class KeyboardInputMixin extends Input {
     @Inject(method = "tick", at = @At("TAIL"))
-    private void isPressed(boolean slowDown, float f, CallbackInfo ci) {
+    private void isPressed(CallbackInfo ci) {
         if (Modules.get().get(Sneak.class).doVanilla()) playerInput = new PlayerInput(
             playerInput.forward(),
             playerInput.backward(),

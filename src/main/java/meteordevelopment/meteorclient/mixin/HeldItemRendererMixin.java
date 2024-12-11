@@ -58,9 +58,9 @@ public abstract class HeldItemRendererMixin {
         return swingProgress;
     }
 
-    @Redirect(method = "updateHeldItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;areEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
-    private boolean redirectSwapping(ItemStack left, ItemStack right) {
-        return showSwapping(left, right);
+    @Redirect(method = "updateHeldItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/item/HeldItemRenderer;shouldSkipHandAnimationOnSwap(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
+    private boolean redirectSwapping(HeldItemRenderer instance, ItemStack from, ItemStack to) {
+        return skipSwapAnimation(from, to);
     }
 
     @ModifyArg(method = "updateHeldItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;clamp(FFF)F", ordinal = 2), index = 0)
@@ -68,12 +68,12 @@ public abstract class HeldItemRendererMixin {
         float f = mc.player.getAttackCooldownProgress(1f);
         float modified = Modules.get().get(HandView.class).oldAnimations() ? 1 : f * f * f;
 
-        return (showSwapping(mainHand, mc.player.getMainHandStack()) ? modified : 0) - equipProgressMainHand;
+        return (skipSwapAnimation(mainHand, mc.player.getMainHandStack()) ? modified : 0) - equipProgressMainHand;
     }
 
     @ModifyArg(method = "updateHeldItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;clamp(FFF)F", ordinal = 3), index = 0)
     private float modifyEquipProgressOffhand(float value) {
-        return (showSwapping(offHand, mc.player.getOffHandStack()) ? 1 : 0) - equipProgressOffHand;
+        return (skipSwapAnimation(offHand, mc.player.getOffHandStack()) ? 1 : 0) - equipProgressOffHand;
     }
 
     @Inject(method = "renderFirstPersonItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/item/HeldItemRenderer;renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ModelTransformationMode;ZLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V"))
@@ -91,9 +91,8 @@ public abstract class HeldItemRendererMixin {
         if (Modules.get().get(HandView.class).disableFoodAnimation()) ci.cancel();
     }
 
-
     @Unique
-    private boolean showSwapping(ItemStack stack1, ItemStack stack2) {
+    private boolean skipSwapAnimation(ItemStack stack1, ItemStack stack2) {
         return !Modules.get().get(HandView.class).showSwapping() || ItemStack.areEqual(stack1, stack2);
     }
 }
