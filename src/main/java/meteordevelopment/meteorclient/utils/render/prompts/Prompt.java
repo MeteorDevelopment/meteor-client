@@ -66,6 +66,12 @@ public abstract class Prompt<T> {
         return true;
     }
 
+    protected void dontShowAgain(PromptScreen screen) {
+        if (screen.dontShowAgainCheckbox != null && screen.dontShowAgainCheckbox.checked && id != null) {
+            Config.get().dontShowAgainPrompts.add(id);
+        }
+    }
+
     protected abstract void initialiseWidgets(PromptScreen screen);
 
     protected class PromptScreen extends WindowScreen {
