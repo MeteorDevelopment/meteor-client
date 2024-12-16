@@ -5,7 +5,7 @@ plugins {
 }
 
 base {
-    archivesBaseName = project.archives_base_name
+    archivesName = project.archives_base_name
     version = project.mod_version + (project.hasProperty("devbuild") ? ("-" + project.findProperty("devbuild")) : "")
     group = project.maven_group
 }
