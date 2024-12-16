@@ -118,8 +118,10 @@ tasks {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
 
-        withSourcesJar()
-        withJavadocJar()
+        if (Boolean.getBoolean("CI")) {
+            withSourcesJar()
+            withJavadocJar()
+        }
     }
 
     shadowJar {
@@ -147,7 +149,9 @@ tasks {
     }
 
     build {
-        dependsOn javadocJar
+        if (Boolean.getBoolean("CI")) {
+            dependsOn javadocJar
+        }
     }
 }
 
