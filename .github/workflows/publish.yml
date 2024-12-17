@@ -14,6 +14,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
