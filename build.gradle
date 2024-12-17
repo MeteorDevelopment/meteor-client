@@ -20,14 +20,6 @@ repositories {
         url = "https://maven.meteordev.org/snapshots"
     }
     maven {
-        name = "modrinth"
-        url = "https://api.modrinth.com/maven"
-
-        content {
-            includeGroup "maven.modrinth"
-        }
-    }
-    maven {
         name = "vram"
         url = "https://maven.vram.io//"
     }
@@ -36,6 +28,18 @@ repositories {
         url = "https://repo.viaversion.com"
     }
     mavenCentral()
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 configurations {
