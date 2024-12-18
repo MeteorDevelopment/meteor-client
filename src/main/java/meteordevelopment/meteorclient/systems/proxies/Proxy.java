@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 
-import java.net.InetSocketAddress;
 import java.util.Objects;
 
 public class Proxy implements ISerializable<Proxy> {
@@ -23,7 +22,6 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<String> name = sgGeneral.add(new StringSetting.Builder()
         .name("name")
         .description("The name of the proxy.")
-        .defaultValue("")
         .build()
     );
 
@@ -37,7 +35,6 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<String> address = sgGeneral.add(new StringSetting.Builder()
         .name("address")
         .description("The ip address of the proxy.")
-        .defaultValue("")
         .filter(Utils::ipFilter)
         .build()
     );
@@ -64,14 +61,12 @@ public class Proxy implements ISerializable<Proxy> {
     public Setting<String> username = sgOptional.add(new StringSetting.Builder()
         .name("username")
         .description("The username of the proxy.")
-        .defaultValue("")
         .build()
     );
 
     public Setting<String> password = sgOptional.add(new StringSetting.Builder()
         .name("password")
         .description("The password of the proxy.")
-        .defaultValue("")
         .visible(() -> type.get().equals(ProxyType.Socks5))
         .build()
     );
@@ -82,12 +77,7 @@ public class Proxy implements ISerializable<Proxy> {
     }
 
     public boolean resolveAddress() {
-        int port = this.port.get();
-        String address = this.address.get();
-
-        if (port <= 0 || port > 65535 || address == null || address.isBlank()) return false;
-        InetSocketAddress socketAddress = new InetSocketAddress(address, port);
-        return !socketAddress.isUnresolved();
+        return Utils.resolveAddress(this.address.get(), this.port.get());
     }
 
     public static class Builder {

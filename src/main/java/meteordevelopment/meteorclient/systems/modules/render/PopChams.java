@@ -139,7 +139,7 @@ public class PopChams extends Module {
 
             // Y Modifier
             lastRenderY = getY();
-            ((IVec3d) getPos()).setY(getY() + yModifier.get() * event.frameTime);
+            ((IVec3d) getPos()).meteor$setY(getY() + yModifier.get() * event.frameTime);
 
             // Scale Modifier
             scale += scaleModifier.get() * event.frameTime;
@@ -149,8 +149,8 @@ public class PopChams extends Module {
             int preLineA = lineColor.get().a;
 
             if (fadeOut.get()) {
-                sideColor.get().a *= 1 - timer / renderTime.get();
-                lineColor.get().a *= 1 - timer / renderTime.get();
+                sideColor.get().a *= (int) (1 - timer / renderTime.get());
+                lineColor.get().a *= (int) (1 - timer / renderTime.get());
             }
 
             // Render

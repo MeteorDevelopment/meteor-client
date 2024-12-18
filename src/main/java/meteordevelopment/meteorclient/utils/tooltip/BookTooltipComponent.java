@@ -5,18 +5,17 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class BookTooltipComponent implements TooltipComponent, MeteorTooltipData {
-    private static final Identifier TEXTURE_BOOK_BACKGROUND = new Identifier("textures/gui/book.png");
+    private static final Identifier TEXTURE_BOOK_BACKGROUND = Identifier.of("textures/gui/book.png");
 
     private final Text page;
 
@@ -30,7 +29,7 @@ public class BookTooltipComponent implements TooltipComponent, MeteorTooltipData
     }
 
     @Override
-    public int getHeight() {
+    public int getHeight(TextRenderer textRenderer) {
         return 134;
     }
 
@@ -40,10 +39,9 @@ public class BookTooltipComponent implements TooltipComponent, MeteorTooltipData
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
         // Background
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        context.drawTexture(TEXTURE_BOOK_BACKGROUND, x, y, 0, 12, 0, 112, 134, 179, 179);
+        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE_BOOK_BACKGROUND, x, y, 0, 12, 0, 112, 134, 179, 179);
 
         // Content
         MatrixStack matrices = context.getMatrices();

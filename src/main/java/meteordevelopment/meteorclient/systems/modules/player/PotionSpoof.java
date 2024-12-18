@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.registry.Registries;
 
 import java.util.List;
 
@@ -41,18 +42,20 @@ public class PotionSpoof extends Module {
         .name("blocked-potions")
         .description("Potions to block.")
         .defaultValue(
-            LEVITATION,
-            JUMP_BOOST,
-            SLOW_FALLING,
-            DOLPHINS_GRACE
+            LEVITATION.value(),
+            JUMP_BOOST.value(),
+            SLOW_FALLING.value(),
+            DOLPHINS_GRACE.value()
         )
         .build()
     );
 
-    public final Setting<Boolean> applyGravity = sgGeneral.add(new BoolSetting.Builder()
-        .name("gravity")
-        .description("Applies gravity when levitating.")
-        .defaultValue(false)
+    private final Setting<Integer> effectDuration = sgGeneral.add(new IntSetting.Builder()
+        .name("effect-duration")
+        .description("How many ticks to spoof the effect for.")
+        .range(1, 32767)
+        .sliderRange(20, 500)
+        .defaultValue(420)
         .build()
     );
 
@@ -66,7 +69,7 @@ public class PotionSpoof extends Module {
 
         for (Reference2IntMap.Entry<StatusEffect> entry : spoofPotions.get().reference2IntEntrySet()) {
             if (entry.getIntValue() <= 0) continue;
-            if (mc.player.hasStatusEffect(entry.getKey())) mc.player.removeStatusEffect(entry.getKey());
+            if (mc.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()))) mc.player.removeStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()));
         }
     }
 
@@ -76,12 +79,12 @@ public class PotionSpoof extends Module {
             int level = entry.getIntValue();
             if (level <= 0) continue;
 
-            if (mc.player.hasStatusEffect(entry.getKey())) {
-                StatusEffectInstance instance = mc.player.getStatusEffect(entry.getKey());
+            if (mc.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()))) {
+                StatusEffectInstance instance = mc.player.getStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()));
                 ((StatusEffectInstanceAccessor) instance).setAmplifier(level - 1);
-                if (instance.getDuration() < 20) ((StatusEffectInstanceAccessor) instance).setDuration(20);
+                if (instance.getDuration() < effectDuration.get()) ((StatusEffectInstanceAccessor) instance).setDuration(effectDuration.get());
             } else {
-                mc.player.addStatusEffect(new StatusEffectInstance(entry.getKey(), 20, level - 1));
+                mc.player.addStatusEffect(new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(entry.getKey()), effectDuration.get(), level - 1));
             }
         }
     }

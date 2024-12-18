@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -47,7 +48,7 @@ public class ModuleScreen extends WindowScreen {
         add(theme.label(module.description, getWindowWidth() / 2.0));
 
         // Settings
-        if (module.settings.groups.size() > 0) {
+        if (!module.settings.groups.isEmpty()) {
             settingsContainer = add(theme.verticalList()).expandX().widget();
             settingsContainer.add(theme.settings(module.settings)).expandX();
         }
@@ -93,12 +94,17 @@ public class ModuleScreen extends WindowScreen {
         // Bottom
         WHorizontalList bottom = add(theme.horizontalList()).expandX().widget();
 
-        //   Active
+        // Active
         bottom.add(theme.label("Active: "));
         active = bottom.add(theme.checkbox(module.isActive())).expandCellX().widget();
         active.action = () -> {
             if (module.isActive() != active.checked) module.toggle();
         };
+
+        if (module.addon != null && module.addon != MeteorClient.ADDON) {
+            bottom.add(theme.label("From: ")).right().widget();
+            bottom.add(theme.label(module.addon.name).color(theme.textSecondaryColor())).right().widget();
+        }
     }
 
     @Override

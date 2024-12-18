@@ -21,9 +21,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(CrashReport.class)
-public class CrashReportMixin {
-    @Inject(method = "addStackTrace", at = @At("TAIL"))
-    private void onAddStackTrace(StringBuilder sb, CallbackInfo info) {
+public abstract class CrashReportMixin {
+    @Inject(method = "addDetails", at = @At("TAIL"))
+    private void onAddDetails(StringBuilder sb, CallbackInfo info) {
         sb.append("\n\n-- Meteor Client --\n\n");
         sb.append("Version: ").append(MeteorClient.VERSION).append("\n");
         if (!MeteorClient.DEV_BUILD.isEmpty()) {

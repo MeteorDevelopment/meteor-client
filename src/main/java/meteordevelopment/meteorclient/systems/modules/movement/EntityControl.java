@@ -39,14 +39,14 @@ public class EntityControl extends Module {
         if (!Utils.canUpdate() || mc.world.getEntities() == null) return;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof AbstractHorseEntity) ((IHorseBaseEntity) entity).setSaddled(false);
+            if (entity instanceof AbstractHorseEntity) ((IHorseBaseEntity) entity).meteor$setSaddled(false);
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof AbstractHorseEntity) ((IHorseBaseEntity) entity).setSaddled(true);
+            if (entity instanceof AbstractHorseEntity) ((IHorseBaseEntity) entity).meteor$setSaddled(true);
         }
 
         if (maxJump.get()) ((ClientPlayerEntityAccessor) mc.player).setMountJumpStrength(1);

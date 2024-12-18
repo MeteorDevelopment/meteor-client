@@ -8,13 +8,13 @@ package meteordevelopment.meteorclient.systems.accounts;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
-import meteordevelopment.meteorclient.systems.accounts.types.EasyMCAccount;
 import meteordevelopment.meteorclient.systems.accounts.types.MicrosoftAccount;
 import meteordevelopment.meteorclient.systems.accounts.types.TheAlteningAccount;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.nbt.NbtCompound;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -51,7 +51,7 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
     }
 
     @Override
-    public Iterator<Account<?>> iterator() {
+    public @NotNull Iterator<Account<?>> iterator() {
         return accounts.iterator();
     }
 
@@ -73,19 +73,14 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
             AccountType type = AccountType.valueOf(t.getString("type"));
 
             try {
-                Account<?> account = switch (type) {
+                return switch (type) {
                     case Cracked ->     new CrackedAccount(null).fromTag(t);
                     case Microsoft ->   new MicrosoftAccount(null).fromTag(t);
                     case TheAltening -> new TheAlteningAccount(null).fromTag(t);
-                    case EasyMC -> new EasyMCAccount(null).fromTag(t);
                 };
-
-                if (account.fetchInfo()) return account;
             } catch (NbtException e) {
                 return null;
             }
-
-            return null;
         }));
 
         return this;

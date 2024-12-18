@@ -6,5 +6,5 @@
 package meteordevelopment.meteorclient.mixininterface;
 
 public interface IHorseBaseEntity {
-    void setSaddled(boolean saddled);
+    void meteor$setSaddled(boolean saddled);
 }

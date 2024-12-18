@@ -24,7 +24,6 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -74,14 +73,6 @@ public class NoFall extends Module {
         .build()
     );
 
-    private final Setting<Boolean> autoDimension = sgGeneral.add(new BoolSetting.Builder()
-        .name("auto-dimension")
-        .description("Use powder snow bucket in nether.")
-        .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Place)
-        .build()
-    );
-
     private final Setting<Boolean> antiBounce = sgGeneral.add(new BoolSetting.Builder()
         .name("anti-bounce")
         .description("Disables bouncing on slime-block and bed upon landing.")
@@ -116,11 +107,11 @@ public class NoFall extends Module {
         if (mc.player.getAbilities().creativeMode
             || !(event.packet instanceof PlayerMoveC2SPacket)
             || mode.get() != Mode.Packet
-            || ((IPlayerMoveC2SPacket) event.packet).getTag() == 1337) return;
+            || ((IPlayerMoveC2SPacket) event.packet).meteor$getTag() == 1337) return;
 
 
         if (!Modules.get().isActive(Flight.class)) {
-            if (mc.player.isFallFlying()) return;
+            if (mc.player.isGliding()) return;
             if (mc.player.getVelocity().y > -0.5) return;
             ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
         } else {
@@ -147,17 +138,17 @@ public class NoFall extends Module {
 
             Rotations.rotate(mc.player.getYaw(), 90, Integer.MAX_VALUE, () -> {
                 double preY = mc.player.getVelocity().y;
-                ((IVec3d) mc.player.getVelocity()).setY(0);
+                ((IVec3d) mc.player.getVelocity()).meteor$setY(0);
 
                 BlockUtils.place(mc.player.getBlockPos().down(), InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem), false, 0, true);
 
-                ((IVec3d) mc.player.getVelocity()).setY(preY);
+                ((IVec3d) mc.player.getVelocity()).meteor$setY(preY);
             });
         }
 
         // Bucket mode
         else if (mode.get() == Mode.Place) {
-            PlacedItem placedItem1 = autoDimension.get() && PlayerUtils.getDimension() == Dimension.Nether ? PlacedItem.PowderSnow : placedItem.get();
+            PlacedItem placedItem1 = mc.world.getDimension().ultrawarm() && placedItem.get() == PlacedItem.Bucket ? PlacedItem.PowderSnow : placedItem.get();
             if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
                 Item item = placedItem1.item;
 
@@ -187,6 +178,8 @@ public class NoFall extends Module {
                 timer++;
                 if (mc.player.getBlockStateAtPos().getBlock() == placedItem1.block) {
                     useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos, true);
+                } else if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == Blocks.POWDER_SNOW && mc.player.fallDistance==0 && placedItem1.block==Blocks.POWDER_SNOW){ //check if the powder snow block is still there and the player is on the ground
+                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos.down(), true);
                 }
             }
         }

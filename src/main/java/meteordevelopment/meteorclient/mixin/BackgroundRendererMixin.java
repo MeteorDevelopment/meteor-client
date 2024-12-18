@@ -5,28 +5,27 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
+import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(BackgroundRenderer.class)
-public class BackgroundRendererMixin {
-    @Inject(method = "applyFog", at = @At("TAIL"))
-    private static void onApplyFog(Camera camera, BackgroundRenderer.FogType fogType, float viewDistance, boolean thickFog, float tickDelta, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noFog() || Modules.get().isActive(Xray.class)) {
-            if (fogType == BackgroundRenderer.FogType.FOG_TERRAIN) {
-                RenderSystem.setShaderFogStart(viewDistance * 4);
-                RenderSystem.setShaderFogEnd(viewDistance * 4.25f);
-            }
+public abstract class BackgroundRendererMixin {
+    @ModifyArgs(method = "applyFog", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Fog;<init>(FFLnet/minecraft/client/render/FogShape;FFFF)V"))
+    private static void modifyFogDistance(Args args, Camera camera, BackgroundRenderer.FogType fogType, Vector4f color, float viewDistance, boolean thickenFog, float tickDelta) {
+        if (fogType == BackgroundRenderer.FogType.FOG_TERRAIN && Modules.get().get(NoRender.class).noFog() || Modules.get().isActive(Xray.class)) {
+            args.set(0, viewDistance * 4);
+            args.set(1, viewDistance * 4.25f);
         }
     }
 

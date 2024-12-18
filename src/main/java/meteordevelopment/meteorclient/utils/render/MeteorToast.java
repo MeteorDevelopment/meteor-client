@@ -7,8 +7,9 @@ package meteordevelopment.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.toast.Toast;
@@ -28,12 +29,13 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class MeteorToast implements Toast {
     public static final int TITLE_COLOR = Color.fromRGBA(145, 61, 226, 255);
     public static final int TEXT_COLOR = Color.fromRGBA(220, 220, 220, 255);
-    private static final Identifier TEXTURE = new Identifier("textures/gui/sprites/toast/advancement.png");
+    private static final Identifier TEXTURE = Identifier.of("textures/gui/sprites/toast/advancement.png");
 
     private ItemStack icon;
     private Text title, text;
     private boolean justUpdated = true, playedSound;
     private long start, duration;
+    private Toast.Visibility visibility = Visibility.HIDE;
 
     public MeteorToast(@Nullable Item item, @NotNull String title, @Nullable String text, long duration) {
         this.icon = item != null ? item.getDefaultStack() : null;
@@ -50,16 +52,30 @@ public class MeteorToast implements Toast {
     }
 
     @Override
-    public Visibility draw(DrawContext context, ToastManager toastManager, long currentTime) {
+    public Visibility getVisibility() {
+        return this.visibility;
+    }
+
+    @Override
+    public void update(ToastManager manager, long time) {
         if (justUpdated) {
-            start = currentTime;
+            start = time;
             justUpdated = false;
         }
 
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        visibility = time - start >= duration ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
+
+        if (!playedSound) {
+            mc.getSoundManager().play(getSound());
+            playedSound = true;
+        }
+    }
+
+    @Override
+    public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
-        context.drawTexture(TEXTURE, 0, 0, 0, 0, getWidth(), getHeight());
+        context.drawGuiTexture(RenderLayer::getGuiTextured, TEXTURE, 0, 0, getWidth(), getHeight());
 
         int x = icon != null ? 28 : 12;
         int titleY = 12;
@@ -72,13 +88,6 @@ public class MeteorToast implements Toast {
         context.drawText(mc.textRenderer, title, x, titleY, TITLE_COLOR, false);
 
         if (icon != null) context.drawItem(icon, 8, 8);
-
-        if (!playedSound) {
-            mc.getSoundManager().play(getSound());
-            playedSound = true;
-        }
-
-        return currentTime - start >= duration ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
     }
 
     public void setIcon(@Nullable Item item) {

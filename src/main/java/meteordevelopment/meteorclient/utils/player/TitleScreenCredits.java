@@ -28,12 +28,14 @@ import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public abstract class TitleScreenCredits {
+public class TitleScreenCredits {
     private static final List<Credit> credits = new ArrayList<>();
+
+    private TitleScreenCredits() {
+    }
 
     private static void init() {
         // Add addons
-        add(MeteorClient.ADDON);
         for (MeteorAddon addon : AddonManager.ADDONS) add(addon);
 
         // Sort by width (Meteor always first)
@@ -46,6 +48,7 @@ public abstract class TitleScreenCredits {
 
                 GithubRepo repo = credit.addon.getRepo();
                 Http.Request request = Http.get("https://api.github.com/repos/%s/branches/%s".formatted(repo.getOwnerName(), repo.branch()));
+                request.exceptionHandler(e -> MeteorClient.LOG.error("Could not fetch repository information for addon '%s'.".formatted(credit.addon.name), e));
                 repo.authenticate(request);
                 HttpResponse<Response> res = request.sendJsonResponse(Response.class);
 
@@ -60,12 +63,8 @@ public abstract class TitleScreenCredits {
                             MeteorClient.LOG.info("See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens");
                         }
                     }
-                    case Http.FORBIDDEN -> {
-                        MeteorClient.LOG.warn("Could not fetch updates for addon '%s': Rate-limited by GitHub.".formatted(credit.addon.name));
-                    }
-                    case Http.NOT_FOUND -> {
-                        MeteorClient.LOG.warn("Could not fetch updates for addon '%s': GitHub repository '%s' not found.".formatted(credit.addon.name, repo.getOwnerName()));
-                    }
+                    case Http.FORBIDDEN -> MeteorClient.LOG.warn("Could not fetch updates for addon '{}': Rate-limited by GitHub.", credit.addon.name);
+                    case Http.NOT_FOUND -> MeteorClient.LOG.warn("Could not fetch updates for addon '{}': GitHub repository '{}' not found.", credit.addon.name, repo.getOwnerName());
                     case Http.SUCCESS -> {
                         if (!credit.addon.getCommit().equals(res.body().commit.sha)) {
                             synchronized (credit.text) {

@@ -67,7 +67,7 @@ public class InventorySorter {
         List<MySlot> slots = new ArrayList<>();
 
         for (Slot slot : screen.getScreenHandler().slots) {
-            if (getInvPart(slot) == originInvPart) slots.add(new MySlot(((ISlot) slot).getId(), slot.getStack()));
+            if (getInvPart(slot) == originInvPart) slots.add(new MySlot(((ISlot) slot).meteor$getId(), slot.getStack()));
         }
 
         slots.sort(Comparator.comparingInt(value -> value.id));
@@ -173,9 +173,9 @@ public class InventorySorter {
     }
 
     private InvPart getInvPart(Slot slot) {
-        int i = ((ISlot) slot).getIndex();
+        int i = ((ISlot) slot).meteor$getIndex();
 
-        if (slot.inventory instanceof PlayerInventory && (!(screen instanceof CreativeInventoryScreen) || ((ISlot) slot).getId() > 8)) {
+        if (slot.inventory instanceof PlayerInventory && (!(screen instanceof CreativeInventoryScreen) || ((ISlot) slot).meteor$getId() > 8)) {
             if (SlotUtils.isHotbar(i)) return InvPart.Hotbar;
             else if (SlotUtils.isMain(i)) return InvPart.Player;
         }
@@ -207,8 +207,8 @@ public class InventorySorter {
         private final List<Pair<ItemStack, List<MySlot>>> map = new ArrayList<>();
 
         public List<MySlot> get(ItemStack itemStack) {
-            for (var entry : map) {
-                if (areEqual(itemStack, entry.getLeft())) {
+            for (Pair<ItemStack, List<MySlot>> entry : map) {
+                if (ItemStack.areItemsEqual(itemStack, entry.getLeft())) {
                     return entry.getRight();
                 }
             }
@@ -216,12 +216,6 @@ public class InventorySorter {
             List<MySlot> list = new ArrayList<>();
             map.add(new Pair<>(itemStack, list));
             return list;
-        }
-
-        private boolean areEqual(ItemStack i1, ItemStack i2) {
-            if (!i1.isOf(i2.getItem()) || (i1.getNbt() == null && i2.getNbt() != null)) return false;
-
-            return i1.getNbt() == null || i1.getNbt().equals(i2.getNbt());
         }
     }
 

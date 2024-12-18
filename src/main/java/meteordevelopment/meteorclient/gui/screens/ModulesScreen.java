@@ -32,7 +32,7 @@ public class ModulesScreen extends TabScreen {
     private WCategoryController controller;
 
     public ModulesScreen(GuiTheme theme) {
-        super(theme, Tabs.get().get(0));
+        super(theme, Tabs.get().getFirst());
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ModulesScreen extends TabScreen {
             // Titles
             Set<Module> modules = Modules.get().searchTitles(text);
 
-            if (modules.size() > 0) {
+            if (!modules.isEmpty()) {
                 WSection section = w.add(theme.section("Modules")).expandX().widget();
                 section.spacing = 0;
 
@@ -97,7 +97,7 @@ public class ModulesScreen extends TabScreen {
             // Settings
             modules = Modules.get().searchSettingTitles(text);
 
-            if (modules.size() > 0) {
+            if (!modules.isEmpty()) {
                 WSection section = w.add(theme.section("Settings")).expandX().widget();
                 section.spacing = 0;
 

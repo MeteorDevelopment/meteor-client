@@ -38,6 +38,9 @@ public class Rotations {
     private static boolean sentLastRotation;
     public static boolean rotating = false;
 
+    private Rotations() {
+    }
+
     @PreInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Rotations.class);
@@ -233,7 +236,7 @@ public class Rotations {
         }
 
         public void sendPacket() {
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround((float) yaw, (float) pitch, mc.player.isOnGround()));
+            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround((float) yaw, (float) pitch, mc.player.isOnGround(), mc.player.horizontalCollision));
             runCallback();
         }
 

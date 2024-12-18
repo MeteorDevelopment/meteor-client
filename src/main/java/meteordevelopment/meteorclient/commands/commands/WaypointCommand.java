@@ -19,9 +19,6 @@ import net.minecraft.command.argument.Vec3ArgumentType;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class WaypointCommand extends Command {
     public WaypointCommand() {
         super("waypoint", "Manages waypoints.", "wp");
@@ -30,7 +27,7 @@ public class WaypointCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("list").executes(context -> {
-            if (Waypoints.get().waypoints.isEmpty()) error("No created waypoints.");
+            if (Waypoints.get().isEmpty()) error("No created waypoints.");
             else {
                 info(Formatting.WHITE + "Created Waypoints:");
                 for (Waypoint waypoint : Waypoints.get()) {
@@ -87,7 +84,7 @@ public class WaypointCommand extends Command {
     private int addWaypoint(CommandContext<CommandSource> context, boolean withCoords) {
         if (mc.player == null) return -1;
 
-        BlockPos pos = withCoords ? context.getArgument("pos", PosArgument.class).toAbsoluteBlockPos(mc.player.getCommandSource()) : mc.player.getBlockPos().up(2);
+        BlockPos pos = withCoords ? context.getArgument("pos", PosArgument.class).toAbsoluteBlockPos(mc.player.getCommandSource(mc.getServer().getOverworld())) : mc.player.getBlockPos().up(2);
         Waypoint waypoint = new Waypoint.Builder()
             .name(StringArgumentType.getString(context, "waypoint"))
             .pos(pos)

@@ -77,7 +77,7 @@ public class BoatFly extends Module {
         else velY -= fallSpeed.get() / 20;
 
         // Apply velocity
-        ((IVec3d) event.boat.getVelocity()).set(velX, velY, velZ);
+        ((IVec3d) event.boat.getVelocity()).meteor$set(velX, velY, velZ);
     }
 
     @EventHandler

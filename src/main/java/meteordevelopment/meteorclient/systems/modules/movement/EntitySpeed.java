@@ -59,6 +59,6 @@ public class EntitySpeed extends Module {
 
         // Set horizontal velocity
         Vec3d vel = PlayerUtils.getHorizontalVelocity(speed.get());
-        ((IVec3d) event.movement).setXZ(vel.x, vel.z);
+        ((IVec3d) event.movement).meteor$setXZ(vel.x, vel.z);
     }
 }

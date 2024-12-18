@@ -9,17 +9,17 @@ import net.minecraft.util.math.Vec3i;
 import org.joml.Vector3d;
 
 public interface IVec3d {
-    void set(double x, double y, double z);
+    void meteor$set(double x, double y, double z);
 
-    default void set(Vec3i vec) {
-        set(vec.getX(), vec.getY(), vec.getZ());
+    default void meteor$set(Vec3i vec) {
+        meteor$set(vec.getX(), vec.getY(), vec.getZ());
     }
 
-    default void set(Vector3d vec) {
-        set(vec.x, vec.y, vec.z);
+    default void meteor$set(Vector3d vec) {
+        meteor$set(vec.x, vec.y, vec.z);
     }
 
-    void setXZ(double x, double z);
+    void meteor$setXZ(double x, double z);
 
-    void setY(double y);
+    void meteor$setY(double y);
 }

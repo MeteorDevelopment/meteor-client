@@ -6,6 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.addons.AddonManager;
+import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Settings;
@@ -31,8 +33,10 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public final String name;
     public final String title;
     public final String description;
+    public final String[] aliases;
     public final Color color;
 
+    public final MeteorAddon addon;
     public final Settings settings = new Settings();
 
     private boolean active;
@@ -46,13 +50,30 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public boolean chatFeedback = true;
     public boolean favorite = false;
 
-    public Module(Category category, String name, String description) {
+    public Module(Category category, String name, String description, String... aliases) {
+        if (name.contains(" ")) MeteorClient.LOG.warn("Module '{}' contains invalid characters in its name making it incompatible with Meteor Client commands.", name);
+
         this.mc = MinecraftClient.getInstance();
         this.category = category;
         this.name = name;
         this.title = Utils.nameToTitle(name);
         this.description = description;
+        this.aliases = aliases;
         this.color = Color.fromHsv(Utils.random(0.0, 360.0), 0.35, 1);
+
+        String classname = this.getClass().getName();
+        for (MeteorAddon addon : AddonManager.ADDONS) {
+            if (classname.startsWith(addon.getPackage())) {
+                this.addon = addon;
+                return;
+            }
+        }
+
+        this.addon = null;
+    }
+
+    public Module(Category category, String name, String desc) {
+        this(category, name, desc, new String[0]);
     }
 
     public WWidget getWidget(GuiTheme theme) {
@@ -131,7 +152,6 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         tag.putBoolean("chatFeedback", chatFeedback);
         tag.putBoolean("favorite", favorite);
         tag.put("settings", settings.toTag());
-
         tag.putBoolean("active", active);
 
         return tag;
@@ -140,9 +160,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     @Override
     public Module fromTag(NbtCompound tag) {
         // General
-        if (tag.contains("key")) keybind.set(true, tag.getInt("key"));
-        else keybind.fromTag(tag.getCompound("keybind"));
-
+        keybind.fromTag(tag.getCompound("keybind"));
         toggleOnBindRelease = tag.getBoolean("toggleOnKeyRelease");
         chatFeedback = !tag.contains("chatFeedback") || tag.getBoolean("chatFeedback");
         favorite = tag.getBoolean("favorite");

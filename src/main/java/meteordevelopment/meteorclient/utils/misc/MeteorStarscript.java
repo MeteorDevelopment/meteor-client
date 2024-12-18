@@ -45,6 +45,7 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
@@ -147,6 +148,8 @@ public class MeteorStarscript {
             .set("dimension", () -> Value.string(PlayerUtils.getDimension().name()))
             .set("opposite_dimension", () -> Value.string(PlayerUtils.getDimension().opposite().name()))
 
+            .set("gamemode", () -> PlayerUtils.getGameMode() != null ? Value.string(StringUtils.capitalize(PlayerUtils.getGameMode().getName())) : Value.null_())
+
             .set("pos", new ValueMap()
                 .set("_toString", () -> posString(false, false))
                 .set("x", () -> Value.number(mc.player != null ? mc.player.getX() : 0))
@@ -228,6 +231,7 @@ public class MeteorStarscript {
     public static Section runSection(Script script) {
         return runSection(script, new StringBuilder());
     }
+
     public static String run(Script script) {
         return run(script, new StringBuilder());
     }
@@ -284,10 +288,10 @@ public class MeteorStarscript {
 
         Identifier name = popIdentifier(ss, "First argument to player.has_potion_effect() needs to a string.");
 
-        StatusEffect effect = Registries.STATUS_EFFECT.get(name);
-        if (effect == null) return Value.bool(false);
+        Optional<RegistryEntry.Reference<StatusEffect>> effect = Registries.STATUS_EFFECT.getEntry(name);
+        if (effect.isEmpty()) return Value.bool(false);
 
-        StatusEffectInstance effectInstance = mc.player.getStatusEffect(effect);
+        StatusEffectInstance effectInstance = mc.player.getStatusEffect(effect.get());
         return Value.bool(effectInstance != null);
     }
 
@@ -297,10 +301,10 @@ public class MeteorStarscript {
 
         Identifier name = popIdentifier(ss, "First argument to player.get_potion_effect() needs to a string.");
 
-        StatusEffect effect = Registries.STATUS_EFFECT.get(name);
-        if (effect == null) return Value.null_();
+        Optional<RegistryEntry.Reference<StatusEffect>> effect = Registries.STATUS_EFFECT.getEntry(name);
+        if (effect.isEmpty()) return Value.null_();
 
-        StatusEffectInstance effectInstance = mc.player.getStatusEffect(effect);
+        StatusEffectInstance effectInstance = mc.player.getStatusEffect(effect.get());
         if (effectInstance == null) return Value.null_();
 
         return wrap(effectInstance);
@@ -364,17 +368,13 @@ public class MeteorStarscript {
             ss.error("Unable to get setting %s for module %s for meteor.get_module_setting()", settingName, moduleName);
         }
         var value = setting.get();
-        if (value instanceof Double) {
-            return Value.number((Double) value);
-        } else if (value instanceof Integer) {
-            return Value.number((Integer) value);
-        } else if (value instanceof Boolean) {
-            return Value.bool((Boolean) value);
-        } else if (value instanceof List) {
-            return Value.number(((List<?>) value).size());
-        } else {
-            return Value.string(value.toString());
-        }
+        return switch (value) {
+            case Double d -> Value.number(d);
+            case Integer i -> Value.number(i);
+            case Boolean b -> Value.bool(b);
+            case List<?> list -> Value.number(list.size());
+            case null, default -> Value.string(value.toString());
+        };
     }
 
     private static Value isModuleActive(Starscript ss, int argCount) {
@@ -388,6 +388,7 @@ public class MeteorStarscript {
         if (argCount != 1) ss.error("player.get_item() requires 1 argument, got %d.", argCount);
 
         int i = (int) ss.popNumber("First argument to player.get_item() needs to be a number.");
+        if (i < 0) ss.error("First argument to player.get_item() needs to be a non-negative integer.", i);
         return mc.player != null ? wrap(mc.player.getInventory().getStack(i)) : Value.null_();
     }
 
@@ -508,10 +509,13 @@ public class MeteorStarscript {
         if (mc.player == null || mc.world == null) return Value.string("");
 
         BP.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
-        Identifier id = mc.world.getRegistryManager().get(RegistryKeys.BIOME).getId(mc.world.getBiome(BP).value());
-        if (id == null) return Value.string("Unknown");
-
-        return Value.string(Arrays.stream(id.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" ")));
+        return mc.world.getRegistryManager().getOptional(RegistryKeys.BIOME)
+            .map(biomeRegistry -> {
+                Identifier id = biomeRegistry.getId(mc.world.getBiome(BP).value());
+                if (id == null) return Value.string("Unknown");
+                return Value.string(Arrays.stream(id.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" ")));
+            })
+            .orElse(Value.string("Unknown"));
     }
 
     private static Value handOrOffhand() {
@@ -585,7 +589,7 @@ public class MeteorStarscript {
 
     public static Identifier popIdentifier(Starscript ss, String errorMessage) {
         try {
-            return new Identifier(ss.popString(errorMessage));
+            return Identifier.of(ss.popString(errorMessage));
         }
         catch (InvalidIdentifierException e) {
             ss.error(e.getMessage());

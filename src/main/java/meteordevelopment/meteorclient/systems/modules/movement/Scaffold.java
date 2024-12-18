@@ -220,7 +220,7 @@ public class Scaffold extends Module {
             List<BlockPos> blockPosArray = new ArrayList<>();
             for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
                 for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
-                    for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getTopY(), mc.player.getY() + placeRange.get()); y++) {
+                    for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getHeight(), mc.player.getY() + placeRange.get()); y++) {
                         bp.set(x, y, z);
                         if (BlockUtils.getPlaceSide(bp) == null) continue;
                         if (!BlockUtils.canPlace(bp)) continue;
@@ -233,7 +233,7 @@ public class Scaffold extends Module {
 
             blockPosArray.sort(Comparator.comparingDouble((blockPos) -> blockPos.getSquaredDistance(targetBlock)));
 
-            bp.set(blockPosArray.get(0));
+            bp.set(blockPosArray.getFirst());
         }
 
         if (airPlace.get()) {

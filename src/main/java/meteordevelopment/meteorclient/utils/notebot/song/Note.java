@@ -5,25 +5,25 @@
 
 package meteordevelopment.meteorclient.utils.notebot.song;
 
-import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.enums.NoteBlockInstrument;
 
 import java.util.Objects;
 
 public class Note {
 
-    private Instrument instrument;
+    private NoteBlockInstrument instrument;
     private int noteLevel;
 
-    public Note(Instrument instrument, int noteLevel) {
+    public Note(NoteBlockInstrument instrument, int noteLevel) {
         this.instrument = instrument;
         this.noteLevel = noteLevel;
     }
 
-    public Instrument getInstrument() {
+    public NoteBlockInstrument getInstrument() {
         return this.instrument;
     }
 
-    public void setInstrument(Instrument instrument) {
+    public void setInstrument(NoteBlockInstrument instrument) {
         this.instrument = instrument;
     }
 

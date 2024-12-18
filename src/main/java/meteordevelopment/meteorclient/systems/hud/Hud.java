@@ -94,6 +94,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     );
 
     // Keybindings
+    @SuppressWarnings("unused")
     private final Setting<Keybind> keybind = sgKeybind.add(new KeybindSetting.Builder()
         .name("bind")
         .defaultValue(Keybind.none())
@@ -207,12 +208,13 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (Utils.isLoading()) return;
-        if (!(active || HudEditorScreen.isOpen())) return;
 
         if (resetToDefaultElements) {
             resetToDefaultElementsImpl();
             resetToDefaultElements = false;
         }
+
+        if (!(active || HudEditorScreen.isOpen())) return;
 
         for (HudElement element : elements) {
             if (element.isActive()) element.tick(HudRenderer.INSTANCE);

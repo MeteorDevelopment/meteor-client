@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IBox;
+import meteordevelopment.meteorclient.mixininterface.IMiningToolItem;
 import meteordevelopment.meteorclient.mixininterface.IRaycastContext;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -694,12 +695,12 @@ public class CrystalAura extends Module {
         }
 
         // Set player eye pos
-        ((IVec3d) playerEyePos).set(mc.player.getPos().x, mc.player.getPos().y + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getPos().z);
+        ((IVec3d) playerEyePos).meteor$set(mc.player.getPos().x, mc.player.getPos().y + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getPos().z);
 
         // Find targets, break and place
         findTargets();
 
-        if (targets.size() > 0) {
+        if (!targets.isEmpty()) {
             if (!didRotateThisTick) doBreak();
             if (!didRotateThisTick) doPlace();
         }
@@ -742,7 +743,7 @@ public class CrystalAura extends Module {
         didRotateThisTick = true;
         isLastRotationPos = isPos;
 
-        if (isPos) ((IVec3d) lastRotationPos).set(pos.x, pos.y, pos.z);
+        if (isPos) ((IVec3d) lastRotationPos).meteor$set(pos.x, pos.y, pos.z);
         else {
             lastYaw = yaw;
             lastPitch = pitch;
@@ -861,10 +862,10 @@ public class CrystalAura extends Module {
     }
 
     private boolean isValidWeaknessItem(ItemStack itemStack) {
-        if (!(itemStack.getItem() instanceof ToolItem) || itemStack.getItem() instanceof HoeItem) return false;
+        if (!(itemStack.getItem() instanceof IMiningToolItem) || itemStack.getItem() instanceof HoeItem) return false;
 
-        ToolMaterial material = ((ToolItem) itemStack.getItem()).getMaterial();
-        return material == ToolMaterials.DIAMOND || material == ToolMaterials.NETHERITE;
+        ToolMaterial material = ((IMiningToolItem) itemStack.getItem()).meteor$getMaterial();
+        return material == ToolMaterial.DIAMOND || material == ToolMaterial.NETHERITE;
     }
 
     private void attackCrystal(Entity entity) {
@@ -933,7 +934,7 @@ public class CrystalAura extends Module {
             }
 
             // Check range
-            ((IVec3d) vec3d).set(bp.getX() + 0.5, bp.getY() + 1, bp.getZ() + 0.5);
+            ((IVec3d) vec3d).meteor$set(bp.getX() + 0.5, bp.getY() + 1, bp.getZ() + 0.5);
             blockPos.set(bp).move(0, 1, 0);
             if (isOutOfRange(vec3d, blockPos, true)) return;
 
@@ -953,7 +954,7 @@ public class CrystalAura extends Module {
             double x = bp.getX();
             double y = bp.getY() + 1;
             double z = bp.getZ();
-            ((IBox) box).set(x, y, z, x + 1, y + (placement112.get() ? 1 : 2), z + 1);
+            ((IBox) box).meteor$set(x, y, z, x + 1, y + (placement112.get() ? 1 : 2), z + 1);
 
             if (intersectsWithEntities(box)) return;
 
@@ -972,7 +973,7 @@ public class CrystalAura extends Module {
 
             BlockHitResult result = getPlaceInfo(bestBlockPos.get());
 
-            ((IVec3d) vec3d).set(
+            ((IVec3d) vec3d).meteor$set(
                     result.getBlockPos().getX() + 0.5 + result.getSide().getVector().getX() * 1.0 / 2.0,
                     result.getBlockPos().getY() + 0.5 + result.getSide().getVector().getY() * 1.0 / 2.0,
                     result.getBlockPos().getZ() + 0.5 + result.getSide().getVector().getZ() * 1.0 / 2.0
@@ -997,16 +998,16 @@ public class CrystalAura extends Module {
     }
 
     private BlockHitResult getPlaceInfo(BlockPos blockPos) {
-        ((IVec3d) vec3d).set(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
+        ((IVec3d) vec3d).meteor$set(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
 
         for (Direction side : Direction.values()) {
-            ((IVec3d) vec3dRayTraceEnd).set(
+            ((IVec3d) vec3dRayTraceEnd).meteor$set(
                     blockPos.getX() + 0.5 + side.getVector().getX() * 0.5,
                     blockPos.getY() + 0.5 + side.getVector().getY() * 0.5,
                     blockPos.getZ() + 0.5 + side.getVector().getZ() * 0.5
             );
 
-            ((IRaycastContext) raycastContext).set(vec3d, vec3dRayTraceEnd, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+            ((IRaycastContext) raycastContext).meteor$set(vec3d, vec3dRayTraceEnd, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
             BlockHitResult result = mc.world.raycast(raycastContext);
 
             if (result != null && result.getType() == HitResult.Type.BLOCK && result.getBlockPos().equals(blockPos)) {
@@ -1149,7 +1150,7 @@ public class CrystalAura extends Module {
     }
 
     private boolean isOutOfRange(Vec3d vec3d, BlockPos blockPos, boolean place) {
-        ((IRaycastContext) raycastContext).set(playerEyePos, vec3d, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+        ((IRaycastContext) raycastContext).meteor$set(playerEyePos, vec3d, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
 
         BlockHitResult result = mc.world.raycast(raycastContext);
 
@@ -1265,13 +1266,13 @@ public class CrystalAura extends Module {
 
                 if (renderBoxOne == null) renderBoxOne = new Box(placeRenderPos);
                 if (renderBoxTwo == null) renderBoxTwo = new Box(placeRenderPos);
-                else ((IBox) renderBoxTwo).set(placeRenderPos);
+                else ((IBox) renderBoxTwo).meteor$set(placeRenderPos);
 
                 double offsetX = (renderBoxTwo.minX - renderBoxOne.minX) / smoothness.get();
                 double offsetY = (renderBoxTwo.minY - renderBoxOne.minY) / smoothness.get();
                 double offsetZ = (renderBoxTwo.minZ - renderBoxOne.minZ) / smoothness.get();
 
-                ((IBox) renderBoxOne).set(
+                ((IBox) renderBoxOne).meteor$set(
                     renderBoxOne.minX + offsetX,
                     renderBoxOne.minY + offsetY,
                     renderBoxOne.minZ + offsetZ,

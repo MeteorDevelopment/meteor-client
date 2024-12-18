@@ -146,7 +146,7 @@ public class StashFinder extends Module {
         WButton clear = list.add(theme.button("Clear")).widget();
 
         WTable table = new WTable();
-        if (chunks.size() > 0) list.add(table);
+        if (!chunks.isEmpty()) list.add(table);
 
         clear.action = () -> {
             chunks.clear();

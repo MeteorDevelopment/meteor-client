@@ -23,11 +23,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.AbstractSkullBlock;
-import net.minecraft.block.CarvedPumpkinBlock;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Equipment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
@@ -36,7 +32,6 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -141,7 +136,7 @@ public class InventoryTweaks extends Module {
     public final Setting<List<ScreenHandlerType<?>>> stealScreens = sgStealDump.add(new ScreenHandlerListSetting.Builder()
         .name("steal-screens")
         .description("Select the screens to display buttons and auto steal.")
-        .defaultValue(Arrays.asList(ScreenHandlerType.GENERIC_9X3, ScreenHandlerType.GENERIC_9X6))
+        .defaultValue(List.of(ScreenHandlerType.GENERIC_9X3, ScreenHandlerType.GENERIC_9X6))
         .build()
     );
 
@@ -263,7 +258,7 @@ public class InventoryTweaks extends Module {
     private void onKey(KeyEvent event) {
         if (event.action != KeyAction.Press) return;
 
-        if (sortingKey.get().matches(true, event.key)) {
+        if (sortingKey.get().matches(true, event.key, event.modifiers)) {
             if (sort()) event.cancel();
         }
     }
@@ -272,7 +267,7 @@ public class InventoryTweaks extends Module {
     private void onMouseButton(MouseButtonEvent event) {
         if (event.action != KeyAction.Press) return;
 
-        if (sortingKey.get().matches(false, event.button)) {
+        if (sortingKey.get().matches(false, event.button, 0)) {
             if (sort()) event.cancel();
         }
     }
@@ -292,14 +287,6 @@ public class InventoryTweaks extends Module {
 
         sorter = new InventorySorter(screen, focusedSlot);
         return true;
-    }
-
-    private boolean isWearable(ItemStack itemStack) {
-        Item item = itemStack.getItem();
-
-        if (item instanceof Equipment) return true;
-        return item instanceof BlockItem blockItem &&
-            (blockItem.getBlock() instanceof AbstractSkullBlock || blockItem.getBlock() instanceof CarvedPumpkinBlock);
     }
 
     @EventHandler

@@ -27,14 +27,14 @@ public class MeshVertexConsumerProvider implements IVertexConsumerProvider {
     }
 
     @Override
-    public void setOffset(double offsetX, double offsetY, double offsetZ) {
+    public void setOffset(int offsetX, int offsetY, int offsetZ) {
         vertexConsumer.setOffset(offsetX, offsetY, offsetZ);
     }
 
     public static class MeshVertexConsumer implements VertexConsumer {
         private final Mesh mesh;
 
-        private double offsetX, offsetY, offsetZ;
+        private int offsetX, offsetY, offsetZ;
 
         private final double[] xs = new double[4];
         private final double[] ys = new double[4];
@@ -47,17 +47,28 @@ public class MeshVertexConsumerProvider implements IVertexConsumerProvider {
             this.mesh = mesh;
         }
 
-        public void setOffset(double offsetX, double offsetY, double offsetZ) {
+        public void setOffset(int offsetX, int offsetY, int offsetZ) {
             this.offsetX = offsetX;
             this.offsetY = offsetY;
             this.offsetZ = offsetZ;
         }
 
         @Override
-        public VertexConsumer vertex(double x, double y, double z) {
-            xs[i] = offsetX + x;
-            ys[i] = offsetY + y;
-            zs[i] = offsetZ + z;
+        public VertexConsumer vertex(float x, float y, float z) {
+            xs[i] = (double) offsetX + x;
+            ys[i] = (double) offsetY + y;
+            zs[i] = (double) offsetZ + z;
+
+            if (++i >= 4) {
+                mesh.quad(
+                    mesh.vec3(xs[0], ys[0], zs[0]).color(color).next(),
+                    mesh.vec3(xs[1], ys[1], zs[1]).color(color).next(),
+                    mesh.vec3(xs[2], ys[2], zs[2]).color(color).next(),
+                    mesh.vec3(xs[3], ys[3], zs[3]).color(color).next()
+                );
+
+                i = 0;
+            }
 
             return this;
         }
@@ -87,26 +98,8 @@ public class MeshVertexConsumerProvider implements IVertexConsumerProvider {
             return null;
         }
 
-        @Override
-        public void next() {
-            if (++i >= 4) {
-                mesh.quad(
-                    mesh.vec3(xs[0], ys[0], zs[0]).color(color).next(),
-                    mesh.vec3(xs[1], ys[1], zs[1]).color(color).next(),
-                    mesh.vec3(xs[2], ys[2], zs[2]).color(color).next(),
-                    mesh.vec3(xs[3], ys[3], zs[3]).color(color).next()
-                );
-
-                i = 0;
-            }
-        }
-
-        @Override
         public void fixedColor(int red, int green, int blue, int alpha) {
             color.set(red, green, blue, alpha);
         }
-
-        @Override
-        public void unfixColor() {}
     }
 }

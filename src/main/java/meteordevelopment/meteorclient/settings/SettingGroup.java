@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -44,7 +45,7 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
     }
 
     @Override
-    public Iterator<Setting<?>> iterator() {
+    public @NotNull Iterator<Setting<?>> iterator() {
         return settings.iterator();
     }
 

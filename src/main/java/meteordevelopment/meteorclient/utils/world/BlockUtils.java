@@ -8,16 +8,20 @@ package meteordevelopment.meteorclient.utils.world;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.player.InstaMine;
+import meteordevelopment.meteorclient.systems.modules.player.InstantRebreak;
 import meteordevelopment.meteorclient.utils.PreInit;
-import meteordevelopment.meteorclient.utils.player.*;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.BlockItem;
@@ -40,6 +44,9 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class BlockUtils {
     public static boolean breaking;
     private static boolean breakingThisTick;
+
+    private BlockUtils() {
+    }
 
     @PreInit
     public static void init() {
@@ -121,17 +128,17 @@ public class BlockUtils {
     }
 
     public static void interact(BlockHitResult blockHitResult, Hand hand, boolean swing) {
-        boolean wasSneaking = mc.player.input.sneaking;
-        mc.player.input.sneaking = false;
+        boolean wasSneaking = mc.player.isSneaking();
+        mc.player.setSneaking(false);
 
         ActionResult result = mc.interactionManager.interactBlock(mc.player, hand, blockHitResult);
 
-        if (result.shouldSwingHand()) {
+        if (result.isAccepted()) {
             if (swing) mc.player.swingHand(hand);
             else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
         }
 
-        mc.player.input.sneaking = wasSneaking;
+        mc.player.setSneaking(wasSneaking);
     }
 
     public static boolean canPlaceBlock(BlockPos blockPos, boolean checkEntities, Block block) {
@@ -232,9 +239,9 @@ public class BlockUtils {
         // Creating new instance of block pos because minecraft assigns the parameter to a field, and we don't want it to change when it has been stored in a field somewhere
         BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
 
-        InstaMine im = Modules.get().get(InstaMine.class);
-        if (im != null && im.isActive() && im.blockPos.equals(pos) && im.shouldMine()) {
-            im.sendPacket();
+        InstantRebreak ir = Modules.get().get(InstantRebreak.class);
+        if (ir != null && ir.isActive() && ir.blockPos.equals(pos) && ir.shouldMine()) {
+            ir.sendPacket();
             return true;
         }
 
@@ -313,7 +320,7 @@ public class BlockUtils {
         if (!topSurface(downState)) {
             if (downState.getCollisionShape(mc.world, down) != VoxelShapes.fullCube())
                 return MobSpawn.Never;
-            if (downState.isTransparent(mc.world, down)) return MobSpawn.Never;
+            if (downState.isTransparent()) return MobSpawn.Never;
         }
 
         if (mc.world.getLightLevel(LightType.BLOCK, blockPos) > spawnLightLimit) return MobSpawn.Never;
@@ -362,13 +369,16 @@ public class BlockUtils {
         }
     }
 
+    /**
+     * @see net.minecraft.entity.player.PlayerEntity#getBlockBreakingSpeed(BlockState)
+     */
     private static double getBlockBreakingSpeed(int slot, BlockState block) {
         double speed = mc.player.getInventory().main.get(slot).getMiningSpeedMultiplier(block);
 
         if (speed > 1) {
             ItemStack tool = mc.player.getInventory().getStack(slot);
 
-            int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, tool);
+            int efficiency = Utils.getEnchantmentLevel(tool, Enchantments.EFFICIENCY);
 
             if (efficiency > 0 && !tool.isEmpty()) speed += efficiency * efficiency + 1;
         }
@@ -388,8 +398,8 @@ public class BlockUtils {
             speed *= k;
         }
 
-        if (mc.player.isSubmergedIn(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(mc.player)) {
-            speed /= 5.0F;
+        if (mc.player.isSubmergedIn(FluidTags.WATER)) {
+            speed *= mc.player.getAttributeValue(EntityAttributes.SUBMERGED_MINING_SPEED);
         }
 
         if (!mc.player.isOnGround()) {

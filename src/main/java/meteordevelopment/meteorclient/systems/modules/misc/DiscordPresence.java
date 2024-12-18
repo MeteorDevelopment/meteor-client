@@ -208,7 +208,7 @@ public class DiscordPresence extends Module {
         if (Utils.canUpdate()) {
             // Line 1
             if (line1Ticks >= line1UpdateDelay.get() || forceUpdate) {
-                if (line1Scripts.size() > 0) {
+                if (!line1Scripts.isEmpty()) {
                     int i = Utils.random(0, line1Scripts.size());
                     if (line1SelectMode.get() == SelectMode.Sequential) {
                         if (line1I >= line1Scripts.size()) line1I = 0;
@@ -225,7 +225,7 @@ public class DiscordPresence extends Module {
 
             // Line 2
             if (line2Ticks >= line2UpdateDelay.get() || forceUpdate) {
-                if (line2Scripts.size() > 0) {
+                if (!line2Scripts.isEmpty()) {
                     int i = Utils.random(0, line2Scripts.size());
                     if (line2SelectMode.get() == SelectMode.Sequential) {
                         if (line2I >= line2Scripts.size()) line2I = 0;

@@ -16,12 +16,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 @Mixin(SimpleOption.class)
-public class SimpleOptionMixin implements ISimpleOption {
+public abstract class SimpleOptionMixin implements ISimpleOption {
     @Shadow Object value;
     @Shadow @Final private Consumer<Object> changeCallback;
 
     @Override
-    public void set(Object value) {
+    public void meteor$set(Object value) {
         if (!MinecraftClient.getInstance().isRunning()) {
             this.value = value;
         } else {

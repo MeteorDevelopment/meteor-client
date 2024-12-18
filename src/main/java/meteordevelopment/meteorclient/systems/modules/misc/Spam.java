@@ -45,7 +45,6 @@ public class Spam extends Module {
         .build()
     );
 
-
     private final Setting<Boolean> disableOnDisconnect = sgGeneral.add(new BoolSetting.Builder()
         .name("disable-on-disconnect")
         .description("Disables spam when you are disconnected from a server.")
@@ -60,10 +59,45 @@ public class Spam extends Module {
         .build()
     );
 
+    private final Setting<Boolean> autoSplitMessages = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-split-messages")
+        .description("Automatically split up large messages after a certain length")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> splitLength = sgGeneral.add(new IntSetting.Builder()
+        .name("split-length")
+        .description("The length after which to split messages in chat")
+        .visible(autoSplitMessages::get)
+        .defaultValue(256)
+        .min(1)
+        .sliderMax(256)
+        .build()
+    );
+
+    private final Setting<Integer> autoSplitDelay = sgGeneral.add(new IntSetting.Builder()
+        .name("split-delay")
+        .description("The delay between split messages in ticks.")
+        .visible(autoSplitMessages::get)
+        .defaultValue(20)
+        .min(0)
+        .sliderMax(200)
+        .build()
+    );
+
     private final Setting<Boolean> bypass = sgGeneral.add(new BoolSetting.Builder()
         .name("bypass")
         .description("Add random text at the end of the message to try to bypass anti spams.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> uppercase = sgGeneral.add(new BoolSetting.Builder()
+        .name("include-uppercase-characters")
+        .description("Whether the bypass text should include uppercase characters.")
+        .visible(bypass::get)
+        .defaultValue(true)
         .build()
     );
 
@@ -76,7 +110,8 @@ public class Spam extends Module {
         .build()
     );
 
-    private int messageI, timer;
+    private int messageI, timer, splitNum;
+    private String text;
 
     public Spam() {
         super(Categories.Misc, "spam", "Spams specified messages in chat.");
@@ -86,6 +121,7 @@ public class Spam extends Module {
     public void onActivate() {
         timer = delay.get();
         messageI = 0;
+        splitNum = 0;
     }
 
     @EventHandler
@@ -105,24 +141,47 @@ public class Spam extends Module {
         if (messages.get().isEmpty()) return;
 
         if (timer <= 0) {
-            int i;
-            if (random.get()) {
-                i = Utils.random(0, messages.get().size());
-            }
-            else {
-                if (messageI >= messages.get().size()) messageI = 0;
-                i = messageI++;
+            if (text == null) {
+                int i;
+                if (random.get()) {
+                    i = Utils.random(0, messages.get().size());
+                } else {
+                    if (messageI >= messages.get().size()) messageI = 0;
+                    i = messageI++;
+                }
+
+                text = messages.get().get(i);
+                if (bypass.get()) {
+                    String bypass = RandomStringUtils.randomAlphabetic(length.get());
+                    if (!uppercase.get()) bypass = bypass.toLowerCase();
+
+                    text += " " + bypass;
+                }
             }
 
-            String text = messages.get().get(i);
-            if (bypass.get()) {
-                text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
-            }
+            if (autoSplitMessages.get() && text.length() > splitLength.get()) {
+                // the number of individual messages the whole text needs to be broken into
+                double length = text.length();
+                int splits = (int) Math.ceil(length / splitLength.get());
 
-            ChatUtils.sendPlayerMsg(text);
-            timer = delay.get();
-        }
-        else {
+                // determine which chunk we need to send
+                int start = splitNum * splitLength.get();
+                int end = Math.min(start + splitLength.get(), text.length());
+                ChatUtils.sendPlayerMsg(text.substring(start, end));
+
+                splitNum = ++splitNum % splits;
+                timer = autoSplitDelay.get();
+                if (splitNum == 0) { // equals zero when all chunks are sent
+                    timer = delay.get();
+                    text = null;
+                }
+            } else {
+                if (text.length() > 256) text = text.substring(0, 256); // prevent kick
+                ChatUtils.sendPlayerMsg(text);
+                timer = delay.get();
+                text = null;
+            }
+        } else {
             timer--;
         }
     }

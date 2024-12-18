@@ -10,8 +10,11 @@ import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.WrittenBookContentComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
+import net.minecraft.text.RawFilteredPair;
 import net.minecraft.util.Hand;
 
 import java.util.ArrayList;
@@ -35,18 +38,19 @@ public class EditBookTitleAndAuthorScreen extends WindowScreen {
         WTable t = add(theme.table()).expandX().widget();
 
         t.add(theme.label("Title"));
-        WTextBox title = t.add(theme.textBox(itemStack.getOrCreateNbt().getString("title"))).minWidth(220).expandX().widget();
+        WTextBox title = t.add(theme.textBox(itemStack.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).title().get(mc.shouldFilterText()))).minWidth(220).expandX().widget();
         t.row();
 
         t.add(theme.label("Author"));
-        WTextBox author = t.add(theme.textBox(itemStack.getNbt().getString("author"))).minWidth(220).expandX().widget();
+        WTextBox author = t.add(theme.textBox(itemStack.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).author())).minWidth(220).expandX().widget();
         t.row();
 
         t.add(theme.button("Done")).expandX().widget().action = () -> {
-            itemStack.getNbt().putString("author", author.get());
-            itemStack.getNbt().putString("title", title.get());
+            WrittenBookContentComponent component = itemStack.get(DataComponentTypes.WRITTEN_BOOK_CONTENT);
+            WrittenBookContentComponent newComponent = new WrittenBookContentComponent(RawFilteredPair.of(title.get()), author.get(), component.generation(), component.pages(), component.resolved());
+            itemStack.set(DataComponentTypes.WRITTEN_BOOK_CONTENT, newComponent);
 
-            BookScreen.Contents contents = new BookScreen.WrittenBookContents(itemStack);
+            BookScreen.Contents contents = new BookScreen.Contents(itemStack.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).getPages(mc.shouldFilterText()));
             List<String> pages = new ArrayList<>(contents.getPageCount());
             for (int i = 0; i < contents.getPageCount(); i++) pages.add(contents.getPage(i).getString());
 

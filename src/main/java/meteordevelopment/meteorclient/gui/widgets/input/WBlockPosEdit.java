@@ -44,8 +44,7 @@ public class WBlockPosEdit extends WHorizontalList {
         if (canUpdate()) {
             WButton click = add(theme.button("Click")).expandX().widget();
             click.action = () -> {
-                String sb = "Click!\n" + "Right click to pick a new position.\n" +
-                    "Left click to cancel.";
+                String sb = "Click!\nRight click to pick a new position.\nLeft click to cancel.";
                 Modules.get().get(Marker.class).info(sb);
 
                 clicking = true;
@@ -83,6 +82,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             set(event.result.getBlockPos());
             newValueCheck();
+
+            clear();
+            init();
 
             clicking = false;
             event.cancel();
@@ -129,7 +131,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             if (textBoxX.get().isEmpty()) set(new BlockPos(0, 0, 0));
             else {
-                set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
+                try {
+                    set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
+                } catch (NumberFormatException ignored) {}
             }
             newValueCheck();
         };
@@ -138,7 +142,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             if (textBoxY.get().isEmpty()) set(new BlockPos(0, 0, 0));
             else {
-                set(new BlockPos(value.getX(), Integer.parseInt(textBoxY.get()), value.getZ()));
+                try {
+                    set(new BlockPos(value.getX(), Integer.parseInt(textBoxY.get()), value.getZ()));
+                } catch (NumberFormatException ignored) {}
             }
             newValueCheck();
         };
@@ -147,7 +153,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             if (textBoxZ.get().isEmpty()) set(new BlockPos(0, 0, 0));
             else {
-                set(new BlockPos(value.getX(), value.getY(), Integer.parseInt(textBoxZ.get())));
+                try {
+                    set(new BlockPos(value.getX(), value.getY(), Integer.parseInt(textBoxZ.get())));
+                } catch (NumberFormatException ignored) {}
             }
             newValueCheck();
         };

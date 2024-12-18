@@ -29,7 +29,7 @@ public class BlockEntityIterator implements Iterator<BlockEntity> {
 
             Map<BlockPos, BlockEntity> blockEntityMap = ((ChunkAccessor) chunks.next()).getBlockEntities();
 
-            if (blockEntityMap.size() > 0) {
+            if (!blockEntityMap.isEmpty()) {
                 blockEntities = blockEntityMap.values().iterator();
                 break;
             }

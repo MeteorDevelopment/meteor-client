@@ -9,11 +9,10 @@ import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.entity.EntityUtils;
+import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EntityGroup;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
@@ -48,10 +47,12 @@ public class AutoWeapon extends Module {
 
     @EventHandler
     private void onAttack(AttackEntityEvent event) {
-        InvUtils.swap(getBestWeapon(EntityUtils.getGroup(event.entity)), false);
+        if (event.entity instanceof LivingEntity livingEntity) {
+            InvUtils.swap(getBestWeapon(livingEntity), false);
+        }
     }
 
-    private int getBestWeapon(EntityGroup group) {
+    private int getBestWeapon(LivingEntity target) {
         int slotS = mc.player.getInventory().selectedSlot;
         int slotA = mc.player.getInventory().selectedSlot;
         double damageS = 0;
@@ -60,16 +61,16 @@ public class AutoWeapon extends Module {
         double currentDamageA;
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.getItem() instanceof SwordItem swordItem
+            if (stack.getItem() instanceof SwordItem
                 && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
-                currentDamageS = swordItem.getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(stack, group) + 2;
+                currentDamageS = DamageUtils.getAttackDamage(mc.player, target, stack);
                 if (currentDamageS > damageS) {
                     damageS = currentDamageS;
                     slotS = i;
                 }
-            } else if (stack.getItem() instanceof AxeItem axeItem
+            } else if (stack.getItem() instanceof AxeItem
                 && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
-                currentDamageA = axeItem.getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(stack, group) + 2;
+                currentDamageA = DamageUtils.getAttackDamage(mc.player, target, stack);
                 if (currentDamageA > damageA) {
                     damageA = currentDamageA;
                     slotA = i;

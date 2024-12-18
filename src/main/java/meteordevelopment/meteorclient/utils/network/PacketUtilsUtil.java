@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.network;
 
 import net.minecraft.network.packet.BundlePacket;
+import net.minecraft.network.packet.BundleSplitterPacket;
 import net.minecraft.network.packet.Packet;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
@@ -16,11 +17,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Set;
 
-public abstract class PacketUtilsUtil {
+public class PacketUtilsUtil {
     private static final String packetRegistryClass = """
     private static class PacketRegistry extends SimpleRegistry<Class<? extends Packet<?>>> {
         public PacketRegistry() {
-            super(RegistryKey.ofRegistry(new MeteorIdentifier("packets")), Lifecycle.stable());
+            super(RegistryKey.ofRegistry(MeteorClient.identifier("packets")), Lifecycle.stable());
         }
 
         @Override
@@ -54,18 +55,13 @@ public abstract class PacketUtilsUtil {
         }
 
         @Override
-        public Lifecycle getEntryLifecycle(Class<? extends Packet<?>> object) {
-            return null;
-        }
-
-        @Override
         public Lifecycle getLifecycle() {
             return null;
         }
 
         @Override
         public Set<Identifier> getIds() {
-            return null;
+            return Collections.emptySet();
         }
 
         @Override
@@ -115,40 +111,9 @@ public abstract class PacketUtilsUtil {
         }
 
         @Override
-        public Optional<RegistryEntry.Reference<Class<? extends Packet<?>>>> getEntry(RegistryKey<Class<? extends Packet<?>>> key) {
-            return Optional.empty();
-        }
-
-        @Override
         public Stream<RegistryEntry.Reference<Class<? extends Packet<?>>>> streamEntries() {
             return null;
         }
-
-        @Override
-        public Optional<RegistryEntryList.Named<Class<? extends Packet<?>>>> getEntryList(TagKey<Class<? extends Packet<?>>> tag) {
-            return Optional.empty();
-        }
-
-        @Override
-        public RegistryEntryList.Named<Class<? extends Packet<?>>> getOrCreateEntryList(TagKey<Class<? extends Packet<?>>> tag) {
-            return null;
-        }
-
-        @Override
-        public Stream<Pair<TagKey<Class<? extends Packet<?>>>, RegistryEntryList.Named<Class<? extends Packet<?>>>>> streamTagsAndEntries() {
-            return null;
-        }
-
-        @Override
-        public Stream<TagKey<Class<? extends Packet<?>>>> streamTags() {
-            return null;
-        }
-
-        @Override
-        public void clearTags() {}
-
-        @Override
-        public void populateTags(Map<TagKey<Class<? extends Packet<?>>>, List<RegistryEntry<Class<? extends Packet<?>>>>> tagEntries) {}
 
         @Override
         public Set<RegistryKey<Class<? extends Packet<?>>>> getKeys() {
@@ -156,6 +121,9 @@ public abstract class PacketUtilsUtil {
         }
     }
 """;
+
+    private PacketUtilsUtil() {
+    }
 
     public static void main(String[] args) {
         try {
@@ -183,32 +151,31 @@ public abstract class PacketUtilsUtil {
             writer.write("package meteordevelopment.meteorclient.utils.network;\n\n");
 
             //   Write imports
-            writer.write("import com.mojang.datafixers.util.Pair;\n");
             writer.write("import com.mojang.serialization.Lifecycle;\n");
-            writer.write("import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;\n");
+            writer.write("import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;\n");
+            writer.write("import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;\n");
+            writer.write("import meteordevelopment.meteorclient.MeteorClient;\n");
             writer.write("import net.minecraft.network.packet.Packet;\n");
             writer.write("import net.minecraft.registry.Registry;\n");
             writer.write("import net.minecraft.registry.RegistryKey;\n");
             writer.write("import net.minecraft.registry.SimpleRegistry;\n");
             writer.write("import net.minecraft.registry.entry.RegistryEntry;\n");
-            writer.write("import net.minecraft.registry.entry.RegistryEntryList;\n");
-            writer.write("import net.minecraft.registry.tag.TagKey;\n");
             writer.write("import net.minecraft.util.Identifier;\n");
             writer.write("import net.minecraft.util.math.random.Random;\n");
-            writer.write("import org.jetbrains.annotations.NotNull;\n");
+            writer.write("import org.jetbrains.annotations.NotNull;\n\n");
 
             writer.write("import java.util.*;\n");
             writer.write("import java.util.stream.Stream;\n");
 
             //   Write class
-            writer.write("\npublic abstract class PacketUtils {\n");
+            writer.write("\npublic class PacketUtils {\n");
 
             //     Write fields
             writer.write("    public static final Registry<Class<? extends Packet<?>>> REGISTRY = new PacketRegistry();\n\n");
-            writer.write("    private static final Map<Class<? extends Packet<?>>, String> S2C_PACKETS = new HashMap<>();\n");
-            writer.write("    private static final Map<Class<? extends Packet<?>>, String> C2S_PACKETS = new HashMap<>();\n\n");
-            writer.write("    private static final Map<String, Class<? extends Packet<?>>> S2C_PACKETS_R = new HashMap<>();\n");
-            writer.write("    private static final Map<String, Class<? extends Packet<?>>> C2S_PACKETS_R = new HashMap<>();\n\n");
+            writer.write("    private static final Map<Class<? extends Packet<?>>, String> S2C_PACKETS = new Reference2ObjectOpenHashMap<>();\n");
+            writer.write("    private static final Map<Class<? extends Packet<?>>, String> C2S_PACKETS = new Reference2ObjectOpenHashMap<>();\n\n");
+            writer.write("    private static final Map<String, Class<? extends Packet<?>>> S2C_PACKETS_R = new Object2ReferenceOpenHashMap<>();\n");
+            writer.write("    private static final Map<String, Class<? extends Packet<?>>> C2S_PACKETS_R = new Object2ReferenceOpenHashMap<>();\n\n");
 
             //     Write static block
             writer.write("    static {\n");
@@ -233,7 +200,7 @@ public abstract class PacketUtilsUtil {
             Set<Class<? extends Packet>> s2cPackets = s2c.getSubTypesOf(Packet.class);
 
             for (Class<? extends Packet> s2cPacket : s2cPackets) {
-                if (s2cPacket == BundlePacket.class) continue;
+                if (s2cPacket == BundlePacket.class || s2cPacket == BundleSplitterPacket.class) continue;
                 String name = s2cPacket.getName();
                 String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');
                 String fullName = name.replace('$', '.');
@@ -242,6 +209,9 @@ public abstract class PacketUtilsUtil {
                 writer.write("        S2C_PACKETS_R.put(\"%s\", %s.class);%n".formatted(className, fullName));
             }
 
+            writer.write("    }\n\n");
+
+            writer.write("    private PacketUtils() {\n");
             writer.write("    }\n\n");
 
             //     Write getName method

@@ -5,11 +5,17 @@
 
 package meteordevelopment.meteorclient.utils.entity;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
@@ -17,6 +23,10 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.registry.tag.EntityTypeTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
@@ -31,8 +41,10 @@ import java.util.function.BiFunction;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-@SuppressWarnings("JavadocReference")
 public class DamageUtils {
+    private DamageUtils() {
+    }
+
     // Explosion damage
 
     /**
@@ -62,7 +74,7 @@ public class DamageUtils {
     /**
      * Low level control of parameters without having to reimplement everything, for addon authors who wish to use their
      * own predictions or other systems.
-     * @see net.minecraft.world.explosion.ExplosionBehavior#calculateDamage(Explosion, Entity)
+     * @see net.minecraft.world.explosion.ExplosionBehavior#calculateDamage(Explosion, Entity, float)
      */
     public static float explosionDamage(LivingEntity target, Vec3d targetPos, Box targetBox, Vec3d explosionPos, float power, RaycastFactory raycastFactory) {
         double modDistance = PlayerUtils.distance(targetPos.x, targetPos.y, targetPos.z, explosionPos.x, explosionPos.y, explosionPos.z);
@@ -132,44 +144,95 @@ public class DamageUtils {
      * @see PlayerEntity#attack(Entity)
      */
     public static float getAttackDamage(LivingEntity attacker, LivingEntity target) {
-        float itemDamage = (float) EntityAttributeHelper.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        float itemDamage = (float) attacker.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
+        DamageSource damageSource = attacker instanceof PlayerEntity player ? mc.world.getDamageSources().playerAttack(player) : mc.world.getDamageSources().mobAttack(attacker);
 
+        float damage = modifyAttackDamage(attacker, target, attacker.getWeaponStack(), damageSource, itemDamage);
+        return calculateReductions(damage, target, damageSource);
+    }
+
+    public static float getAttackDamage(LivingEntity attacker, LivingEntity target, ItemStack weapon) {
+        EntityAttributeInstance original = attacker.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
+        EntityAttributeInstance copy = new EntityAttributeInstance(EntityAttributes.ATTACK_DAMAGE, o -> {});
+
+        copy.setBaseValue(original.getBaseValue());
+        for (EntityAttributeModifier modifier : original.getModifiers()) {
+            copy.addTemporaryModifier(modifier);
+        }
+        copy.removeModifier(Item.BASE_ATTACK_DAMAGE_MODIFIER_ID);
+
+        AttributeModifiersComponent attributeModifiers = weapon.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+        if (attributeModifiers != null) {
+            attributeModifiers.applyModifiers(EquipmentSlot.MAINHAND, (entry, modifier) -> {
+                if (entry == EntityAttributes.ATTACK_DAMAGE) copy.updateModifier(modifier);
+            });
+        }
+
+        float itemDamage = (float) copy.getValue();
+        DamageSource damageSource = attacker instanceof PlayerEntity player ? mc.world.getDamageSources().playerAttack(player) : mc.world.getDamageSources().mobAttack(attacker);
+
+        float damage = modifyAttackDamage(attacker, target, weapon, damageSource, itemDamage);
+        return calculateReductions(damage, target, damageSource);
+    }
+
+    private static float modifyAttackDamage(LivingEntity attacker, LivingEntity target, ItemStack weapon, DamageSource damageSource, float damage) {
         // Get enchant damage
-        ItemStack stack = attacker.getStackInHand(attacker.getActiveHand());
-        float enchantDamage = EnchantmentHelper.getAttackDamage(stack, target.getGroup());
+        Object2IntMap<RegistryEntry<Enchantment>> enchantments = new Object2IntOpenHashMap<>();
+        Utils.getEnchantments(weapon, enchantments);
+        float enchantDamage = 0f;
+
+        int sharpness = Utils.getEnchantmentLevel(enchantments, Enchantments.SHARPNESS);
+        if (sharpness > 0) {
+            enchantDamage += 1 + 0.5f * (sharpness - 1);
+        }
+
+        int baneOfArthropods = Utils.getEnchantmentLevel(enchantments, Enchantments.BANE_OF_ARTHROPODS);
+        if (baneOfArthropods > 0 && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS)) {
+            enchantDamage += 2.5f * baneOfArthropods;
+        }
+
+        int impaling = Utils.getEnchantmentLevel(enchantments, Enchantments.IMPALING);
+        if (impaling > 0 && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_IMPALING)) {
+            enchantDamage += 2.5f * impaling;
+        }
+
+        int smite = Utils.getEnchantmentLevel(enchantments, Enchantments.SMITE);
+        if (smite > 0 && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_SMITE)) {
+            enchantDamage += 2.5f * smite;
+        }
 
         // Factor charge
         if (attacker instanceof PlayerEntity playerEntity) {
             float charge = playerEntity.getAttackCooldownProgress(0.5f);
-            itemDamage *= 0.2f + charge * charge * 0.8f;
+            damage *= 0.2f + charge * charge * 0.8f;
             enchantDamage *= charge;
+
+            if (weapon.getItem() instanceof MaceItem item) {
+                float bonusDamage = item.getBonusAttackDamage(target, damage, damageSource);
+                if (bonusDamage > 0f) {
+                    int density = Utils.getEnchantmentLevel(weapon, Enchantments.DENSITY);
+                    if (density > 0) bonusDamage += 0.5f * attacker.fallDistance;
+                    damage += bonusDamage;
+                }
+            }
 
             // Factor critical hit
             if (charge > 0.9f && attacker.fallDistance > 0f && !attacker.isOnGround() && !attacker.isClimbing() && !attacker.isTouchingWater() && !attacker.hasStatusEffect(StatusEffects.BLINDNESS) && !attacker.hasVehicle()) {
-                itemDamage *= 1.5f;
+                damage *= 1.5f;
             }
         }
 
-        float damage = itemDamage + enchantDamage;
-
-        damage = calculateReductions(damage, target, attacker instanceof PlayerEntity player ? mc.world.getDamageSources().playerAttack(player) : mc.world.getDamageSources().mobAttack(attacker));
-
-        // Factor Fire Aspect
-        if (EnchantmentHelper.getFireAspect(attacker) > 0 && !StatusEffectHelper.hasStatusEffect(target, StatusEffects.FIRE_RESISTANCE)) {
-            damage++;
-        }
-
-        return damage;
+        return damage + enchantDamage;
     }
 
     // Fall Damage
 
     /**
-     * @see LivingEntity#computeFallDamage(float, float) (float, float, DamageSource)
+     * @see LivingEntity#computeFallDamage(float, float)
      */
     public static float fallDamage(LivingEntity entity) {
         if (entity instanceof PlayerEntity player && player.getAbilities().flying) return 0f;
-        if (StatusEffectHelper.hasStatusEffect(entity, StatusEffects.SLOW_FALLING) || StatusEffectHelper.hasStatusEffect(entity, StatusEffects.LEVITATION)) return 0f;
+        if (entity.hasStatusEffect(StatusEffects.SLOW_FALLING) || entity.hasStatusEffect(StatusEffects.LEVITATION)) return 0f;
 
         // Fast path - Above the surface
         int surface = mc.world.getWorldChunk(entity.getBlockPos()).getHeightmap(Heightmap.Type.MOTION_BLOCKING).get(entity.getBlockX() & 15, entity.getBlockZ() & 15);
@@ -184,7 +247,7 @@ public class DamageUtils {
 
     private static float fallDamageReductions(LivingEntity entity, int surface) {
         int fallHeight = (int) (entity.getY() - surface + entity.fallDistance - 3d);
-        @Nullable StatusEffectInstance jumpBoostInstance = StatusEffectHelper.getStatusEffect(entity, StatusEffects.JUMP_BOOST);
+        @Nullable StatusEffectInstance jumpBoostInstance = entity.getStatusEffect(StatusEffects.JUMP_BOOST);
         if (jumpBoostInstance != null) fallHeight -= jumpBoostInstance.getAmplifier() + 1;
 
         return calculateReductions(fallHeight, entity, mc.world.getDamageSources().fall());
@@ -193,7 +256,7 @@ public class DamageUtils {
     // Utils
 
     /**
-     * @see LivingEntity#applyDamage(DamageSource, float)
+     * @see LivingEntity#applyDamage(ServerWorld, DamageSource, float)
      */
     public static float calculateReductions(float damage, LivingEntity entity, DamageSource damageSource) {
         if (damageSource.isScaledWithDifficulty()) {
@@ -204,7 +267,7 @@ public class DamageUtils {
         }
 
         // Armor reduction
-        damage = DamageUtil.getDamageLeft(damage, getArmor(entity), (float) EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft(entity, damage, damageSource, getArmor(entity), (float) entity.getAttributeValue(EntityAttributes.ARMOR_TOUGHNESS));
 
         // Resistance reduction
         damage = resistanceReduction(entity, damage);
@@ -216,22 +279,55 @@ public class DamageUtils {
     }
 
     private static float getArmor(LivingEntity entity) {
-        return (float) Math.floor(EntityAttributeHelper.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR));
+        return (float) Math.floor(entity.getAttributeValue(EntityAttributes.ARMOR));
     }
 
     /**
      * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
      */
-    private static float protectionReduction(Entity player, float damage, DamageSource source) {
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), source);
-        return DamageUtil.getInflictedDamage(damage, protLevel);
+    private static float protectionReduction(LivingEntity player, float damage, DamageSource source) {
+        if (source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) return damage;
+
+        int damageProtection = 0;
+
+        for (ItemStack stack : player.getAllArmorItems()) {
+            Object2IntMap<RegistryEntry<Enchantment>> enchantments = new Object2IntOpenHashMap<>();
+            Utils.getEnchantments(stack, enchantments);
+
+            int protection = Utils.getEnchantmentLevel(enchantments, Enchantments.PROTECTION);
+            if (protection > 0) {
+                damageProtection += protection;
+            }
+
+            int fireProtection = Utils.getEnchantmentLevel(enchantments, Enchantments.FIRE_PROTECTION);
+            if (fireProtection > 0 && source.isIn(DamageTypeTags.IS_FIRE)) {
+                damageProtection += 2 * fireProtection;
+            }
+
+            int blastProtection = Utils.getEnchantmentLevel(enchantments, Enchantments.BLAST_PROTECTION);
+            if (blastProtection > 0 && source.isIn(DamageTypeTags.IS_EXPLOSION)) {
+                damageProtection += 2 * blastProtection;
+            }
+
+            int projectileProtection = Utils.getEnchantmentLevel(enchantments, Enchantments.PROJECTILE_PROTECTION);
+            if (projectileProtection > 0 && source.isIn(DamageTypeTags.IS_PROJECTILE)) {
+                damageProtection += 2 * projectileProtection;
+            }
+
+            int featherFalling = Utils.getEnchantmentLevel(enchantments, Enchantments.FEATHER_FALLING);
+            if (featherFalling > 0 && source.isIn(DamageTypeTags.IS_FALL)) {
+                damageProtection += 3 * featherFalling;
+            }
+        }
+
+        return DamageUtil.getInflictedDamage(damage, damageProtection);
     }
 
     /**
      * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
      */
     private static float resistanceReduction(LivingEntity player, float damage) {
-        StatusEffectInstance resistance = StatusEffectHelper.getStatusEffect(player, StatusEffects.RESISTANCE);
+        StatusEffectInstance resistance = player.getStatusEffect(StatusEffects.RESISTANCE);
         if (resistance != null) {
             int lvl = resistance.getAmplifier() + 1;
             damage *= (1 - (lvl * 0.2f));
@@ -241,7 +337,7 @@ public class DamageUtils {
     }
 
     /**
-     * @see Explosion#getExposure(Vec3d, Entity)
+     * @see net.minecraft.world.explosion.ExplosionImpl#calculateReceivedDamage(Vec3d, Entity)
      */
     private static float getExposure(Vec3d source, Box box, RaycastFactory raycastFactory) {
         double xDiff = box.maxX - box.minX;

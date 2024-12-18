@@ -111,7 +111,7 @@ public class PlayerModelHud extends HudElement {
 
             float offset = centerOrientation.get() == CenterOrientation.North ? 180 : 0;
 
-            float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.getYaw() - player.prevYaw) * mc.getTickDelta() + offset) : (float) customYaw.get();
+            float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.getYaw() - player.prevYaw) * mc.getRenderTickCounter().getTickDelta(true) + offset) : (float) customYaw.get();
             float pitch = copyPitch.get() ? player.getPitch() : (float) customPitch.get();
 
             drawEntity(renderer.drawContext, x, y, (int) (30 * scale.get()), -yaw, -pitch, player);

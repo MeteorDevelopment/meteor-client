@@ -12,17 +12,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Slot.class)
-public class SlotMixin implements ISlot {
+public abstract class SlotMixin implements ISlot {
     @Shadow public int id;
     @Shadow @Final private int index;
 
     @Override
-    public int getId() {
+    public int meteor$getId() {
         return id;
     }
 
     @Override
-    public int getIndex() {
+    public int meteor$getIndex() {
         return index;
     }
 }

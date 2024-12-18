@@ -16,8 +16,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 public class ModulesCommand extends Command {
     public ModulesCommand() {
         super("modules", "Displays a list of all modules.", "features");
@@ -48,7 +46,7 @@ public class ModulesCommand extends Command {
 
         MutableText finalModule = Text.literal(module.title);
         if (!module.isActive()) finalModule.formatted(Formatting.GRAY);
-        if (!module.equals(Modules.get().getGroup(module.category).get(Modules.get().getGroup(module.category).size() - 1))) finalModule.append(Text.literal(", ").formatted(Formatting.GRAY));
+        if (!module.equals(Modules.get().getGroup(module.category).getLast())) finalModule.append(Text.literal(", ").formatted(Formatting.GRAY));
         finalModule.setStyle(finalModule.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip)));
 
         return finalModule;
