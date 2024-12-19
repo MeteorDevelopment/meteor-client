@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayerEntityAccessor;
@@ -40,6 +41,15 @@ public class Flight extends Module {
         .description("Your speed when flying.")
         .defaultValue(0.1)
         .min(0.0)
+        .build()
+    );
+
+    private final Setting<Double> speedScrollSensitivity = sgGeneral.add(new DoubleSetting.Builder()
+        .name("speed-scroll-sensitivity")
+        .description("Allows you to change flight speed using scroll wheel. 0 to disable.")
+        .defaultValue(0.0)
+        .min(0.0)
+        .sliderMax(2.0)
         .build()
     );
 
@@ -118,6 +128,17 @@ public class Flight extends Module {
             flip = !flip;
         }
         lastYaw = currentYaw;
+    }
+
+    @EventHandler
+    private void onMouseScroll(MouseScrollEvent event) {
+        if (speedScrollSensitivity.get() > 0 && mc.currentScreen == null) {
+            double newSpeed = speed.get() + event.value * 0.25 * (speedScrollSensitivity.get() * speed.get());
+            if (newSpeed < 0.01) newSpeed = 0.01;  // Ensuring the speed doesn't become too slow.
+
+            speed.set(newSpeed);  // Update the speed setting with the new value.
+            event.cancel();
+        }
     }
 
     @EventHandler
