@@ -11,9 +11,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import meteordevelopment.meteorclient.utils.misc.ComponentMapReader;
+import meteordevelopment.meteorclient.utils.commands.ComponentMapReader;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
 import net.minecraft.component.ComponentMap;
 
 import java.util.Collection;
@@ -32,7 +31,7 @@ public class ComponentMapArgumentType implements ArgumentType<ComponentMap> {
         return new ComponentMapArgumentType(commandRegistryAccess);
     }
 
-    public static <S extends CommandSource> ComponentMap getComponentMap(CommandContext<S> context, String name) {
+    public static <S> ComponentMap getComponentMap(CommandContext<S> context, String name) {
         return context.getArgument(name, ComponentMap.class);
     }
 

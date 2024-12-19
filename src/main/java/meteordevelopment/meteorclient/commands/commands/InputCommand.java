@@ -5,8 +5,10 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.util.Pair;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
@@ -21,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputCommand extends Command {
+    private static final SimpleCommandExceptionType OUT_OF_RANGE_EXCEPTION = new SimpleCommandExceptionType(new LiteralMessage("Index out of range."));
+    private static final SimpleCommandExceptionType NO_ACTIVE_HANDLERS_EXCEPTION = new SimpleCommandExceptionType(new LiteralMessage("No active keypres handlers."));
     private static final List<KeypressHandler> activeHandlers = new ArrayList<>();
 
     private static final List<Pair<KeyBinding, String>> holdKeys = List.of(
@@ -76,7 +80,7 @@ public class InputCommand extends Command {
         }
 
         builder.then(literal("clear").executes(ctx -> {
-            if (activeHandlers.isEmpty()) warning("No active keypress handlers.");
+            if (activeHandlers.isEmpty()) throw NO_ACTIVE_HANDLERS_EXCEPTION.create();
             else {
                 info("Cleared all keypress handlers.");
                 activeHandlers.forEach(MeteorClient.EVENT_BUS::unsubscribe);
@@ -99,7 +103,7 @@ public class InputCommand extends Command {
 
         builder.then(literal("remove").then(argument("index", IntegerArgumentType.integer(0)).executes(ctx -> {
             int index = IntegerArgumentType.getInteger(ctx, "index");
-            if (index >= activeHandlers.size()) warning("Index out of range.");
+            if (index >= activeHandlers.size()) throw OUT_OF_RANGE_EXCEPTION.create();
             else {
                 info("Removed keypress handler.");
                 MeteorClient.EVENT_BUS.unsubscribe(activeHandlers.get(index));

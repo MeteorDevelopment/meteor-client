@@ -43,10 +43,6 @@ public class FriendsCommand extends Command {
             .then(argument("friend", FriendArgumentType.create())
                 .executes(context -> {
                     Friend friend = FriendArgumentType.get(context);
-                    if (friend == null) {
-                        error("Not friends with that player.");
-                        return SINGLE_SUCCESS;
-                    }
 
                     if (Friends.get().remove(friend)) {
                         ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, "Removed (highlight)%s (default)from friends.".formatted(friend.getName()));
