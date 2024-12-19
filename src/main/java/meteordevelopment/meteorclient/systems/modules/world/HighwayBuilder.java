@@ -343,7 +343,6 @@ public class HighwayBuilder extends Module {
             - getting echests and picks from shulker boxes - refactor echest blockade to be more general purpose?
             - access to your ec
         - separate walking forwards from the current state to speed up actions
-        - fix issues related to y level changes
      */
 
     @Override
@@ -420,6 +419,8 @@ public class HighwayBuilder extends Module {
         count = 0;
 
         state.tick(this);
+
+        constantAxis(start);
 
         if (breakTimer > 0) breakTimer--;
         if (placeTimer > 0) placeTimer--;
@@ -514,6 +515,23 @@ public class HighwayBuilder extends Module {
         text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
 
         return text;
+    }
+
+    private void constantAxis(Vec3d initPos) {
+
+        // Get to old y-level if offset
+        if ((int) mc.player.getY() < (int) initPos.getY()) {
+
+            if (!mc.world.getBlockState(mc.player.getBlockPos().up(2)).isSolid()) {
+
+                mc.player.jump();
+               
+                BlockUtils.place(mc.player.getBlockPos().down(), InvUtils.find(itemStack -> trashItems.get().contains(itemStack.getItem()) || itemStack.getItem() == Items.OBSIDIAN), rotation.get() == Rotation.Place || rotation.get() == Rotation.Both, 90);
+
+            } else BlockUtils.breakBlock(mc.player.getBlockPos().up(2), true);
+
+        } else if ((int) mc.player.getY() > (int) initPos.getY())
+            BlockUtils.breakBlock(mc.player.getBlockPos().up(2), true);
     }
 
     private enum State {
@@ -1705,3 +1723,4 @@ public class HighwayBuilder extends Module {
         }
     }
 }
+
