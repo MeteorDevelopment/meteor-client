@@ -30,7 +30,6 @@ public abstract class ItemRendererMixin {
     )
     private static void modifyEnchant(Args args, ModelTransformationMode transformationMode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, int[] tints, BakedModel model, RenderLayer layer, ItemRenderState.Glint glint) {
         if (!Modules.get().get(NoRender.class).noEnchantGlint()) return;
-        // TODO: double check this
         args.set(5, vertexConsumers.getBuffer(layer));
     }
 }
