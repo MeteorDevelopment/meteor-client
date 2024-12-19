@@ -8,17 +8,15 @@ package meteordevelopment.meteorclient.utils.player;
 import net.minecraft.client.input.Input;
 import net.minecraft.util.PlayerInput;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class CustomPlayerInput extends Input {
     @Override
     public void tick(boolean slowDown, float f) {
-        movementForward = mc.player.input.playerInput.forward() == mc.player.input.playerInput.backward() ? 0.0F : (mc.player.input.playerInput.forward() ? 1.0F : -1.0F);
-        movementSideways = mc.player.input.playerInput.left() == mc.player.input.playerInput.right() ? 0.0F : (mc.player.input.playerInput.left() ? 1.0F : -1.0F);
+        movementForward = this.playerInput.forward() == this.playerInput.backward() ? 0.0F : (this.playerInput.forward() ? 1.0F : -1.0F);
+        movementSideways = this.playerInput.left() == this.playerInput.right() ? 0.0F : (this.playerInput.left() ? 1.0F : -1.0F);
 
-        if (mc.player.isSneaking()) {
-            movementForward *= 0.3;
-            movementSideways *= 0.3;
+        if (this.playerInput.sneak()) {
+            movementForward *= 0.3f;
+            movementSideways *= 0.3f;
         }
     }
 
