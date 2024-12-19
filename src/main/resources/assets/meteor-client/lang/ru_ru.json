@@ -1,0 +1,18 @@
+{
+  "key.meteor-client.open-gui": "Открыть меню",
+  "key.meteor-client.open-commands": "Открыть команды",
+
+  "modules.meteor-client.better-tooltips.beehive.honey-level": "§7Уровень мёда: §e%s§7.",
+  "modules.meteor-client.better-tooltips.beehive.bees": "§7Пчел: §e%d§7.",
+
+  "modules.meteor-client.better-tooltips.kilobytes": "§7%.2f кб",
+  "modules.meteor-client.better-tooltips.bytes": "§7%d байт",
+  "modules.meteor-client.better-tooltips.error-getting-bytes": "§cОшибка при получении байтов.",
+
+  "modules.meteor-client.better-tooltips.unknown-inventory": "§4Неизвестный инвентарь",
+
+  "modules.meteor-client.better-tooltips.hold-to-preview": "Удерживайте §e%s§r для предпросмотра",
+
+  "modules.meteor-client.inventory-tweaks.dump": "Сложить",
+  "modules.meteor-client.inventory-tweaks.steal": "Взять"
+}
