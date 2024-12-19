@@ -12,7 +12,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class CustomPlayerInput extends Input {
     @Override
-    public void tick(boolean slowDown, float f) {
+    public void tick() {
         movementForward = mc.player.input.playerInput.forward() == mc.player.input.playerInput.backward() ? 0.0F : (mc.player.input.playerInput.forward() ? 1.0F : -1.0F);
         movementSideways = mc.player.input.playerInput.left() == mc.player.input.playerInput.right() ? 0.0F : (mc.player.input.playerInput.left() ? 1.0F : -1.0F);
 

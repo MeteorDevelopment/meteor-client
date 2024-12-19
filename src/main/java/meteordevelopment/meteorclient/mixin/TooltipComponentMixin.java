@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(targets = "net/minecraft/client/gui/tooltip/TooltipComponent")
+@Mixin(TooltipComponent.class)
 public interface TooltipComponentMixin {
     @Inject(method = "of(Lnet/minecraft/item/tooltip/TooltipData;)Lnet/minecraft/client/gui/tooltip/TooltipComponent;", at = @At("HEAD"), cancellable = true)
     private static void shortcutMeteorTooltipData(TooltipData tooltipData, CallbackInfoReturnable<TooltipComponent> cir) {

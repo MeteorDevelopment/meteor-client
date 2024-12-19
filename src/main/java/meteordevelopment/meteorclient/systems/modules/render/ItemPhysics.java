@@ -47,6 +47,7 @@ public class ItemPhysics extends Module {
         super(Categories.Render, "item-physics", "Applies physics to items on the ground.");
     }
 
+    /*
     @EventHandler
     private void onRenderItemEntity(RenderItemEntityEvent event) {
         MatrixStack matrices = event.matrixStack;
@@ -201,4 +202,6 @@ public class ItemPhysics extends Module {
     }
 
     record ModelInfo(boolean flat, float offsetY, float offsetZ) {}
+
+     */
 }

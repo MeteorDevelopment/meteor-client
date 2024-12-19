@@ -15,8 +15,8 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(FoliageColors.class)
 public abstract class FoliageColorsMixin {
-
-    @ModifyReturnValue(method = "getBirchColor", at = @At("RETURN"))
+    // FIXME: these getters no loner exist, instead replaced by public static final int values per wood type
+    /*@ModifyReturnValue(method = "getBirchColor", at = @At("RETURN"))
     private static int onGetBirchColor(int original) {
         return getModifiedColor(original);
     }
@@ -29,7 +29,7 @@ public abstract class FoliageColorsMixin {
     @ModifyReturnValue(method = "getMangroveColor", at = @At("RETURN"))
     private static int onGetMangroveColor(int original) {
         return getModifiedColor(original);
-    }
+    }*/
 
     @Unique
     private static int getModifiedColor(int original) {
