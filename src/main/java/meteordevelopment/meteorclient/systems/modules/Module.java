@@ -106,6 +106,14 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         }
     }
 
+    public void enable() {
+        if (!isActive()) toggle();
+    }
+
+    public void disable() {
+        if (isActive()) toggle();
+    }
+
     public void sendToggledMsg() {
         if (Config.get().chatFeedback.get() && chatFeedback) {
             ChatUtils.forceNextPrefixClass(getClass());
