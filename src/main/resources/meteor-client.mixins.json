@@ -190,7 +190,8 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor"
+    "YggdrasilMinecraftSessionServiceAccessor",
+    "MobSpawnerLogicAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

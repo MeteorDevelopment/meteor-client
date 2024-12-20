@@ -281,6 +281,9 @@ public class ESPBlock {
         }
     }
 
+    public BlockState getState() {
+        return state;
+    }
 
     public static long getKey(int x, int y, int z) {
         return ((long) y << 16) | ((long) (z & 15) << 8) | ((long) (x & 15));

@@ -77,6 +77,14 @@ public class BlockESP extends Module {
         .build()
     );
 
+    private final Setting<Boolean> onlyActivatedSpawners = sgGeneral.add(new BoolSetting.Builder()
+        .name("only-activated-spawners")
+        .description("Only show activated spawners.")
+        .defaultValue(false)
+        .visible(() -> blocks.get().stream().anyMatch(block -> block.getTranslationKey().equals("block.minecraft.spawner")))
+        .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
@@ -264,5 +272,9 @@ public class BlockESP extends Module {
     @Override
     public String getInfoString() {
         return "%s groups".formatted(groups.size());
+    }
+
+    public boolean isOnlyActivatedSpawners() {
+        return onlyActivatedSpawners.get();
     }
 }

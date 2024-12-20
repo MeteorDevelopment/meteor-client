@@ -8,8 +8,13 @@ package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.mixin.MobSpawnerLogicAccessor;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SpawnerBlock;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.MobSpawnerBlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.Heightmap;
@@ -21,6 +26,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getRenderDistance;
 
 public class ESPChunk {
+    private static final BlockESP blockEsp = Modules.get().get(BlockESP.class);
 
     private final int x, z;
     public Long2ObjectMap<ESPBlock> blocks;
@@ -81,7 +87,20 @@ public class ESPChunk {
 
     public void render(Render3DEvent event) {
         if (blocks != null) {
-            for (ESPBlock block : blocks.values()) block.render(event);
+            for (ESPBlock block : blocks.values()) {
+                BlockState state = block.getState();
+                if (state != null && mc.world != null && state.getBlock() instanceof SpawnerBlock && blockEsp.isOnlyActivatedSpawners()) {
+                    BlockEntity blockEntity = mc.world.getBlockEntity(new BlockPos(block.x, block.y, block.z));
+                    if (blockEntity instanceof MobSpawnerBlockEntity spawner) {
+                        MobSpawnerLogicAccessor logic = (MobSpawnerLogicAccessor) spawner.getLogic();
+                        if (logic.meteor$getSpawnDelay() != 20) {
+                            block.render(event);
+                        }
+                    }
+                } else {
+                    block.render(event);
+                }
+            }
         }
     }
 
