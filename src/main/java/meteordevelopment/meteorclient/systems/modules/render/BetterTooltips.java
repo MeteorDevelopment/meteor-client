@@ -103,7 +103,7 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    public final Setting<Boolean> echest = sgPreviews.add(new BoolSetting.Builder()
+    private final Setting<Boolean> echest = sgPreviews.add(new BoolSetting.Builder()
         .name("echests")
         .description("Shows a preview of your echest when hovering over it in an inventory.")
         .defaultValue(true)
@@ -237,7 +237,7 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    public final Setting<Boolean> jukeboxPlayable = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> jukeboxPlayable = sgHideFlags.add(new BoolSetting.Builder()
         .name("jukebox-playable")
         .description("Show if something is playable in a jukebox when it's hidden.")
         .defaultValue(true)
