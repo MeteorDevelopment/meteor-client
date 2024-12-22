@@ -40,7 +40,7 @@ public class Blink extends Module {
         .defaultValue(Keybind.none())
         .action(() -> {
             cancelled = true;
-            if (isActive()) toggle();
+            disable();
         })
         .build()
     );

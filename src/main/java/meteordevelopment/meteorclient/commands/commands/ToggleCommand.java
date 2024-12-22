@@ -26,9 +26,7 @@ public class ToggleCommand extends Command {
             .then(literal("all")
                 .then(literal("on")
                     .executes(context -> {
-                        new ArrayList<>(Modules.get().getAll()).forEach(module -> {
-                            if (!module.isActive()) module.toggle();
-                        });
+                        new ArrayList<>(Modules.get().getAll()).forEach(Module::enable);
                         Hud.get().active = true;
                         return SINGLE_SUCCESS;
                     })
@@ -51,13 +49,13 @@ public class ToggleCommand extends Command {
                 .then(literal("on")
                     .executes(context -> {
                         Module m = ModuleArgumentType.get(context);
-                        if (!m.isActive()) m.toggle();
+                        m.enable();
                         return SINGLE_SUCCESS;
                     }))
                 .then(literal("off")
                     .executes(context -> {
                         Module m = ModuleArgumentType.get(context);
-                        if (m.isActive()) m.toggle();
+                        m.disable();
                         return SINGLE_SUCCESS;
                     })
                 )
