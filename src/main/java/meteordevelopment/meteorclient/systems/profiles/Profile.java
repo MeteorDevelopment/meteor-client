@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.macros.Macros;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.presets.Presets;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
@@ -69,6 +70,13 @@ public class Profile implements ISerializable<Profile> {
         .build()
     );
 
+    public Setting<Boolean> presets = sgSave.add(new BoolSetting.Builder()
+        .name("presets")
+        .description("Whether the profile should save presets.")
+        .defaultValue(false)
+        .build()
+    );
+
     public Profile() {}
     public Profile(NbtElement tag) {
         fromTag((NbtCompound) tag);
@@ -81,6 +89,7 @@ public class Profile implements ISerializable<Profile> {
         if (macros.get()) Macros.get().load(folder);
         if (modules.get()) Modules.get().load(folder);
         if (waypoints.get()) Waypoints.get().load(folder);
+        if (presets.get()) Presets.get().load(folder);
     }
 
     public void save() {
@@ -90,6 +99,7 @@ public class Profile implements ISerializable<Profile> {
         if (macros.get()) Macros.get().save(folder);
         if (modules.get()) Modules.get().save(folder);
         if (waypoints.get()) Waypoints.get().save(folder);
+        if (presets.get()) Presets.get().save(folder);
     }
 
     public void delete() {
