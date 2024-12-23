@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -39,8 +40,8 @@ import java.util.List;
 import java.util.Random;
 
 public class SwarmCommand extends Command {
-
-    private final static SimpleCommandExceptionType SWARM_NOT_ACTIVE = new SimpleCommandExceptionType(Text.literal("The swarm module must be active to use this command."));
+    private static final SimpleCommandExceptionType SWARM_NOT_ACTIVE = new SimpleCommandExceptionType(new LiteralMessage("The swarm module must be active to use this command."));
+    private static final SimpleCommandExceptionType NO_PENDING_CONNECTION_EXCEPTION = new SimpleCommandExceptionType(new LiteralMessage("No pending connections."));
     private @Nullable ObjectIntPair<String> pendingConnection;
 
     public SwarmCommand() {
@@ -82,8 +83,7 @@ public class SwarmCommand extends Command {
                 )
                 .then(literal("confirm").executes(ctx -> {
                     if (pendingConnection == null) {
-                        error("No pending swarm connections.");
-                        return SINGLE_SUCCESS;
+                        throw NO_PENDING_CONNECTION_EXCEPTION.create();
                     }
 
                     Swarm swarm = Modules.get().get(Swarm.class);
@@ -96,7 +96,7 @@ public class SwarmCommand extends Command {
                     pendingConnection = null;
 
                     try {
-                        info("Connected to (highlight)%s.", swarm.worker.getConnection());
+                        info("Connected to (highlight)%s(default).", swarm.worker.getConnection());
                     } catch (NullPointerException e) {
                         error("Error connecting to swarm host.");
                         swarm.close();
