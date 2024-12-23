@@ -12,6 +12,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Icons;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
@@ -21,21 +22,24 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 public class IconChanger {
 
     public static void setIcon(Identifier iconPath) {
         if (iconPath == null) { // If the default Minecraft icon should be used
             try {
                 //Default Minecraft method for setting the windows' icon
-                MeteorClient.mc.getWindow().setIcon(
-                    MeteorClient.mc.getDefaultResourcePack(),
+                mc.getWindow().setIcon(
+                    mc.getDefaultResourcePack(),
                     SharedConstants.getGameVersion().isStable() ? Icons.RELEASE : Icons.SNAPSHOT
                 );
             } catch (IOException e) {
-                e.printStackTrace();
+                MeteorClient.LOG.error("Failed to set icon", e);
             }
             return;
         }
+
         // Retrieve the native window handle of the Minecraft game window
         long windowHandle = MinecraftClient.getInstance().getWindow().getHandle();
         setWindowIcon(windowHandle, iconPath);
@@ -64,7 +68,7 @@ public class IconChanger {
                 icons.put(1, glfwImage2); // Add the second icon to the buffer
 
                 // Set the window icon using GLFW
-                org.lwjgl.glfw.GLFW.glfwSetWindowIcon(windowHandle, icons);
+                GLFW.glfwSetWindowIcon(windowHandle, icons);
 
                 // Free the allocated GLFWImage and buffer memory
                 icons.free();
@@ -79,7 +83,7 @@ public class IconChanger {
     private static ByteBuffer loadIcon(Identifier path, IntBuffer w, IntBuffer h, IntBuffer channels) {
         try {
             // Retrieve the resource from the game's resource manager using the provided path
-            Resource resource = MeteorClient.mc.getResourceManager()
+            Resource resource = mc.getResourceManager()
                 .getResource(path)
                 .orElseThrow(() -> new IOException("Icon not found: " + path));
 
@@ -94,14 +98,16 @@ public class IconChanger {
 
             // Load the image from the byte buffer using STBImage
             ByteBuffer icon = STBImage.stbi_load_from_memory(buffer, w, h, channels, 4); // 4 = RGBA channels
+
             if (icon == null) {
                 // Log an error if the image could not be loaded
                 info("Failed to load image from memory for: " + path + " - " + STBImage.stbi_failure_reason());
             }
+
             return icon; // Return the loaded image
         } catch (IOException e) {
             // Handle IO exceptions during icon loading
-            e.printStackTrace();
+            MeteorClient.LOG.error("Failed to load icon", e);
             return null;
         }
     }

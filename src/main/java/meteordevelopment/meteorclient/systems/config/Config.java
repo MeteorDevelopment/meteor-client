@@ -199,19 +199,17 @@ public class Config extends System<Config> {
         for (NbtElement item : tag.getList(key, 8)) list.add(item.asString());
         return list;
     }
-    private enum Icons  {
+
+    public enum Icons  {
         Meteor(MeteorClient.identifier("textures/meteor.png")),
-        Halloween((MeteorClient.identifier("textures/icons/windowicon/halloween.png"))),
-        Christmas((MeteorClient.identifier("textures/icons/windowicon/christmas.png"))),
+        Halloween(MeteorClient.identifier("textures/icons/windowicon/halloween.png")),
+        Christmas(MeteorClient.identifier("textures/icons/windowicon/christmas.png")),
         Default(null);
 
         private final Identifier identifier;
-        Icons(final net.minecraft.util.Identifier identifier) {
-            this.identifier = identifier;
 
-        }
-        public net.minecraft.util.Identifier getIdentifier() {
-            return identifier;
+        Icons(Identifier identifier) {
+            this.identifier = identifier;
         }
     }
 }
