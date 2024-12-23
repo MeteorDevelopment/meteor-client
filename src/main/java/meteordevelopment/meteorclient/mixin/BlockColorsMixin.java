@@ -41,7 +41,7 @@ public abstract class BlockColorsMixin {
         index = 0
     )
     private static BlockColorProvider modifyBirchLeavesColor(BlockColorProvider provider) {
-        return (state, world, pos, tintIndex) -> getModifiedColor(-10036259);
+        return (state, world, pos, tintIndex) -> getModifiedColor(-8345771);
     }
 
     @Unique
