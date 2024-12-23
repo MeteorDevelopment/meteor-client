@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -32,7 +33,7 @@ public class Flamethrower extends Module {
 
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
         .name("distance")
-        .description("The maximum distance the animal has to be to be roasted.")
+        .description("The maximum distance the entity has to be to be roasted.")
         .min(0.0)
         .defaultValue(5.0)
         .build()
@@ -47,7 +48,7 @@ public class Flamethrower extends Module {
 
     private final Setting<Boolean> putOutFire = sgGeneral.add(new BoolSetting.Builder()
         .name("put-out-fire")
-        .description("Tries to put out the fire when animal is low health, so the items don't burn.")
+        .description("Tries to put out the fire when entity is at low health, so the items don't burn.")
         .defaultValue(true)
         .build()
     );
@@ -67,7 +68,7 @@ public class Flamethrower extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Automatically faces towards the animal roasted.")
+        .description("Automatically faces towards the entity while roasting.")
         .defaultValue(true)
         .build()
     );
@@ -90,7 +91,7 @@ public class Flamethrower extends Module {
     private Hand hand;
 
     public Flamethrower() {
-        super(Categories.World, "flamethrower", "Ignites every alive piece of food.");
+        super(Categories.World, "flamethrower", "Automatically ignites mobs to produce cooked food.");
     }
 
     @Override
@@ -104,14 +105,17 @@ public class Flamethrower extends Module {
         ticks++;
         for (Entity entity : mc.world.getEntities()) {
             if (!entities.get().contains(entity.getType()) || !PlayerUtils.isWithin(entity, distance.get())) continue;
-            if (entity.isFireImmune()) continue;
+            if (!entity.isAlive()) continue;
             if (entity == mc.player) continue;
-            if (!targetBabies.get() && entity instanceof LivingEntity && ((LivingEntity)entity).isBaby()) continue;
+            if (entity.isWet() || entity.inPowderSnow || entity.isFireImmune()) continue;
+            if (!targetBabies.get() && entity instanceof LivingEntity lentity && lentity.isBaby()) continue;
 
-            FindItemResult findFlintAndSteel = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.FLINT_AND_STEEL && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
-            if (!InvUtils.swap(findFlintAndSteel.slot(), true)) return;
+            FindItemResult item = InvUtils.findInHotbar(itemStack -> (itemStack.isOf(Items.FLINT_AND_STEEL) || itemStack.isOf(Items.FIRE_CHARGE)) &&
+                (!itemStack.isDamageable() || !antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
 
-            this.hand = findFlintAndSteel.getHand();
+            if (!InvUtils.swap(item.slot(), true)) return;
+
+            this.hand = item.getHand();
             this.entity = entity;
 
             if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity.getBlockPos()), Rotations.getPitch(entity.getBlockPos()), -100, this::interact);
@@ -129,10 +133,9 @@ public class Flamethrower extends Module {
 
         if (putOutFire.get() && entity instanceof LivingEntity animal && animal.getHealth() < 1) {
             mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
-            mc.interactionManager.attackBlock(entity.getBlockPos().west(), Direction.DOWN);
-            mc.interactionManager.attackBlock(entity.getBlockPos().east(), Direction.DOWN);
-            mc.interactionManager.attackBlock(entity.getBlockPos().north(), Direction.DOWN);
-            mc.interactionManager.attackBlock(entity.getBlockPos().south(), Direction.DOWN);
+            for (HorizontalDirection direction : HorizontalDirection.values()) {
+                mc.interactionManager.attackBlock(direction.offset(entity.getBlockPos()), Direction.DOWN);
+            }
         } else {
             if (ticks >= tickInterval.get() && !entity.isOnFire()) {
                 mc.interactionManager.interactBlock(mc.player, hand, new BlockHitResult(
