@@ -28,9 +28,6 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Grant execute permission to Gradle wrapper
-        run: chmod +x gradlew
-
       - name: Set up Node JS
         uses: actions/setup-node@v3
         with:
