@@ -123,8 +123,9 @@ tasks {
     }
 
     jar {
+        val licenseSuffix = project.base.archivesName.get()
         from("LICENSE") {
-            rename { "${it}_${project.base.archivesName.get()}" }
+            rename { "${it}_${licenseSuffix}" }
         }
 
         manifest {
@@ -145,8 +146,9 @@ tasks {
     shadowJar {
         configurations = listOf(project.configurations.shadow.get())
 
+        val licenseSuffix = project.base.archivesName.get()
         from("LICENSE") {
-            rename { "${it}_${project.base.archivesName.get()}" }
+            rename { "${it}_${licenseSuffix}" }
         }
 
         dependencies {
