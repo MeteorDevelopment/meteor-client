@@ -460,7 +460,6 @@ public class BetterChat extends Module {
         Identifier skin = entry.getSkinTextures().texture();
 
         context.drawTexture(RenderLayer::getGuiTextured, skin, 0, y, 8, 8, 8, 8, 8, 8, 64, 64);
-        context.drawTexture(RenderLayer::getGuiTextured, skin, 0, y, 8, 8, 40, 8, 8, 8, 64, 64);
     }
 
     private GameProfile getSender(IChatHudLine line, String text) {
