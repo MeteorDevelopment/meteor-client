@@ -252,8 +252,7 @@ public class Utils {
             for (int i = 0; i < stacks.size(); i++) {
                 if (i >= 0 && i < items.length) items[i] = stacks.get(i);
             }
-        }
-        else if (components.contains(DataComponentTypes.BLOCK_ENTITY_DATA)) {
+        } else if (components.contains(DataComponentTypes.BLOCK_ENTITY_DATA)) {
             NbtComponent nbt2 = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
 
             if (nbt2.contains("Items")) {
@@ -262,7 +261,8 @@ public class Utils {
                 for (int i = 0; i < nbt3.size(); i++) {
                     int slot = nbt3.getCompound(i).getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
                     // now NPEs when mc.world == null
-                    if (slot >= 0 && slot < items.length) items[slot] = ItemStack.fromNbtOrEmpty(mc.player.getRegistryManager(), nbt3.getCompound(i));
+                    if (slot >= 0 && slot < items.length)
+                        items[slot] = ItemStack.fromNbtOrEmpty(mc.player.getRegistryManager(), nbt3.getCompound(i));
                 }
             }
         }
@@ -514,6 +514,12 @@ public class Utils {
     }
 
     public static void leftClick() {
+        // check if screens are open
+        int attackCooldown = ((MinecraftClientAccessor) mc).getAttackCooldown();
+        if (attackCooldown == 10000) {
+            ((MinecraftClientAccessor) mc).setAttackCooldown(0);
+        }
+
         mc.options.attackKey.setPressed(true);
         ((MinecraftClientAccessor) mc).leftClick();
         mc.options.attackKey.setPressed(false);
