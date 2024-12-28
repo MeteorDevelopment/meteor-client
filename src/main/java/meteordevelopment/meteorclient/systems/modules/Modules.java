@@ -134,7 +134,7 @@ public class Modules extends System<Modules> {
     }
 
     public Module get(String name) {
-        for (Module module : moduleInstances.values()) {
+        for (Module module : modules) {
             if (module.name.equalsIgnoreCase(name)) return module;
         }
 
@@ -151,7 +151,7 @@ public class Modules extends System<Modules> {
     }
 
     public Collection<Module> getAll() {
-        return moduleInstances.values();
+        return modules;
     }
 
     public List<Module> getList() {
@@ -159,7 +159,7 @@ public class Modules extends System<Modules> {
     }
 
     public int getCount() {
-        return moduleInstances.values().size();
+        return modules.size();
     }
 
     public List<Module> getActive() {
@@ -171,7 +171,7 @@ public class Modules extends System<Modules> {
     public Set<Module> searchTitles(String text) {
         Map<Module, Integer> modules = new ValueComparableMap<>(Comparator.naturalOrder());
 
-        for (Module module : this.moduleInstances.values()) {
+        for (Module module : this.modules) {
             int score = Utils.searchLevenshteinDefault(module.title, text, false);
             if (Config.get().moduleAliases.get()) {
                 for (String alias : module.aliases) {
@@ -188,7 +188,7 @@ public class Modules extends System<Modules> {
     public Set<Module> searchSettingTitles(String text) {
         Map<Module, Integer> modules = new ValueComparableMap<>(Comparator.naturalOrder());
 
-        for (Module module : this.moduleInstances.values()) {
+        for (Module module : this.modules) {
             int lowest = Integer.MAX_VALUE;
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
@@ -288,7 +288,7 @@ public class Modules extends System<Modules> {
     private void onAction(boolean isKey, int value, int modifiers, boolean isPress) {
         if (mc.currentScreen != null || Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
 
-        for (Module module : moduleInstances.values()) {
+        for (Module module : modules) {
             if (module.keybind.matches(isKey, value, modifiers) && (isPress || (module.toggleOnBindRelease && module.isActive()))) {
                 module.toggle();
                 module.sendToggledMsg();
@@ -302,7 +302,7 @@ public class Modules extends System<Modules> {
     private void onOpenScreen(OpenScreenEvent event) {
         if (!Utils.canUpdate()) return;
 
-        for (Module module : moduleInstances.values()) {
+        for (Module module : modules) {
             if (module.toggleOnBindRelease && module.isActive()) {
                 module.toggle();
                 module.sendToggledMsg();
@@ -380,6 +380,19 @@ public class Modules extends System<Modules> {
 
         // Remove the previous module with the same name
         AtomicReference<Module> removedModule = new AtomicReference<>();
+        if (modules.removeIf(module1 -> {
+            if (module1.name.equals(module.name)) {
+                removedModule.set(module1);
+                module1.settings.unregisterColorSettings();
+
+                return true;
+            }
+
+            return false;
+        })) {
+            getGroup(removedModule.get().category).remove(removedModule.get());
+        }
+
         if (moduleInstances.values().removeIf(module1 -> {
             if (module1.name.equals(module.name)) {
                 removedModule.set(module1);
