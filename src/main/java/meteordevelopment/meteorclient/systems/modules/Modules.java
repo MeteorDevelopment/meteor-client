@@ -393,6 +393,19 @@ public class Modules extends System<Modules> {
             getGroup(removedModule.get().category).remove(removedModule.get());
         }
 
+        if (moduleInstances.values().removeIf(module1 -> {
+            if (module1.name.equals(module.name)) {
+                removedModule.set(module1);
+                module1.settings.unregisterColorSettings();
+
+                return true;
+            }
+
+            return false;
+        })) {
+            getGroup(removedModule.get().category).remove(removedModule.get());
+        }
+
         // Add the module
         modules.add(module);
         moduleInstances.put(module.getClass(), module);
