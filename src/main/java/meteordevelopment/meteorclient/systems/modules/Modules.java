@@ -66,6 +66,7 @@ public class Modules extends System<Modules> {
     private static final List<Category> CATEGORIES = new ArrayList<>();
 
     private final List<Module> modules = new ArrayList<>();
+    private final Map<Class<? extends Module>, Module> moduleInstances = new Reference2ReferenceOpenHashMap<>();
     private final Map<Category, List<Module>> groups = new Reference2ReferenceOpenHashMap<>();
 
     private final List<Module> active = new ArrayList<>();
@@ -127,9 +128,9 @@ public class Modules extends System<Modules> {
         return null;
     }
 
-    @SuppressWarnings({"unchecked", "OptionalGetWithoutIsPresent"})
+    @SuppressWarnings("unchecked")
     public <T extends Module> T get(Class<T> klass) {
-        return (T) modules.stream().filter(module -> module.getClass().equals(klass)).findFirst().orElse(null);
+        return (T) moduleInstances.get(klass);
     }
 
     public Module get(String name) {
@@ -394,6 +395,7 @@ public class Modules extends System<Modules> {
 
         // Add the module
         modules.add(module);
+        moduleInstances.put(module.getClass(), module);
         getGroup(module.category).add(module);
 
         // Register color settings for the module
