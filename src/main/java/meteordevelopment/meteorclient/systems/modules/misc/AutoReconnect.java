@@ -30,6 +30,13 @@ public class AutoReconnect extends Module {
         .build()
     );
 
+    public final Setting<Boolean> button = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-button")
+        .description("Will hide the buttons related to Auto Reconnect.")
+        .defaultValue(false)
+        .build()
+    );
+
     public Pair<ServerAddress, ServerInfo> lastServerConnection;
 
     public AutoReconnect() {
