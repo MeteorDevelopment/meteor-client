@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.events.entity;
 
-import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.entity.vehicle.AbstractBoatEntity;
 
 public class BoatMoveEvent {
     private static final BoatMoveEvent INSTANCE = new BoatMoveEvent();
 
-    public BoatEntity boat;
+    public AbstractBoatEntity boat;
 
-    public static BoatMoveEvent get(BoatEntity entity) {
+    public static BoatMoveEvent get(AbstractBoatEntity entity) {
         INSTANCE.boat = entity;
         return INSTANCE;
     }
