@@ -42,7 +42,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
 
         if (autoReconnect.lastServerConnection != null) {
             reconnectBtn = new ButtonWidget.Builder(Text.literal(getText()), button -> tryConnecting()).build();
-            if (Modules.get().get(AutoReconnect.class).button.get()) {
+            if (!Modules.get().get(AutoReconnect.class).button.get()) {
                 grid.add(reconnectBtn);
             }
             reconnectBtn = new ButtonWidget.Builder(Text.literal("Toggle Auto Reconnect"), button -> {
@@ -50,7 +50,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
                     reconnectBtn.setMessage(Text.literal(getText()));
                     time = autoReconnect.time.get() * 20;
                 }).build();
-            if (Modules.get().get(AutoReconnect.class).button.get()) {
+            if (!Modules.get().get(AutoReconnect.class).button.get()) {
                 grid.add(reconnectBtn);
             }
         }
