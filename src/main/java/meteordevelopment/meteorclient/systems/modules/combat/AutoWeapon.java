@@ -100,10 +100,10 @@ public class AutoWeapon extends Module {
                 }
             }
         }
-        if (weapon.get() != Weapon.Sword) damageS -= 4;
-        if (weapon.get() != Weapon.Axe) damageA -= 4;
-        if (weapon.get() != Weapon.Trident) damageT -= 4;
-        if (weapon.get() != Weapon.Mace) damageM -= 4;
+        if (weapon.get() != Weapon.Sword) damageS -= threshold.get();
+        if (weapon.get() != Weapon.Axe) damageA -= threshold.get();
+        if (weapon.get() != Weapon.Trident) damageT -= threshold.get();
+        if (weapon.get() != Weapon.Mace) damageM -= threshold.get();
         double max = Math.max(Math.max(damageS, damageA), Math.max(damageT, damageM));
             if (max == damageS) return slotS;
             else if (max == damageA) return slotA;
