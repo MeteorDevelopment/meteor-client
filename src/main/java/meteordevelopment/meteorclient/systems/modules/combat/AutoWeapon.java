@@ -13,9 +13,12 @@ import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.AxeItem;
 import net.minecraft.item.SwordItem;
+import net.minecraft.item.MaceItem;
+import net.minecraft.item.TridentItem;
+import java.lang.Math;
 
 public class AutoWeapon extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -55,37 +58,64 @@ public class AutoWeapon extends Module {
     private int getBestWeapon(LivingEntity target) {
         int slotS = mc.player.getInventory().selectedSlot;
         int slotA = mc.player.getInventory().selectedSlot;
+        int slotT = mc.player.getInventory().selectedSlot;
+        int slotM = mc.player.getInventory().selectedSlot;
         double damageS = 0;
         double damageA = 0;
+        double damageT = 0;
+        double damageM = 0;
         double currentDamageS;
         double currentDamageA;
+        double currentDamageT;
+        double currentDamageM;
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.getItem() instanceof SwordItem
-                && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
+                    && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
                 currentDamageS = DamageUtils.getAttackDamage(mc.player, target, stack);
                 if (currentDamageS > damageS) {
                     damageS = currentDamageS;
                     slotS = i;
                 }
             } else if (stack.getItem() instanceof AxeItem
-                && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
+                    && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
                 currentDamageA = DamageUtils.getAttackDamage(mc.player, target, stack);
                 if (currentDamageA > damageA) {
                     damageA = currentDamageA;
                     slotA = i;
                 }
+            } else if (stack.getItem() instanceof TridentItem
+                    && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
+                currentDamageT = DamageUtils.getAttackDamage(mc.player, target, stack);
+                if (currentDamageT > damageT) {
+                    damageT = currentDamageT;
+                    slotT = i;
+                }
+            } else if (stack.getItem() instanceof MaceItem
+                    && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
+                currentDamageM = DamageUtils.getAttackDamage(mc.player, target, stack);
+                if (currentDamageM > damageM) {
+                    damageM = currentDamageM;
+                    slotM = i;
+                }
             }
         }
-        if (weapon.get() == Weapon.Sword && threshold.get() > damageA - damageS) return slotS;
-        else if (weapon.get() == Weapon.Axe && threshold.get() > damageS - damageA) return slotA;
-        else if (weapon.get() == Weapon.Sword && threshold.get() < damageA - damageS) return slotA;
-        else if (weapon.get() == Weapon.Axe && threshold.get() < damageS - damageA) return slotS;
-        else return mc.player.getInventory().selectedSlot;
+        if (weapon.get() != Weapon.Sword) damageS -= 4;
+        if (weapon.get() != Weapon.Axe) damageA -= 4;
+        if (weapon.get() != Weapon.Trident) damageT -= 4;
+        if (weapon.get() != Weapon.Mace) damageM -= 4;
+        double max = Math.max(Math.max(damageS, damageA), Math.max(damageT, damageM));
+            if (max == damageS) return slotS;
+            else if (max == damageA) return slotA;
+            else if (max == damageT) return slotT;
+            else if (max == damageM) return slotT;
+            else return mc.player.getInventory().selectedSlot;
     }
 
     public enum Weapon {
         Sword,
-        Axe
+        Axe,
+        Trident,
+        Mace
     }
 }
