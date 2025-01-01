@@ -30,7 +30,7 @@ public class Sprint extends Module {
     }
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-        .name("speed-mode")
+        .name("sprint-mode")
         .description("What mode of sprinting.")
         .defaultValue(Mode.Strict)
         .build()
