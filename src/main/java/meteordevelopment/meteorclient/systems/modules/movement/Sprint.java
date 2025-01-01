@@ -44,16 +44,16 @@ public class Sprint extends Module {
         .build()
     );
 
-    private final Setting<Boolean> keepSprint = sgGeneral.add(new BoolSetting.Builder()
-        .name("keep-sprint")
-        .description("Whether to keep sprinting after attacking an entity.")
+    private final Setting<Boolean> unsprintOnHit = sgGeneral.add(new BoolSetting.Builder()
+        .name("unsprint-on-hit")
+        .description("Whether to stop sprinting before attacking, to ensure you get crits and sweep attacks.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> unsprintOnHit = sgGeneral.add(new BoolSetting.Builder()
-        .name("unsprint-on-hit")
-        .description("Whether to stop sprinting when attacking, to ensure you get crits and sweep attacks.")
+    private final Setting<Boolean> keepAfterHit = sgGeneral.add(new BoolSetting.Builder()
+        .name("keep-after-hit")
+        .description("Whether to keep sprinting after attacking.")
         .defaultValue(false)
         .build()
     );
@@ -74,7 +74,7 @@ public class Sprint extends Module {
         mc.player.setSprinting(false);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     private void onTickMovement(TickEvent.Post event) {
         if (shouldSprint()) mc.player.setSprinting(true);
     }
@@ -93,7 +93,7 @@ public class Sprint extends Module {
 
     @EventHandler
     private void onPacketSent(PacketEvent.Sent event) {
-        if (!unsprintOnHit.get() || !keepSprint.get()) return;
+        if (!unsprintOnHit.get() || !keepAfterHit.get()) return;
         if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)
             || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
@@ -123,6 +123,6 @@ public class Sprint extends Module {
     }
 
     public boolean stopSprinting() {
-        return !isActive() || !keepSprint.get();
+        return !isActive() || !keepAfterHit.get();
     }
 }
