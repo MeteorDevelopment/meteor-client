@@ -98,16 +98,17 @@ public class Sprint extends Module {
     }
 
     public boolean shouldSprint() {
-        if (unsprintInWater.get() && (mc.player.isTouchingWater() || mc.player.isSubmergedInWater())) return false;
+        if (mc.currentScreen != null && !Modules.get().get(GUIMove.class).sprint.get()) return false;
+
+        boolean isTouchingWater = mc.player.isTouchingWater() || mc.player.isSubmergedInWater();
+        if (unsprintInWater.get() && isTouchingWater) return false;
 
         boolean strictSprint = mc.player.forwardSpeed > 1.0E-5F
             && ((ClientPlayerEntityAccessor) mc.player).invokeCanSprint()
             && (!mc.player.horizontalCollision || mc.player.collidedSoftly)
-            && !(mc.player.isTouchingWater() && !mc.player.isSubmergedInWater());
+            && !isTouchingWater;
 
-        return isActive()
-            && (mode.get() == Mode.Rage || strictSprint)
-            && (mc.currentScreen == null || Modules.get().get(GUIMove.class).sprint.get());
+        return isActive() && (mode.get() == Mode.Rage || strictSprint);
     }
 
     public boolean rageSprint() {
