@@ -124,7 +124,7 @@ public abstract class LivingEntityMixin extends Entity {
         if ((Object) this != mc.player) return original;
 
         Sprint s = Modules.get().get(Sprint.class);
-        if (!s.rageSprint() || !s.jumpFix.get()) return original;
+        if (!s.rageSprint()) return original;
 
         float forward = Math.signum(mc.player.input.movementForward);
         float strafe = 90 * Math.signum(mc.player.input.movementSideways);

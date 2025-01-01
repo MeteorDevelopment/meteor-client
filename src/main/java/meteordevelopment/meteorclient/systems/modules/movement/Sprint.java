@@ -36,14 +36,6 @@ public class Sprint extends Module {
         .build()
     );
 
-    public final Setting<Boolean> jumpFix = sgGeneral.add(new BoolSetting.Builder()
-        .name("jump-fix")
-        .description("Whether to correct jumping directions.")
-        .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Rage)
-        .build()
-    );
-
     private final Setting<Boolean> unsprintOnHit = sgGeneral.add(new BoolSetting.Builder()
         .name("unsprint-on-hit")
         .description("Whether to stop sprinting before attacking, to ensure you get crits and sweep attacks.")
