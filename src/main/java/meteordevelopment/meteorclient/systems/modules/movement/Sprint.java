@@ -9,7 +9,10 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayerEntityAccessor;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -33,6 +36,13 @@ public class Sprint extends Module {
         .build()
     );
 
+    private final Setting<Boolean> keepSprint = sgGeneral.add(new BoolSetting.Builder()
+        .name("keep-sprint")
+        .description("Whether to keep sprinting after attacking.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> unsprintOnHit = sgGeneral.add(new BoolSetting.Builder()
         .name("unsprint-on-hit")
         .description("Whether to stop sprinting before attacking, to ensure you get crits and sweep attacks.")
@@ -40,17 +50,11 @@ public class Sprint extends Module {
         .build()
     );
 
-    private final Setting<Boolean> keepAfterHit = sgGeneral.add(new BoolSetting.Builder()
-        .name("keep-after-hit")
-        .description("Whether to keep sprinting after attacking.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> unsprintInWater = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> unsprintInWater = sgGeneral.add(new BoolSetting.Builder()
         .name("unsprint-in-water")
         .description("Whether to stop sprinting when in water.")
         .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Rage)
         .build()
     );
 
@@ -58,13 +62,10 @@ public class Sprint extends Module {
         super(Categories.Movement, "sprint", "Automatically sprints.");
     }
 
-    @Override
-    public void onDeactivate() {
-        mc.player.setSprinting(false);
-    }
-
     @EventHandler(priority = EventPriority.HIGH)
     private void onTickMovement(TickEvent.Post event) {
+        if (unsprintInWater.get() && mc.player.isTouchingWater()) return;
+
         mc.player.setSprinting(shouldSprint());
     }
 
@@ -74,40 +75,32 @@ public class Sprint extends Module {
         if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)
             || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
-        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(
-            mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING
-        ));
+        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
         mc.player.setSprinting(false);
     }
 
     @EventHandler
     private void onPacketSent(PacketEvent.Sent event) {
-        if (!unsprintOnHit.get() || !keepAfterHit.get()) return;
+        if (!unsprintOnHit.get() || !keepSprint.get()) return;
         if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)
             || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
         if (!shouldSprint() || mc.player.isSprinting()) return;
 
-        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(
-            mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING
-        ));
+        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));
         mc.player.setSprinting(true);
     }
 
     public boolean shouldSprint() {
         if (mc.currentScreen != null && !Modules.get().get(GUIMove.class).sprint.get()) return false;
 
-        boolean isTouchingWater = mc.player.isTouchingWater() || mc.player.isSubmergedInWater();
-        if (unsprintInWater.get() && isTouchingWater) return false;
+        float movement = mode.get() == Mode.Rage
+            ? (Math.abs(mc.player.input.movementForward) + Math.abs(mc.player.input.movementSideways))
+            : mc.player.input.movementForward;
 
-        float speed = mc.player.forwardSpeed;
-        if (mode.get() == Mode.Rage) {
-            speed = Math.abs(speed);
-            speed += Math.abs(mc.player.sidewaysSpeed);
-        }
-        if (speed < 1.0E-5F) return false;
+        if (movement <= (mc.player.isSubmergedInWater() ? 1.0E-5F : 0.8)) return false;
 
-        boolean strictSprint = isTouchingWater
+        boolean strictSprint = !(mc.player.isTouchingWater() && !mc.player.isSubmergedInWater())
             && ((ClientPlayerEntityAccessor) mc.player).invokeCanSprint()
             && (!mc.player.horizontalCollision || mc.player.collidedSoftly);
 
@@ -118,7 +111,11 @@ public class Sprint extends Module {
         return isActive() && mode.get() == Mode.Rage;
     }
 
+    public boolean unsprintInWater() {
+        return isActive() && unsprintInWater.get();
+    }
+
     public boolean stopSprinting() {
-        return !isActive() || !keepAfterHit.get();
+        return !isActive() || !keepSprint.get();
     }
 }
