@@ -58,6 +58,14 @@ public class Sprint extends Module {
         .build()
     );
 
+    private final Setting<Boolean> permaSprint = sgGeneral.add(new BoolSetting.Builder()
+        .name("sprint-while-stationary")
+        .description("Sprint even when not moving.")
+        .defaultValue(false)
+        .visible(() -> mode.get() == Mode.Rage)
+        .build()
+    );
+
     public Sprint() {
         super(Categories.Movement, "sprint", "Automatically sprints.");
     }
@@ -98,7 +106,9 @@ public class Sprint extends Module {
             ? (Math.abs(mc.player.input.movementForward) + Math.abs(mc.player.input.movementSideways))
             : mc.player.input.movementForward;
 
-        if (movement <= (mc.player.isSubmergedInWater() ? 1.0E-5F : 0.8)) return false;
+        if (movement <= (mc.player.isSubmergedInWater() ? 1.0E-5F : 0.8)) {
+            if (mode.get() == Mode.Strict || !permaSprint.get()) return false;
+        }
 
         boolean strictSprint = !(mc.player.isTouchingWater() && !mc.player.isSubmergedInWater())
             && ((ClientPlayerEntityAccessor) mc.player).invokeCanSprint()
