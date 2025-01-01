@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
@@ -182,6 +183,10 @@ public class MeteorClient implements ClientModInitializer {
         }
 
         wasWidgetScreen = event.screen instanceof WidgetScreen;
+
+        if (!GuiThemes.get().showHUDInEditor()) return;
+        if (!(event.screen instanceof HudEditorScreen)) return;
+        mc.options.hudHidden = false;
     }
 
     public static Identifier identifier(String path) {
