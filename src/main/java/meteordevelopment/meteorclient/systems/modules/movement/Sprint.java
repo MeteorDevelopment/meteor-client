@@ -9,10 +9,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayerEntityAccessor;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -68,7 +65,7 @@ public class Sprint extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onTickMovement(TickEvent.Post event) {
-        if (shouldSprint()) mc.player.setSprinting(true);
+        mc.player.setSprinting(shouldSprint());
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -103,10 +100,16 @@ public class Sprint extends Module {
         boolean isTouchingWater = mc.player.isTouchingWater() || mc.player.isSubmergedInWater();
         if (unsprintInWater.get() && isTouchingWater) return false;
 
-        boolean strictSprint = mc.player.forwardSpeed > 1.0E-5F
+        float speed = mc.player.forwardSpeed;
+        if (mode.get() == Mode.Rage) {
+            speed = Math.abs(speed);
+            speed += Math.abs(mc.player.sidewaysSpeed);
+        }
+        if (speed < 1.0E-5F) return false;
+
+        boolean strictSprint = isTouchingWater
             && ((ClientPlayerEntityAccessor) mc.player).invokeCanSprint()
-            && (!mc.player.horizontalCollision || mc.player.collidedSoftly)
-            && !isTouchingWater;
+            && (!mc.player.horizontalCollision || mc.player.collidedSoftly);
 
         return isActive() && (mode.get() == Mode.Rage || strictSprint);
     }
