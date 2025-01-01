@@ -113,7 +113,9 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     @WrapWithCondition(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;setSprinting(Z)V", ordinal = 3))
     private boolean wrapSetSprinting(ClientPlayerEntity instance, boolean b) {
-        return !Modules.get().get(Sprint.class).rageSprint();
+        Sprint s = Modules.get().get(Sprint.class);
+
+        return !s.rageSprint() || s.unsprintInWater() && isTouchingWater();
     }
 
     // Rotations
