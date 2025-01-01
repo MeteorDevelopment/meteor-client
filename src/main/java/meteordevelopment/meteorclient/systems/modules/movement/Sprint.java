@@ -81,21 +81,28 @@ public class Sprint extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onPacketSend(PacketEvent.Send event) {
-        if (!unsprintOnHit.get() || !(event.packet instanceof IPlayerInteractEntityC2SPacket packet) || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
+        if (!unsprintOnHit.get()) return;
+        if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)
+            || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
-        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
+        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(
+            mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING
+        ));
         mc.player.setSprinting(false);
     }
 
     @EventHandler
     private void onPacketSent(PacketEvent.Sent event) {
         if (!unsprintOnHit.get() || !keepSprint.get()) return;
-        if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet) || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
+        if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)
+            || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
-        if (shouldSprint() && !mc.player.isSprinting()) {
-            mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));
-            mc.player.setSprinting(true);
-        }
+        if (!shouldSprint() || mc.player.isSprinting()) return;
+
+        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(
+            mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING
+        ));
+        mc.player.setSprinting(true);
     }
 
     public boolean shouldSprint() {
@@ -106,7 +113,9 @@ public class Sprint extends Module {
             && (!mc.player.horizontalCollision || mc.player.collidedSoftly)
             && !(mc.player.isTouchingWater() && !mc.player.isSubmergedInWater());
 
-        return isActive() && (mode.get() == Mode.Rage || strictSprint) && (mc.currentScreen == null || Modules.get().get(GUIMove.class).sprint.get());
+        return isActive()
+            && (mode.get() == Mode.Rage || strictSprint)
+            && (mc.currentScreen == null || Modules.get().get(GUIMove.class).sprint.get());
     }
 
     public boolean rageSprint() {
