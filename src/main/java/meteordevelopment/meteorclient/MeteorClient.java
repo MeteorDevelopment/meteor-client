@@ -184,9 +184,9 @@ public class MeteorClient implements ClientModInitializer {
 
         wasWidgetScreen = event.screen instanceof WidgetScreen;
 
-        if (!GuiThemes.get().showHUDInEditor()) return;
-        if (!(event.screen instanceof HudEditorScreen)) return;
-        mc.options.hudHidden = false;
+        if (event.screen instanceof HudEditorScreen) {
+            mc.options.hudHidden = false;
+        }
     }
 
     public static Identifier identifier(String path) {

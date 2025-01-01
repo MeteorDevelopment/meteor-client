@@ -84,14 +84,6 @@ public class MeteorGuiTheme extends GuiTheme {
         .build()
     );
 
-    public final Setting<Boolean> showInEditor = sgGeneral.add(new BoolSetting.Builder()
-        .name("show-in-editor")
-        .description("Show the HUD when using the Meteor HUD editor.")
-        .defaultValue(false)
-        .visible(hideHUD::get)
-        .build()
-    );
-
     // Colors
 
     public final Setting<SettingColor> accentColor = color("accent", "Main color of the GUI.", new SettingColor(145, 61, 226));
@@ -383,11 +375,6 @@ public class MeteorGuiTheme extends GuiTheme {
     @Override
     public boolean hideHUD() {
         return hideHUD.get();
-    }
-
-    @Override
-    public boolean showHUDInEditor() {
-        return showInEditor.get();
     }
 
     public class ThreeStateColorSetting {
