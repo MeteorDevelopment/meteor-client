@@ -173,20 +173,19 @@ public class MeteorClient implements ClientModInitializer {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private void onOpenScreen(OpenScreenEvent event) {
-        boolean hideHud = GuiThemes.get().hideHUD();
-
-        if (hideHud) {
+        if (event.screen instanceof WidgetScreen) {
             if (!wasWidgetScreen) wasHudHiddenRoot = mc.options.hudHidden;
-
-            if (event.screen instanceof WidgetScreen) mc.options.hudHidden = true;
-            else if (!wasHudHiddenRoot) mc.options.hudHidden = false;
+            if (GuiThemes.get().hideHUD() || wasHudHiddenRoot) {
+                // Always show the MC HUD in the HUD editor screen since people like
+                // to align some items with the hotbar or chat
+                mc.options.hudHidden = !(event.screen instanceof HudEditorScreen);
+            }
+        } else {
+            if (wasWidgetScreen) mc.options.hudHidden = wasHudHiddenRoot;
+            wasHudHiddenRoot = mc.options.hudHidden;
         }
 
         wasWidgetScreen = event.screen instanceof WidgetScreen;
-
-        if (event.screen instanceof HudEditorScreen) {
-            mc.options.hudHidden = false;
-        }
     }
 
     public static Identifier identifier(String path) {
