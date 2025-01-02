@@ -69,6 +69,7 @@ public class ModulesScreen extends TabScreen {
         w.view.spacing = 0;
 
         for (Module module : Modules.get().getGroup(category)) {
+            if (Config.get().hiddenModules.get().contains(module)) continue;
             w.add(theme.module(module)).expandX();
         }
 
