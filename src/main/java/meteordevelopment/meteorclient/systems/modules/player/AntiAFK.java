@@ -3,13 +3,14 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.movement;
+package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
@@ -30,6 +31,16 @@ public class AntiAFK extends Module {
         .build()
     );
 
+    private final Setting<Integer> jumpRate = sgActions.add(new IntSetting.Builder()
+        .name("jump-rate")
+        .description("How many seconds between jumps (set to 0 for random).")
+        .defaultValue(0)
+        .min(0)
+        .sliderRange(0, 60)
+        .visible(jump::get)
+        .build()
+    );
+
     private final Setting<Boolean> swing = sgActions.add(new BoolSetting.Builder()
         .name("swing")
         .description("Swings your hand.")
@@ -37,10 +48,30 @@ public class AntiAFK extends Module {
         .build()
     );
 
+    private final Setting<Integer> swingRate = sgActions.add(new IntSetting.Builder()
+        .name("swing-rate")
+        .description("How many seconds between hand swings (set to 0 for random).")
+        .defaultValue(0)
+        .min(0)
+        .sliderRange(0, 60)
+        .visible(swing::get)
+        .build()
+    );
+
     private final Setting<Boolean> sneak = sgActions.add(new BoolSetting.Builder()
         .name("sneak")
         .description("Sneaks and unsneaks quickly.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> sneakRate = sgActions.add(new IntSetting.Builder()
+        .name("sneak-rate")
+        .description("How many seconds between sneaks (set to 0 for random).")
+        .defaultValue(0)
+        .min(0)
+        .sliderRange(0, 60)
+        .visible(sneak::get)
         .build()
     );
 
@@ -149,8 +180,11 @@ public class AntiAFK extends Module {
     private final Random random = new Random();
     private int messageTimer = 0;
     private int messageI = 0;
+    private int jumpTimer = 0;
+    private int swingTimer = 0;
     private int sneakTimer = 0;
     private int strafeTimer = 0;
+    private int ticksSneaked = 0;
     private boolean direction = false;
     private float prevYaw;
 
@@ -179,20 +213,43 @@ public class AntiAFK extends Module {
 
         // Jump
         if (jump.get()) {
-            if (mc.options.jumpKey.isPressed()) mc.options.jumpKey.setPressed(false);
-            else if (random.nextInt(99) == 0) mc.options.jumpKey.setPressed(true);
+            if (jumpRate.get() > 0) {
+                ++jumpTimer;
+                if (jumpTimer >= jumpRate.get() * 20) {
+                    jumpTimer = 0;
+                    if (mc.player.isOnGround()) mc.player.jump();
+                }
+            } else if (random.nextInt(99) == 0) {
+                if (mc.player.isOnGround()) mc.player.jump();
+            }
         }
 
         // Swing
-        if (swing.get() && random.nextInt(99) == 0) {
-            mc.player.swingHand(mc.player.getActiveHand());
+        if (swing.get()) {
+            if (swingRate.get() > 0) {
+                ++swingTimer;
+                if (swingTimer >= swingRate.get() * 20) {
+                    swingTimer = 0;
+                    mc.player.swingHand(mc.player.getActiveHand());
+                }
+            } else if (random.nextInt(99) == 0) {
+                mc.player.swingHand(mc.player.getActiveHand());
+            }
         }
 
         // Sneak
         if (sneak.get()) {
-            if (sneakTimer++ >= sneakTime.get()) {
-                mc.options.sneakKey.setPressed(false);
-                if (random.nextInt(99) == 0) sneakTimer = 0; // Sneak after ~5 seconds
+            if (ticksSneaked++ >= sneakTime.get()) {
+                if (ticksSneaked <= sneakTime.get() + 5) {
+                    mc.options.sneakKey.setPressed(false);
+                }
+                if (sneakRate.get() > 0) {
+                  ++sneakTimer;
+                  if (sneakTimer >= sneakRate.get() * 20) {
+                      sneakTimer = 0;
+                      ticksSneaked = 0;
+                  }
+                } else if (random.nextInt(99) == 0) ticksSneaked = 0; // Sneak after ~5 seconds
             } else mc.options.sneakKey.setPressed(true);
         }
 
