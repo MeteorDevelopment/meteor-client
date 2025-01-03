@@ -292,14 +292,6 @@ public class ActiveModulesHud extends HudElement {
                 renderer.quad(x - 2 - outlineWidth.get(), lineStartY,
                     textLength + 4 + 2 * outlineWidth.get(),
                     outlineWidth.get(), prevColor, prevColor, color, color);
-            }
-
-            if (index == modules.size() - 1) { // Render bottom quad for last item in list
-                lineHeight += 2;
-
-                renderer.quad(x - 2 - outlineWidth.get(), lineStartY + lineHeight,
-                    textLength + 4 + 2 * outlineWidth.get(), outlineWidth.get(),
-                    prevColor, prevColor, color, color);
             } else { // Otherwise render the inbetween quads that connect each side quad
                 renderer.quad(Math.min(prevX, x) - 2 - outlineWidth.get(), Math.max(prevX, x) == x ? y : y - outlineWidth.get(),
                     (Math.max(prevX, x) - 2) - (Math.min(prevX, x) - 2 - outlineWidth.get()), outlineWidth.get(),
@@ -308,6 +300,14 @@ public class ActiveModulesHud extends HudElement {
                 renderer.quad(Math.min(prevX + prevTextLength, x + textLength) + 2, Math.min(prevX + prevTextLength, x + textLength) == x + textLength ? y : y - outlineWidth.get(),
                     (Math.max(prevX + prevTextLength, x + textLength) + 2 + outlineWidth.get()) - (Math.min(prevX + prevTextLength, x + textLength) + 2), outlineWidth.get(),
                     prevColor, prevColor, color, color); // Right inbetween quad
+            }
+
+            if (index == modules.size() - 1) { // Render bottom quad for last item in list
+                lineHeight += 2;
+
+                renderer.quad(x - 2 - outlineWidth.get(), lineStartY + lineHeight,
+                    textLength + 4 + 2 * outlineWidth.get(), outlineWidth.get(),
+                    prevColor, prevColor, color, color);
             }
 
             // Left side quad
