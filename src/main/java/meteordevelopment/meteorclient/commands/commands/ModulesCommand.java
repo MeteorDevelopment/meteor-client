@@ -27,7 +27,7 @@ public class ModulesCommand extends Command {
             ChatUtils.info("--- Modules ((highlight)%d(default)) ---", Modules.get().getCount());
 
             Modules.loopCategories().forEach(category -> {
-                MutableText categoryMessage = Text.literal("");
+                MutableText categoryMessage = Text.empty();
                 Modules.get().getGroup(category).forEach(module -> categoryMessage.append(getModuleText(module)));
                 ChatUtils.sendMsg(category.name, categoryMessage);
             });

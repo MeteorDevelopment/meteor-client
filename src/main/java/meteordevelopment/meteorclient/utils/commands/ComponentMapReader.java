@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.utils.misc;
+package meteordevelopment.meteorclient.utils.commands;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -90,20 +90,34 @@ public class ComponentMapReader {
             suggestor = this::suggestComponentType;
             Set<ComponentType<?>> set = new ReferenceArraySet<>();
 
-            while(reader.canRead() && reader.peek() != ']') {
+            while (reader.canRead() && reader.peek() != ']') {
                 reader.skipWhitespace();
+
+                boolean removed = false;
+                if (reader.peek() == '!') {
+                    removed = true;
+                    suggestor = this::suggestComponentTypeNameOnly;
+                    reader.skip();
+                    reader.skipWhitespace();
+                }
+
                 ComponentType<?> dataComponentType = readComponentType(reader);
                 if (!set.add(dataComponentType)) {
                     throw REPEATED_COMPONENT_EXCEPTION.create(dataComponentType);
                 }
 
-                suggestor = this::suggestEqual;
-                reader.skipWhitespace();
-                reader.expect('=');
-                suggestor = SUGGEST_DEFAULT;
-                reader.skipWhitespace();
-                this.readComponentValue(reader, builder, dataComponentType);
-                reader.skipWhitespace();
+                if (removed) {
+                    builder.add(dataComponentType, null);
+                } else {
+                    suggestor = this::suggestEqual;
+                    reader.skipWhitespace();
+                    reader.expect('=');
+                    suggestor = SUGGEST_DEFAULT;
+                    reader.skipWhitespace();
+                    this.readComponentValue(reader, builder, dataComponentType);
+                    reader.skipWhitespace();
+                }
+
                 suggestor = this::suggestEndOfComponent;
                 if (!reader.canRead() || reader.peek() != ',') {
                     break;
@@ -140,15 +154,25 @@ public class ComponentMapReader {
         }
 
         private CompletableFuture<Suggestions> suggestComponentType(SuggestionsBuilder builder) {
+            builder.suggest("!");
+            suggestComponentType(builder, "=");
+            return builder.buildFuture();
+        }
+
+        private CompletableFuture<Suggestions> suggestComponentTypeNameOnly(SuggestionsBuilder builder) {
+            suggestComponentType(builder, "");
+            return builder.buildFuture();
+        }
+
+        private static void suggestComponentType(SuggestionsBuilder builder, String suffix) {
             String string = builder.getRemaining().toLowerCase(Locale.ROOT);
             CommandSource.forEachMatching(Registries.DATA_COMPONENT_TYPE.getEntrySet(), string, entry -> entry.getKey().getValue(), entry -> {
                 ComponentType<?> dataComponentType = entry.getValue();
                 if (dataComponentType.getCodec() != null) {
                     Identifier identifier = entry.getKey().getValue();
-                    builder.suggest(identifier.toString() + "=");
+                    builder.suggest(identifier.toString() + suffix);
                 }
             });
-            return builder.buildFuture();
         }
 
         private <T> void readComponentValue(StringReader reader, ComponentMap.Builder builder, ComponentType<T> type) throws CommandSyntaxException {
