@@ -19,7 +19,7 @@ public class StreamUtils {
              OutputStream out = new FileOutputStream(to)) {
             in.transferTo(out);
         } catch (IOException e) {
-            MeteorClient.LOG.error("Error copying from file '%s' to file '%s'.".formatted(from.getName(), to.getName()), e);
+            MeteorClient.LOG.error("Error copying from file '{}' to file '{}'.", from.getName(), to.getName(), e);
         }
     }
 

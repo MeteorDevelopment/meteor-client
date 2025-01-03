@@ -15,7 +15,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class PacketUtilsUtil {
     private static final String packetRegistryClass = """
@@ -128,8 +131,7 @@ public class PacketUtilsUtil {
     public static void main(String[] args) {
         try {
             init();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -180,11 +182,17 @@ public class PacketUtilsUtil {
             //     Write static block
             writer.write("    static {\n");
 
+            Comparator<Class<?>> packetsComparator = Comparator
+                .comparing((Class<?> cls) -> cls.getName().substring(cls.getName().lastIndexOf('.') + 1))
+                .thenComparing(Class::getName);
+
             // Client -> Sever Packets
             Reflections c2s = new Reflections("net.minecraft.network.packet.c2s", Scanners.SubTypes);
             Set<Class<? extends Packet>> c2sPackets = c2s.getSubTypesOf(Packet.class);
+            SortedSet<Class<? extends Packet>> sortedC2SPackets = new TreeSet<>(packetsComparator);
+            sortedC2SPackets.addAll(c2sPackets);
 
-            for (Class<? extends Packet> c2sPacket : c2sPackets) {
+            for (Class<? extends Packet> c2sPacket : sortedC2SPackets) {
                 String name = c2sPacket.getName();
                 String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');
                 String fullName = name.replace('$', '.');
@@ -198,8 +206,10 @@ public class PacketUtilsUtil {
             // Server -> Client Packets
             Reflections s2c = new Reflections("net.minecraft.network.packet.s2c", Scanners.SubTypes);
             Set<Class<? extends Packet>> s2cPackets = s2c.getSubTypesOf(Packet.class);
+            SortedSet<Class<? extends Packet>> sortedS2CPackets = new TreeSet<>(packetsComparator);
+            sortedS2CPackets.addAll(s2cPackets);
 
-            for (Class<? extends Packet> s2cPacket : s2cPackets) {
+            for (Class<? extends Packet> s2cPacket : sortedS2CPackets) {
                 if (s2cPacket == BundlePacket.class || s2cPacket == BundleSplitterPacket.class) continue;
                 String name = s2cPacket.getName();
                 String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');

@@ -82,7 +82,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         mca.setSessionService(sessService);
         PlayerSkinProvider.FileCache skinCache = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCache();
         Path skinCachePath = ((FileCacheAccessor) skinCache).getDirectory();
-        mca.setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), skinCachePath, sessService, mc));
+        mca.setSkinProvider(new PlayerSkinProvider(skinCachePath, sessService, mc));
     }
 
     @Override

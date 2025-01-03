@@ -84,7 +84,7 @@ public class Collisions extends Module {
     private void onPacketSend(PacketEvent.Send event) {
         if (!unloadedChunks.get()) return;
         if (event.packet instanceof VehicleMoveC2SPacket packet) {
-            if (!mc.world.getChunkManager().isChunkLoaded((int) packet.getX() >> 4, (int) packet.getZ() >> 4)) {
+            if (!mc.world.getChunkManager().isChunkLoaded((int) packet.position().getX() >> 4, (int) packet.position().getZ() >> 4)) {
                 mc.player.getVehicle().updatePosition(mc.player.getVehicle().prevX, mc.player.getVehicle().prevY, mc.player.getVehicle().prevZ);
                 event.cancel();
             }

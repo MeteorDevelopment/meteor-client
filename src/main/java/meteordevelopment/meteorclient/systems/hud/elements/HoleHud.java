@@ -109,7 +109,7 @@ public class HoleHud extends HudElement {
 
     private Direction get(Facing dir) {
         if (isInEditor()) return Direction.DOWN;
-        return Direction.fromRotation(MathHelper.wrapDegrees(mc.player.getYaw() + dir.offset));
+        return Direction.fromHorizontalDegrees(MathHelper.wrapDegrees(mc.player.getYaw() + dir.offset));
     }
 
     private void drawBlock(HudRenderer renderer, Direction dir, double x, double y) {

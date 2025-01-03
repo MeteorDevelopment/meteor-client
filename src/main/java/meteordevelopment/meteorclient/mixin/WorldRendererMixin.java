@@ -65,7 +65,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     // No Render
 
     @Inject(method = "renderWeather", at = @At("HEAD"), cancellable = true)
-    private void onRenderWeather(FrameGraphBuilder frameGraphBuilder, LightmapTextureManager lightmapTextureManager, Vec3d pos, float tickDelta, Fog fog, CallbackInfo ci) {
+    private void onRenderWeather(FrameGraphBuilder frameGraphBuilder, Vec3d pos, float tickDelta, Fog fog, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noWeather()) ci.cancel();
     }
 
@@ -77,7 +77,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     // Entity Shaders
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void onRenderHead(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
+    private void onRenderHead(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
         PostProcessShaders.beginRender();
     }
 
