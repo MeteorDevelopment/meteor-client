@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.events.render.GetFovEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -164,7 +163,7 @@ public class Zoom extends Module {
 
     @EventHandler
     private void onGetFov(GetFovEvent event) {
-        event.fov /= getScaling();
+        event.fov /= (float) getScaling();
 
         if (lastFov != event.fov) mc.worldRenderer.scheduleTerrainUpdate();
         lastFov = event.fov;
