@@ -21,12 +21,9 @@ public class ActiveModulesHud extends HudElement {
     private static final Color WHITE = new Color();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<List<Module>> hiddenModules = sgGeneral.add(new ModuleListSetting.Builder()
-        .name("hidden-modules")
-        .description("Which modules not to show in the list.")
-        .build()
-    );
+    private final SettingGroup sgColor = settings.createGroup("Color");
+    private final SettingGroup sgScale = settings.createGroup("Scale");
+    private final SettingGroup sgBackground = settings.createGroup("Color");
 
     private final Setting<Sort> sort = sgGeneral.add(new EnumSetting.Builder<Sort>()
         .name("sort")
@@ -35,33 +32,16 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
+    private final Setting<List<Module>> hiddenModules = sgGeneral.add(new ModuleListSetting.Builder()
+        .name("hidden-modules")
+        .description("Which modules not to show in the list.")
+        .build()
+    );
+
     private final Setting<Boolean> activeInfo = sgGeneral.add(new BoolSetting.Builder()
-        .name("additional-info")
-        .description("Shows additional info from the module next to the name in the active modules list.")
+        .name("module-info")
+        .description("Shows info from the module next to the name in the active modules list.")
         .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<SettingColor> moduleInfoColor = sgGeneral.add(new ColorSetting.Builder()
-        .name("module-info-color")
-        .description("Color of module info text.")
-        .defaultValue(new SettingColor(175, 175, 175))
-        .visible(activeInfo::get)
-        .build()
-    );
-
-    private final Setting<ColorMode> colorMode = sgGeneral.add(new EnumSetting.Builder<ColorMode>()
-        .name("color-mode")
-        .description("What color to use for active modules.")
-        .defaultValue(ColorMode.Rainbow)
-        .build()
-    );
-
-    private final Setting<SettingColor> flatColor = sgGeneral.add(new ColorSetting.Builder()
-        .name("flat-color")
-        .description("Color for flat color mode.")
-        .defaultValue(new SettingColor(225, 25, 25))
-        .visible(() -> colorMode.get() == ColorMode.Flat)
         .build()
     );
 
@@ -69,13 +49,6 @@ public class ActiveModulesHud extends HudElement {
         .name("shadow")
         .description("Renders shadow behind text.")
         .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Alignment> alignment = sgGeneral.add(new EnumSetting.Builder<Alignment>()
-        .name("alignment")
-        .description("Horizontal alignment.")
-        .defaultValue(Alignment.Auto)
         .build()
     );
 
@@ -96,24 +69,31 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
-    private final Setting<Boolean> customScale = sgGeneral.add(new BoolSetting.Builder()
-        .name("custom-scale")
-        .description("Applies custom text scale rather than the global one.")
-        .defaultValue(false)
+    private final Setting<Alignment> alignment = sgGeneral.add(new EnumSetting.Builder<Alignment>()
+        .name("alignment")
+        .description("Horizontal alignment.")
+        .defaultValue(Alignment.Auto)
         .build()
     );
 
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("Custom scale.")
-        .visible(customScale::get)
-        .defaultValue(1)
-        .min(0.5)
-        .sliderRange(0.5, 3)
+    // Color
+
+    private final Setting<ColorMode> colorMode = sgColor.add(new EnumSetting.Builder<ColorMode>()
+        .name("color-mode")
+        .description("What color to use for active modules.")
+        .defaultValue(ColorMode.Rainbow)
         .build()
     );
 
-    private final Setting<Double> rainbowSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<SettingColor> flatColor = sgColor.add(new ColorSetting.Builder()
+        .name("flat-color")
+        .description("Color for flat color mode.")
+        .defaultValue(new SettingColor(225, 25, 25))
+        .visible(() -> colorMode.get() == ColorMode.Flat)
+        .build()
+    );
+
+    private final Setting<Double> rainbowSpeed = sgColor.add(new DoubleSetting.Builder()
         .name("rainbow-speed")
         .description("Rainbow speed of rainbow color mode.")
         .defaultValue(0.05)
@@ -124,7 +104,7 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> rainbowSpread = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> rainbowSpread = sgColor.add(new DoubleSetting.Builder()
         .name("rainbow-spread")
         .description("Rainbow spread of rainbow color mode.")
         .defaultValue(0.01)
@@ -135,7 +115,7 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> rainbowSaturation = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> rainbowSaturation = sgColor.add(new DoubleSetting.Builder()
         .name("rainbow-saturation")
         .defaultValue(1.0d)
         .sliderRange(0.0d, 1.0d)
@@ -143,11 +123,55 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> rainbowBrightness = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> rainbowBrightness = sgColor.add(new DoubleSetting.Builder()
         .name("rainbow-brightness")
         .defaultValue(1.0d)
         .sliderRange(0.0d, 1.0d)
         .visible(() -> colorMode.get() == ColorMode.Rainbow)
+        .build()
+    );
+
+    private final Setting<SettingColor> moduleInfoColor = sgColor.add(new ColorSetting.Builder()
+        .name("module-info-color")
+        .description("Color of module info text.")
+        .defaultValue(new SettingColor(175, 175, 175))
+        .visible(activeInfo::get)
+        .build()
+    );
+
+    // Scale
+
+    private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
+        .name("custom-scale")
+        .description("Applies custom text scale rather than the global one.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Custom scale.")
+        .visible(customScale::get)
+        .defaultValue(1)
+        .min(0.5)
+        .sliderRange(0.5, 3)
+        .build()
+    );
+
+    // Background
+
+    private final Setting<Background> background = sgBackground.add(new EnumSetting.Builder<Background>()
+        .name("background")
+        .description("How to render the background.")
+        .defaultValue(Background.None)
+        .build()
+    );
+
+    private final Setting<SettingColor> color = sgBackground.add(new ColorSetting.Builder()
+        .name("background-color")
+        .description("Color of the background.")
+        .defaultValue(new SettingColor(255, 255, 255))
+        .visible(() -> background.get() != Background.None)
         .build()
     );
 
@@ -321,5 +345,11 @@ public class ActiveModulesHud extends HudElement {
         Flat,
         Random,
         Rainbow
+    }
+
+    public enum Background {
+        None,
+        Block,
+        Text
     }
 }
