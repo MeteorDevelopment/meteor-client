@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.macros.Macros;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.presets.Presets;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
@@ -45,6 +46,7 @@ public class Systems {
         add(new Modules());
         add(new Macros());
         add(new Friends());
+        add(new Presets());
         add(new Accounts());
         add(new Waypoints());
         add(new Profiles());
