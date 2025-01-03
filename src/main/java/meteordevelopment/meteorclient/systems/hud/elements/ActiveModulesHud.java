@@ -167,10 +167,10 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> color = sgBackground.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
         .description("Color of the background.")
-        .defaultValue(new SettingColor(255, 255, 255))
+        .defaultValue(new SettingColor(0, 0, 0, 75))
         .visible(() -> background.get() != Background.None)
         .build()
     );
@@ -250,6 +250,10 @@ public class ActiveModulesHud extends HudElement {
             prevX = x + offset;
             y += renderer.textHeight(shadow.get(), getScale());
         }
+
+        if (background.get() == Background.Block) {
+            renderer.quad(this.x - 2, this.y - 2, getWidth() + 4, getHeight() + 4, backgroundColor.get());
+        }
     }
 
     private void renderModule(HudRenderer renderer, int index, double x, double y) {
@@ -286,13 +290,13 @@ public class ActiveModulesHud extends HudElement {
 
         if (outlines.get()) {
             if (index == 0) { // Render top quad for first item in list
-                lineStartY -= 4;
-                lineHeight += 4;
+                lineStartY -= 2;
+                lineHeight += 2;
 
-                renderer.quad(x - 2 - outlineWidth.get(), lineStartY,
+                renderer.quad(x - 2 - outlineWidth.get(), lineStartY - outlineWidth.get(),
                     textLength + 4 + 2 * outlineWidth.get(),
                     outlineWidth.get(), prevColor, prevColor, color, color);
-            } else { // Otherwise render the inbetween quads that connect each side quad
+            } else if (background.get() != Background.Block) { // Otherwise render the inbetween quads that connect each side quad
                 renderer.quad(Math.min(prevX, x) - 2 - outlineWidth.get(), Math.max(prevX, x) == x ? y : y - outlineWidth.get(),
                     (Math.max(prevX, x) - 2) - (Math.min(prevX, x) - 2 - outlineWidth.get()), outlineWidth.get(),
                     prevColor, prevColor, color, color); // Left inbetween quad
@@ -319,9 +323,9 @@ public class ActiveModulesHud extends HudElement {
                 prevColor, prevColor, color, color);
         }
 
-//        if (background.get() != Background.None) {
-//            renderer.quad();
-//        }
+        if (background.get() == Background.Text) {
+            renderer.quad( x - 2, lineStartY, textLength + 4, lineHeight, backgroundColor.get());
+        }
 
         prevTextLength = textLength;
         prevColor = color;
