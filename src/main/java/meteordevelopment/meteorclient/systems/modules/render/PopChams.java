@@ -127,7 +127,7 @@ public class PopChams extends Module {
         private double timer, scale = 1;
 
         public GhostPlayer(PlayerEntity player) {
-            super(player, "ghost", 20, false);
+            super(player, "ghost", 20, false, false);
 
             uuid = player.getUuid();
         }
