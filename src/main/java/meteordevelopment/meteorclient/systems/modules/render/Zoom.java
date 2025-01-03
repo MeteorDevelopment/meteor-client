@@ -116,12 +116,6 @@ public class Zoom extends Module {
         hudManualToggled = true;
     }
 
-    @EventHandler
-    public void onMouseButtonPressed(MouseButtonEvent event) {
-        if (event.button != GLFW.GLFW_KEY_F1) return;
-        hudManualToggled = true;
-    }
-
     public void onStop() {
         mc.options.smoothCameraEnabled = preCinematic;
         mc.options.getMouseSensitivity().setValue(preMouseSensitivity);
