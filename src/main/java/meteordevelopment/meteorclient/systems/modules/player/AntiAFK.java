@@ -105,6 +105,15 @@ public class AntiAFK extends Module {
         })
         .build()
     );
+    private final Setting<Integer> strafeRate = sgActions.add(new IntSetting.Builder()
+        .name("strafe-rate")
+        .description("How many seconds before changing strafe direction (set to 0 for random).")
+        .defaultValue(1)
+        .min(0)
+        .sliderRange(0, 60)
+        .visible(strafe::get)
+        .build()
+    );
 
     private final Setting<Boolean> spin = sgActions.add(new BoolSetting.Builder()
         .name("spin")
@@ -369,11 +378,20 @@ public class AntiAFK extends Module {
         }
 
         // Strafe
-        if (strafe.get() && strafeTimer-- <= 0) {
-            mc.options.leftKey.setPressed(!direction);
-            mc.options.rightKey.setPressed(direction);
-            direction = !direction;
-            strafeTimer = 20;
+        if (strafe.get()) {
+            if (strafeRate.get() > 0) {
+                ++strafeTimer;
+                if (strafeTimer >= strafeRate.get() * 20) {
+                    strafeTimer = 0;
+                    mc.options.leftKey.setPressed(!direction);
+                    mc.options.rightKey.setPressed(direction);
+                    direction = !direction;
+                }
+            } else if (random.nextInt(42) == 0) {
+                mc.options.leftKey.setPressed(!direction);
+                mc.options.rightKey.setPressed(direction);
+                direction = !direction;
+            }
         }
 
         // Spin
