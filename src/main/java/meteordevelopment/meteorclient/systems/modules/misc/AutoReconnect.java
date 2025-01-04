@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.ServerConnectBeginEvent;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -27,6 +28,13 @@ public class AutoReconnect extends Module {
         .defaultValue(3.5)
         .min(0)
         .decimalPlaces(1)
+        .build()
+    );
+
+    public final Setting<Boolean> button = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-buttons")
+        .description("Will hide the buttons related to Auto Reconnect.")
+        .defaultValue(false)
         .build()
     );
 
