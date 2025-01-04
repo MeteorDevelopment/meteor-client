@@ -162,6 +162,7 @@ public class AntiAFK extends Module {
         .description("Where to look.")
         .defaultValue(LookMode.Random)
         .visible(look::get)
+        .onChanged(mode -> this.currentTarget = null)
         .build()
     );
     private final Setting<Boolean> wander = sgActions.add(new BoolSetting.Builder()
