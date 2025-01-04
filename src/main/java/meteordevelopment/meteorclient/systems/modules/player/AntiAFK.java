@@ -384,7 +384,7 @@ public class AntiAFK extends Module {
                       sneakTimer = 0;
                       ticksSneaked = 0;
                   }
-                } else if (random.nextInt(99) == 0) ticksSneaked = 0; // Sneak after ~5 seconds
+                } else if (random.nextInt(9) == 0) ticksSneaked = 0; // Twerk
             } else mc.options.sneakKey.setPressed(true);
         }
 
