@@ -553,7 +553,9 @@ public class AntiAFK extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (entity.equals(mc.player)) continue;
             if (entity instanceof PlayerEntity player && targetPlayers.get().contains(player.getName().getString().toLowerCase())) {
-                validTargets.add(entity);
+                if (entity.getBlockPos().isWithinDistance(mc.player.getBlockPos(), maxDistance.get())) {
+                    validTargets.add(entity);
+                }
             }
         }
     }
