@@ -120,8 +120,8 @@ public class AntiAFK extends Module {
         .build()
     );
     private final Setting<Integer> spinSpeed = sgActions.add(new IntSetting.Builder()
-        .name("speed")
-        .description("The speed to spin you.")
+        .name("spin-speed")
+        .description("The speed to spin you (set to 0 for random).")
         .defaultValue(7)
         .visible(spin::get)
         .build()
@@ -378,7 +378,9 @@ public class AntiAFK extends Module {
 
         // Spin
         if (spin.get()) {
-            prevYaw += spinSpeed.get();
+            prevYaw += spinSpeed.get() <= 0
+                ? random.nextInt(42) : spinSpeed.get();
+
             if (!silentSpin.get()) mc.player.setYaw(prevYaw);
             else Rotations.rotate(prevYaw, spinPitch.get(), -15);
         }
