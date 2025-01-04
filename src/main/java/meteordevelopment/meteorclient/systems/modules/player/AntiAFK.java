@@ -172,6 +172,11 @@ public class AntiAFK extends Module {
         .visible(() -> look.get() && lookMode.get().equals(LookMode.Random))
         .onChanged(value -> {
             if (value) silentLook.set(false);
+            else if (this.ticksWalking > 0) {
+                ticksWalking = 0;
+                mc.options.forwardKey.setPressed(false);
+                mc.options.getAutoJump().setValue(this.hadAutoJump);
+            }
         })
         .build()
     );
@@ -186,7 +191,7 @@ public class AntiAFK extends Module {
     private final Setting<Integer> wanderRate = sgActions.add(new IntSetting.Builder()
         .name("wander-rate")
         .description("How often to wander.")
-        .defaultValue(200).min(1).sliderRange(1, 420)
+        .defaultValue(20).min(1).sliderRange(1, 420)
         .visible(() -> wander.isVisible() && wander.get())
         .build()
     );
@@ -196,7 +201,13 @@ public class AntiAFK extends Module {
         .defaultValue(false)
         .visible(() -> look.get() && !lookMode.get().equals(LookMode.Random))
         .onChanged(value -> {
-            if (value) silentLook.set(false);
+            if (value) {
+                silentLook.set(false);
+                this.lookRate.set(0);
+            } else if (this.currentTarget != null) {
+                mc.options.forwardKey.setPressed(false);
+                mc.options.getAutoJump().setValue(this.hadAutoJump);
+            }
         })
         .build()
     );
@@ -219,7 +230,7 @@ public class AntiAFK extends Module {
     private final Setting<Integer> lookRate = sgActions.add(new IntSetting.Builder()
         .name("look-rate")
         .description("How many seconds before looking in a new direction (set to 0 for random/tracking).")
-        .defaultValue(1).min(0)
+        .defaultValue(10).min(0)
         .sliderRange(0, 60)
         .visible(look::get)
         .onChanged(value -> {
@@ -424,7 +435,7 @@ public class AntiAFK extends Module {
                         boolean shouldWander = random.nextInt(wanderRate.get()) == 0;
 
                         if (shouldWander) {
-                            ticksWalking = random.nextInt(600);
+                            ticksWalking = random.nextInt(69,1337);
                             mc.options.forwardKey.setPressed(true);
                             hadAutoJump = mc.options.getAutoJump().getValue();
                             mc.options.getAutoJump().setValue(true);
