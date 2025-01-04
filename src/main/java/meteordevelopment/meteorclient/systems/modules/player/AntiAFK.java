@@ -83,9 +83,8 @@ public class AntiAFK extends Module {
     private final Setting<Integer> sneakTime = sgActions.add(new IntSetting.Builder()
         .name("sneak-time")
         .description("How many ticks to stay sneaked.")
-        .defaultValue(5)
-        .min(1)
-        .sliderMin(1)
+        .defaultValue(3)
+        .min(1).sliderMin(1)
         .visible(sneak::get)
         .build()
     );
@@ -188,10 +187,10 @@ public class AntiAFK extends Module {
         .visible(() -> look.get() && wander.isVisible() && wander.get())
         .build()
     );
-    private final Setting<Integer> wanderRate = sgActions.add(new IntSetting.Builder()
-        .name("wander-rate")
+    private final Setting<Integer> wanderChance = sgActions.add(new IntSetting.Builder()
+        .name("wander-chance")
         .description("How often to wander.")
-        .defaultValue(20).min(1).sliderRange(1, 420)
+        .defaultValue(200).min(20).sliderRange(10, 500)
         .visible(() -> wander.isVisible() && wander.get())
         .build()
     );
@@ -230,7 +229,7 @@ public class AntiAFK extends Module {
     private final Setting<Integer> lookRate = sgActions.add(new IntSetting.Builder()
         .name("look-rate")
         .description("How many seconds before looking in a new direction (set to 0 for random/tracking).")
-        .defaultValue(10).min(0)
+        .defaultValue(0).min(0)
         .sliderRange(0, 60)
         .visible(look::get)
         .onChanged(value -> {
@@ -384,7 +383,7 @@ public class AntiAFK extends Module {
                       sneakTimer = 0;
                       ticksSneaked = 0;
                   }
-                } else if (random.nextInt(9) == 0) ticksSneaked = 0; // Twerk
+                } else if (random.nextInt(5) == 0) ticksSneaked = 0; // Twerk
             } else mc.options.sneakKey.setPressed(true);
         }
 
@@ -425,6 +424,7 @@ public class AntiAFK extends Module {
 
         // Look
         ++lookTimer; // Guard syntax to reduce nesting
+        if (ticksWalking >= 0) --ticksWalking;
         if (lookTimer < lookRate.get() * 20 || !look.get()) return;
 
         lookTimer = 0;
@@ -432,10 +432,10 @@ public class AntiAFK extends Module {
             case Random -> {
                 if (wander.get()) {
                     if (ticksWalking <= 0) {
-                        boolean shouldWander = random.nextInt(wanderRate.get()) == 0;
+                        boolean shouldWander = random.nextInt(wanderChance.get()) == 0;
 
                         if (shouldWander) {
-                            ticksWalking = random.nextInt(69,1337);
+                            ticksWalking = random.nextInt(69, 1337);
                             mc.options.forwardKey.setPressed(true);
                             hadAutoJump = mc.options.getAutoJump().getValue();
                             mc.options.getAutoJump().setValue(true);
@@ -446,19 +446,13 @@ public class AntiAFK extends Module {
                                 mc.options.getAutoJump().setValue(false);
                             }
                         }
-
-                    } else --ticksWalking;
-
-                    if (wanderPitchOutOfBounds()) {
-                        if (lookRate.get() > 0) lookRandomly();
-                        else if (random.nextInt(99) == 0) lookRandomly();
-                    } else {
-                        if (lookRate.get() > 0) yawRandomly(wanderPitch.get());
-                        else if (random.nextInt(99) == 0) yawRandomly(wanderPitch.get());
                     }
 
-                } else if (lookRate.get() > 0) lookRandomly();
-                else if (random.nextInt(99) == 0) lookRandomly();
+                    if (wanderPitchOutOfBounds()) {
+                        if (lookRate.get() > 0 || random.nextInt(99) == 0) lookRandomly();
+                    } else if (lookRate.get() > 0 || random.nextInt(99) == 0) yawRandomly(wanderPitch.get());
+
+                } else if (lookRate.get() > 0 || random.nextInt(99) == 0) lookRandomly();
             }
             case Entity, RandomEntity, Player -> {
                 boolean playerMode = lookMode.get().equals(LookMode.Player);
