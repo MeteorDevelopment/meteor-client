@@ -391,7 +391,7 @@ public class Nametags extends Module {
 
     private void renderNametagPlayer(Render2DEvent event, PlayerEntity player, boolean shadow) {
         TextRenderer text = TextRenderer.get();
-        NametagUtils.begin(pos, event.drawContext);
+        NametagUtils.begin(pos);
 
         // Gamemode
         GameMode gm = EntityUtils.getGameMode(player);

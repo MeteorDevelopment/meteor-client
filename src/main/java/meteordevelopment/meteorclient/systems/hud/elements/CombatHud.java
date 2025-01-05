@@ -352,7 +352,7 @@ public class CombatHud extends HudElement {
 
                 ItemStack itemStack = getItem(slot);
 
-                renderer.item(itemStack, (int) (armorX * scale.get()), (int) (armorY * scale.get()), scale.get().floatValue(), true);
+                renderer.item(itemStack, (int) (armorX), (int) (armorY), 1, true);
 
                 armorY += 18;
 
