@@ -444,7 +444,7 @@ public class AntiAFK extends Module {
                             --ticksWalking;
                             if (ticksWalking >= -5) {
                                 mc.options.forwardKey.setPressed(false);
-                                mc.options.getAutoJump().setValue(false);
+                                mc.options.getAutoJump().setValue(hadAutoJump);
                             }
                         }
                     }
