@@ -577,7 +577,7 @@ public class Nametags extends Module {
             }
         } else if (displayEnchants.get()) displayEnchants.set(false);
 
-        NametagUtils.end(event.drawContext);
+        NametagUtils.end();
     }
 
     private void renderNametagItem(ItemStack stack, boolean shadow) {
