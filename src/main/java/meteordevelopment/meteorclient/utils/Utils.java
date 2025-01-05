@@ -515,6 +515,8 @@ public class Utils {
 
     public static void leftClick() {
         // check if a screen is open
+        // see net.minecraft.client.Mouse.lockCursor
+        // see net.minecraft.client.MinecraftClient.tick
         int attackCooldown = ((MinecraftClientAccessor) mc).getAttackCooldown();
         if (attackCooldown == 10000) {
             ((MinecraftClientAccessor) mc).setAttackCooldown(0);
