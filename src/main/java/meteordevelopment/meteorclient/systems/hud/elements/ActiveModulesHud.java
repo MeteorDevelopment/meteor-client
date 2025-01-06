@@ -160,18 +160,18 @@ public class ActiveModulesHud extends HudElement {
 
     // Background
 
-    private final Setting<Background> background = sgBackground.add(new EnumSetting.Builder<Background>()
+    private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
         .name("background")
-        .description("How to render the background.")
-        .defaultValue(Background.None)
+        .description("Displays background.")
+        .defaultValue(false)
         .build()
     );
 
     private final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color of the background.")
-        .defaultValue(new SettingColor(0, 0, 0, 75))
-        .visible(() -> background.get() != Background.None)
+        .description("Color used for the background.")
+        .visible(background::get)
+        .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()
     );
 
@@ -250,10 +250,6 @@ public class ActiveModulesHud extends HudElement {
             prevX = x + offset;
             y += renderer.textHeight(shadow.get(), getScale());
         }
-
-        if (background.get() == Background.Block) {
-            renderer.quad(this.x - 2, this.y - 2, getWidth() + 4, getHeight() + 4, backgroundColor.get());
-        }
     }
 
     private void renderModule(HudRenderer renderer, int index, double x, double y) {
@@ -296,7 +292,7 @@ public class ActiveModulesHud extends HudElement {
                 renderer.quad(x - 2 - outlineWidth.get(), lineStartY - outlineWidth.get(),
                     textLength + 4 + 2 * outlineWidth.get(),
                     outlineWidth.get(), prevColor, prevColor, color, color);
-            } else if (background.get() != Background.Block) { // Otherwise render the inbetween quads that connect each side quad
+            } else { // Inbetweens are rendered above the current line so don't need for the top
                 renderer.quad(Math.min(prevX, x) - 2 - outlineWidth.get(), Math.max(prevX, x) == x ? y : y - outlineWidth.get(),
                     (Math.max(prevX, x) - 2) - (Math.min(prevX, x) - 2 - outlineWidth.get()), outlineWidth.get(),
                     prevColor, prevColor, color, color); // Left inbetween quad
@@ -323,7 +319,7 @@ public class ActiveModulesHud extends HudElement {
                 prevColor, prevColor, color, color);
         }
 
-        if (background.get() == Background.Text) {
+        if (background.get()) {
             renderer.quad( x - 2, lineStartY, textLength + 4, lineHeight, backgroundColor.get());
         }
 
