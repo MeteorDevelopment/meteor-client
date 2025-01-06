@@ -7,10 +7,10 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.AutoReconnect;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.DirectionalLayoutWidget;
 import net.minecraft.text.Text;
@@ -40,7 +40,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
     private void addButtons(CallbackInfo ci) {
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
 
-        if (autoReconnect.lastServerConnection != null) {
+        if (autoReconnect.lastServerConnection != null && !autoReconnect.button.get()) {
             reconnectBtn = new ButtonWidget.Builder(Text.literal(getText()), button -> tryConnecting()).build();
             grid.add(reconnectBtn);
 
