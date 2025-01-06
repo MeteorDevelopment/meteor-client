@@ -172,6 +172,8 @@ public class Modules extends System<Modules> {
         Map<Module, Integer> modules = new ValueComparableMap<>(Comparator.naturalOrder());
 
         for (Module module : this.moduleInstances.values()) {
+            if (Config.get().hiddenModules.get().contains(module)) continue;
+
             int score = Utils.searchLevenshteinDefault(module.title, text, false);
             if (Config.get().moduleAliases.get()) {
                 for (String alias : module.aliases) {
@@ -179,6 +181,7 @@ public class Modules extends System<Modules> {
                     if (aliasScore < score) score = aliasScore;
                 }
             }
+
             modules.put(module, modules.getOrDefault(module, 0) + score);
         }
 
@@ -189,6 +192,8 @@ public class Modules extends System<Modules> {
         Map<Module, Integer> modules = new ValueComparableMap<>(Comparator.naturalOrder());
 
         for (Module module : this.moduleInstances.values()) {
+            if (Config.get().hiddenModules.get().contains(module)) continue;
+
             int lowest = Integer.MAX_VALUE;
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
@@ -196,6 +201,7 @@ public class Modules extends System<Modules> {
                     if (score < lowest) lowest = score;
                 }
             }
+
             modules.put(module, modules.getOrDefault(module, 0) + lowest);
         }
 
