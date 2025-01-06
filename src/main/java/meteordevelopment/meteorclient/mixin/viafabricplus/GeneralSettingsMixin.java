@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.mixin.viafabricplus;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import de.florianmichael.viafabricplus.settings.impl.GeneralSettings;
+import com.viaversion.viafabricplus.settings.impl.GeneralSettings;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
