@@ -1,7 +1,7 @@
 plugins {
-    id "fabric-loom" version "1.8-SNAPSHOT"
+    id "fabric-loom" version "1.9-SNAPSHOT"
     id "maven-publish"
-    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.gradleup.shadow" version "8.3.5"
 }
 
 base {
@@ -60,7 +60,8 @@ dependencies {
     modCompileOnly("maven.modrinth:sodium:${project.sodium_version}") { transitive = false }
     modCompileOnly("maven.modrinth:lithium:${project.lithium_version}") { transitive = false }
     modCompileOnly("maven.modrinth:iris:${project.iris_version}") { transitive = false }
-    modCompileOnly("de.florianmichael:ViaFabricPlus:${project.viafabricplus_version}") { transitive = false }
+    modCompileOnly("com.viaversion:viafabricplus:${project.viafabricplus_version}") { transitive = false }
+    modCompileOnly("com.viaversion:viafabricplus-api:${project.viafabricplus_version}") { transitive = false }
 
     // Baritone (https://github.com/MeteorDevelopment/baritone)
     modCompileOnly "meteordevelopment:baritone:${project.baritone_version}-SNAPSHOT"
