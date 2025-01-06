@@ -140,8 +140,6 @@ public class ItemPhysics extends Module {
     }
 
     private ModelInfo getInfo(BakedModel model) {
-        Random random = Random.createLocal();
-
         float minX = Float.MAX_VALUE, maxX = Float.MIN_VALUE;
         float minY = Float.MAX_VALUE, maxY = Float.MIN_VALUE;
         float minZ = Float.MAX_VALUE, maxZ = Float.MIN_VALUE;
