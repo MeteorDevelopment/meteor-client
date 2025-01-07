@@ -143,6 +143,10 @@ tasks {
         }
     }
 
+    withType<JavaCompile> {
+        options.release = 21
+    }
+
     shadowJar {
         configurations = listOf(project.configurations.shadow.get())
 
