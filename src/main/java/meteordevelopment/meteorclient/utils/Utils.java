@@ -272,13 +272,16 @@ public class Utils {
         if (shulkerItem.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
             if (block == Blocks.ENDER_CHEST) return BetterTooltips.ECHEST_COLOR;
+
             if (block instanceof ShulkerBoxBlock shulkerBlock) {
                 DyeColor dye = shulkerBlock.getColor();
                 if (dye == null) return WHITE;
+
                 final int color = dye.getEntityColor();
-                return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 1f);
+                return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 255);
             }
         }
+
         return WHITE;
     }
 
@@ -511,6 +514,14 @@ public class Utils {
     }
 
     public static void leftClick() {
+        // check if a screen is open
+        // see net.minecraft.client.Mouse.lockCursor
+        // see net.minecraft.client.MinecraftClient.tick
+        int attackCooldown = ((MinecraftClientAccessor) mc).getAttackCooldown();
+        if (attackCooldown == 10000) {
+            ((MinecraftClientAccessor) mc).setAttackCooldown(0);
+        }
+
         mc.options.attackKey.setPressed(true);
         ((MinecraftClientAccessor) mc).leftClick();
         mc.options.attackKey.setPressed(false);

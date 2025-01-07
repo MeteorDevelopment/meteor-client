@@ -64,7 +64,7 @@ public class WireframeEntityRenderer {
         matrices.push();
         matrices.scale((float) scale, (float) scale, (float) scale);
         renderer.render(state, matrices, MyVertexConsumerProvider.INSTANCE, 15);
-        matrices.push();
+        matrices.pop();
     }
 
     private static class MyVertexConsumerProvider implements VertexConsumerProvider {
