@@ -138,7 +138,7 @@ tasks {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
 
-        if (System.getProperty("CI")?.toBoolean() == true) {
+        if (System.getenv("CI")?.toBoolean() == true) {
             withSourcesJar()
             withJavadocJar()
         }
@@ -177,7 +177,7 @@ tasks {
     }
 
     build {
-        if (System.getProperty("CI")?.toBoolean() == true) {
+        if (System.getenv("CI")?.toBoolean() == true) {
             dependsOn("javadocJar")
         }
     }
