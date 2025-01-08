@@ -31,6 +31,10 @@ function sendDiscordWebhook() {
             }
             if (hasChanges) description += changes;
 
+            if (success) {
+                description += "\n\nVisit our [website](https://meteorclient.com) for download";
+            }
+
             const webhook = {
                 username: "Builds",
                 avatar_url: "https://meteorclient.com/icon.png",

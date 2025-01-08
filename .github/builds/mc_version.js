@@ -16,7 +16,7 @@ export async function getMcVersion() {
 
     for await (const line of lines) {
         if (line.startsWith("minecraft_version")) {
-            mcVersion = line.substring(0, line.indexOf("="))
+            mcVersion = line.substring(line.indexOf("=") + 1)
             break
         }
     }
