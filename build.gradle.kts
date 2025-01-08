@@ -75,7 +75,8 @@ dependencies {
     modCompileOnly("maven.modrinth:sodium:${properties["sodium_version"] as String}") { isTransitive  = false }
     modCompileOnly("maven.modrinth:lithium:${properties["lithium_version"] as String}") { isTransitive  = false }
     modCompileOnly("maven.modrinth:iris:${properties["iris_version"] as String}") { isTransitive  = false }
-    modCompileOnly("de.florianmichael:ViaFabricPlus:${properties["viafabricplus_version"] as String}") { isTransitive  = false }
+    modCompileOnly("com.viaversion:viafabricplus:${properties["viafabricplus_version"] as String}") { isTransitive  = false }
+    modCompileOnly("com.viaversion:viafabricplus-api:${properties["viafabricplus_version"] as String}") { isTransitive  = false }
 
     // Baritone (https://github.com/MeteorDevelopment/baritone)
     modCompileOnly("meteordevelopment:baritone:${properties["baritone_version"] as String}-SNAPSHOT")
