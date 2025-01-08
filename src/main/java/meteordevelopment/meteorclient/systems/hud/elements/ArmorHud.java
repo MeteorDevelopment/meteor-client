@@ -50,14 +50,6 @@ public class ArmorHud extends HudElement {
         .build()
     );
 
-    private final Setting<Integer> border = sgGeneral.add(new IntSetting.Builder()
-        .name("border")
-        .description("How much space to add around the element.")
-        .defaultValue(0)
-        .onChanged(integer -> calculateSize())
-        .build()
-    );
-
     // Durability
 
     private final Setting<Durability> durability = sgDurability.add(new EnumSetting.Builder<Durability>()
@@ -105,11 +97,6 @@ public class ArmorHud extends HudElement {
         super(INFO);
 
         calculateSize();
-    }
-
-    @Override
-    public void setSize(double width, double height) {
-        super.setSize(width + border.get() * 2, height + border.get() * 2);
     }
 
     private void calculateSize() {
