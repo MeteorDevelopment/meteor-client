@@ -1,4 +1,4 @@
-name: Dev Build
+name: Build
 
 concurrency:
   group: "build"
@@ -38,7 +38,7 @@ jobs:
         run: |
           cd .github/builds
           npm install
-          node get_number.js >> $GITHUB_OUTPUT
+          npm run get_number >> $GITHUB_OUTPUT
 
       - name: Build
         run: ./gradlew build -Pcommit=${{ github.sha }} -Pbuild_number=${{ steps.build-number.outputs.number }}
@@ -47,7 +47,7 @@ jobs:
         if: ${{ failure() }}
         run: |
           cd .github/builds
-          npm start ${{ steps.build-number.outputs.number }} ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} false
+          npm run webhook ${{ steps.build-number.outputs.number }} ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} false
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
@@ -60,7 +60,7 @@ jobs:
       - name: Discord webhook
         run: |
           cd .github/builds
-          npm start ${{ steps.build-number.outputs.number }} ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} true
+          npm run webhook ${{ steps.build-number.outputs.number }} ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} true
         env:
           SERVER_TOKEN: ${{ secrets.SERVER_TOKEN }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

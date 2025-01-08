@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-const { getMcVersion } = require("./mc_version")
+import { getMcVersion } from "./mc_version.js"
 
 const buildNumber = process.argv[2];
 const branch = process.argv[3];

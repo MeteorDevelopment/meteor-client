@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-const { getMcVersion } = require("./mc_version")
+import { getMcVersion } from "./mc_version.js"
 
 const mcVersion = await getMcVersion();
 

@@ -3,8 +3,8 @@
  * Copyright (c) Meteor Development.
  */
 
-const fs = require("fs")
-const readline = require("readline")
+import * as fs from "fs"
+import * as readline from "readline"
 
 export async function getMcVersion() {
     let lines = readline.createInterface({
