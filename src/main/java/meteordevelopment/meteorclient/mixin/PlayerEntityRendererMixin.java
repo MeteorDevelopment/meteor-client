@@ -7,8 +7,6 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
@@ -28,6 +26,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 @Mixin(PlayerEntityRenderer.class)
 public abstract class PlayerEntityRendererMixin {
     // Chams
@@ -45,7 +45,7 @@ public abstract class PlayerEntityRendererMixin {
     @Inject(method = "updateRenderState(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;F)V", at = @At("RETURN"))
     private void updateRenderState$scale(AbstractClientPlayerEntity player, PlayerEntityRenderState state, float f, CallbackInfo info) {
         if (!chams.isActive() || !chams.players.get()) return;
-        if (chams.ignoreSelf.get() && player == MeteorClient.mc.player) return;
+        if (chams.ignoreSelf.get() && player == mc.player) return;
 
         float v = chams.playersScale.get().floatValue();
         state.baseScale *= v;
@@ -82,7 +82,7 @@ public abstract class PlayerEntityRendererMixin {
 
     @Inject(method = "updateRenderState(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;F)V", at = @At("RETURN"))
     private void updateRenderState$rotations(AbstractClientPlayerEntity player, PlayerEntityRenderState state, float f, CallbackInfo info) {
-        if (Rotations.rotating && ((IEntityRenderState) state).meteor$getEntity() == MeteorClient.mc.player) {
+        if (Rotations.rotating && player == mc.player) {
             state.bodyYaw = Rotations.serverYaw;
             state.pitch = Rotations.serverPitch;
         }
