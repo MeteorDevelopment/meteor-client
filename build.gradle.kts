@@ -6,8 +6,15 @@ plugins {
 
 base {
     archivesName = properties["archives_base_name"] as String
-    version = properties["mod_version"] as String + (if (project.hasProperty("devbuild")) ("-" + project.findProperty("devbuild")) else "")
     group = properties["maven_group"] as String
+
+    val suffix = if (project.hasProperty("build_number")) {
+         project.findProperty("build_number")
+    } else {
+        "local"
+    }
+
+    version = properties["minecraft_version"] as String + "-" + suffix
 }
 
 repositories {
@@ -106,12 +113,12 @@ afterEvaluate {
 
 tasks {
     processResources {
-        val devbuild = project.findProperty("devbuild")?.toString() ?: ""
+        val buildNumber = project.findProperty("build_number")?.toString() ?: ""
         val commit = project.findProperty("commit")?.toString() ?: ""
 
         val propertyMap = mapOf(
             "version"           to project.version,
-            "devbuild"          to devbuild,
+            "build_number"      to buildNumber,
             "commit"            to commit,
             "minecraft_version" to project.property("minecraft_version"),
             "loader_version"    to project.property("loader_version")
@@ -189,13 +196,12 @@ publishing {
             from(components["java"])
             artifactId = "meteor-client"
 
-            version = properties["mod_version"] as String
-            if (project.hasProperty("devbuild")) version += "-SNAPSHOT"
+            version = properties["minecraft_version"] as String + "-SNAPSHOT"
         }
     }
 
     repositories {
-        maven(if (project.hasProperty("devbuild")) "https://maven.meteordev.org/snapshots" else "https://maven.meteordev.org/releases") {
+        maven("https://maven.meteordev.org/snapshots") {
             name = "meteor-maven"
 
             credentials {

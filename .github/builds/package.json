@@ -8,6 +8,5 @@
   "scripts": {
     "get_number": "node get_number.js",
     "start": "node index.js"
-  },
-  "dependencies": {}
+  }
 }
