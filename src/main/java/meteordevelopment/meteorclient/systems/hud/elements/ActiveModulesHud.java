@@ -23,7 +23,7 @@ public class ActiveModulesHud extends HudElement {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColor = settings.createGroup("Color");
     private final SettingGroup sgScale = settings.createGroup("Scale");
-    private final SettingGroup sgBackground = settings.createGroup("Color");
+    private final SettingGroup sgBackground = settings.createGroup("Background");
 
     private final Setting<Sort> sort = sgGeneral.add(new EnumSetting.Builder<Sort>()
         .name("sort")
