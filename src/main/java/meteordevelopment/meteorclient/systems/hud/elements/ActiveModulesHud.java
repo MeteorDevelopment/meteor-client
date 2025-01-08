@@ -339,7 +339,7 @@ public class ActiveModulesHud extends HudElement {
     }
 
     private double getScale() {
-        return customScale.get() ? scale.get() : -1;
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 
     public enum Sort {
