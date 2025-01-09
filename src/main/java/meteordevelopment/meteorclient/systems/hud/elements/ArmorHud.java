@@ -113,8 +113,8 @@ public class ArmorHud extends HudElement {
 
     private void calculateSize() {
         switch (orientation.get()) {
-            case Horizontal -> setSize(16 * getScale() * 4 + 2 * 4, 16 * getScale());
-            case Vertical -> setSize(16 * getScale(), 16 * getScale() * 4 + 2 * 4);
+            case Horizontal -> setSize(16 * getScale() * 4 + 2 * 4 * getScale(), 16 * getScale());
+            case Vertical -> setSize(16 * getScale(), 16 * getScale() * 4 + 2 * 4 * getScale());
         }
     }
 
