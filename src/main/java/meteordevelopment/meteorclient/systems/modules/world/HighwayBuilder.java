@@ -6,26 +6,26 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ShulkerBoxScreenHandlerAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
+import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
-import meteordevelopment.meteorclient.systems.modules.player.AutoEat;
-import meteordevelopment.meteorclient.systems.modules.player.AutoGap;
-import meteordevelopment.meteorclient.systems.modules.player.AutoTool;
-import meteordevelopment.meteorclient.systems.modules.player.InstantRebreak;
+import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
 import meteordevelopment.meteorclient.utils.misc.MBlockPos;
 import meteordevelopment.meteorclient.utils.player.*;
+import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -59,7 +59,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EmptyBlockView;
 import net.minecraft.world.RaycastContext;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3d;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -184,6 +186,21 @@ public class HighwayBuilder extends Module {
 
     // Digging
 
+    private final Setting<Boolean> doubleMine = sgDigging.add(new BoolSetting.Builder()
+        .name("double-mine")
+        .description("Whether to double mine blocks when applicable (normal mine and packet mine simultaneously).")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> fastBreak = sgDigging.add(new BoolSetting.Builder()
+        .name("fast-break")
+        .description("Whether to finish breaking blocks faster than normal while double mining.")
+        .defaultValue(true)
+        .visible(doubleMine::get)
+        .build()
+    );
+
     private final Setting<Boolean> dontBreakTools = sgDigging.add(new BoolSetting.Builder()
         .name("dont-break-tools")
         .description("Don't break tools.")
@@ -229,11 +246,11 @@ public class HighwayBuilder extends Module {
     );
 
     private final Setting<Double> placeRange = sgPaving.add(new DoubleSetting.Builder()
-    	.name("place-range")
-    	.description("The maximum distance at which you can place blocks.")
-    	.defaultValue(4.5)
+        .name("place-range")
+        .description("The maximum distance at which you can place blocks.")
+        .defaultValue(4.5)
         .max(5.5)
-    	.build()
+        .build()
     );
 
     private final Setting<Integer> placeDelay = sgPaving.add(new IntSetting.Builder()
@@ -420,6 +437,7 @@ public class HighwayBuilder extends Module {
     private int placeTimer, breakTimer, count, syncId;
     private final RestockTask restockTask = new RestockTask();
     private final ArrayList<EndCrystalEntity> ignoreCrystals = new ArrayList<>();
+    public DoubleMineBlock normalMining, packetMining;
 
     private final MBlockPos posRender2 = new MBlockPos();
     private final MBlockPos posRender3 = new MBlockPos();
@@ -455,6 +473,8 @@ public class HighwayBuilder extends Module {
         placeTimer = breakTimer = count = syncId = 0;
         restockTask.complete();
         ignoreCrystals.clear();
+
+        normalMining = packetMining = null;
 
         if (blocksPerTick.get() > 1 && rotation.get().mine) warning("With rotations enabled, you can break at most 1 block per tick.");
         if (placementsPerTick.get() > 1 && rotation.get().place) warning("With rotations enabled, you can place at most 1 block per tick.");
@@ -512,6 +532,7 @@ public class HighwayBuilder extends Module {
         count = 0;
 
         if (mc.player.getY() < start.y - 0.5) setState(State.ReLevel); // don't let the current state keep ticking, switch to re-levelling straight away
+        tickDoubleMine();
         state.tick(this);
 
         if (breakTimer > 0) breakTimer--;
@@ -523,6 +544,14 @@ public class HighwayBuilder extends Module {
         if (event.packet instanceof InventoryS2CPacket p && p.getSyncId() != 0) {
             this.syncId = p.getSyncId();
         }
+    }
+
+    @EventHandler
+    private void onRender2d(Render2DEvent event) {
+        if (!renderMine.get()) return;
+
+        if (normalMining != null) normalMining.renderLetter();
+        if (packetMining != null) packetMining.renderLetter();
     }
 
     @EventHandler
@@ -539,10 +568,26 @@ public class HighwayBuilder extends Module {
 
         if (renderPlace.get()) {
             render(event, blockPosProvider.getLiquids(), mBlockPos -> canPlace(mBlockPos, true), false);
+
             if (railings.get()) {
                 render(event, blockPosProvider.getRailings(0), mBlockPos -> canPlace(mBlockPos, false), false);
-                if (cornerBlock.get()) render(event, blockPosProvider.getRailings(-1), mBlockPos -> canPlace(mBlockPos, false), false);
+
+                if (cornerBlock.get()) {
+                    // make sure we only render corner support blocks if we are actually planning to place a block there
+                    render(event, blockPosProvider.getRailings(-1), mBlockPos -> {
+                        boolean valid = false;
+                        for (MBlockPos pos : blockPosProvider.getRailings(0)) {
+                            if (!blocksToPlace.get().contains(pos.getState().getBlock()) && pos.add(0, -1, 0).equals(mBlockPos)) {
+                                valid = true;
+                                break;
+                            }
+                        }
+
+                        return valid && canPlace(mBlockPos, false);
+                    }, false);
+                }
             }
+
             render(event, blockPosProvider.getFloor(), mBlockPos -> canPlace(mBlockPos, false), false);
             if (state == State.PlaceEChestBlockade) render(event, blockPosProvider.getBlockade(false, blockadeType.get()), mBlockPos -> canPlace(mBlockPos, false), false);
         }
@@ -625,6 +670,38 @@ public class HighwayBuilder extends Module {
         text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
 
         return text;
+    }
+
+    private void tickDoubleMine() {
+        // could add clientside block breaking to speed the system up, but it would probably make it too vulnerable to desyncs
+        if (normalMining != null) {
+            if (normalMining.shouldRemove()) {
+                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, normalMining.blockPos, normalMining.direction));
+                normalMining = null;
+                DoubleMineBlock.rateLimited = true;
+            }
+            else if (mc.world.getBlockState(normalMining.blockPos).getBlock() != normalMining.block) {
+                normalMining = null;
+                blocksBroken++;
+                count++;
+                DoubleMineBlock.rateLimited = false;
+            }
+            else if (normalMining.isReady()) {
+                normalMining.stopDestroying();
+            }
+        }
+
+        if (packetMining != null) {
+            if (packetMining.shouldRemove()) {
+                // should we add rate limiting for packet mined blocks? More testing required to see if appropriate
+                packetMining = null;
+            }
+            else if (mc.world.getBlockState(packetMining.blockPos).getBlock() != packetMining.block) {
+                packetMining = null;
+                blocksBroken++;
+                count++;
+            }
+        }
     }
 
     private enum State {
@@ -739,8 +816,9 @@ public class HighwayBuilder extends Module {
                     Vec3d vec1 = new Vec3d(0, 0, 0);
                     Vec3d vec2 = new Vec3d(0, 0, 0);
 
+                    // todo add a better raytrace check
                     ((IVec3d) vec1).meteor$set(b.mc.player.getX(), b.mc.player.getY() + b.mc.player.getStandingEyeHeight(), b.mc.player.getZ());
-                    ((IVec3d) vec2).meteor$set(entity.getX(), entity.getY(), entity.getZ());
+                    ((IVec3d) vec2).meteor$set(entity.getX(), entity.getY() + 0.5, entity.getZ());
                     return b.mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, b.mc.player)).getType() == HitResult.Type.MISS;
                 }
 
@@ -1677,6 +1755,48 @@ public class HighwayBuilder extends Module {
             boolean breaking = false;
             boolean finishedBreaking = false; // if you can multi break this lets you mine blocks between tasks in a single tick
 
+            // extract all candidates for double mining and enqueue them to be mined. After those we can break the remaining
+            // blocks normally
+            if (b.doubleMine.get()) {
+                ArrayDeque<BlockPos> toDoubleMine = new ArrayDeque<>();
+
+                it.save();
+                it.forEach(pos -> {
+                    // only want to double mine blocks that we can mine, that are not instamined, and we are not already mining
+                    if (
+                        BlockUtils.canBreak(pos.getBlockPos(), pos.getState())
+                        && (mineBlocksToPlace || !b.blocksToPlace.get().contains(pos.getState().getBlock()))
+                        && !BlockUtils.canInstaBreak(pos.getBlockPos()) && (!Modules.get().get(SpeedMine.class).instamine() || pos.getState().calcBlockBreakingDelta(b.mc.player, b.mc.world, pos.getBlockPos()) <= 0.5)
+                        && (b.normalMining == null || !pos.getBlockPos().equals(b.normalMining.blockPos))
+                        && (b.packetMining == null || !pos.getBlockPos().equals(b.packetMining.blockPos))
+                    ) {
+                        toDoubleMine.add(pos.getBlockPos().mutableCopy());
+                    }
+                });
+
+                // have to save and restore the iterator from the beginning to make sure the subsequent loop can use it properly
+                it.restore();
+
+                // repeating the code for swapping to a tool, since we don't want to start mining a block if we don't
+                // have a tool to mine it with, but also we want to lock the slot to the tool while we are mining even
+                // the ArrayDequeue is empty
+                if (!toDoubleMine.isEmpty()) {
+                    int slot = findAndMoveBestToolToHotbar(b, b.mc.world.getBlockState(toDoubleMine.peek()), false);
+                    if (slot == -1) return;
+
+                    InvUtils.swap(slot, false);
+                    doubleMine(b, toDoubleMine);
+                }
+
+                if (b.normalMining != null || b.packetMining != null) {
+                    int slot = findAndMoveBestToolToHotbar(b, b.normalMining != null ? b.normalMining.blockState : b.packetMining.blockState, false);
+                    if (slot == -1) return;
+
+                    InvUtils.swap(slot, false);
+                    return;
+                }
+            }
+
             for (MBlockPos pos : it) {
                 if (b.count >= b.blocksPerTick.get()) return;
                 if (b.breakTimer > 0) return;
@@ -1690,6 +1810,7 @@ public class HighwayBuilder extends Module {
                 InvUtils.swap(slot, false);
 
                 BlockPos mcPos = pos.getBlockPos();
+                boolean multiBreak = b.blocksPerTick.get() > 1 && BlockUtils.canInstaBreak(mcPos) && !b.rotation.get().mine;
                 if (BlockUtils.canBreak(mcPos)) {
                     if (b.rotation.get().mine) Rotations.rotate(Rotations.getYaw(mcPos), Rotations.getPitch(mcPos), () -> BlockUtils.breakBlock(mcPos, true));
                     else BlockUtils.breakBlock(mcPos, true);
@@ -1705,17 +1826,43 @@ public class HighwayBuilder extends Module {
                     b.count++;
 
                     // can only multi break if we aren't rotating and the block can be insta-mined
-                    if (b.blocksPerTick.get() == 1 || !BlockUtils.canInstaBreak(mcPos) || b.rotation.get().mine) break;
+                    if (!multiBreak) break;
                 }
 
                 if (!it.hasNext() && BlockUtils.canInstaBreak(mcPos)) finishedBreaking = true;
             }
 
+            // we quickly jump to the next state, to remove micro delays in the process and allow us to break blocks
+            // between tasks if we can multi break
             if (finishedBreaking || !breaking) {
                 b.setState(nextState, lastState);
             }
         }
 
+        private void doubleMine(HighwayBuilder b, ArrayDeque<BlockPos> blocks) {
+            if (b.breakTimer > 0) return;
+
+            if (b.normalMining == null) {
+                DoubleMineBlock block = new DoubleMineBlock(b, blocks.pop());
+                b.normalMining = block.startDestroying();
+
+                b.breakTimer = b.breakDelay.get();
+                if (b.breakTimer > 0) return;
+            }
+
+            if (DoubleMineBlock.rateLimited) return;
+
+            if (b.packetMining == null && !blocks.isEmpty()) {
+                DoubleMineBlock block = new DoubleMineBlock(b, blocks.pop());
+
+                if (block != null) {
+                    b.packetMining = b.normalMining.packetMine();
+                    b.normalMining = block.startDestroying();
+
+                    b.breakTimer = b.breakDelay.get();
+                }
+            }
+        }
 
         protected void place(HighwayBuilder b, MBPIterator it, int slot, State nextState) {
             boolean placed = false;
@@ -2523,6 +2670,80 @@ public class HighwayBuilder extends Module {
                     return 1;
                 }
             };
+        }
+    }
+
+    public static class DoubleMineBlock {
+        public static boolean rateLimited = false;
+        public final BlockPos blockPos;
+        public final BlockState blockState;
+
+        private final Block block;
+        private final Direction direction;
+        private final HighwayBuilder b;
+        private final Vector3d vec3 = new Vector3d(0);
+
+        private int normalStartTime, packetStartTime;
+        private boolean packet;
+
+        public DoubleMineBlock(HighwayBuilder b, BlockPos pos) {
+            this.b = b;
+            this.blockPos = pos;
+            this.blockState = b.mc.world.getBlockState(this.blockPos);
+            this.block = this.blockState.getBlock();
+            this.direction = BlockUtils.getDirection(pos);
+            this.packet = false;
+        }
+
+        public DoubleMineBlock startDestroying() {
+            b.mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, this.blockPos, this.direction));
+            normalStartTime = b.mc.player.age;
+            return this;
+        }
+
+        public DoubleMineBlock stopDestroying() {
+            b.mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.blockPos, this.direction));
+            return this;
+        }
+
+        public DoubleMineBlock packetMine() {
+            packetStartTime = b.mc.player.age;
+            packet = true;
+            return stopDestroying();
+        }
+
+        public boolean isReady() {
+            return progress() >= (b.fastBreak.get() ? 0.7 : 1.0);
+        }
+
+        public boolean shouldRemove() {
+            boolean distance = !packet && Utils.distance(b.mc.player.getEyePos().x, b.mc.player.getEyePos().y, b.mc.player.getEyePos().z, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > b.mc.player.getBlockInteractionRange();
+
+            // a minimum amount of time needs to have elapsed for the timeout check to occur, otherwise it may trigger
+            // when it isn't supposed to due to latency
+            boolean timeout = progress() > 2 && ((packet ? packetStartTime : normalStartTime) - b.mc.player.age > 20);
+
+            return  distance || timeout;
+        }
+
+        public double progress() {
+            int slot = b.mc.player.getInventory().selectedSlot;
+            return BlockUtils.getBreakDelta(slot , blockState) * ((b.mc.player.age - (packet ? packetStartTime : normalStartTime)) + 1);
+        }
+
+        public void renderLetter() {
+            vec3.set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+            if (!NametagUtils.to2D(vec3, 2)) return;
+
+            NametagUtils.begin(vec3);
+            TextRenderer.get().begin(1.0, false, true);
+
+            String letter = packet ? "P" : "N";
+            double w = TextRenderer.get().getWidth(letter) / 2.0;
+            TextRenderer.get().render(letter, -w, 0.0, Color.WHITE, true);
+
+            TextRenderer.get().end();
+            NametagUtils.end();
         }
     }
 
