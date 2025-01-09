@@ -41,6 +41,13 @@ public class ArmorHud extends HudElement {
         .build()
     );
 
+    private final Setting<Boolean> showEmpty = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-empty")
+        .description("Renders barrier icons for empty slots.")
+        .defaultValue(false)
+        .build()
+    );
+
     // Durability
 
     private final Setting<Durability> durability = sgDurability.add(new EnumSetting.Builder<Durability>()
@@ -122,12 +129,16 @@ public class ArmorHud extends HudElement {
     public void render(HudRenderer renderer) {
         double x = this.x;
         double y = this.y;
+
         double armorX;
         double armorY;
 
         int slot = flipOrder.get() ? 3 : 0;
+        int emptySlots = 0;
+
         for (int position = 0; position < 4; position++) {
             ItemStack itemStack = getItem(slot);
+            if (itemStack.isEmpty()) emptySlots++;
 
             if (orientation.get() == Orientation.Vertical) {
                 armorX = x;
@@ -163,7 +174,7 @@ public class ArmorHud extends HudElement {
             else slot++;
         }
 
-        if (background.get()) {
+        if (background.get() && emptySlots < 4) {
             renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
         }
     }
@@ -178,7 +189,8 @@ public class ArmorHud extends HudElement {
             };
         }
 
-        return mc.player.getInventory().getArmorStack(i);
+        ItemStack stack = mc.player.getInventory().getArmorStack(i);
+        return stack.isEmpty() && showEmpty.get() ? Items.BARRIER.getDefaultStack() : stack;
     }
 
     private double getScale() {
