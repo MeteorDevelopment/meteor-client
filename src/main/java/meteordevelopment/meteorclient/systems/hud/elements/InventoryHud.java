@@ -27,6 +27,8 @@ public class InventoryHud extends HudElement {
     private static final Identifier TEXTURE_TRANSPARENT = MeteorClient.identifier("textures/container-transparent.png");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgScale = settings.createGroup("Scale");
+    private final SettingGroup sgBackground = settings.createGroup("Background");
 
     private final Setting<Boolean> containers = sgGeneral.add(new BoolSetting.Builder()
         .name("containers")
@@ -35,17 +37,30 @@ public class InventoryHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("The scale.")
-        .defaultValue(2)
-        .min(1)
-        .sliderRange(1, 5)
-        .onChanged(aDouble -> calculateSize())
+    // Scale
+
+    public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
+        .name("custom-scale")
+        .description("Applies custom text scale rather than the global one.")
+        .defaultValue(false)
+        .onChanged(integer -> calculateSize())
         .build()
     );
 
-    private final Setting<Background> background = sgGeneral.add(new EnumSetting.Builder<Background>()
+    public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Custom scale.")
+        .visible(customScale::get)
+        .defaultValue(1)
+        .onChanged(integer -> calculateSize())
+        .min(0.5)
+        .sliderRange(0.5, 3)
+        .build()
+    );
+
+    // Background
+
+    private final Setting<Background> background = sgBackground.add(new EnumSetting.Builder<Background>()
         .name("background")
         .description("Background of inventory viewer.")
         .defaultValue(Background.Texture)
@@ -53,15 +68,16 @@ public class InventoryHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> color = sgGeneral.add(new ColorSetting.Builder()
+    public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color of the background.")
-        .defaultValue(new SettingColor(255, 255, 255))
-        .visible(() -> background.get() != Background.None)
+        .description("Color used for the background.")
+        .visible(() -> background.get() == Background.Flat)
+        .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()
     );
 
     private final ItemStack[] containerItems = new ItemStack[9 * 3];
+    private final Color WHITE = new Color(255, 255, 255);
 
     private InventoryHud() {
         super(INFO);
@@ -76,7 +92,8 @@ public class InventoryHud extends HudElement {
         ItemStack container = getContainer();
         boolean hasContainer = containers.get() && container != null;
         if (hasContainer) Utils.getItemsInContainerItem(container, containerItems);
-        Color drawColor = hasContainer ? Utils.getShulkerColor(container) : color.get();
+        Color drawColor = hasContainer ? Utils.getShulkerColor(container) :
+            background.get() == Background.Flat ? backgroundColor.get() : WHITE;
 
         if (background.get() != Background.None) {
             drawBackground(renderer, (int) x, (int) y, drawColor);
