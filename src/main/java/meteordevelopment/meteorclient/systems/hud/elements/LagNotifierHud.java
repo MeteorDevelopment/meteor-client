@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.TickRate;
-import net.minecraft.world.tick.Tick;
 
 public class LagNotifierHud extends HudElement {
     public static final HudElementInfo<LagNotifierHud> INFO = new HudElementInfo<>(Hud.GROUP, "lag-notifier", "Displays if the server is lagging in ticks.", LagNotifierHud::new);
@@ -59,13 +58,6 @@ public class LagNotifierHud extends HudElement {
         .build()
     );
 
-    private final Setting<Integer> border = sgGeneral.add(new IntSetting.Builder()
-        .name("border")
-        .description("How much space to add around the element.")
-        .defaultValue(0)
-        .build()
-    );
-
     // Scale
 
     private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
@@ -107,11 +99,6 @@ public class LagNotifierHud extends HudElement {
     }
 
     @Override
-    public void setSize(double width, double height) {
-        super.setSize(width + border.get() * 2, height + border.get() * 2);
-    }
-
-    @Override
     public void render(HudRenderer renderer) {
         float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
         if (timeSinceLastTick < 1.1f && !isInEditor()) return;
@@ -129,9 +116,6 @@ public class LagNotifierHud extends HudElement {
     }
 
     private void render(HudRenderer renderer, String right, Color rightColor) {
-        double x = this.x + border.get();
-        double y = this.y + border.get();
-
         double x2 = renderer.text("Time since last tick ", x, y, textColor.get(), shadow.get(), getScale());
         x2 = renderer.text(right, x2, y, rightColor, shadow.get(), getScale());
 
