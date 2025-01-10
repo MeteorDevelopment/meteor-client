@@ -25,6 +25,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -283,7 +284,15 @@ public class StorageESP extends Module {
                 count++;
             }
         }
-        if (mode.get() == Mode.Shader) PostProcessShaders.STORAGE_OUTLINE.endRender(() -> mesh.render(event.matrices));
+
+        if (mode.get() == Mode.Shader) {
+            PostProcessShaders.STORAGE_OUTLINE.endRender(() -> {
+                MatrixStack matrices = new MatrixStack();
+                matrices.multiplyPositionMatrix(event.view);
+
+                mesh.render(matrices);
+            });
+        }
     }
 
 

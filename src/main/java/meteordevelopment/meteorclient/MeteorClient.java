@@ -10,10 +10,13 @@ import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
+import meteordevelopment.meteorclient.renderer.GL;
+import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
@@ -28,6 +31,8 @@ import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
+import meteordevelopment.meteorclient.utils.render.NametagUtils;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
@@ -38,11 +43,16 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.util.Identifier;
+import org.joml.Matrix4f;
+import org.meteordev.juno.api.Device;
+import org.meteordev.juno.api.commands.*;
+import org.meteordev.juno.mc.events.Render3DCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
+import java.util.function.Consumer;
 
 public class MeteorClient implements ClientModInitializer {
     public static final String MOD_ID = "meteor-client";
@@ -139,6 +149,9 @@ public class MeteorClient implements ClientModInitializer {
             Systems.save();
             GuiThemes.save();
         }));
+
+        // Rendering
+        Render3DCallback.EVENT.register(this::onRender3D);
     }
 
     @EventHandler
@@ -165,6 +178,38 @@ public class MeteorClient implements ClientModInitializer {
     private void toggleGui() {
         if (Utils.canCloseGui()) mc.currentScreen.close();
         else if (Utils.canOpenGui()) Tabs.get().getFirst().openScreen(GuiThemes.get());
+    }
+
+    // Rendering
+
+    private final Renderer3D renderer = new Renderer3D();
+
+    private void onRender3D(Device device, Matrix4f projection, Matrix4f view) {
+        RenderUtils.updateScreenCenter(projection, view);
+        NametagUtils.onRender(view);
+
+        GL.enableLineSmooth();
+        CommandList commandList = device.createCommandList();
+
+        renderer.begin();
+
+        Render3DEvent event = Render3DEvent.get(commandList, projection, view, renderer, mc.getRenderTickCounter().getTickDelta(false));
+        EVENT_BUS.post(event);
+
+        RenderPass pass = commandList.beginRenderPass(
+            new Attachment(device.getBackBufferDepth(), LoadOp.LOAD, null, StoreOp.STORE),
+            new Attachment(device.getBackBufferColor(), LoadOp.LOAD, null, StoreOp.STORE)
+        );
+
+        renderer.draw(pass, event.projectionView);
+
+        for (Consumer<RenderPass> action : event.renderToDefaultPass)
+            action.accept(pass);
+
+        pass.end();
+
+        commandList.submit();
+        GL.disableLineSmooth();
     }
 
     // Hide HUD

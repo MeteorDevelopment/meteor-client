@@ -100,10 +100,10 @@ public class Breadcrumbs extends Module {
 
         for (Section section : sections) {
             if (iLast == -1) {
-                iLast = event.renderer.lines.vec3(section.x1, section.y1, section.z1).color(color.get()).next();
+                iLast = event.renderer.lineVertex(section.x1, section.y1, section.z1, color.get());
             }
 
-            int i = event.renderer.lines.vec3(section.x2, section.y2, section.z2).color(color.get()).next();
+            int i = event.renderer.lineVertex(section.x2, section.y2, section.z2, color.get());
             event.renderer.lines.line(iLast, i);
             iLast = i;
         }
@@ -127,10 +127,6 @@ public class Breadcrumbs extends Module {
             x2 = (float) mc.player.getX();
             y2 = (float) mc.player.getY();
             z2 = (float) mc.player.getZ();
-        }
-
-        public void render(Render3DEvent event) {
-            event.renderer.line(x1, y1, z1, x2, y2, z2, color.get());
         }
     }
 }

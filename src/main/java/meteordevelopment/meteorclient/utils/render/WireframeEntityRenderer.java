@@ -107,10 +107,10 @@ public class WireframeEntityRenderer {
             if (i == 4) {
                 if (shapeMode.sides()) {
                     renderer.triangles.quad(
-                        renderer.triangles.vec3(offsetX + xs[0], offsetY + ys[0], offsetZ + zs[0]).color(sideColor).next(),
-                        renderer.triangles.vec3(offsetX + xs[1], offsetY + ys[1], offsetZ + zs[1]).color(sideColor).next(),
-                        renderer.triangles.vec3(offsetX + xs[2], offsetY + ys[2], offsetZ + zs[2]).color(sideColor).next(),
-                        renderer.triangles.vec3(offsetX + xs[3], offsetY + ys[3], offsetZ + zs[3]).color(sideColor).next()
+                        renderer.triangleVertex(offsetX + xs[0], offsetY + ys[0], offsetZ + zs[0], sideColor),
+                        renderer.triangleVertex(offsetX + xs[1], offsetY + ys[1], offsetZ + zs[1], sideColor),
+                        renderer.triangleVertex(offsetX + xs[2], offsetY + ys[2], offsetZ + zs[2], sideColor),
+                        renderer.triangleVertex(offsetX + xs[3], offsetY + ys[3], offsetZ + zs[3], sideColor)
                     );
                 }
 

@@ -8,13 +8,10 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.GetFovEvent;
-import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.LiquidInteract;
 import meteordevelopment.meteorclient.systems.modules.player.NoMiningTrace;
@@ -22,20 +19,14 @@ import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.render.Zoom;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
-import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.render.NametagUtils;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.profiler.Profilers;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -61,59 +52,6 @@ public abstract class GameRendererMixin {
     @Shadow
     @Final
     private Camera camera;
-
-    @Shadow
-    protected abstract void bobView(MatrixStack matrices, float tickDelta);
-
-    @Shadow
-    protected abstract void tiltViewWhenHurt(MatrixStack matrices, float tickDelta);
-
-    @Unique
-    private Renderer3D renderer;
-
-    @Unique
-    private final MatrixStack matrices = new MatrixStack();
-
-    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
-    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 2) Matrix4f view, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
-        if (!Utils.canUpdate()) return;
-
-        Profilers.get().push(MeteorClient.MOD_ID + "_render");
-
-        // Create renderer and event
-
-        if (renderer == null) renderer = new Renderer3D();
-        Render3DEvent event = Render3DEvent.get(matrixStack, renderer, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
-
-        // Call utility classes
-
-        RenderUtils.updateScreenCenter(projection, view);
-        NametagUtils.onRender(view);
-
-        // Update model view matrix
-
-        RenderSystem.getModelViewStack().pushMatrix().mul(view);
-
-        matrices.push();
-
-        tiltViewWhenHurt(matrices, camera.getLastTickDelta());
-        if (client.options.getBobView().getValue()) bobView(matrices, camera.getLastTickDelta());
-
-        RenderSystem.getModelViewStack().mul(matrices.peek().getPositionMatrix().invert());
-        matrices.pop();
-
-        // Render
-
-        renderer.begin();
-        MeteorClient.EVENT_BUS.post(event);
-        renderer.render(matrixStack);
-
-        // Revert model view matrix
-
-        RenderSystem.getModelViewStack().popMatrix();
-
-        Profilers.get().pop();
-    }
 
     @Inject(method = "renderWorld", at = @At("TAIL"))
     private void onRenderWorldTail(CallbackInfo info) {

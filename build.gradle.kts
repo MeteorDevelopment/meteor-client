@@ -97,6 +97,8 @@ dependencies {
     library("io.netty:netty-codec-socks:${properties["netty_version"] as String}") { isTransitive  = false }
     library("de.florianmichael:WaybackAuthLib:${properties["waybackauthlib_version"] as String}")
 
+    modInclude("org.meteordev:juno-mc:${properties["juno_version"]}")
+
     // Launch sub project
     shadow(project(":launch"))
 }
