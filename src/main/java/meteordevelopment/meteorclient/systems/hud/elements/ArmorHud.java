@@ -182,8 +182,6 @@ public class ArmorHud extends HudElement {
                 renderer.text(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
             }
         }
-
-
     }
 
     private ItemStack getItem(int i) {
