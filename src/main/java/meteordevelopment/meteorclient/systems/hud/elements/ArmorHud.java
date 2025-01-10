@@ -137,13 +137,9 @@ public class ArmorHud extends HudElement {
         double armorY;
         int emptySlots = 0;
 
-        List<ItemStack> armor = List.of(
-            getItem(0),
-            getItem(1),
-            getItem(2),
-            getItem(3)
-        );
-        if (flipOrder.get()) armor = armor.reversed();
+        ItemStack[] armor = flipOrder.get() ?
+            new ItemStack[]{getItem(3), getItem(2), getItem(1), getItem(0)} :
+            new ItemStack[]{getItem(0), getItem(1), getItem(2), getItem(3)};
 
         for (ItemStack stack : armor) {
             if (stack.isEmpty()) emptySlots++;
@@ -154,7 +150,7 @@ public class ArmorHud extends HudElement {
         }
 
         for (int position = 0; position < 4; position++) {
-            ItemStack itemStack = armor.get(position);
+            ItemStack itemStack = armor[position];
 
             if (orientation.get() == Orientation.Vertical) {
                 armorX = x;
