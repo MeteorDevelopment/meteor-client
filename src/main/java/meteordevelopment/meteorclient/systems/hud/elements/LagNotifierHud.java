@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.TickRate;
+import net.minecraft.world.tick.Tick;
 
 public class LagNotifierHud extends HudElement {
     public static final HudElementInfo<LagNotifierHud> INFO = new HudElementInfo<>(Hud.GROUP, "lag-notifier", "Displays if the server is lagging in ticks.", LagNotifierHud::new);
@@ -112,24 +113,17 @@ public class LagNotifierHud extends HudElement {
 
     @Override
     public void render(HudRenderer renderer) {
-        if (isInEditor()) {
-            render(renderer, "4.3", color3.get());
-            return;
-        }
-
         float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
+        if (timeSinceLastTick < 1.1f && !isInEditor()) return;
 
-        if (timeSinceLastTick >= 1.1f) {
-            Color color;
+        Color color = isInEditor() || timeSinceLastTick > 10f ? color3.get()
+            : timeSinceLastTick > 3f ? color2.get()
+            : color1.get();
 
-            if (timeSinceLastTick > 10) color = color3.get();
-            else if (timeSinceLastTick > 3) color = color2.get();
-            else color = color1.get();
+        String info = isInEditor() ? "10.2" : String.format("%.1f", timeSinceLastTick);
 
-            render(renderer, String.format("%.1f", timeSinceLastTick), color);
-        }
-
-        if (background.get() && (timeSinceLastTick >= 1.1f || isInEditor())) {
+        render(renderer, info, color);
+        if (background.get()) {
             renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
         }
     }
