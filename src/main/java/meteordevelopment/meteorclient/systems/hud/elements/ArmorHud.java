@@ -88,7 +88,7 @@ public class ArmorHud extends HudElement {
         .name("scale")
         .description("Custom scale.")
         .visible(customScale::get)
-        .defaultValue(1)
+        .defaultValue(2)
         .min(0.5)
         .sliderRange(0.5, 3)
         .onChanged(val -> calculateSize())
