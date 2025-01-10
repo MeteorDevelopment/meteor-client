@@ -54,7 +54,7 @@ public class ItemHud extends HudElement {
         .name("scale")
         .description("Custom scale.")
         .visible(customScale::get)
-        .defaultValue(1)
+        .defaultValue(2.5)
         .onChanged(aDouble -> calculateSize())
         .min(0.5)
         .sliderRange(0.5, 3)
