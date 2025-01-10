@@ -112,10 +112,6 @@ public class LagNotifierHud extends HudElement {
 
     @Override
     public void render(HudRenderer renderer) {
-        if (background.get()) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-        }
-
         if (isInEditor()) {
             render(renderer, "4.3", color3.get());
             return;
@@ -123,7 +119,7 @@ public class LagNotifierHud extends HudElement {
 
         float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
 
-        if (timeSinceLastTick >= 1f) {
+        if (timeSinceLastTick >= 1.1f) {
             Color color;
 
             if (timeSinceLastTick > 10) color = color3.get();
@@ -131,6 +127,10 @@ public class LagNotifierHud extends HudElement {
             else color = color1.get();
 
             render(renderer, String.format("%.1f", timeSinceLastTick), color);
+        }
+
+        if (background.get() && (timeSinceLastTick >= 1.1f || isInEditor())) {
+            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
         }
     }
 
