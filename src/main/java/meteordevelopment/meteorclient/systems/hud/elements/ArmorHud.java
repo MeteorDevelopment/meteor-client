@@ -11,8 +11,11 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+
+import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -132,13 +135,26 @@ public class ArmorHud extends HudElement {
 
         double armorX;
         double armorY;
-
-        int slot = flipOrder.get() ? 3 : 0;
         int emptySlots = 0;
 
+        List<ItemStack> armor = List.of(
+            getItem(0),
+            getItem(1),
+            getItem(2),
+            getItem(3)
+        );
+        if (flipOrder.get()) armor = armor.reversed();
+
+        for (ItemStack stack : armor) {
+            if (stack.isEmpty()) emptySlots++;
+        }
+
+        if (background.get() && emptySlots < 4) {
+            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
+        }
+
         for (int position = 0; position < 4; position++) {
-            ItemStack itemStack = getItem(slot);
-            if (itemStack.isEmpty()) emptySlots++;
+            ItemStack itemStack = armor.get(position);
 
             if (orientation.get() == Orientation.Vertical) {
                 armorX = x;
@@ -169,14 +185,9 @@ public class ArmorHud extends HudElement {
 
                 renderer.text(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
             }
-
-            if (flipOrder.get()) slot--;
-            else slot++;
         }
 
-        if (background.get() && emptySlots < 4) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-        }
+
     }
 
     private ItemStack getItem(int i) {
