@@ -108,17 +108,17 @@ public class InventoryHud extends HudElement {
                     ItemStack stack = hasContainer ? containerItems[index] : mc.player.getInventory().getStack(index + 9);
                     if (stack == null) continue;
 
-                    int itemX = background.get() == Background.Texture ? (int) (x + (8 + i * 18) * scale.get()) : (int) (x + (1 + i * 18) * scale.get());
-                    int itemY = background.get() == Background.Texture ? (int) (y + (7 + row * 18) * scale.get()) : (int) (y + (1 + row * 18) * scale.get());
+                    int itemX = background.get() == Background.Texture ? (int) (x + (8 + i * 18) * getScale()) : (int) (x + (1 + i * 18) * getScale());
+                    int itemY = background.get() == Background.Texture ? (int) (y + (7 + row * 18) * getScale()) : (int) (y + (1 + row * 18) * getScale());
 
-                    renderer.item(stack, itemX, itemY, scale.get().floatValue(), true);
+                    renderer.item(stack, itemX, itemY, (float) getScale(), true);
                 }
             }
         });
     }
 
     private void calculateSize() {
-        setSize(background.get().width * scale.get(), background.get().height * scale.get());
+        setSize(background.get().width * getScale(), background.get().height * getScale());
     }
 
     private void drawBackground(HudRenderer renderer, int x, int y, Color color) {
@@ -141,6 +141,10 @@ public class InventoryHud extends HudElement {
         if (Utils.hasItems(stack) || stack.getItem() == Items.ENDER_CHEST) return stack;
 
         return null;
+    }
+
+    private double getScale() {
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 
     public enum Background {

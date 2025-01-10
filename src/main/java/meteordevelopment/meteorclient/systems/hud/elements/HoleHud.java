@@ -86,16 +86,16 @@ public class HoleHud extends HudElement {
     }
 
     private void calculateSize() {
-        setSize(16 * 3 * scale.get(), 16 * 3 * scale.get());
+        setSize(16 * 3 * getScale(), 16 * 3 * getScale());
     }
 
     @Override
     public void render(HudRenderer renderer) {
         renderer.post(() -> {
-            drawBlock(renderer, get(Facing.Left), x, y + 16 * scale.get()); // Left
-            drawBlock(renderer, get(Facing.Front), x + 16 * scale.get(), y); // Front
-            drawBlock(renderer, get(Facing.Right), x + 32 * scale.get(), y + 16 * scale.get()); // Right
-            drawBlock(renderer, get(Facing.Back), x + 16 * scale.get(), y + 32 * scale.get()); // Back
+            drawBlock(renderer, get(Facing.Left), x, y + 16 * getScale()); // Left
+            drawBlock(renderer, get(Facing.Front), x + 16 * getScale(), y); // Front
+            drawBlock(renderer, get(Facing.Right), x + 32 * getScale(), y + 16 * getScale()); // Right
+            drawBlock(renderer, get(Facing.Back), x + 16 * getScale(), y + 32 * getScale()); // Back
         });
 
         if (background.get()) {
@@ -112,7 +112,7 @@ public class HoleHud extends HudElement {
         Block block = dir == Direction.DOWN ? Blocks.OBSIDIAN : mc.world.getBlockState(mc.player.getBlockPos().offset(dir)).getBlock();
         if (!safe.get().contains(block)) return;
 
-        renderer.item(block.asItem().getDefaultStack(), (int) x, (int) y, scale.get().floatValue(), false);
+        renderer.item(block.asItem().getDefaultStack(), (int) x, (int) y, (float) getScale(), false);
 
         if (dir == Direction.DOWN) return;
 
@@ -124,11 +124,15 @@ public class HoleHud extends HudElement {
     }
 
     private void renderBreaking(HudRenderer renderer, double x, double y, double percent) {
-        renderer.quad(x, y, (16 * percent) * scale.get(), 16 * scale.get(), BG_COLOR);
-        renderer.quad(x, y, 16 * scale.get(), 1 * scale.get(), OL_COLOR);
-        renderer.quad(x, y + 15 * scale.get(), 16 * scale.get(), 1 * scale.get(), OL_COLOR);
-        renderer.quad(x, y, 1 * scale.get(), 16 * scale.get(), OL_COLOR);
-        renderer.quad(x + 15 * scale.get(), y, 1 * scale.get(), 16 * scale.get(), OL_COLOR);
+        renderer.quad(x, y, (16 * percent) * getScale(), 16 * getScale(), BG_COLOR);
+        renderer.quad(x, y, 16 * getScale(), 1 * getScale(), OL_COLOR);
+        renderer.quad(x, y + 15 * getScale(), 16 * getScale(), 1 * getScale(), OL_COLOR);
+        renderer.quad(x, y, 1 * getScale(), 16 * getScale(), OL_COLOR);
+        renderer.quad(x + 15 * getScale(), y, 1 * getScale(), 16 * getScale(), OL_COLOR);
+    }
+
+    private double getScale() {
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 
     private enum Facing {
