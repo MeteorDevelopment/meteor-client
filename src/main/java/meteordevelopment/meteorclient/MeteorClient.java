@@ -189,7 +189,9 @@ public class MeteorClient implements ClientModInitializer {
         NametagUtils.onRender(view);
 
         GL.enableLineSmooth();
+
         CommandList commandList = device.createCommandList();
+        commandList.pushGroup("Meteor - 3D");
 
         renderer.begin();
 
@@ -208,7 +210,9 @@ public class MeteorClient implements ClientModInitializer {
 
         pass.end();
 
+        commandList.popGroup();
         commandList.submit();
+
         GL.disableLineSmooth();
     }
 
