@@ -59,6 +59,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EmptyBlockView;
 import net.minecraft.world.RaycastContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 import org.joml.Vector3d;
 
 import java.util.ArrayDeque;
@@ -205,6 +206,16 @@ public class HighwayBuilder extends Module {
         .name("dont-break-tools")
         .description("Don't break tools.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> breakDurability = sgDigging.add(new IntSetting.Builder()
+        .name("durability-percentage")
+        .description("The durability percentage at which to stop using a tool.")
+        .defaultValue(2)
+        .range(1, 100)
+        .sliderRange(1, 100)
+        .visible(dontBreakTools::get)
         .build()
     );
 
@@ -435,7 +446,7 @@ public class HighwayBuilder extends Module {
     private final MBlockPos lastBreakingPos = new MBlockPos();
     private boolean displayInfo;
     private int placeTimer, breakTimer, count, syncId;
-    private final RestockTask restockTask = new RestockTask();
+    private final RestockTask restockTask = new RestockTask(this);
     private final ArrayList<EndCrystalEntity> ignoreCrystals = new ArrayList<>();
     public DoubleMineBlock normalMining, packetMining;
 
@@ -1461,6 +1472,7 @@ public class HighwayBuilder extends Module {
                             breakContainer = true;
                         }
                         else {
+                            if (!b.searchShulkers.get()) breakContainer = true;
                             handleContainerBlock(b, blockPos);
                         }
                     }
@@ -1500,6 +1512,7 @@ public class HighwayBuilder extends Module {
                             breakContainer = true;
                         }
                         else {
+                            if (!b.searchEnderChest.get()) breakContainer = true;
                             handleContainerBlock(b, blockPos);
                         }
                     }
@@ -1668,7 +1681,7 @@ public class HighwayBuilder extends Module {
                         b.destroyCrystalTraps.set(false);
                         b.warning("No bow found to destroy crystal traps with. Toggling the setting off.");
                         b.setState(Forward);
-                        b.mc.options.useKey.setPressed(false);
+                        if (b.mc.player.isUsingItem()) b.mc.interactionManager.stopUsingItem(b.mc.player);
                         return;
                     }
 
@@ -1691,7 +1704,7 @@ public class HighwayBuilder extends Module {
                 if (target == null || target.isRemoved()) {
                     if (potentialTarget == null) {
                         b.setState(Forward);
-                        b.mc.options.useKey.setPressed(false);
+                        if (b.mc.player.isUsingItem()) b.mc.interactionManager.stopUsingItem(b.mc.player);
                         return;
                     }
                     else {
@@ -1704,7 +1717,7 @@ public class HighwayBuilder extends Module {
                     b.ignoreCrystals.add(target);
                     b.warning("Detected potential hangup on a crystal. Adding it to ignore list and continuing forward.");
                     b.setState(Forward);
-                    b.mc.options.useKey.setPressed(false);
+                    if (b.mc.player.isUsingItem()) b.mc.interactionManager.stopUsingItem(b.mc.player);
                     return;
                 }
 
@@ -1716,14 +1729,10 @@ public class HighwayBuilder extends Module {
 
                 if (BowItem.getPullProgress(b.mc.player.getItemUseTime() - 3) >= 1.0f) {
                     b.mc.interactionManager.stopUsingItem(b.mc.player);
-                    b.mc.options.useKey.setPressed(false);
                     cooldown = 20;
                     shots++;
                 }
-                else {
-                    if (b.mc.currentScreen != null) b.mc.currentScreen.close();
-                    b.mc.options.useKey.setPressed(true);
-                }
+                else b.mc.interactionManager.interactItem(b.mc.player, Hand.MAIN_HAND);
             }
 
             private float aim(HighwayBuilder b, Entity target) {
@@ -1989,7 +1998,7 @@ public class HighwayBuilder extends Module {
             for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
                 double score = AutoTool.getScore(b.mc.player.getInventory().getStack(i), blockState, false, false, AutoTool.EnchantPreference.None, itemStack -> {
                     if (noSilkTouch && Utils.hasEnchantment(itemStack, Enchantments.SILK_TOUCH)) return false;
-                    return !b.dontBreakTools.get() || itemStack.getMaxDamage() - itemStack.getDamage() > 1;
+                    return !b.dontBreakTools.get() || itemStack.getMaxDamage() - itemStack.getDamage() > (itemStack.getMaxDamage() * (b.breakDurability.get() / 100));
                 });
 
                 if (score > bestScore) {
@@ -2000,15 +2009,18 @@ public class HighwayBuilder extends Module {
 
             if (bestSlot == -1) return b.mc.player.getInventory().selectedSlot;
 
-            if (b.mc.player.getInventory().getStack(bestSlot).getItem() instanceof PickaxeItem) {
+            ItemStack bestStack = b.mc.player.getInventory().getStack(bestSlot);
+            if (bestStack.getItem() instanceof PickaxeItem) {
                 int count = countItem(b, stack -> stack.getItem() instanceof PickaxeItem);
 
-                if (count <= b.savePickaxes.get()) {
-                    if (b.searchEnderChest.get() || b.searchShulkers.get()) {
+                // If we are in the process of restocking pickaxes and happen to need one, we should allow using it
+                // as long as it has enough durability, since we will obtain more shortly thereafter
+                if (count <= b.savePickaxes.get() && !(b.restockTask.pickaxes && bestStack.getMaxDamage() - bestStack.getDamage() > (bestStack.getMaxDamage() * (b.breakDurability.get() / 100)))) {
+                    if (!b.restockTask.pickaxes && (b.searchEnderChest.get() || b.searchShulkers.get())) {
                         b.restockTask.setPickaxes();
                     }
                     else {
-                        b.error("Found less than the selected amount of pickaxes required: " + count + "/" + (b.savePickaxes.get() + 1));
+                        b.error("Found less than the minimum amount of pickaxes required: " + count + "/" + (b.savePickaxes.get() + 1));
                     }
 
                     return -1;
@@ -2751,23 +2763,35 @@ public class HighwayBuilder extends Module {
         public boolean materials;
         public boolean pickaxes;
         public boolean food;
+        private final HighwayBuilder b;
+
+        public RestockTask(HighwayBuilder b) {
+            this.b = b;
+        }
 
         public void setMaterials() {
-            complete();
-            materials = true;
-            setState(State.Restock);
+            setTask(0);
         }
 
         public void setPickaxes() {
-            complete();
-            pickaxes = true;
-            setState(State.Restock);
+            setTask(1);
         }
 
         public void setFood() {
+            setTask(2);
+        }
+
+        private void setTask(@Range(from = 0, to = 2) int value) {
             complete();
-            food = true;
+
+            switch (value) {
+                case 0 -> materials = true;
+                case 1 -> pickaxes = true;
+                case 2 -> food = true;
+            }
+
             setState(State.Restock);
+            b.info("Starting new restock task for " + item());
         }
 
         public void complete() {
@@ -2781,7 +2805,7 @@ public class HighwayBuilder extends Module {
         }
 
         public String item() {
-            if (materials) return "materials";
+            if (materials) return "building materials";
             if (pickaxes) return "pickaxes";
             if (food) return "food";
             return "unknown";
