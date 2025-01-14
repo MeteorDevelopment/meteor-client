@@ -34,7 +34,7 @@ public class Systems {
     }
 
     public static void init() {
-        // Has to be loaded first so the the hidden modules list in config tab can load modules
+        // Has to be loaded first so the hidden modules list in config tab can load modules
         add(new Modules());
 
         Config config = new Config();
