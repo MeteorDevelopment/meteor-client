@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -34,14 +35,18 @@ import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.client.input.Input;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.client.option.GameOptions;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
@@ -445,9 +450,11 @@ public class HighwayBuilder extends Module {
     public int blocksBroken, blocksPlaced;
     private final MBlockPos lastBreakingPos = new MBlockPos();
     private boolean displayInfo;
+    private boolean suspended = true, inventory = true;
     private int placeTimer, breakTimer, count, syncId;
     private final RestockTask restockTask = new RestockTask(this);
     private final ArrayList<EndCrystalEntity> ignoreCrystals = new ArrayList<>();
+    public boolean drawingBow;
     public DoubleMineBlock normalMining, packetMining;
 
     private final MBlockPos posRender2 = new MBlockPos();
@@ -455,22 +462,26 @@ public class HighwayBuilder extends Module {
 
     public HighwayBuilder() {
         super(Categories.World, "highway-builder", "Automatically builds highways.");
+        runInMainMenu = true;
     }
 
     /* todo
         - separate digging and paving more effectively
         - separate walking forwards from the current state to speed up actions
         - scan one block behind you to ensure the highway is still valid
+        - investigate inventory desync when tools break with double mine?
+        - do something about god damn lava flowing in
      */
 
     @Override
     public void onActivate() {
+        if (!Utils.canUpdate()) return;
+
+        updateVariables();
+
         dir = HorizontalDirection.get(mc.player.getYaw());
         leftDir = dir.rotateLeftSkipOne();
         rightDir = leftDir.opposite();
-
-        prevInput = mc.player.input;
-        mc.player.input = input = new CustomPlayerInput();
 
         blockPosProvider = dir.diagonal ? new DiagonalBlockPosProvider() : new StraightBlockPosProvider();
         state = State.Forward;
@@ -480,12 +491,9 @@ public class HighwayBuilder extends Module {
         start = mc.player.getPos();
         blocksBroken = blocksPlaced = 0;
         displayInfo = true;
+        suspended = false;
 
-        placeTimer = breakTimer = count = syncId = 0;
         restockTask.complete();
-        ignoreCrystals.clear();
-
-        normalMining = packetMining = null;
 
         if (blocksPerTick.get() > 1 && rotation.get().mine) warning("With rotations enabled, you can break at most 1 block per tick.");
         if (placementsPerTick.get() > 1 && rotation.get().place) warning("With rotations enabled, you can place at most 1 block per tick.");
@@ -495,6 +503,8 @@ public class HighwayBuilder extends Module {
 
     @Override
     public void onDeactivate() {
+        if (!Utils.canUpdate()) return;
+
         mc.player.input = prevInput;
         mc.player.setYaw(dir.yaw);
         mc.options.useKey.setPressed(false);
@@ -525,6 +535,19 @@ public class HighwayBuilder extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (dir == null) {
+            onActivate();
+            return;
+        }
+
+        if (suspended) {
+            if (inventory && Utils.canUpdate()) {
+                updateVariables();
+                suspended = false;
+            }
+            else return;
+        }
+
         if (width.get() < 3 && dir.diagonal) {
             errorEarly("Diagonal highways with width less than 3 are not supported.");
             return;
@@ -552,13 +575,23 @@ public class HighwayBuilder extends Module {
 
     @EventHandler
     private void onPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof InventoryS2CPacket p && p.getSyncId() != 0) {
-            this.syncId = p.getSyncId();
+        if (event.packet instanceof InventoryS2CPacket p) {
+            if (p.getSyncId() == 0 && suspended)
+                inventory = true;
+            else
+                this.syncId = p.getSyncId();
         }
     }
 
     @EventHandler
+    private void onGameLeave(GameLeftEvent event) {
+        suspended = true;
+        inventory = false;
+    }
+
+    @EventHandler
     private void onRender2d(Render2DEvent event) {
+        if (suspended) return;
         if (!renderMine.get()) return;
 
         if (normalMining != null) normalMining.renderLetter();
@@ -567,6 +600,7 @@ public class HighwayBuilder extends Module {
 
     @EventHandler
     private void onRender3D(Render3DEvent event) {
+        if (suspended) return;
         if (blockPosProvider == null) return; // prevents a fascinating crash
 
         if (renderMine.get()) {
@@ -628,6 +662,17 @@ public class HighwayBuilder extends Module {
                 event.renderer.box(posRender2.getBlockPos(), sideColor, lineColor, shapeMode, excludeDir);
             }
         }
+    }
+
+    private void updateVariables() {
+        prevInput = mc.player.input;
+        mc.player.input = input = new CustomPlayerInput();
+
+        placeTimer = breakTimer = count = syncId = 0;
+        ignoreCrystals.clear();
+
+        normalMining = null;
+        packetMining = null;
     }
 
     private void setState(State state) {
@@ -700,6 +745,8 @@ public class HighwayBuilder extends Module {
             else if (normalMining.isReady()) {
                 normalMining.stopDestroying();
             }
+
+            mc.player.swingHand(Hand.MAIN_HAND);
         }
 
         if (packetMining != null) {
@@ -1135,7 +1182,7 @@ public class HighwayBuilder extends Module {
             private int minimumObsidian;
             private boolean first, primed;
             private boolean stopTimerEnabled;
-            private int stopTimer, moveTimer, rebreakTimer;
+            private int stopTimer, moveTimer, rebreakTimer, timeout;
 
             @Override
             protected void start(HighwayBuilder b) {
@@ -1165,7 +1212,7 @@ public class HighwayBuilder extends Module {
                 int minimumSlots = Math.max(emptySlots - b.minEmpty.get(), 1);
                 minimumObsidian = minimumSlots * 64;
                 first = true;
-                moveTimer = 0;
+                moveTimer = timeout = 0;
 
                 stopTimerEnabled = false;
                 primed = false;
@@ -1250,6 +1297,13 @@ public class HighwayBuilder extends Module {
                     InvUtils.swap(slot, false);
 
                     if (b.rebreakEchests.get() && primed) {
+                        timeout++;
+                        if (timeout > 60) {
+                            primed = false;
+                            timeout = 0;
+                            return;
+                        }
+
                         if (rebreakTimer > 0) {
                             rebreakTimer--;
                             return;
@@ -1284,6 +1338,7 @@ public class HighwayBuilder extends Module {
                     if (!first) primed = true;
 
                     BlockUtils.place(bp, Hand.MAIN_HAND, slot, b.rotation.get().place, 0, true, true, false);
+                    timeout = 0;
                 }
             }
         },
@@ -1668,6 +1723,16 @@ public class HighwayBuilder extends Module {
                 target = null;
             }
 
+            /**
+             * Need to perform the linked injection to ensure that vanilla code does not interfere with us drawing our
+             * bow. The {@link MinecraftClient#handleInputEvents} method is only called when you are not in a screen,
+             * meaning we cannot draw our bow using {@link GameOptions#useKey} since it would not work if you are in a
+             * screen. Similarly, drawing our bow by {@link ClientPlayerInteractionManager#interactItem} would get
+             * cancelled by default within the handleInputEvents method if you do not have the use key held down,
+             * essentially meaning without the following injection it would not work if you don't have a screen open.
+             *
+             * @see meteordevelopment.meteorclient.mixin.MinecraftClientMixin#wrapStopUsing(ClientPlayerInteractionManager, PlayerEntity)
+             */
             @Override
             protected void tick(HighwayBuilder b) {
                 if (cooldown > 0) {
@@ -1681,7 +1746,8 @@ public class HighwayBuilder extends Module {
                         b.destroyCrystalTraps.set(false);
                         b.warning("No bow found to destroy crystal traps with. Toggling the setting off.");
                         b.setState(Forward);
-                        if (b.mc.player.isUsingItem()) b.mc.interactionManager.stopUsingItem(b.mc.player);
+                        b.mc.interactionManager.stopUsingItem(b.mc.player);
+                        b.drawingBow = false;
                         return;
                     }
 
@@ -1704,7 +1770,8 @@ public class HighwayBuilder extends Module {
                 if (target == null || target.isRemoved()) {
                     if (potentialTarget == null) {
                         b.setState(Forward);
-                        if (b.mc.player.isUsingItem()) b.mc.interactionManager.stopUsingItem(b.mc.player);
+                        b.mc.interactionManager.stopUsingItem(b.mc.player);
+                        b.drawingBow = false;
                         return;
                     }
                     else {
@@ -1717,7 +1784,8 @@ public class HighwayBuilder extends Module {
                     b.ignoreCrystals.add(target);
                     b.warning("Detected potential hangup on a crystal. Adding it to ignore list and continuing forward.");
                     b.setState(Forward);
-                    if (b.mc.player.isUsingItem()) b.mc.interactionManager.stopUsingItem(b.mc.player);
+                    b.mc.interactionManager.stopUsingItem(b.mc.player);
+                    b.drawingBow = false;
                     return;
                 }
 
@@ -1729,10 +1797,14 @@ public class HighwayBuilder extends Module {
 
                 if (BowItem.getPullProgress(b.mc.player.getItemUseTime() - 3) >= 1.0f) {
                     b.mc.interactionManager.stopUsingItem(b.mc.player);
+                    b.drawingBow = false;
                     cooldown = 20;
                     shots++;
                 }
-                else b.mc.interactionManager.interactItem(b.mc.player, Hand.MAIN_HAND);
+                else {
+                    b.drawingBow = true;
+                    b.mc.interactionManager.interactItem(b.mc.player, Hand.MAIN_HAND);
+                }
             }
 
             private float aim(HighwayBuilder b, Entity target) {
@@ -1767,6 +1839,7 @@ public class HighwayBuilder extends Module {
             // extract all candidates for double mining and enqueue them to be mined. After those we can break the remaining
             // blocks normally
             if (b.doubleMine.get()) {
+                // todo hold the best mining tool before performing the double mining checks so we dont double mine blocks unnecessarily
                 ArrayDeque<BlockPos> toDoubleMine = new ArrayDeque<>();
 
                 it.save();
@@ -1988,6 +2061,10 @@ public class HighwayBuilder extends Module {
         }
 
         protected int findAndMoveBestToolToHotbar(HighwayBuilder b, BlockState blockState, boolean noSilkTouch) {
+            return findAndMoveBestToolToHotbar(b, blockState, noSilkTouch, true);
+        }
+
+        protected int findAndMoveBestToolToHotbar(HighwayBuilder b, BlockState blockState, boolean noSilkTouch, boolean error) {
             // Check for creative
             if (b.mc.player.isCreative()) return b.mc.player.getInventory().selectedSlot;
 
@@ -2019,7 +2096,7 @@ public class HighwayBuilder extends Module {
                     if (!b.restockTask.pickaxes && (b.searchEnderChest.get() || b.searchShulkers.get())) {
                         b.restockTask.setPickaxes();
                     }
-                    else {
+                    else if (error) {
                         b.error("Found less than the minimum amount of pickaxes required: " + count + "/" + (b.savePickaxes.get() + 1));
                     }
 
@@ -2733,7 +2810,7 @@ public class HighwayBuilder extends Module {
 
             // a minimum amount of time needs to have elapsed for the timeout check to occur, otherwise it may trigger
             // when it isn't supposed to due to latency
-            boolean timeout = progress() > 2 && ((packet ? packetStartTime : normalStartTime) - b.mc.player.age > 20);
+            boolean timeout = progress() > 2 && (b.mc.player.age - (packet ? packetStartTime : normalStartTime) > 60);
 
             return  distance || timeout;
         }
