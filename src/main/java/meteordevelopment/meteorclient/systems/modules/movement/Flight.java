@@ -60,7 +60,7 @@ public class Flight extends Module {
 
     private final Setting<AntiKickMode> antiKickMode = sgAntiKick.add(new EnumSetting.Builder<AntiKickMode>()
         .name("mode")
-        .description("The mode for anti kick.")
+        .description("The mode for anti-kick.")
         .defaultValue(AntiKickMode.Packet)
         .build()
     );
