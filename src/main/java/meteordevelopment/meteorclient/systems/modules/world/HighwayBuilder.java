@@ -265,7 +265,7 @@ public class HighwayBuilder extends Module {
         .name("place-range")
         .description("The maximum distance at which you can place blocks.")
         .defaultValue(4.5)
-        .max(5.5)
+        .sliderMax(5.5)
         .build()
     );
 
@@ -469,7 +469,6 @@ public class HighwayBuilder extends Module {
         - separate digging and paving more effectively
         - separate walking forwards from the current state to speed up actions
         - scan one block behind you to ensure the highway is still valid
-        - investigate inventory desync when tools break with double mine?
         - do something about god damn lava flowing in
      */
 
@@ -591,8 +590,7 @@ public class HighwayBuilder extends Module {
 
     @EventHandler
     private void onRender2d(Render2DEvent event) {
-        if (suspended) return;
-        if (!renderMine.get()) return;
+        if (suspended || !renderMine.get()) return;
 
         if (normalMining != null) normalMining.renderLetter();
         if (packetMining != null) packetMining.renderLetter();
@@ -600,8 +598,7 @@ public class HighwayBuilder extends Module {
 
     @EventHandler
     private void onRender3D(Render3DEvent event) {
-        if (suspended) return;
-        if (blockPosProvider == null) return; // prevents a fascinating crash
+        if (suspended || blockPosProvider == null) return; // prevents a fascinating crash
 
         if (renderMine.get()) {
             render(event, blockPosProvider.getFront(), mBlockPos -> canMine(mBlockPos, true), true);
@@ -946,9 +943,16 @@ public class HighwayBuilder extends Module {
                     return b.trashItems.get().contains(itemStack.getItem());
                 });
 
+                // next we prioritise placement blocks
+                if (slot == -1) slot = findAndMoveToHotbar(b, itemStack -> {
+                    if (!(itemStack.getItem() instanceof BlockItem bi)) return false;
+                    return b.blocksToPlace.get().contains(bi.getBlock());
+                });
+
                 // falling is an emergency; in this case only, we allow access to any whole block in your inventory
                 return slot != -1 ? slot : findAndMoveToHotbar(b, itemStack -> {
                     if (!(itemStack.getItem() instanceof BlockItem bi)) return false;
+                    if (Utils.isShulker(bi)) return false;
                     Block block = bi.getBlock();
 
                     if (!Block.isShapeFullCube(block.getDefaultState().getCollisionShape(b.mc.world, pos))) return false;
@@ -2013,7 +2017,7 @@ public class HighwayBuilder extends Module {
             if (thrashSlot != -1) return thrashSlot;
 
             // If there are more than 1 slots with building blocks return the slot with the lowest amount of blocks
-            if (slotsWithBlocks > 1) return slotWithLeastBlocks;
+            if (slotsWithBlocks > 0) return slotWithLeastBlocks;
 
             // No space found in hotbar
             b.error("No empty space in hotbar.");
@@ -2061,10 +2065,6 @@ public class HighwayBuilder extends Module {
         }
 
         protected int findAndMoveBestToolToHotbar(HighwayBuilder b, BlockState blockState, boolean noSilkTouch) {
-            return findAndMoveBestToolToHotbar(b, blockState, noSilkTouch, true);
-        }
-
-        protected int findAndMoveBestToolToHotbar(HighwayBuilder b, BlockState blockState, boolean noSilkTouch, boolean error) {
             // Check for creative
             if (b.mc.player.isCreative()) return b.mc.player.getInventory().selectedSlot;
 
@@ -2096,7 +2096,7 @@ public class HighwayBuilder extends Module {
                     if (!b.restockTask.pickaxes && (b.searchEnderChest.get() || b.searchShulkers.get())) {
                         b.restockTask.setPickaxes();
                     }
-                    else if (error) {
+                    else {
                         b.error("Found less than the minimum amount of pickaxes required: " + count + "/" + (b.savePickaxes.get() + 1));
                     }
 
