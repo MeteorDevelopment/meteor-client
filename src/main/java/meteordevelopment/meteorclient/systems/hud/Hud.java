@@ -217,7 +217,9 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         if (!(active || HudEditorScreen.isOpen())) return;
 
         for (HudElement element : elements) {
-            if (element.isActive()) element.tick(HudRenderer.INSTANCE);
+            if (element.isActive() || element.isInEditor()) {
+                element.tick(HudRenderer.INSTANCE);
+            }
         }
     }
 
@@ -233,7 +235,9 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         for (HudElement element : elements) {
             element.updatePos();
 
-            if (element.isActive()) element.render(HudRenderer.INSTANCE);
+            if (element.isActive() || element.isInEditor()) {
+                element.render(HudRenderer.INSTANCE);
+            }
         }
 
         HudRenderer.INSTANCE.end();
