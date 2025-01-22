@@ -118,10 +118,10 @@ public class ArmorHud extends HudElement {
         double x = this.x;
         double y = this.y;
 
-        double armorX;
-        double armorY;
+        double armorX, armorY;
         int emptySlots = 0;
 
+        // default order is from boots to helmet
         ItemStack[] armor = flipOrder.get() ?
             new ItemStack[]{getItem(3), getItem(2), getItem(1), getItem(0)} :
             new ItemStack[]{getItem(0), getItem(1), getItem(2), getItem(3)};
@@ -172,9 +172,9 @@ public class ArmorHud extends HudElement {
     private ItemStack getItem(int i) {
         if (isInEditor()) {
             return switch (i) {
-                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
                 case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
+                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
+                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
                 default -> Items.NETHERITE_BOOTS.getDefaultStack();
             };
         }
