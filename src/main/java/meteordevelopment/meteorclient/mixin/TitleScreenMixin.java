@@ -38,7 +38,7 @@ public abstract class TitleScreenMixin extends Screen {
         if (Utils.firstTimeTitleScreen) {
             Utils.firstTimeTitleScreen = false;
 
-            if (!MeteorClient.VERSION.isZero()) {
+            if (!MeteorClient.VERSION.isZero() && !MeteorClient.BUILD_NUMBER.isEmpty()) {
                 MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
                 MeteorExecutor.execute(() -> {
