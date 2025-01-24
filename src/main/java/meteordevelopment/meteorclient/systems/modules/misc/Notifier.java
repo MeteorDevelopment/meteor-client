@@ -23,6 +23,7 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
@@ -306,7 +307,7 @@ public class Notifier extends Module {
             case PlayerRemoveS2CPacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Leaves) ->
                 createLeaveNotification(packet);
 
-            case EntityStatusS2CPacket packet when totemPops.get() && packet.getStatus() == 35 && packet.getEntity(mc.world) instanceof PlayerEntity entity -> {
+            case EntityStatusS2CPacket packet when totemPops.get() && packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING && packet.getEntity(mc.world) instanceof PlayerEntity entity -> {
                 if ((entity.equals(mc.player) && totemsIgnoreOwn.get())
                     || (Friends.get().isFriend(entity) && totemsIgnoreOthers.get())
                     || (!Friends.get().isFriend(entity) && totemsIgnoreFriends.get())
