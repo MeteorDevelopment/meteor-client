@@ -226,8 +226,8 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Integer> savePickaxes = sgDigging.add(new IntSetting.Builder()
         .name("save-pickaxes")
-        .description("How many pickaxes to ensure are saved.")
-        .defaultValue(0)
+        .description("How many pickaxes to ensure are saved. Hitting this number in your inventory will trigger a restock or the module toggling off.")
+        .defaultValue(1)
         .range(0, 36)
         .sliderRange(0, 36)
         .visible(() -> !dontBreakTools.get())
@@ -353,7 +353,7 @@ public class HighwayBuilder extends Module {
 
     public final Setting<Integer> saveEchests = sgInventory.add(new IntSetting.Builder()
         .name("save-ender-chests")
-        .description("How many ender chests to ensure are saved.")
+        .description("How many ender chests to ensure are saved. Hitting this number in your inventory will trigger a restock or the module toggling off.")
         .defaultValue(2)
         .range(0, 64)
         .sliderRange(0, 64)
@@ -1348,6 +1348,8 @@ public class HighwayBuilder extends Module {
         },
 
         // this one was rough to do
+        // todo if it goes from mining echests to a pickaxe restocking task, make it mine the whole echest blockade
+        //  and not just the shulker one
         Restock {
             private static final MBlockPos pos = new MBlockPos();
             private static final ItemStack[] ITEMS = new ItemStack[27];
@@ -1435,7 +1437,7 @@ public class HighwayBuilder extends Module {
                     return;
                 }
 
-                int restockSlots = -1 - b.minEmpty.get();
+                int restockSlots = -b.minEmpty.get();
                 for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
                     if (b.mc.player.getInventory().getStack(i).isEmpty()) restockSlots++;
                 }
@@ -1446,10 +1448,18 @@ public class HighwayBuilder extends Module {
                 }
 
                 // todo when we add a digging only mode, make pickaxes fill all empty slots
-                minimumSlots = b.restockTask.materials ? Math.max(restockSlots, 1) : 1;
+                minimumSlots = b.restockTask.materials ? restockSlots : 1;
+
+                HorizontalDirection dir = b.dir.diagonal ? b.dir.rotateLeft().rotateLeftSkipOne() : b.dir.opposite();
+                pos.set(b.mc.player).offset(dir);
+
+                // Quick fix for a specific issue - if your pickaxe breaks while mining echests, it will start a new
+                // task to restock pickaxes. However, there will be an echest placed down in the same position specified
+                // above, and if you have the search echest setting enabled it will assume it needs to pull items from
+                // your echest, even if you have a shulker full of pickaxes in your inventory.
+                breakContainer = b.mc.world.getBlockState(pos.getBlockPos()).getBlock() == Blocks.ENDER_CHEST;
 
                 indicateStopping = false;
-                breakContainer = false;
                 delayTimer = b.inventoryDelay.get();
             }
 
@@ -1504,11 +1514,8 @@ public class HighwayBuilder extends Module {
                     return;
                 }
 
-                HorizontalDirection dir = b.dir.diagonal ? b.dir.rotateLeft().rotateLeftSkipOne() : b.dir.opposite();
-                pos.set(b.mc.player).offset(dir);
-                BlockPos blockPos = pos.getBlockPos();
-
                 // Check block state
+                BlockPos blockPos = pos.getBlockPos();
                 BlockState blockState = b.mc.world.getBlockState(blockPos);
 
                 switch (blockState.getBlock()) {
@@ -1549,8 +1556,7 @@ public class HighwayBuilder extends Module {
                                 return;
                             }
 
-                            // we have taken items themselves from the ec, but still need more. Now we try to find a shulker containing the items
-                            // todo grab as many shulkers as it takes to fill up your inventory
+                            // we may have taken items themselves from the ec, but still need more. Now we try to find a shulker containing the items
                             if (b.searchShulkers.get()) {
                                 int moveTo = InvUtils.findEmpty().slot();
 
@@ -1559,7 +1565,7 @@ public class HighwayBuilder extends Module {
                                         if (shulkerPredicate.test(inv.getStack(i))) {
                                             InvUtils.move().fromId(i).to(moveTo);
                                             delayTimer = b.inventoryDelay.get();
-                                            return;
+                                            break;
                                         }
                                     }
                                 }
@@ -1657,9 +1663,14 @@ public class HighwayBuilder extends Module {
                     if (b.rotation.get().mine) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.breakBlock(bp, true));
                     else BlockUtils.breakBlock(bp, true);
                 } else {
-                    if (b.rotation.get().place) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () ->
-                        b.mc.interactionManager.interactBlock(b.mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.ofCenter(bp), Direction.UP, bp, false)));
+                    if (b.rotation.get().place) {
+                        Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () ->
+                            b.mc.interactionManager.interactBlock(b.mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.ofCenter(bp), Direction.UP, bp, false))
+                        );
+                    }
                     else b.mc.interactionManager.interactBlock(b.mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.ofCenter(bp), Direction.UP, bp, false));
+
+                    delayTimer = b.inventoryDelay.get();
                 }
             }
 
@@ -1983,7 +1994,7 @@ public class HighwayBuilder extends Module {
             return -1;
         }
 
-        private int findHotbarSlot(HighwayBuilder b, boolean replaceTools) {
+        protected int findHotbarSlot(HighwayBuilder b, boolean replaceTools) {
             int thrashSlot = -1;
             int slotsWithBlocks = 0;
             int slotWithLeastBlocks = -1;
