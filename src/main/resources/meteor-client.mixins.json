@@ -162,6 +162,7 @@
     "ServerResourcePackLoaderMixin",
     "ShapeIndexBufferAccessor",
     "ShulkerBoxBlockMixin",
+    "ShulkerBoxScreenHandlerAccessor",
     "SimpleEntityLookupAccessor",
     "SimpleOptionMixin",
     "SlimeBlockMixin",

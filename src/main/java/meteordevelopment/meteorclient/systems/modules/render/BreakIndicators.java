@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.systems.modules.world.PacketMine;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -43,7 +44,6 @@ public class BreakIndicators extends Module {
         .build()
     );
 
-
     private final Setting<SettingColor> startColor = sgGeneral.add(new ColorSetting.Builder()
         .name("start-color")
         .description("The color for the non-broken block.")
@@ -71,6 +71,25 @@ public class BreakIndicators extends Module {
 
         if (packetMine.get() && !Modules.get().get(PacketMine.class).blocks.isEmpty()) {
             renderPacket(event, Modules.get().get(PacketMine.class).blocks);
+        }
+
+        HighwayBuilder b = Modules.get().get(HighwayBuilder.class);
+        if (!b.isActive()) return;
+
+        if (b.normalMining != null) {
+            VoxelShape voxelShape = b.normalMining.blockState.getOutlineShape(mc.world, b.normalMining.blockPos);
+            if (voxelShape.isEmpty()) return;
+
+            double normalised = Math.min(1, b.normalMining.progress());
+            renderBlock(event, voxelShape.getBoundingBox(), b.normalMining.blockPos, 1 - normalised, normalised);
+        }
+
+        if (b.packetMining != null) {
+            VoxelShape voxelShape = b.packetMining.blockState.getOutlineShape(mc.world, b.packetMining.blockPos);
+            if (voxelShape.isEmpty()) return;
+
+            double normalised = Math.min(1, b.packetMining.progress());
+            renderBlock(event, voxelShape.getBoundingBox(), b.packetMining.blockPos, 1 - normalised, normalised);
         }
     }
 
