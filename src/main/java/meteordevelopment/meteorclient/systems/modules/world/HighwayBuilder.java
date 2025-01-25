@@ -1348,8 +1348,6 @@ public class HighwayBuilder extends Module {
         },
 
         // this one was rough to do
-        // todo if it goes from mining echests to a pickaxe restocking task, make it mine the whole echest blockade
-        //  and not just the shulker one
         Restock {
             private static final MBlockPos pos = new MBlockPos();
             private static final ItemStack[] ITEMS = new ItemStack[27];
@@ -1711,7 +1709,9 @@ public class HighwayBuilder extends Module {
             @Override
             protected void tick(HighwayBuilder b) {
                 if (!stopTimerEnabled) {
-                    mine(b, b.blockPosProvider.getBlockade(true, BlockadeType.Shulker), true, this, this);
+                    // mining b.blockadeType instead of BlockadeType.Shulker is the fastest fix to the module leaving
+                    // some blocks behind if you start a pickaxe restock task while mining echests
+                    mine(b, b.blockPosProvider.getBlockade(true, b.blockadeType.get()), true, this, this);
                 }
                 else {
                     stopTimer--;
