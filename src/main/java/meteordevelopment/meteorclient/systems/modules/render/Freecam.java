@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -106,6 +107,13 @@ public class Freecam extends Module {
         .name("static")
         .description("Disables settings that move the view.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> baritoneClick = sgGeneral.add(new BoolSetting.Builder()
+        .name("click-sets-goal")
+        .description("Sets a goal to any block you click.")
+        .defaultValue(false)
         .build()
     );
 
@@ -301,9 +309,24 @@ public class Freecam extends Module {
         if (cancel) event.cancel();
     }
 
+    private void setGoal() {
+        if (!(mc.crosshairTarget instanceof BlockHitResult res)) {
+            return;
+        }
+
+        // Don't move inside the block
+        BlockPos pos = res.getBlockPos().add(res.getSide().getVector());
+
+        PathManagers.get().moveTo(pos);
+    }
+
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (checkGuiMove()) return;
+
+        if (baritoneClick.get() && event.action == KeyAction.Press && mc.options.attackKey.matchesMouse(event.button)) {
+            setGoal();
+        }
 
         boolean cancel = true;
 
