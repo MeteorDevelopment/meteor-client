@@ -95,10 +95,18 @@ public class Freecam extends Module {
         .build()
     );
 
+    private final Setting<Boolean> changeTarget = sgGeneral.add(new BoolSetting.Builder()
+        .name("change-target")
+        .description("Changes the target block or entity to the one you are looking at.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
         .description("Rotates to the block or entity you are looking at.")
         .defaultValue(false)
+        .visible(changeTarget::get)
         .build()
     );
 
@@ -418,5 +426,9 @@ public class Freecam extends Module {
     }
     public double getPitch(float tickDelta) {
         return MathHelper.lerp(tickDelta, prevPitch, pitch);
+    }
+
+    public boolean shouldChangeTarget() {
+        return isActive() && changeTarget.get();
     }
 }
