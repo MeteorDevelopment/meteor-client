@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -28,14 +29,20 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.client.option.Perspective;
+import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
@@ -109,6 +116,22 @@ public class Freecam extends Module {
         .build()
     );
 
+    private final SettingGroup sgPathing = settings.createGroup("Pathing");
+
+    private final Setting<Boolean> baritoneClick = sgPathing.add(new BoolSetting.Builder()
+        .name("click-sets-goal")
+        .description("Sets a goal to any block you click.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> requireDoubleClick = sgPathing.add(new BoolSetting.Builder()
+        .name("double-click")
+        .description("Require two clicks to start pathing.")
+        .defaultValue(false)
+        .build()
+    );
+
     public final Vector3d pos = new Vector3d();
     public final Vector3d prevPos = new Vector3d();
 
@@ -122,6 +145,9 @@ public class Freecam extends Module {
     private boolean bobView;
 
     private boolean forward, backward, right, left, up, down;
+
+    private boolean clicked = false;
+    private long clickTs = 0;
 
     public Freecam() {
         super(Categories.Render, "freecam", "Allows the camera to move away from the player.");
@@ -301,9 +327,79 @@ public class Freecam extends Module {
         if (cancel) event.cancel();
     }
 
+    private BlockPos rayCastEntity(Vec3d posVec, Vec3d max, short maxDist) {
+        EntityHitResult res = ProjectileUtil.raycast(
+            mc.player,
+            posVec,
+            max,
+            Box.enclosing(BlockPos.ofFloored(posVec.x, posVec.y, posVec.z), BlockPos.ofFloored(max.x, max.y, max.z)),
+            (entity) -> true,
+            maxDist
+        );
+
+        if (res == null) {
+            return null;
+        }
+
+        Vec3d vec = res.getPos();
+
+        return BlockPos.ofFloored(vec.x, vec.y, vec.z);
+    }
+
+    private BlockPos rayCastBlock(Vec3d posVec, Vec3d max) {
+        RaycastContext ctx = new RaycastContext(
+            posVec,
+            max,
+            RaycastContext.ShapeType.VISUAL,
+            RaycastContext.FluidHandling.SOURCE_ONLY,
+            ShapeContext.absent()
+        );
+
+        BlockHitResult res = mc.world.raycast(ctx);
+        if (res.getType() == HitResult.Type.MISS) {
+            return null;
+        }
+
+        // Don't move inside block
+        return res.getBlockPos().add(res.getSide().getVector());
+    }
+
+    private void setGoal() {
+        if (System.currentTimeMillis() - clickTs > 500) {
+            clicked = false;
+        }
+
+        if (requireDoubleClick.get() && !clicked) {
+            clickTs = System.currentTimeMillis();
+            clicked = true;
+            return;
+        }
+
+        Camera cam = mc.gameRenderer.getCamera();
+        Vec3d posVec = cam.getPos();
+        Vec3d lookVec = Vec3d.fromPolar(cam.getPitch(), cam.getYaw());
+        short maxDist = 256;
+        Vec3d max = posVec.add(lookVec.multiply(maxDist));
+
+        BlockPos pos = rayCastEntity(posVec, max, maxDist);
+        if (pos == null) {
+            pos = rayCastBlock(posVec, max);
+        }
+
+        if (pos == null) {
+            return;
+        }
+
+        PathManagers.get().moveTo(pos);
+    }
+
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (checkGuiMove()) return;
+
+        if (baritoneClick.get() && event.action == KeyAction.Press && mc.options.attackKey.matchesMouse(event.button)) {
+            setGoal();
+        }
 
         boolean cancel = true;
 
