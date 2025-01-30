@@ -54,24 +54,7 @@ public class AutoTool extends Module {
         .defaultValue(false)
         .build()
     );
-
-    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-break")
-        .description("Stops you from breaking your tool.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Integer> breakDurability = sgGeneral.add(new IntSetting.Builder()
-        .name("anti-break-percentage")
-        .description("The durability percentage to stop using a tool.")
-        .defaultValue(10)
-        .range(1, 100)
-        .sliderRange(1, 100)
-        .visible(antiBreak::get)
-        .build()
-    );
-
+  
     private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
         .name("switch-back")
         .description("Switches your hand to whatever was selected when releasing your attack key.")
@@ -154,14 +137,15 @@ public class AutoTool extends Module {
         double bestScore = -1;
         bestSlot = -1;
 
+        AntiBreak antiBreak = Modules.get().get(AntiBreak.class);
+
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
 
             if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
             if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(itemStack.getItem())) continue;
 
-            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
-            if (score < 0) continue;
+            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack2 -> antiBreak.isActive() && antiBreak.canUse(itemStack2));
 
             if (score > bestScore) {
                 bestScore = score;
@@ -169,24 +153,12 @@ public class AutoTool extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        if ((bestSlot != -1 && bestSlot != mc.player.getInventory().selectedSlot || !isTool(currentStack))) {
             ticks = switchDelay.get();
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
             else shouldSwitch = true;
         }
-
-        // Anti break
-        currentStack = mc.player.getMainHandStack();
-
-        if (shouldStopUsing(currentStack) && isTool(currentStack)) {
-            mc.options.attackKey.setPressed(false);
-            event.cancel();
-        }
-    }
-
-    private boolean shouldStopUsing(ItemStack itemStack) {
-        return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
