@@ -161,13 +161,13 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public void add(HudElementInfo.Preset preset, int x, int y, XAnchor xAnchor, YAnchor yAnchor) {
+    public void add(@NotNull HudElementInfo.Preset preset, int x, int y, XAnchor xAnchor, YAnchor yAnchor) {
         HudElement element = preset.info.create();
         preset.callback.accept(element);
         add(element, x, y, xAnchor, yAnchor);
     }
 
-    public void add(HudElementInfo<?>.Preset preset, int x, int y) {
+    public void add(@NotNull HudElementInfo<?>.Preset preset, int x, int y) {
         add(preset, x, y, null, null);
     }
 
