@@ -5,9 +5,9 @@
   "main": "index.js",
   "author": "MineGame159",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "get_number": "node get_number.js",
-    "start": "node index.js"
-  },
-  "dependencies": {}
+    "webhook": "node index.js"
+  }
 }

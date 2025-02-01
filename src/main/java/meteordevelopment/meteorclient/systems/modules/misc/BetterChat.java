@@ -28,6 +28,7 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.PlayerSkinDrawer;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.RenderLayer;
@@ -225,7 +226,7 @@ public class BetterChat extends Module {
         .build()
     );
 
-    private static final Pattern antiSpamRegex = Pattern.compile(" \\(([0-9]+)\\)$");
+    private static final Pattern antiSpamRegex = Pattern.compile(" \\(([0-9]{1,9})\\)$");
     private static final Pattern antiClearRegex = Pattern.compile("\\n(\\n|\\s)+\\n");
     private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
     private static final Pattern usernameRegex = Pattern.compile("^(?:<[0-9]{2}:[0-9]{2}>\\s)?<(.*?)>.*");
@@ -457,10 +458,7 @@ public class BetterChat extends Module {
         PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(sender.getId());
         if (entry == null) return;
 
-        Identifier skin = entry.getSkinTextures().texture();
-
-        context.drawTexture(RenderLayer::getGuiTextured, skin, 0, y, 8, 8, 8, 8, 8, 8, 64, 64);
-        context.drawTexture(RenderLayer::getGuiTextured, skin, 0, y, 8, 8, 40, 8, 8, 8, 64, 64);
+        PlayerSkinDrawer.draw(context, entry.getSkinTextures(), 0, y, 8);
     }
 
     private GameProfile getSender(IChatHudLine line, String text) {

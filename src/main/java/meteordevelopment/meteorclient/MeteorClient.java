@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
@@ -47,8 +48,8 @@ public class MeteorClient implements ClientModInitializer {
     public static final String MOD_ID = "meteor-client";
     public static final ModMetadata MOD_META;
     public static final String NAME;
-    public static final  Version VERSION;
-    public static final  String DEV_BUILD;
+    public static final Version VERSION;
+    public static final String BUILD_NUMBER;
 
     public static MeteorClient INSTANCE;
     public static MeteorAddon ADDON;
@@ -71,7 +72,7 @@ public class MeteorClient implements ClientModInitializer {
         if (versionString.equals("${version}")) versionString = "0.0.0";
 
         VERSION = new Version(versionString);
-        DEV_BUILD = MOD_META.getCustomValue(MeteorClient.MOD_ID + ":devbuild").getAsString();
+        BUILD_NUMBER = MOD_META.getCustomValue(MeteorClient.MOD_ID + ":build_number").getAsString();
     }
 
     @Override
@@ -172,13 +173,16 @@ public class MeteorClient implements ClientModInitializer {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private void onOpenScreen(OpenScreenEvent event) {
-        boolean hideHud = GuiThemes.get().hideHUD();
-
-        if (hideHud) {
+        if (event.screen instanceof WidgetScreen) {
             if (!wasWidgetScreen) wasHudHiddenRoot = mc.options.hudHidden;
-
-            if (event.screen instanceof WidgetScreen) mc.options.hudHidden = true;
-            else if (!wasHudHiddenRoot) mc.options.hudHidden = false;
+            if (GuiThemes.get().hideHUD() || wasHudHiddenRoot) {
+                // Always show the MC HUD in the HUD editor screen since people like
+                // to align some items with the hotbar or chat
+                mc.options.hudHidden = !(event.screen instanceof HudEditorScreen);
+            }
+        } else {
+            if (wasWidgetScreen) mc.options.hudHidden = wasHudHiddenRoot;
+            wasHudHiddenRoot = mc.options.hudHidden;
         }
 
         wasWidgetScreen = event.screen instanceof WidgetScreen;

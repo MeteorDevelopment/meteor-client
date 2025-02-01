@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Bounce;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Packet;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Pitch40;
-import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Bounce;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.systems.modules.player.Rotation;
@@ -29,6 +29,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.MathHelper;
@@ -470,6 +471,8 @@ public class ElytraFly extends Module {
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
+        if (event.packet instanceof PlayerPositionLookS2CPacket) currentMode.zeroAcceleration();
+
         currentMode.onPacketReceive(event);
     }
 

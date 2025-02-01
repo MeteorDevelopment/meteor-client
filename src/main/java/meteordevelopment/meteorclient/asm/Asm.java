@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.asm;
 
-import meteordevelopment.meteorclient.asm.transformers.GameRendererTransformer;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.asm.transformers.PacketInflaterTransformer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.ClassReader;
@@ -41,7 +41,6 @@ public class Asm {
         if (INSTANCE != null) return;
 
         INSTANCE = new Asm(System.getProperty("meteor.asm.export") != null);
-        INSTANCE.add(new GameRendererTransformer());
         INSTANCE.add(new PacketInflaterTransformer());
     }
 
@@ -76,7 +75,7 @@ public class Asm {
                 new File(path.toUri()).getParentFile().mkdirs();
                 Files.write(path, bytes);
             } catch (IOException e) {
-                e.printStackTrace();
+                MeteorClient.LOG.error("Failed to export transformer '{}': ", name, e);
             }
         }
     }
