@@ -45,16 +45,15 @@ public class ArmorHud extends HudElement {
         .description("The scale.")
         .defaultValue(2)
         .onChanged(aDouble -> calculateSize())
-        .min(1)
-        .sliderRange(1, 5)
+        .min(0.5)
+        .sliderRange(0.5, 5)
         .build()
     );
 
-    private final Setting<Integer> border = sgGeneral.add(new IntSetting.Builder()
-        .name("border")
-        .description("How much space to add around the element.")
-        .defaultValue(0)
-        .onChanged(integer -> calculateSize())
+    private final Setting<Boolean> showEmpty = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-empty")
+        .description("Renders barrier icons for empty slots.")
+        .defaultValue(false)
         .build()
     );
 
@@ -107,15 +106,10 @@ public class ArmorHud extends HudElement {
         calculateSize();
     }
 
-    @Override
-    public void setSize(double width, double height) {
-        super.setSize(width + border.get() * 2, height + border.get() * 2);
-    }
-
     private void calculateSize() {
         switch (orientation.get()) {
-            case Horizontal -> setSize(16 * scale.get() * 4 + 2 * 4, 16 * scale.get());
-            case Vertical -> setSize(16 * scale.get(), 16 * scale.get() * 4 + 2 * 4);
+            case Horizontal -> setSize(16 * scale.get() * 4 + 2 * 4 * scale.get(), 16 * scale.get());
+            case Vertical -> setSize(16 * scale.get(), 16 * scale.get() * 4 + 2 * 4 * scale.get());
         }
     }
 
@@ -123,25 +117,37 @@ public class ArmorHud extends HudElement {
     public void render(HudRenderer renderer) {
         double x = this.x;
         double y = this.y;
-        double armorX;
-        double armorY;
 
-        int slot = flipOrder.get() ? 3 : 0;
+        double armorX, armorY;
+        int emptySlots = 0;
+
+        // default order is from boots to helmet
+        ItemStack[] armor = flipOrder.get() ?
+            new ItemStack[]{getItem(3), getItem(2), getItem(1), getItem(0)} :
+            new ItemStack[]{getItem(0), getItem(1), getItem(2), getItem(3)};
+
+        for (ItemStack stack : armor) {
+            if (stack.isEmpty()) emptySlots++;
+        }
+
+        if (background.get() && emptySlots < 4) {
+            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
+        }
+
         for (int position = 0; position < 4; position++) {
-            ItemStack itemStack = getItem(slot);
+            ItemStack itemStack = armor[position];
 
             if (orientation.get() == Orientation.Vertical) {
                 armorX = x;
                 armorY = y + position * 18 * scale.get();
-            }
-            else {
+            } else {
                 armorX = x + position * 18 * scale.get();
                 armorY = y;
             }
 
             renderer.item(itemStack, (int) armorX, (int) armorY, scale.get().floatValue(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
 
-            if (itemStack.isDamageable() && !isInEditor() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
+            if (itemStack.isDamageable() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
                 String message = switch (durability.get()) {
                     case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
                     case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
@@ -160,27 +166,21 @@ public class ArmorHud extends HudElement {
 
                 renderer.text(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
             }
-
-            if (flipOrder.get()) slot--;
-            else slot++;
-        }
-
-        if (background.get()) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
         }
     }
 
     private ItemStack getItem(int i) {
         if (isInEditor()) {
             return switch (i) {
-                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
                 case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
+                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
+                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
                 default -> Items.NETHERITE_BOOTS.getDefaultStack();
             };
         }
 
-        return mc.player.getInventory().getArmorStack(i);
+        ItemStack stack = mc.player.getInventory().getArmorStack(i);
+        return stack.isEmpty() && showEmpty.get() ? Items.BARRIER.getDefaultStack() : stack;
     }
 
     public enum Durability {
