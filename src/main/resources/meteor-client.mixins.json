@@ -101,6 +101,7 @@
     "GameRendererMixin",
     "HandledScreenAccessor",
     "HandledScreenMixin",
+    "HeadFeatureRendererMixin",
     "HeldItemRendererMixin",
     "HorseBaseEntityMixin",
     "HorseScreenHandlerAccessor",
