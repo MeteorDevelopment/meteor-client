@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements;
 
+import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
@@ -115,10 +116,6 @@ public class ArmorHud extends HudElement {
 
     @Override
     public void render(HudRenderer renderer) {
-        double x = this.x;
-        double y = this.y;
-
-        double armorX, armorY;
         int emptySlots = 0;
 
         // default order is from boots to helmet
@@ -134,39 +131,46 @@ public class ArmorHud extends HudElement {
             renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
         }
 
-        for (int position = 0; position < 4; position++) {
-            ItemStack itemStack = armor[position];
+        renderer.post(() -> {
+            double x = this.x;
+            double y = this.y;
 
-            if (orientation.get() == Orientation.Vertical) {
-                armorX = x;
-                armorY = y + position * 18 * scale.get();
-            } else {
-                armorX = x + position * 18 * scale.get();
-                armorY = y;
-            }
+            double armorX, armorY;
 
-            renderer.item(itemStack, (int) armorX, (int) armorY, scale.get().floatValue(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
-
-            if (itemStack.isDamageable() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
-                String message = switch (durability.get()) {
-                    case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
-                    case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
-                    default -> "err";
-                };
-
-                double messageWidth = renderer.textWidth(message);
+            for (int position = 0; position < 4; position++) {
+                ItemStack itemStack = armor[position];
 
                 if (orientation.get() == Orientation.Vertical) {
-                    armorX = x + 8 * scale.get() - messageWidth / 2.0;
-                    armorY = y + (18 * position * scale.get()) + (18 * scale.get() - renderer.textHeight());
+                    armorX = x;
+                    armorY = y + position * 18 * scale.get();
                 } else {
-                    armorX = x + 18 * position * scale.get() + 8 * scale.get() - messageWidth / 2.0;
-                    armorY = y + (getHeight() - renderer.textHeight());
+                    armorX = x + position * 18 * scale.get();
+                    armorY = y;
                 }
 
-                renderer.text(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
+                renderer.item(itemStack, (int) armorX, (int) armorY, scale.get().floatValue(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
+
+                if (itemStack.isDamageable() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
+                    String message = switch (durability.get()) {
+                        case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
+                        case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
+                        default -> "err";
+                    };
+
+                    double messageWidth = renderer.textWidth(message);
+
+                    if (orientation.get() == Orientation.Vertical) {
+                        armorX = x + 8 * scale.get() - messageWidth / 2.0;
+                        armorY = y + (18 * position * scale.get()) + (18 * scale.get() - renderer.textHeight());
+                    } else {
+                        armorX = x + 18 * position * scale.get() + 8 * scale.get() - messageWidth / 2.0;
+                        armorY = y + (getHeight() - renderer.textHeight());
+                    }
+
+                    TextRenderer.get().render(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
+                }
             }
-        }
+        });
     }
 
     private ItemStack getItem(int i) {
