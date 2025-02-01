@@ -147,7 +147,7 @@ public class ArmorHud extends HudElement {
 
             renderer.item(itemStack, (int) armorX, (int) armorY, scale.get().floatValue(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
 
-            if (itemStack.isDamageable() && !isInEditor() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
+            if (itemStack.isDamageable() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
                 String message = switch (durability.get()) {
                     case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
                     case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
