@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.commands.CreativeCommandHelper;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandSource;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ToolComponent;
@@ -16,6 +16,7 @@ import net.minecraft.item.BlockPredicatesChecker;
 import net.minecraft.item.ItemStack;
 import net.minecraft.predicate.BlockPredicate;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -40,7 +41,8 @@ public class MultitoolCommand extends Command {
                 ToolComponent.Rule.ofAlwaysDropping(Registries.BLOCK.getOrThrow(BlockTags.HOE_MINEABLE), 8f),
                 ToolComponent.Rule.ofAlwaysDropping(Registries.BLOCK.getOrThrow(BlockTags.PICKAXE_MINEABLE), 8f),
                 ToolComponent.Rule.ofAlwaysDropping(Registries.BLOCK.getOrThrow(BlockTags.SHOVEL_MINEABLE), 8f),
-                ToolComponent.Rule.ofAlwaysDropping(Registries.BLOCK.getOrThrow(BlockTags.SWORD_EFFICIENT), 24f)
+                ToolComponent.Rule.ofAlwaysDropping(Registries.BLOCK.getOrThrow(BlockTags.SWORD_EFFICIENT), 8f),
+                ToolComponent.Rule.ofAlwaysDropping(RegistryEntryList.of(Registries.BLOCK.getEntry(Blocks.COBWEB)), 16f)
             ), 10f, 1));
             stack.set(DataComponentTypes.CAN_BREAK, new BlockPredicatesChecker(List.of(
                 BlockPredicate.Builder.create().tag(Registries.BLOCK, BlockTags.AXE_MINEABLE).build(),
