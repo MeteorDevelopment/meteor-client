@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -15,11 +16,10 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.text.Text;
 
 public class DropCommand extends Command {
-    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(Text.literal("Can't drop items while in spectator."));
-    private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(Text.literal("Could not find an item with that name!"));
+    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(new LiteralMessage("Can't drop items while in spectator."));
+    private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(new LiteralMessage("Could not find an item with that name!"));
 
     public DropCommand() {
         super("drop", "Automatically drops specified items.");
