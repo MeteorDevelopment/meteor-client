@@ -24,7 +24,7 @@ import java.util.List;
 
 public class MultitoolCommand extends Command {
     public MultitoolCommand() {
-        super("multitool", "");
+        super("multitool", "Makes your held item able to mine (almost) anything.");
     }
 
     @Override
@@ -40,7 +40,7 @@ public class MultitoolCommand extends Command {
                 ToolComponent.Rule.ofAlwaysDropping(Registries.BLOCK.getOrThrow(BlockTags.HOE_MINEABLE), 8f),
                 ToolComponent.Rule.ofAlwaysDropping(Registries.BLOCK.getOrThrow(BlockTags.PICKAXE_MINEABLE), 8f),
                 ToolComponent.Rule.ofAlwaysDropping(Registries.BLOCK.getOrThrow(BlockTags.SHOVEL_MINEABLE), 8f),
-                ToolComponent.Rule.ofAlwaysDropping(Registries.BLOCK.getOrThrow(BlockTags.SWORD_EFFICIENT), 15f)
+                ToolComponent.Rule.ofAlwaysDropping(Registries.BLOCK.getOrThrow(BlockTags.SWORD_EFFICIENT), 24f)
             ), 10f, 1));
             stack.set(DataComponentTypes.CAN_BREAK, new BlockPredicatesChecker(List.of(
                 BlockPredicate.Builder.create().tag(Registries.BLOCK, BlockTags.AXE_MINEABLE).build(),
