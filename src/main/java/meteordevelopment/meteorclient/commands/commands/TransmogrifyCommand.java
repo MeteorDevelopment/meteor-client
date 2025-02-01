@@ -55,7 +55,7 @@ public class TransmogrifyCommand extends Command {
 
             MeteorExecutor.execute(() -> {
                 // check if resource exists
-                Identifier resourceId = modelId.withPath(path -> "models/item/" + path + ".json");
+                Identifier resourceId = modelId.withPath(path -> "items/" + path + ".json");
                 Optional<Resource> modelResource = mc.getResourceManager().getResource(resourceId);
 
                 MinecraftClient.getInstance().execute(() -> { // fun fact: ChatUtils#error is not thread safe
@@ -83,7 +83,7 @@ public class TransmogrifyCommand extends Command {
     private void transmogrify(ItemStack stack, Identifier modelId, @Nullable Text name) throws CommandSyntaxException {
         // check whether the old and new item models match
         Identifier oldModel = stack.get(DataComponentTypes.ITEM_MODEL);
-        if ((oldModel != null && oldModel.equals(modelId)) || Registries.ITEM.getId(stack.getItem()).equals(modelId)) {
+        if (oldModel != null && oldModel.equals(modelId)) {
             info(Text.literal("Nothing changed...").setStyle(Style.EMPTY.withColor(Formatting.GRAY).withItalic(true)));
             return;
         }

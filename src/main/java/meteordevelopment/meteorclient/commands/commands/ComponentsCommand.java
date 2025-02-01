@@ -193,7 +193,7 @@ public class ComponentsCommand extends Command {
         ItemStack stack = mc.player.getInventory().getStack(slot);
         CreativeCommandHelper.assertValid(stack);
 
-        stack.clearComponentChanges();
+        ((MergedComponentMap) stack.getComponents()).clearChanges();
 
         CreativeCommandHelper.setStack(stack, slot);
         info("Reset components.");
