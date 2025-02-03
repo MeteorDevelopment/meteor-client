@@ -31,8 +31,8 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Unit;
 
 import java.util.Locale;
@@ -43,8 +43,24 @@ public class ComponentsCommand extends Command {
         error -> Text.stringifiedTranslatable("arguments.item.malformed", error)
     );
 
+    private static final Text COPY_BUTTON = Text.literal("Data").setStyle(Style.EMPTY
+        .withFormatting(Formatting.UNDERLINE)
+        .withHoverEvent(new HoverEvent(
+            HoverEvent.Action.SHOW_TEXT,
+            Text.literal("Copy the component data to your clipboard.")
+        ))
+    );
+
     public ComponentsCommand() {
         super("components", "View and modify data components for an item, example: .components add [minecraft:item_name='{\"color\":\"red\",\"text\":\"Red Name\"}']");
+    }
+
+    public static MutableText createCopyButton(String toCopy) {
+        return Text.empty().append(COPY_BUTTON).setStyle(Style.EMPTY
+            .withClickEvent(new ClickEvent(
+                ClickEvent.Action.COPY_TO_CLIPBOARD,
+                toCopy
+            )));
     }
 
     @Override
@@ -321,7 +337,7 @@ public class ComponentsCommand extends Command {
             SerializedComponents serialized = SerializedComponents.serialize(stack, componentType);
             info(serialized.formatted());
         } else {
-            info(NbtCommand.createCopyButton("[]").append(" []"));
+            info("Item does not have component '(highlight)%s(default)'.", componentTypeKey.getValue());
         }
 
         return SINGLE_SUCCESS;
@@ -375,20 +391,20 @@ public class ComponentsCommand extends Command {
         public static SerializedComponents serialize(ComponentMap componentMap) {
             ComponentMapWriter writer = new ComponentMapWriter(REGISTRY_ACCESS);
             String stringified = writer.write(componentMap).resultOrPartial().orElseThrow();
-            return new SerializedComponents(stringified, NbtCommand.createCopyButton(stringified).append(ScreenTexts.SPACE).append(writer.writePrettyPrinted(componentMap).resultOrPartial().orElseThrow()));
+            return new SerializedComponents(stringified, createCopyButton(stringified).append(ScreenTexts.SPACE).append(writer.writePrettyPrinted(componentMap).resultOrPartial().orElseThrow()));
         }
 
         public static SerializedComponents serialize(ComponentChanges componentChanges) {
             ComponentMapWriter writer = new ComponentMapWriter(REGISTRY_ACCESS);
             String stringified = writer.write(componentChanges).resultOrPartial().orElseThrow();
-            return new SerializedComponents(stringified, NbtCommand.createCopyButton(stringified).append(ScreenTexts.SPACE).append(writer.writePrettyPrinted(componentChanges).resultOrPartial().orElseThrow()));
+            return new SerializedComponents(stringified, createCopyButton(stringified).append(ScreenTexts.SPACE).append(writer.writePrettyPrinted(componentChanges).resultOrPartial().orElseThrow()));
         }
 
         public static <T> SerializedComponents serialize(ItemStack stack, ComponentType<T> componentType) {
             T componentValue = stack.get(componentType);
             ComponentMapWriter writer = new ComponentMapWriter(REGISTRY_ACCESS);
             String stringified = writer.write(componentType, componentValue).resultOrPartial().orElseThrow();
-            return new SerializedComponents(stringified, NbtCommand.createCopyButton(stringified).append(ScreenTexts.SPACE).append(writer.writePrettyPrinted(componentType, componentValue).resultOrPartial().orElseThrow()));
+            return new SerializedComponents(stringified, createCopyButton(stringified).append(ScreenTexts.SPACE).append(writer.writePrettyPrinted(componentType, componentValue).resultOrPartial().orElseThrow()));
         }
     }
 }
