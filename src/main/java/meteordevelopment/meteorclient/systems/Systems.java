@@ -34,6 +34,9 @@ public class Systems {
     }
 
     public static void init() {
+        // Has to be loaded first so the hidden modules list in config tab can load modules
+        add(new Modules());
+
         Config config = new Config();
         System<?> configSystem = add(config);
         configSystem.init();
@@ -42,7 +45,6 @@ public class Systems {
         // Registers the colors from config tab. This allows rainbow colours to work for friends.
         config.settings.registerColorSettings(null);
 
-        add(new Modules());
         add(new Macros());
         add(new Friends());
         add(new Accounts());
