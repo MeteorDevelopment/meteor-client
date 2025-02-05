@@ -34,7 +34,7 @@ public abstract class WAccount extends WHorizontalList {
     @Override
     public void init() {
         // Head
-        add(theme.texture(32, 32, account.getCache().getHeadTexture().needsRotate() ? 90 : 0, account.getCache().getHeadTexture()));
+        add(theme.texture(32, 32, 0, account.getCache().getHeadTexture()));
 
         // Name
         WLabel name = add(theme.label(account.getUsername())).widget();
