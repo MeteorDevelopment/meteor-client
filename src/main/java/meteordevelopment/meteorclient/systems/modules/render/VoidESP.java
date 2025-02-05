@@ -139,7 +139,7 @@ public class VoidESP extends Module {
 
     private boolean isHole(BlockPos.Mutable blockPos, boolean nether) {
         for (int i = 0; i < holeHeight.get(); i++) {
-            blockPos.setY(nether ? 127 - i : mc.world.getBottomY());
+            blockPos.setY(nether ? 127 - i : mc.world.getBottomY() + i);
             if (isBlockWrong(blockPos)) return false;
         }
 
