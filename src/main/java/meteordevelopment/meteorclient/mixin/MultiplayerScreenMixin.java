@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.misc.NameProtect;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.meteorclient.systems.config.Config;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -48,19 +49,23 @@ public abstract class MultiplayerScreenMixin extends Screen {
         loggedInAs = "Logged in as ";
         loggedInAsLength = textRenderer.getWidth(loggedInAs);
 
-        addDrawableChild(
-            new ButtonWidget.Builder(Text.literal("Accounts"), button -> client.setScreen(GuiThemes.get().accountsScreen()))
-                .position(this.width - 75 - 3, 3)
-                .size(75, 20)
-                .build()
-        );
+        if (Config.get().accountsButton.get()) {
+            addDrawableChild(
+                new ButtonWidget.Builder(Text.literal("Accounts"), button -> client.setScreen(GuiThemes.get().accountsScreen()))
+                    .position(this.width - 75 - 3, 3)
+                    .size(75, 20)
+                    .build()
+            );
+        }
 
-        addDrawableChild(
-            new ButtonWidget.Builder(Text.literal("Proxies"), button -> client.setScreen(GuiThemes.get().proxiesScreen()))
-                .position(this.width - 75 - 3 - 75 - 2, 3)
-                .size(75, 20)
-                .build()
-        );
+        if (Config.get().proxiesButton.get()) {
+            addDrawableChild(
+                new ButtonWidget.Builder(Text.literal("Proxies"), button -> client.setScreen(GuiThemes.get().proxiesScreen()))
+                    .position(this.width - 75 - 3 - 75 - 2, 3)
+                    .size(75, 20)
+                    .build()
+            );
+        }
     }
 
     @Inject(method = "render", at = @At("TAIL"))
@@ -69,19 +74,23 @@ public abstract class MultiplayerScreenMixin extends Screen {
         int y = 3;
 
         // Logged in as
-        context.drawTextWithShadow(mc.textRenderer, loggedInAs, x, y, textColor1);
-        context.drawTextWithShadow(mc.textRenderer, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
+        if (Config.get().accountStatus.get()) {
+            context.drawTextWithShadow(mc.textRenderer, loggedInAs, x, y, textColor1);
+            context.drawTextWithShadow(mc.textRenderer, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
+        }
 
         y += textRenderer.fontHeight + 2;
 
         // Proxy
-        Proxy proxy = Proxies.get().getEnabled();
+        if (Config.get().proxyStatus.get()) {
+            Proxy proxy = Proxies.get().getEnabled();
 
-        String left = proxy != null ? "Using proxy " : "Not using a proxy";
-        String right = proxy != null ? (proxy.name.get() != null && !proxy.name.get().isEmpty() ? "(" + proxy.name.get() + ") " : "") + proxy.address.get() + ":" + proxy.port.get() : null;
+            String left = proxy != null ? "Using proxy " : "Not using a proxy";
+            String right = proxy != null ? (proxy.name.get() != null && !proxy.name.get().isEmpty() ? "(" + proxy.name.get() + ") " : "") + proxy.address.get() + ":" + proxy.port.get() : null;
 
-        context.drawTextWithShadow(mc.textRenderer, left, x, y, textColor1);
-        if (right != null)
-            context.drawTextWithShadow(mc.textRenderer, right, x + textRenderer.getWidth(left), y, textColor2);
+            context.drawTextWithShadow(mc.textRenderer, left, x, y, textColor1);
+            if (right != null)
+                context.drawTextWithShadow(mc.textRenderer, right, x + textRenderer.getWidth(left), y, textColor2);
+        }
     }
 }

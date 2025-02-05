@@ -71,6 +71,34 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<Boolean> proxiesButton = sgVisual.add(new BoolSetting.Builder()
+        .name("proxies-button")
+        .description("Show proxies button on multiplayer screen")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> accountsButton = sgVisual.add(new BoolSetting.Builder()
+        .name("accounts-button")
+        .description("Show accounts button on multiplayer screen")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> accountStatus = sgVisual.add(new BoolSetting.Builder()
+        .name("account-status")
+        .description("Show account status on multiplayer screen")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> proxyStatus = sgVisual.add(new BoolSetting.Builder()
+        .name("proxy-status")
+        .description("Show proxy status on multiplayer screen")
+        .defaultValue(true)
+        .build()
+    );
+
     public final Setting<Boolean> customWindowTitle = sgVisual.add(new BoolSetting.Builder()
         .name("custom-window-title")
         .description("Show custom text in the window title.")
