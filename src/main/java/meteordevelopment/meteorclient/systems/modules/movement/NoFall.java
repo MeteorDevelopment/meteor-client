@@ -30,6 +30,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.item.MaceItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -80,6 +81,13 @@ public class NoFall extends Module {
         .build()
     );
 
+    private final Setting<Boolean> pauseOnMace = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-on-mace")
+        .description("Pauses NoFall when using a mace.")
+        .defaultValue(true)
+        .build()
+    );
+
     private boolean placedWater;
     private BlockPos targetPos;
     private int timer;
@@ -104,6 +112,7 @@ public class NoFall extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
+        if (pauseOnMace.get() && mc.player.getMainHandStack().getItem() instanceof MaceItem) return;
         if (mc.player.getAbilities().creativeMode
             || !(event.packet instanceof PlayerMoveC2SPacket)
             || mode.get() != Mode.Packet
@@ -127,6 +136,7 @@ public class NoFall extends Module {
         }
 
         if (mc.player.getAbilities().creativeMode) return;
+        if (pauseOnMace.get() && mc.player.getMainHandStack().getItem() instanceof MaceItem) return;
 
         // Airplace mode
         if (mode.get() == Mode.AirPlace) {
