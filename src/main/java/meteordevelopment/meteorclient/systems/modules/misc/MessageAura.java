@@ -27,6 +27,13 @@ public class MessageAura extends Module {
         .build()
     );
 
+    private final Setting<String> command = sgGeneral.add(new StringSetting.Builder()
+        .name("command")
+        .description("The message command for the server.")
+        .defaultValue("/msg")
+        .build()
+    );
+
     private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-friends")
         .description("Will not send any messages to people friended.")
@@ -43,7 +50,7 @@ public class MessageAura extends Module {
         if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
 
         if (!ignoreFriends.get() || (ignoreFriends.get() && !Friends.get().isFriend((PlayerEntity)event.entity))) {
-            ChatUtils.sendPlayerMsg("/msg " + event.entity.getName().getString() + " " + message.get());
+            ChatUtils.sendPlayerMsg(command.get() + " " + event.entity.getName().getString() + " " + message.get());
         }
     }
 }
