@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -26,6 +27,7 @@ public class Config extends System<Config> {
     public final Settings settings = new Settings();
 
     private final SettingGroup sgVisual = settings.createGroup("Visual");
+    private final SettingGroup sgModules = settings.createGroup("Modules");
     private final SettingGroup sgChat = settings.createGroup("Chat");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
 
@@ -94,6 +96,29 @@ public class Config extends System<Config> {
         .build()
     );
 
+    // Modules
+
+    public final Setting<List<Module>> hiddenModules = sgModules.add(new ModuleListSetting.Builder()
+        .name("hidden-modules")
+        .description("Prevent these modules from being rendered as options in the clickgui.")
+        .build()
+    );
+
+    public final Setting<Integer> moduleSearchCount = sgModules.add(new IntSetting.Builder()
+        .name("module-search-count")
+        .description("Amount of modules and settings to be shown in the module search bar.")
+        .defaultValue(8)
+        .min(1).sliderMax(12)
+        .build()
+    );
+
+    public final Setting<Boolean> moduleAliases = sgModules.add(new BoolSetting.Builder()
+        .name("search-module-aliases")
+        .description("Whether or not module aliases will be used in the module search bar.")
+        .defaultValue(true)
+        .build()
+    );
+
     // Chat
 
     public final Setting<String> prefix = sgChat.add(new StringSetting.Builder()
@@ -130,21 +155,6 @@ public class Config extends System<Config> {
     public final Setting<Boolean> useTeamColor = sgMisc.add(new BoolSetting.Builder()
         .name("use-team-color")
         .description("Uses player's team color for rendering things like esp and tracers.")
-        .defaultValue(true)
-        .build()
-    );
-
-    public final Setting<Integer> moduleSearchCount = sgMisc.add(new IntSetting.Builder()
-        .name("module-search-count")
-        .description("Amount of modules and settings to be shown in the module search bar.")
-        .defaultValue(8)
-        .min(1).sliderMax(12)
-        .build()
-    );
-
-    public final Setting<Boolean> moduleAliases = sgMisc.add(new BoolSetting.Builder()
-        .name("search-module-aliases")
-        .description("Whether or not module aliases will be used in the module search bar.")
         .defaultValue(true)
         .build()
     );

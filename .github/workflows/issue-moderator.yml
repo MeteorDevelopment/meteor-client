@@ -11,7 +11,11 @@ jobs:
   issue-moderator:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
       - name: Automatically close issues that don't follow the issue template
         uses: lucasbento/auto-close-issues@v1.0.2
         with:
@@ -20,4 +24,3 @@ jobs:
             @${issue.user.login}: hello! :wave:
             This issue is being automatically closed because it does not follow the issue template."
           closed-issues-label: "invalid"
-

@@ -43,7 +43,7 @@ public class AutoLog extends Module {
     );
 
     private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
-        .name("smart")
+        .name("predict-incoming-damage")
         .description("Disconnects when it detects you're about to take enough damage to set you under the 'health' setting.")
         .defaultValue(true)
         .build()
@@ -73,6 +73,13 @@ public class AutoLog extends Module {
     private final Setting<Boolean> toggleOff = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-off")
         .description("Disables Auto Log after usage.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> toggleAutoReconnect = sgGeneral.add(new BoolSetting.Builder()
+        .name("toggle-auto-reconnect")
+        .description("Whether to disable Auto Reconnect after a logout.")
         .defaultValue(true)
         .build()
     );
@@ -214,7 +221,7 @@ public class AutoLog extends Module {
         text.append(reason);
 
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
-        if (autoReconnect.isActive()) {
+        if (autoReconnect.isActive() && toggleAutoReconnect.get()) {
             text.append(Text.literal("\n\nINFO - AutoReconnect was disabled").withColor(Colors.GRAY));
             autoReconnect.toggle();
         }

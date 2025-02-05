@@ -185,7 +185,6 @@ public class InvUtils {
      * When writing code with quickSwap, both to and from should provide the ID of a slot, not the index.
      * From should be the slot in the hotbar, to should be the slot you're switching an item from.
      */
-
     public static Action quickSwap() {
         ACTION.type = SlotActionType.SWAP;
         return ACTION;

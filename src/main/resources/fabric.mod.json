@@ -33,7 +33,7 @@
   ],
   "accessWidener": "meteor-client.accesswidener",
   "custom": {
-    "meteor-client:devbuild": "${devbuild}",
+    "meteor-client:build_number": "${build_number}",
     "meteor-client:color": "145,61,226",
     "meteor-client:commit": "${commit}",
     "modmenu": {
@@ -44,7 +44,7 @@
   },
   "depends": {
     "java": ">=21",
-    "minecraft": ["1.21.2", "${minecraft_version}"],
+    "minecraft": ["${minecraft_version}"],
     "fabricloader": ">=${loader_version}"
   },
   "breaks": {
@@ -52,7 +52,7 @@
     "feather": "*",
     "origins": "*",
     "wurst": "*",
-    "sodium": "<0.6.0",
+    "sodium": "<0.6.5",
     "morechathistory": "*"
   }
 }

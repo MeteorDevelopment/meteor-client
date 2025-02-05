@@ -1,11 +1,18 @@
-const fs = require("fs");
-const path = require("path");
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
 
-const branch = process.argv[2];
-const compareUrl = process.argv[3];
-const success = process.argv[4] === "true";
+import { getMcVersion } from "./mc_version.js"
 
-function send(version, number) {
+const buildNumber = process.argv[2];
+const branch = process.argv[3];
+const compareUrl = process.argv[4];
+const success = process.argv[5] === "true";
+
+const mcVersion = await getMcVersion();
+
+function sendDiscordWebhook() {
     fetch(compareUrl)
         .then(res => res.json())
         .then(res => {
@@ -25,15 +32,15 @@ function send(version, number) {
             if (hasChanges) description += changes;
 
             if (success) {
-                description += "\n\n**Download:** [meteor-client-" + version + "-" + number + "](https://meteorclient.com/download?devBuild=" + number + ")";
+                description += "\n\nVisit our [website](https://meteorclient.com) for download";
             }
 
             const webhook = {
-                username: "Dev Builds",
+                username: "Builds",
                 avatar_url: "https://meteorclient.com/icon.png",
                 embeds: [
                     {
-                        title: "meteor client v" + version + " build #" + number,
+                        title: "Meteor Client " + mcVersion + " build #" + buildNumber,
                         description: description,
                         url: "https://meteorclient.com",
                             color: success ? 2672680 : 13117480
@@ -52,38 +59,12 @@ function send(version, number) {
 }
 
 if (success) {
-    let jar = "";
-    fs.readdirSync("../../build/libs").forEach(file => {
-        if (!file.endsWith("-all.jar") && !file.endsWith("-sources.jar")) jar = "../../build/libs/" + file;
-    });
-
-    let form = new FormData();
-    form.set(
-        "file",
-        new Blob([fs.readFileSync(jar)], { type: "application/java-archive" }),
-        path.basename(jar)
-    );
-
-    fetch("https://meteorclient.com/api/uploadDevBuild", {
+    fetch("https://meteorclient.com/api/recheckMaven", {
         method: "POST",
         headers: {
             "Authorization": process.env.SERVER_TOKEN
-        },
-        body: form
-    })
-        .then(async res => {
-            let data = await res.json();
+        }
+    });
+}
 
-            if (res.ok) {
-                send(data.version, data.number);
-            }
-            else {
-                console.log("Failed to upload dev build: " + data.error);
-            }
-        });
-}
-else {
-    fetch("https://meteorclient.com/api/stats")
-        .then(res => res.json())
-        .then(res => send(res.dev_build_version, parseInt(res.devBuild) + 1));
-}
+sendDiscordWebhook()

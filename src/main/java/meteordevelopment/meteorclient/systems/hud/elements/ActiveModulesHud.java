@@ -21,12 +21,9 @@ public class ActiveModulesHud extends HudElement {
     private static final Color WHITE = new Color();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<List<Module>> hiddenModules = sgGeneral.add(new ModuleListSetting.Builder()
-        .name("hidden-modules")
-        .description("Which modules not to show in the list.")
-        .build()
-    );
+    private final SettingGroup sgColor = settings.createGroup("Color");
+    private final SettingGroup sgScale = settings.createGroup("Scale");
+    private final SettingGroup sgBackground = settings.createGroup("Background");
 
     private final Setting<Sort> sort = sgGeneral.add(new EnumSetting.Builder<Sort>()
         .name("sort")
@@ -35,33 +32,16 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
+    private final Setting<List<Module>> hiddenModules = sgGeneral.add(new ModuleListSetting.Builder()
+        .name("hidden-modules")
+        .description("Which modules not to show in the list.")
+        .build()
+    );
+
     private final Setting<Boolean> activeInfo = sgGeneral.add(new BoolSetting.Builder()
-        .name("additional-info")
-        .description("Shows additional info from the module next to the name in the active modules list.")
+        .name("module-info")
+        .description("Shows info from the module next to the name in the active modules list.")
         .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<SettingColor> moduleInfoColor = sgGeneral.add(new ColorSetting.Builder()
-        .name("module-info-color")
-        .description("Color of module info text.")
-        .defaultValue(new SettingColor(175, 175, 175))
-        .visible(activeInfo::get)
-        .build()
-    );
-
-    private final Setting<ColorMode> colorMode = sgGeneral.add(new EnumSetting.Builder<ColorMode>()
-        .name("color-mode")
-        .description("What color to use for active modules.")
-        .defaultValue(ColorMode.Rainbow)
-        .build()
-    );
-
-    private final Setting<SettingColor> flatColor = sgGeneral.add(new ColorSetting.Builder()
-        .name("flat-color")
-        .description("Color for flat color mode.")
-        .defaultValue(new SettingColor(225, 25, 25))
-        .visible(() -> colorMode.get() == ColorMode.Flat)
         .build()
     );
 
@@ -69,13 +49,6 @@ public class ActiveModulesHud extends HudElement {
         .name("shadow")
         .description("Renders shadow behind text.")
         .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Alignment> alignment = sgGeneral.add(new EnumSetting.Builder<Alignment>()
-        .name("alignment")
-        .description("Horizontal alignment.")
-        .defaultValue(Alignment.Auto)
         .build()
     );
 
@@ -96,24 +69,31 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
-    private final Setting<Boolean> customScale = sgGeneral.add(new BoolSetting.Builder()
-        .name("custom-scale")
-        .description("Applies custom text scale rather than the global one.")
-        .defaultValue(false)
+    private final Setting<Alignment> alignment = sgGeneral.add(new EnumSetting.Builder<Alignment>()
+        .name("alignment")
+        .description("Horizontal alignment.")
+        .defaultValue(Alignment.Auto)
         .build()
     );
 
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("Custom scale.")
-        .visible(customScale::get)
-        .defaultValue(1)
-        .min(0.5)
-        .sliderRange(0.5, 3)
+    // Color
+
+    private final Setting<ColorMode> colorMode = sgColor.add(new EnumSetting.Builder<ColorMode>()
+        .name("color-mode")
+        .description("What color to use for active modules.")
+        .defaultValue(ColorMode.Rainbow)
         .build()
     );
 
-    private final Setting<Double> rainbowSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<SettingColor> flatColor = sgColor.add(new ColorSetting.Builder()
+        .name("flat-color")
+        .description("Color for flat color mode.")
+        .defaultValue(new SettingColor(225, 25, 25))
+        .visible(() -> colorMode.get() == ColorMode.Flat)
+        .build()
+    );
+
+    private final Setting<Double> rainbowSpeed = sgColor.add(new DoubleSetting.Builder()
         .name("rainbow-speed")
         .description("Rainbow speed of rainbow color mode.")
         .defaultValue(0.05)
@@ -124,7 +104,7 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> rainbowSpread = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> rainbowSpread = sgColor.add(new DoubleSetting.Builder()
         .name("rainbow-spread")
         .description("Rainbow spread of rainbow color mode.")
         .defaultValue(0.01)
@@ -135,7 +115,7 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> rainbowSaturation = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> rainbowSaturation = sgColor.add(new DoubleSetting.Builder()
         .name("rainbow-saturation")
         .defaultValue(1.0d)
         .sliderRange(0.0d, 1.0d)
@@ -143,11 +123,55 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> rainbowBrightness = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> rainbowBrightness = sgColor.add(new DoubleSetting.Builder()
         .name("rainbow-brightness")
         .defaultValue(1.0d)
         .sliderRange(0.0d, 1.0d)
         .visible(() -> colorMode.get() == ColorMode.Rainbow)
+        .build()
+    );
+
+    private final Setting<SettingColor> moduleInfoColor = sgColor.add(new ColorSetting.Builder()
+        .name("module-info-color")
+        .description("Color of module info text.")
+        .defaultValue(new SettingColor(175, 175, 175))
+        .visible(activeInfo::get)
+        .build()
+    );
+
+    // Scale
+
+    private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
+        .name("custom-scale")
+        .description("Applies custom text scale rather than the global one.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Custom scale.")
+        .visible(customScale::get)
+        .defaultValue(1)
+        .min(0.5)
+        .sliderRange(0.5, 3)
+        .build()
+    );
+
+    // Background
+
+    private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
+        .name("background")
+        .description("Displays background.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
+        .name("background-color")
+        .description("Color used for the background.")
+        .visible(background::get)
+        .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()
     );
 
@@ -158,6 +182,7 @@ public class ActiveModulesHud extends HudElement {
     private double rainbowHue2;
 
     private double prevX;
+    private double emptySpace;
     private double prevTextLength;
     private Color prevColor = new Color();
 
@@ -189,12 +214,9 @@ public class ActiveModulesHud extends HudElement {
         double width = 0;
         double height = 0;
 
-        for (int i = 0; i < modules.size(); i++) {
-            Module module = modules.get(i);
-
+        for (Module module : modules) {
             width = Math.max(width, getModuleWidth(renderer, module));
             height += renderer.textHeight(shadow.get(), getScale());
-            if (i > 0) height += 2;
         }
 
         setSize(width, height);
@@ -219,17 +241,18 @@ public class ActiveModulesHud extends HudElement {
         rainbowHue2 = rainbowHue1;
 
         prevX = x;
+        emptySpace = renderer.textWidth(" ", shadow.get(), getScale());
 
         for (int i = 0; i < modules.size(); i++) {
             double offset = alignX(getModuleWidth(renderer, modules.get(i)), alignment.get());
-            renderModule(renderer, modules, i, x + offset, y);
+            renderModule(renderer, i, x + offset, y);
 
             prevX = x + offset;
-            y += 2 + renderer.textHeight(shadow.get(), getScale());
+            y += renderer.textHeight(shadow.get(), getScale());
         }
     }
 
-    private void renderModule(HudRenderer renderer, List<Module> modules, int index, double x, double y) {
+    private void renderModule(HudRenderer renderer, int index, double x, double y) {
         Module module = modules.get(index);
         Color color = flatColor.get();
 
@@ -247,9 +270,11 @@ public class ActiveModulesHud extends HudElement {
 
         renderer.text(module.title, x, y, color, shadow.get(), getScale());
 
-        double emptySpace = renderer.textWidth(" ", shadow.get(), getScale());
         double textHeight = renderer.textHeight(shadow.get(), getScale());
         double textLength = renderer.textWidth(module.title, shadow.get(), getScale());
+
+        double lineStartY = y;
+        double lineHeight = textHeight;
 
         if (activeInfo.get()) {
             String info = module.getInfoString();
@@ -260,28 +285,14 @@ public class ActiveModulesHud extends HudElement {
         }
 
         if (outlines.get()) {
-            if (index == 0) {
-                renderer.quad(x - 2 - outlineWidth.get(), y - 2, outlineWidth.get(), textHeight + 4, prevColor, prevColor, color, color); // Left quad
-                renderer.quad(x + textLength + 2, y - 2, outlineWidth.get(), textHeight + 4, prevColor, prevColor, color, color); // Right quad
+            if (index == 0) { // Render top quad for first item in list
+                lineStartY -= 2;
+                lineHeight += 2;
 
-                renderer.quad(x - 2 - outlineWidth.get(), y - 2 - outlineWidth.get(), textLength + 4 + (outlineWidth.get() * 2), outlineWidth.get(), prevColor, prevColor, color, color); // Top quad
-				if (index == modules.size() - 1)
-                    renderer.quad(x - 2 - outlineWidth.get(), y + textHeight + 2, textLength + 4 + (outlineWidth.get() * 2), outlineWidth.get(), prevColor, prevColor, color, color); // Bottom quad
-
-            } else if (index == modules.size() - 1) {
-                renderer.quad(x - 2 - outlineWidth.get(), y, outlineWidth.get(), textHeight + 2 + outlineWidth.get(), prevColor, prevColor, color, color); // Left quad
-                renderer.quad(x + textLength + 2, y, outlineWidth.get(), textHeight + 2 + outlineWidth.get(), prevColor, prevColor, color, color); // Right quad
-
-                renderer.quad(x - 2 - outlineWidth.get(), y + textHeight + 2, textLength + 4 + (outlineWidth.get() * 2), outlineWidth.get(), prevColor, prevColor, color, color); // Bottom quad
-            }
-
-            if (index > 0) {
-                if (index < modules.size() - 1) {
-
-                    renderer.quad(x - 2 - outlineWidth.get(), y, outlineWidth.get(), textHeight + 2, prevColor, prevColor, color, color); // Left quad
-                    renderer.quad(x + textLength + 2, y, outlineWidth.get(), textHeight + 2, prevColor, prevColor, color, color); // Right quad
-                }
-
+                renderer.quad(x - 2 - outlineWidth.get(), lineStartY - outlineWidth.get(),
+                    textLength + 4 + 2 * outlineWidth.get(),
+                    outlineWidth.get(), prevColor, prevColor, color, color);
+            } else { // Inbetweens are rendered above the current line so don't need for the top
                 renderer.quad(Math.min(prevX, x) - 2 - outlineWidth.get(), Math.max(prevX, x) == x ? y : y - outlineWidth.get(),
                     (Math.max(prevX, x) - 2) - (Math.min(prevX, x) - 2 - outlineWidth.get()), outlineWidth.get(),
                     prevColor, prevColor, color, color); // Left inbetween quad
@@ -290,6 +301,26 @@ public class ActiveModulesHud extends HudElement {
                     (Math.max(prevX + prevTextLength, x + textLength) + 2 + outlineWidth.get()) - (Math.min(prevX + prevTextLength, x + textLength) + 2), outlineWidth.get(),
                     prevColor, prevColor, color, color); // Right inbetween quad
             }
+
+            if (index == modules.size() - 1) { // Render bottom quad for last item in list
+                lineHeight += 2;
+
+                renderer.quad(x - 2 - outlineWidth.get(), lineStartY + lineHeight,
+                    textLength + 4 + 2 * outlineWidth.get(), outlineWidth.get(),
+                    prevColor, prevColor, color, color);
+            }
+
+            // Left side quad
+            renderer.quad(x - 2 - outlineWidth.get(), lineStartY, outlineWidth.get(), lineHeight,
+                prevColor, prevColor, color, color);
+
+            // Right side quad
+            renderer.quad(x + textLength + 2, lineStartY, outlineWidth.get(), lineHeight,
+                prevColor, prevColor, color, color);
+        }
+
+        if (background.get()) {
+            renderer.quad( x - 2, lineStartY, textLength + 4, lineHeight, backgroundColor.get());
         }
 
         prevTextLength = textLength;
@@ -308,7 +339,7 @@ public class ActiveModulesHud extends HudElement {
     }
 
     private double getScale() {
-        return customScale.get() ? scale.get() : -1;
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 
     public enum Sort {
@@ -321,5 +352,11 @@ public class ActiveModulesHud extends HudElement {
         Flat,
         Random,
         Rainbow
+    }
+
+    public enum Background {
+        None,
+        Block,
+        Text
     }
 }
