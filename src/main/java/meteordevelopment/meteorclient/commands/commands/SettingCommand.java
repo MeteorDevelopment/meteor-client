@@ -58,16 +58,16 @@ public class SettingCommand extends Command {
         // View or change settings
         for (Module module : Modules.get().getAll()) {
             LiteralArgumentBuilder<CommandSource> moduleBuilder = literal(module.name);
-            builder.then(moduleBuilder);
 
             if (hasDuplicateSettingNames(module.settings)) {
                 for (SettingGroup settingGroup : module.settings) {
                     LiteralArgumentBuilder<CommandSource> settingGroupBuilder = literal(Utils.titleToName(settingGroup.name));
-                    moduleBuilder.then(settingGroupBuilder);
 
                     for (Setting<?> setting : settingGroup) {
                         buildSetting(settingGroupBuilder, setting, module);
                     }
+
+                    moduleBuilder.then(settingGroupBuilder);
                 }
             } else {
                 for (SettingGroup settingGroup : module.settings) {
@@ -76,12 +76,13 @@ public class SettingCommand extends Command {
                     }
                 }
             }
+
+            builder.then(moduleBuilder);
         }
     }
 
     private <T> void buildSetting(LiteralArgumentBuilder<CommandSource> parentBuilder, Setting<T> setting, Module module) {
         LiteralArgumentBuilder<CommandSource> builder = literal(setting.name);
-        parentBuilder.then(builder);
 
         builder.then(literal("reset").executes(context -> {
             setting.reset();
@@ -89,11 +90,11 @@ public class SettingCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        LiteralArgumentBuilder<CommandSource> getter = setting.buildGetterNode(module::info);
-        builder.then(getter);
-        builder.redirect(getter.build());
+        builder.then(setting.buildGetterNode(module::info));
 
         setting.buildCommandNode(builder, module::info);
+
+        parentBuilder.then(builder);
     }
 
     private static boolean hasDuplicateSettingNames(Settings settings) {

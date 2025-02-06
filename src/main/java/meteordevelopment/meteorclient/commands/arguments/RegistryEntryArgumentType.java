@@ -26,6 +26,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -38,6 +39,7 @@ public class RegistryEntryArgumentType<T> implements ArgumentType<RegistryEntry.
     private static final RegistryEntryArgumentType<EntityType<?>> ENTITY_TYPE = new RegistryEntryArgumentType<>(Registries.ENTITY_TYPE);
     private static final RegistryEntryArgumentType<Item> ITEM = new RegistryEntryArgumentType<>(Registries.ITEM);
     private static final RegistryEntryArgumentType<ParticleType<?>> PARTICLE_TYPE = new RegistryEntryArgumentType<>(Registries.PARTICLE_TYPE);
+    private static final RegistryEntryArgumentType<ScreenHandlerType<?>> SCREEN_HANDLER = new RegistryEntryArgumentType<>(Registries.SCREEN_HANDLER);
     private static final RegistryEntryArgumentType<SoundEvent> SOUND_EVENT = new RegistryEntryArgumentType<>(Registries.SOUND_EVENT);
     private static final RegistryEntryArgumentType<StatusEffect> STATUS_EFFECT = new RegistryEntryArgumentType<>(Registries.STATUS_EFFECT);
 
@@ -73,6 +75,10 @@ public class RegistryEntryArgumentType<T> implements ArgumentType<RegistryEntry.
         return PARTICLE_TYPE;
     }
 
+    public static RegistryEntryArgumentType<ScreenHandlerType<?>> screenHandler() {
+        return SCREEN_HANDLER;
+    }
+
     public static RegistryEntryArgumentType<SoundEvent> soundEvent() {
         return SOUND_EVENT;
     }
@@ -99,6 +105,10 @@ public class RegistryEntryArgumentType<T> implements ArgumentType<RegistryEntry.
 
     public static <S> RegistryEntry.Reference<ParticleType<?>> getParticleType(CommandContext<S> context, String name) throws CommandSyntaxException {
         return getRegistryEntry(context, name, RegistryKeys.PARTICLE_TYPE);
+    }
+
+    public static <S> RegistryEntry.Reference<ScreenHandlerType<?>> getScreenHandler(CommandContext<S> context, String name) throws CommandSyntaxException {
+        return getRegistryEntry(context, name, RegistryKeys.SCREEN_HANDLER);
     }
 
     public static <S> RegistryEntry.Reference<SoundEvent> getSoundEvent(CommandContext<S> context, String name) throws CommandSyntaxException {
