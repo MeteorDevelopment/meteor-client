@@ -5,6 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.commands.Command;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
@@ -29,12 +33,18 @@ public class DoubleSetting extends Setting<Double> {
     }
 
     @Override
-    protected Double parseImpl(String str) {
-        try {
-            return Double.parseDouble(str.trim());
-        } catch (NumberFormatException ignored) {
-            return null;
-        }
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("set")
+            .then(Command.argument("value", DoubleArgumentType.doubleArg(this.min, this.max))
+                .executes(context -> {
+                    if (this.set(DoubleArgumentType.getDouble(context, "value"))) {
+                        String formatStr = "%." + this.decimalPlaces + "f";
+                        output.accept(String.format("Set (highlight)%s(default) to (hightlight)" + formatStr + "(default).", this.title, this.get()));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override

@@ -5,8 +5,13 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
+import meteordevelopment.meteorclient.commands.arguments.ColorArgumentType;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 
@@ -20,22 +25,31 @@ public class ColorListSetting extends Setting<List<SettingColor>> {
     }
 
     @Override
-    protected List<SettingColor> parseImpl(String str) {
-        List<SettingColor> colors = new ArrayList<>();
-        try {
-            String[] colorsStr = str.replaceAll("\\s+", "").split(";");
-            for (String colorStr : colorsStr) {
-                String[] strs = colorStr.split(",");
-                colors.add(new SettingColor(Integer.parseInt(strs[0]), Integer.parseInt(strs[1]), Integer.parseInt(strs[2]), Integer.parseInt(strs[3])));
-            }
-        } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
-        }
-        return colors;
-    }
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("add")
+            .then(Command.argument("color", ColorArgumentType.color())
+                .executes(context -> {
+                    SettingColor color = ColorArgumentType.get(context, "color");
+                    this.get().add(color);
+                    output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", color, this.title));
+                    this.onChanged();
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
 
-    @Override
-    protected boolean isValueValid(List<SettingColor> value) {
-        return true;
+        builder.then(Command.literal("remove")
+            .then(Command.argument("color", new CollectionItemArgumentType<>(this::get))
+                .executes(context -> {
+                    SettingColor color = context.getArgument("color", SettingColor.class);
+                    if (this.get().remove(color)) {
+                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", color, this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override

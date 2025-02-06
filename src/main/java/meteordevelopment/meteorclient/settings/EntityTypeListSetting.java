@@ -5,15 +5,21 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
+import meteordevelopment.meteorclient.commands.arguments.RegistryEntryArgumentType;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
+import meteordevelopment.meteorclient.utils.misc.Names;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
@@ -39,52 +45,32 @@ public class EntityTypeListSetting extends Setting<Set<EntityType<?>>> {
     }
 
     @Override
-    protected Set<EntityType<?>> parseImpl(String str) {
-        String[] values = str.split(",");
-        Set<EntityType<?>> entities = new ObjectOpenHashSet<>(values.length);
-
-        try {
-            for (String value : values) {
-                EntityType<?> entity = parseId(Registries.ENTITY_TYPE, value);
-                if (entity != null) entities.add(entity);
-                else {
-                    String lowerValue = value.trim().toLowerCase();
-                    if (!groups.contains(lowerValue)) continue;
-
-                    for (EntityType<?> entityType : Registries.ENTITY_TYPE) {
-                        if (filter != null && !filter.test(entityType)) continue;
-
-                        switch (lowerValue) {
-                            case "animal" -> {
-                                if (entityType.getSpawnGroup() == SpawnGroup.CREATURE) entities.add(entityType);
-                            }
-                            case "wateranimal" -> {
-                                if (entityType.getSpawnGroup() == SpawnGroup.WATER_AMBIENT
-                                    || entityType.getSpawnGroup() == SpawnGroup.WATER_CREATURE
-                                    || entityType.getSpawnGroup() == SpawnGroup.UNDERGROUND_WATER_CREATURE
-                                    || entityType.getSpawnGroup() == SpawnGroup.AXOLOTLS) entities.add(entityType);
-                            }
-                            case "monster" -> {
-                                if (entityType.getSpawnGroup() == SpawnGroup.MONSTER) entities.add(entityType);
-                            }
-                            case "ambient" -> {
-                                if (entityType.getSpawnGroup() == SpawnGroup.AMBIENT) entities.add(entityType);
-                            }
-                            case "misc" -> {
-                                if (entityType.getSpawnGroup() == SpawnGroup.MISC) entities.add(entityType);
-                            }
-                        }
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("add")
+            .then(Command.argument("entity", RegistryEntryArgumentType.entityType())
+                .executes(context -> {
+                    RegistryEntry.Reference<EntityType<?>> entry = RegistryEntryArgumentType.getEntityType(context, "entity");
+                    if ((filter == null || filter.test(entry.value()) && this.get().add(entry.value()))) {
+                        output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", Names.get(entry.value()), this.title));
+                        this.onChanged();
                     }
-                }
-            }
-        } catch (Exception ignored) {}
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
 
-        return entities;
-    }
-
-    @Override
-    protected boolean isValueValid(Set<EntityType<?>> value) {
-        return true;
+        builder.then(Command.literal("remove")
+            .then(Command.argument("entity", new CollectionItemArgumentType<>(this::get, Names::get))
+                .executes(context -> {
+                    EntityType<?> entityType = context.getArgument("entity", EntityType.class);
+                    if (this.get().remove(entityType)) {
+                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", Names.get(entityType), this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override

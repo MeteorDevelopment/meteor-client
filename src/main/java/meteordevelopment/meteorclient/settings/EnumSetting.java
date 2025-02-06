@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.ArrayList;
@@ -25,17 +27,14 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     }
 
     @Override
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {} // todo
+
     protected T parseImpl(String str) {
         for (T possibleValue : values) {
             if (str.equalsIgnoreCase(possibleValue.toString())) return possibleValue;
         }
 
         return null;
-    }
-
-    @Override
-    protected boolean isValueValid(T value) {
-        return true;
     }
 
     @Override
@@ -52,9 +51,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
 
     @Override
     public T load(NbtCompound tag) {
-        parse(tag.getString("value"));
-
-        return get();
+        return parseImpl(tag.getString("value")); // todo
     }
 
     public static class Builder<T extends Enum<?>> extends SettingBuilder<Builder<T>, T, EnumSetting<T>> {

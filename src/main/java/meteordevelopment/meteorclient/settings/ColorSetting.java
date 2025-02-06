@@ -5,28 +5,36 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.ColorArgumentType;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public class ColorSetting extends Setting<SettingColor> {
-    private static final List<String> SUGGESTIONS = List.of("0 0 0 255", "225 25 25 255", "25 225 25 255", "25 25 225 255", "255 255 255 255");
+    public static final List<String> SUGGESTIONS = List.of("0 0 0 255", "225 25 25 255", "25 225 25 255", "25 25 225 255", "255 255 255 255");
 
     public ColorSetting(String name, String description, SettingColor defaultValue, Consumer<SettingColor> onChanged, Consumer<Setting<SettingColor>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
 
     @Override
-    protected SettingColor parseImpl(String str) {
-        try {
-            String[] strs = str.split(" ");
-            return new SettingColor(Integer.parseInt(strs[0]), Integer.parseInt(strs[1]), Integer.parseInt(strs[2]), Integer.parseInt(strs[3]));
-        } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
-            return null;
-        }
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("set")
+            .then(Command.argument("color", ColorArgumentType.color())
+                .executes(context -> {
+                    SettingColor color = ColorArgumentType.get(context, "color");
+                    this.set(color);
+                    output.accept(String.format("Set (highlight)%s(default) to (highlight)%s(default).", this.title, this.get()));
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override

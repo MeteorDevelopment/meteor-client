@@ -5,6 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.commands.Command;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.List;
@@ -18,16 +22,22 @@ public class BoolSetting extends Setting<Boolean> {
     }
 
     @Override
-    protected Boolean parseImpl(String str) {
-        if (str.equalsIgnoreCase("true") || str.equalsIgnoreCase("1")) return true;
-        else if (str.equalsIgnoreCase("false") || str.equalsIgnoreCase("0")) return false;
-        else if (str.equalsIgnoreCase("toggle")) return !get();
-        return null;
-    }
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("toggle").executes(context -> {
+            this.set(!this.get());
+            output.accept(String.format("Set (highlight)%s(default) to (highlight)%s(default).", this.title, this.get()));
+            return Command.SINGLE_SUCCESS;
+        }));
 
-    @Override
-    protected boolean isValueValid(Boolean value) {
-        return true;
+        builder.then(Command.literal("set")
+            .then(Command.argument("value", BoolArgumentType.bool())
+                .executes(context -> {
+                    this.set(BoolArgumentType.getBool(context, "value"));
+                    output.accept(String.format("Set (highlight)%s(default) to (highlight)%s(default).", this.title, this.get()));
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override

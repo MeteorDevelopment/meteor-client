@@ -5,10 +5,15 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.ObjectIterators;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
+import meteordevelopment.meteorclient.commands.arguments.RegistryEntryArgumentType;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -59,24 +64,33 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     }
 
     @Override
-    protected List<BlockEntityType<?>> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<BlockEntityType<?>> blocks = new ArrayList<>(values.length);
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("add")
+            .then(Command.argument("blockEntity", RegistryEntryArgumentType.blockEntityType())
+                .executes(context -> {
+                    RegistryEntry<BlockEntityType<?>> entry = RegistryEntryArgumentType.getBlockEntityType(context, "blockEntity");
+                    if (!this.get().contains(entry.value())) {
+                        this.get().add(entry.value());
+                        output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", entry.getIdAsString(), this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
 
-        try {
-            for (String value : values) {
-                BlockEntityType<?> block = parseId(Registries.BLOCK_ENTITY_TYPE, value);
-                if (block != null) blocks.add(block);
-            }
-        } catch (Exception ignored) {
-        }
-
-        return blocks;
-    }
-
-    @Override
-    protected boolean isValueValid(List<BlockEntityType<?>> value) {
-        return true;
+        builder.then(Command.literal("remove")
+            .then(Command.argument("blockEntity", new CollectionItemArgumentType<>(this::get))
+                .executes(context -> {
+                    BlockEntityType<?> blockEntityType = context.getArgument("effect", BlockEntityType.class);
+                    if (this.get().remove(blockEntityType)) {
+                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", blockEntityType, this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override

@@ -5,12 +5,19 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
+import meteordevelopment.meteorclient.commands.arguments.RegistryEntryArgumentType;
+import meteordevelopment.meteorclient.utils.misc.Names;
+import net.minecraft.command.CommandSource;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
@@ -31,28 +38,38 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    protected List<Item> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<Item> items = new ArrayList<>(values.length);
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("add")
+            .then(Command.argument("item", RegistryEntryArgumentType.item())
+                .executes(context -> {
+                    RegistryEntry<Item> entry = RegistryEntryArgumentType.getItem(context, "item");
+                    if ((filter == null || filter.test(entry.value())) && !this.get().contains(entry.value())) {
+                        this.get().add(entry.value());
+                        output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", Names.get(entry.value()), this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
 
-        try {
-            for (String value : values) {
-                Item item = parseId(Registries.ITEM, value);
-                if (item != null && (filter == null || filter.test(item))) items.add(item);
-            }
-        } catch (Exception ignored) {}
-
-        return items;
+        builder.then(Command.literal("remove")
+            .then(Command.argument("item", new CollectionItemArgumentType<>(this::get, Names::get))
+                .executes(context -> {
+                    Item item = context.getArgument("item", Item.class);
+                    if (this.get().remove(item)) {
+                        this.onChanged();
+                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", Names.get(item), this.title));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override
     public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-    }
-
-    @Override
-    protected boolean isValueValid(List<Item> value) {
-        return true;
     }
 
     @Override

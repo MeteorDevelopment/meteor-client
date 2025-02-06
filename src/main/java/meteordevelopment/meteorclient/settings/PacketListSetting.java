@@ -5,8 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.utils.network.PacketUtils;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -35,24 +37,7 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     }
 
     @Override
-    protected Set<Class<? extends Packet<?>>> parseImpl(String str) {
-        String[] values = str.split(",");
-        Set<Class<? extends Packet<?>>> packets = new ObjectOpenHashSet<>(values.length);
-
-        try {
-            for (String value : values) {
-                Class<? extends Packet<?>> packet = PacketUtils.getPacket(value.trim());
-                if (packet != null && (filter == null || filter.test(packet))) packets.add(packet);
-            }
-        } catch (Exception ignored) {}
-
-        return packets;
-    }
-
-    @Override
-    protected boolean isValueValid(Set<Class<? extends Packet<?>>> value) {
-        return true;
-    }
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {} // todo
 
     @Override
     public List<String> getSuggestions() {

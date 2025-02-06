@@ -5,8 +5,14 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
+import meteordevelopment.meteorclient.commands.arguments.RegistryEntryReferenceArgumentType;
+import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.command.CommandSource;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.nbt.NbtCompound;
@@ -16,6 +22,7 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
 import java.lang.reflect.AccessFlag;
@@ -34,26 +41,32 @@ public class EnchantmentListSetting extends Setting<Set<RegistryKey<Enchantment>
     }
 
     @Override
-    protected Set<RegistryKey<Enchantment>> parseImpl(String str) {
-        String[] values = str.split(",");
-        Set<RegistryKey<Enchantment>> enchs = new ObjectOpenHashSet<>(values.length);
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("add")
+            .then(Command.argument("enchantment", RegistryEntryReferenceArgumentType.enchantment())
+                .executes(context -> {
+                    RegistryEntry<Enchantment> entry = RegistryEntryReferenceArgumentType.getEnchantment(context, "enchantment");
+                    if (this.get().add(entry.getKey().orElseThrow())) {
+                        output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", Names.get(entry), this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
 
-        for (String value : values) {
-            String name = value.trim();
-
-            Identifier id;
-            if (name.contains(":")) id = Identifier.of(name);
-            else id = Identifier.ofVanilla(name);
-
-            enchs.add(RegistryKey.of(RegistryKeys.ENCHANTMENT, id));
-        }
-
-        return enchs;
-    }
-
-    @Override
-    protected boolean isValueValid(Set<RegistryKey<Enchantment>> value) {
-        return true;
+        builder.then(Command.literal("remove")
+            .then(Command.argument("enchantment", new CollectionItemArgumentType<>(this::get, Names::get))
+                .executes(context -> {
+                    RegistryKey<Enchantment> entry = context.getArgument("enchantment", RegistryKey.class);
+                    if (this.get().remove(entry)) {
+                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", Names.get(entry), this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override
