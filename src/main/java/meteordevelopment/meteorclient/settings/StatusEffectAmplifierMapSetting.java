@@ -5,9 +5,16 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import it.unimi.dsi.fastutil.objects.Reference2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
+import meteordevelopment.meteorclient.commands.arguments.RegistryEntryArgumentType;
+import meteordevelopment.meteorclient.utils.misc.Names;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
@@ -28,27 +35,35 @@ public class StatusEffectAmplifierMapSetting extends Setting<Reference2IntMap<St
     }
 
     @Override
-    protected Reference2IntMap<StatusEffect> parseImpl(String str) {
-        String[] values = str.split(",");
-        Reference2IntMap<StatusEffect> effects = new Reference2IntOpenHashMap<>(EMPTY_STATUS_EFFECT_MAP);
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("set")
+            .then(Command.argument("effect", RegistryEntryArgumentType.statusEffect())
+                .then(Command.argument("amplifier", IntegerArgumentType.integer(0))
+                    .executes(context -> {
+                        StatusEffect effect = RegistryEntryArgumentType.getStatusEffect(context, "effect").value();
+                        int amplifier = IntegerArgumentType.getInteger(context, "amplifier");
+                        this.get().put(effect, amplifier);
+                        output.accept(String.format("Set (highlight)%s(default) to (highlight)%s(default).", Names.get(effect), amplifier));
+                        this.onChanged();
+                        return Command.SINGLE_SUCCESS;
+                    })
+                )
+            )
+        );
 
-        try {
-            for (String value : values) {
-                String[] split = value.split(" ");
-
-                StatusEffect effect = parseId(Registries.STATUS_EFFECT, split[0]);
-                int level = Integer.parseInt(split[1]);
-
-                effects.put(effect, level);
-            }
-        } catch (Exception ignored) {}
-
-        return effects;
-    }
-
-    @Override
-    protected boolean isValueValid(Reference2IntMap<StatusEffect> value) {
-        return true;
+        builder.then(Command.literal("remove")
+            .then(Command.argument("effect", new CollectionItemArgumentType<>(() -> this.get().keySet(), Names::get))
+                .executes(context -> {
+                    StatusEffect effect = context.getArgument("effect", StatusEffect.class);
+                    if (this.get().containsKey(effect)) {
+                        this.get().removeInt(effect);
+                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", Names.get(effect), this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override

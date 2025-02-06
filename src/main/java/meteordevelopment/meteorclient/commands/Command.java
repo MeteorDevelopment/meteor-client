@@ -24,8 +24,8 @@ import java.util.List;
 
 public abstract class Command {
     protected static final CommandRegistryAccess REGISTRY_ACCESS = CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup());
-    protected static final int SINGLE_SUCCESS = com.mojang.brigadier.Command.SINGLE_SUCCESS;
     protected static final MinecraftClient mc = MeteorClient.mc;
+    public static final int SINGLE_SUCCESS = com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
     private final String name;
     private final String title;
@@ -40,11 +40,11 @@ public abstract class Command {
     }
 
     // Helper methods to painlessly infer the CommandSource generic type argument
-    protected static <T> RequiredArgumentBuilder<CommandSource, T> argument(final String name, final ArgumentType<T> type) {
+    public static <T> RequiredArgumentBuilder<CommandSource, T> argument(final String name, final ArgumentType<T> type) {
         return RequiredArgumentBuilder.argument(name, type);
     }
 
-    protected static LiteralArgumentBuilder<CommandSource> literal(final String name) {
+    public static LiteralArgumentBuilder<CommandSource> literal(final String name) {
         return LiteralArgumentBuilder.literal(name);
     }
 

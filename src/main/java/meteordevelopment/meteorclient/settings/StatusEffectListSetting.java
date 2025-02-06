@@ -5,6 +5,12 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
+import meteordevelopment.meteorclient.commands.arguments.RegistryEntryArgumentType;
+import meteordevelopment.meteorclient.utils.misc.Names;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -29,23 +35,33 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
     }
 
     @Override
-    protected List<StatusEffect> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<StatusEffect> effects = new ArrayList<>(values.length);
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("add")
+            .then(Command.argument("effect", RegistryEntryArgumentType.statusEffect())
+                .executes(context -> {
+                    StatusEffect effect = RegistryEntryArgumentType.getStatusEffect(context, "effect").value();
+                    if (!this.get().contains(effect)) {
+                        this.get().add(effect);
+                        output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", Names.get(effect), this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
 
-        try {
-            for (String value : values) {
-                StatusEffect effect = parseId(Registries.STATUS_EFFECT, value);
-                if (effect != null) effects.add(effect);
-            }
-        } catch (Exception ignored) {}
-
-        return effects;
-    }
-
-    @Override
-    protected boolean isValueValid(List<StatusEffect> value) {
-        return true;
+        builder.then(Command.literal("remove")
+            .then(Command.argument("effect", new CollectionItemArgumentType<>(this::get, Names::get))
+                .executes(context -> {
+                    StatusEffect effect = context.getArgument("effect", StatusEffect.class);
+                    if (this.get().remove(effect)) {
+                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", Names.get(effect), this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override

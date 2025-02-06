@@ -5,6 +5,11 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.RegistryEntryArgumentType;
+import meteordevelopment.meteorclient.utils.misc.Names;
+import net.minecraft.command.CommandSource;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
@@ -23,8 +28,18 @@ public class ItemSetting extends Setting<Item> {
     }
 
     @Override
-    protected Item parseImpl(String str) {
-        return parseId(Registries.ITEM, str);
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("set")
+            .then(Command.argument("item", RegistryEntryArgumentType.item())
+                .executes(context -> {
+                    Item item = RegistryEntryArgumentType.getItem(context, "item").value();
+                    if (this.set(item)) {
+                        output.accept(String.format("Set (highlight)%s(default) to (highlight)%s(default).", this.title, Names.get(item)));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override

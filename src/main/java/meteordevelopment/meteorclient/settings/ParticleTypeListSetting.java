@@ -5,13 +5,19 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
+import meteordevelopment.meteorclient.commands.arguments.RegistryEntryArgumentType;
+import meteordevelopment.meteorclient.utils.misc.Names;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
@@ -30,23 +36,33 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     }
 
     @Override
-    protected List<ParticleType<?>> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<ParticleType<?>> particleTypes = new ArrayList<>(values.length);
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
+        builder.then(Command.literal("add")
+            .then(Command.argument("particle", RegistryEntryArgumentType.particleType())
+                .executes(context -> {
+                    RegistryEntry<ParticleType<?>> entry = RegistryEntryArgumentType.getParticleType(context, "particle");
+                    if (!this.get().contains(entry.value())) {
+                        this.get().add(entry.value());
+                        output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", Names.get(entry.value()), this.title));
+                        this.onChanged();
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
 
-        try {
-            for (String value : values) {
-                ParticleType<?> particleType = parseId(Registries.PARTICLE_TYPE, value);
-                if (particleType instanceof ParticleEffect) particleTypes.add(particleType);
-            }
-        } catch (Exception ignored) {}
-
-        return particleTypes;
-    }
-
-    @Override
-    protected boolean isValueValid(List<ParticleType<?>> value) {
-        return true;
+        builder.then(Command.literal("remove")
+            .then(Command.argument("particle", new CollectionItemArgumentType<>(this::get, Names::get))
+                .executes(context -> {
+                    ParticleType<?> particleType = context.getArgument("particle", ParticleType.class);
+                    if (this.get().remove(particleType)) {
+                        this.onChanged();
+                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", Names.get(particleType), this.title));
+                    }
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
     }
 
     @Override

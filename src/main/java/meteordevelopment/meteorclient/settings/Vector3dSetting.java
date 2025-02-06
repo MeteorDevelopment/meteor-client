@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import org.joml.Vector3d;
 
@@ -41,14 +43,7 @@ public class Vector3dSetting extends Setting<Vector3d> {
     }
 
     @Override
-    protected Vector3d parseImpl(String str) {
-        try {
-            String[] strs = str.split(" ");
-            return new Vector3d(Double.parseDouble(strs[0]), Double.parseDouble(strs[1]), Double.parseDouble(strs[2]));
-        } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
-            return null;
-        }
-    }
+    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {} // todo
 
     @Override
     protected boolean isValueValid(Vector3d value) {

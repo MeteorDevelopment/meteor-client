@@ -6,18 +6,22 @@
 package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.ModuleArgumentType;
-import meteordevelopment.meteorclient.commands.arguments.SettingArgumentType;
-import meteordevelopment.meteorclient.commands.arguments.SettingValueArgumentType;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.command.CommandSource;
+
+import java.util.Set;
 
 public class SettingCommand extends Command {
     public SettingCommand() {
@@ -52,33 +56,69 @@ public class SettingCommand extends Command {
         );
 
         // View or change settings
-        builder.then(
-                argument("module", ModuleArgumentType.create())
-                .then(
-                        argument("setting", SettingArgumentType.create())
-                        .executes(context -> {
-                            // Get setting value
-                            Setting<?> setting = SettingArgumentType.get(context);
+        for (Module module : Modules.get().getAll()) {
+            LiteralArgumentBuilder<CommandSource> moduleBuilder = literal(module.name);
+            builder.then(moduleBuilder);
 
-                            ModuleArgumentType.get(context).info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
+            if (hasDuplicateSettingNames(module.settings)) {
+                for (SettingGroup settingGroup : module.settings) {
+                    LiteralArgumentBuilder<CommandSource> settingGroupBuilder = literal(Utils.titleToName(settingGroup.name));
+                    moduleBuilder.then(settingGroupBuilder);
 
-                            return SINGLE_SUCCESS;
-                        })
-                        .then(
-                                argument("value", SettingValueArgumentType.create())
-                                .executes(context -> {
-                                    // Set setting value
-                                    Setting<?> setting = SettingArgumentType.get(context);
-                                    String value = SettingValueArgumentType.get(context);
+                    for (Setting<?> setting : settingGroup) {
+                        buildSetting(settingGroupBuilder, setting, module);
+                    }
+                }
+            } else {
+                for (SettingGroup settingGroup : module.settings) {
+                    for (Setting<?> setting : settingGroup) {
+                        buildSetting(moduleBuilder, setting, module);
+                    }
+                }
+            }
+        }
+    }
 
-                                    if (setting.parse(value)) {
-                                        ModuleArgumentType.get(context).info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
-                                    }
+    private <T> void buildSetting(LiteralArgumentBuilder<CommandSource> parentBuilder, Setting<T> setting, Module module) {
+        LiteralArgumentBuilder<CommandSource> builder = literal(setting.name);
+        parentBuilder.then(builder);
 
-                                    return SINGLE_SUCCESS;
-                                })
-                        )
-                )
-        );
+        builder.then(literal("reset").executes(context -> {
+            setting.reset();
+            module.info("Setting (highlight)%s(default) reset.", setting.title);
+            return SINGLE_SUCCESS;
+        }));
+
+        LiteralArgumentBuilder<CommandSource> getter = setting.buildGetterNode(module::info);
+        builder.then(getter);
+        builder.redirect(getter.build());
+
+        setting.buildCommandNode(builder, module::info);
+    }
+
+    private static boolean hasDuplicateSettingNames(Settings settings) {
+        int groups = settings.sizeGroups();
+        if (groups <= 1) {
+            return false;
+        }
+
+        Set<String> settingNames = new ObjectOpenHashSet<>();
+
+        for (int i = 0; i < groups - 1; i++) {
+            SettingGroup group = settings.groups.get(i);
+            for (Setting<?> setting : group) {
+                if (!settingNames.add(setting.name)) {
+                    return true;
+                }
+            }
+        }
+
+        for (Setting<?> setting : settings.groups.getLast()) {
+            if (settingNames.contains(setting.name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
