@@ -11,8 +11,6 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.command.CommandSource;
 
-import java.util.ArrayList;
-
 public class SwapCommand extends Command {
     public SwapCommand() {
         super("swap", "Swaps to a hotbar slot");
