@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import org.joml.Vector3d;
 
@@ -41,9 +39,6 @@ public class Vector3dSetting extends Setting<Vector3d> {
         if (value == null) value = new Vector3d();
         value.set(defaultValue);
     }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {} // todo
 
     @Override
     protected boolean isValueValid(Vector3d value) {

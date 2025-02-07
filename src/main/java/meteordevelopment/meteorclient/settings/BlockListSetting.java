@@ -5,12 +5,7 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.commands.Command;
-import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
-import meteordevelopment.meteorclient.commands.arguments.RegistryEntryArgumentType;
 import net.minecraft.block.Block;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -36,38 +31,6 @@ public class BlockListSetting extends Setting<List<Block>> {
     @Override
     public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-    }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
-        builder.then(Command.literal("remove")
-            .then(Command.argument("block", new CollectionItemArgumentType<>(this::get, t -> Registries.BLOCK.getId(t).toString()))
-                .executes(context -> {
-                    Block block = context.getArgument("block", Block.class);
-                    if (this.get().remove(block)) {
-                        String blockName = Registries.BLOCK.getId(block).toString();
-                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", blockName, this.title));
-                        this.onChanged();
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
-
-        builder.then(Command.literal("add")
-            .then(Command.argument("block", RegistryEntryArgumentType.block()).executes(context -> {
-                Block block = RegistryEntryArgumentType.getBlock(context, "block").value();
-                String blockName = Registries.BLOCK.getId(block).toString();
-                if ((filter == null || filter.test(block)) && !this.get().contains(block)) {
-                    this.get().add(block);
-                    output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", blockName, this.title));
-                    this.onChanged();
-                } else {
-                    output.accept(String.format("Could not add (highlight)%s(default) to (highlight)%s(default).", blockName, this.title));
-                }
-                return Command.SINGLE_SUCCESS;
-            }))
-        );
     }
 
     @Override

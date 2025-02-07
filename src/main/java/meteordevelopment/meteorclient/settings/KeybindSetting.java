@@ -5,10 +5,7 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.gui.widgets.WKeybind;
@@ -16,7 +13,6 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import org.lwjgl.glfw.GLFW;
 
@@ -65,20 +61,6 @@ public class KeybindSetting extends Setting<Keybind> {
         else value.set(defaultValue);
 
         if (widget != null) widget.reset();
-    }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
-        builder.then(Command.literal("set")
-            .then(Command.argument("keybind", IntegerArgumentType.integer())
-                .executes(context -> {
-                    int value = IntegerArgumentType.getInteger(context, "keybind");
-                    this.set(Keybind.fromKey(value));
-                    output.accept(String.format("Set (highlight)%s(default) to (highlight)%s(default).", this.title, this.get()));
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
     }
 
     @Override

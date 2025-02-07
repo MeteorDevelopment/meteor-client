@@ -5,12 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.commands.Command;
-import meteordevelopment.meteorclient.commands.arguments.ColorArgumentType;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.List;
@@ -21,20 +17,6 @@ public class ColorSetting extends Setting<SettingColor> {
 
     public ColorSetting(String name, String description, SettingColor defaultValue, Consumer<SettingColor> onChanged, Consumer<Setting<SettingColor>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-    }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
-        builder.then(Command.literal("set")
-            .then(Command.argument("color", ColorArgumentType.color())
-                .executes(context -> {
-                    SettingColor color = ColorArgumentType.get(context, "color");
-                    this.set(color);
-                    output.accept(String.format("Set (highlight)%s(default) to (highlight)%s(default).", this.title, this.get()));
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
     }
 
     @Override

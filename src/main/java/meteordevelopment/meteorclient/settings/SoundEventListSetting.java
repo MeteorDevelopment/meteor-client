@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -29,9 +27,6 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     public void resetImpl() {
         value = new ArrayList<>(defaultValue);
     }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {} // todo
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {

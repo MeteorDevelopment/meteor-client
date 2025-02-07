@@ -5,13 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.IGetter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -90,18 +87,9 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return visible == null || visible.isVisible();
     }
 
-    public abstract void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output);
-
-    public LiteralArgumentBuilder<CommandSource> buildGetterNode(Consumer<String> output) {
-        return Command.literal("get").executes(context -> {
-            output.accept(String.format("Setting (highlight)%s(default) is (highlight)%s(default).", this.title, this.get()));
-            return Command.SINGLE_SUCCESS;
-        });
-    }
-
     protected boolean isValueValid(T value) {
         return true;
-    };
+    }
 
     public Iterable<Identifier> getIdentifierSuggestions() {
         return null;

@@ -5,14 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.commands.Command;
-import meteordevelopment.meteorclient.commands.arguments.FontFaceArgumentType;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.renderer.text.FontFamily;
 import meteordevelopment.meteorclient.renderer.text.FontInfo;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.List;
@@ -23,22 +19,6 @@ public class FontFaceSetting extends Setting<FontFace> {
 
     public FontFaceSetting(String name, String description, FontFace defaultValue, Consumer<FontFace> onChanged, Consumer<Setting<FontFace>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-    }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
-        builder.then(Command.literal("set")
-            .then(Command.argument("font", FontFaceArgumentType.fontFace())
-                .executes(context -> {
-                    FontFace fontFace = FontFaceArgumentType.get(context, "font");
-                    if (this.set(fontFace)) {
-                        this.set(fontFace);
-                        output.accept(String.format("Set (highlight)%s(default) to (highlight)%s(default).", this.title, fontFace));
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
     }
 
     @Override

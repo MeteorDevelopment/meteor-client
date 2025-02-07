@@ -5,17 +5,11 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.commands.Command;
-import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
-import meteordevelopment.meteorclient.commands.arguments.RegistryEntryArgumentType;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
 
@@ -32,34 +26,6 @@ public class ScreenHandlerListSetting extends Setting<List<ScreenHandlerType<?>>
     @Override
     public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-    }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
-        builder.then(Command.literal("add")
-            .then(Command.argument("screenHandler", RegistryEntryArgumentType.screenHandler())
-                .executes(context -> {
-                    RegistryEntry.Reference<ScreenHandlerType<?>> entry = RegistryEntryArgumentType.getScreenHandler(context, "screenHandler");
-                    this.get().add(entry.value());
-                    output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", entry.getIdAsString(), this.title));
-                    this.onChanged();
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
-
-        builder.then(Command.literal("remove")
-            .then(Command.argument("screenHandler", new CollectionItemArgumentType<>(this::get))
-                .executes(context -> {
-                    ScreenHandlerType<?> screenHandler = context.getArgument("screenHandler", ScreenHandlerType.class);
-                    if (this.get().remove(screenHandler)) {
-                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", screenHandler, this.title));
-                        this.onChanged();
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
     }
 
     @Override

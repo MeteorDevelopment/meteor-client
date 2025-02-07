@@ -5,14 +5,9 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.commands.Command;
-import meteordevelopment.meteorclient.commands.arguments.RegistryEntryArgumentType;
 import net.minecraft.block.Block;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
 import java.util.function.Consumer;
@@ -25,22 +20,6 @@ public class BlockSetting extends Setting<Block> {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.filter = filter;
-    }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
-        builder.then(Command.literal("set")
-            .then(Command.argument("block", RegistryEntryArgumentType.block())
-                .executes(context -> {
-                    RegistryEntry<Block> blockEntry = RegistryEntryArgumentType.getBlock(context, "block");
-                    if (isValueValid(blockEntry.value())) {
-                        this.set(blockEntry.value());
-                        output.accept(String.format("Set (highlight)%s(default) to (highlight)%s(default).", this.title, blockEntry.getIdAsString()));
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
     }
 
     @Override

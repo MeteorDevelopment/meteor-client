@@ -5,11 +5,9 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.gui.utils.IScreenFactory;
 import meteordevelopment.meteorclient.utils.misc.ICopyable;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
@@ -24,9 +22,6 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
         if (value == null) value = defaultValue.copy();
         value.set(defaultValue);
     }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {}
 
     @Override
     public NbtCompound save(NbtCompound tag) {

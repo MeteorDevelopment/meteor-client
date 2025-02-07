@@ -5,10 +5,6 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
@@ -26,21 +22,6 @@ public class IntSetting extends Setting<Integer> {
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
         this.noSlider = noSlider;
-    }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
-        builder.then(Command.literal("set")
-            .then(Command.argument("value", IntegerArgumentType.integer(this.min, this.max))
-                .executes(context -> {
-                    int value = IntegerArgumentType.getInteger(context, "value");
-                    if (this.set(value)) {
-                        output.accept(String.format("Set (highlight)%s(default) to (highlight)%s(default).", this.title, value));
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
     }
 
     @Override

@@ -5,10 +5,6 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.commands.Command;
-import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
@@ -16,7 +12,6 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -36,34 +31,6 @@ public class StringListSetting extends Setting<List<String>>{
 
         this.renderer = renderer;
         this.filter = filter;
-    }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
-        builder.then(Command.literal("add")
-            .then(Command.argument("string", StringArgumentType.string())
-                .executes(context -> {
-                    String string = StringArgumentType.getString(context, "string");
-                    this.get().add(string);
-                    output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", string, this.title));
-                    this.onChanged();
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
-
-        builder.then(Command.literal("remove")
-            .then(Command.argument("string", new CollectionItemArgumentType<>(this::get))
-                .executes(context -> {
-                    String string = context.getArgument("string", String.class);
-                    if (this.get().remove(string)) {
-                        this.onChanged();
-                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", string, this.title));
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
     }
 
     @Override

@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.ArrayList;
@@ -25,9 +23,6 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
         suggestions = new ArrayList<>(values.length);
         for (T value : values) suggestions.add(value.toString());
     }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {} // todo
 
     protected T parseImpl(String str) {
         for (T possibleValue : values) {

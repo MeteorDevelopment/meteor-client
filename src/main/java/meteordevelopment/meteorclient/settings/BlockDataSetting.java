@@ -5,13 +5,11 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.utils.misc.IChangeable;
 import meteordevelopment.meteorclient.utils.misc.ICopyable;
 import meteordevelopment.meteorclient.utils.misc.IGetter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.block.Block;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
@@ -33,9 +31,6 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     public void resetImpl() {
         value = new HashMap<>(defaultValue);
     }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {}
 
     @Override
     protected NbtCompound save(NbtCompound tag) {

@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.SettingCommandRegistry;
 import meteordevelopment.meteorclient.commands.arguments.ModuleArgumentType;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
@@ -90,9 +91,12 @@ public class SettingCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(setting.buildGetterNode(module::info));
+        builder.then(literal("get").executes(context -> {
+            module.info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
+            return SINGLE_SUCCESS;
+        }));
 
-        setting.buildCommandNode(builder, module::info);
+        SettingCommandRegistry.get(setting).build(builder, setting, module::info);
 
         parentBuilder.then(builder);
     }

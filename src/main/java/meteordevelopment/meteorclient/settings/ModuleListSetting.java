@@ -5,13 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.commands.Command;
-import meteordevelopment.meteorclient.commands.arguments.CollectionItemArgumentType;
-import meteordevelopment.meteorclient.commands.arguments.ModuleArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -31,36 +26,6 @@ public class ModuleListSetting extends Setting<List<Module>> {
     @Override
     public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-    }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {
-        builder.then(Command.literal("add")
-            .then(Command.argument("module", ModuleArgumentType.create())
-                .executes(context -> {
-                    Module module = ModuleArgumentType.get(context);
-                    if (!this.get().contains(module)) {
-                        this.get().add(module);
-                        output.accept(String.format("Added (highlight)%s(default) to (highlight)%s(default).", module.title, this.title));
-                        this.onChanged();
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
-
-        builder.then(Command.literal("remove")
-            .then(Command.argument("module", new CollectionItemArgumentType<>(this::get, module -> module.name))
-                .executes(context -> {
-                    Module module = context.getArgument("module", Module.class);
-                    if (this.get().remove(module)) {
-                        this.onChanged();
-                        output.accept(String.format("Removed (highlight)%s(default) from (highlight)%s(default).", module.title, this.title));
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })
-            )
-        );
     }
 
     @Override

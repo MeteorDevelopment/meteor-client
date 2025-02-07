@@ -5,10 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.utils.network.PacketUtils;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -35,9 +33,6 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     public void resetImpl() {
         value = new ObjectOpenHashSet<>(defaultValue);
     }
-
-    @Override
-    public void buildCommandNode(LiteralArgumentBuilder<CommandSource> builder, Consumer<String> output) {} // todo
 
     @Override
     public List<String> getSuggestions() {
