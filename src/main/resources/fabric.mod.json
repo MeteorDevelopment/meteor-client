@@ -21,6 +21,9 @@
   "entrypoints": {
     "client": [
       "meteordevelopment.meteorclient.MeteorClient"
+    ],
+    "modmenu": [
+      "meteordevelopment.meteorclient.ModMenuIntegration"
     ]
   },
   "mixins": [
