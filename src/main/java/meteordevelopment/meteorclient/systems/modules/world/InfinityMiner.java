@@ -81,13 +81,6 @@ public class InfinityMiner extends Module {
         .build()
     );
 
-    public final Setting<Boolean> stopPrevMineScanDroppedItems = sgGeneral.add(new BoolSetting.Builder()
-        .name("stop-prev-mine-scan-dropped-items")
-        .description("Will stop the mine scan dropped items setting when reparining.")
-        .defaultValue(true)
-        .build()
-    );
-
     // When Full
 
     public final Setting<Boolean> walkHome = sgWhenFull.add(new BoolSetting.Builder()
@@ -165,9 +158,7 @@ public class InfinityMiner extends Module {
             if (!needsRepair()) {
                 warning("Finished repairing, going back to mining.");
                 repairing = false;
-                if (stopPrevMineScanDroppedItems.get()) {
-                    baritoneSettings.mineScanDroppedItems.value = false;
-                }
+                baritoneSettings.mineScanDroppedItems.value = true;
                 mineTargetBlocks();
                 return;
             }
@@ -178,9 +169,7 @@ public class InfinityMiner extends Module {
             if (needsRepair()) {
                 warning("Pickaxe needs repair, beginning repair process");
                 repairing = true;
-                if (stopPrevMineScanDroppedItems.get()) {
-                    baritoneSettings.mineScanDroppedItems.value = false;
-                }
+                baritoneSettings.mineScanDroppedItems.value = false;
                 mineRepairBlocks();
                 return;
             }
