@@ -155,11 +155,19 @@ public class BetterTooltips extends Module {
 
     // Extras
 
-    public final Setting<Boolean> byteSize = sgOther.add(new BoolSetting.Builder()
-        .name("byte-size")
-        .description("Displays an item's size in bytes in the tooltip.")
+    private final Setting<Boolean> size = sgOther.add(new BoolSetting.Builder()
+        .name("size")
+        .description("Displays an item's size in the tooltip.")
         .defaultValue(true)
         .onChanged(value -> updateTooltips = true)
+        .build()
+    );
+
+    private final Setting<SortSize> sizeType = sgOther.add(new EnumSetting.Builder<SortSize>()
+        .name("size-type")
+        .description("Displays an item's size in the specified type in the tooltip.")
+        .defaultValue(SortSize.Dynamic)
+        .visible(size::get)
         .build()
     );
 
@@ -306,7 +314,7 @@ public class BetterTooltips extends Module {
         }
 
         // Item size tooltip
-        if (byteSize.get()) {
+        if (size.get()) {
             try {
                 event.itemStack().toNbt(mc.player.getRegistryManager()).write(ByteCountDataOutput.INSTANCE);
 
@@ -315,8 +323,27 @@ public class BetterTooltips extends Module {
 
                 ByteCountDataOutput.INSTANCE.reset();
 
-                if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
-                else count = String.format("%d bytes", byteCount);
+                switch (sizeType.get()) {
+                    case Bytes:
+                        count = String.format("%d bytes", byteCount);
+                        break;
+                    case KiloBytes:
+                        count = String.format("%.2f kb", byteCount / (float) 1024);
+                        break;
+                    case MegaBytes:
+                        count = String.format("%.4f mb", byteCount / (float) 1024 / 1024);
+                        break;
+                    case Dynamic:
+                        if (byteCount >= 1048576) count = String.format("%.2f mb", byteCount / (float) 1048576);
+                        else if (byteCount >= 1024) count = String.format("%.4f kb", byteCount / (float) 1024);
+                        else count = String.format("%d bytes", byteCount);
+                        break;
+                    default:
+                        if (byteCount >= 1048576) count = String.format("%.2f mb", byteCount / (float) 1048576);
+                        else if (byteCount >= 1024) count = String.format("%.4f kb", byteCount / (float) 1024);
+                        else count = String.format("%d bytes", byteCount);
+                        break;
+                }
 
                 event.appendEnd(Text.literal(count).formatted(Formatting.GRAY));
             } catch (Exception e) {
@@ -519,5 +546,12 @@ public class BetterTooltips extends Module {
     public enum DisplayWhen {
         Keybind,
         Always
+    }
+
+    public enum SortSize {
+        Bytes,
+        KiloBytes,
+        MegaBytes,
+        Dynamic,
     }
 }
