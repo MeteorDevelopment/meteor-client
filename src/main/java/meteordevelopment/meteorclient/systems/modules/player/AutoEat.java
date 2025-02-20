@@ -229,6 +229,8 @@ public class AutoEat extends Module {
     }
 
     public boolean shouldEat() {
+        if(!mc.player.getHungerManager().isNotFull()) return false;
+
         boolean health = mc.player.getHealth() <= healthThreshold.get();
         boolean hunger = mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
 

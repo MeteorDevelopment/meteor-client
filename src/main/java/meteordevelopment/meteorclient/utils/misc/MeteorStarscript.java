@@ -420,7 +420,7 @@ public class MeteorStarscript {
 
     private static Value baritoneProcess() {
         Optional<IBaritoneProcess> process = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingControlManager().mostRecentInControl();
-        return Value.string(process.isEmpty() ? "" : process.get().displayName0());
+        return Value.string(process == null || process.isEmpty() ? "" : process.get().displayName0());
     }
 
     private static Value baritoneProcessName() {
