@@ -13,10 +13,6 @@ public class CustomPlayerInput extends Input {
     public void tick() {
         movementForward = this.playerInput.forward() == this.playerInput.backward() ? 0.0F : (this.playerInput.forward() ? 1.0F : -1.0F);
         movementSideways = this.playerInput.left() == this.playerInput.right() ? 0.0F : (this.playerInput.left() ? 1.0F : -1.0F);
-        if (this.playerInput.sneak()) {
-            movementForward *= 0.3f;
-            movementSideways *= 0.3f;
-        }
     }
 
     public void stop() {

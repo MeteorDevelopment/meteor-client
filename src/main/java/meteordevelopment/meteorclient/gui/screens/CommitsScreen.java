@@ -34,6 +34,13 @@ public class CommitsScreen extends WindowScreen {
 
         MeteorExecutor.execute(() -> {
             GithubRepo repo = addon.getRepo();
+
+            if (addon.getCommit() == null || addon.getCommit().equals("${commit}")) {
+                statusCode = 404;
+                taskAfterRender = this::populateError;
+                return;
+            }
+
             Http.Request request = Http.get(String.format("https://api.github.com/repos/%s/compare/%s...%s", repo.getOwnerName(), addon.getCommit(), repo.branch()));
             repo.authenticate(request);
             HttpResponse<Response> res = request.sendJsonResponse(Response.class);

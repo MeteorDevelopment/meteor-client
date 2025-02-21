@@ -158,6 +158,7 @@ public class InfinityMiner extends Module {
             if (!needsRepair()) {
                 warning("Finished repairing, going back to mining.");
                 repairing = false;
+                baritoneSettings.mineScanDroppedItems.value = true;
                 mineTargetBlocks();
                 return;
             }
@@ -168,6 +169,7 @@ public class InfinityMiner extends Module {
             if (needsRepair()) {
                 warning("Pickaxe needs repair, beginning repair process");
                 repairing = true;
+                baritoneSettings.mineScanDroppedItems.value = false;
                 mineRepairBlocks();
                 return;
             }
