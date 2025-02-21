@@ -29,7 +29,7 @@ public class Queue2b2t extends Module {
     private final Setting<Integer> position = sg.add(new IntSetting.Builder()
             .name("position")
             .description("Position at which to send the message.")
-            .defaultValue(10)
+            .defaultValue(5)
             .min(1)
             .noSlider()
             .build());
@@ -62,6 +62,8 @@ public class Queue2b2t extends Module {
 
     @EventHandler(priority = 1)
     private void onMessageReceive(final ReceiveMessageEvent event) {
+        if (!mc.player.isSpectator())
+            return;
         if (mc.getCurrentServerEntry() == null || !mc.getCurrentServerEntry().address.equals("2b2t.org"))
             return;
 
@@ -71,11 +73,8 @@ public class Queue2b2t extends Module {
         final var s = message.substring(match.length()).split("\n")[0];
         try {
             final var pos = Integer.parseInt(s);
-            if (pos > last)
+            if (pos > last || (pos < last && pos <= position.get() && (!once.get() || last > position.get())))
                 alert(mc.player.getName().getString() + " " + pos);
-            if (pos < last && pos <= position.get())
-                if (!once.get() || last > position.get())
-                    alert(mc.player.getName().getString() + " " + pos);
             last = pos;
         } catch (final Exception e) {
             e.printStackTrace();
