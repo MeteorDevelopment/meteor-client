@@ -77,7 +77,6 @@ public class Utils {
     public static final Color WHITE = new Color(255, 255, 255);
 
     private static final Random random = new Random();
-    public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
     public static boolean rendering3D = true;
     public static double frameTime;
