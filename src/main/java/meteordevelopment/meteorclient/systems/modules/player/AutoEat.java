@@ -100,6 +100,14 @@ public class AutoEat extends Module {
         .build()
     );
 
+    private final Setting<Boolean> untilFull = sgGeneral.add(new BoolSetting.Builder()
+        .name("until-full")
+        .description("Once triggered, eat until full.")
+        .defaultValue(true)
+        .build()
+    );
+
+
     public boolean eating;
     private int slot, prevSlot;
 
@@ -229,12 +237,13 @@ public class AutoEat extends Module {
     }
 
     public boolean shouldEat() {
-        if(!mc.player.getHungerManager().isNotFull()) return false;
+        final var full = !mc.player.getHungerManager().isNotFull();
+        if (full) return false;
 
         boolean health = mc.player.getHealth() <= healthThreshold.get();
         boolean hunger = mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
 
-        return thresholdMode.get().test(health, hunger);
+        return thresholdMode.get().test(health, hunger) || (eating && untilFull.get());
     }
 
     private int findSlot() {

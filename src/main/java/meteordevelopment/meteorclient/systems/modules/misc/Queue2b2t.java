@@ -28,7 +28,7 @@ public class Queue2b2t extends Module {
 
     private final Setting<Integer> position = sg.add(new IntSetting.Builder()
             .name("position")
-            .description("Position at which to send the message.")
+            .description("Position at which to start sending messages.")
             .defaultValue(5)
             .min(1)
             .noSlider()
@@ -36,7 +36,7 @@ public class Queue2b2t extends Module {
 
     private final Setting<Boolean> once = sg.add(new BoolSetting.Builder()
             .name("once")
-            .description("Only alert when crossed position.")
+            .description("Only send one message, when crossed position.")
             .defaultValue(false)
             .build());
 
@@ -72,10 +72,12 @@ public class Queue2b2t extends Module {
             return;
         final var s = message.substring(match.length()).split("\n")[0];
         try {
-            final var pos = Integer.parseInt(s);
-            if (pos > last || (pos < last && pos <= position.get() && (!once.get() || last > position.get())))
-                alert(mc.player.getName().getString() + " " + pos);
-            last = pos;
+            final var i = Integer.parseInt(s);
+            if (i == last)
+                return;
+            if (i > last || (i <= position.get() && (!once.get() || last > position.get())))
+                alert(mc.player.getName().getString() + " " + i);
+            last = i;
         } catch (final Exception e) {
             e.printStackTrace();
         }

@@ -83,6 +83,14 @@ public class Freecam extends Module {
         .build()
     );
 
+    // TODO
+    private final Setting<Boolean> toggleOnPortal = sgGeneral.add(new BoolSetting.Builder()
+        .name("toggle-on-portal")
+        .description("Disables freecam when you enter a portal.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> reloadChunks = sgGeneral.add(new BoolSetting.Builder()
         .name("reload-chunks")
         .description("Disables cave culling.")
