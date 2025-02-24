@@ -31,6 +31,7 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
@@ -83,7 +84,6 @@ public class Freecam extends Module {
         .build()
     );
 
-    // TODO
     private final Setting<Boolean> toggleOnPortal = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-on-portal")
         .description("Disables freecam when you enter a portal.")
@@ -371,6 +371,16 @@ public class Freecam extends Module {
         if (!toggleOnLog.get()) return;
 
         toggle();
+    }
+
+    @EventHandler
+    private void onPacketSent(PacketEvent.Sent event) {
+        if (event.packet instanceof TeleportConfirmC2SPacket) {
+            if (toggleOnPortal.get()) {
+                toggle();
+                info("Toggled off because you teleported.");
+            }
+        }
     }
 
     @EventHandler
