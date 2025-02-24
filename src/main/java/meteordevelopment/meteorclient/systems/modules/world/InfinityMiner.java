@@ -142,6 +142,10 @@ public class InfinityMiner extends Module {
             return;
         }
 
+        if (!isBaritoneNotPaused()) {
+            return;
+        }
+
         if (!findPickaxe()) {
             error("Could not find a usable mending pickaxe.");
             toggle();
@@ -172,7 +176,7 @@ public class InfinityMiner extends Module {
                 baritoneSettings.mineScanDroppedItems.value = false;
                 mineRepairBlocks();
                 return;
-            }
+            }   
 
             if (isBaritoneNotMining()) mineTargetBlocks();
         }
@@ -182,6 +186,10 @@ public class InfinityMiner extends Module {
         ItemStack itemStack = mc.player.getMainHandStack();
         double toolPercentage = ((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage();
         return !(toolPercentage > startMining.get() || (toolPercentage > startRepairing.get() && !repairing));
+    }
+
+    private boolean isBaritoneNotPaused() {
+        return baritone.getPathingControlManager().mostRecentInControl().isEmpty();
     }
 
     private boolean findPickaxe() {
