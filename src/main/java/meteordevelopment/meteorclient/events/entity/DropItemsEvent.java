@@ -12,10 +12,16 @@ public class DropItemsEvent extends Cancellable {
     private static final DropItemsEvent INSTANCE = new DropItemsEvent();
 
     public ItemStack itemStack;
+    public int slotId;
 
     public static DropItemsEvent get(ItemStack itemStack) {
+        return get(itemStack, -999);
+    }
+
+    public static DropItemsEvent get(ItemStack itemStack, int slotId) {
         INSTANCE.setCancelled(false);
         INSTANCE.itemStack = itemStack;
+        INSTANCE.slotId = slotId;
         return INSTANCE;
     }
 }

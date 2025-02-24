@@ -1,7 +1,8 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -14,7 +15,7 @@ import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 
 public class DateSign extends Module {
     public DateSign() {
-        super(Categories.World, "date-sign", "Automatically writes the currend date on signs.");
+        super(Categories.World, "date-sign", "Automatically writes the currend date (UTC) on signs.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -22,7 +23,7 @@ public class DateSign extends Module {
     private final Setting<String> match = sgGeneral.add(new StringSetting.Builder()
             .name("match")
             .description("The text to replace.")
-            .defaultValue("@today")
+            .defaultValue("@NOW")
             .build());
 
     private final Setting<String> format = sgGeneral.add(new StringSetting.Builder()
@@ -31,19 +32,20 @@ public class DateSign extends Module {
             .defaultValue("yyyy/MM/dd HH:mm")
             .onChanged(v -> {
                 try {
-                    formatter = new SimpleDateFormat(v);
+                    formatter = DateTimeFormatter.ofPattern(v);
                 } catch (Exception e) {
+                    info(e.getMessage());
                     formatter = null;
                 }
             })
             .build());
 
-    private SimpleDateFormat formatter;
+    private DateTimeFormatter formatter;
 
     private String apply(String i) {
         if (formatter == null)
             return i;
-        return i.replace(match.get(), formatter.format(new Date()));
+        return i.replace(match.get(), Instant.now().atOffset(ZoneOffset.UTC).format(formatter));
     }
 
     @EventHandler
@@ -51,17 +53,17 @@ public class DateSign extends Module {
         if (!(event.packet instanceof UpdateSignC2SPacket packet))
             return;
 
-        final var t = packet.getText();
-        try {
-            event.packet = new UpdateSignC2SPacket(
-                    packet.getPos(),
-                    packet.isFront(),
-                    apply(t[0]),
-                    apply(t[1]),
-                    apply(t[2]),
-                    apply(t[3]));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        final var text = packet.getText();
+        for (var i = 0; i < text.length; i++)
+            text[i] = apply(text[i]);
+
+        if (text.equals(packet.getText()))
+            return;
+
+        event.setCancelled(true);
+        mc.getNetworkHandler().sendPacket(new UpdateSignC2SPacket(
+                packet.getPos(),
+                packet.isFront(),
+                text[0], text[1], text[2], text[3]));
     }
 }

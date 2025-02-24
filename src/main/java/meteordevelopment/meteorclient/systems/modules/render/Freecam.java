@@ -31,14 +31,16 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.WorldEventS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.WorldEvents;
+
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
@@ -374,16 +376,6 @@ public class Freecam extends Module {
     }
 
     @EventHandler
-    private void onPacketSent(PacketEvent.Sent event) {
-        if (event.packet instanceof TeleportConfirmC2SPacket) {
-            if (toggleOnPortal.get()) {
-                toggle();
-                info("Toggled off because you teleported.");
-            }
-        }
-    }
-
-    @EventHandler
     private void onPacketReceive(PacketEvent.Receive event)  {
         if (event.packet instanceof DeathMessageS2CPacket packet) {
             Entity entity = mc.world.getEntityById(packet.playerId());
@@ -396,6 +388,12 @@ public class Freecam extends Module {
             if (mc.player.getHealth() - packet.getHealth() > 0 && toggleOnDamage.get()) {
                 toggle();
                 info("Toggled off because you took damage.");
+            }
+        }
+        else if (event.packet instanceof WorldEventS2CPacket packet) {
+            if (packet.getEventId() == WorldEvents.TRAVEL_THROUGH_PORTAL && toggleOnPortal.get()) {
+                toggle();
+                info("Toggled off because you teleported.");
             }
         }
     }

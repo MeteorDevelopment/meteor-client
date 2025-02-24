@@ -57,6 +57,21 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
+    private final Setting<Boolean> antiDropEquipped = sgGeneral.add(new BoolSetting.Builder()
+        .name("equipped")
+        .description("Whether or not to drop items equipped in armor slots.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> antiDropHotbar = sgGeneral.add(new BoolSetting.Builder()
+        .name("hotbar")
+        .description("Whether or not to drop items from your hotbar.")
+        .defaultValue(false)
+        .build()
+    );
+
+
     private final Setting<Boolean> xCarry = sgGeneral.add(new BoolSetting.Builder()
         .name("xcarry")
         .description("Allows you to store four extra item stacks in your crafting grid.")
@@ -316,9 +331,14 @@ public class InventoryTweaks extends Module {
         }
     }
 
+    // Anti Drop
+
     @EventHandler
     private void onDropItems(DropItemsEvent event) {
-        if (antiDropItems.get().contains(event.itemStack.getItem())) event.cancel();
+        if ((antiDropEquipped.get() && SlotUtils.isArmor(event.slotId))
+                || (antiDropHotbar.get() && SlotUtils.isHotbar(event.slotId))
+                || antiDropItems.get().contains(event.itemStack.getItem()))
+            event.cancel();
     }
 
     // XCarry

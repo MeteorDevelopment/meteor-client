@@ -84,6 +84,7 @@ public class WaypointCommand extends Command {
     private int addWaypoint(CommandContext<CommandSource> context, boolean withCoords) {
         if (mc.player == null) return -1;
 
+        // TODO: Cannot invoke "getOverworld()Lnet/minecraft/server/world/ServerWorld;" because the return value of "getServer()Lnet/minecraft/server/integrated/IntegratedServer;" is null
         BlockPos pos = withCoords ? context.getArgument("pos", PosArgument.class).toAbsoluteBlockPos(mc.player.getCommandSource(mc.getServer().getOverworld())) : mc.player.getBlockPos().up(2);
         Waypoint waypoint = new Waypoint.Builder()
             .name(StringArgumentType.getString(context, "waypoint"))
