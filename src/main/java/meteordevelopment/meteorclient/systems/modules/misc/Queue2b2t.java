@@ -40,6 +40,14 @@ public class Queue2b2t extends Module {
             .defaultValue(false)
             .build());
 
+    private final Setting<Integer> interval = sg.add(new IntSetting.Builder()
+            .name("interval")
+            .description("Send message when crossing a multiple of this, 0 to disable.")
+            .defaultValue(100)
+            .min(0)
+            .noSlider()
+            .build());
+
     private int last;
 
     public Queue2b2t() {
@@ -75,7 +83,9 @@ public class Queue2b2t extends Module {
             final var i = Integer.parseInt(s);
             if (i == last)
                 return;
-            if (i > last || (i <= position.get() && (!once.get() || last > position.get())))
+            if (i > last
+                    || (interval.get() > 0 && (i - 1) / interval.get() < (last - 1) / interval.get())
+                    || (i <= position.get() && (!once.get() || last > position.get())))
                 alert(mc.player.getName().getString() + " " + i);
             last = i;
         } catch (final Exception e) {

@@ -15,7 +15,7 @@ public class DropItemsEvent extends Cancellable {
     public int slotId;
 
     public static DropItemsEvent get(ItemStack itemStack) {
-        return get(itemStack, -999);
+        return get(itemStack, -1);
     }
 
     public static DropItemsEvent get(ItemStack itemStack, int slotId) {

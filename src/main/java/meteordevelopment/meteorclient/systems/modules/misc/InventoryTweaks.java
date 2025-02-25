@@ -335,6 +335,7 @@ public class InventoryTweaks extends Module {
 
     @EventHandler
     private void onDropItems(DropItemsEvent event) {
+        // TODO: SlotUtils.indexToId seems broken
         if ((antiDropEquipped.get() && SlotUtils.isArmor(event.slotId))
                 || (antiDropHotbar.get() && SlotUtils.isHotbar(event.slotId))
                 || antiDropItems.get().contains(event.itemStack.getItem()))

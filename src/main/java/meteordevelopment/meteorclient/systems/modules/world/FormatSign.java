@@ -13,44 +13,54 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 
-public class DateSign extends Module {
-    public DateSign() {
-        super(Categories.World, "date-sign", "Automatically writes the currend date (UTC) on signs.");
-    }
+// TODO: StarcriptSign or something
+public class FormatSign extends Module {
+    private final SettingGroup sgPlayer = settings.createGroup("Player");
+    private final SettingGroup sgDate = settings.createGroup("Date");
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<String> match = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<String> playerMatch = sgPlayer.add(new StringSetting.Builder()
             .name("match")
             .description("The text to replace.")
-            .defaultValue("@NOW")
+            .defaultValue("{me}")
             .build());
 
-    private final Setting<String> format = sgGeneral.add(new StringSetting.Builder()
+
+    private final Setting<String> dateMatch = sgDate.add(new StringSetting.Builder()
+            .name("match")
+            .description("The text to replace.")
+            .defaultValue("{now}")
+            .build());
+
+    private final Setting<String> dateFormat = sgDate.add(new StringSetting.Builder()
             .name("format")
             .description("How to format the date.")
             .defaultValue("yyyy/MM/dd HH:mm")
             .onChanged(v -> {
                 try {
-                    formatter = DateTimeFormatter.ofPattern(v);
-                } catch (Exception e) {
+                    dateFormatter = DateTimeFormatter.ofPattern(v);
+                } catch (final Exception e) {
                     info(e.getMessage());
-                    formatter = null;
+                    dateFormatter = null;
                 }
             })
             .build());
 
-    private DateTimeFormatter formatter;
+    private DateTimeFormatter dateFormatter;
+
+    public FormatSign() {
+        super(Categories.World, "format-sign", "Automatically replaces text on signs.");
+    }
 
     private String apply(String i) {
-        if (formatter == null)
+        i = i.replace(playerMatch.get(), mc.player.getName().getString());
+        if (dateFormatter == null)
             return i;
-        return i.replace(match.get(), Instant.now().atOffset(ZoneOffset.UTC).format(formatter));
+        return i.replace(dateMatch.get(), Instant.now().atOffset(ZoneOffset.UTC).format(dateFormatter));
     }
 
     @EventHandler
-    private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof UpdateSignC2SPacket packet))
+    private void onSendPacket(final PacketEvent.Send event) {
+        if (!(event.packet instanceof final UpdateSignC2SPacket packet))
             return;
 
         final var text = packet.getText();

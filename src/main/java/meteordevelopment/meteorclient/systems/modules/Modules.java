@@ -552,7 +552,7 @@ public class Modules extends System<Modules> {
         add(new AutoSmelter());
         add(new BuildHeight());
         add(new Collisions());
-        add(new DateSign());
+        add(new FormatSign());
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new Flamethrower());
