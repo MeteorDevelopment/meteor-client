@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 
 import com.mojang.blaze3d.systems.RenderSystem;
+
+import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
@@ -30,16 +32,13 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.option.Perspective;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.WorldEventS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.WorldEvents;
 
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
@@ -69,27 +68,6 @@ public class Freecam extends Module {
         .name("toggle-on-damage")
         .description("Disables freecam when you take damage.")
         .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> toggleOnDeath = sgGeneral.add(new BoolSetting.Builder()
-        .name("toggle-on-death")
-        .description("Disables freecam when you die.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> toggleOnLog = sgGeneral.add(new BoolSetting.Builder()
-        .name("toggle-on-log")
-        .description("Disables freecam when you disconnect from a server.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> toggleOnPortal = sgGeneral.add(new BoolSetting.Builder()
-        .name("toggle-on-portal")
-        .description("Disables freecam when you enter a portal.")
-        .defaultValue(true)
         .build()
     );
 
@@ -370,31 +348,20 @@ public class Freecam extends Module {
 
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
-        if (!toggleOnLog.get()) return;
-
         toggle();
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event)  {
-        if (event.packet instanceof DeathMessageS2CPacket packet) {
-            Entity entity = mc.world.getEntityById(packet.playerId());
-            if (entity == mc.player && toggleOnDeath.get()) {
-                toggle();
-                info("Toggled off because you died.");
-            }
-        }
-        else if (event.packet instanceof HealthUpdateS2CPacket packet) {
+        if (event.packet instanceof HealthUpdateS2CPacket packet) {
             if (mc.player.getHealth() - packet.getHealth() > 0 && toggleOnDamage.get()) {
                 toggle();
                 info("Toggled off because you took damage.");
             }
         }
-        else if (event.packet instanceof WorldEventS2CPacket packet) {
-            if (packet.getEventId() == WorldEvents.TRAVEL_THROUGH_PORTAL && toggleOnPortal.get()) {
-                toggle();
-                info("Toggled off because you teleported.");
-            }
+        else if (event.packet instanceof PlayerRespawnS2CPacket) {
+            toggle();
+            info("Toggled off because you respawned.");
         }
     }
 
