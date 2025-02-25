@@ -37,6 +37,7 @@ import java.util.function.Predicate;
 public class InfinityMiner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgWhenFull = settings.createGroup("When Full");
+    private int tickCounter = 0; // Counter to track ticks
 
     // General
 
@@ -125,6 +126,7 @@ public class InfinityMiner extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        tickCounter++;
         if (isFull()) {
             if (walkHome.get()) {
                 if (isBaritoneNotWalking()) {
@@ -142,8 +144,11 @@ public class InfinityMiner extends Module {
             return;
         }
 
-        if (!isBaritoneNotPaused()) {
-            return;
+        if (tickCounter > 19) {
+            tickCounter = 0;
+                if (!isBaritoneNotPaused()) {
+                    return;
+            }
         }
 
         if (!findPickaxe()) {
