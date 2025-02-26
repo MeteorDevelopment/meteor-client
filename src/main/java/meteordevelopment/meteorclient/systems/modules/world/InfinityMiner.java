@@ -38,6 +38,7 @@ public class InfinityMiner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgWhenFull = settings.createGroup("When Full");
     private int tickCounter = 0; // Counter to track ticks
+    private boolean isBaritonePaused = false; // Boolean to track if baritone is paused
 
     // General
 
@@ -147,8 +148,14 @@ public class InfinityMiner extends Module {
         if (tickCounter > 19) {
             tickCounter = 0;
                 if (!isBaritoneNotPaused()) {
-                    return;
+                    isBaritonePaused = true;
+            } else {
+                isBaritonePaused = false;
             }
+        }
+
+        if (isBaritonePaused) {
+            return;
         }
 
         if (!findPickaxe()) {
