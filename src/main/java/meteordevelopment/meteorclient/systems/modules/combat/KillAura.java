@@ -332,12 +332,13 @@ public class KillAura extends Module {
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
         if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
 
+
         Box hitbox = entity.getBoundingBox();
         if (!PlayerUtils.isWithin(
             MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
             MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
             MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
-            range.get()
+            range.get() + entity.getVelocity().length() / 2
         )) return false;
 
         if (!entities.get().contains(entity.getType())) return false;

@@ -527,7 +527,6 @@ public class Modules extends System<Modules> {
         add(new StorageESP());
         add(new TimeChanger());
         add(new Tracers());
-        add(new Trail());
         add(new Trajectories());
         add(new VoidESP());
         add(new WallHack());

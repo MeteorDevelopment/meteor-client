@@ -14,16 +14,18 @@ import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 
 public class Queue2b2t extends Module {
     private static final String match = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPosition in queue: ";
+
     private final HttpClient http = HttpClient.newHttpClient();
 
     private final SettingGroup sg = settings.getDefaultGroup();
 
     private final Setting<String> webhook = sg.add(new StringSetting.Builder()
             .name("webhook")
-            .description("Discord webhook to send message to.")
+            .description("Discord webhook to send messages to.")
             .build());
 
     private final Setting<Integer> position = sg.add(new IntSetting.Builder()
@@ -68,7 +70,7 @@ public class Queue2b2t extends Module {
         http.sendAsync(request, HttpResponse.BodyHandlers.discarding());
     }
 
-    @EventHandler(priority = 1)
+    @EventHandler(priority = EventPriority.HIGH)
     private void onMessageReceive(final ReceiveMessageEvent event) {
         if (!mc.player.isSpectator())
             return;
