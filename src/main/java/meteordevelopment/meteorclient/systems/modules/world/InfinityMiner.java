@@ -148,9 +148,9 @@ public class InfinityMiner extends Module {
         if (tickCounter > 19) {
             tickCounter = 0;
                 if (!isBaritoneNotPaused()) {
-                    isBaritonePaused = true;
+                    isBaritonePaused = false;
             } else {
-                isBaritonePaused = false;
+                isBaritonePaused = true;
             }
         }
 
@@ -181,6 +181,7 @@ public class InfinityMiner extends Module {
 
             if (isBaritoneNotMining()) mineRepairBlocks();
         }
+        
         else {
             if (needsRepair()) {
                 warning("Pickaxe needs repair, beginning repair process");
