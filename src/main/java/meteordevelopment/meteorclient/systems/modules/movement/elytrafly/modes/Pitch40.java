@@ -22,16 +22,13 @@ public class Pitch40 extends ElytraFlightMode {
         if (mc.player.getY() < elytraFly.pitch40upperBounds.get()) {
             elytraFly.error("Player must be above upper bounds!");
             elytraFly.toggle();
-        } else if (mc.player.getY() - 40 > elytraFly.pitch40lowerBounds.get()) {
+        } else if (mc.player.getY() - 40 < elytraFly.pitch40lowerBounds.get()) {
             elytraFly.error("Player must be at least 40 blocks above the lower bounds!");
             elytraFly.toggle();
         }
 
         pitch = 32.0F;
     }
-
-    @Override
-    public void onDeactivate() {}
 
     /**
      * Create a random pitch around `pitch` that is within +/- bound/2
