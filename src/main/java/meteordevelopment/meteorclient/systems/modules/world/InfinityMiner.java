@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
- * Copyright (c) Meteor Development.
+ * Copyright (c) Meteor Development (https://github.com/MeteorDevelopment).
  */
 
 package meteordevelopment.meteorclient.systems.modules.world;
@@ -37,8 +37,8 @@ import java.util.function.Predicate;
 public class InfinityMiner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgWhenFull = settings.createGroup("When Full");
-    private int tickCounter = 0; // Counter to track ticks
-    private boolean isBaritonePaused = false; // Boolean to track if baritone is paused
+    private int tickCounter = 0;
+    private boolean isBaritonePaused = false;
 
     // General
 
@@ -128,6 +128,26 @@ public class InfinityMiner extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         tickCounter++;
+
+        // Every 20 ticks, check if Baritone is paused
+        if (tickCounter >= 20) {
+            tickCounter = 0;
+
+            // Check if Baritone is paused
+            if (isBaritoneNotPaused()) {
+                isBaritonePaused = false; // Continue processing if Baritone is unpaused
+            } else {
+                isBaritonePaused = true; // Set flag to true if Baritone is paused
+                return; // Skip the rest of the method if Baritone is paused
+            }
+        }
+
+        // If Baritone is paused, return early to prevent further actions
+        if (isBaritonePaused) {
+            return;
+        }
+
+        // Rest of the logic continues if Baritone is not paused
         if (isFull()) {
             if (walkHome.get()) {
                 if (isBaritoneNotWalking()) {
@@ -142,19 +162,6 @@ public class InfinityMiner extends Module {
                 toggle();
             }
 
-            return;
-        }
-
-        if (tickCounter > 19) {
-            tickCounter = 0;
-                if (!isBaritoneNotPaused()) {
-                    isBaritonePaused = false;
-            } else {
-                isBaritonePaused = true;
-            }
-        }
-
-        if (isBaritonePaused) {
             return;
         }
 
