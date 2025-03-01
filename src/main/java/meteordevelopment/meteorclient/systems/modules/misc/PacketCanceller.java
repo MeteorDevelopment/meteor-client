@@ -5,9 +5,10 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import static meteordevelopment.meteorclient.MeteorClient.LOG;
+
 import java.util.Set;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.PacketListSetting;
@@ -19,6 +20,9 @@ import meteordevelopment.meteorclient.utils.network.PacketUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.c2s.common.KeepAliveC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClientTickEndC2SPacket;
+import net.minecraft.network.packet.s2c.common.KeepAliveS2CPacket;
 
 public class PacketCanceller extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -54,28 +58,49 @@ public class PacketCanceller extends Module {
         .build()
     );
 
+    private final Setting<Set<Class<? extends Packet<?>>>> logExclude = sgGeneral.add(new PacketListSetting.Builder()
+        .name("exclude")
+        .description("Packets to not log.")
+        .defaultValue(Set.of(ClientTickEndC2SPacket.class, KeepAliveC2SPacket.class, KeepAliveS2CPacket.class))
+        .visible(logPackets::get)
+        .build()
+    );
+
     public PacketCanceller() {
         super(Categories.Misc, "packet-canceller", "Allows you to cancel certain packets.");
         runInMainMenu = true;
     }
 
+    @Override
+    public String getInfoString() {
+        return c2sPackets.get().size() + " " + s2cPackets.get().size();
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (s2cPackets.get().contains(event.packet.getClass())) event.cancel();
-        if(logPackets.get() && (!logCancelled.get() || event.isCancelled()))
-            MeteorClient.LOG.info((event.isCancelled() ? "Drop " : "") + "Packet.Receive {}", event.packet.getPacketType());
+        final var c = event.packet.getClass();
+
+        if (s2cPackets.get().contains(c)) event.cancel();
+
+        if(logPackets.get() && !logExclude.get().contains(c))
+            if(!logCancelled.get() || event.isCancelled())
+                LOG.info((event.isCancelled() ? "Drop " : "") + "Packet.Receive " + event.packet.getPacketType());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onSendPacket(PacketEvent.Send event) {
-        if (c2sPackets.get().contains(event.packet.getClass())) event.cancel();
-        if(logPackets.get() && (logCancelled.get() && event.isCancelled()))
-            MeteorClient.LOG.info("Cancel Packet.Send {}", event.packet.getPacketType());
+        final var c = event.packet.getClass();
+
+        if (c2sPackets.get().contains(c)) event.cancel();
+
+        if(logPackets.get() && !logExclude.get().contains(c))
+            if(logCancelled.get() && event.isCancelled())
+                LOG.info("Cancel Packet.Send " + event.packet.getPacketType());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onSentPacket(PacketEvent.Sent event) {
-        if(logPackets.get())
-            MeteorClient.LOG.info("Packet.Sent {}", event.packet.getPacketType());
+        if(logPackets.get() && !logExclude.get().contains(event.packet.getClass()))
+            LOG.info("Packet.Sent " + event.packet.getPacketType());
     }
 }

@@ -338,7 +338,7 @@ public class KillAura extends Module {
             MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
             MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
             MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
-            range.get() + entity.getVelocity().length() / 2
+            range.get() + entity.getVelocity().length()
         )) return false;
 
         if (!entities.get().contains(entity.getType())) return false;

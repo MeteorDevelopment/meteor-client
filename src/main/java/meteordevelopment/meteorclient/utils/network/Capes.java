@@ -22,6 +22,8 @@ import java.util.stream.Stream;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Capes {
+    private static final boolean DISABLE_CAPES = true;
+
     private static final String CAPE_OWNERS_URL = "https://meteorclient.com/api/capeowners";
     private static final String CAPES_URL = "https://meteorclient.com/api/capes";
 
@@ -38,6 +40,8 @@ public class Capes {
 
     @PreInit(dependencies = MeteorExecutor.class)
     public static void init() {
+        if (DISABLE_CAPES) return;
+
         OWNERS.clear();
         URLS.clear();
         TEXTURES.clear();
