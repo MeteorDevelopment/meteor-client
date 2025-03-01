@@ -1,19 +1,15 @@
 {
   "schemaVersion": 1,
-  "name": "Meteor Client",
+  "name": "Snova Client",
   "id": "meteor-client",
   "version": "${version}",
-  "description": "Based utility mod.",
+  "description": "Reskinned Meteor..",
   "authors": [
-    "MineGame159",
-    "squidoodly",
-    "seasnail"
+    "Theyfwsnow",
+    "nova3ris"
   ],
   "contact": {
-    "homepage": "https://meteorclient.com",
-    "issues": "https://github.com/MeteorDevelopment/meteor-client/issues",
-    "sources": "https://github.com/MeteorDevelopment/meteor-client",
-    "discord": "https://meteorclient.com/discord"
+    "homepage": "https://github.com/Theyfwsnow/snova-client"
   },
   "license": "GPL-3.0",
   "icon": "assets/meteor-client/icon.png",
@@ -34,7 +30,7 @@
   "accessWidener": "meteor-client.accesswidener",
   "custom": {
     "meteor-client:devbuild": "${devbuild}",
-    "meteor-client:color": "145,61,226",
+    "meteor-client:color": "232, 232, 232",
     "meteor-client:commit": "${commit}",
     "modmenu": {
       "links": {
