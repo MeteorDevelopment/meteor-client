@@ -6,6 +6,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -15,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
+import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
 
 public class Queue2b2t extends Module {
     private static final String match = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPosition in queue: ";
@@ -61,13 +63,21 @@ public class Queue2b2t extends Module {
         this.last = 0;
     }
 
-    private void alert(final String s) throws Exception {
+    private void alert(final String s) {
         final var data = "{\"content\": \"" + s.replace("\"", "\\\"") + "\"}";
         final var request = HttpRequest.newBuilder(URI.create(webhook.get()))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .build();
         http.sendAsync(request, HttpResponse.BodyHandlers.discarding());
+    }
+
+    @EventHandler
+    private void onPacketReceive(final PacketEvent.Receive event) {
+        if (event.packet instanceof PlayerRespawnS2CPacket) {
+            toggle();
+            alert(mc.player.getName().getString());
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -91,6 +101,7 @@ public class Queue2b2t extends Module {
                 alert(mc.player.getName().getString() + " " + i);
             last = i;
         } catch (final Exception e) {
+            info(e.getMessage());
             e.printStackTrace();
         }
     }

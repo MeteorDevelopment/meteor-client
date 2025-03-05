@@ -24,13 +24,13 @@ public class FormatSign extends Module {
             .defaultValue("{me}")
             .build());
 
-
     private final Setting<String> dateMatch = sgDate.add(new StringSetting.Builder()
             .name("match")
             .description("The text to replace.")
             .defaultValue("{now}")
             .build());
 
+    @SuppressWarnings("unused")
     private final Setting<String> dateFormat = sgDate.add(new StringSetting.Builder()
             .name("format")
             .description("How to format the date.")

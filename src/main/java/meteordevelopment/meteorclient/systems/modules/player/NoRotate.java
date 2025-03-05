@@ -6,11 +6,15 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.entity.player.PlayerPosition;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
+import net.minecraft.util.math.Vec2f;
 
 public class NoRotate extends Module {
     public NoRotate() {
@@ -32,6 +36,19 @@ public class NoRotate extends Module {
                 newPosition,
                 packet.relatives()
             );
+        }
+        else if (event.packet instanceof PlayerRespawnS2CPacket) {
+            rotation = mc.player.getRotationClient();
+        }
+    }
+
+    private Vec2f rotation;
+
+    @EventHandler
+    private void tick(TickEvent.Post event) {
+        if (rotation != null) {
+            mc.player.rotate(rotation.y, rotation.x);
+            rotation = null;
         }
     }
 }
