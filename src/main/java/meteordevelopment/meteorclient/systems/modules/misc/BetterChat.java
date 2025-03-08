@@ -73,6 +73,7 @@ public class BetterChat extends Module {
         .build()
     );
 
+    // TODO: player heads fuck up the hover offset
     private final Setting<Boolean> playerHeads = sgGeneral.add(new BoolSetting.Builder()
         .name("player-heads")
         .description("Displays player heads next to their messages.")

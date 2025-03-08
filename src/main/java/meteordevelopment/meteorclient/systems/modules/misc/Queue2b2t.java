@@ -16,9 +16,10 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
+import net.minecraft.network.packet.s2c.play.EnterReconfigurationS2CPacket;
 
 public class Queue2b2t extends Module {
+    private static final String ip = "2b2t.org";
     private static final String match = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPosition in queue: ";
 
     private final HttpClient http = HttpClient.newHttpClient();
@@ -52,6 +53,20 @@ public class Queue2b2t extends Module {
             .noSlider()
             .build());
 
+    private final SettingGroup sgFormat = settings.createGroup("Format");
+
+    // TODO
+
+    private final Setting<String> formatPosition = sgFormat.add(new StringSetting.Builder()
+            .name("position")
+            .defaultValue("{player} %d")
+            .build());
+
+    private final Setting<String> formatJoined = sgFormat.add(new StringSetting.Builder()
+            .name("joined")
+            .defaultValue("{player} @here")
+            .build());
+
     private int last;
 
     public Queue2b2t() {
@@ -74,17 +89,20 @@ public class Queue2b2t extends Module {
 
     @EventHandler
     private void onPacketReceive(final PacketEvent.Receive event) {
-        if (event.packet instanceof PlayerRespawnS2CPacket) {
-            toggle();
+        if (!isInQ())
+            return;
+        if (event.packet instanceof EnterReconfigurationS2CPacket)
             alert(mc.player.getName().getString());
-        }
+    }
+
+    private boolean isInQ() {
+        return mc.player.isSpectator()
+                && mc.getCurrentServerEntry() != null && mc.getCurrentServerEntry().address.equals(Queue2b2t.ip);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onMessageReceive(final ReceiveMessageEvent event) {
-        if (!mc.player.isSpectator())
-            return;
-        if (mc.getCurrentServerEntry() == null || !mc.getCurrentServerEntry().address.equals("2b2t.org"))
+        if (!isInQ())
             return;
 
         final var message = event.getMessage().getString();

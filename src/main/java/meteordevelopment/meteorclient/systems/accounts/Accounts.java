@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+//TODO: add session token based auth
 public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
     private List<Account<?>> accounts = new ArrayList<>();
 

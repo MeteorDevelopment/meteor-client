@@ -332,6 +332,7 @@ public class InventoryTweaks extends Module {
     }
 
     // Anti Drop
+    // TODO: add locking slots
 
     @EventHandler
     private void onDropItems(DropItemsEvent event) {
