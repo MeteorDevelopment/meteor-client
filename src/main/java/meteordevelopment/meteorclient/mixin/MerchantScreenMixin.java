@@ -71,13 +71,12 @@ public abstract class MerchantScreenMixin extends HandledScreen<MerchantScreenHa
             return;
         }
 
-
         TradeOfferList tradeOfferList = this.handler.getRecipes();
         if (tradeOfferList.size() < selectedIndex) return;
 
         TradeOffer selectedOffer = tradeOfferList.get(selectedIndex);
         MerchantScreenHandler handler = getScreenHandler();
-        module.tradeUntilDoneOrEmpty(selectedOffer, handler, this.selectedIndex);
+        module.trade(selectedOffer, handler, this.selectedIndex);
     }
 }
 

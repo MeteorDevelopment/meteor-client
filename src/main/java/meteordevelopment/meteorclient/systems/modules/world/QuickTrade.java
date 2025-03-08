@@ -61,19 +61,20 @@ public class QuickTrade extends Module {
         tasks.add(task);
     }
 
-    public void tradeUntilDoneOrEmpty(TradeOffer selectedOffer, MerchantScreenHandler handler, int selectedIndex) {
+    public void trade(TradeOffer selectedOffer, MerchantScreenHandler handler, int selectedIndex) {
         final MinecraftClient client = MinecraftClient.getInstance();
-
-        if (client.interactionManager == null) {
-            error("Client interaction manager is null!");
-            return;
-        }
 
         Slot inSlot0 = handler.getSlot(0);
         Slot inSlot1 = handler.getSlot(1);
         Slot outputSlot = handler.getSlot(2);
+
         runUntilFalse(() -> {
-            // If player is null or they changed screen
+
+            if (client.interactionManager == null) {
+                error("Client interaction manager is null!");
+                return false;
+            }
+
             if (client.player == null) {
                 error("Player is null, stopping trading.");
                 return false;
