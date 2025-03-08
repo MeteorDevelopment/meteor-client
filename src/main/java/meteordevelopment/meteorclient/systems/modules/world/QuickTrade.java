@@ -21,7 +21,6 @@ import net.minecraft.screen.MerchantScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.village.TradeOffer;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Collections;
 import java.util.LinkedList;

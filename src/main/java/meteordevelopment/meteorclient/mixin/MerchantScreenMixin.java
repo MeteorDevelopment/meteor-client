@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.mixin;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.QuickTrade;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -29,6 +28,30 @@ public abstract class MerchantScreenMixin extends HandledScreen<MerchantScreenHa
 
     public MerchantScreenMixin(MerchantScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
+    }
+
+    @Inject(
+        method = "render",
+        at = @At("TAIL")
+    )
+    private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+
+        if (client == null) {
+            return;
+        }
+
+        QuickTrade module = Modules.get().get(QuickTrade.class);
+
+
+        if (!module.isActive()) {
+            return;
+        }
+
+        if (!module.modifier.get().isPressed()) {
+            return;
+        }
+
+        context.drawCenteredTextWithShadow(client.textRenderer, "Select a trade on the left to quick-trade", width / 2, height / 2 + 100, 0xFFFFFFFF);
     }
 
     @Inject(
