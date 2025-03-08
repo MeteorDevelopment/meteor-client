@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.KeybindSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -35,6 +36,13 @@ public class QuickTrade extends Module {
         .name("Activation key")
         .description("Key to press to perform trade until exhausted.")
         .defaultValue(Keybind.none())
+        .build()
+    );
+
+    public final Setting<Boolean> drop = sgGeneral.add(new BoolSetting.Builder()
+        .name("Drop if full")
+        .description("Should we drop items on the floor if we run out of inventory space?")
+        .defaultValue(true)
         .build()
     );
 
@@ -84,12 +92,23 @@ public class QuickTrade extends Module {
             // If there is an item in the trade slot(s) already, then shift click or drop them
             if (!inSlot0.getStack().isEmpty()) {
                 client.interactionManager.clickSlot(handler.syncId, inSlot0.id, 1, SlotActionType.QUICK_MOVE, client.player);
-                client.interactionManager.clickSlot(handler.syncId, inSlot0.id, 1, SlotActionType.THROW, client.player);
+
+                if (drop.get()) {
+                    client.interactionManager.clickSlot(handler.syncId, inSlot0.id, 1, SlotActionType.THROW, client.player);
+                } else if (!inSlot0.getStack().isEmpty()) {
+                    // If still not empty then we should stop trading
+                    return false;
+                }
             }
 
             if (!inSlot1.getStack().isEmpty()) {
                 client.interactionManager.clickSlot(handler.syncId, inSlot1.id, 1, SlotActionType.QUICK_MOVE, client.player);
-                client.interactionManager.clickSlot(handler.syncId, inSlot1.id, 1, SlotActionType.THROW, client.player);
+
+                if (drop.get()) {
+                    client.interactionManager.clickSlot(handler.syncId, inSlot1.id, 1, SlotActionType.THROW, client.player);
+                } else if (!inSlot1.getStack().isEmpty()) {
+                    return false;
+                }
             }
 
             // Refresh items
@@ -113,8 +132,11 @@ public class QuickTrade extends Module {
 
             if (hasSpace(client.player.getInventory(), selectedOffer.getSellItem())) {
                 client.interactionManager.clickSlot(handler.syncId, outputSlot.id, 0, SlotActionType.QUICK_MOVE, client.player);
-            } else {
+            } else if (drop.get()) {
                 client.interactionManager.clickSlot(handler.syncId, outputSlot.id, 0, SlotActionType.THROW, client.player);
+            } else {
+                // Out of inventory space and drop is not enabled - stop trading
+                return false;
             }
 
             return true;
