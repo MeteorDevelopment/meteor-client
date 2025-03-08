@@ -35,7 +35,7 @@ public class QuickTrade extends Module {
     public final Setting<Keybind> modifier = sgGeneral.add(new KeybindSetting.Builder()
         .name("Activation key")
         .description("Key to press to perform trade until exhausted.")
-        .defaultValue(Keybind.fromButton(GLFW.GLFW_KEY_LEFT_CONTROL))
+        .defaultValue(Keybind.none())
         .build()
     );
 
