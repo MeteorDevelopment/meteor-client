@@ -501,8 +501,11 @@ public class Modules extends System<Modules> {
     }
 
     private void initRender() {
+        add(new BetterTab());
         add(new BetterTooltips());
+        add(new BlockESP());
         add(new BlockSelection());
+        add(new Blur());
         add(new BossStack());
         add(new Breadcrumbs());
         add(new BreakIndicators());
@@ -523,21 +526,18 @@ public class Modules extends System<Modules> {
         add(new Marker());
         add(new Nametags());
         add(new NoRender());
-        add(new BlockESP());
+        add(new PopChams());
         add(new StorageESP());
         add(new TimeChanger());
         add(new Tracers());
         add(new Trail());
         add(new Trajectories());
+        add(new TunnelESP());
         add(new VoidESP());
         add(new WallHack());
         add(new WaypointsModule());
         add(new Xray());
         add(new Zoom());
-        add(new Blur());
-        add(new PopChams());
-        add(new TunnelESP());
-        add(new BetterTab());
     }
 
     private void initWorld() {
