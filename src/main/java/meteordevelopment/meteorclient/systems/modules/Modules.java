@@ -434,8 +434,8 @@ public class Modules extends System<Modules> {
 
     private void initPlayer() {
         add(new AntiHunger());
-        add(new AutoEat());
         add(new AutoClicker());
+        add(new AutoEat());
         add(new AutoFish());
         add(new AutoGap());
         add(new AutoMend());
@@ -501,42 +501,42 @@ public class Modules extends System<Modules> {
     }
 
     private void initRender() {
+        add(new BetterTab());
         add(new BetterTooltips());
+        add(new BlockESP());
         add(new BlockSelection());
+        add(new Blur());
         add(new BossStack());
         add(new Breadcrumbs());
         add(new BreakIndicators());
         add(new CameraTweaks());
         add(new Chams());
         add(new CityESP());
-        add(new EntityOwner());
         add(new ESP());
-        add(new Freecam());
+        add(new EntityOwner());
         add(new FreeLook());
+        add(new Freecam());
         add(new Fullbright());
         add(new HandView());
         add(new HoleESP());
-        add(new ItemPhysics());
         add(new ItemHighlight());
+        add(new ItemPhysics());
         add(new LightOverlay());
         add(new LogoutSpots());
         add(new Marker());
         add(new Nametags());
         add(new NoRender());
-        add(new BlockESP());
+        add(new PopChams());
         add(new StorageESP());
         add(new TimeChanger());
         add(new Tracers());
         add(new Trajectories());
+        add(new TunnelESP());
         add(new VoidESP());
         add(new WallHack());
         add(new WaypointsModule());
         add(new Xray());
         add(new Zoom());
-        add(new Blur());
-        add(new PopChams());
-        add(new TunnelESP());
-        add(new BetterTab());
     }
 
     private void initWorld() {
@@ -551,7 +551,6 @@ public class Modules extends System<Modules> {
         add(new AutoSmelter());
         add(new BuildHeight());
         add(new Collisions());
-        add(new FormatSign());
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new Flamethrower());
@@ -561,8 +560,9 @@ public class Modules extends System<Modules> {
         add(new NoGhostBlocks());
         add(new Nuker());
         add(new PacketMine());
-        add(new StashFinder());
+        add(new ScriptSign());
         add(new SpawnProofer());
+        add(new StashFinder());
         add(new Timer());
         add(new VeinMiner());
 

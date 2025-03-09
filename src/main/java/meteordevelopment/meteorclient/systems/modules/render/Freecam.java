@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
