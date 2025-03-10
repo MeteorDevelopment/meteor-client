@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
@@ -83,6 +84,13 @@ public class KillAura extends Module {
     private final Setting<Boolean> onlyOnLook = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-look")
         .description("Only attacks when looking at an entity.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> allowFlying = sgGeneral.add(new BoolSetting.Builder()
+        .name("allow-flying")
+        .description("Attack while using an elytra.")
         .defaultValue(false)
         .build()
     );
@@ -249,6 +257,7 @@ public class KillAura extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
+        if (!allowFlying.get() && mc.player.getPose() == EntityPose.GLIDING) return;
         if (pauseOnUse.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) return;
         if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
         if (TickRate.INSTANCE.getTimeSinceLastTick() >= 1f && pauseOnLag.get()) return;

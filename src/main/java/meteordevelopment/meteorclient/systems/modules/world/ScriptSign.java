@@ -7,12 +7,14 @@ import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 
+// TODO
+// add support for books too
+// add some visual feedback while editing
+// change AutoSign behavior to re-eval the original script
 public class ScriptSign extends Module {
     public ScriptSign() {
         super(Categories.World, "script-sign", "Enables the use of Starscript in signs.");
     }
-
-    // TODO: change AutoSign behavior to re-eval
 
     @EventHandler
     private void onSendPacket(final PacketEvent.Send event) {
