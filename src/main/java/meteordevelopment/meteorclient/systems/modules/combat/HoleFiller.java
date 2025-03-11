@@ -38,6 +38,7 @@ import net.minecraft.util.math.Vec3d;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: repair own?
 public class HoleFiller extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSmart = settings.createGroup("Smart");

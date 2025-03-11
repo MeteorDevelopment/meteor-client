@@ -560,7 +560,7 @@ public class Modules extends System<Modules> {
         add(new NoGhostBlocks());
         add(new Nuker());
         add(new PacketMine());
-        add(new ScriptSign());
+        add(new ScriptWrite());
         add(new SpawnProofer());
         add(new StashFinder());
         add(new Timer());

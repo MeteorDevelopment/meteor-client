@@ -409,6 +409,7 @@ public class ElytraFly extends Module {
         } else {
             if (currentMode.lastForwardPressed && flightMode.get() != ElytraFlightModes.Bounce) {
                 mc.options.forwardKey.setPressed(false);
+                // TODO: why tf is it setting keys pressed????? freecam is completely unusable
                 currentMode.lastForwardPressed = false;
             }
         }
