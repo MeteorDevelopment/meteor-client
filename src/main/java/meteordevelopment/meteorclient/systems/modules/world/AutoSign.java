@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.mixin.AbstractSignEditScreenAccessor;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
@@ -27,11 +28,14 @@ public class AutoSign extends Module {
         text = null;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof UpdateSignC2SPacket)) return;
+        if (!(event.packet instanceof UpdateSignC2SPacket packet)) return;
 
-        text = ((UpdateSignC2SPacket) event.packet).getText();
+        if (text == null) {
+            text = packet.getText().clone();
+            info("Set text to:\n" + String.join("\n", text));
+        }
     }
 
     @EventHandler

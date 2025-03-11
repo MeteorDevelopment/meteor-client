@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.network.packet.s2c.play.EnterReconfigurationS2CPacket;
@@ -35,19 +36,20 @@ public class Queue2b2t extends Module {
             .name("position")
             .description("Position at which to start sending messages.")
             .defaultValue(5)
-            .min(1)
+            .min(0)
             .noSlider()
             .build());
 
     private final Setting<Boolean> once = sg.add(new BoolSetting.Builder()
             .name("once")
-            .description("Only send one message, when crossed position.")
+            .description("Only send one message, when crossed Position.")
             .defaultValue(false)
+            .visible(() -> position.get() > 0)
             .build());
 
     private final Setting<Integer> interval = sg.add(new IntSetting.Builder()
             .name("interval")
-            .description("Send message when crossing a multiple of this, 0 to disable.")
+            .description("Send a message when crossing a multiple of this, 0 to disable.")
             .defaultValue(100)
             .min(0)
             .noSlider()
@@ -55,16 +57,23 @@ public class Queue2b2t extends Module {
 
     private final SettingGroup sgFormat = settings.createGroup("Format");
 
-    // TODO
+    private final Setting<String> formatInterval = sgFormat.add(new StringSetting.Builder()
+            .name("interval")
+            .description("Format for Interval messages, %d is the position in queue.")
+            .defaultValue("{player}@{server}: %d")
+            .visible(() -> interval.get() > 0)
+            .build());
 
     private final Setting<String> formatPosition = sgFormat.add(new StringSetting.Builder()
             .name("position")
-            .defaultValue("{player} %d")
+            .description("Format for Position messages, %d is the position in queue.")
+            .defaultValue("@here {player}@{server}: %d")
+            .visible(() -> position.get() > 0)
             .build());
 
     private final Setting<String> formatJoined = sgFormat.add(new StringSetting.Builder()
             .name("joined")
-            .defaultValue("{player} @here")
+            .defaultValue("@here {player}@{server}")
             .build());
 
     private int last;
@@ -79,7 +88,10 @@ public class Queue2b2t extends Module {
     }
 
     private void alert(final String s) {
-        final var data = "{\"content\": \"" + s.replace("\"", "\\\"") + "\"}";
+        final var data = "{\"content\": \""
+                + MeteorStarscript.run(MeteorStarscript.compile(s))
+                        .replace("\"", "\\\"")
+                + "\"}";
         final var request = HttpRequest.newBuilder(URI.create(webhook.get()))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(data))
@@ -92,7 +104,7 @@ public class Queue2b2t extends Module {
         if (!isInQ())
             return;
         if (event.packet instanceof EnterReconfigurationS2CPacket)
-            alert(mc.player.getName().getString());
+            alert(formatJoined.get());
     }
 
     private boolean isInQ() {
@@ -116,7 +128,7 @@ public class Queue2b2t extends Module {
             if (i > last
                     || (interval.get() > 0 && (i - 1) / interval.get() < (last - 1) / interval.get())
                     || (i <= position.get() && (!once.get() || last > position.get())))
-                alert(mc.player.getName().getString() + " " + i);
+                alert(String.format(i <= position.get() ? formatPosition.get() : formatInterval.get(), i));
             last = i;
         } catch (final Exception e) {
             info(e.getMessage());

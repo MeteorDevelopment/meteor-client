@@ -12,7 +12,6 @@ import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 
 // TODO: add some visual feedback while editing
-// TODO: change AutoSign behavior to re-eval the original script
 public class ScriptWrite extends Module {
     private static String eval(final String s) {
         return MeteorStarscript.run(MeteorStarscript.compile(s));
