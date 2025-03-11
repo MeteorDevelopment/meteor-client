@@ -24,44 +24,45 @@ public class Commands {
 
     @PostInit(dependencies = PathManagers.class)
     public static void init() {
-        add(new VClipCommand());
-        add(new HClipCommand());
-        add(new DismountCommand());
-        add(new DisconnectCommand());
+        add(new BindCommand());
+        add(new BindsCommand());
+        add(new CommandsCommand());
         add(new DamageCommand());
+        add(new DisconnectCommand());
+        add(new DismountCommand());
         add(new DropCommand());
         add(new EnchantCommand());
+        add(new EnderChestCommand());
         add(new FakePlayerCommand());
+        add(new FovCommand());
         add(new FriendsCommand());
-        add(new CommandsCommand());
+        add(new GamemodeCommand());
+        add(new GiveCommand());
+        add(new HClipCommand());
+        add(new InputCommand());
         add(new InventoryCommand());
+        add(new LocateCommand());
+        add(new MacroCommand());
+        add(new ModulesCommand());
+        add(new NameHistoryCommand());
         add(new NbtCommand());
         add(new NotebotCommand());
         add(new PeekCommand());
-        add(new EnderChestCommand());
         add(new ProfilesCommand());
         add(new ReloadCommand());
         add(new ResetCommand());
+        add(new RotationCommand());
+        add(new SaveMapCommand());
         add(new SayCommand());
         add(new ServerCommand());
-        add(new SwarmCommand());
-        add(new ToggleCommand());
+        add(new SessionCommand());
         add(new SettingCommand());
         add(new SpectateCommand());
-        add(new GamemodeCommand());
-        add(new SaveMapCommand());
-        add(new MacroCommand());
-        add(new ModulesCommand());
-        add(new BindsCommand());
-        add(new GiveCommand());
-        add(new NameHistoryCommand());
-        add(new BindCommand());
-        add(new FovCommand());
-        add(new RotationCommand());
-        add(new WaypointCommand());
-        add(new InputCommand());
+        add(new SwarmCommand());
+        add(new ToggleCommand());
+        add(new VClipCommand());
         add(new WaspCommand());
-        add(new LocateCommand());
+        add(new WaypointCommand());
 
         COMMANDS.sort(Comparator.comparing(Command::getName));
     }

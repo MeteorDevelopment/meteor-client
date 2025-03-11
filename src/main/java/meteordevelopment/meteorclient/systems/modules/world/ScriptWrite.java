@@ -17,9 +17,17 @@ public class ScriptWrite extends Module {
         return MeteorStarscript.run(MeteorStarscript.compile(s));
     }
 
-    private final SettingGroup book = settings.createGroup("Book");
+    private final SettingGroup sgSign = settings.createGroup("Sign");
 
-    private final Setting<Boolean> onSign = book.add(new BoolSetting.Builder()
+    private final Setting<Boolean> signSigns = sgSign.add(new BoolSetting.Builder()
+            .name("sign")
+            .description("Sign signs by setting line 3 to \"{player}\" and 4 to \"{time}\".")
+            .defaultValue(true)
+            .build());
+
+    private final SettingGroup sgBook = settings.createGroup("Book");
+
+    private final Setting<Boolean> onSign = sgBook.add(new BoolSetting.Builder()
             .name("on-sign")
             .description("Evaluate book content only when signing it.")
             .defaultValue(true)
@@ -49,6 +57,11 @@ public class ScriptWrite extends Module {
                 break;
             case final UpdateSignC2SPacket p:
                 final var text = p.getText();
+                if (signSigns.get()) {
+                    text[2] = "{player}";
+                    text[3] = "{time}";
+                }
+
                 for (var i = 0; i < text.length; i++)
                     text[i] = eval(text[i]);
 
