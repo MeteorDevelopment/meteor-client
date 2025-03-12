@@ -183,9 +183,9 @@ public class ElytraFly extends Module {
     public final Setting<Double> pitch40rotationSpeed = sgGeneral.add(new DoubleSetting.Builder()
         .name("pitch40-rotate-speed")
         .description("The speed for pitch rotation (degrees per tick)")
-        .defaultValue(4)
+        .defaultValue(15)
         .min(1)
-        .sliderMax(6)
+        .sliderMax(20)
         .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
         .build()
     );
