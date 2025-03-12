@@ -56,7 +56,7 @@ public class Systems {
         MeteorClient.EVENT_BUS.subscribe(Systems.class);
     }
 
-    private static System<?> add(System<?> system) {
+    public static System<?> add(System<?> system) {
         systems.put(system.getClass(), system);
         MeteorClient.EVENT_BUS.subscribe(system);
         system.init();
