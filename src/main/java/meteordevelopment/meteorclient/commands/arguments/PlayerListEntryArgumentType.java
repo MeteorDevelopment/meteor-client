@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.commands.arguments;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -14,7 +15,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,7 +24,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PlayerListEntryArgumentType implements ArgumentType<PlayerListEntry> {
     private static final PlayerListEntryArgumentType INSTANCE = new PlayerListEntryArgumentType();
-    private static final DynamicCommandExceptionType NO_SUCH_PLAYER = new DynamicCommandExceptionType(name -> Text.literal("Player list entry with name " + name + " doesn't exist."));
+    private static final DynamicCommandExceptionType NO_SUCH_PLAYER = new DynamicCommandExceptionType(name -> new LiteralMessage("Player list entry with name " + name + " doesn't exist."));
 
     private static final Collection<String> EXAMPLES = List.of("seasnail8169", "MineGame159");
 
@@ -32,8 +32,12 @@ public class PlayerListEntryArgumentType implements ArgumentType<PlayerListEntry
         return INSTANCE;
     }
 
-    public static PlayerListEntry get(CommandContext<?> context) {
+    public static <S> PlayerListEntry get(CommandContext<S> context) {
         return context.getArgument("player", PlayerListEntry.class);
+    }
+
+    public static <S> PlayerListEntry get(CommandContext<S> context, String name) {
+        return context.getArgument(name, PlayerListEntry.class);
     }
 
     private PlayerListEntryArgumentType() {}

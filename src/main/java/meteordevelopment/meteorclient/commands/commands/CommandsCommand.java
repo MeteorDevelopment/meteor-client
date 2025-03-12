@@ -12,10 +12,8 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 public class CommandsCommand extends Command {
@@ -28,7 +26,7 @@ public class CommandsCommand extends Command {
         builder.executes(context -> {
             ChatUtils.info("--- Commands ((highlight)%d(default)) ---", Commands.COMMANDS.size());
 
-            MutableText commands = Text.literal("");
+            MutableText commands = Text.empty();
             Commands.COMMANDS.forEach(command -> commands.append(getCommandText(command)));
             ChatUtils.sendMsg(commands);
 
@@ -38,17 +36,17 @@ public class CommandsCommand extends Command {
 
     private MutableText getCommandText(Command command) {
         // Hover tooltip
-        MutableText tooltip = Text.literal("");
+        MutableText tooltip = Text.empty();
 
-        tooltip.append(Text.literal(Utils.nameToTitle(command.getName())).formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
+        tooltip.append(Text.literal(Utils.nameToTitle(command.getName())).formatted(Formatting.BLUE, Formatting.BOLD)).append(ScreenTexts.LINE_BREAK);
 
         MutableText aliases = Text.literal(Config.get().prefix.get() + command.getName());
         if (!command.getAliases().isEmpty()) {
-            aliases.append(", ");
+            aliases.append(Texts.DEFAULT_SEPARATOR_TEXT);
             for (String alias : command.getAliases()) {
                 if (alias.isEmpty()) continue;
                 aliases.append(Config.get().prefix.get() + alias);
-                if (!alias.equals(command.getAliases().getLast())) aliases.append(", ");
+                if (!alias.equals(command.getAliases().getLast())) aliases.append(Texts.DEFAULT_SEPARATOR_TEXT);
             }
         }
         tooltip.append(aliases.formatted(Formatting.GRAY)).append("\n\n");
@@ -58,7 +56,7 @@ public class CommandsCommand extends Command {
         // Text
         MutableText text = Text.literal(Utils.nameToTitle(command.getName()));
         if (command != Commands.COMMANDS.getLast())
-            text.append(Text.literal(", ").formatted(Formatting.GRAY));
+            text.append(Texts.GRAY_DEFAULT_SEPARATOR_TEXT);
         text.setStyle(text
             .getStyle()
             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip))
