@@ -191,7 +191,10 @@ public class AutoTool extends Module {
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
-        if (!itemStack.isSuitableFor(state) && !(itemStack.getItem() instanceof SwordItem && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock)) && !(itemStack.getItem() instanceof ShearsItem && state.getBlock() instanceof LeavesBlock || state.isIn(BlockTags.WOOL))) return -1;
+        if (!itemStack.isSuitableFor(state) && 
+            !(itemStack.getItem() instanceof SwordItem && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock)) && 
+            !(itemStack.getItem() instanceof ShearsItem && state.getBlock() instanceof LeavesBlock || state.isIn(BlockTags.WOOL)) &&
+            !(itemStack.getItem() instanceof HoeItem && state.getBlock() == Blocks.NETHER_WART)) return -1;
 
         if (silkTouchEnderChest
             && state.getBlock() == Blocks.ENDER_CHEST
@@ -218,11 +221,14 @@ public class AutoTool extends Module {
         if (itemStack.getItem() instanceof SwordItem item && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
             score += 9000 + (item.getComponents().get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
 
+        if (itemStack.getItem() instanceof HoeItem && state.getBlock() == Blocks.NETHER_WART)
+            score += 9000;
+
         return score;
     }
 
     public static boolean isTool(Item item) {
-        return item instanceof MiningToolItem || item instanceof ShearsItem;
+        return item instanceof MiningToolItem || item instanceof ShearsItem || item instanceof HoeItem;
     }
     public static boolean isTool(ItemStack itemStack) {
         return isTool(itemStack.getItem());
@@ -231,7 +237,7 @@ public class AutoTool extends Module {
 
     private static boolean isFortunable(Block block) {
         if (block == Blocks.ANCIENT_DEBRIS) return false;
-        return Xray.ORES.contains(block) || block instanceof CropBlock;
+        return Xray.ORES.contains(block) || block instanceof CropBlock || block == Blocks.NETHER_WART;
     }
 
     public enum EnchantPreference {
