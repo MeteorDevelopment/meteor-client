@@ -45,6 +45,13 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
+    private final Setting<Boolean> showKeybind = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-keybind")
+        .description("Shows the module's keybind next to its name.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> shadow = sgGeneral.add(new BoolSetting.Builder()
         .name("shadow")
         .description("Renders shadow behind text.")
@@ -273,16 +280,22 @@ public class ActiveModulesHud extends HudElement {
         double textHeight = renderer.textHeight(shadow.get(), getScale());
         double textLength = renderer.textWidth(module.title, shadow.get(), getScale());
 
-        double lineStartY = y;
-        double lineHeight = textHeight;
+        if (showKeybind.get() && module.keybind != null && module.keybind.isSet()) {
+            String keybindStr = " [" + module.keybind.toString() + "]";
+            renderer.text(keybindStr, x + textLength, y, moduleInfoColor.get(), shadow.get(), getScale());
+            textLength += renderer.textWidth(keybindStr, shadow.get(), getScale());
+        }
 
         if (activeInfo.get()) {
             String info = module.getInfoString();
             if (info != null) {
-                renderer.text(info, x + emptySpace + textLength, y, moduleInfoColor.get(), shadow.get(), getScale());
+                renderer.text(info, x + textLength + emptySpace, y, moduleInfoColor.get(), shadow.get(), getScale());
                 textLength += emptySpace + renderer.textWidth(info, shadow.get(), getScale());
             }
         }
+
+        double lineStartY = y;
+        double lineHeight = textHeight;
 
         if (outlines.get()) {
             if (index == 0) { // Render top quad for first item in list
@@ -329,6 +342,10 @@ public class ActiveModulesHud extends HudElement {
 
     private double getModuleWidth(HudRenderer renderer, Module module) {
         double width = renderer.textWidth(module.title, shadow.get(), getScale());
+
+        if (showKeybind.get() && module.keybind != null && module.keybind.isSet()) {
+            width += renderer.textWidth(" [" + module.keybind.toString() + "]", shadow.get(), getScale());
+        }
 
         if (activeInfo.get()) {
             String info = module.getInfoString();
