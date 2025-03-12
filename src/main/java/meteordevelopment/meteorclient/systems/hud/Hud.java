@@ -129,6 +129,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         register(ModuleInfosHud.INFO);
         register(PotionTimersHud.INFO);
         register(CombatHud.INFO);
+        register(TabHud.INFO);
 
         // Default config
         if (isFirstInit) resetToDefaultElements();
