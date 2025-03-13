@@ -144,7 +144,7 @@ public class Criticals extends Module {
                 double currentY = mc.player.getY();
                 if (currentY <= lastY) {
                     waitingForPeak = false;
-                    sendTimer = 1; // Attack on next tick after reaching peak
+                    sendTimer = 0; // Attack on next tick after reaching peak
                 }
                 lastY = currentY;
                 return;
