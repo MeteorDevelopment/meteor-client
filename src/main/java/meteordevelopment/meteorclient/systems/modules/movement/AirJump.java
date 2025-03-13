@@ -46,7 +46,10 @@ public class AirJump extends Module {
 
         if (mc.options.jumpKey.matchesKey(event.key, 0)) {
             level = mc.player.getBlockPos().getY();
+            double velX = mc.player.getVelocity().x;
+            double velZ = mc.player.getVelocity().z;
             mc.player.jump();
+            mc.player.setVelocity(velX, mc.player.getVelocity().y, velZ);
         }
         else if (mc.options.sneakKey.matchesKey(event.key, 0)) {
             level--;
@@ -58,7 +61,10 @@ public class AirJump extends Module {
         if (Modules.get().isActive(Freecam.class) || mc.player.isOnGround()) return;
 
         if (maintainLevel.get() && mc.player.getBlockPos().getY() == level && mc.options.jumpKey.isPressed()) {
+            double velX = mc.player.getVelocity().x;
+            double velZ = mc.player.getVelocity().z;
             mc.player.jump();
+            mc.player.setVelocity(velX, mc.player.getVelocity().y, velZ);
         }
     }
 }
