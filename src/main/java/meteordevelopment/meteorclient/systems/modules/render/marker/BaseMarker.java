@@ -103,4 +103,38 @@ public abstract class BaseMarker implements ISerializable<BaseMarker> {
 
         return this;
     }
+
+    public enum Mode {
+        Full,
+        Hollow
+    }
+
+    protected static class RenderBlock {
+        public final int x, y, z;
+        public byte excludeDir;
+
+        public RenderBlock(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        @Override
+        public int hashCode() {
+            long hash = 3241;
+            hash = 3457689L * hash + x;
+            hash = 8734625L * hash + y;
+            hash = 2873465L * hash + z;
+            return (int) hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj instanceof RenderBlock other) {
+                return x == other.x && y == other.y && z == other.z;
+            }
+            return false;
+        }
+    }
 }
