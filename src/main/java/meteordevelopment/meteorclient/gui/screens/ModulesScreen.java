@@ -28,6 +28,7 @@ import java.util.Set;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
+// TODO: z-indexing
 public class ModulesScreen extends TabScreen {
     private WCategoryController controller;
 
