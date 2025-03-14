@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.ModuleArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -16,14 +17,50 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.List;
+
 public class ModulesCommand extends Command {
     public ModulesCommand() {
-        super("modules", "Displays a list of all modules.", "features");
+        super("modules", "List or toggle modules.", "features");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.executes(context -> {
+
+        builder.then(literal("toggle").then(argument("module", ModuleArgumentType.create()).executes(context -> {
+            Module module = ModuleArgumentType.get(context);
+            module.toggle();
+            module.sendToggledMsg();
+            return SINGLE_SUCCESS;
+        })));
+
+        builder.then(literal("enable").then(argument("module", ModuleArgumentType.create()).executes(context -> {
+            Module module = ModuleArgumentType.get(context);
+
+            if(module.isActive()) {
+                ChatUtils.error("Module is already enabled.");
+                return SINGLE_SUCCESS;
+            }
+
+            module.toggle();
+            module.sendToggledMsg();
+            return SINGLE_SUCCESS;
+        })));
+
+        builder.then(literal("disable").then(argument("module", ModuleArgumentType.create()).executes(context -> {
+            Module module = ModuleArgumentType.get(context);
+
+            if(!module.isActive()) {
+                ChatUtils.error("Module is already disabled.");
+                return SINGLE_SUCCESS;
+            }
+
+            module.toggle();
+            module.sendToggledMsg();
+            return SINGLE_SUCCESS;
+        })));
+
+        builder.then(literal("list").executes(context -> {
             ChatUtils.info("--- Modules ((highlight)%d(default)) ---", Modules.get().getCount());
 
             Modules.loopCategories().forEach(category -> {
@@ -33,7 +70,7 @@ public class ModulesCommand extends Command {
             });
 
             return SINGLE_SUCCESS;
-        });
+        }));
     }
 
     private MutableText getModuleText(Module module) {
