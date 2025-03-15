@@ -8,8 +8,8 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -20,11 +20,11 @@ import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
-import net.minecraft.entity.EntityStatuses;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
@@ -57,7 +57,6 @@ public class AutoLog extends Module {
         .description("Disconnects when you have popped this many totems. Set to 0 to disable.")
         .defaultValue(0)
         .min(0)
-        .sliderMax(10)
         .build()
     );
 
@@ -142,7 +141,7 @@ public class AutoLog extends Module {
         .build()
     );
 
-    //Declaring variables outside the loop for better efficiency
+    // Declaring variables outside the loop for better efficiency
     private final Object2IntMap<EntityType<?>> entityCounts = new Object2IntOpenHashMap<>();
 
     private int pops;
