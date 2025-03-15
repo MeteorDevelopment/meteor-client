@@ -103,8 +103,11 @@ public class Queue2b2t extends Module {
     private void onPacketReceive(final PacketEvent.Receive event) {
         if (!isInQ())
             return;
-        if (event.packet instanceof EnterReconfigurationS2CPacket)
-            alert(formatJoined.get());
+        if (!(event.packet instanceof EnterReconfigurationS2CPacket))
+            return;
+
+        last = 0;
+        alert(formatJoined.get());
     }
 
     private boolean isInQ() {

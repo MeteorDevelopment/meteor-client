@@ -178,6 +178,9 @@ public class Trajectories extends Module {
             if (!items.get().contains(itemStack.getItem())) return;
         }
 
+        if (itemStack.getEnchantments().getEnchantments().stream().anyMatch(i -> i.matchesKey(Enchantments.RIPTIDE)))
+            return;
+
         // Calculate paths
         if (!simulator.set(player, itemStack, 0, accurate.get(), tickDelta)) return;
         getEmptyPath().calculate();

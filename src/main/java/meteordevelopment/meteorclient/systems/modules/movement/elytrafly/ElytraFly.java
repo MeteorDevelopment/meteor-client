@@ -160,13 +160,30 @@ public class ElytraFly extends Module {
         .build()
     );
 
+    public final Setting<Boolean> pitch40AutoBounds = sgGeneral.add(new BoolSetting.Builder()
+        .name("pitch40-auto-bounds")
+        .description("The upper boundary is set to the player height at activation.")
+        .defaultValue(true)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
+        .build()
+    );
+
+    public final Setting<Double> pitch40AutoDistance = sgGeneral.add(new DoubleSetting.Builder()
+        .name("pitch40-auto-distance")
+        .description("The lower boundary would that much lower than the upper one.")
+        .defaultValue(40)
+        .sliderMax(360)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40 && pitch40AutoBounds.get())
+        .build()
+    );
+
     public final Setting<Double> pitch40lowerBounds = sgGeneral.add(new DoubleSetting.Builder()
         .name("pitch40-lower-bounds")
         .description("The bottom height boundary for pitch40.")
         .defaultValue(80)
         .min(-128)
         .sliderMax(360)
-        .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40 && !pitch40AutoBounds.get())
         .build()
     );
 
@@ -176,7 +193,7 @@ public class ElytraFly extends Module {
         .defaultValue(120)
         .min(-128)
         .sliderMax(360)
-        .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40 && !pitch40AutoBounds.get())
         .build()
     );
 

@@ -19,6 +19,11 @@ public class Pitch40 extends ElytraFlightMode {
 
     @Override
     public void onActivate() {
+        if (elytraFly.pitch40AutoBounds.get()) {
+            elytraFly.pitch40upperBounds.set(mc.player.getY());
+            elytraFly.pitch40lowerBounds.set(mc.player.getY() - elytraFly.pitch40AutoDistance.get());
+        }
+
         if (mc.player.getY() < elytraFly.pitch40upperBounds.get()) {
             elytraFly.error("Player must be above upper bounds!");
             elytraFly.toggle();

@@ -20,6 +20,7 @@ import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
 
+// TODO: cycle tab
 public class BetterTab extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

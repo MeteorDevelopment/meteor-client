@@ -35,6 +35,7 @@ public class ItemHighlight extends Module {
 
     public ItemHighlight() {
         super(Categories.Render, "item-highlight", "Highlights selected items when in guis");
+        // TODO: ctrl+f
     }
 
     public int getColor(ItemStack stack) {
