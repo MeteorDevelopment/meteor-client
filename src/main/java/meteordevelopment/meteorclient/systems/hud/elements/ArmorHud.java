@@ -22,6 +22,7 @@ public class ArmorHud extends HudElement {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDurability = settings.createGroup("Durability");
+    private final SettingGroup sgScale = settings.createGroup("Scale");
     private final SettingGroup sgBackground = settings.createGroup("Background");
 
     // General
@@ -38,16 +39,6 @@ public class ArmorHud extends HudElement {
         .name("flip-order")
         .description("Flips the order of armor items.")
         .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("The scale.")
-        .defaultValue(2)
-        .onChanged(aDouble -> calculateSize())
-        .min(0.5)
-        .sliderRange(0.5, 5)
         .build()
     );
 
@@ -84,6 +75,27 @@ public class ArmorHud extends HudElement {
         .build()
     );
 
+    // Scale
+
+    private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
+        .name("custom-scale")
+        .description("Applies a custom scale to this hud element.")
+        .defaultValue(false)
+        .onChanged(aBoolean -> calculateSize())
+        .build()
+    );
+
+    private final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Custom scale.")
+        .visible(customScale::get)
+        .defaultValue(2)
+        .onChanged(aDouble -> calculateSize())
+        .min(0.5)
+        .sliderRange(0.5, 3)
+        .build()
+    );
+
     // Background
 
     private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
@@ -109,8 +121,9 @@ public class ArmorHud extends HudElement {
 
     private void calculateSize() {
         switch (orientation.get()) {
-            case Horizontal -> setSize(16 * scale.get() * 4 + 2 * 4 * scale.get(), 16 * scale.get());
-            case Vertical -> setSize(16 * scale.get(), 16 * scale.get() * 4 + 2 * 4 * scale.get());
+            // Four item stacks plus
+            case Horizontal -> setSize((16 * 4 + 2 * 4) * getScale(), 16 * getScale());
+            case Vertical -> setSize(16 * getScale(), (16 * 4 + 2 * 4) * getScale());
         }
     }
 
@@ -142,13 +155,13 @@ public class ArmorHud extends HudElement {
 
                 if (orientation.get() == Orientation.Vertical) {
                     armorX = x;
-                    armorY = y + position * 18 * scale.get();
+                    armorY = y + position * 18 * getScale();
                 } else {
-                    armorX = x + position * 18 * scale.get();
+                    armorX = x + position * 18 * getScale();
                     armorY = y;
                 }
 
-                renderer.item(itemStack, (int) armorX, (int) armorY, scale.get().floatValue(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
+                renderer.item(itemStack, (int) armorX, (int) armorY, getScale(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
 
                 if (itemStack.isDamageable() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
                     String message = switch (durability.get()) {
@@ -160,10 +173,10 @@ public class ArmorHud extends HudElement {
                     double messageWidth = renderer.textWidth(message);
 
                     if (orientation.get() == Orientation.Vertical) {
-                        armorX = x + 8 * scale.get() - messageWidth / 2.0;
-                        armorY = y + (18 * position * scale.get()) + (18 * scale.get() - renderer.textHeight());
+                        armorX = x + 8 * getScale() - messageWidth / 2.0;
+                        armorY = y + (18 * position * getScale()) + (18 * getScale() - renderer.textHeight());
                     } else {
-                        armorX = x + 18 * position * scale.get() + 8 * scale.get() - messageWidth / 2.0;
+                        armorX = x + 18 * position * getScale() + 8 * getScale() - messageWidth / 2.0;
                         armorY = y + (getHeight() - renderer.textHeight());
                     }
 
@@ -185,6 +198,10 @@ public class ArmorHud extends HudElement {
 
         ItemStack stack = mc.player.getInventory().getArmorStack(i);
         return stack.isEmpty() && showEmpty.get() ? Items.BARRIER.getDefaultStack() : stack;
+    }
+
+    private float getScale() {
+        return customScale.get() ? scale.get().floatValue() : scale.getDefaultValue().floatValue();
     }
 
     public enum Durability {
