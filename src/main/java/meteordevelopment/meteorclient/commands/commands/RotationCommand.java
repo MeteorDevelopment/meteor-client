@@ -24,8 +24,9 @@ public class RotationCommand extends Command {
             .then(literal("set")
                 .then(argument("direction", DirectionArgumentType.create())
                     .executes(context -> {
-                        mc.player.setPitch(context.getArgument("direction", Direction.class).getVector().getY() * -90);
-                        mc.player.setYaw(context.getArgument("direction", Direction.class).getPositiveHorizontalDegrees());
+                        Direction direction = DirectionArgumentType.getDirection(context);
+                        mc.player.setPitch(direction.getVector().getY() * -90);
+                        mc.player.setYaw(direction.getPositiveHorizontalDegrees());
 
                         return SINGLE_SUCCESS;
                     }))
