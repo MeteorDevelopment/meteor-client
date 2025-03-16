@@ -239,9 +239,10 @@ public class CombatHud extends HudElement {
 
             if (playerEntity == null && !isInEditor()) return;
 
-            // Background
-            Renderer2D.COLOR.begin();
-            Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
+            if (background.get()) {
+                Renderer2D.COLOR.begin();
+                Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
+            }
 
             if (playerEntity == null) {
                 if (isInEditor()) {
