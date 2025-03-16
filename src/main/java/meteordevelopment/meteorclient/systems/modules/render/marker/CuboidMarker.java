@@ -15,10 +15,6 @@ import net.minecraft.util.math.BlockPos;
 public class CuboidMarker extends BaseMarker {
     public static final String type = "Cuboid";
 
-    public enum Mode {
-        Full
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -36,14 +32,14 @@ public class CuboidMarker extends BaseMarker {
         .build()
     );
 
-    // Render
-
-    private final Setting<Mode> mode = sgRender.add(new EnumSetting.Builder<Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("What mode to use for this marker.")
-        .defaultValue(Mode.Full)
+        .defaultValue(Mode.Hollow)
         .build()
     );
+
+    // Render
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
@@ -85,5 +81,12 @@ public class CuboidMarker extends BaseMarker {
         int maxZ = Math.max(pos1.get().getZ(), pos2.get().getZ());
 
         event.renderer.box(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+
+        if (mode.get() == Mode.Hollow
+            && maxX - minX >= 2
+            && maxY - minY >= 2
+            && maxZ - minZ >= 2) {
+            event.renderer.box(minX + 1, minY + 1, minZ + 1, maxX, maxY, maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        }
     }
 }
