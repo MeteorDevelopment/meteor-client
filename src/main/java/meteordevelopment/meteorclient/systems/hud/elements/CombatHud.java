@@ -178,9 +178,9 @@ public class CombatHud extends HudElement {
 
     public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies custom text scale rather than the global one.")
+        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
-        .onChanged(integer -> calculateSize())
+        .onChanged(aBoolean -> calculateSize())
         .build()
     );
 
@@ -189,7 +189,7 @@ public class CombatHud extends HudElement {
         .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
-        .onChanged(integer -> calculateSize())
+        .onChanged(aDouble -> calculateSize())
         .min(0.5)
         .sliderRange(0.5, 3)
         .build()

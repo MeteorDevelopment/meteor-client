@@ -44,9 +44,9 @@ public class ItemHud extends HudElement {
 
     public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies custom text scale rather than the global one.")
+        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
-        .onChanged(anInteger -> calculateSize())
+        .onChanged(aBoolean -> calculateSize())
         .build()
     );
 

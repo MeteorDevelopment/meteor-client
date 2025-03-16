@@ -66,7 +66,7 @@ public class CompassHud extends HudElement {
 
     private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies custom scales rather than the global ones.")
+        .description("Apply custom scales to this hud element.")
         .defaultValue(false)
         .onChanged(aBoolean -> calculateSize())
         .build()
@@ -74,7 +74,7 @@ public class CompassHud extends HudElement {
 
     private final Setting<Double> textScale = sgScale.add(new DoubleSetting.Builder()
         .name("text-scale")
-        .description("Custom text scale.")
+        .description("Scale to use for the letters.")
         .visible(customScale::get)
         .defaultValue(1)
         .min(0.5)

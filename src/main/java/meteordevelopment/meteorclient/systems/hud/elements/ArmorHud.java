@@ -79,8 +79,9 @@ public class ArmorHud extends HudElement {
 
     private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies custom text scale rather than the global one.")
+        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
+        .onChanged(aBoolean -> calculateSize())
         .build()
     );
 
