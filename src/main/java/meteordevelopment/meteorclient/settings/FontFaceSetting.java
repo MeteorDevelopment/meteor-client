@@ -15,32 +15,15 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class FontFaceSetting extends Setting<FontFace> {
+    public static final List<String> EXAMPLES = List.of("JetBrainsMono-Regular", "Arial-Bold");
+
     public FontFaceSetting(String name, String description, FontFace defaultValue, Consumer<FontFace> onChanged, Consumer<Setting<FontFace>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
 
     @Override
-    protected FontFace parseImpl(String str) {
-        String[] split = str.replace(" ", "").split("-");
-        if (split.length != 2) return null;
-
-        for (FontFamily family : Fonts.FONT_FAMILIES) {
-            if (family.getName().replace(" ", "").equals(split[0])) {
-                try {
-                    return family.get(FontInfo.Type.valueOf(split[1]));
-                }
-                catch (IllegalArgumentException ignored) {
-                    return null;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    @Override
     public List<String> getSuggestions() {
-        return List.of("JetBrainsMono-Regular", "Arial-Bold");
+        return EXAMPLES;
     }
 
     @Override
