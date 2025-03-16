@@ -112,7 +112,7 @@ public class HoleHud extends HudElement {
         Block block = dir == Direction.DOWN ? Blocks.OBSIDIAN : mc.world.getBlockState(mc.player.getBlockPos().offset(dir)).getBlock();
         if (!safe.get().contains(block)) return;
 
-        renderer.item(block.asItem().getDefaultStack(), (int) x, (int) y, (float) getScale(), false);
+        renderer.item(block.asItem().getDefaultStack(), (int) x, (int) y, getScale(), false);
 
         if (dir == Direction.DOWN) return;
 
