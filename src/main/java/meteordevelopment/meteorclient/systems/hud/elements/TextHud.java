@@ -259,7 +259,7 @@ public class TextHud extends HudElement {
     }
 
     private double getScale() {
-        return customScale.get() ? scale.get() : -1;
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 
     public static Color getSectionColor(int i) {

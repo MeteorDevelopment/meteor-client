@@ -132,7 +132,7 @@ public class HoleHud extends HudElement {
     }
 
     private double getScale() {
-        return customScale.get() ? scale.get() : Hud.get().getTextScale();
+        return customScale.get() ? scale.get() : scale.getDefaultValue();
     }
 
     private enum Facing {

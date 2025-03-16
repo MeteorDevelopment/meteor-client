@@ -200,7 +200,7 @@ public class ArmorHud extends HudElement {
     }
 
     private float getScale() {
-        return customScale.get() ? scale.get().floatValue() : 2.0f;
+        return customScale.get() ? scale.get().floatValue() : scale.getDefaultValue().floatValue();
     }
 
     public enum Durability {

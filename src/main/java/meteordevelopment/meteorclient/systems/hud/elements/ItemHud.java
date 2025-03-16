@@ -85,7 +85,7 @@ public class ItemHud extends HudElement {
     }
 
     private void calculateSize() {
-        setSize(17 * scale.get(), 17 * scale.get());
+        setSize(17 * getScale(), 17 * getScale());
     }
 
     @Override
@@ -106,7 +106,7 @@ public class ItemHud extends HudElement {
 
     private void render(HudRenderer renderer, ItemStack itemStack, int x, int y) {
         if (noneMode.get() == NoneMode.HideItem) {
-            renderer.item(itemStack, x, y, scale.get().floatValue(), true);
+            renderer.item(itemStack, x, y, getScale(), true);
             return;
         }
 
@@ -121,14 +121,14 @@ public class ItemHud extends HudElement {
             resetToZero = true;
         }
 
-        renderer.item(itemStack, x, y, scale.get().floatValue(), true, countOverride);
+        renderer.item(itemStack, x, y, getScale(), true, countOverride);
 
         if (resetToZero)
             itemStack.setCount(0);
     }
 
-    private double getScale() {
-        return customScale.get() ? scale.get() : Hud.get().getTextScale();
+    private float getScale() {
+        return customScale.get() ? scale.get().floatValue() : scale.getDefaultValue().floatValue();
     }
 
     public enum NoneMode {

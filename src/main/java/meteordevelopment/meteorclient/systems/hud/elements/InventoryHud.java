@@ -144,7 +144,7 @@ public class InventoryHud extends HudElement {
     }
 
     private double getScale() {
-        return customScale.get() ? scale.get() : Hud.get().getTextScale();
+        return customScale.get() ? scale.get() : scale.getDefaultValue();
     }
 
     public enum Background {
