@@ -20,7 +20,6 @@ import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.GameMode;
 
-// TODO: cycle tab
 public class BetterTab extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -40,6 +39,14 @@ public class BetterTab extends Module {
         .defaultValue(20)
         .min(1)
         .sliderRange(1, 1000)
+        .build()
+    );
+
+    public final Setting<Integer> shiftSpeed = sgGeneral.add(new IntSetting.Builder()
+        .name("shift-speed")
+        .description("Cycle through the tablist entries at this many players a second.")
+        .defaultValue(2)
+        .min(0)
         .build()
     );
 

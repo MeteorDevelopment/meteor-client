@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.ServerConnectBeginEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -35,6 +36,14 @@ public class AutoReconnect extends Module {
         .name("hide-buttons")
         .description("Will hide the buttons related to Auto Reconnect.")
         .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Integer> confirmDisonnect = sgGeneral.add(new IntSetting.Builder()
+        .name("confirm-disconnect")
+        .description("The disconnect button needs to be clicked this many additional times.")
+        .defaultValue(0)
+        .min(0)
         .build()
     );
 
