@@ -131,8 +131,8 @@ public class HoleHud extends HudElement {
         renderer.quad(x + 15 * getScale(), y, 1 * getScale(), 16 * getScale(), OL_COLOR);
     }
 
-    private double getScale() {
-        return customScale.get() ? scale.get() : scale.getDefaultValue();
+    private float getScale() {
+        return customScale.get() ? scale.get().floatValue() : scale.getDefaultValue().floatValue();
     }
 
     private enum Facing {
