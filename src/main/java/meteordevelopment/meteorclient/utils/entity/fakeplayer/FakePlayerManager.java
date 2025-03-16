@@ -32,10 +32,10 @@ public class FakePlayerManager {
         return null;
     }
 
-    public static void add(String name, float health, boolean copyInv) {
+    public static void add(String name, float health, boolean copyInv, boolean allowDamage) {
         if (!Utils.canUpdate()) return;
 
-        FakePlayerEntity fakePlayer = new FakePlayerEntity(mc.player, name, health, copyInv);
+        FakePlayerEntity fakePlayer = new FakePlayerEntity(mc.player, name, health, copyInv, allowDamage);
         fakePlayer.spawn();
         ENTITIES.add(fakePlayer);
     }
