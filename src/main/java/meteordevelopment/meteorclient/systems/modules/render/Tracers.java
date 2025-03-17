@@ -33,6 +33,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
 
+// TODO: item tracers
 public class Tracers extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAppearance = settings.createGroup("Appearance");

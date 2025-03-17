@@ -39,7 +39,7 @@ public class AutoReconnect extends Module {
         .build()
     );
 
-    public final Setting<Integer> confirmDisonnect = sgGeneral.add(new IntSetting.Builder()
+    public final Setting<Integer> confirmDisconnect = sgGeneral.add(new IntSetting.Builder()
         .name("confirm-disconnect")
         .description("The disconnect button needs to be clicked this many additional times.")
         .defaultValue(0)

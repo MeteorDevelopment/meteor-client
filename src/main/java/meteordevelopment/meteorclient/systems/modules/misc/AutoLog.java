@@ -17,12 +17,14 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.DamageUtils;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.text.MutableText;
@@ -52,11 +54,11 @@ public class AutoLog extends Module {
         .build()
     );
 
-    private final Setting<Integer> totemPops = sgGeneral.add(new IntSetting.Builder()
-        .name("totem-pops")
-        .description("Disconnects when you have popped this many totems. Set to 0 to disable.")
+    private final Setting<Integer> totemsLeft = sgGeneral.add(new IntSetting.Builder()
+        .name("totems-left")
+        .description("Disconnects if after popping a totem there are this many left in the inventory.")
         .defaultValue(0)
-        .min(0)
+        .min(-1)
         .build()
     );
 
@@ -144,15 +146,8 @@ public class AutoLog extends Module {
     // Declaring variables outside the loop for better efficiency
     private final Object2IntMap<EntityType<?>> entityCounts = new Object2IntOpenHashMap<>();
 
-    private int pops;
-
     public AutoLog() {
         super(Categories.Combat, "auto-log", "Automatically disconnects you when certain requirements are met.");
-    }
-
-    @Override
-    public void onActivate() {
-        pops = 0;
     }
 
     @EventHandler
@@ -163,9 +158,8 @@ public class AutoLog extends Module {
         Entity entity = p.getEntity(mc.world);
         if (entity == null || !entity.equals(mc.player)) return;
 
-        pops++;
-        if (totemPops.get() > 0 && pops >= totemPops.get()) {
-            disconnect("Popped " + pops + " totems.");
+        if (InvUtils.find(Items.TOTEM_OF_UNDYING).count() - 1 == totemsLeft.get()) {
+            disconnect("Totems left: " + totemsLeft.get() + ".");
             if (toggleOff.get()) this.toggle();
         }
     }
@@ -231,8 +225,7 @@ public class AutoLog extends Module {
             if (useTotalCount.get() && totalEntities >= combinedEntityThreshold.get()) {
                 disconnect("Total number of selected entities within range exceeded the limit.");
                 if (toggleOff.get()) this.toggle();
-            }
-            else if (!useTotalCount.get()) {
+            } else if (!useTotalCount.get()) {
                 // Check if the count of each entity type exceeds the specified limit
                 for (Object2IntMap.Entry<EntityType<?>> entry : entityCounts.object2IntEntrySet()) {
                     if (entry.getIntValue() >= individualEntityThreshold.get()) {

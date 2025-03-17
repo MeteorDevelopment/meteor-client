@@ -21,14 +21,11 @@ public class SessionCommand extends Command {
     public void build(final LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
             final var s = mc.getSession();
-            sendMsg(Text.of("access token: " + s.getAccessToken()));
-            sendMsg(Text.of("uuid: " + s.getUuidOrNull()));
-            sendMsg(Text.of("session id: " + s.getSessionId())
-                    .getWithStyle(Style.EMPTY
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s.getSessionId()))
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("session id: copy"))))
-                    .getFirst());
-            sendMsg(Text.of("username: " + s.getUsername()));
+            sendMsg(Text.of(s.getUsername() + " session id: " + s.getSessionId())
+                .getWithStyle(Style.EMPTY
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, s.getSessionId()))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("copy"))))
+                .getFirst());
             return SINGLE_SUCCESS;
         });
     }

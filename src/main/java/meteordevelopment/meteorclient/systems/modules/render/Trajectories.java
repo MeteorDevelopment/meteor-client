@@ -178,14 +178,13 @@ public class Trajectories extends Module {
             if (!items.get().contains(itemStack.getItem())) return;
         }
 
-        if (itemStack.getEnchantments().getEnchantments().stream().anyMatch(i -> i.matchesKey(Enchantments.RIPTIDE)))
-            return;
+        if (Utils.hasEnchantment(itemStack, Enchantments.RIPTIDE)) return;
 
         // Calculate paths
         if (!simulator.set(player, itemStack, 0, accurate.get(), tickDelta)) return;
         getEmptyPath().calculate();
 
-        if (itemStack.getItem() instanceof CrossbowItem && Utils.hasEnchantment(itemStack, Enchantments.MULTISHOT)) {
+        if (Utils.hasEnchantment(itemStack, Enchantments.MULTISHOT)) {
             if (!simulator.set(player, itemStack, MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // left multishot arrow
             getEmptyPath().calculate();
 

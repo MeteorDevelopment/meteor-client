@@ -96,7 +96,7 @@ public class PacketCanceller extends Module {
 
     @EventHandler
     private void onSentPacket(PacketEvent.Sent event) {
-        if (log.get() && !logExclude.get().contains(event.packet.getClass()))
+        if (log.get() && !logCancelled.get() && !logExclude.get().contains(event.packet.getClass()))
             LOG.info("Packet.Sent " + event.packet.getPacketType());
     }
 }

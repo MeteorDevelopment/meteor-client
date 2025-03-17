@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.pathing.NopPathManager;
 import meteordevelopment.meteorclient.pathing.PathManagers;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -48,6 +49,15 @@ public class AutoWalk extends Module {
             if (isActive()) unpress();
         })
         .visible(() -> mode.get() == Mode.Simple)
+        .build()
+    );
+
+    // TODO: this
+    private final Setting<Boolean> keepY = sgGeneral.add(new BoolSetting.Builder()
+        .name("keep-y")
+        .description("Stay at the same height level.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart)
         .build()
     );
 

@@ -22,7 +22,7 @@ public class GameMenuScreenMixin {
 
     @Inject(method = "disconnect", at = @At("HEAD"), cancellable = true)
     private void disconnect(final CallbackInfo ci) {
-        final var clicks = Modules.get().get(AutoReconnect.class).confirmDisonnect.get();
+        final var clicks = Modules.get().get(AutoReconnect.class).confirmDisconnect.get();
 
         if (confirm++ < clicks) {
             exitButton.active = true;
