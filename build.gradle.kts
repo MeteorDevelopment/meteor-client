@@ -93,7 +93,6 @@ dependencies {
     // Libraries
     library("meteordevelopment:orbit:${properties["orbit_version"] as String}")
     library("meteordevelopment:starscript:${properties["starscript_version"] as String}")
-    library("meteordevelopment:discord-ipc:${properties["discordipc_version"] as String}")
     library("org.reflections:reflections:${properties["reflections_version"] as String}")
     library("io.netty:netty-handler-proxy:${properties["netty_version"] as String}") { isTransitive = false }
     library("io.netty:netty-codec-socks:${properties["netty_version"] as String}") { isTransitive = false }
