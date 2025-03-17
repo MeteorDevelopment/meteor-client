@@ -197,16 +197,21 @@ public class StarscriptTextBoxRenderer implements WTextBox.Renderer {
     }
 
     private boolean isKeyword(String text, int i, String keyword) {
+        // word starts before index
         if (i > 0) {
-            char c = text.charAt(i - 1);
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') return false;
+            if (isWordChar(text.charAt(i - 1))) return false;
         }
 
-        for (int j = 0; j < keyword.length(); j++) {
-            if (i + j >= text.length() || text.charAt(i + j) != keyword.charAt(j)) return false;
+        // word continues after keyword end
+        if (text.length() > i + keyword.length()) {
+            if (isWordChar(text.charAt(i + keyword.length()))) return false;
         }
 
-        return true;
+        return text.startsWith(keyword, i);
+    }
+
+    private boolean isWordChar(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
     }
 
     private boolean isDigit(char c) {
