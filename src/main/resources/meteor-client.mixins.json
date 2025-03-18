@@ -113,7 +113,6 @@
     "ItemGroupsMixin",
     "ItemMixin",
     "ItemRendererMixin",
-    "ItemStackAccessor",
     "ItemStackMixin",
     "JukeboxPlayableComponentMixin",
     "KeyBindingAccessor",
