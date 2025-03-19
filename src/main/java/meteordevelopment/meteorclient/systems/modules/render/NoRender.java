@@ -144,6 +144,7 @@ public class NoRender extends Module {
         .defaultValue(false)
         .build()
     );
+
     private final Setting<Boolean> noTitle = sgHUD.add(new BoolSetting.Builder()
         .name("title")
         .description("Disables rendering of the title.")
@@ -460,6 +461,7 @@ public class NoRender extends Module {
     public boolean noCrosshair() {
         return isActive() && noCrosshair.get();
     }
+
     public boolean noTitle() {
         return isActive() && noTitle.get();
     }

@@ -22,7 +22,10 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Mixin(PlayerListHud.class)
 public abstract class PlayerListHudMixin {
@@ -34,6 +37,25 @@ public abstract class PlayerListHudMixin {
         BetterTab module = Modules.get().get(BetterTab.class);
 
         return module.isActive() ? module.tabSize.get() : count;
+    }
+
+    @Redirect(method = "collectPlayerEntries()Ljava/util/List;", at = @At(value = "INVOKE", target = "Ljava/util/stream/Stream;sorted(Ljava/util/Comparator;)Ljava/util/stream/Stream;"))
+    private Stream<PlayerListEntry> modifyStreamAfterSorted(Stream<PlayerListEntry> stream, Comparator<PlayerListEntry> comparator) {
+        final var s = stream.sorted(comparator); // TODO: friends first?
+
+        final var betterTab = Modules.get().get(BetterTab.class);
+        final var i = betterTab.shiftSpeed.get();
+        if (!betterTab.isActive() || i == 0) return s;
+
+        final var l = s.toList();
+        final var size = l.size();
+        if (size == 0) return Stream.empty();
+
+        final var n = (int) (System.currentTimeMillis() / 1000d * i % size);
+
+        final var o = new ArrayList<>(l.subList(n, size));
+        o.addAll(l.subList(0, n));
+        return o.stream();
     }
 
     @Inject(method = "getPlayerName", at = @At("HEAD"), cancellable = true)
@@ -51,7 +73,7 @@ public abstract class PlayerListHudMixin {
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I", shift = At.Shift.BEFORE))
-    private void modifyHeight(CallbackInfo ci, @Local(ordinal = 5)LocalIntRef o, @Local(ordinal = 6)LocalIntRef p) {
+    private void modifyHeight(CallbackInfo ci, @Local(ordinal = 5) LocalIntRef o, @Local(ordinal = 6) LocalIntRef p) {
         BetterTab module = Modules.get().get(BetterTab.class);
         if (!module.isActive()) return;
 

@@ -28,8 +28,12 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
+import net.minecraft.network.packet.s2c.play.OverlayMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket;
+import net.minecraft.network.packet.s2c.play.RemoveEntityStatusEffectS2CPacket;
+import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
+import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
@@ -47,6 +51,7 @@ public class Notifier extends Module {
     private final SettingGroup sgVisualRange = settings.createGroup("Visual Range");
     private final SettingGroup sgPearl = settings.createGroup("Pearl");
     private final SettingGroup sgJoinsLeaves = settings.createGroup("Joins/Leaves");
+    private final SettingGroup sgOther = settings.createGroup("Other");
 
     // Totem Pops
 
@@ -188,6 +193,20 @@ public class Notifier extends Module {
         .build()
     );
 
+    private final Setting<Boolean> effectRanOut = sgOther.add(new BoolSetting.Builder()
+        .name("effect-ran-out")
+        .description("Send chat messages when potion effects end.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> titleToChat = sgOther.add(new BoolSetting.Builder()
+        .name("title-to-chat")
+        .description("When receiving a title or action thingy log it to chat.")
+        .defaultValue(true)
+        .build()
+    );
+
     private int timer;
     private boolean loginPacket = true;
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
@@ -323,6 +342,10 @@ public class Notifier extends Module {
                     ChatUtils.sendMsg(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
                 }
             }
+            case TitleS2CPacket packet when titleToChat.get() && !packet.text().getString().isEmpty() -> info("Title: " + packet.text().getString());
+            case SubtitleS2CPacket packet when titleToChat.get() && !packet.text().getString().isEmpty() -> info("Subtitle: " + packet.text().getString());
+            case OverlayMessageS2CPacket packet when titleToChat.get() && !packet.text().getString().isEmpty() -> info("Actionbar:\n" + packet.text().getString());
+            case RemoveEntityStatusEffectS2CPacket packet when effectRanOut.get() && packet.getEntity(mc.world) == mc.player -> info("Effect ran out: " + packet.effect().getIdAsString());
             default -> {}
         }
     }

@@ -40,6 +40,7 @@ public class BlockSelection extends Module {
         .name("shape-mode")
         .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
+        .visible(() -> !oneSide.get())
         .build()
     );
 
@@ -84,38 +85,39 @@ public class BlockSelection extends Module {
 
         if (oneSide.get()) {
             if (side == Direction.UP || side == Direction.DOWN) {
-                event.renderer.sideHorizontal(bp.getX() + box.minX, bp.getY() + (side == Direction.DOWN ? box.minY : box.maxY), bp.getZ() + box.minZ, bp.getX() + box.maxX, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get());
+                event.renderer.sideHorizontal(bp.getX() + box.minX, bp.getY() + (side == Direction.DOWN ? box.minY : box.maxY), bp.getZ() + box.minZ, bp.getX() + box.maxX, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), ShapeMode.Sides);
             }
             else if (side == Direction.SOUTH || side == Direction.NORTH) {
                 double z = side == Direction.NORTH ? box.minZ : box.maxZ;
-                event.renderer.sideVertical(bp.getX() + box.minX, bp.getY() + box.minY, bp.getZ() + z, bp.getX() + box.maxX, bp.getY() + box.maxY, bp.getZ() + z, sideColor.get(), lineColor.get(), shapeMode.get());
+                event.renderer.sideVertical(bp.getX() + box.minX, bp.getY() + box.minY, bp.getZ() + z, bp.getX() + box.maxX, bp.getY() + box.maxY, bp.getZ() + z, sideColor.get(), lineColor.get(), ShapeMode.Sides);
             }
             else {
                 double x = side == Direction.WEST ? box.minX : box.maxX;
-                event.renderer.sideVertical(bp.getX() + x, bp.getY() + box.minY, bp.getZ() + box.minZ, bp.getX() + x, bp.getY() + box.maxY, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get());
+                event.renderer.sideVertical(bp.getX() + x, bp.getY() + box.minY, bp.getZ() + box.minZ, bp.getX() + x, bp.getY() + box.maxY, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), ShapeMode.Sides);
+            }
+        }
+        if (advanced.get()) {
+            if (shapeMode.get() == ShapeMode.Both || shapeMode.get() == ShapeMode.Lines || oneSide.get()) {
+                shape.forEachEdge((minX, minY, minZ, maxX, maxY, maxZ) -> {
+                    event.renderer.line(bp.getX() + minX, bp.getY() + minY, bp.getZ() + minZ, bp.getX() + maxX, bp.getY() + maxY, bp.getZ() + maxZ, lineColor.get());
+                });
+            }
+            if (shapeMode.get() == ShapeMode.Both || shapeMode.get() == ShapeMode.Sides && !oneSide.get()) {
+                for (Box b : shape.getBoundingBoxes()) {
+                    render(event, bp, b);
+                }
             }
         }
         else {
-            if (advanced.get()) {
-                if (shapeMode.get() == ShapeMode.Both || shapeMode.get() == ShapeMode.Lines) {
-                    shape.forEachEdge((minX, minY, minZ, maxX, maxY, maxZ) -> {
-                        event.renderer.line(bp.getX() + minX, bp.getY() + minY, bp.getZ() + minZ, bp.getX() + maxX, bp.getY() + maxY, bp.getZ() + maxZ, lineColor.get());
-                    });
-                }
-
-                if (shapeMode.get() == ShapeMode.Both || shapeMode.get() == ShapeMode.Sides) {
-                    for (Box b : shape.getBoundingBoxes()) {
-                        render(event, bp, b);
-                    }
-                }
-            }
-            else {
-                render(event, bp, box);
-            }
+            render(event, bp, box);
         }
     }
 
     private void render(Render3DEvent event, BlockPos bp, Box box) {
-        event.renderer.box(bp.getX() + box.minX, bp.getY() + box.minY, bp.getZ() + box.minZ, bp.getX() + box.maxX, bp.getY() + box.maxY, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        render(event, bp, box, oneSide.get() ? ShapeMode.Lines : shapeMode.get());
+    }
+
+    private void render(Render3DEvent event, BlockPos bp, Box box, ShapeMode sm) {
+        event.renderer.box(bp.getX() + box.minX, bp.getY() + box.minY, bp.getZ() + box.minZ, bp.getX() + box.maxX, bp.getY() + box.maxY, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), sm, 0);
     }
 }

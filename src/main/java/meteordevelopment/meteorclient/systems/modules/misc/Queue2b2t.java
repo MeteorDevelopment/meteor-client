@@ -111,7 +111,7 @@ public class Queue2b2t extends Module {
         if (!isInQ()) return;
         if (!(event.packet instanceof EnterReconfigurationS2CPacket)) return;
 
-        last = 0;
+        onActivate();
         alert(formatJoined.get());
     }
 

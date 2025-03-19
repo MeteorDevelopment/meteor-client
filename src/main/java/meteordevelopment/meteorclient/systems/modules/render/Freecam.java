@@ -42,6 +42,7 @@ import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
+// TODO: when activating freecam in sneaking pose the crosshair target and camera desync
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -352,15 +353,13 @@ public class Freecam extends Module {
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event)  {
-        if (event.packet instanceof HealthUpdateS2CPacket packet) {
-            if (mc.player.getHealth() - packet.getHealth() > 0 && toggleOnDamage.get()) {
+        switch (event.packet) {
+            case HealthUpdateS2CPacket packet when toggleOnDamage.get() && mc.player.getHealth() > packet.getHealth() -> {
                 toggle();
                 info("Toggled off because you took damage.");
             }
-        }
-        else if (event.packet instanceof PlayerRespawnS2CPacket) {
-            toggle();
-            info("Toggled off because you respawned.");
+            case PlayerRespawnS2CPacket packet -> toggle();
+            default -> {}
         }
     }
 

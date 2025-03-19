@@ -1,5 +1,7 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import java.util.Arrays;
+
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -20,18 +22,20 @@ public class ScriptWrite extends Module {
     private final SettingGroup sgSign = settings.createGroup("Sign");
 
     private final Setting<Boolean> signSigns = sgSign.add(new BoolSetting.Builder()
-            .name("sign")
-            .description("Sign signs by setting line 3 to \"{player}\" and 4 to \"{time}\".")
-            .defaultValue(true)
-            .build());
+        .name("sign")
+        .description("Sign signs by setting line 3 to \"{player}\" and 4 to \"{time}\".")
+        .defaultValue(true)
+        .build()
+    );
 
     private final SettingGroup sgBook = settings.createGroup("Book");
 
     private final Setting<Boolean> onSign = sgBook.add(new BoolSetting.Builder()
-            .name("on-sign")
-            .description("Evaluate book content only when signing it.")
-            .defaultValue(true)
-            .build());
+        .name("on-sign")
+        .description("Evaluate book content only when signing it.")
+        .defaultValue(true)
+        .build()
+    );
 
     public ScriptWrite() {
         super(Categories.World, "script-write", "Enables the use of Starscript in signs and books.");
@@ -40,42 +44,41 @@ public class ScriptWrite extends Module {
     @EventHandler
     private void onSendPacket(final PacketEvent.Send event) {
         switch (event.packet) {
-            case final BookUpdateC2SPacket p:
-                if (onSign.get() && !p.title().isPresent())
-                    break;
+            case final BookUpdateC2SPacket p -> {
+                if (onSign.get() && p.title().isEmpty()) break;
 
                 final var pages = p.pages()
-                        .stream()
-                        .map(ScriptWrite::eval)
-                        .toList();
+                    .stream()
+                    .map(ScriptWrite::eval)
+                    .toList();
 
-                if (pages.equals(p.pages()))
-                    return;
+                if (pages.equals(p.pages())) break; // if it works (so far it does) dont fix it*
 
                 event.setCancelled(true);
                 mc.getNetworkHandler().sendPacket(new BookUpdateC2SPacket(p.slot(), pages, p.title()));
-                break;
-            case final UpdateSignC2SPacket p:
+            }
+            case final UpdateSignC2SPacket p -> {
                 final var text = p.getText();
+
                 if (signSigns.get()) {
-                    text[2] = "{player}";
-                    text[3] = "{time}";
+                    if (text[2].isEmpty()) text[2] = "{player}";
+                    if (text[3].isEmpty()) text[3] = "{time}";
                 }
 
                 for (var i = 0; i < text.length; i++)
                     text[i] = eval(text[i]);
 
-                if (text.equals(p.getText()))
-                    return;
+                if (Arrays.equals(text, p.getText())) break; // * this too
 
                 event.setCancelled(true);
                 mc.getNetworkHandler().sendPacket(
-                        new UpdateSignC2SPacket(
-                                p.getPos(),
-                                p.isFront(),
-                                text[0], text[1], text[2], text[3]));
-                break;
-            default:
+                    new UpdateSignC2SPacket(
+                        p.getPos(),
+                        p.isFront(),
+                        text[0], text[1], text[2], text[3]
+                    ));
+            }
+            default -> {}
         }
     }
 }
