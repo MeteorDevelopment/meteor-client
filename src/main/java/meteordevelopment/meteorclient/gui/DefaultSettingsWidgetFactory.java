@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.gui;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.screens.settings.*;
 import meteordevelopment.meteorclient.gui.themes.meteor.widgets.WMeteorLabel;
@@ -509,6 +510,18 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         }
 
         public static int getSize(Setting<?> setting) {
+            if (setting instanceof StatusEffectAmplifierMapSetting mapSetting) {
+                int selected = 0;
+
+                for (int potionLevel : mapSetting.get().values()) {
+                    if (potionLevel == 0) continue;
+                    selected++;
+                }
+
+                return selected;
+
+            }
+
             if (setting.get() instanceof Collection<?> collection) return collection.size();
             if (setting.get() instanceof Map<?, ?> map) return map.size();
 
