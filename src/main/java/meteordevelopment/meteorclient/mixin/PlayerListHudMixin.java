@@ -44,14 +44,14 @@ public abstract class PlayerListHudMixin {
         final var s = stream.sorted(comparator); // TODO: friends first?
 
         final var betterTab = Modules.get().get(BetterTab.class);
-        final var i = betterTab.shiftSpeed.get();
+        final var i = betterTab.cycleSpeed.get();
         if (!betterTab.isActive() || i == 0) return s;
 
         final var l = s.toList();
         final var size = l.size();
         if (size == 0) return Stream.empty();
 
-        final var n = (int) (System.currentTimeMillis() / 1000d * i % size);
+        final var n = (int) (System.currentTimeMillis() / 1000d * size / i % size);
 
         final var o = new ArrayList<>(l.subList(n, size));
         o.addAll(l.subList(0, n));

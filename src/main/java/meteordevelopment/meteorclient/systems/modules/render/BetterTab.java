@@ -42,11 +42,12 @@ public class BetterTab extends Module {
         .build()
     );
 
-    public final Setting<Double> shiftSpeed = sgGeneral.add(new DoubleSetting.Builder()
-        .name("shift-speed")
-        .description("Cycle through the tablist entries at this many players per second.")
-        .defaultValue(1)
+    public final Setting<Double> cycleSpeed = sgGeneral.add(new DoubleSetting.Builder()
+        .name("cycle-speed")
+        .description("How many seconds it takes to complete a tablist rotation, 0 to disable.")
+        .defaultValue(60)
         .min(0)
+        .sliderMin(5)
         .build()
     );
 

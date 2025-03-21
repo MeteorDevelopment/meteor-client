@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
 import meteordevelopment.meteorclient.mixininterface.IChatHudLine;
 import meteordevelopment.meteorclient.mixininterface.IChatHudLineVisible;
@@ -32,6 +33,9 @@ import net.minecraft.client.gui.PlayerSkinDrawer;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.network.packet.s2c.play.OverlayMessageS2CPacket;
+import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
+import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -91,6 +95,13 @@ public class BetterChat extends Module {
     private final Setting<Boolean> keepHistory = sgGeneral.add(new BoolSetting.Builder()
         .name("keep-history")
         .description("Prevents the chat history from being cleared when disconnecting.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> logTitles = sgGeneral.add(new BoolSetting.Builder()
+        .name("log-titles")
+        .description("Duplicates the big on screen fading text to chat.")
         .defaultValue(true)
         .build()
     );
@@ -318,6 +329,17 @@ public class BetterChat extends Module {
         }
 
         event.message = message;
+    }
+
+    @EventHandler
+    private void onPacketReceive(PacketEvent.Receive event) {
+        if (logTitles.get())
+            switch (event.packet) {
+                case TitleS2CPacket p when !p.text().getString().isEmpty() -> info("Title: " + p.text().getString());
+                case SubtitleS2CPacket p when !p.text().getString().isEmpty() -> info("Subtitle: " + p.text().getString());
+                case OverlayMessageS2CPacket p when !p.text().getString().isEmpty() -> info("Actionbar: " + p.text().getString());
+                default -> {}
+            }
     }
 
     // Anti Spam

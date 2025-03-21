@@ -200,13 +200,6 @@ public class Notifier extends Module {
         .build()
     );
 
-    private final Setting<Boolean> titleToChat = sgOther.add(new BoolSetting.Builder()
-        .name("title-to-chat")
-        .description("When receiving a title or action thingy log it to chat.")
-        .defaultValue(true)
-        .build()
-    );
-
     private int timer;
     private boolean loginPacket = true;
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
@@ -342,9 +335,6 @@ public class Notifier extends Module {
                     ChatUtils.sendMsg(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
                 }
             }
-            case TitleS2CPacket packet when titleToChat.get() && !packet.text().getString().isEmpty() -> info("Title: " + packet.text().getString());
-            case SubtitleS2CPacket packet when titleToChat.get() && !packet.text().getString().isEmpty() -> info("Subtitle: " + packet.text().getString());
-            case OverlayMessageS2CPacket packet when titleToChat.get() && !packet.text().getString().isEmpty() -> info("Actionbar:\n" + packet.text().getString());
             case RemoveEntityStatusEffectS2CPacket packet when effectRanOut.get() && packet.getEntity(mc.world) == mc.player -> info("Effect ran out: " + packet.effect().getIdAsString());
             default -> {}
         }

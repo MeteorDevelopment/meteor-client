@@ -15,7 +15,9 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
+import net.minecraft.block.BedBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.RespawnAnchorBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
@@ -28,8 +30,16 @@ import java.util.List;
 import java.util.Set;
 
 public class NoInteract extends Module {
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBlocks = settings.createGroup("Blocks");
     private final SettingGroup sgEntities = settings.createGroup("Entities");
+
+    private final Setting<Boolean> noBeds = sgGeneral.add(new BoolSetting.Builder()
+        .name("no-beds")
+        .description("Prevents you from overriding your respawn point.")
+        .defaultValue(true)
+        .build()
+    );
 
     // Blocks
 
@@ -135,7 +145,9 @@ public class NoInteract extends Module {
 
     @EventHandler
     private void onInteractBlock(InteractBlockEvent event) {
-        if (!shouldInteractBlock(event.result, event.hand)) event.cancel();
+        if (shouldInteractBlock(event.result, event.hand)) return;
+        event.cancel();
+        info("block interaction cancelled");
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -159,6 +171,15 @@ public class NoInteract extends Module {
     }
 
     private boolean shouldInteractBlock(BlockHitResult hitResult, Hand hand) {
+        if (noBeds.get()) {
+            final var b = mc.world.getBlockState(hitResult.getBlockPos()).getBlock();
+            if (mc.world.getDimension().bedWorks()) {
+                if (b instanceof BedBlock)
+                    return false;
+            } else if (b instanceof RespawnAnchorBlock)
+                return false;
+        }
+
         // Hand Interactions
         if (blockInteractHand.get() == HandMode.Both ||
             (blockInteractHand.get() == HandMode.Mainhand && hand == Hand.MAIN_HAND) ||
