@@ -31,13 +31,6 @@ public class PotionSpoof extends Module {
         .build()
     );
 
-    private final Setting<Boolean> clearEffects = sgGeneral.add(new BoolSetting.Builder()
-        .name("clear-effects")
-        .description("Clears effects on module disable.")
-        .defaultValue(true)
-        .build()
-    );
-
     private final Setting<List<StatusEffect>> antiPotion = sgGeneral.add(new StatusEffectListSetting.Builder()
         .name("blocked-potions")
         .description("Potions to block.")
@@ -59,8 +52,15 @@ public class PotionSpoof extends Module {
         .build()
     );
 
+    private final Setting<Boolean> clearEffects = sgGeneral.add(new BoolSetting.Builder()
+        .name("clear-effects")
+        .description("Clears effects on module disable.")
+        .defaultValue(true)
+        .build()
+    );
+
     public PotionSpoof() {
-        super(Categories.Player, "potion-spoof", "Spoofs potion statuses for you. SOME effects DO NOT work.");
+        super(Categories.Player, "potion-spoof", "Spoofs potion statuses on you.");
     }
 
     @Override
@@ -69,7 +69,9 @@ public class PotionSpoof extends Module {
 
         for (Reference2IntMap.Entry<StatusEffect> entry : spoofPotions.get().reference2IntEntrySet()) {
             if (entry.getIntValue() <= 0) continue;
-            if (mc.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()))) mc.player.removeStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()));
+            if (!mc.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()))) continue;
+
+            mc.player.removeStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()));
         }
     }
 
@@ -84,7 +86,9 @@ public class PotionSpoof extends Module {
                 ((StatusEffectInstanceAccessor) instance).setAmplifier(level - 1);
                 if (instance.getDuration() < effectDuration.get()) ((StatusEffectInstanceAccessor) instance).setDuration(effectDuration.get());
             } else {
-                mc.player.addStatusEffect(new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(entry.getKey()), effectDuration.get(), level - 1));
+                mc.player.addStatusEffect(new StatusEffectInstance(
+                    Registries.STATUS_EFFECT.getEntry(entry.getKey()), effectDuration.get(), level - 1
+                ));
             }
         }
     }
