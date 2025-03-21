@@ -11,8 +11,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.render.model.BlockStateModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -44,7 +44,7 @@ public class SimpleBlockRenderer {
         if (state.getRenderType() != BlockRenderType.MODEL) return;
 
         VertexConsumer consumer = consumerProvider.getBuffer(RenderLayer.getSolid());
-        BakedModel model = mc.getBlockRenderManager().getModel(state);
+        BlockStateModel model = mc.getBlockRenderManager().getModel(state);
         Vec3d offset = state.getModelOffset(pos);
 
         float offsetX = (float) offset.x;

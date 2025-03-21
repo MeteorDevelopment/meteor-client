@@ -96,8 +96,8 @@ public abstract class GameRendererMixin {
 
         matrices.push();
 
-        tiltViewWhenHurt(matrices, camera.getLastTickDelta());
-        if (client.options.getBobView().getValue()) bobView(matrices, camera.getLastTickDelta());
+        tiltViewWhenHurt(matrices, camera.getLastTickProgress());
+        if (client.options.getBobView().getValue()) bobView(matrices, camera.getLastTickProgress());
 
         RenderSystem.getModelViewStack().mul(matrices.peek().getPositionMatrix().invert());
         matrices.pop();

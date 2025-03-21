@@ -562,8 +562,7 @@ public class BetterChat extends Module {
                 ClickEvent.Action.RUN_COMMAND,
                 Commands.get("say").toString(message)
             ))
-            .withHoverEvent(new HoverEvent(
-                HoverEvent.Action.SHOW_TEXT,
+            .withHoverEvent(new HoverEvent.ShowText(
                 hintBaseText
             )));
         return sendButton;

@@ -44,8 +44,7 @@ public class NbtCommand extends Command {
             ClickEvent.Action.RUN_COMMAND,
             this.toString("copy")
         ))
-        .withHoverEvent(new HoverEvent(
-            HoverEvent.Action.SHOW_TEXT,
+        .withHoverEvent(new HoverEvent.ShowText(
             Text.literal("Copy the NBT data to your clipboard.")
         )));
 
@@ -204,7 +203,7 @@ public class NbtCommand extends Command {
     }
 
     private void setStack(ItemStack stack) {
-        mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(36 + mc.player.getInventory().selectedSlot, stack));
+        mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(36 + mc.player.getInventory().getSelectedSlot(), stack));
     }
 
     private boolean validBasic(ItemStack stack) {

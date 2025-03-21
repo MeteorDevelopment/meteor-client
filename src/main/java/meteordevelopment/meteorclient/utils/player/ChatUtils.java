@@ -257,8 +257,7 @@ public class ChatUtils {
 
         if (BaritoneUtils.IS_AVAILABLE) {
             Style style = coordsText.getStyle().withFormatting(Formatting.BOLD)
-                .withHoverEvent(new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
+                .withHoverEvent(new HoverEvent.ShowText(
                     Text.literal("Set as Baritone goal")
                 ))
                 .withClickEvent(new MeteorClickEvent(

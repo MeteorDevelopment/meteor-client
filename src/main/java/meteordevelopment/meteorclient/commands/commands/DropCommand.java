@@ -42,7 +42,7 @@ public class DropCommand extends Command {
 
         // Main Inv
         builder.then(literal("inventory").executes(context -> drop(player -> {
-            for (int i = 9; i < player.getInventory().main.size(); i++) {
+            for (int i = 9; i < player.getInventory().getMainStacks().size(); i++) {
                 InvUtils.drop().slotMain(i - 9);
             }
         })));
