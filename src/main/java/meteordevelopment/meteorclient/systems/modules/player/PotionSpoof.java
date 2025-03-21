@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.player;
 
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.mixin.StatusEffectInstanceAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -31,13 +33,6 @@ public class PotionSpoof extends Module {
         .build()
     );
 
-    private final Setting<Boolean> clearEffects = sgGeneral.add(new BoolSetting.Builder()
-        .name("clear-effects")
-        .description("Clears effects on module disable.")
-        .defaultValue(true)
-        .build()
-    );
-
     private final Setting<List<StatusEffect>> antiPotion = sgGeneral.add(new StatusEffectListSetting.Builder()
         .name("blocked-potions")
         .description("Potions to block.")
@@ -59,8 +54,25 @@ public class PotionSpoof extends Module {
         .build()
     );
 
+    private final Setting<Boolean> clearEffects = sgGeneral.add(new BoolSetting.Builder()
+        .name("clear-effects")
+        .description("Clears effects on module disable.")
+        .defaultValue(true)
+        .build()
+    );
+
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        return theme.label("""
+            Warning: haste, jump boost, slow falling and levitation are handled by
+            the game such that spoofing these potions will alter client behavior,
+            which anticheats can detect and ban for. Spoof these at your own risk!
+            """, Utils.getWindowWidth() / 3.0);
+    }
+
     public PotionSpoof() {
-        super(Categories.Player, "potion-spoof", "Spoofs potion statuses for you. SOME effects DO NOT work.");
+        super(Categories.Player, "potion-spoof", "Spoofs potion statuses on you.");
     }
 
     @Override
@@ -69,7 +81,9 @@ public class PotionSpoof extends Module {
 
         for (Reference2IntMap.Entry<StatusEffect> entry : spoofPotions.get().reference2IntEntrySet()) {
             if (entry.getIntValue() <= 0) continue;
-            if (mc.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()))) mc.player.removeStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()));
+            if (!mc.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()))) continue;
+
+            mc.player.removeStatusEffect(Registries.STATUS_EFFECT.getEntry(entry.getKey()));
         }
     }
 
@@ -84,7 +98,9 @@ public class PotionSpoof extends Module {
                 ((StatusEffectInstanceAccessor) instance).setAmplifier(level - 1);
                 if (instance.getDuration() < effectDuration.get()) ((StatusEffectInstanceAccessor) instance).setDuration(effectDuration.get());
             } else {
-                mc.player.addStatusEffect(new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(entry.getKey()), effectDuration.get(), level - 1));
+                mc.player.addStatusEffect(new StatusEffectInstance(
+                    Registries.STATUS_EFFECT.getEntry(entry.getKey()), effectDuration.get(), level - 1
+                ));
             }
         }
     }
