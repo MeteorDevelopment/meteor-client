@@ -98,6 +98,7 @@ public class Bounce extends ElytraFlightMode {
 
 
     private void setPressed(KeyBinding key, boolean pressed) {
+        // TODO: freecam gets fucked
         key.setPressed(pressed);
         Input.setKeyState(key, pressed);
     }

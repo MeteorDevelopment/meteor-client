@@ -28,12 +28,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
-import net.minecraft.network.packet.s2c.play.OverlayMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket;
 import net.minecraft.network.packet.s2c.play.RemoveEntityStatusEffectS2CPacket;
-import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
-import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
@@ -382,11 +379,12 @@ public class Notifier extends Module {
                     Formatting.GRAY + "["
                         + Formatting.GREEN + "+"
                         + Formatting.GRAY + "] "
+                        + (Friends.get().isFriend(entry.profile()) ? Formatting.GREEN : "")
                         + entry.profile().getName()
                 ));
             } else {
                 messageQueue.addLast(Text.literal(
-                    Formatting.WHITE
+                    (Friends.get().isFriend(entry.profile()) ? Formatting.GREEN : Formatting.WHITE)
                         + entry.profile().getName()
                         + Formatting.GRAY + " joined."
                 ));
@@ -406,11 +404,12 @@ public class Notifier extends Module {
                     Formatting.GRAY + "["
                         + Formatting.RED + "-"
                         + Formatting.GRAY + "] "
+                        + (Friends.get().isFriend(toRemove) ? Formatting.RED : "")
                         + toRemove.getProfile().getName()
                 ));
             } else {
                 messageQueue.addLast(Text.literal(
-                    Formatting.WHITE
+                    (Friends.get().isFriend(toRemove) ? Formatting.RED : Formatting.WHITE)
                         + toRemove.getProfile().getName()
                         + Formatting.GRAY + " left."
                 ));

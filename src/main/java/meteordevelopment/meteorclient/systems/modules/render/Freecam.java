@@ -64,6 +64,17 @@ public class Freecam extends Module {
         .build()
     );
 
+    private final Setting<Boolean> relative = sgGeneral.add(new BoolSetting.Builder() // TODO
+        .name("relative")
+        .description("The freecam position is computed relative to the player position.")
+        .defaultValue(false)
+        .onChanged((i) -> {
+            if (isActive())
+                onActivate();
+        })
+        .build()
+    );
+
     private final Setting<Boolean> toggleOnDamage = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-on-damage")
         .description("Disables freecam when you take damage.")

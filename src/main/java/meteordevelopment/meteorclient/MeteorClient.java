@@ -58,6 +58,8 @@ public class MeteorClient implements ClientModInitializer {
     public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
     public static final Logger LOG;
 
+    public static final long timestamp;
+
     static {
         MOD_META = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
 
@@ -72,6 +74,8 @@ public class MeteorClient implements ClientModInitializer {
 
         VERSION = new Version(versionString);
         BUILD_NUMBER = MOD_META.getCustomValue(MeteorClient.MOD_ID + ":build_number").getAsString();
+
+        timestamp = System.currentTimeMillis();
     }
 
     @Override

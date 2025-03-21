@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.render.prompts.YesNoPrompt;
 import net.minecraft.client.gui.screen.Screen;
 
 import java.util.ArrayList;
@@ -66,10 +67,10 @@ public class ProfilesTab extends Tab {
                 table.add(theme.label(profile.name.get())).expandCellX();
 
                 WButton save = table.add(theme.button("Save")).widget();
-                save.action = profile::save;
+                save.action = () -> YesNoPrompt.create().title("Save profile " + profile.name).onYes(profile::save).dontShowAgainCheckboxVisible(false).show();
 
                 WButton load = table.add(theme.button("Load")).widget();
-                load.action = profile::load;
+                load.action = () -> YesNoPrompt.create().title("Load profile " + profile.name).onYes(profile::load).dontShowAgainCheckboxVisible(false).show();
 
                 WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
                 edit.action = () -> mc.setScreen(new EditProfileScreen(theme, profile, this::reload));

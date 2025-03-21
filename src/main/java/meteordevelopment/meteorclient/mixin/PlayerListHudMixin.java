@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTab;
 import net.minecraft.client.MinecraftClient;
@@ -41,7 +43,7 @@ public abstract class PlayerListHudMixin {
 
     @Redirect(method = "collectPlayerEntries()Ljava/util/List;", at = @At(value = "INVOKE", target = "Ljava/util/stream/Stream;sorted(Ljava/util/Comparator;)Ljava/util/stream/Stream;"))
     private Stream<PlayerListEntry> modifyStreamAfterSorted(Stream<PlayerListEntry> stream, Comparator<PlayerListEntry> comparator) {
-        final var s = stream.sorted(comparator); // TODO: friends first?
+        final var s = stream.sorted(comparator).sorted((i1, i2) -> Friends.get().isFriend(i1) ? 1 : 0); // TODO: ???
 
         final var betterTab = Modules.get().get(BetterTab.class);
         final var i = betterTab.cycleSpeed.get();

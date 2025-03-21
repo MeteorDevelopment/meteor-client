@@ -24,16 +24,19 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.Vec2f;
 import org.joml.Vector2f;
 import org.joml.Vector3d;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
-// TODO: item tracers
 public class Tracers extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAppearance = settings.createGroup("Appearance");
@@ -50,6 +53,53 @@ public class Tracers extends Module {
         .name("entities")
         .description("Select specific entities.")
         .defaultValue(EntityType.PLAYER)
+        .build()
+    );
+
+    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
+        .name("items")
+        .description("Select specific items.")
+        .defaultValue(
+            Items.DIAMOND_HELMET,
+            Items.DIAMOND_CHESTPLATE,
+            Items.DIAMOND_LEGGINGS,
+            Items.DIAMOND_BOOTS,
+            Items.NETHERITE_HELMET,
+            Items.NETHERITE_CHESTPLATE,
+            Items.NETHERITE_LEGGINGS,
+            Items.NETHERITE_BOOTS,
+            Items.ELYTRA,
+            Items.MACE,
+            Items.TRIDENT,
+            Items.DIAMOND_SWORD,
+            Items.DIAMOND_AXE,
+            Items.DIAMOND_PICKAXE,
+            Items.NETHERITE_SWORD,
+            Items.NETHERITE_AXE,
+            Items.NETHERITE_PICKAXE,
+            Items.ENCHANTED_GOLDEN_APPLE,
+            Items.END_CRYSTAL,
+            Items.ENDER_CHEST,
+            Items.TOTEM_OF_UNDYING,
+            Items.EXPERIENCE_BOTTLE,
+            Items.SHULKER_BOX,
+            Items.RED_SHULKER_BOX,
+            Items.ORANGE_SHULKER_BOX,
+            Items.YELLOW_SHULKER_BOX,
+            Items.LIME_SHULKER_BOX,
+            Items.GREEN_SHULKER_BOX,
+            Items.CYAN_SHULKER_BOX,
+            Items.LIGHT_BLUE_SHULKER_BOX,
+            Items.BLUE_SHULKER_BOX,
+            Items.PURPLE_SHULKER_BOX,
+            Items.MAGENTA_SHULKER_BOX,
+            Items.PINK_SHULKER_BOX,
+            Items.WHITE_SHULKER_BOX,
+            Items.LIGHT_GRAY_SHULKER_BOX,
+            Items.GRAY_SHULKER_BOX,
+            Items.BROWN_SHULKER_BOX,
+            Items.BLACK_SHULKER_BOX)
+        .visible(() -> entities.get().contains(EntityType.ITEM))
         .build()
     );
 
@@ -171,6 +221,14 @@ public class Tracers extends Module {
         .build()
     );
 
+    private final Setting<SettingColor> itemsColor = sgColors.add(new ColorSetting.Builder()
+        .name("items-color")
+        .description("The item's color.")
+        .defaultValue(new SettingColor(255, 255, 0, 127))
+        .visible(() -> !distance.get() && entities.get().contains(EntityType.ITEM))
+        .build()
+    );
+
     private final Setting<SettingColor> animalsColor = sgColors.add(new ColorSetting.Builder()
         .name("animals-color")
         .description("The animal's color.")
@@ -219,7 +277,7 @@ public class Tracers extends Module {
     }
 
     private boolean shouldBeIgnored(Entity entity) {
-        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType()) || (ignoreSelf.get() && entity == mc.player) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity);
+        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType()) || (ignoreSelf.get() && entity == mc.player) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity) || (entity instanceof ItemEntity i && !items.get().contains(i.getStack().getItem()));
     }
 
     private Color getEntityColor(Entity entity) {
@@ -233,6 +291,9 @@ public class Tracers extends Module {
         }
         else if (entity instanceof PlayerEntity) {
             color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
+        }
+        else if (entity instanceof ItemEntity) {
+            color = itemsColor.get();
         }
         else {
             color = switch (entity.getType().getSpawnGroup()) {

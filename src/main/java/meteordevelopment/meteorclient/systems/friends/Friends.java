@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.util.UndashedUuid;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
@@ -78,6 +79,10 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     public boolean isFriend(PlayerListEntry player) {
         return get(player) != null;
+    }
+
+    public boolean isFriend(GameProfile profile) {
+        return get(profile.getName()) != null;
     }
 
     public boolean shouldAttack(PlayerEntity player) {

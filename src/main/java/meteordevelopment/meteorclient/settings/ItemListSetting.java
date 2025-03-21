@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+// any reason to use List over Set?
 public class ItemListSetting extends Setting<List<Item>> {
     public final Predicate<Item> filter;
     private final boolean bypassFilterWhenSavingAndLoading;

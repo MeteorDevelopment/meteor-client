@@ -77,7 +77,6 @@ public class BetterChat extends Module {
         .build()
     );
 
-    // TODO: player heads fuck up the hover offset
     private final Setting<Boolean> playerHeads = sgGeneral.add(new BoolSetting.Builder()
         .name("player-heads")
         .description("Displays player heads next to their messages.")
@@ -452,6 +451,7 @@ public class BetterChat extends Module {
 
         // Offset
         context.getMatrices().translate(10, 0, 0);
+        // TODO: also adjust hover and click event handlers
     }
 
     private void drawTexture(DrawContext context, IChatHudLine line, int y) {
