@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.player;
 
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.mixin.StatusEffectInstanceAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -58,6 +60,16 @@ public class PotionSpoof extends Module {
         .defaultValue(true)
         .build()
     );
+
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        return theme.label("""
+            Warning: haste, jump boost, slow falling and levitation are handled by
+            the game such that spoofing these potions will alter client behavior,
+            which anticheats can detect and ban for. Spoof these at your own risk!
+            """, Utils.getWindowWidth() / 3.0);
+    }
 
     public PotionSpoof() {
         super(Categories.Player, "potion-spoof", "Spoofs potion statuses on you.");
