@@ -170,7 +170,7 @@ public class ElytraFly extends Module {
 
     public final Setting<Double> pitch40AutoDistance = sgGeneral.add(new DoubleSetting.Builder()
         .name("pitch40-auto-distance")
-        .description("The lower boundary would that much lower than the upper one.")
+        .description("The lower boundary would be that much lower than the upper one.")
         .defaultValue(40)
         .sliderMax(360)
         .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40 && pitch40AutoBounds.get())
