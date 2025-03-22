@@ -26,7 +26,10 @@ import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.*;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Unit;
 
@@ -41,7 +44,6 @@ public class NbtCommand extends Command {
     private final Text copyButton = Text.literal("NBT").setStyle(Style.EMPTY
         .withFormatting(Formatting.UNDERLINE)
         .withClickEvent(new MeteorClickEvent(
-            ClickEvent.Action.RUN_COMMAND,
             this.toString("copy")
         ))
         .withHoverEvent(new HoverEvent.ShowText(
@@ -55,7 +57,7 @@ public class NbtCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("add").then(argument("component", ComponentMapArgumentType.componentMap(REGISTRY_ACCESS)).executes(ctx -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getSelectedStack();
 
             if (validBasic(stack)) {
                 ComponentMap itemComponents = stack.getComponents();
@@ -74,7 +76,7 @@ public class NbtCommand extends Command {
         })));
 
         builder.then(literal("set").then(argument("component", ComponentMapArgumentType.componentMap(REGISTRY_ACCESS)).executes(ctx -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getSelectedStack();
 
             if (validBasic(stack)) {
                 ComponentMap components = ComponentMapArgumentType.getComponentMap(ctx, "component");
@@ -106,7 +108,7 @@ public class NbtCommand extends Command {
         })));
 
         builder.then(literal("remove").then(argument("component", RegistryKeyArgumentType.registryKey(RegistryKeys.DATA_COMPONENT_TYPE)).executes(ctx -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getSelectedStack();
 
             if (validBasic(stack)) {
                 @SuppressWarnings("unchecked")
@@ -122,7 +124,7 @@ public class NbtCommand extends Command {
 
             return SINGLE_SUCCESS;
         }).suggests((ctx, suggestionsBuilder) -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getSelectedStack();
             if (stack != ItemStack.EMPTY) {
                 ComponentMap components = stack.getComponents();
                 String remaining = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
@@ -189,7 +191,7 @@ public class NbtCommand extends Command {
         }));
 
         builder.then(literal("count").then(argument("count", IntegerArgumentType.integer(-127, 127)).executes(context -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getSelectedStack();
 
             if (validBasic(stack)) {
                 int count = IntegerArgumentType.getInteger(context, "count");

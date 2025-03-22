@@ -41,7 +41,6 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -360,12 +359,12 @@ public class Modules extends System<Modules> {
     public Modules fromTag(NbtCompound tag) {
         disableAll();
 
-        NbtList modulesTag = tag.getList("modules", 10);
-        for (NbtElement moduleTagI : modulesTag) {
-            NbtCompound moduleTag = (NbtCompound) moduleTagI;
-            Module module = get(moduleTag.getString("name"));
-            if (module != null) module.fromTag(moduleTag);
-        }
+        tag.getList("modules").ifPresent(modulesTag ->
+            modulesTag.forEach(moduleTagI -> {
+                NbtCompound moduleTag = (NbtCompound) moduleTagI;
+                moduleTag.getString("name").flatMap(name -> Optional.ofNullable(get(name))).ifPresent(module -> module.fromTag(moduleTag));
+            })
+        );
 
         return this;
     }

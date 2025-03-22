@@ -78,7 +78,7 @@ public class LocateCommand extends Command {
         // Overworld structures
 
         builder.then(literal("buried_treasure").executes(s -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getSelectedStack();
             if (stack.getItem() != Items.FILLED_MAP
                 || stack.get(DataComponentTypes.ITEM_NAME) == null
                 || !stack.get(DataComponentTypes.ITEM_NAME).getString().equals(Text.translatable("filled_map.buried_treasure").getString())) {
@@ -108,7 +108,7 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("mansion").executes(s -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getSelectedStack();
             if (stack.getItem() != Items.FILLED_MAP
                 || stack.get(DataComponentTypes.ITEM_NAME) == null
                 || !stack.get(DataComponentTypes.ITEM_NAME).getString().equals(Text.translatable("filled_map.mansion").getString())) {
@@ -138,7 +138,7 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("monument").executes(s -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getSelectedStack();
             if (stack.getItem() == Items.FILLED_MAP
                 && stack.get(DataComponentTypes.ITEM_NAME) != null
                 && stack.get(DataComponentTypes.ITEM_NAME).getString().equals(Text.translatable("filled_map.monument").getString())) {
@@ -263,7 +263,7 @@ public class LocateCommand extends Command {
         // Misc structures
 
         builder.then(literal("lodestone").executes(s -> {
-            ItemStack stack = mc.player.getInventory().getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getSelectedStack();
             if (stack.getItem() != Items.COMPASS) {
                 error("You need to hold a (highlight)lodestone(default) compass!");
                 return SINGLE_SUCCESS;

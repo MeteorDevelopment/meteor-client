@@ -47,9 +47,9 @@ public abstract class ScreenMixin {
 
     @Inject(method = "handleTextClick", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", ordinal = 1, remap = false), cancellable = true)
     private void onRunCommand(Style style, CallbackInfoReturnable<Boolean> cir) {
-        if (style.getClickEvent() instanceof MeteorClickEvent clickEvent && clickEvent.getValue().startsWith(Config.get().prefix.get())) {
+        if (style.getClickEvent() instanceof MeteorClickEvent clickEvent && clickEvent.value.startsWith(Config.get().prefix.get())) {
             try {
-                Commands.dispatch(style.getClickEvent().getValue().substring(Config.get().prefix.get().length()));
+                Commands.dispatch(clickEvent.value.substring(Config.get().prefix.get().length()));
                 cir.setReturnValue(true);
             } catch (CommandSyntaxException e) {
                 MeteorClient.LOG.error("Failed to run command", e);

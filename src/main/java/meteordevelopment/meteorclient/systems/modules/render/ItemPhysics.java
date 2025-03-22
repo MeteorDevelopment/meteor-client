@@ -124,12 +124,12 @@ public class ItemPhysics extends Module {
     }
 
     private void applyTransformation(MatrixStack matrices, Transformation transformation) {
-        float prevY = transformation.translation.y;
+        float lastY = transformation.translation.y;
         transformation.translation.y = 0;
 
         transformation.apply(false, matrices);
 
-        transformation.translation.y = prevY;
+        transformation.translation.y = lastY;
     }
 
     private void offsetInWater(MatrixStack matrices, ItemEntity entity) {

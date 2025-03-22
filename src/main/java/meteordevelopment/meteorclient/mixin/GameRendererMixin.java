@@ -173,26 +173,26 @@ public abstract class GameRendererMixin {
             double x = cameraE.getX();
             double y = cameraE.getY();
             double z = cameraE.getZ();
-            double prevX = cameraE.prevX;
-            double prevY = cameraE.prevY;
-            double prevZ = cameraE.prevZ;
+            double lastX = cameraE.lastX;
+            double lastY = cameraE.lastY;
+            double lastZ = cameraE.lastZ;
             float yaw = cameraE.getYaw();
             float pitch = cameraE.getPitch();
-            float prevYaw = cameraE.prevYaw;
-            float prevPitch = cameraE.prevPitch;
+            float lastYaw = cameraE.lastYaw;
+            float lastPitch = cameraE.lastPitch;
 
             if (highwayBuilder) {
                 cameraE.setYaw(camera.getYaw());
                 cameraE.setPitch(camera.getPitch());
             } else {
                 ((IVec3d) cameraE.getPos()).meteor$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
-                cameraE.prevX = freecam.prevPos.x;
-                cameraE.prevY = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
-                cameraE.prevZ = freecam.prevPos.z;
+                cameraE.lastX = freecam.prevPos.x;
+                cameraE.lastY = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
+                cameraE.lastZ = freecam.prevPos.z;
                 cameraE.setYaw(freecam.yaw);
                 cameraE.setPitch(freecam.pitch);
-                cameraE.prevYaw = freecam.prevYaw;
-                cameraE.prevPitch = freecam.prevPitch;
+                cameraE.lastYaw = freecam.lastYaw;
+                cameraE.lastPitch = freecam.lastPitch;
             }
 
             freecamSet = true;
@@ -200,13 +200,13 @@ public abstract class GameRendererMixin {
             freecamSet = false;
 
             ((IVec3d) cameraE.getPos()).meteor$set(x, y, z);
-            cameraE.prevX = prevX;
-            cameraE.prevY = prevY;
-            cameraE.prevZ = prevZ;
+            cameraE.lastX = lastX;
+            cameraE.lastY = lastY;
+            cameraE.lastZ = lastZ;
             cameraE.setYaw(yaw);
             cameraE.setPitch(pitch);
-            cameraE.prevYaw = prevYaw;
-            cameraE.prevPitch = prevPitch;
+            cameraE.lastYaw = lastYaw;
+            cameraE.lastPitch = lastPitch;
         }
     }
 

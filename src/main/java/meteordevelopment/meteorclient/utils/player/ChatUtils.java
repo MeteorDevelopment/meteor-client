@@ -261,7 +261,6 @@ public class ChatUtils {
                     Text.literal("Set as Baritone goal")
                 ))
                 .withClickEvent(new MeteorClickEvent(
-                    ClickEvent.Action.RUN_COMMAND,
                     String.format("%sgoto %d %d %d", BaritoneUtils.getPrefix(), (int) pos.x, (int) pos.y, (int) pos.z)
                 ));
 
