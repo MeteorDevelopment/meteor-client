@@ -94,12 +94,12 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     // Sprint
 
-    @ModifyExpressionValue(method = "canStartSprinting", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isWalking()Z"))
+    @ModifyExpressionValue(method = "canStartSprinting", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/input/Input;hasForwardMovement()Z"))
     private boolean modifyIsWalking(boolean original) {
         if (!Modules.get().get(Sprint.class).rageSprint()) return original;
 
-        float forwards = Math.abs(input.movementSideways);
-        float sideways = Math.abs(input.movementForward);
+        float forwards = Math.abs(input.getMovementInput().y);
+        float sideways = Math.abs(input.getMovementInput().x);
 
         return (isSubmergedInWater() ? (forwards > 1.0E-5F || sideways > 1.0E-5F) : (forwards > 0.8 || sideways > 0.8));
     }
@@ -108,7 +108,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     private boolean modifyMovement(boolean original) {
         if (!Modules.get().get(Sprint.class).rageSprint()) return original;
 
-        return Math.abs(input.movementSideways) > 1.0E-5F || Math.abs(input.movementForward) > 1.0E-5F;
+        return Math.abs(input.getMovementInput().x) > 1.0E-5F || Math.abs(input.getMovementInput().y) > 1.0E-5F;
     }
 
     @WrapWithCondition(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;setSprinting(Z)V", ordinal = 3))

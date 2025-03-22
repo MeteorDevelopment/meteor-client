@@ -1026,7 +1026,7 @@ public class CrystalAura extends Module {
         FindItemResult item = InvUtils.findInHotbar(targetItem);
         if (!item.found()) return;
 
-        int prevSlot = mc.player.getInventory().selectedSlot;
+        int prevSlot = mc.player.getInventory().getSelectedSlot();
 
         if (autoSwitch.get() != AutoSwitchMode.None && !item.isOffhand()) InvUtils.swap(item.slot(), false);
 

@@ -52,7 +52,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
 
     @Override
     public T load(NbtCompound tag) {
-        parse(tag.getString("value"));
+        parse(tag.getString("value", ""));
 
         return get();
     }

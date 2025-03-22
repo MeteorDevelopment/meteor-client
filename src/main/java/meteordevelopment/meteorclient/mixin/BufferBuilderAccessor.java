@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.util.BufferAllocator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -16,6 +16,6 @@ public interface BufferBuilderAccessor {
     @Accessor("allocator")
     BufferAllocator meteor$getAllocator();
 
-    @Accessor("format")
+    @Accessor("vertexFormat")
     VertexFormat getVertexFormat();
 }

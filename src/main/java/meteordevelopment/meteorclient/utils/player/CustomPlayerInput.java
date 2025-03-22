@@ -7,12 +7,14 @@ package meteordevelopment.meteorclient.utils.player;
 
 import net.minecraft.client.input.Input;
 import net.minecraft.util.PlayerInput;
+import net.minecraft.util.math.Vec2f;
 
 public class CustomPlayerInput extends Input {
     @Override
     public void tick() {
-        movementForward = this.playerInput.forward() == this.playerInput.backward() ? 0.0F : (this.playerInput.forward() ? 1.0F : -1.0F);
-        movementSideways = this.playerInput.left() == this.playerInput.right() ? 0.0F : (this.playerInput.left() ? 1.0F : -1.0F);
+        float f = this.playerInput.forward() == this.playerInput.backward() ? 0.0F : (this.playerInput.forward() ? 1.0F : -1.0F);
+        float g = this.playerInput.left() == this.playerInput.right() ? 0.0F : (this.playerInput.left() ? 1.0F : -1.0F);
+        this.movementVector = new Vec2f(g, f).normalize();
     }
 
     public void stop() {

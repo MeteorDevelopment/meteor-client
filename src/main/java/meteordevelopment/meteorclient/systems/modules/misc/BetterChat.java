@@ -32,7 +32,10 @@ import net.minecraft.client.gui.PlayerSkinDrawer;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.text.*;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
@@ -558,12 +561,8 @@ public class BetterChat extends Module {
 
         sendButton.setStyle(sendButton.getStyle()
             .withFormatting(Formatting.DARK_RED)
-            .withClickEvent(new MeteorClickEvent(
-                ClickEvent.Action.RUN_COMMAND,
-                Commands.get("say").toString(message)
-            ))
-            .withHoverEvent(new HoverEvent(
-                HoverEvent.Action.SHOW_TEXT,
+            .withClickEvent(new MeteorClickEvent(Commands.get("say").toString(message)))
+            .withHoverEvent(new HoverEvent.ShowText(
                 hintBaseText
             )));
         return sendButton;

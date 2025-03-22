@@ -33,5 +33,5 @@ accessible   class   net/minecraft/client/render/RenderPhase$Target
 # Item Physics
 accessible field net/minecraft/client/render/item/ItemRenderState layers [Lnet/minecraft/client/render/item/ItemRenderState$LayerRenderState;
 accessible field net/minecraft/client/render/item/ItemRenderState layerCount I
-accessible field net/minecraft/client/render/item/ItemRenderState$LayerRenderState model Lnet/minecraft/client/render/model/BakedModel;
-accessible method net/minecraft/client/render/item/ItemRenderState$LayerRenderState getTransformation ()Lnet/minecraft/client/render/model/json/Transformation;
+#accessible field net/minecraft/client/render/item/ItemRenderState$LayerRenderState model Lnet/minecraft/client/render/model/BakedModel;
+#accessible method net/minecraft/client/render/item/ItemRenderState$LayerRenderState getTransformation ()Lnet/minecraft/client/render/model/json/Transformation;

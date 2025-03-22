@@ -349,7 +349,7 @@ public class HoleFiller extends Module {
                 player.isDead() ||
                 !Friends.get().shouldAttack(player) ||
                 (ignoreSafe.get() && isSurrounded(player)) ||
-                (onlyMoving.get() && (player.getX() - player.prevX != 0 || player.getY() - player.prevY != 0 || player.getZ() - player.prevZ != 0))
+                (onlyMoving.get() && (player.getX() - player.lastX != 0 || player.getY() - player.lastY != 0 || player.getZ() - player.lastZ != 0))
             ) continue;
 
             targets.add(player);
@@ -378,9 +378,9 @@ public class HoleFiller extends Module {
 
         else if (predict.get()) {
             testVec.add(
-                player.getX() - player.prevX,
-                player.getY() - player.prevY,
-                player.getZ() - player.prevZ
+                player.getX() - player.lastX,
+                player.getY() - player.lastY,
+                player.getZ() - player.lastZ
             );
         }
 

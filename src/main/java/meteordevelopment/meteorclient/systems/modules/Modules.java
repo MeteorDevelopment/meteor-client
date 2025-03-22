@@ -360,10 +360,10 @@ public class Modules extends System<Modules> {
     public Modules fromTag(NbtCompound tag) {
         disableAll();
 
-        NbtList modulesTag = tag.getList("modules", 10);
+        NbtList modulesTag = tag.getListOrEmpty("modules");
         for (NbtElement moduleTagI : modulesTag) {
             NbtCompound moduleTag = (NbtCompound) moduleTagI;
-            Module module = get(moduleTag.getString("name"));
+            Module module = get(moduleTag.getString("name", ""));
             if (module != null) module.fromTag(moduleTag);
         }
 

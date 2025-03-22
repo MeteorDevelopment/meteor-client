@@ -53,8 +53,8 @@ public class AutoWeapon extends Module {
     }
 
     private int getBestWeapon(LivingEntity target) {
-        int slotS = mc.player.getInventory().selectedSlot;
-        int slotA = mc.player.getInventory().selectedSlot;
+        int slotS = mc.player.getInventory().getSelectedSlot();
+        int slotA = mc.player.getInventory().getSelectedSlot();
         double damageS = 0;
         double damageA = 0;
         double currentDamageS;
@@ -81,7 +81,7 @@ public class AutoWeapon extends Module {
         else if (weapon.get() == Weapon.Axe && threshold.get() > damageS - damageA) return slotA;
         else if (weapon.get() == Weapon.Sword && threshold.get() < damageA - damageS) return slotA;
         else if (weapon.get() == Weapon.Axe && threshold.get() < damageS - damageA) return slotS;
-        else return mc.player.getInventory().selectedSlot;
+        else return mc.player.getInventory().getSelectedSlot();
     }
 
     public enum Weapon {

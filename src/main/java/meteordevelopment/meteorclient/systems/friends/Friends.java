@@ -110,14 +110,14 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     public Friends fromTag(NbtCompound tag) {
         friends.clear();
 
-        for (NbtElement itemTag : tag.getList("friends", 10)) {
+        for (NbtElement itemTag : tag.getListOrEmpty("friends")) {
             NbtCompound friendTag = (NbtCompound) itemTag;
             if (!friendTag.contains("name")) continue;
 
-            String name = friendTag.getString("name");
+            String name = friendTag.getString("name", "");
             if (get(name) != null) continue;
 
-            String uuid = friendTag.getString("id");
+            String uuid = friendTag.getString("id", "");
             Friend friend = !uuid.isBlank()
                 ? new Friend(name, UndashedUuid.fromStringLenient(uuid))
                 : new Friend(name);

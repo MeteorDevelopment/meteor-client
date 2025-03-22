@@ -412,14 +412,14 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         @Override
         public void move(int deltaX, int deltaY) {
-            int prevX = x;
-            int prevY = y;
+            int lastX = x;
+            int lastY = y;
 
             int border = Hud.get().border.get();
             x = MathHelper.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
             y = MathHelper.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
 
-            for (HudElement element : selection) element.move(x - prevX, y - prevY);
+            for (HudElement element : selection) element.move(x - lastX, y - lastY);
         }
     }
 }

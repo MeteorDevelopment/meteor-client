@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.renderer;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import meteordevelopment.meteorclient.mixin.BufferRendererAccessor;
 import meteordevelopment.meteorclient.mixininterface.ICapabilityTracker;
 import net.fabricmc.loader.api.FabricLoader;
@@ -197,7 +197,7 @@ public class GL {
 
     public static void uniformMatrix(int location, Matrix4f v) {
         v.get(MAT);
-        GlStateManager._glUniformMatrix4(location, false, MAT);
+        GlStateManager._glUniformMatrix4(location, MAT);
     }
 
     // Textures

@@ -421,7 +421,7 @@ public class InventoryTweaks extends Module {
     @EventHandler
     private void onInventory(InventoryEvent event) {
         ScreenHandler handler = mc.player.currentScreenHandler;
-        if (canSteal(handler) && event.packet.getSyncId() == handler.syncId) {
+        if (canSteal(handler) && event.packet.syncId() == handler.syncId) {
             if (autoSteal.get()) {
                 steal(handler);
             } else if (autoDump.get()) {

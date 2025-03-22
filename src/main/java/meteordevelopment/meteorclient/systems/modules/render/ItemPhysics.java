@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.json.Transformation;
 import net.minecraft.client.util.math.MatrixStack;
@@ -125,12 +124,12 @@ public class ItemPhysics extends Module {
     }
 
     private void applyTransformation(MatrixStack matrices, Transformation transformation) {
-        float prevY = transformation.translation.y;
+        float lastY = transformation.translation.y;
         transformation.translation.y = 0;
 
         transformation.apply(false, matrices);
 
-        transformation.translation.y = prevY;
+        transformation.translation.y = lastY;
     }
 
     private void offsetInWater(MatrixStack matrices, ItemEntity entity) {

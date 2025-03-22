@@ -136,12 +136,12 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
 
     @Override
     public Settings fromTag(NbtCompound tag) {
-        NbtList groupsTag = tag.getList("groups", 10);
+        NbtList groupsTag = tag.getListOrEmpty("groups");
 
         for (NbtElement t : groupsTag) {
             NbtCompound groupTag = (NbtCompound) t;
 
-            SettingGroup sg = getGroup(groupTag.getString("name"));
+            SettingGroup sg = getGroup(groupTag.getString("name", ""));
             if (sg != null) sg.fromTag(groupTag);
         }
 

@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Map;
@@ -103,7 +104,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     public Waypoint(NbtElement tag) {
         NbtCompound nbt = (NbtCompound) tag;
 
-        if (nbt.containsUuid("uuid")) uuid = nbt.getUuid("uuid");
+        if (nbt.contains("uuid")) uuid = nbt.get("uuid", Uuids.INT_STREAM_CODEC).get();
         else uuid = UUID.randomUUID();
 
         fromTag(nbt);
@@ -188,7 +189,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
 
-        tag.putUuid("uuid", uuid);
+        tag.put("uuid", Uuids.INT_STREAM_CODEC, uuid);
         tag.put("settings", settings.toTag());
 
         return tag;
@@ -197,7 +198,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     @Override
     public Waypoint fromTag(NbtCompound tag) {
         if (tag.contains("settings")) {
-            settings.fromTag(tag.getCompound("settings"));
+            settings.fromTag(tag.getCompoundOrEmpty("settings"));
         }
 
         return this;

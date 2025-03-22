@@ -1,5 +1,6 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.PostProcessRenderer;
 import meteordevelopment.meteorclient.renderer.Shader;
@@ -18,7 +19,7 @@ public abstract class PostProcessShader {
 
     public void init(String frag) {
         vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());
-        framebuffer = new SimpleFramebuffer(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), true);
+        framebuffer = new SimpleFramebuffer(MeteorClient.NAME + " PostProcessShader", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), true);
         shader = new Shader("post-process/base.vert", "post-process/" + frag + ".frag");
     }
 

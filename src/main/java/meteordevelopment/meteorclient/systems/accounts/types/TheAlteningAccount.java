@@ -98,11 +98,11 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
 
     @Override
     public TheAlteningAccount fromTag(NbtCompound tag) {
-        if (!tag.contains("name") || !tag.contains("cache") || !tag.contains("token")) throw new NbtException();
+        if (tag.getString("name").isEmpty() || tag.getCompound("cache").isEmpty() || tag.getString("token").isEmpty()) throw new NbtException();
 
-        name = tag.getString("name");
-        token = tag.getString("token");
-        cache.fromTag(tag.getCompound("cache"));
+        name = tag.getString("name").get();
+        token = tag.getString("token").get();
+        cache.fromTag(tag.getCompound("cache").get());
 
         return this;
     }

@@ -59,7 +59,7 @@ public class EntityOwner extends Module {
         for (Entity entity : mc.world.getEntities()) {
             UUID ownerUuid;
 
-            if (entity instanceof TameableEntity tameable) ownerUuid = tameable.getOwnerUuid();
+            if (entity instanceof TameableEntity tameable) ownerUuid = tameable.getOwner().getUuid();
             else continue;
 
             if (ownerUuid != null) {

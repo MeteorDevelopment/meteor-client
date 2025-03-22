@@ -152,7 +152,7 @@ public class AntiAFK extends Module {
     private int sneakTimer = 0;
     private int strafeTimer = 0;
     private boolean direction = false;
-    private float prevYaw;
+    private float lastYaw;
 
     @Override
     public void onActivate() {
@@ -161,7 +161,7 @@ public class AntiAFK extends Module {
             sendMessages.set(false);
         }
 
-        prevYaw = mc.player.getYaw();
+        lastYaw = mc.player.getYaw();
         messageTimer = delay.get() * 20;
     }
 
@@ -206,10 +206,10 @@ public class AntiAFK extends Module {
 
         // Spin
         if (spin.get()) {
-            prevYaw += spinSpeed.get();
+            lastYaw += spinSpeed.get();
             switch (spinMode.get()) {
-                case Client -> mc.player.setYaw(prevYaw);
-                case Server -> Rotations.rotate(prevYaw, pitch.get(), -15);
+                case Client -> mc.player.setYaw(lastYaw);
+                case Server -> Rotations.rotate(lastYaw, pitch.get(), -15);
             }
         }
 
