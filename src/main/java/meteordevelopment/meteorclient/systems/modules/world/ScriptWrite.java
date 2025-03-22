@@ -1,7 +1,5 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import java.util.Arrays;
-
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -13,12 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 
-// TODO: add some visual feedback while editing
 public class ScriptWrite extends Module {
-    private static String eval(final String s) {
-        return MeteorStarscript.run(MeteorStarscript.compile(s));
-    }
-
     private final SettingGroup sgSign = settings.createGroup("Sign");
 
     private final Setting<Boolean> signSigns = sgSign.add(new BoolSetting.Builder()
@@ -45,17 +38,14 @@ public class ScriptWrite extends Module {
     private void onSendPacket(final PacketEvent.Send event) {
         switch (event.packet) {
             case final BookUpdateC2SPacket p -> {
-                if (onSign.get() && p.title().isEmpty()) break;
+                if (onSign.get() && p.title().isEmpty()) return;
 
                 final var pages = p.pages()
                     .stream()
-                    .map(ScriptWrite::eval)
+                    .map(MeteorStarscript::eval)
                     .toList();
 
-                if (pages.equals(p.pages())) break; // if it works (so far it does) dont fix it*
-
-                event.setCancelled(true);
-                mc.getNetworkHandler().sendPacket(new BookUpdateC2SPacket(p.slot(), pages, p.title()));
+                event.connection.send(new BookUpdateC2SPacket(p.slot(), pages, p.title()), null, true);
             }
             case final UpdateSignC2SPacket p -> {
                 final var text = p.getText();
@@ -66,19 +56,19 @@ public class ScriptWrite extends Module {
                 }
 
                 for (var i = 0; i < text.length; i++)
-                    text[i] = eval(text[i]);
+                    text[i] = MeteorStarscript.eval(text[i]);
 
-                if (Arrays.equals(text, p.getText())) break; // * this too
-
-                event.setCancelled(true);
-                mc.getNetworkHandler().sendPacket(
+                event.connection.send(
                     new UpdateSignC2SPacket(
                         p.getPos(),
                         p.isFront(),
-                        text[0], text[1], text[2], text[3]
-                    ));
+                        text[0], text[1], text[2], text[3]),
+                    null, true);
             }
-            default -> {}
+            default -> {
+                return;
+            }
         }
+        event.cancel();
     }
 }

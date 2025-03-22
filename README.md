@@ -1,4 +1,30 @@
-
+## Forked from [MeteorDevelopment/meteor-client](https://github.com/MeteorDevelopment/meteor-client)
+### Changes
+- Add Queue-2b2t module.
+- Add Script-Write module to use Starscript in signs and books.
+- Add Tracers option to highlight only specific items.
+- Add a confirm prompt when saving/loading profiles.
+- Add allow-flying option to Kill-Aura.
+- Add confirm-disconnect option to Auto-Reconnect.
+- Add effect-ran-out option to Notifier.
+- Add no-beds option to No-Interact.
+- Add session command.
+- Add uptime to Starscript.
+- Improve Auto-Eat.
+- Improve Auto-Sign.
+- Improve Better-Chat.
+- Improve Better-Tab.
+- Improve Block-Selection.
+- Improve Elytra-Fly/Pitch40.
+- Improve No-Rotate.
+- Improve Notifier.
+- Improve Packet-Canceller.
+- Improve Trajectories.
+- Remove Discord-Presence.
+- Remove Trail.
+- Remove meteor capes and player count.
+- Fix stuff.
+#
 <p align="center">
 <img src="https://meteorclient.com/icon.png" alt="meteor-client-logo" width="15%"/>
 </p>

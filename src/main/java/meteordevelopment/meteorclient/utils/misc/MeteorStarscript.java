@@ -83,6 +83,7 @@ public class MeteorStarscript {
         ss.set("ping", MeteorStarscript::ping);
         ss.set("time", () -> Value.string(Instant.now().atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm"))));
         ss.set("uptime", new ValueMap()
+            .set("_toString", () -> Value.number(System.currentTimeMillis() - MeteorClient.timestamp))
             .set("hours", () -> Value.number((System.currentTimeMillis() - MeteorClient.timestamp) / 1000 / 60 / 60))
             .set("minutes", () -> Value.number((System.currentTimeMillis() - MeteorClient.timestamp) / 1000 / 60 % 60))
             .set("seconds", () -> Value.number((System.currentTimeMillis() - MeteorClient.timestamp) / 1000 % 60))
@@ -239,6 +240,10 @@ public class MeteorStarscript {
 
     public static String run(Script script) {
         return run(script, new StringBuilder());
+    }
+
+    public static String eval(String string) {
+        return String.valueOf(run(compile(string)));
     }
 
     // Errors

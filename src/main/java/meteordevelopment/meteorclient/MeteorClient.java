@@ -26,7 +26,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
-import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
@@ -137,7 +136,6 @@ public class MeteorClient implements ClientModInitializer {
 
         // Save on shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            OnlinePlayers.leave();
             Systems.save();
             GuiThemes.save();
         }));
