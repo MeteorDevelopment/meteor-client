@@ -78,9 +78,8 @@ public class EnchantmentListSetting extends Setting<Set<RegistryKey<Enchantment>
     public Set<RegistryKey<Enchantment>> load(NbtCompound tag) {
         get().clear();
 
-        NbtList valueTag = tag.getList("value", 8);
-        for (NbtElement tagI : valueTag) {
-            get().add(RegistryKey.of(RegistryKeys.ENCHANTMENT, Identifier.of(tagI.asString())));
+        for (NbtElement tagI : tag.getListOrEmpty("value")) {
+            get().add(RegistryKey.of(RegistryKeys.ENCHANTMENT, Identifier.of(tagI.asString().orElse(""))));
         }
 
         return get();

@@ -339,7 +339,7 @@ public class BookBot extends Module {
     @Override
     public Module fromTag(NbtCompound tag) {
         if (tag.contains("file")) {
-            file = new File(tag.getString("file"));
+            file = new File(tag.getString("file", ""));
         }
 
         return super.fromTag(tag);

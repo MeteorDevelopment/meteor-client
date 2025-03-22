@@ -103,8 +103,8 @@ public class Sprint extends Module {
         if (mc.currentScreen != null && !Modules.get().get(GUIMove.class).sprint.get()) return false;
 
         float movement = mode.get() == Mode.Rage
-            ? (Math.abs(mc.player.input.movementForward) + Math.abs(mc.player.input.movementSideways))
-            : mc.player.input.movementForward;
+            ? (Math.abs(mc.player.input.getMovementInput().y) + Math.abs(mc.player.input.getMovementInput().x))
+            : mc.player.input.getMovementInput().y;
 
         if (movement <= (mc.player.isSubmergedInWater() ? 1.0E-5F : 0.8)) {
             if (mode.get() == Mode.Strict || !permaSprint.get()) return false;

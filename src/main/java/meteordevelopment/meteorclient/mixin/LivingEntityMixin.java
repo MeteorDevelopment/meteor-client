@@ -121,8 +121,8 @@ public abstract class LivingEntityMixin extends Entity {
         if ((Object) this != mc.player) return original;
         if (!Modules.get().get(Sprint.class).rageSprint()) return original;
 
-        float forward = Math.signum(mc.player.input.movementForward);
-        float strafe = 90 * Math.signum(mc.player.input.movementSideways);
+        float forward = Math.signum(mc.player.input.getMovementInput().y);
+        float strafe = 90 * Math.signum(mc.player.input.getMovementInput().x);
         if (forward != 0) strafe *= (forward * 0.5f);
 
         original -= strafe;
@@ -137,6 +137,6 @@ public abstract class LivingEntityMixin extends Entity {
         if (!Modules.get().get(Sprint.class).rageSprint()) return original;
 
         // only add the extra velocity if you're actually moving, otherwise you'll jump in place and move forward
-        return original && (Math.abs(mc.player.input.movementForward) > 1.0E-5F || Math.abs(mc.player.input.movementSideways) > 1.0E-5F);
+        return original && (Math.abs(mc.player.input.getMovementInput().y) > 1.0E-5F || Math.abs(mc.player.input.getMovementInput().x) > 1.0E-5F);
     }
 }

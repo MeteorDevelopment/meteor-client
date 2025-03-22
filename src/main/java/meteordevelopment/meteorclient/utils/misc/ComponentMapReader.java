@@ -153,7 +153,7 @@ public class ComponentMapReader {
 
         private <T> void readComponentValue(StringReader reader, ComponentMap.Builder builder, ComponentType<T> type) throws CommandSyntaxException {
             int i = reader.getCursor();
-            NbtElement nbtElement = new StringNbtReader(reader).parseElement();
+            NbtElement nbtElement = StringNbtReader.fromOps(NbtOps.INSTANCE).read(reader); // todo no idea if this is correct, crosby should double check
             DataResult<T> dataResult = type.getCodecOrThrow().parse(this.nbtOps, nbtElement);
             builder.add(type, dataResult.getOrThrow(error -> {
                 reader.setCursor(i);

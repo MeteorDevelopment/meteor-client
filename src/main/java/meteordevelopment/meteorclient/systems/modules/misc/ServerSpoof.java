@@ -126,8 +126,8 @@ public class ServerSpoof extends Module {
         link.setStyle(link.getStyle()
             .withColor(Formatting.BLUE)
             .withUnderline(true)
-            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.url()))
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to open the pack url")))
+            .withClickEvent(new ClickEvent.OpenUrl(URI.create(packet.url())))
+            .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to open the pack url")))
         );
 
         MutableText acceptance = Text.literal("[Accept Pack]");
@@ -142,7 +142,7 @@ public class ServerSpoof extends Module {
                     mc.getServerResourcePackProvider().addResourcePack(packet.id(), url, packet.hash());
                 }
             }))
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to accept and apply the pack.")))
+            .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to accept and apply the pack.")))
         );
 
         msg.append(link).append(" ");

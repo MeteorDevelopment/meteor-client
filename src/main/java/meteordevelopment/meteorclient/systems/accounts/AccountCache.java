@@ -38,7 +38,7 @@ public class AccountCache implements ISerializable<AccountCache> {
 
     @Override
     public AccountCache fromTag(NbtCompound tag) {
-        if (!tag.contains("username") || !tag.contains("uuid")) throw new NbtException();
+        if (tag.getString("username").isEmpty() || tag.getString("uuid").isEmpty()) throw new NbtException();
 
         username = tag.getString("username").get();
         uuid = tag.getString("uuid").get();

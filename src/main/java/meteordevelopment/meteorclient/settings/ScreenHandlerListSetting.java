@@ -70,9 +70,9 @@ public class ScreenHandlerListSetting extends Setting<List<ScreenHandlerType<?>>
     public List<ScreenHandlerType<?>> load(NbtCompound tag) {
         get().clear();
 
-        NbtList valueTag = tag.getList("value", 8);
+        NbtList valueTag = tag.getListOrEmpty("value");
         for (NbtElement tagI : valueTag) {
-            ScreenHandlerType<?> type = Registries.SCREEN_HANDLER.get(Identifier.of(tagI.asString()));
+            ScreenHandlerType<?> type = Registries.SCREEN_HANDLER.get(Identifier.of(tagI.asString().orElse("")));
             if (type != null) get().add(type);
         }
 

@@ -71,8 +71,8 @@ public class Strafe extends SpeedMode {
     }
 
     private Vector2d transformStrafe(double speed) {
-        float forward = mc.player.input.getMovementInput().x;
-        float side = mc.player.input.getMovementInput().y;
+        float forward = mc.player.input.getMovementInput().y;
+        float side = mc.player.input.getMovementInput().x;
         float yaw = mc.player.lastYaw + (mc.player.getYaw() - mc.player.lastYaw) * mc.getRenderTickCounter().getTickProgress(true);
 
         double velX, velZ;

@@ -167,9 +167,9 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
 
     @Override
     public Keybind fromTag(NbtCompound tag) {
-        isKey = tag.getBoolean("isKey");
-        value = tag.getInt("value");
-        modifiers = tag.getInt("modifiers");
+        isKey = tag.getBoolean("isKey", false);
+        value = tag.getInt("value", 0);
+        modifiers = tag.getInt("modifiers", 0);
 
         return this;
     }

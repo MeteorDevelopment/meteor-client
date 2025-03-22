@@ -86,18 +86,18 @@ public abstract class BookEditScreenMixin extends Screen {
                     try {
                         NbtCompound tag = NbtIo.readCompressed(in, NbtSizeTracker.ofUnlimitedBytes());
 
-                        NbtList listTag = tag.getList("pages", 8).copy();
+                        NbtList listTag = tag.getListOrEmpty("pages").copy();
 
                         pages.clear();
                         for(int i = 0; i < listTag.size(); ++i) {
-                            pages.add(listTag.getString(i));
+                            pages.add(listTag.getString(i, ""));
                         }
 
                         if (pages.isEmpty()) {
                             pages.add("");
                         }
 
-                        currentPage = tag.getInt("currentPage");
+                        currentPage = tag.getInt("currentPage", 0);
 
                         dirty = true;
                         updateButtons();

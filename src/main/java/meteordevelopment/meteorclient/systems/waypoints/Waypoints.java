@@ -165,7 +165,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     public Waypoints fromTag(NbtCompound tag) {
         waypoints.clear();
 
-        for (NbtElement waypointTag : tag.getList("waypoints", 10)) {
+        for (NbtElement waypointTag : tag.getListOrEmpty("waypoints")) {
             waypoints.add(new Waypoint(waypointTag));
         }
 

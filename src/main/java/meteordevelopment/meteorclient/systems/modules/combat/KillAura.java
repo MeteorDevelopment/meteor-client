@@ -32,7 +32,10 @@ import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.MaceItem;
+import net.minecraft.item.TridentItem;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
@@ -318,7 +321,7 @@ public class KillAura extends Module {
     private boolean shouldShieldBreak() {
         for (Entity target : targets) {
             if (target instanceof PlayerEntity player) {
-                if (player.blockedByShield(mc.world.getDamageSources().playerAttack(mc.player)) && shieldMode.get() == ShieldMode.Break) {
+                if (player.isBlocking() && shieldMode.get() == ShieldMode.Break) {
                     return true;
                 }
             }
@@ -344,8 +347,8 @@ public class KillAura extends Module {
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
         if (ignoreTamed.get()) {
             if (entity instanceof Tameable tameable
-                && tameable.getOwnerUuid() != null
-                && tameable.getOwnerUuid().equals(mc.player.getUuid())
+                && tameable.getOwner() != null
+                && tameable.getOwner().equals(mc.player)
             ) return false;
         }
         if (ignorePassive.get()) {
@@ -356,7 +359,7 @@ public class KillAura extends Module {
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
-            if (shieldMode.get() == ShieldMode.Ignore && player.blockedByShield(mc.world.getDamageSources().playerAttack(mc.player))) return false;
+            if (shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
         }
         if (entity instanceof AnimalEntity animal) {
             return switch (mobAgeFilter.get()) {

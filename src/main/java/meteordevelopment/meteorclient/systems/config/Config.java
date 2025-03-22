@@ -182,7 +182,7 @@ public class Config extends System<Config> {
 
     @Override
     public Config fromTag(NbtCompound tag) {
-        if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
+        if (tag.contains("settings")) settings.fromTag(tag.getCompoundOrEmpty("settings"));
         if (tag.contains("dontShowAgainPrompts")) dontShowAgainPrompts = listFromTag(tag, "dontShowAgainPrompts");
 
         return this;
@@ -196,7 +196,7 @@ public class Config extends System<Config> {
 
     private List<String> listFromTag(NbtCompound tag, String key) {
         List<String> list = new ArrayList<>();
-        for (NbtElement item : tag.getList(key, 8)) list.add(item.asString());
+        for (NbtElement item : tag.getListOrEmpty(key)) list.add(item.asString().orElse(""));
         return list;
     }
 }
