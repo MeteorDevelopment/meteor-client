@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTab;
@@ -43,21 +44,36 @@ public abstract class PlayerListHudMixin {
 
     @Redirect(method = "collectPlayerEntries()Ljava/util/List;", at = @At(value = "INVOKE", target = "Ljava/util/stream/Stream;sorted(Ljava/util/Comparator;)Ljava/util/stream/Stream;"))
     private Stream<PlayerListEntry> modifyStreamAfterSorted(Stream<PlayerListEntry> stream, Comparator<PlayerListEntry> comparator) {
-        final var s = stream.sorted(comparator).sorted((i1, i2) -> Friends.get().isFriend(i1) ? 1 : 0); // TODO: ???
+        final var s = stream.sorted(comparator);
 
         final var betterTab = Modules.get().get(BetterTab.class);
-        final var i = betterTab.cycleSpeed.get();
-        if (!betterTab.isActive() || i == 0) return s;
+        if (!betterTab.isActive()) return s;
 
         final var l = s.toList();
         final var size = l.size();
-        if (size == 0) return Stream.empty();
+        if (size == 0) return s;
 
-        final var n = (int) (System.currentTimeMillis() / 1000d * size / i % size);
+        final var i = betterTab.scroll;
+        final var p = betterTab.passiveScroll.get();
+
+        final var n = (int) ((p == 0 ? 0 : (System.currentTimeMillis() / 1000d * size / p)) + i) % size;
 
         final var o = new ArrayList<>(l.subList(n, size));
         o.addAll(l.subList(0, n));
-        return o.stream();
+        if (!betterTab.sort.get())
+            return o.stream();
+
+        // TODO: questionable efficiency
+        final var f = new ArrayList<PlayerListEntry>();
+        for (var j = o.size() - 1; j >= 0; j--) {
+            final var pl = o.get(j);
+            if (Friends.get().isFriend(pl) || pl.getProfile().getId().toString().equals(MeteorClient.mc.player.getGameProfile().getId().toString())) {
+                f.add(pl);
+                o.remove(j);
+            }
+        }
+        f.addAll(o);
+        return f.stream();
     }
 
     @Inject(method = "getPlayerName", at = @At("HEAD"), cancellable = true)

@@ -11,11 +11,14 @@ import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
+
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,8 +53,9 @@ public abstract class ClientWorldMixin {
     @Inject(method = "getDimensionEffects", at = @At("HEAD"), cancellable = true)
     private void onGetSkyProperties(CallbackInfoReturnable<DimensionEffects> info) {
         Ambience ambience = Modules.get().get(Ambience.class);
+        Dimension dimension = PlayerUtils.getDimension();
 
-        if (ambience.isActive() && ambience.endSky.get()) {
+        if (ambience.isActive() && ((ambience.endSky.get() && dimension == Dimension.Overworld) || (ambience.netherEndSky.get() && dimension == Dimension.Nether))) {
             info.setReturnValue(ambience.customSkyColor.get() ? customSky : endSky);
         }
     }

@@ -32,6 +32,13 @@ public class Ambience extends Module {
         .build()
     );
 
+    public final Setting<Boolean> netherEndSky = sgSky.add(new BoolSetting.Builder()
+        .name("nether-end-sky")
+        .description("Makes the nether sky like the end.")
+        .defaultValue(false)
+        .build()
+    );
+
     public final Setting<Boolean> customSkyColor = sgSky.add(new BoolSetting.Builder()
         .name("custom-sky-color")
         .description("Whether the sky color should be changed.")

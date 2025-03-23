@@ -3,12 +3,14 @@
 - Add Queue-2b2t module.
 - Add Script-Write module to use Starscript in signs and books.
 - Add Tracers option to highlight only specific items.
-- Add a confirm prompt when saving/loading profiles.
+- Add a confirm prompt when saving/loading/deleting profiles.
 - Add allow-flying option to Kill-Aura.
 - Add confirm-disconnect option to Auto-Reconnect.
 - Add effect-ran-out option to Notifier.
 - Add no-beds option to No-Interact.
+- Add scroll option to Better-Tab.
 - Add session command.
+- Add sysgc command.
 - Add uptime to Starscript.
 - Improve Auto-Eat.
 - Improve Auto-Sign.
@@ -24,6 +26,7 @@
 - Remove Trail.
 - Remove meteor capes and player count.
 - Fix stuff.
+- Some opinionated changes.
 #
 <p align="center">
 <img src="https://meteorclient.com/icon.png" alt="meteor-client-logo" width="15%"/>

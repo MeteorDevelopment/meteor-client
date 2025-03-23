@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friend;
@@ -13,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -42,12 +44,27 @@ public class BetterTab extends Module {
         .build()
     );
 
-    public final Setting<Double> cycleSpeed = sgGeneral.add(new DoubleSetting.Builder()
-        .name("cycle-speed")
-        .description("How many seconds it takes to complete a tablist rotation, 0 to disable.")
-        .defaultValue(60)
+    public int scroll;
+    public final Setting<Boolean> scrollEnabled = sgGeneral.add(new BoolSetting.Builder()
+        .name("scroll")
+        .description("Use the mouse wheel to cycle through the tablist entries.")
+        .defaultValue(true)
+        .onChanged((i) -> scroll = 0)
+        .build()
+    );
+
+    public final Setting<Integer> passiveScroll = sgGeneral.add(new IntSetting.Builder()
+        .name("passive-scroll")
+        .description("0 to disable.")
+        .defaultValue(120)
         .min(0)
-        .sliderMin(5)
+        .build()
+    );
+
+    public final Setting<Boolean> sort = sgGeneral.add(new BoolSetting.Builder()
+        .name("sort")
+        .description("Place yourself and your friends first, then the other players.")
+        .defaultValue(true)
         .build()
     );
 
@@ -137,4 +154,12 @@ public class BetterTab extends Module {
         return name;
     }
 
+
+    @EventHandler
+    private void onMouseScroll(MouseScrollEvent event) {
+        if (!mc.options.playerListKey.isPressed() || !scrollEnabled.get()) return;
+
+        scroll += event.value;
+        event.cancel();
+    }
 }

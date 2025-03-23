@@ -49,6 +49,7 @@ public class Commands {
         add(new NotebotCommand());
         add(new PeekCommand());
         add(new ProfilesCommand());
+        add(new QuickSwapCommand());
         add(new ReloadCommand());
         add(new ResetCommand());
         add(new RotationCommand());
@@ -59,6 +60,7 @@ public class Commands {
         add(new SettingCommand());
         add(new SpectateCommand());
         add(new SwarmCommand());
+        add(new SysgcCommand());
         add(new ToggleCommand());
         add(new VClipCommand());
         add(new WaspCommand());
