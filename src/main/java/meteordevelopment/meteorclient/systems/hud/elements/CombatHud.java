@@ -29,14 +29,15 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.EnchantmentTags;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix4fStack;
 
@@ -326,7 +327,7 @@ public class CombatHud extends HudElement {
                     for (int position = 5; position >= 0; position--) {
                         ItemStack itemStack = getItem(position);
 
-                        if (itemStack.getItem() instanceof SwordItem
+                        if (itemStack.isIn(ItemTags.SWORDS)
                             || itemStack.getItem() == Items.END_CRYSTAL
                             || itemStack.getItem() == Items.RESPAWN_ANCHOR
                             || itemStack.getItem() instanceof BedItem) threat = true;
@@ -474,9 +475,13 @@ public class CombatHud extends HudElement {
         if (playerEntity == null) return ItemStack.EMPTY;
 
         return switch (i) {
-            case 4 -> playerEntity.getOffHandStack();
             case 5 -> playerEntity.getMainHandStack();
-            default -> playerEntity.getInventory().getArmorStack(i);
+            case 4 -> playerEntity.getOffHandStack();
+            case 3 -> playerEntity.getEquippedStack(EquipmentSlot.HEAD);
+            case 2 -> playerEntity.getEquippedStack(EquipmentSlot.CHEST);
+            case 1 -> playerEntity.getEquippedStack(EquipmentSlot.FEET);
+            case 0 -> playerEntity.getEquippedStack(EquipmentSlot.LEGS);
+            default -> ItemStack.EMPTY;
         };
     }
 

@@ -51,6 +51,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -1141,7 +1142,7 @@ public class HighwayBuilder extends Module {
                                 eject = false;
                                 break;
                             }
-                            if (stack.getItem() instanceof PickaxeItem) {
+                            if (stack.isIn(ItemTags.PICKAXES)) {
                                 eject = false;
                                 break;
                             }
@@ -1333,7 +1334,7 @@ public class HighwayBuilder extends Module {
                         return;
                     }
 
-                    if (countItem(b, stack -> stack.getItem() instanceof PickaxeItem) <= b.savePickaxes.get()) {
+                    if (countItem(b, stack -> stack.isIn(ItemTags.PICKAXES)) <= b.savePickaxes.get()) {
                         if (b.searchEnderChest.get() || b.searchShulkers.get()) {
                             b.restockTask.setPickaxes();
                         }
@@ -1401,7 +1402,7 @@ public class HighwayBuilder extends Module {
                                     break;
                                 }
                             }
-                            if (b.restockTask.pickaxes && stack.getItem() instanceof PickaxeItem) {
+                            if (b.restockTask.pickaxes && stack.isIn(ItemTags.PICKAXES)) {
                                 stop = false;
                                 break;
                             }
@@ -1424,7 +1425,7 @@ public class HighwayBuilder extends Module {
                 if (slot == -1) {
                     boolean restockOccurred = (
                         (b.restockTask.materials && (hasItem(b, stack -> stack.getItem() instanceof BlockItem bi && b.blocksToPlace.get().contains(bi.getBlock())) || b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && countItem(b, itemStack -> itemStack.getItem() == Items.ENDER_CHEST) > b.saveEchests.get())) ||
-                        (b.restockTask.pickaxes && countItem(b, itemStack -> itemStack.getItem() instanceof PickaxeItem) > b.savePickaxes.get()) ||
+                        (b.restockTask.pickaxes && countItem(b, itemStack -> itemStack.isIn(ItemTags.PICKAXES)) > b.savePickaxes.get()) ||
                         (b.restockTask.food && hasItem(b, itemStack -> itemStack.contains(DataComponentTypes.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem())))
                     );
 
@@ -1499,7 +1500,7 @@ public class HighwayBuilder extends Module {
                     slotsPulled += countSlots(b, itemStack -> itemStack.getItem() instanceof BlockItem bi && b.blocksToPlace.get().contains(bi.getBlock()));
                     if (b.blocksToPlace.get().contains(Blocks.OBSIDIAN)) slotsPulled += ((countItem(b, itemStack -> itemStack.getItem() == Items.ENDER_CHEST) - b.saveEchests.get()) * 8) / 64;
                 }
-                if (b.restockTask.pickaxes) slotsPulled += countSlots(b, itemStack -> itemStack.getItem() instanceof PickaxeItem) - b.savePickaxes.get();
+                if (b.restockTask.pickaxes) slotsPulled += countSlots(b, itemStack -> itemStack.isIn(ItemTags.PICKAXES)) - b.savePickaxes.get();
                 if (b.restockTask.food) slotsPulled += countSlots(b, itemStack -> itemStack.contains(DataComponentTypes.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem()));
 
 
@@ -1613,7 +1614,7 @@ public class HighwayBuilder extends Module {
                     }
                 }
                 if (b.restockTask.pickaxes) {
-                    if (grabFromInventory(inv, itemStack -> itemStack.getItem() instanceof PickaxeItem)) return true;
+                    if (grabFromInventory(inv, itemStack -> itemStack.isIn(ItemTags.PICKAXES))) return true;
                 }
                 if (b.restockTask.food) {
                     return grabFromInventory(inv, itemStack -> itemStack.contains(DataComponentTypes.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem()));
@@ -1643,7 +1644,7 @@ public class HighwayBuilder extends Module {
                         if (b.restockTask.materials && stack.getItem() instanceof BlockItem bi) {
                             if (b.blocksToPlace.get().contains(bi.getBlock()) || (b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && bi == Items.ENDER_CHEST)) return true;
                         }
-                        if (b.restockTask.pickaxes && stack.getItem() instanceof PickaxeItem) return true;
+                        if (b.restockTask.pickaxes && stack.isIn(ItemTags.PICKAXES)) return true;
                         if (b.restockTask.food && stack.contains(DataComponentTypes.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(stack.getItem())) return true;
                     }
 
@@ -2098,8 +2099,8 @@ public class HighwayBuilder extends Module {
             if (bestSlot == -1) return b.mc.player.getInventory().getSelectedSlot();
 
             ItemStack bestStack = b.mc.player.getInventory().getStack(bestSlot);
-            if (bestStack.getItem() instanceof PickaxeItem) {
-                int count = countItem(b, stack -> stack.getItem() instanceof PickaxeItem);
+            if (bestStack.isIn(ItemTags.PICKAXES)) {
+                int count = countItem(b, stack -> stack.isIn(ItemTags.PICKAXES));
 
                 // If we are in the process of restocking pickaxes and happen to need one, we should allow using it
                 // as long as it has enough durability, since we will obtain more shortly thereafter

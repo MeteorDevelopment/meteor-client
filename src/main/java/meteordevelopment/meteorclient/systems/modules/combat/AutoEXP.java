@@ -15,7 +15,9 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
@@ -80,9 +82,10 @@ public class AutoEXP extends Module {
     private void onTick(TickEvent.Pre event) {
         if (repairingI == -1) {
             if (mode.get() != Mode.Hands) {
-                for (int i = 0; i < mc.player.getInventory().armor.size(); i++) {
-                    if (needsRepair(mc.player.getInventory().armor.get(i), minThreshold.get())) {
-                        repairingI = SlotUtils.ARMOR_START + i;
+                for (EquipmentSlot slot : AttributeModifierSlot.ARMOR) {
+                    ItemStack stack = mc.player.getEquippedStack(slot);
+                    if (needsRepair(stack, minThreshold.get())) {
+                        repairingI = SlotUtils.ARMOR_START + slot.getEntitySlotId();
                         break;
                     }
                 }

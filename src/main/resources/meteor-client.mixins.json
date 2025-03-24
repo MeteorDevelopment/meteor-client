@@ -125,7 +125,6 @@
     "MinecraftClientAccessor",
     "MinecraftClientMixin",
     "MinecraftServerAccessor",
-    "MiningToolItemMixin",
     "MobSpawnerBlockEntityRendererMixin",
     "MouseMixin",
     "MultiPhaseMixin",

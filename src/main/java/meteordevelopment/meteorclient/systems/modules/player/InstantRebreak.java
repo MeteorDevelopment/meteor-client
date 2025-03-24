@@ -16,9 +16,9 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.PickaxeItem;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -123,7 +123,7 @@ public class InstantRebreak extends Module {
     public boolean shouldMine() {
         if (mc.world.isOutOfHeightLimit(blockPos) || !BlockUtils.canBreak(blockPos)) return false;
 
-        return !pick.get() || mc.player.getMainHandStack().getItem() instanceof PickaxeItem;
+        return !pick.get() || mc.player.getMainHandStack().isIn(ItemTags.PICKAXES);
     }
 
     @EventHandler

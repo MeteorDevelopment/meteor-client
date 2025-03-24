@@ -18,7 +18,9 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.*;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.Items;
+import net.minecraft.registry.tag.ItemTags;
 
 import static meteordevelopment.orbit.EventPriority.HIGHEST;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
@@ -175,7 +177,7 @@ public class Offhand extends Module {
         // Sword Gap & Right Gap
         if (rightgapple.get()) {
             if (!locked) {
-                if (SwordGap.get() && mc.player.getMainHandStack().getItem() instanceof SwordItem) {
+                if (SwordGap.get() && mc.player.getMainHandStack().isIn(ItemTags.SWORDS)) {
                     if (isClicking) {
                         currentItem = Item.EGap;
                     }
@@ -189,12 +191,12 @@ public class Offhand extends Module {
         }
 
         // Always Gap
-        else if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysSwordGap.get()) currentItem = Item.EGap;
+        else if ((mc.player.getMainHandStack().isIn(ItemTags.SWORDS) || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysSwordGap.get()) currentItem = Item.EGap;
 
-            // Potion Click
+        // Potion Click
         else if (potionClick.get()) {
             if (!locked) {
-                if (mc.player.getMainHandStack().getItem() instanceof SwordItem) {
+                if (mc.player.getMainHandStack().isIn(ItemTags.SWORDS)) {
                     if (isClicking) {
                         currentItem = Item.Potion;
                     }
@@ -203,7 +205,7 @@ public class Offhand extends Module {
         }
 
         // Always Pot
-        else if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysPot.get()) currentItem = Item.Potion;
+        else if ((mc.player.getMainHandStack().isIn(ItemTags.SWORDS) || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysPot.get()) currentItem = Item.Potion;
 
 
         else currentItem = preferreditem.get();

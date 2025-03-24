@@ -15,7 +15,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
+import net.minecraft.registry.tag.ItemTags;
 
 public class AutoWeapon extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -61,7 +61,7 @@ public class AutoWeapon extends Module {
         double currentDamageA;
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.getItem() instanceof SwordItem
+            if (stack.isIn(ItemTags.SWORDS)
                 && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
                 currentDamageS = DamageUtils.getAttackDamage(mc.player, target, stack);
                 if (currentDamageS > damageS) {
