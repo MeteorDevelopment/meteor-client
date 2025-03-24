@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.mining.InfinityMiner;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.Target;
@@ -233,6 +234,7 @@ public class KillAura extends Module {
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
+    private boolean wasMining = false;
     public boolean attacking;
 
     public KillAura() {
@@ -243,6 +245,10 @@ public class KillAura extends Module {
     public void onDeactivate() {
         targets.clear();
         attacking = false;
+        if (wasMining) {
+            Modules.get().get(InfinityMiner.class).resume();
+            wasMining = false;
+        }
     }
 
     @EventHandler
@@ -271,6 +277,10 @@ public class KillAura extends Module {
             if (wasPathing) {
                 PathManagers.get().resume();
                 wasPathing = false;
+            }
+            if (wasMining) {
+                Modules.get().get(InfinityMiner.class).resume();
+                wasMining = false;
             }
             return;
         }
@@ -303,6 +313,11 @@ public class KillAura extends Module {
         if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
             PathManagers.get().pause();
             wasPathing = true;
+        }
+
+        if (pauseOnCombat.get() && Modules.get().get(InfinityMiner.class).isActive() && !wasMining) {
+            Modules.get().get(InfinityMiner.class).pause();
+            wasMining = true;
         }
 
         if (delayCheck()) targets.forEach(this::attack);

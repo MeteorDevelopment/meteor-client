@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.combat.AnchorAura;
 import meteordevelopment.meteorclient.systems.modules.combat.BedAura;
 import meteordevelopment.meteorclient.systems.modules.combat.CrystalAura;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
+import meteordevelopment.meteorclient.systems.modules.mining.InfinityMiner;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -68,6 +69,13 @@ public class AutoGap extends Module {
     private final Setting<Boolean> pauseBaritone = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-baritone")
         .description("Pause baritone when eating.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> pauseInfinityMiner = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-infinity-miner")
+        .description("Pause Infinity Miner when eating.")
         .defaultValue(true)
         .build()
     );
@@ -122,6 +130,7 @@ public class AutoGap extends Module {
 
     private final List<Class<? extends Module>> wasAura = new ArrayList<>();
     private boolean wasBaritone;
+    private boolean wasInfinityMiner;
 
     public AutoGap() {
         super(Categories.Player, "auto-gap", "Automatically eats Gaps or E-Gaps.");
@@ -201,6 +210,16 @@ public class AutoGap extends Module {
             wasBaritone = true;
             PathManagers.get().pause();
         }
+
+        // Pause Infinity Miner
+        wasInfinityMiner = false;
+        if (pauseInfinityMiner.get()) {
+            Module infinityMiner = Modules.get().get(InfinityMiner.class);
+            if (infinityMiner.isActive()) {
+                wasInfinityMiner = true;
+                infinityMiner.toggle();
+            }
+        }
     }
 
     private void eat() {
@@ -231,6 +250,14 @@ public class AutoGap extends Module {
         // Resume baritone
         if (pauseBaritone.get() && wasBaritone) {
             PathManagers.get().resume();
+        }
+
+        // Resume Infinity Miner
+        if (pauseInfinityMiner.get() && wasInfinityMiner) {
+            Module infinityMiner = Modules.get().get(InfinityMiner.class);
+            if (!infinityMiner.isActive()) {
+                infinityMiner.toggle();
+            }
         }
     }
 

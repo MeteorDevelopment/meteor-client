@@ -30,6 +30,9 @@ import net.minecraft.item.PickaxeItem;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import meteordevelopment.meteorclient.systems.modules.combat.AutoEat;
+import meteordevelopment.meteorclient.systems.modules.combat.AutoGap;
+import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -81,6 +84,13 @@ public class InfinityMiner extends Module {
         .build()
     );
 
+    public final Setting<Boolean> itemPickupWhileRepairing = sgGeneral.add(new BoolSetting.Builder()
+        .name("item-pickup-while-repairing")
+        .description("Enable or disable item pickup while repairing.")
+        .defaultValue(false)
+        .build()
+    );
+
     // When Full
 
     public final Setting<Boolean> walkHome = sgWhenFull.add(new BoolSetting.Builder()
@@ -125,6 +135,16 @@ public class InfinityMiner extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        // Check if the player is eating
+        if (mc.player.isUsingItem() && (mc.player.getActiveItem().getItem().isFood() || mc.player.getActiveItem().getItem() == Items.ENCHANTED_GOLDEN_APPLE)) {
+            return;
+        }
+
+        // Check if Kill Aura is active
+        if (Modules.get().isActive(KillAura.class)) {
+            return;
+        }
+
         if (isFull()) {
             if (walkHome.get()) {
                 if (isBaritoneNotWalking()) {
@@ -158,23 +178,29 @@ public class InfinityMiner extends Module {
             if (!needsRepair()) {
                 warning("Finished repairing, going back to mining.");
                 repairing = false;
-                baritoneSettings.mineScanDroppedItems.value = true;
+                baritoneSettings.mineScanDroppedItems.value = true; // Turn on mineScanDroppedItems after repairing
                 mineTargetBlocks();
                 return;
             }
 
-            if (isBaritoneNotMining()) mineRepairBlocks();
+            if (isBaritoneNotMining()) {
+                baritoneSettings.mineScanDroppedItems.value = itemPickupWhileRepairing.get(); // Use setting for mineScanDroppedItems during repairing
+                mineRepairBlocks();
+            }
         }
         else {
             if (needsRepair()) {
                 warning("Pickaxe needs repair, beginning repair process");
                 repairing = true;
-                baritoneSettings.mineScanDroppedItems.value = false;
+                baritoneSettings.mineScanDroppedItems.value = itemPickupWhileRepairing.get(); // Use setting for mineScanDroppedItems during repairing
                 mineRepairBlocks();
                 return;
             }
 
-            if (isBaritoneNotMining()) mineTargetBlocks();
+            if (isBaritoneNotMining()) {
+                baritoneSettings.mineScanDroppedItems.value = true; // Ensure mineScanDroppedItems is on during mining
+                mineTargetBlocks();
+            }
         }
     }
 

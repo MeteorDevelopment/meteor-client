@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.combat.AnchorAura;
 import meteordevelopment.meteorclient.systems.modules.combat.BedAura;
 import meteordevelopment.meteorclient.systems.modules.combat.CrystalAura;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
+import meteordevelopment.meteorclient.systems.modules.mining.InfinityMiner;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
@@ -105,6 +106,7 @@ public class AutoEat extends Module {
 
     private final List<Class<? extends Module>> wasAura = new ArrayList<>();
     private boolean wasBaritone = false;
+    private boolean wasInfinityMiner = false;
 
     public AutoEat() {
         super(Categories.Player, "auto-eat", "Automatically eats food.");
@@ -185,6 +187,13 @@ public class AutoEat extends Module {
             wasBaritone = true;
             PathManagers.get().pause();
         }
+
+        // Pause InfinityMiner
+        Module infinityMiner = Modules.get().get(InfinityMiner.class);
+        if (infinityMiner.isActive()) {
+            wasInfinityMiner = true;
+            infinityMiner.toggle();
+        }
     }
 
     private void eat() {
@@ -216,6 +225,15 @@ public class AutoEat extends Module {
         if (pauseBaritone.get() && wasBaritone) {
             wasBaritone = false;
             PathManagers.get().resume();
+        }
+
+        // Resume InfinityMiner
+        if (wasInfinityMiner) {
+            wasInfinityMiner = false;
+            Module infinityMiner = Modules.get().get(InfinityMiner.class);
+            if (!infinityMiner.isActive()) {
+                infinityMiner.toggle();
+            }
         }
     }
 
