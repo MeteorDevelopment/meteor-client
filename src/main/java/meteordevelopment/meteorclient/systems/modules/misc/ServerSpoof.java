@@ -135,6 +135,7 @@ public class ServerSpoof extends Module {
             .withColor(Formatting.DARK_GREEN)
             .withUnderline(true)
             .withClickEvent(new RunnableClickEvent(() -> {
+                // TODO: does this thing actually work?
                 URL url = getParsedResourcePackUrl(packet.url());
                 if (url == null) error("Invalid resource pack URL: " + packet.url());
                 else {

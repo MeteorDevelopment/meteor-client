@@ -263,6 +263,6 @@ public class BlockESP extends Module {
 
     @Override
     public String getInfoString() {
-        return "%s groups".formatted(groups.size());
+        return String.valueOf(groups.size());
     }
 }

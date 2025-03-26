@@ -11,7 +11,6 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
-// TODO: add a tab for running commands in the menu
 public class SessionCommand extends Command {
     public SessionCommand() {
         super("session", "Get session info.");

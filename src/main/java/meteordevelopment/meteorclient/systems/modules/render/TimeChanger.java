@@ -52,6 +52,7 @@ public class TimeChanger extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (mc.world == null) return;
         mc.world.getLevelProperties().setTimeOfDay(time.get().longValue());
     }
 }

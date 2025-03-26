@@ -180,10 +180,7 @@ public abstract class ChatHudMixin implements IChatHud {
         int extra = getBetterChat().isLongerChat() ? getBetterChat().getExtraChatLines() : 0;
         int size = betterChat.lines.size();
 
-        while (size > 100 + extra) {
-            betterChat.lines.removeLast();
-            size--;
-        }
+        betterChat.lines.removeElements(100 + extra - 1, size);
     }
 
     @Inject(method = "clear", at = @At("HEAD"))

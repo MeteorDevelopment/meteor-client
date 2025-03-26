@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.settings.Settings;
@@ -44,6 +45,10 @@ public class MacrosTab extends Tab {
 
         @Override
         public void initWidgets() {
+            WTextBox textBox = add(theme.textBox("")).expandX().widget();
+            // TODO: running commands
+            // TODO: also add some sort of system hook for ssh
+
             WTable table = add(theme.table()).expandX().minWidth(400).widget();
             initTable(table);
 
