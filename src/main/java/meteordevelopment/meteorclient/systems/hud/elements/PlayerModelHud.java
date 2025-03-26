@@ -25,19 +25,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class PlayerModelHud extends HudElement {
     public static final HudElementInfo<PlayerModelHud> INFO = new HudElementInfo<>(Hud.GROUP, "player-model", "Displays a model of your player.", PlayerModelHud::new);
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgScale = settings.createGroup("Scale");
     private final SettingGroup sgBackground = settings.createGroup("Background");
 
     // General
-
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("The scale.")
-        .defaultValue(2)
-        .min(1)
-        .sliderRange(1, 5)
-        .onChanged(aDouble -> calculateSize())
-        .build()
-    );
 
     private final Setting<Boolean> copyYaw = sgGeneral.add(new BoolSetting.Builder()
         .name("copy-yaw")
@@ -80,6 +71,27 @@ public class PlayerModelHud extends HudElement {
         .build()
     );
 
+    // Scale
+
+    public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
+        .name("custom-scale")
+        .description("Applies a custom scale to this hud element.")
+        .defaultValue(false)
+        .onChanged(aBoolean -> calculateSize())
+        .build()
+    );
+
+    public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Custom scale.")
+        .visible(customScale::get)
+        .defaultValue(2)
+        .onChanged(aDouble -> calculateSize())
+        .min(0.5)
+        .sliderRange(0.5, 3)
+        .build()
+    );
+
     // Background
 
     private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
@@ -114,7 +126,7 @@ public class PlayerModelHud extends HudElement {
             float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.getYaw() - player.prevYaw) * mc.getRenderTickCounter().getTickDelta(true) + offset) : (float) customYaw.get();
             float pitch = copyPitch.get() ? player.getPitch() : (float) customPitch.get();
 
-            drawEntity(renderer.drawContext, x, y, (int) (30 * scale.get()), -yaw, -pitch, player);
+            drawEntity(renderer.drawContext, x, y, (int) (30 * getScale()), -yaw, -pitch, player);
         });
 
         if (background.get()) {
@@ -127,7 +139,7 @@ public class PlayerModelHud extends HudElement {
     }
 
     private void calculateSize() {
-        setSize(50 * scale.get(), 75 * scale.get());
+        setSize(50 * getScale(), 75 * getScale());
     }
 
     /**
@@ -179,6 +191,10 @@ public class PlayerModelHud extends HudElement {
         entity.setPitch(previousPitch);
         entity.prevHeadYaw = previousPrevHeadYaw;
         entity.headYaw = prevHeadYaw;
+    }
+
+    private double getScale() {
+        return customScale.get() ? scale.get() : scale.getDefaultValue();
     }
 
     private enum CenterOrientation {

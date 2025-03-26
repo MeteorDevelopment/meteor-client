@@ -21,6 +21,7 @@ public class ItemHud extends HudElement {
     public static final HudElementInfo<ItemHud> INFO = new HudElementInfo<>(Hud.GROUP, "item", "Displays the item count.", ItemHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgScale = settings.createGroup("Scale");
     private final SettingGroup sgBackground = settings.createGroup("Background");
 
     // General
@@ -39,34 +40,37 @@ public class ItemHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("Scale of the item.")
-        .defaultValue(2)
-        .onChanged(aDouble -> calculateSize())
-        .min(1)
-        .sliderRange(1, 4)
+    // Scale
+
+    public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
+        .name("custom-scale")
+        .description("Applies a custom scale to this hud element.")
+        .defaultValue(false)
+        .onChanged(aBoolean -> calculateSize())
         .build()
     );
 
-    private final Setting<Integer> border = sgGeneral.add(new IntSetting.Builder()
-        .name("border")
-        .description("How much space to add around the element.")
-        .defaultValue(0)
-        .onChanged(integer -> calculateSize())
+    public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Custom scale.")
+        .visible(customScale::get)
+        .defaultValue(2)
+        .onChanged(aDouble -> calculateSize())
+        .min(0.5)
+        .sliderRange(0.5, 3)
         .build()
     );
 
     // Background
 
-    private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
+    public final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
         .name("background")
         .description("Displays background.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
+    public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
         .description("Color used for the background.")
         .visible(background::get)
@@ -80,13 +84,8 @@ public class ItemHud extends HudElement {
         calculateSize();
     }
 
-    @Override
-    public void setSize(double width, double height) {
-        super.setSize(width + border.get() * 2, height + border.get() * 2);
-    }
-
     private void calculateSize() {
-        setSize(17 * scale.get(), 17 * scale.get());
+        setSize(17 * getScale(), 17 * getScale());
     }
 
     @Override
@@ -99,12 +98,7 @@ public class ItemHud extends HudElement {
                 renderer.line(x, y + getHeight(), x + getWidth(), y, Color.GRAY);
             }
         } else {
-            renderer.post(() -> {
-                double x = this.x + border.get();
-                double y = this.y + border.get();
-
-                render(renderer, itemStack, (int) x, (int) y);
-            });
+            renderer.post(() -> render(renderer, itemStack, x, y));
         }
 
         if (background.get()) renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
@@ -112,7 +106,7 @@ public class ItemHud extends HudElement {
 
     private void render(HudRenderer renderer, ItemStack itemStack, int x, int y) {
         if (noneMode.get() == NoneMode.HideItem) {
-            renderer.item(itemStack, x, y, scale.get().floatValue(), true);
+            renderer.item(itemStack, x, y, getScale(), true);
             return;
         }
 
@@ -127,10 +121,14 @@ public class ItemHud extends HudElement {
             resetToZero = true;
         }
 
-        renderer.item(itemStack, x, y, scale.get().floatValue(), true, countOverride);
+        renderer.item(itemStack, x, y, getScale(), true, countOverride);
 
         if (resetToZero)
             itemStack.setCount(0);
+    }
+
+    private float getScale() {
+        return customScale.get() ? scale.get().floatValue() : scale.getDefaultValue().floatValue();
     }
 
     public enum NoneMode {
