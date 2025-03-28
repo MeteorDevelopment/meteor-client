@@ -299,7 +299,7 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> ejectUselessShulkers = sgInventory.add(new BoolSetting.Builder()
         .name("eject-useless-shulkers")
-        .description("Whether you should eject useless shulkers. Warning - will throw out any shulkers that don't contain blocks to place, pickaxes, or food. Be careful with your kits.")
+        .description("Whether you should eject useless shulkers.")
         .defaultValue(true)
         .build()
     );
@@ -454,7 +454,7 @@ public class HighwayBuilder extends Module {
     private boolean btSettingAllowPlace;
     private boolean btSettingRenderGoal;
 
-    private State state, lastState;
+    private State state;
 
     public HighwayBuilder() {
         super(Categories.World, "highway-builder", "Automatically builds highways.");
@@ -479,8 +479,6 @@ public class HighwayBuilder extends Module {
         rightDir = leftDir.opposite();
 
         blockPosProvider = dir.diagonal ? new DiagonalBlockPosProvider() : new StraightBlockPosProvider();
-
-        lastBreakingPos.set(0, 0, 0);
 
         start.set(playerPos());
         currentPos.set(start);
@@ -705,14 +703,9 @@ public class HighwayBuilder extends Module {
     }
 
     private void setState(State state) {
-        setState(state, this.state);
-    }
-
-    private void setState(State state, State lastState) {
-        this.lastState = lastState;
         this.state = state;
-
         state.start(this);
+        state.tick(this);
     }
 
     private int getWidthLeft() {
@@ -807,8 +800,10 @@ public class HighwayBuilder extends Module {
     private void updatePosition() {
         MBlockPos next = new MBlockPos().set(currentPos).add(dir.offsetX, 0, dir.offsetZ);
 
-        if (distance(next, playerPos()) < 3)
+        if (distance(next, playerPos()) < 3) {
             currentPos.set(next);
+            setState(State.CheckTasks);
+        }
     }
 
     private class btProcess implements IBaritoneProcess {
@@ -848,11 +843,6 @@ public class HighwayBuilder extends Module {
 
     private enum State {
         CheckTasks {
-            @Override
-            protected void start(HighwayBuilder b) {
-                tick(b);
-            }
-
             @Override
             protected void tick(HighwayBuilder b) {
                 if (b.destroyCrystalTraps.get() && isCrystalTrap(b)) b.setState(DefuseCrystalTraps); // Destroy crystal traps
@@ -908,7 +898,6 @@ public class HighwayBuilder extends Module {
             @Override
             protected void start(HighwayBuilder b) {
                 b.currentPos.add(-b.dir.offsetX * 4, 0, -b.dir.offsetZ * 4);
-                tick(b);
             }
 
             @Override
@@ -941,100 +930,65 @@ public class HighwayBuilder extends Module {
                 int slot = findBlocksToPlacePrioritizeTrash(b);
                 if (slot == -1) return;
 
-                place(b, new MBPIteratorFilter(b.blockPosProvider.getLiquids(), pos -> !pos.getState().getFluidState().isEmpty()), slot, CheckTasks);
+                place(b, new MBPIteratorFilter(b.blockPosProvider.getLiquids(), pos -> !pos.getState().getFluidState().isEmpty()), slot);
             }
         },
 
         MineFront {
             @Override
-            protected void start(HighwayBuilder b) {
-                tick(b);
-            }
-
-            @Override
             protected void tick(HighwayBuilder b) {
-                mine(b, b.blockPosProvider.getFront(), true, CheckTasks, this);
+                mine(b, b.blockPosProvider.getFront(), true);
             }
         },
 
         MineFloor {
             @Override
-            protected void start(HighwayBuilder b) {
-                tick(b);
-            }
-
-            @Override
             protected void tick(HighwayBuilder b) {
-                mine(b, b.blockPosProvider.getFloor(), false, CheckTasks, this);
+                mine(b, b.blockPosProvider.getFloor(), false);
             }
         },
 
         MineRailings {
             @Override
-            protected void start(HighwayBuilder b) {
-                tick(b);
-            }
-
-            @Override
             protected void tick(HighwayBuilder b) {
-                mine(b, b.blockPosProvider.getRailings(0), false, CheckTasks, this);
+                mine(b, b.blockPosProvider.getRailings(0), false);
             }
         },
 
         MineAboveRailings {
             @Override
-            protected void start(HighwayBuilder b) {
-                tick(b);
-            }
-
-            @Override
             protected void tick(HighwayBuilder b) {
-                mine(b, b.blockPosProvider.getRailings(1), true, CheckTasks, this);
+                mine(b, b.blockPosProvider.getRailings(1), true);
             }
         },
 
         PlaceCornerBlock {
             @Override
-            protected void start(HighwayBuilder b) {
-                tick(b);
-            }
-
-            @Override
             protected void tick(HighwayBuilder b) {
                 int slot = findBlocksToPlacePrioritizeTrash(b);
                 if (slot == -1) return;
 
-                place(b, b.blockPosProvider.getRailings(-1), slot, CheckTasks);
+                place(b, b.blockPosProvider.getRailings(-1), slot);
             }
         },
 
         PlaceRailings {
             @Override
-            protected void start(HighwayBuilder b) {
-                tick(b);
-            }
-
-            @Override
             protected void tick(HighwayBuilder b) {
                 int slot = findBlocksToPlace(b);
                 if (slot == -1) return;
 
-                place(b, b.blockPosProvider.getRailings(0), slot, CheckTasks);
+                place(b, b.blockPosProvider.getRailings(0), slot);
             }
         },
 
         PlaceFloor {
             @Override
-            protected void start(HighwayBuilder b) {
-                tick(b);
-            }
-
-            @Override
             protected void tick(HighwayBuilder b) {
                 int slot = findBlocksToPlace(b);
                 if (slot == -1) return;
 
-                place(b, b.blockPosProvider.getFloor(), slot, CheckTasks);
+                place(b, b.blockPosProvider.getFloor(), slot);
             }
         },
 
@@ -1128,21 +1082,20 @@ public class HighwayBuilder extends Module {
 
             @Override
             protected void start(HighwayBuilder b) {
-                int emptySlots = 0;
+                int availableSlots = 0;
                 for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
                     ItemStack itemStack = b.mc.player.getInventory().getStack(i);
                     if (itemStack.isEmpty() ||
                         b.trashItems.get().contains(itemStack.getItem()))
-                        emptySlots++;
+                        availableSlots++;
                 }
 
-                if (emptySlots == 0) {
+                if (availableSlots == 0) {
                     b.error("No empty slots.");
                     return;
                 }
 
-                int minimumSlots = Math.max(emptySlots - 4, 1);
-                counter = minimumSlots * 8;
+                counter = Math.max(availableSlots - b.minEmpty.get(), 1) * 8;
 
                 first = true;
                 primed = false;
@@ -1213,6 +1166,7 @@ public class HighwayBuilder extends Module {
                         b.setState(Collect);
                         return;
                     }
+                    counter--;
 
                     if (countItem(b, stack -> stack.getItem() instanceof PickaxeItem) <= b.savePickaxes.get()) {
                         if (b.searchEnderChest.get() || b.searchShulkers.get()) {
@@ -1675,7 +1629,7 @@ public class HighwayBuilder extends Module {
 
         protected abstract void tick(HighwayBuilder b);
 
-        protected void mine(HighwayBuilder b, MBPIterator it, boolean mineBlocksToPlace, State nextState, State lastState) {
+        protected void mine(HighwayBuilder b, MBPIterator it, boolean mineBlocksToPlace) {
             boolean breaking = false;
             boolean finishedBreaking = false; // if you can multi break this lets you mine blocks between tasks in a single tick
 
@@ -1760,7 +1714,7 @@ public class HighwayBuilder extends Module {
             // we quickly jump to the next state, to remove micro delays in the process and allow us to break blocks
             // between tasks if we can multi break
             if (finishedBreaking || !breaking) {
-                b.setState(nextState, lastState);
+                b.setState(State.CheckTasks);
             }
         }
 
@@ -1789,7 +1743,7 @@ public class HighwayBuilder extends Module {
             }
         }
 
-        protected void place(HighwayBuilder b, MBPIterator it, int slot, State nextState) {
+        protected void place(HighwayBuilder b, MBPIterator it, int slot) {
             boolean placed = false;
             boolean finishedPlacing = false;
 
@@ -1811,7 +1765,8 @@ public class HighwayBuilder extends Module {
                 if (!it.hasNext()) finishedPlacing = true;
             }
 
-            if (finishedPlacing || !placed) b.setState(nextState);
+            if (finishedPlacing || !placed)
+                b.setState(State.CheckTasks);
         }
 
         private int findSlot(HighwayBuilder b, Predicate<ItemStack> predicate, boolean hotbar) {
