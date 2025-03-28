@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
+import it.unimi.dsi.fastutil.ints.IntArraySet;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -22,6 +23,7 @@ import net.minecraft.item.Items;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class AutoReplenish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -37,7 +39,7 @@ public class AutoReplenish extends Module {
 
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("How long to wait before refilling after hitting the threshold.")
+        .description("How long to wait between each inventory action.")
         .defaultValue(1)
         .min(0)
         .build()
@@ -113,42 +115,46 @@ public class AutoReplenish extends Module {
             ItemStack stack = mc.player.getOffHandStack();
             replenishSlot(SlotUtils.OFFHAND, stack);
         }
-
-        tickDelayLeft = tickDelay.get();
     }
 
     private void replenishSlot(int slot, ItemStack currentStack) {
         int itemsIndex = slot == SlotUtils.OFFHAND ? 9 : slot;
         ItemStack prevStack = items[itemsIndex];
-        int fromSlot = -1;
+        Set<Integer> fromSlots = new IntArraySet();
 
         // If you still have some left in the stack and just now crossed the threshold
         if (!currentStack.isEmpty() && currentStack.isStackable() && currentStack.getCount() <= threshold.get()) {
             if (excludedItems.get().contains(currentStack.getItem())) return;
-            fromSlot = findItem(currentStack, slot, threshold.get() - currentStack.getCount() + 1);
+            fromSlots = findItem(currentStack, slot, threshold.get() - currentStack.getCount() + 1);
         }
 
         // If you just went from above the threshold to zero in a single tick, which is possible
         // with a low enough threshold and using modules that place multiple blocks per tick,
         // e.g. surround or holefiller using obsidian
-        if (currentStack.isEmpty() && !prevStack.isEmpty() && !prevStack.isStackable() && unstackable.get()) {
+        if (currentStack.isEmpty() && !prevStack.isEmpty() && prevStack.isStackable()) {
             if (excludedItems.get().contains(prevStack.getItem())) return;
-            fromSlot = findItem(prevStack, slot, threshold.get() - currentStack.getCount() + 1);
+            fromSlots = findItem(prevStack, slot, threshold.get() - currentStack.getCount());
         }
 
         // Unstackable items
-        if (currentStack.isEmpty() && !prevStack.isEmpty() && prevStack.isStackable()) {
+        if (currentStack.isEmpty() && !prevStack.isEmpty() && !prevStack.isStackable()) {
             if (excludedItems.get().contains(prevStack.getItem())) return;
-            fromSlot = findItem(prevStack, slot, 1);
+            fromSlots = findItem(prevStack, slot, 1);
         }
 
-        InvUtils.move().from(fromSlot).to(slot);
+        for (int foundSlot: fromSlots) {
+            InvUtils.move().from(foundSlot).to(slot);
+
+            tickDelayLeft = tickDelay.get();
+            if (tickDelayLeft > 0) return;
+        }
+
         items[itemsIndex] = currentStack.copy();
     }
 
-    private int findItem(ItemStack itemStack, int excludedSlot, int minimumCount) {
-        int slot = -1;
-        int count = 0;
+    private IntArraySet findItem(ItemStack itemStack, int excludedSlot, int minimumCount) {
+        IntArraySet slots = new IntArraySet();
+        int totalCount = 0;
 
         for (int i = mc.player.getInventory().size() - 2; i >= (searchHotbar.get() ? 0 : 9); i--) {
             if (i == excludedSlot) continue;
@@ -158,15 +164,14 @@ public class AutoReplenish extends Module {
 
             if (sameEnchants.get() && !stack.getEnchantments().equals(itemStack.getEnchantments())) continue;
 
-            if (stack.getCount() <= count) continue;
+            totalCount += stack.getCount();
+            slots.add(i);
 
-            slot = i;
-            count = stack.getCount();
-
-            if (count >= minimumCount) break;
+            if (!itemStack.isStackable() && unstackable.get()) break;
+            if (totalCount >= minimumCount) break;
         }
 
-        return slot;
+        return slots;
     }
 
     private void fillItems() {
