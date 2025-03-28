@@ -15,10 +15,12 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class AutoReplenish extends Module {
@@ -76,30 +78,26 @@ public class AutoReplenish extends Module {
     );
 
     private final ItemStack[] items = new ItemStack[10];
-    private boolean prevHadOpenScreen;
     private double tickDelayLeft;
 
     public AutoReplenish() {
         super(Categories.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
 
-        for (int i = 0; i < items.length; i++) items[i] = Items.AIR.getDefaultStack();
+        Arrays.fill(items, 0, 9, Items.AIR.getDefaultStack());
     }
 
     @Override
     public void onActivate() {
         fillItems();
         tickDelayLeft = 0;
-        prevHadOpenScreen = mc.currentScreen != null;
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.currentScreen == null && prevHadOpenScreen) {
-            fillItems();
-        }
+        fillItems();
 
-        prevHadOpenScreen = mc.currentScreen != null;
-        if (mc.player.currentScreenHandler.getStacks().size() != 46 || mc.currentScreen != null) return;
+        boolean hasOpenScreen = mc.currentScreen instanceof GenericContainerScreen;
+        if (mc.player.currentScreenHandler.getStacks().size() != 46 || hasOpenScreen) return;
 
         tickDelayLeft -= TickRate.INSTANCE.getTickRate() / 20.0;
         if (tickDelayLeft > 0) return;
@@ -107,19 +105,19 @@ public class AutoReplenish extends Module {
         // Hotbar
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
-            checkSlot(i, stack);
+            replenishSlot(i, stack);
         }
 
         // Offhand
         if (offhand.get() && !Modules.get().get(AutoTotem.class).isLocked()) {
             ItemStack stack = mc.player.getOffHandStack();
-            checkSlot(SlotUtils.OFFHAND, stack);
+            replenishSlot(SlotUtils.OFFHAND, stack);
         }
 
         tickDelayLeft = tickDelay.get();
     }
 
-    private void checkSlot(int slot, ItemStack currentStack) {
+    private void replenishSlot(int slot, ItemStack currentStack) {
         int itemsIndex = slot == SlotUtils.OFFHAND ? 9 : slot;
         ItemStack prevStack = items[itemsIndex];
         int fromSlot = -1;
