@@ -16,7 +16,7 @@ import org.joml.Vector3f;
 
 @SuppressWarnings("unused")
 public class Color implements ICopyable<Color>, ISerializable<Color> {
-
+    public static final Color CLEAR = new Color(0, 0, 0, 0);
     public static final Color WHITE = new Color(java.awt.Color.WHITE);
     public static final Color LIGHT_GRAY = new Color(java.awt.Color.LIGHT_GRAY);
     public static final Color GRAY = new Color(java.awt.Color.GRAY);

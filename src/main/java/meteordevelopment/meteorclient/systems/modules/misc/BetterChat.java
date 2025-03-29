@@ -421,13 +421,9 @@ public class BetterChat extends Module {
 
         // Only draw the first line of multi line messages
         if (((IChatHudLineVisible) (Object) line).meteor$isStartOfEntry())  {
-            RenderSystem.enableBlend();
             RenderSystem.setShaderColor(1, 1, 1, Color.toRGBAA(color) / 255f);
-
             drawTexture(context, (IChatHudLine) (Object) line, y);
-
             RenderSystem.setShaderColor(1, 1, 1, 1);
-            RenderSystem.disableBlend();
         }
 
         // Offset
@@ -449,7 +445,7 @@ public class BetterChat extends Module {
         for (CustomHeadEntry entry : CUSTOM_HEAD_ENTRIES) {
             // Check prefix
             if (text.startsWith(entry.prefix(), startOffset)) {
-                context.drawTexture(RenderLayer::getGuiTextured, entry.texture(), 0, y, 8, 8, 0, 0, 64, 64, 64, 64);
+                context.drawTexture(RenderLayer::getGuiTextured, entry.texture(), 0, y, 0, 0, 8, 8, 64, 64, 64, 64);
                 return;
             }
         }

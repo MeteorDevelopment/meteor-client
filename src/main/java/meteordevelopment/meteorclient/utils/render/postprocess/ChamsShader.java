@@ -6,12 +6,16 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.TextureFormat;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.utils.PostInit;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.resource.Resource;
@@ -58,10 +62,10 @@ public class ChamsShader extends EntityShader {
                 IntBuffer comp = stack.mallocInt(1);
 
                 STBImage.stbi_set_flip_vertically_on_load(true);
-                ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 3);
+                ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 4);
 
-                IMAGE_TEX = new Texture();
-                IMAGE_TEX.upload(width.get(0), height.get(0), image, Texture.Format.RGB, Texture.Filter.Nearest, Texture.Filter.Nearest, false);
+                IMAGE_TEX = new Texture(width.get(0), height.get(0), TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
+                IMAGE_TEX.upload(image);
 
                 STBImage.stbi_image_free(image);
                 STBImage.stbi_set_flip_vertically_on_load(false);
@@ -78,12 +82,12 @@ public class ChamsShader extends EntityShader {
     }
 
     @Override
-    protected void setUniforms() {
-        shader.set("u_Color", chams.shaderColor.get());
+    protected void setupPass(RenderPass pass) {
+        Color color = chams.shaderColor.get();
+        pass.setUniform("u_Color", color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
 
-        if (chams.isShader() && chams.shader.get() == Chams.Shader.Image && IMAGE_TEX != null && IMAGE_TEX.isValid()) {
-            IMAGE_TEX.bind(1);
-            shader.set("u_TextureI", 1);
+        if (chams.isShader() && chams.shader.get() == Chams.Shader.Image && IMAGE_TEX != null) {
+            pass.bindSampler("u_TextureI", IMAGE_TEX.getGlTexture());
         }
     }
 

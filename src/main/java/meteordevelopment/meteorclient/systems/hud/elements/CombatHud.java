@@ -251,11 +251,11 @@ public class CombatHud extends HudElement {
                 if (isInEditor()) {
                     renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
                     renderer.line(x + getWidth(), y, x, y + getHeight(), Color.GRAY);
-                    Renderer2D.COLOR.render(null); // I know, ill fix it soon
+                    Renderer2D.COLOR.render(); // I know, ill fix it soon
                 }
                 return;
             }
-            Renderer2D.COLOR.render(null);
+            Renderer2D.COLOR.render();
 
             // Player Model
             InventoryScreen.drawEntity(
@@ -429,7 +429,7 @@ public class CombatHud extends HudElement {
 
             Renderer2D.COLOR.begin();
             Renderer2D.COLOR.boxLines(x, y, 165, 11, BLACK);
-            Renderer2D.COLOR.render(null);
+            Renderer2D.COLOR.render();
 
             x += 2;
             y += 2;
@@ -453,7 +453,7 @@ public class CombatHud extends HudElement {
             Renderer2D.COLOR.begin();
             Renderer2D.COLOR.quad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get(), healthColor2.get(), healthColor1.get());
             Renderer2D.COLOR.quad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get(), healthColor3.get(), healthColor2.get());
-            Renderer2D.COLOR.render(null);
+            Renderer2D.COLOR.render();
 
             matrices.popMatrix();
         });

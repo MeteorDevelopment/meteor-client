@@ -96,6 +96,7 @@
     "FluidRendererMixin",
     "GameOptionsMixin",
     "GameRendererMixin",
+    "GlBackendMixin",
     "HandledScreenAccessor",
     "HandledScreenMixin",
     "HeadFeatureRendererMixin",
@@ -114,6 +115,7 @@
     "KeyBindingAccessor",
     "KeyboardInputMixin",
     "KeyboardMixin",
+    "LayerRenderStateAccessor",
     "LightmapTextureManagerMixin",
     "LightningEntityRendererMixin",
     "LivingEntityAccessor",
@@ -149,6 +151,7 @@
     "RegistriesMixin",
     "ReloadStateAccessor",
     "RenderLayersMixin",
+    "RenderPipelineMixin",
     "RenderTickCounterDynamicMixin",
     "ResourceReloadLoggerAccessor",
     "ScreenMixin",
@@ -178,7 +181,6 @@
     "TransformationMixin",
     "TridentItemMixin",
     "Vec3dMixin",
-    "VertexBufferMixin",
     "WorldAccessor",
     "WorldBorderMixin",
     "WorldChunkMixin",
@@ -188,5 +190,8 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "GlResourceManagerMixin"
+  ]
 }

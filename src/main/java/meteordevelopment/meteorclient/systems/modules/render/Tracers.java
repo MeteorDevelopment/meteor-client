@@ -319,7 +319,7 @@ public class Tracers extends Module {
             count++;
         }
 
-        Renderer2D.COLOR.render(null);
+        Renderer2D.COLOR.render();
     }
 
     private void rotateTriangle(Vector2f[] points, float ang) {

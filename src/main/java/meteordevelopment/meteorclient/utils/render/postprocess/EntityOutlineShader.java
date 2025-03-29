@@ -1,5 +1,7 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
+import com.mojang.blaze3d.systems.RenderPass;
+import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import net.minecraft.entity.Entity;
@@ -8,7 +10,7 @@ public class EntityOutlineShader extends EntityShader {
     private static ESP esp;
 
     public EntityOutlineShader() {
-        init("outline");
+        init(MeteorRenderPipelines.POST_OUTLINE);
     }
 
     @Override
@@ -24,10 +26,10 @@ public class EntityOutlineShader extends EntityShader {
     }
 
     @Override
-    protected void setUniforms() {
-        shader.set("u_Width", esp.outlineWidth.get());
-        shader.set("u_FillOpacity", esp.fillOpacity.get());
-        shader.set("u_ShapeMode", esp.shapeMode.get().ordinal());
-        shader.set("u_GlowMultiplier", esp.glowMultiplier.get());
+    protected void setupPass(RenderPass pass) {
+        pass.setUniform("u_Width", esp.outlineWidth.get());
+        pass.setUniform("u_FillOpacity", esp.fillOpacity.get().floatValue());
+        pass.setUniform("u_ShapeMode", esp.shapeMode.get().ordinal());
+        pass.setUniform("u_GlowMultiplier", esp.glowMultiplier.get().floatValue());
     }
 }

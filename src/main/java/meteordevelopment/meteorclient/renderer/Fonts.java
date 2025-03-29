@@ -35,7 +35,7 @@ public class Fonts {
     private Fonts() {
     }
 
-    @PreInit(dependencies = Shaders.class)
+    @PreInit
     public static void refresh() {
         FONT_FAMILIES.clear();
 

@@ -5,10 +5,8 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import net.minecraft.client.gl.Framebuffer;
+public interface IRenderPipeline {
+    void meteor$setLineSmooth(boolean lineSmooth);
 
-public interface IMinecraftClient {
-    void meteor$rightClick();
-
-    void meteor$setFramebuffer(Framebuffer framebuffer);
+    boolean meteor$getLineSmooth();
 }

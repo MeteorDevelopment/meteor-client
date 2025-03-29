@@ -145,12 +145,16 @@ public class PacketUtils {
         C2S_PACKETS_R.put("SelectKnownPacksC2SPacket", net.minecraft.network.packet.c2s.config.SelectKnownPacksC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class, "SelectMerchantTradeC2SPacket");
         C2S_PACKETS_R.put("SelectMerchantTradeC2SPacket", net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SetTestBlockC2SPacket.class, "SetTestBlockC2SPacket");
+        C2S_PACKETS_R.put("SetTestBlockC2SPacket", net.minecraft.network.packet.c2s.play.SetTestBlockC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SlotChangedStateC2SPacket.class, "SlotChangedStateC2SPacket");
         C2S_PACKETS_R.put("SlotChangedStateC2SPacket", net.minecraft.network.packet.c2s.play.SlotChangedStateC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SpectatorTeleportC2SPacket.class, "SpectatorTeleportC2SPacket");
         C2S_PACKETS_R.put("SpectatorTeleportC2SPacket", net.minecraft.network.packet.c2s.play.SpectatorTeleportC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket.class, "TeleportConfirmC2SPacket");
         C2S_PACKETS_R.put("TeleportConfirmC2SPacket", net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.TestInstanceBlockActionC2SPacket.class, "TestInstanceBlockActionC2SPacket");
+        C2S_PACKETS_R.put("TestInstanceBlockActionC2SPacket", net.minecraft.network.packet.c2s.play.TestInstanceBlockActionC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket.class, "UpdateBeaconC2SPacket");
         C2S_PACKETS_R.put("UpdateBeaconC2SPacket", net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateCommandBlockC2SPacket.class, "UpdateCommandBlockC2SPacket");
@@ -284,8 +288,6 @@ public class PacketUtils {
         S2C_PACKETS_R.put("EntityVelocityUpdateS2CPacket", net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ExperienceBarUpdateS2CPacket.class, "ExperienceBarUpdateS2CPacket");
         S2C_PACKETS_R.put("ExperienceBarUpdateS2CPacket", net.minecraft.network.packet.s2c.play.ExperienceBarUpdateS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket.class, "ExperienceOrbSpawnS2CPacket");
-        S2C_PACKETS_R.put("ExperienceOrbSpawnS2CPacket", net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ExplosionS2CPacket.class, "ExplosionS2CPacket");
         S2C_PACKETS_R.put("ExplosionS2CPacket", net.minecraft.network.packet.s2c.play.ExplosionS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.config.FeaturesS2CPacket.class, "FeaturesS2CPacket");
@@ -432,6 +434,8 @@ public class PacketUtils {
         S2C_PACKETS_R.put("SynchronizeTagsS2CPacket", net.minecraft.network.packet.s2c.common.SynchronizeTagsS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TeamS2CPacket.class, "TeamS2CPacket");
         S2C_PACKETS_R.put("TeamS2CPacket", net.minecraft.network.packet.s2c.play.TeamS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TestInstanceBlockStatusS2CPacket.class, "TestInstanceBlockStatusS2CPacket");
+        S2C_PACKETS_R.put("TestInstanceBlockStatusS2CPacket", net.minecraft.network.packet.s2c.play.TestInstanceBlockStatusS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TickStepS2CPacket.class, "TickStepS2CPacket");
         S2C_PACKETS_R.put("TickStepS2CPacket", net.minecraft.network.packet.s2c.play.TickStepS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket.class, "TitleFadeS2CPacket");

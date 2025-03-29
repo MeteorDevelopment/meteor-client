@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
@@ -168,11 +167,13 @@ public class Freecam extends Module {
     @Override
     public void onDeactivate() {
         if (reloadChunks.get()) {
-            if (!RenderSystem.isOnRenderThread()) RenderSystem.recordRenderCall(mc.worldRenderer::reload);
-            else mc.worldRenderer.reload();
+            mc.execute(mc.worldRenderer::reload);
         }
+
         mc.options.setPerspective(perspective);
+
         if (staticView.get()) {
+
             mc.options.getFovEffectScale().setValue(fovScale);
             mc.options.getBobView().setValue(bobView);
         }

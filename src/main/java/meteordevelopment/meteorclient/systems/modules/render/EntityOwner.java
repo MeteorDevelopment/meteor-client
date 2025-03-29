@@ -86,7 +86,7 @@ public class EntityOwner extends Module {
 
         Renderer2D.COLOR.begin();
         Renderer2D.COLOR.quad(x - 1, y - 1, w + 2, text.getHeight() + 2, BACKGROUND);
-        Renderer2D.COLOR.render(null);
+        Renderer2D.COLOR.render();
 
         text.render(name, x, y, TEXT);
 

@@ -62,17 +62,17 @@ public abstract class GameRendererMixin {
     @Final
     private Camera camera;
 
-    @Shadow
-    protected abstract void bobView(MatrixStack matrices, float tickDelta);
-
-    @Shadow
-    protected abstract void tiltViewWhenHurt(MatrixStack matrices, float tickDelta);
-
     @Unique
     private Renderer3D renderer;
 
     @Unique
     private final MatrixStack matrices = new MatrixStack();
+
+    @Shadow
+    protected abstract void bobView(MatrixStack matrices, float tickDelta);
+
+    @Shadow
+    protected abstract void tiltViewWhenHurt(MatrixStack matrices, float tickDelta);
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
     private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 2) Matrix4f view, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
@@ -95,10 +95,8 @@ public abstract class GameRendererMixin {
         RenderSystem.getModelViewStack().pushMatrix().mul(view);
 
         matrices.push();
-
         tiltViewWhenHurt(matrices, camera.getLastTickProgress());
         if (client.options.getBobView().getValue()) bobView(matrices, camera.getLastTickProgress());
-
         RenderSystem.getModelViewStack().mul(matrices.peek().getPositionMatrix().invert());
         matrices.pop();
 
