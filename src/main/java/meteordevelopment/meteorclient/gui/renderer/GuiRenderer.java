@@ -147,7 +147,11 @@ public class GuiRenderer {
         Scissor scissor = scissorStack.pop();
 
         endRender(scissor);
+
+        scissor.push();
         for (Runnable task : scissor.postTasks) task.run();
+        scissor.pop();
+
         if (!scissorStack.isEmpty()) beginRender();
 
         scissorPool.free(scissor);

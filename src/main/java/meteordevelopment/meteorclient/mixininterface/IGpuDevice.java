@@ -17,9 +17,8 @@ public interface IGpuDevice {
 
     /**
      * This is an *INTERNAL* method, it shouldn't be called.
-     *
-     * @deprecated
      */
+    @Deprecated
     @SuppressWarnings("DeprecatedIsStillUsed")
     void meteor$onCreateRenderPass(RenderPass pass);
 }
