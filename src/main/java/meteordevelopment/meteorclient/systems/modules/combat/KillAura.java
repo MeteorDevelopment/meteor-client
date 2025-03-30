@@ -257,7 +257,7 @@ public class KillAura extends Module {
     @Override
     public void onDeactivate() {
         targets.clear();
-        attacking = false;
+        stopAttacking();
     }
 
     @EventHandler
