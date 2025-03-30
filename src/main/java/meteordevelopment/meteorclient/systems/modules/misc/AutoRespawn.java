@@ -40,7 +40,7 @@ public class AutoRespawn extends Module {
     );
 
     private final Setting<Double> respawnMessageDelay = sgGeneral.add(new DoubleSetting.Builder()
-        .name("initial-delay")
+        .name("message-delay")
         .description("The delay before sending respawn message in seconds.")
         .defaultValue(0.5)
         .sliderMax(10)
@@ -62,6 +62,7 @@ public class AutoRespawn extends Module {
             }
         }
 
+        info("Sending message '"+respawnMessage.get()+"'");
         ChatUtils.sendPlayerMsg(respawnMessage.get());
     }
 
