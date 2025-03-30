@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
@@ -129,13 +128,19 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
 
-        tag.put("groups", NbtUtils.listToTag(groups));
+        NbtList groupsTag = new NbtList();
+        for (SettingGroup group : groups) {
+            if (group.wasChanged()) groupsTag.add(group.toTag());
+        }
+        if (!groupsTag.isEmpty()) tag.put("groups", groupsTag);
 
         return tag;
     }
 
     @Override
     public Settings fromTag(NbtCompound tag) {
+        reset();
+
         NbtList groupsTag = tag.getList("groups", 10);
 
         for (NbtElement t : groupsTag) {

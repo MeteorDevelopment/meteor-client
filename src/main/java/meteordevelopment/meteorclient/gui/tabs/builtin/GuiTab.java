@@ -7,15 +7,15 @@ package meteordevelopment.meteorclient.gui.tabs.builtin;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
-import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.input.WDropdown;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -43,10 +43,10 @@ public class GuiTab extends Tab {
 
         @Override
         public void initWidgets() {
-            WTable table = add(theme.table()).expandX().widget();
+            WHorizontalList opts = add(theme.horizontalList()).expandX().widget();
 
-            table.add(theme.label("Theme:"));
-            WDropdown<String> themeW = table.add(theme.dropdown(GuiThemes.getNames(), GuiThemes.get().name)).widget();
+            opts.add(theme.label("Theme:"));
+            WDropdown<String> themeW = opts.add(theme.dropdown(GuiThemes.getNames(), GuiThemes.get().name)).widget();
             themeW.action = () -> {
                 GuiThemes.select(themeW.get());
 
@@ -54,27 +54,33 @@ public class GuiTab extends Tab {
                 tab.openScreen(GuiThemes.get());
             };
 
-            WButton reset = add(theme.button("Reset GUI Layout")).widget();
-            reset.action = theme::clearWindowConfigs;
+            WButton resetLayout = opts.add(theme.button("Reset Layout")).expandX().widget();
+            resetLayout.action = theme::clearWindowConfigs;
+
+            WButton reset = opts.add(theme.button("Reset Colors")).right().widget();
+            reset.action = () -> {
+                theme.settings.reset();
+                mc.setScreen(null);
+                tab.openScreen(GuiThemes.get());
+            };
+
+            WButton copyButton = opts.add(theme.button(GuiRenderer.COPY)).widget();
+            copyButton.action = this::toClipboard;
+
+            WButton pasteButton = opts.add(theme.button(GuiRenderer.PASTE)).right().widget();
+            pasteButton.action = this::fromClipboard;
 
             add(theme.settings(theme.settings)).expandX();
         }
 
         @Override
         public boolean toClipboard() {
-            return NbtUtils.toClipboard(theme.name + " GUI Theme", theme.toTag());
+            return NbtUtils.toClipboard(theme);
         }
 
         @Override
         public boolean fromClipboard() {
-            NbtCompound clipboard = NbtUtils.fromClipboard(theme.toTag());
-
-            if (clipboard != null) {
-                theme.fromTag(clipboard);
-                return true;
-            }
-
-            return false;
+            return NbtUtils.fromClipboard(theme);
         }
     }
 }
