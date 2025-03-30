@@ -35,8 +35,8 @@ public abstract class MeteorRenderPipelines {
 
     // World
 
-    public static final RenderPipeline WORLD_COLORED_TRIANGLES = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
-        .withLocation(MeteorClient.identifier("pipeline/world_colored_triangles"))
+    public static final RenderPipeline WORLD_COLORED = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+        .withLocation(MeteorClient.identifier("pipeline/world_colored"))
         .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.frag"))
@@ -60,8 +60,8 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
-    public static final RenderPipeline WORLD_COLORED_TRIANGLES_DEPTH = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
-        .withLocation(MeteorClient.identifier("pipeline/world_colored_triangles_depth"))
+    public static final RenderPipeline WORLD_COLORED_DEPTH = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+        .withLocation(MeteorClient.identifier("pipeline/world_colored_depth"))
         .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.frag"))
@@ -90,6 +90,18 @@ public abstract class MeteorRenderPipelines {
     public static final RenderPipeline UI_COLORED = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/ui_colored"))
         .withVertexFormat(MeteorVertexFormats.POS2_COLOR, VertexFormat.DrawMode.TRIANGLES)
+        .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
+        .withFragmentShader(MeteorClient.identifier("shaders/pos_color.frag"))
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .withDepthWrite(false)
+        .withBlend(BlendFunction.TRANSLUCENT)
+        .withCull(true)
+        .build()
+    );
+
+    public static final RenderPipeline UI_COLORED_LINES = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+        .withLocation(MeteorClient.identifier("pipeline/ui_colored_lines"))
+        .withVertexFormat(MeteorVertexFormats.POS2_COLOR, VertexFormat.DrawMode.DEBUG_LINES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_color.frag"))
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)

@@ -184,7 +184,7 @@ public class StorageESP extends Module {
     public StorageESP() {
         super(Categories.Render, "storage-esp", "Renders all specified storage blocks.");
 
-        mesh = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED_TRIANGLES);
+        mesh = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED);
         vertexConsumerProvider = new MeshBuilderVertexConsumerProvider(mesh);
     }
 
@@ -300,7 +300,7 @@ public class StorageESP extends Module {
             PostProcessShaders.STORAGE_OUTLINE.endRender(() -> MeshRenderer.begin()
                 .attachments(mc.getFramebuffer())
                 .clearColor(Color.CLEAR)
-                .pipeline(MeteorRenderPipelines.WORLD_COLORED_TRIANGLES)
+                .pipeline(MeteorRenderPipelines.WORLD_COLORED)
                 .mesh(mesh, event.matrices)
                 .end()
             );

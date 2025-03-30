@@ -27,7 +27,7 @@ public class Renderer2D {
         this.textured = textured;
 
         triangles = new MeshBuilder(textured ? MeteorRenderPipelines.UI_TEXTURED : MeteorRenderPipelines.UI_COLORED);
-        lines = new MeshBuilder(MeteorRenderPipelines.UI_COLORED);
+        lines = new MeshBuilder(MeteorRenderPipelines.UI_COLORED_LINES);
     }
 
     @PreInit
@@ -67,7 +67,7 @@ public class Renderer2D {
 
         MeshRenderer.begin()
             .attachments(MinecraftClient.getInstance().getFramebuffer())
-            .pipeline(MeteorRenderPipelines.UI_COLORED)
+            .pipeline(MeteorRenderPipelines.UI_COLORED_LINES)
             .mesh(lines)
             .end();
 

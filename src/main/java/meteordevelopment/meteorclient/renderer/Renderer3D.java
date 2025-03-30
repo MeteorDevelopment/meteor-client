@@ -14,7 +14,7 @@ import net.minecraft.util.math.Box;
 
 public class Renderer3D {
     public final MeshBuilder lines = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED_LINES);
-    public final MeshBuilder triangles = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED_TRIANGLES);
+    public final MeshBuilder triangles = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED);
 
     public void begin() {
         lines.begin();
@@ -30,7 +30,7 @@ public class Renderer3D {
 
         MeshRenderer.begin()
             .attachments(MinecraftClient.getInstance().getFramebuffer())
-            .pipeline(MeteorRenderPipelines.WORLD_COLORED_TRIANGLES)
+            .pipeline(MeteorRenderPipelines.WORLD_COLORED)
             .mesh(triangles, matrices)
             .end();
     }
