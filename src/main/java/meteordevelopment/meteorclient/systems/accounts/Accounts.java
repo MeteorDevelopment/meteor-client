@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
 import meteordevelopment.meteorclient.systems.accounts.types.MicrosoftAccount;
-import meteordevelopment.meteorclient.systems.accounts.types.TheAlteningAccount;
+import meteordevelopment.meteorclient.systems.accounts.types.TokenAccount;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-//TODO: add session token based auth
 public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
     private List<Account<?>> accounts = new ArrayList<>();
 
@@ -75,9 +74,9 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
 
             try {
                 return switch (type) {
-                    case Cracked ->     new CrackedAccount(null).fromTag(t);
-                    case Microsoft ->   new MicrosoftAccount(null).fromTag(t);
-                    case TheAltening -> new TheAlteningAccount(null).fromTag(t);
+                    case Cracked -> new CrackedAccount(null).fromTag(t);
+                    case Microsoft -> new MicrosoftAccount(null).fromTag(t);
+                    case Token -> new TokenAccount(null).fromTag(t);
                 };
             } catch (NbtException e) {
                 return null;

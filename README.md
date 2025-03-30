@@ -6,24 +6,27 @@
 - Add a confirm prompt when saving/loading/deleting profiles.
 - Add allow-flying option to Kill-Aura.
 - Add confirm-disconnect option to Auto-Reconnect.
-- Add effect-ran-out option to Notifier.
+- Add effect-ran-out and log-signs options to Notifier.
 - Add no-beds option to No-Interact.
 - Add scroll option to Better-Tab.
 - Add session command.
 - Add sysgc command.
 - Add uptime to Starscript.
+- Improve Anti-Afk.
 - Improve Auto-Eat.
 - Improve Auto-Sign.
 - Improve Better-Chat.
 - Improve Better-Tab.
 - Improve Block-Selection.
 - Improve Elytra-Fly/Pitch40.
+- Improve Kill-Aura.
 - Improve No-Rotate.
 - Improve Notifier.
 - Improve Packet-Canceller.
 - Improve Trajectories.
 - Remove Discord-Presence.
 - Remove Trail.
+- Remove all but 1 builtin font.
 - Remove meteor capes and player count.
 - Fix stuff.
 - Some opinionated changes.

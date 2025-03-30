@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.accounts.Account;
-import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
+import meteordevelopment.meteorclient.systems.accounts.types.TokenAccount;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -31,7 +31,7 @@ public class AccountInfoScreen extends WindowScreen {
         WButton copy = theme.button("Copy");
         copy.action = () -> mc.keyboard.setClipboard(e.getToken());
 
-        l.add(theme.label("TheAltening token:"));
+        l.add(theme.label("Token:"));
         l.add(theme.label(e.getToken()).color(Color.GRAY)).pad(5);
         l.add(copy);
     }

@@ -101,20 +101,18 @@ public class InventoryHud extends HudElement {
 
         if (mc.player == null) return;
 
-        renderer.post(() -> {
-            for (int row = 0; row < 3; row++) {
-                for (int i = 0; i < 9; i++) {
-                    int index = row * 9 + i;
-                    ItemStack stack = hasContainer ? containerItems[index] : mc.player.getInventory().getStack(index + 9);
-                    if (stack == null) continue;
+        for (int row = 0; row < 3; row++) {
+            for (int i = 0; i < 9; i++) {
+                int index = row * 9 + i;
+                ItemStack stack = hasContainer ? containerItems[index] : mc.player.getInventory().getStack(index + 9);
+                if (stack == null) continue;
 
-                    int itemX = background.get() == Background.Texture ? (int) (x + (8 + i * 18) * getScale()) : (int) (x + (1 + i * 18) * getScale());
-                    int itemY = background.get() == Background.Texture ? (int) (y + (7 + row * 18) * getScale()) : (int) (y + (1 + row * 18) * getScale());
+                int itemX = background.get() == Background.Texture ? (int) (x + (8 + i * 18) * getScale()) : (int) (x + (1 + i * 18) * getScale());
+                int itemY = background.get() == Background.Texture ? (int) (y + (7 + row * 18) * getScale()) : (int) (y + (1 + row * 18) * getScale());
 
-                    renderer.item(stack, itemX, itemY, (float) getScale(), true);
-                }
+                renderer.item(stack, itemX, itemY, (float) getScale(), true);
             }
-        });
+        }
     }
 
     private void calculateSize() {

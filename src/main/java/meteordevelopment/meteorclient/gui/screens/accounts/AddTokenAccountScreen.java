@@ -1,18 +1,13 @@
-/*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
- * Copyright (c) Meteor Development.
- */
-
 package meteordevelopment.meteorclient.gui.screens.accounts;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
-import meteordevelopment.meteorclient.systems.accounts.types.TheAlteningAccount;
+import meteordevelopment.meteorclient.systems.accounts.types.TokenAccount;
 
-public class AddAlteningAccountScreen extends AddAccountScreen {
-    public AddAlteningAccountScreen(GuiTheme theme, AccountsScreen parent) {
-        super(theme, "Add The Altening Account", parent);
+public class AddTokenAccountScreen extends AddAccountScreen {
+    public AddTokenAccountScreen(GuiTheme theme, AccountsScreen parent) {
+        super(theme, "Add Token Account", parent);
     }
 
     @Override
@@ -29,7 +24,7 @@ public class AddAlteningAccountScreen extends AddAccountScreen {
         add = t.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
             if (!token.get().isEmpty()) {
-                AccountsScreen.addAccount(this, parent, new TheAlteningAccount(token.get()));
+                AccountsScreen.addAccount(this, parent, new TokenAccount(token.get()));
             }
         };
 

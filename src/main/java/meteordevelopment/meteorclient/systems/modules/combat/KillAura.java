@@ -34,6 +34,8 @@ import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.entity.projectile.ShulkerBulletEntity;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
@@ -46,6 +48,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+// TODO: this whole module is very poorly written
 public class KillAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTargeting = settings.createGroup("Targeting");
@@ -143,6 +146,13 @@ public class KillAura extends Module {
         .defaultValue(4.5)
         .min(0)
         .sliderMax(6)
+        .build()
+    );
+
+    private final Setting<Double> velocityPredict = sgGeneral.add(new DoubleSetting.Builder()
+        .name("velocity-predict")
+        .description("Act as if the target is this many ticks ahead.")
+        .defaultValue(0)
         .build()
     );
 
@@ -315,7 +325,10 @@ public class KillAura extends Module {
             wasPathing = true;
         }
 
-        if (delayCheck()) targets.forEach(this::attack);
+        targets.forEach((i) -> {
+            if (delayCheck() || (i instanceof FireballEntity || i instanceof ShulkerBulletEntity))
+                attack(i);
+        });
     }
 
     @EventHandler
@@ -342,12 +355,12 @@ public class KillAura extends Module {
         if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
 
 
-        Box hitbox = entity.getBoundingBox();
+        Box hitbox = entity.getBoundingBox().offset(entity.getVelocity().multiply(velocityPredict.get()));
         if (!PlayerUtils.isWithin(
             MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
             MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
             MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
-            range.get() + entity.getVelocity().length()
+            range.get()
         )) return false;
 
         if (!entities.get().contains(entity.getType())) return false;

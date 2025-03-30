@@ -109,6 +109,7 @@
     "IdentifierAccessor",
     "InGameHudMixin",
     "InGameOverlayRendererMixin",
+    "InactivityFpsLimiterAccessor",
     "ItemEnchantmentsComponentMixin",
     "ItemEntityRendererMixin",
     "ItemGroupsMixin",

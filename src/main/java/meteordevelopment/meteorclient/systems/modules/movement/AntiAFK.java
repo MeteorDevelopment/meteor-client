@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.InactivityFpsLimiterAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -13,13 +14,26 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.util.Util;
 
 import java.util.List;
 import java.util.Random;
 
 public class AntiAFK extends Module {
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgActions = settings.createGroup("Actions");
     private final SettingGroup sgMessages = settings.createGroup("Messages");
+
+    // Auto
+
+    private final Setting<Integer> auto = sgGeneral.add(new IntSetting.Builder()
+        .name("auto")
+        .description("How many seconds without input is considered AFK.")
+        .min(0)
+        .sliderMax(60 * 5)
+        .defaultValue(60)
+        .build()
+    );
 
     // Actions
 
@@ -173,8 +187,23 @@ public class AntiAFK extends Module {
         }
     }
 
+    private long timeSinceLastInput() {
+        return Util.getMeasuringTimeMs() - ((InactivityFpsLimiterAccessor) mc.getInactivityFpsLimiter()).lastInputTime();
+    }
+
+    private boolean isAFK() {
+        return timeSinceLastInput() > 1000 * auto.get();
+    }
+
+    @Override
+    public String getInfoString() {
+        if (!isAFK()) return super.getInfoString();
+        return String.valueOf(timeSinceLastInput() / 1000);
+    }
+
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (!isAFK()) return; // TODO: onActivate/Deactivate?
         if (!Utils.canUpdate()) return;
 
         // Jump

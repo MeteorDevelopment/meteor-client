@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -21,6 +22,8 @@ import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityStatuses;
@@ -197,6 +200,13 @@ public class Notifier extends Module {
         .build()
     );
 
+    private final Setting<Boolean> logSigns = sgOther.add(new BoolSetting.Builder()
+        .name("log-signs")
+        .description("Log contents of loaded signs to chat.")
+        .defaultValue(true)
+        .build()
+    );
+
     private int timer;
     private boolean loginPacket = true;
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
@@ -364,6 +374,26 @@ public class Notifier extends Module {
                 }
             }
         }
+    }
+
+    @EventHandler
+    private void onChunkData(ChunkDataEvent event) {
+        if (logSigns.get()) {
+            event.chunk().getBlockEntities().values().forEach((i) -> {
+                if (i instanceof SignBlockEntity e)
+                    info("[" + logSigns.title + "]"
+                            + Formatting.GRAY + "\n"
+                            + " Front: " + formatSignText(e.getFrontText())
+                            + Formatting.GRAY + "\n"
+                            + " Back: " + formatSignText(e.getBackText()));
+            });
+        }
+    }
+
+    private String formatSignText(SignText text) {
+        return String.join("\n", Arrays.stream(text.getMessages(false))
+                .map(i -> Formatting.WHITE + i.getString().trim()).toArray(String[]::new))
+            .replace("\n", Formatting.GRAY + "-");
     }
 
     private int getChatId(Entity entity) {

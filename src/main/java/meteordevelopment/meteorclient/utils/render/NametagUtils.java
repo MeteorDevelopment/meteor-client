@@ -34,6 +34,7 @@ public class NametagUtils {
     private NametagUtils() {
     }
 
+    // TODO: nametag rendering messes up the text renderer's (and not only it's) scale (and not only scale)
     public static void onRender(Matrix4f modelView) {
         model.set(modelView);
         NametagUtils.projection.set(RenderSystem.getProjectionMatrix());

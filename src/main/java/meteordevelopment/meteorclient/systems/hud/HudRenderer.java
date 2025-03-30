@@ -72,8 +72,7 @@ public class HudRenderer {
     public void end() {
         Renderer2D.COLOR.render(new MatrixStack());
 
-        for (Runnable task : postTasks) task.run();
-        postTasks.clear();
+        runPostTasks();
 
         if (hud.hasCustomFont()) {
             // Render fonts that were visited this frame and move to cache which weren't visited
@@ -98,6 +97,11 @@ public class HudRenderer {
         }
 
         this.drawContext = null;
+    }
+
+    private void runPostTasks() {
+        for (Runnable task : postTasks) task.run();
+        postTasks.clear();
     }
 
     public void line(double x1, double y1, double x2, double y2, Color color) {

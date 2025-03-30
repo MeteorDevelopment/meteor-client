@@ -51,12 +51,12 @@ public abstract class PlayerListHudMixin {
 
         final var l = s.toList();
         final var size = l.size();
-        if (size == 0) return s;
+        if (size == 0) return Stream.empty();
 
         final var i = betterTab.scroll;
         final var p = betterTab.passiveScroll.get();
 
-        final var n = (int) ((p == 0 ? 0 : (System.currentTimeMillis() / 1000d * size / p)) + i) % size;
+        final var n = (int) ((p == 0 ? 0 : ((System.currentTimeMillis() / 1000.0) * size / p)) + i) % size;
 
         final var o = new ArrayList<>(l.subList(n, size));
         o.addAll(l.subList(0, n));
