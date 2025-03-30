@@ -6,8 +6,9 @@
 package meteordevelopment.meteorclient.systems.modules.misc;
 
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.DoubleSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.StringSetting;
@@ -15,7 +16,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.WaypointsModule;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
@@ -39,31 +39,21 @@ public class AutoRespawn extends Module {
         .build()
     );
 
-    private final Setting<Double> respawnMessageDelay = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Integer> respawnMessageDelay = sgGeneral.add(new IntSetting.Builder()
         .name("message-delay")
-        .description("The delay before sending respawn message in seconds.")
-        .defaultValue(0.5)
-        .sliderMax(10)
+        .description("The delay before sending respawn message in ticks.")
+        .defaultValue(1)
+        .sliderMax(100)
         .visible(sendRespawnMessage::get)
         .build()
     );
 
+    // Fields
+    private int respawnTimer;
+    private boolean respawning = false;
+
     public AutoRespawn() {
         super(Categories.Player, "auto-respawn", "Automatically respawns after death.");
-    }
-
-    private void sendDeathMessage() {
-        long delay = (long) Math.floor(respawnMessageDelay.get() * 1000);
-        if (delay > 0) {
-            try {
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        info("Sending message '"+respawnMessage.get()+"'");
-        ChatUtils.sendPlayerMsg(respawnMessage.get());
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -75,7 +65,19 @@ public class AutoRespawn extends Module {
         event.cancel();
 
         if (!sendRespawnMessage.get()) return;
-        // execute on a different thread to not yield literally everything.
-        MeteorExecutor.execute(() -> sendDeathMessage());
+        respawnTimer = 0;
+        respawning = true;
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (!respawning) return;
+        respawnTimer++;
+
+        if (respawnTimer <= respawnMessageDelay.get()) return;
+        respawning = false;
+
+        info("Sending message '"+respawnMessage.get()+"'");
+        ChatUtils.sendPlayerMsg(respawnMessage.get());
     }
 }
