@@ -17,7 +17,7 @@ import net.minecraft.item.Items;
 import java.util.List;
 import java.util.Map;
 
-public class StorageBlockListSettingScreen extends RegistryListSettingScreen<BlockEntityType<?>> {
+public class StorageBlockListSettingScreen extends CollectionListSettingScreen<BlockEntityType<?>> {
     private static final Map<BlockEntityType<?>, BlockEntityTypeInfo> BLOCK_ENTITY_TYPE_INFO_MAP = new Object2ObjectOpenHashMap<>();
     private static final BlockEntityTypeInfo UNKNOWN = new BlockEntityTypeInfo(Items.BARRIER, "Unknown");
 
