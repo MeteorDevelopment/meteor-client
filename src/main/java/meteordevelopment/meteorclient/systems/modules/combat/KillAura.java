@@ -72,6 +72,14 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final Setting<Boolean> swapBack = sgGeneral.add(new BoolSetting.Builder()
+        .name("swap-back")
+        .description("Switches to your previous slot when done attacking the target.")
+        .defaultValue(false)
+        .visible(autoSwitch::get)
+        .build()
+    );
+
     private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-click")
         .description("Only attacks when holding left click.")
@@ -233,10 +241,17 @@ public class KillAura extends Module {
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
-    public boolean attacking;
+    public boolean attacking, swapped;
+    public static int previousSlot;
 
     public KillAura() {
         super(Categories.Combat, "kill-aura", "Attacks specified entities around you.");
+    }
+
+    @Override
+    public void onActivate() {
+        previousSlot = -1;
+        swapped = false;
     }
 
     @Override
@@ -272,6 +287,10 @@ public class KillAura extends Module {
                 PathManagers.get().resume();
                 wasPathing = false;
             }
+            if (swapBack.get() && swapped) {
+                InvUtils.swap(previousSlot, false);
+                swapped = false;
+            }
             return;
         }
 
@@ -293,6 +312,10 @@ public class KillAura extends Module {
                 if (axeResult.found()) weaponResult = axeResult;
             }
 
+            if (!swapped) {
+                previousSlot  = mc.player.getInventory().selectedSlot;
+                swapped = true;
+            }
             InvUtils.swap(weaponResult.slot(), false);
         }
 
