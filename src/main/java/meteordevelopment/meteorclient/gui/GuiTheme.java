@@ -113,6 +113,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
 
     public abstract <T> WDropdown<T> dropdown(T[] values, T value);
+    @SuppressWarnings("unchecked")
     public <T extends Enum<?>> WDropdown<T> dropdown(T value) {
         Class<?> klass = value.getDeclaringClass();
         T[] values = (T[]) klass.getEnumConstants();

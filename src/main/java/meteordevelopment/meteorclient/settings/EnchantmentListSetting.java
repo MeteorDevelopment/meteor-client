@@ -85,6 +85,7 @@ public class EnchantmentListSetting extends Setting<Set<RegistryKey<Enchantment>
         return get();
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static class Builder extends SettingBuilder<Builder, Set<RegistryKey<Enchantment>>, EnchantmentListSetting> {
         private static final Set<RegistryKey<Enchantment>> VANILLA_DEFAULTS;
 
@@ -107,7 +108,6 @@ public class EnchantmentListSetting extends Setting<Set<RegistryKey<Enchantment>
         }
 
         static {
-            //noinspection unchecked,rawtypes
             VANILLA_DEFAULTS = (Set) Arrays.stream(Enchantments.class.getDeclaredFields())
                 .filter(field -> field.accessFlags().containsAll(List.of(AccessFlag.PUBLIC, AccessFlag.STATIC, AccessFlag.FINAL)))
                 .filter(field -> field.getType() == RegistryKey.class)

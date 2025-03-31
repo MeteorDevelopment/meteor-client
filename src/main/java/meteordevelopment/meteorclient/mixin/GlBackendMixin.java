@@ -40,6 +40,7 @@ public abstract class GlBackendMixin implements IGpuDevice {
         set = false;
     }
 
+    @Deprecated
     @Override
     public void meteor$onCreateRenderPass(RenderPass pass) {
         if (set) {

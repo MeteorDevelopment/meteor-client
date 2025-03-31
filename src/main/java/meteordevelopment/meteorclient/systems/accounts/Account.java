@@ -96,6 +96,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         return tag;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T fromTag(NbtCompound tag) {
         if (tag.getString("name").isEmpty() || tag.getCompound("cache").isEmpty()) throw new NbtException();

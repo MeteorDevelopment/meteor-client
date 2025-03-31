@@ -229,6 +229,7 @@ public class Utils {
         return false;
     }
 
+    @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static void getItemsInContainerItem(ItemStack itemStack, ItemStack[] items) {
         if (itemStack.getItem() == Items.ENDER_CHEST) {
             for (int i = 0; i < EChestMemory.ITEMS.size(); i++) {
@@ -253,12 +254,10 @@ public class Utils {
             NbtComponent nbt2 = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
 
             if (nbt2.contains("Items")) {
-                //noinspection deprecation
                 NbtList nbt3 = (NbtList) nbt2.getNbt().get("Items");
                 if (nbt3 == null) return;
 
                 for (int i = 0; i < nbt3.size(); i++) {
-                    boolean empty = false;
                     Optional<NbtCompound> compound = nbt3.getCompound(i);
                     if (compound.isEmpty()) continue;
 
@@ -294,11 +293,11 @@ public class Utils {
         return WHITE;
     }
 
+    @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static boolean hasItems(ItemStack itemStack) {
         ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) itemStack.get(DataComponentTypes.CONTAINER));
         if (container != null && !container.getStacks().isEmpty()) return true;
 
-        //noinspection deprecation
         NbtCompound compoundTag = itemStack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).getNbt();
         return compoundTag != null && compoundTag.contains("Items");
     }

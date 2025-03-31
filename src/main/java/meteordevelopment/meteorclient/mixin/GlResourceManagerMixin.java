@@ -27,9 +27,9 @@ public abstract class GlResourceManagerMixin {
     @Final
     private GlBackend backend;
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "createRenderPass(Lcom/mojang/blaze3d/textures/GpuTexture;Ljava/util/OptionalInt;Lcom/mojang/blaze3d/textures/GpuTexture;Ljava/util/OptionalDouble;)Lcom/mojang/blaze3d/systems/RenderPass;", at = @At("RETURN"))
     private void createRenderPass$iGpuDevice(CallbackInfoReturnable<RenderPass> info) {
-        //noinspection deprecation
         ((IGpuDevice) backend).meteor$onCreateRenderPass(info.getReturnValue());
     }
 

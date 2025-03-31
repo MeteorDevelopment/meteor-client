@@ -75,13 +75,13 @@ public class EntityUtils {
         return playerListEntry.getGameMode();
     }
 
+    @SuppressWarnings("deprecation") // Use of AbstractBlock.AbstractBlockState#blocksMovement
     public static boolean isAboveWater(Entity entity) {
         BlockPos.Mutable blockPos = entity.getBlockPos().mutableCopy();
 
         for (int i = 0; i < 64; i++) {
             BlockState state = mc.world.getBlockState(blockPos);
 
-            //noinspection deprecation
             if (state.blocksMovement()) break;
 
             Fluid fluid = state.getFluidState().getFluid();

@@ -40,6 +40,7 @@ public class WireframeEntityRenderer {
     private WireframeEntityRenderer() {
     }
 
+    @SuppressWarnings("unchecked")
     public static void render(Render3DEvent event, Entity entity, double scale, Color sideColor, Color lineColor, ShapeMode shapeMode) {
         WireframeEntityRenderer.renderer = event.renderer;
         WireframeEntityRenderer.sideColor = sideColor;
@@ -52,7 +53,6 @@ public class WireframeEntityRenderer {
         offsetY = MathHelper.lerp(tickDelta, entity.lastRenderY, entity.getY());
         offsetZ = MathHelper.lerp(tickDelta, entity.lastRenderZ, entity.getZ());
 
-        //noinspection unchecked
         var renderer = (EntityRenderer<Entity, EntityRenderState>) mc.getEntityRenderDispatcher().getRenderer(entity);
         var state = renderer.getAndUpdateRenderState(entity, tickDelta);
 

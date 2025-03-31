@@ -155,6 +155,8 @@ tasks {
 
     withType<JavaCompile> {
         options.release = 21
+        options.compilerArgs.add("-Xlint:deprecation")
+        options.compilerArgs.add("-Xlint:unchecked")
     }
 
     shadowJar {
