@@ -357,7 +357,7 @@ public class Nametags extends Module {
             if (NametagUtils.to2D(pos, scale.get())) {
                 if (type == EntityType.PLAYER) renderNametagPlayer(event, (PlayerEntity) entity, shadow);
                 else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getStack(), shadow);
-                else if (type == EntityType.ITEM_FRAME)
+                else if (type == EntityType.ITEM_FRAME || type == EntityType.GLOW_ITEM_FRAME)
                     renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack(), shadow);
                 else if (type == EntityType.TNT) renderTntNametag(ticksToTime(((TntEntity) entity).getFuse()), shadow);
                 else if (type == EntityType.TNT_MINECART && ((TntMinecartEntity) entity).isPrimed())
@@ -383,7 +383,7 @@ public class Nametags extends Module {
     private double getHeight(Entity entity) {
         double height = entity.getEyeHeight(entity.getPose());
 
-        if (entity.getType() == EntityType.ITEM || entity.getType() == EntityType.ITEM_FRAME) height += 0.2;
+        if (entity.getType() == EntityType.ITEM || entity.getType() == EntityType.ITEM_FRAME || entity.getType() == EntityType.GLOW_ITEM_FRAME) height += 0.2;
         else height += 0.5;
 
         return height;
