@@ -182,10 +182,6 @@ public class PacketUtils {
         S2C_PACKETS_R.put("BlockUpdateS2CPacket", net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BossBarS2CPacket.class, "BossBarS2CPacket");
         S2C_PACKETS_R.put("BossBarS2CPacket", net.minecraft.network.packet.s2c.play.BossBarS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BundleDelimiterS2CPacket.class, "BundleDelimiterS2CPacket");
-        S2C_PACKETS_R.put("BundleDelimiterS2CPacket", net.minecraft.network.packet.s2c.play.BundleDelimiterS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BundleS2CPacket.class, "BundleS2CPacket");
-        S2C_PACKETS_R.put("BundleS2CPacket", net.minecraft.network.packet.s2c.play.BundleS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket.class, "ChatMessageS2CPacket");
         S2C_PACKETS_R.put("ChatMessageS2CPacket", net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChatSuggestionsS2CPacket.class, "ChatSuggestionsS2CPacket");

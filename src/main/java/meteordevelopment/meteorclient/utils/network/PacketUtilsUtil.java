@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 public class PacketUtilsUtil {
     private PacketUtilsUtil() {
@@ -70,42 +71,14 @@ public class PacketUtilsUtil {
             //     Write static block
             writer.write("    static {\n");
 
-            Comparator<Class<?>> packetsComparator = Comparator
-                .comparing((Class<?> cls) -> cls.getName().substring(cls.getName().lastIndexOf('.') + 1))
-                .thenComparing(Class::getName);
-
-            // Client -> Sever Packets
-            Reflections c2s = new Reflections("net.minecraft.network.packet.c2s", Scanners.SubTypes);
-            Set<Class<? extends Packet>> c2sPackets = c2s.getSubTypesOf(Packet.class);
-            SortedSet<Class<? extends Packet>> sortedC2SPackets = new TreeSet<>(packetsComparator);
-            sortedC2SPackets.addAll(c2sPackets);
-
-            for (Class<? extends Packet> c2sPacket : sortedC2SPackets) {
-                String name = c2sPacket.getName();
-                String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');
-                String fullName = name.replace('$', '.');
-
-                writer.write("        C2S_PACKETS.put(%s.class, \"%s\");%n".formatted(fullName, className));
-                writer.write("        C2S_PACKETS_R.put(\"%s\", %s.class);%n".formatted(className, fullName));
-            }
-
+            // Process packets
+            processPackets(writer, "net.minecraft.network.packet.c2s", "C2S_PACKETS", "C2S_PACKETS_R",
+                packet -> false // No exclusions for C2S packets
+            );
             writer.newLine();
-
-            // Server -> Client Packets
-            Reflections s2c = new Reflections("net.minecraft.network.packet.s2c", Scanners.SubTypes);
-            Set<Class<? extends Packet>> s2cPackets = s2c.getSubTypesOf(Packet.class);
-            SortedSet<Class<? extends Packet>> sortedS2CPackets = new TreeSet<>(packetsComparator);
-            sortedS2CPackets.addAll(s2cPackets);
-
-            for (Class<? extends Packet> s2cPacket : sortedS2CPackets) {
-                if (s2cPacket == BundlePacket.class || s2cPacket == BundleSplitterPacket.class) continue;
-                String name = s2cPacket.getName();
-                String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');
-                String fullName = name.replace('$', '.');
-
-                writer.write("        S2C_PACKETS.put(%s.class, \"%s\");%n".formatted(fullName, className));
-                writer.write("        S2C_PACKETS_R.put(\"%s\", %s.class);%n".formatted(className, fullName));
-            }
+            processPackets(writer, "net.minecraft.network.packet.s2c", "S2C_PACKETS", "S2C_PACKETS_R",
+                packet -> BundlePacket.class.isAssignableFrom(packet) || BundleSplitterPacket.class.isAssignableFrom(packet)
+            );
 
             writer.write("    }\n\n");
 
@@ -138,6 +111,29 @@ public class PacketUtilsUtil {
 
             //   Write end class
             writer.write("}\n");
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static void processPackets(BufferedWriter writer, String packageName, String packetMapName, String reverseMapName, Predicate<Class<?>> exclusionFilter) throws IOException {
+        Comparator<Class<?>> packetsComparator = Comparator
+            .comparing((Class<?> cls) -> cls.getName().substring(cls.getName().lastIndexOf('.') + 1))
+            .thenComparing(Class::getName);
+
+        Reflections reflections = new Reflections(packageName, Scanners.SubTypes);
+        Set<Class<? extends Packet>> packets = reflections.getSubTypesOf(Packet.class);
+        SortedSet<Class<? extends Packet>> sortedPackets = new TreeSet<>(packetsComparator);
+        sortedPackets.addAll(packets);
+
+        for (Class<? extends Packet> packet : sortedPackets) {
+            if (exclusionFilter.test(packet)) continue;
+
+            String name = packet.getName();
+            String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');
+            String fullName = name.replace('$', '.');
+
+            writer.write("        %s.put(%s.class, \"%s\");%n".formatted(packetMapName, fullName, className));
+            writer.write("        %s.put(\"%s\", %s.class);%n".formatted(reverseMapName, className, fullName));
         }
     }
 }
