@@ -253,6 +253,7 @@ public class Utils {
             NbtComponent nbt2 = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
 
             if (nbt2.contains("Items")) {
+                //noinspection deprecation
                 NbtList nbt3 = (NbtList) nbt2.getNbt().get("Items");
                 if (nbt3 == null) return;
 
@@ -297,8 +298,9 @@ public class Utils {
         ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) itemStack.get(DataComponentTypes.CONTAINER));
         if (container != null && !container.getStacks().isEmpty()) return true;
 
+        //noinspection deprecation
         NbtCompound compoundTag = itemStack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).getNbt();
-        return compoundTag != null && compoundTag.contains("Items"); // todo double check this
+        return compoundTag != null && compoundTag.contains("Items");
     }
 
     public static Reference2IntMap<StatusEffect> createStatusEffectMap() {

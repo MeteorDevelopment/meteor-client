@@ -152,6 +152,7 @@ public class Spam extends Module {
 
                 text = messages.get().get(i);
                 if (bypass.get()) {
+                    //noinspection deprecation
                     String bypass = RandomStringUtils.randomAlphabetic(length.get());
                     if (!uppercase.get()) bypass = bypass.toLowerCase();
 

@@ -78,6 +78,7 @@ public class SaveMapCommand extends Command {
         try {
             if (scale == 128) texture.texture.getImage().writeTo(path);
             else {
+                //noinspection deprecation
                 int[] data = texture.texture.getImage().makePixelArray();
                 BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
                 image.setRGB(0, 0, image.getWidth(), image.getHeight(), data, 0, 128);
