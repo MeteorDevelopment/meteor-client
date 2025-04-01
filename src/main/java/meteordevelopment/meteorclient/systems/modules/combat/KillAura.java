@@ -325,7 +325,7 @@ public class KillAura extends Module {
             }
 
             if (!swapped) {
-                previousSlot  = mc.player.getInventory().selectedSlot;
+                previousSlot  = mc.player.getInventory().getSelectedSlot();
                 swapped = true;
             }
             InvUtils.swap(weaponResult.slot(), false);
