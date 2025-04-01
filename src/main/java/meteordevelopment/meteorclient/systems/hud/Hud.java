@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
@@ -223,7 +224,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     private void onRender(Render2DEvent event) {
         if (Utils.isLoading()) return;
 

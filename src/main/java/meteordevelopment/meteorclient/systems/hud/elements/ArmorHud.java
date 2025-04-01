@@ -144,55 +144,50 @@ public class ArmorHud extends HudElement {
             renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
         }
 
-        renderer.post(() -> {
-            double x = this.x;
-            double y = this.y;
+        double armorX, armorY;
 
-            double armorX, armorY;
+        for (int position = 0; position < 4; position++) {
+            ItemStack itemStack = armor[position];
 
-            for (int position = 0; position < 4; position++) {
-                ItemStack itemStack = armor[position];
+            if (orientation.get() == Orientation.Vertical) {
+                armorX = x;
+                armorY = y + position * 18 * getScale();
+            } else {
+                armorX = x + position * 18 * getScale();
+                armorY = y;
+            }
+
+            renderer.item(itemStack, (int) armorX, (int) armorY, getScale(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
+
+            if (itemStack.isDamageable() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
+                String message = switch (durability.get()) {
+                    case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
+                    case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
+                    default -> "err";
+                };
+
+                double messageWidth = renderer.textWidth(message);
 
                 if (orientation.get() == Orientation.Vertical) {
-                    armorX = x;
-                    armorY = y + position * 18 * getScale();
+                    armorX = x + 8 * getScale() - messageWidth / 2.0;
+                    armorY = y + (18 * position * getScale()) + (18 * getScale() - renderer.textHeight());
                 } else {
-                    armorX = x + position * 18 * getScale();
-                    armorY = y;
+                    armorX = x + 18 * position * getScale() + 8 * getScale() - messageWidth / 2.0;
+                    armorY = y + (getHeight() - renderer.textHeight());
                 }
 
-                renderer.item(itemStack, (int) armorX, (int) armorY, getScale(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
-
-                if (itemStack.isDamageable() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
-                    String message = switch (durability.get()) {
-                        case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
-                        case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
-                        default -> "err";
-                    };
-
-                    double messageWidth = renderer.textWidth(message);
-
-                    if (orientation.get() == Orientation.Vertical) {
-                        armorX = x + 8 * getScale() - messageWidth / 2.0;
-                        armorY = y + (18 * position * getScale()) + (18 * getScale() - renderer.textHeight());
-                    } else {
-                        armorX = x + 18 * position * getScale() + 8 * getScale() - messageWidth / 2.0;
-                        armorY = y + (getHeight() - renderer.textHeight());
-                    }
-
-                    TextRenderer.get().render(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
-                }
+                TextRenderer.get().render(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
             }
-        });
+        }
     }
 
     private ItemStack getItem(int i) {
         if (isInEditor()) {
             return switch (i) {
-                case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
-                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
+                case 3 -> Items.TURTLE_HELMET.getDefaultStack();
+                case 2 -> Items.ELYTRA.getDefaultStack();
                 case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
-                default -> Items.NETHERITE_BOOTS.getDefaultStack();
+                default -> Items.LEATHER_BOOTS.getDefaultStack();
             };
         }
 

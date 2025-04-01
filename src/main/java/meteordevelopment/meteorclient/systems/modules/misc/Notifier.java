@@ -381,19 +381,30 @@ public class Notifier extends Module {
         if (logSigns.get()) {
             event.chunk().getBlockEntities().values().forEach((i) -> {
                 if (i instanceof SignBlockEntity e)
-                    info("[" + logSigns.title + "]"
-                            + Formatting.GRAY + "\n"
-                            + " Front: " + formatSignText(e.getFrontText())
-                            + Formatting.GRAY + "\n"
-                            + " Back: " + formatSignText(e.getBackText()));
+                    logSign(e);
             });
         }
     }
 
+    private void logSign(SignBlockEntity sign) {
+        final var sb = new StringBuilder("[" + logSigns.title + "]");
+
+        final var front = sign.getFrontText();
+        if (!isEmpty(front)) sb.append("\n").append(formatSignText(front));
+        final var back = sign.getBackText();
+        if (!isEmpty(back)) sb.append("\n").append(formatSignText(back));
+
+        info(sb.toString());
+    }
+
+    private boolean isEmpty(SignText text) {
+        return Arrays.stream(text.getMessages(false)).allMatch(i -> i.getString().isEmpty());
+    }
+
     private String formatSignText(SignText text) {
         return String.join("\n", Arrays.stream(text.getMessages(false))
-                .map(i -> Formatting.WHITE + i.getString().trim()).toArray(String[]::new))
-            .replace("\n", Formatting.GRAY + "-");
+                .map(i -> Formatting.WHITE + i.getString()).toArray(String[]::new))
+            .replace("\n", Formatting.GRAY + "-") + Formatting.GRAY;
     }
 
     private int getChatId(Entity entity) {

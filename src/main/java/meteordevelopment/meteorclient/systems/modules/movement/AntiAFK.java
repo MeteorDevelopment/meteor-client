@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.InactivityFpsLimiterAccessor;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -192,6 +193,7 @@ public class AntiAFK extends Module {
     }
 
     private boolean isAFK() {
+        if (PathManagers.get().isPathing()) return false;
         return timeSinceLastInput() > 1000 * auto.get();
     }
 
