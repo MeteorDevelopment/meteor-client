@@ -18,7 +18,6 @@ import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -79,19 +78,12 @@ public class HudTab extends Tab {
 
         @Override
         public boolean toClipboard() {
-            return NbtUtils.toClipboard("hud-settings", hud.settings.toTag());
+            return NbtUtils.toClipboard(hud);
         }
 
         @Override
         public boolean fromClipboard() {
-            NbtCompound clipboard = NbtUtils.fromClipboard(hud.settings.toTag());
-
-            if (clipboard != null) {
-                hud.settings.fromTag(clipboard);
-                return true;
-            }
-
-            return false;
+            return NbtUtils.fromClipboard(hud);
         }
     }
 }
