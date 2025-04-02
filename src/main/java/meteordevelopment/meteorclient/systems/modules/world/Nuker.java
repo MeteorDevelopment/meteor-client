@@ -23,6 +23,8 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Block;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -42,15 +44,13 @@ public class Nuker extends Module {
             .name("shape")
             .description("The shape of nuking algorithm.")
             .defaultValue(Shape.Sphere)
-            .build()
-    );
+            .build());
 
     private final Setting<Nuker.Mode> mode = sgGeneral.add(new EnumSetting.Builder<Nuker.Mode>()
             .name("mode")
             .description("The way the blocks are broken.")
             .defaultValue(Nuker.Mode.Flatten)
-            .build()
-    );
+            .build());
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
@@ -58,8 +58,7 @@ public class Nuker extends Module {
             .defaultValue(4)
             .min(0)
             .visible(() -> shape.get() != Shape.Cube)
-            .build()
-    );
+            .build());
 
     private final Setting<Integer> range_up = sgGeneral.add(new IntSetting.Builder()
             .name("up")
@@ -67,8 +66,7 @@ public class Nuker extends Module {
             .defaultValue(1)
             .min(0)
             .visible(() -> shape.get() == Shape.Cube)
-            .build()
-    );
+            .build());
 
     private final Setting<Integer> range_down = sgGeneral.add(new IntSetting.Builder()
             .name("down")
@@ -76,8 +74,7 @@ public class Nuker extends Module {
             .defaultValue(1)
             .min(0)
             .visible(() -> shape.get() == Shape.Cube)
-            .build()
-    );
+            .build());
 
     private final Setting<Integer> range_left = sgGeneral.add(new IntSetting.Builder()
             .name("left")
@@ -85,8 +82,7 @@ public class Nuker extends Module {
             .defaultValue(1)
             .min(0)
             .visible(() -> shape.get() == Shape.Cube)
-            .build()
-    );
+            .build());
 
     private final Setting<Integer> range_right = sgGeneral.add(new IntSetting.Builder()
             .name("right")
@@ -94,8 +90,7 @@ public class Nuker extends Module {
             .defaultValue(1)
             .min(0)
             .visible(() -> shape.get() == Shape.Cube)
-            .build()
-    );
+            .build());
 
     private final Setting<Integer> range_forward = sgGeneral.add(new IntSetting.Builder()
             .name("forward")
@@ -103,8 +98,7 @@ public class Nuker extends Module {
             .defaultValue(1)
             .min(0)
             .visible(() -> shape.get() == Shape.Cube)
-            .build()
-    );
+            .build());
 
     private final Setting<Integer> range_back = sgGeneral.add(new IntSetting.Builder()
             .name("back")
@@ -112,15 +106,13 @@ public class Nuker extends Module {
             .defaultValue(1)
             .min(0)
             .visible(() -> shape.get() == Shape.Cube)
-            .build()
-    );
+            .build());
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
             .description("Delay in ticks between breaking blocks.")
             .defaultValue(0)
-            .build()
-    );
+            .build());
 
     private final Setting<Integer> maxBlocksPerTick = sgGeneral.add(new IntSetting.Builder()
             .name("max-blocks-per-tick")
@@ -128,59 +120,53 @@ public class Nuker extends Module {
             .defaultValue(1)
             .min(1)
             .sliderRange(1, 6)
-            .build()
-    );
+            .build());
 
     private final Setting<Nuker.SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<Nuker.SortMode>()
             .name("sort-mode")
             .description("The blocks you want to mine first.")
             .defaultValue(Nuker.SortMode.Closest)
-            .build()
-    );
+            .build());
 
     private final Setting<Boolean> swingHand = sgGeneral.add(new BoolSetting.Builder()
             .name("swing-hand")
             .description("Swing hand client side.")
             .defaultValue(true)
-            .build()
-    );
+            .build());
 
     private final Setting<Boolean> packetMine = sgGeneral.add(new BoolSetting.Builder()
             .name("packet-mine")
             .description("Attempt to instamine everything at once.")
             .defaultValue(false)
-            .build()
-    );
+            .build());
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Rotates server-side to the block being mined.")
             .defaultValue(true)
-            .build()
-    );
+            .build());
 
     // Whitelist and blacklist
 
     private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
             .name("list-mode")
-            .description("Selection mode.")
+            .description("Auto select the block you're looking at when active.")
             .defaultValue(ListMode.Blacklist)
-            .build()
-    );
+            .build());
 
     private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
             .name("blacklist")
             .description("The blocks you don't want to mine.")
             .visible(() -> listMode.get() == ListMode.Blacklist)
-            .build()
-    );
+            .build());
 
     private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
             .name("whitelist")
             .description("The blocks you want to mine.")
             .visible(() -> listMode.get() == ListMode.Whitelist)
-            .build()
-    );
+            .build());
+
+    private Block autoSelectBlock = null; // Internal field to store the selected block for AutoSelect mode
 
     // Rendering
 
@@ -188,60 +174,52 @@ public class Nuker extends Module {
             .name("bounding-box")
             .description("Enable rendering bounding box for Cube and Uniform Cube.")
             .defaultValue(true)
-            .build()
-    );
+            .build());
 
     private final Setting<ShapeMode> shapeModeBox = sgRender.add(new EnumSetting.Builder<ShapeMode>()
             .name("nuke-box-mode")
             .description("How the shape for the bounding box is rendered.")
             .defaultValue(ShapeMode.Both)
-            .build()
-    );
+            .build());
 
     private final Setting<SettingColor> sideColorBox = sgRender.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 100))
-            .build()
-    );
+            .defaultValue(new SettingColor(16, 106, 144, 100))
+            .build());
 
     private final Setting<SettingColor> lineColorBox = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 255))
-            .build()
-    );
+            .defaultValue(new SettingColor(16, 106, 144, 255))
+            .build());
 
     private final Setting<Boolean> enableRenderBreaking = sgRender.add(new BoolSetting.Builder()
             .name("broken-blocks")
             .description("Enable rendering bounding box for Cube and Uniform Cube.")
             .defaultValue(true)
-            .build()
-    );
+            .build());
 
     private final Setting<ShapeMode> shapeModeBreak = sgRender.add(new EnumSetting.Builder<ShapeMode>()
             .name("nuke-block-mode")
             .description("How the shapes for broken blocks are rendered.")
             .defaultValue(ShapeMode.Both)
             .visible(enableRenderBreaking::get)
-            .build()
-    );
+            .build());
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color of the target block rendering.")
             .defaultValue(new SettingColor(255, 0, 0, 80))
             .visible(enableRenderBreaking::get)
-            .build()
-    );
+            .build());
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color of the target block rendering.")
             .defaultValue(new SettingColor(255, 0, 0, 255))
             .visible(enableRenderBreaking::get)
-            .build()
-    );
+            .build());
 
     private final List<BlockPos> blocks = new ArrayList<>();
 
@@ -265,6 +243,21 @@ public class Nuker extends Module {
         firstBlock = true;
         timer = 0;
         noBlockTimer = 0;
+
+        if (listMode.get() == ListMode.AutoSelect) {
+            HitResult hitResult = mc.crosshairTarget;
+            if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
+                BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
+                autoSelectBlock = mc.world.getBlockState(pos).getBlock();
+            }
+        }
+    }
+
+    @Override
+    public void onDeactivate() {
+        if (listMode.get() == ListMode.AutoSelect) {
+            autoSelectBlock = null;
+        }
     }
 
     @EventHandler
@@ -278,7 +271,8 @@ public class Nuker extends Module {
                 int maxX = Math.max(pos1.getX(), pos2.getX());
                 int maxY = Math.max(pos1.getY(), pos2.getY());
                 int maxZ = Math.max(pos1.getZ(), pos2.getZ());
-                event.renderer.box(minX, minY, minZ, maxX, maxY, maxZ, sideColorBox.get(), lineColorBox.get(), shapeModeBox.get(), 0);
+                event.renderer.box(minX, minY, minZ, maxX, maxY, maxZ, sideColorBox.get(), lineColorBox.get(),
+                        shapeModeBox.get(), 0);
             }
         }
     }
@@ -298,7 +292,8 @@ public class Nuker extends Module {
 
         double rangeSq = Math.pow(range.get(), 2);
 
-        if (shape.get() == Shape.UniformCube) range.set((double) Math.round(range.get()));
+        if (shape.get() == Shape.UniformCube)
+            range.set((double) Math.round(range.get()));
 
         // Some render stuff
 
@@ -324,24 +319,28 @@ public class Nuker extends Module {
                 case 0 -> {
                     pZ_ += 1;
                     pX_ += 1;
-                    pos1.set(pX_ - (range_right.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - (range_back.get() + 1)); // down
+                    pos1.set(pX_ - (range_right.get() + 1), Math.ceil(pY) - range_down.get(),
+                            pZ_ - (range_back.get() + 1)); // down
                     pos2.set(pX_ + range_left.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_forward.get()); // up
                 }
                 case 2 -> {
                     pX_ += 1;
                     pZ_ += 1;
-                    pos1.set(pX_ - (range_left.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - (range_forward.get() + 1)); // down
+                    pos1.set(pX_ - (range_left.get() + 1), Math.ceil(pY) - range_down.get(),
+                            pZ_ - (range_forward.get() + 1)); // down
                     pos2.set(pX_ + range_right.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_back.get()); // up
                 }
                 case 3 -> {
                     pX_ += 1;
                     pos1.set(pX_ - (range_back.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - range_left.get()); // down
-                    pos2.set(pX_ + range_forward.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_right.get() + 1); // up
+                    pos2.set(pX_ + range_forward.get(), Math.ceil(pY + range_up.get() + 1),
+                            pZ_ + range_right.get() + 1); // up
                 }
             }
 
             // get largest horizontal
-            maxh = 1 + Math.max(Math.max(Math.max(range_back.get(), range_right.get()), range_forward.get()), range_left.get());
+            maxh = 1 + Math.max(Math.max(Math.max(range_back.get(), range_right.get()), range_forward.get()),
+                    range_left.get());
             maxv = 1 + Math.max(range_up.get(), range_down.get());
         }
 
@@ -351,35 +350,57 @@ public class Nuker extends Module {
         Box box = new Box(pos1.toCenterPos(), pos2.toCenterPos());
 
         // Find blocks to break
-        BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
-            // Check for air, unbreakable blocks and distance
-            switch (shape.get()) {
-                case Sphere -> {
-                    if (Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5) > rangeSq) return;
-                }
-                case UniformCube -> {
-                    if (chebyshevDist(mc.player.getBlockPos().getX(), mc.player.getBlockPos().getY(), mc.player.getBlockPos().getZ(), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= range.get()) return;
-                }
-                case Cube -> {
-                    if (!box.contains(Vec3d.ofCenter(blockPos))) return;
-                }
-            }
+        BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh),
+                Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
+                    // Check for air, unbreakable blocks and distance
+                    switch (shape.get()) {
+                        case Sphere -> {
+                            if (Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5,
+                                    blockPos.getZ() + 0.5) > rangeSq)
+                                return;
+                        }
+                        case UniformCube -> {
+                            if (chebyshevDist(mc.player.getBlockPos().getX(), mc.player.getBlockPos().getY(),
+                                    mc.player.getBlockPos().getZ(), blockPos.getX(), blockPos.getY(),
+                                    blockPos.getZ()) >= range.get())
+                                return;
+                        }
+                        case Cube -> {
+                            if (!box.contains(Vec3d.ofCenter(blockPos)))
+                                return;
+                        }
+                    }
 
-            if (!BlockUtils.canBreak(blockPos, blockState)) return;
+                    if (!BlockUtils.canBreak(blockPos, blockState))
+                        return;
 
-            // Flatten
-            if (mode.get() == Mode.Flatten && blockPos.getY() < Math.floor(mc.player.getY())) return;
+                    // Flatten
+                    if (mode.get() == Mode.Flatten && blockPos.getY() < Math.floor(mc.player.getY()))
+                        return;
 
-            // Smash
-            if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0) return;
+                    // Smash
+                    if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0)
+                        return;
 
-            // Check whitelist or blacklist
-            if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(blockState.getBlock())) return;
-            if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(blockState.getBlock())) return;
+                    // Check list mode
+                    switch (listMode.get()) {
+                        case AutoSelect -> {
+                            if (autoSelectBlock == null || !blockState.getBlock().equals(autoSelectBlock))
+                                return;
+                        }
+                        case Whitelist -> {
+                            if (!whitelist.get().contains(blockState.getBlock()))
+                                return;
+                        }
+                        case Blacklist -> {
+                            if (blacklist.get().contains(blockState.getBlock()))
+                                return;
+                        }
+                    }
 
-            // Add block
-            blocks.add(blockPos.toImmutable());
-        });
+                    // Add block
+                    blocks.add(blockPos.toImmutable());
+                });
 
         // Break block if found
         BlockIterator.after(() -> {
@@ -387,15 +408,17 @@ public class Nuker extends Module {
             if (sortMode.get() == SortMode.TopDown)
                 blocks.sort(Comparator.comparingDouble(value -> -value.getY()));
             else if (sortMode.get() != SortMode.None)
-                blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
+                blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5,
+                        value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
 
             // Check if some block was found
             if (blocks.isEmpty()) {
-                // If no block was found for long enough then set firstBlock flag to true to not wait before breaking another again
-                if (noBlockTimer++ >= delay.get()) firstBlock = true;
+                // If no block was found for long enough then set firstBlock flag to true to not
+                // wait before breaking another again
+                if (noBlockTimer++ >= delay.get())
+                    firstBlock = true;
                 return;
-            }
-            else {
+            } else {
                 noBlockTimer = 0;
             }
 
@@ -406,25 +429,34 @@ public class Nuker extends Module {
                 firstBlock = false;
                 lastBlockPos.set(blocks.getFirst());
 
-                if (timer > 0) return;
+                if (timer > 0)
+                    return;
             }
 
             // Break
             int count = 0;
 
             for (BlockPos block : blocks) {
-                if (count >= maxBlocksPerTick.get()) break;
+                if (count >= maxBlocksPerTick.get())
+                    break;
 
                 boolean canInstaMine = BlockUtils.canInstaBreak(block);
 
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(block), Rotations.getPitch(block), () -> breakBlock(block));
-                else breakBlock(block);
+                if (rotate.get())
+                    Rotations.rotate(Rotations.getYaw(block), Rotations.getPitch(block), () -> breakBlock(block));
+                else
+                    breakBlock(block);
 
-                if (enableRenderBreaking.get()) RenderUtils.renderTickingBlock(block, sideColor.get(), lineColor.get(), shapeModeBreak.get(), 0, 8, true, false);
+                if (enableRenderBreaking.get())
+                    RenderUtils.renderTickingBlock(block, sideColor.get(), lineColor.get(), shapeModeBreak.get(), 0, 8,
+                            true, false);
                 lastBlockPos.set(block);
 
                 count++;
-                if (!canInstaMine && !packetMine.get() /* With packet mine attempt to break everything possible at once */) break;
+                if (!canInstaMine && !packetMine.get() /*
+                                                        * With packet mine attempt to break everything possible at once
+                                                        */)
+                    break;
             }
 
             firstBlock = false;
@@ -436,9 +468,11 @@ public class Nuker extends Module {
 
     private void breakBlock(BlockPos blockPos) {
         if (packetMine.get()) {
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos)));
+            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
+                    PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos)));
             mc.player.swingHand(Hand.MAIN_HAND);
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos)));
+            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
+                    blockPos, BlockUtils.getDirection(blockPos)));
         } else {
             BlockUtils.breakBlock(blockPos, swingHand.get());
         }
@@ -449,9 +483,15 @@ public class Nuker extends Module {
         event.cooldown = 0;
     }
 
+    // Getter for GUI display
+    public Block getAutoSelectBlock() {
+        return autoSelectBlock;
+    }
+
     public enum ListMode {
         Whitelist,
-        Blacklist
+        Blacklist,
+        AutoSelect
     }
 
     public enum Mode {
