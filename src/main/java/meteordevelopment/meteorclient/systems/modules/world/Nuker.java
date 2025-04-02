@@ -150,7 +150,7 @@ public class Nuker extends Module {
 
     private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
             .name("list-mode")
-            .description("Auto select the block you're looking at when active.")
+            .description("Selection mode.")
             .defaultValue(ListMode.Blacklist)
             .build());
 
