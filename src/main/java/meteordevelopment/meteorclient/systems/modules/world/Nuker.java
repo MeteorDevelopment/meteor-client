@@ -249,6 +249,9 @@ public class Nuker extends Module {
             if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
                 autoSelectBlock = mc.world.getBlockState(pos).getBlock();
+            } else {
+                autoSelectBlock = null;
+                warning("No block is being targeted for auto-select mode.");
             }
         }
     }
