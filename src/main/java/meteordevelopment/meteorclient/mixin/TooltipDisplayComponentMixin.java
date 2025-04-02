@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(TooltipDisplayComponent.class)
-public class TooltipDisplayComponentMixin {
+public abstract class TooltipDisplayComponentMixin {
     @ModifyExpressionValue(method = "shouldDisplay", at = @At(value = "FIELD", target = "Lnet/minecraft/component/type/TooltipDisplayComponent;hideTooltip:Z"))
     private boolean modifyHideTooltip(boolean original) {
         return original && !Modules.get().get(BetterTooltips.class).tooltip.get();

@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.Consumer;
 
 @Mixin(ContainerComponent.class)
-public class ContainerComponentMixin {
+public abstract class ContainerComponentMixin {
     @Shadow
     @Final
     private DefaultedList<ItemStack> stacks;

@@ -36,7 +36,6 @@
     "BossBarHudMixin",
     "BoxMixin",
     "BrewingStandScreenMixin",
-    "BufferBuilderAccessor",
     "CameraMixin",
     "CapabilityTrackerMixin",
     "CapeFeatureRendererMixin",
@@ -61,7 +60,6 @@
     "ClientPlayNetworkHandlerAccessor",
     "ClientPlayNetworkHandlerMixin",
     "ClientWorldMixin",
-    "CloseHandledScreenC2SPacketAccessor",
     "CobwebBlockMixin",
     "CompassStateMixin",
     "ConnectScreenMixin",
@@ -97,6 +95,7 @@
     "GameOptionsMixin",
     "GameRendererMixin",
     "GlBackendMixin",
+    "GlResourceManagerMixin",
     "HandledScreenAccessor",
     "HandledScreenMixin",
     "HeadFeatureRendererMixin",
@@ -166,7 +165,6 @@
     "SlotMixin",
     "SoundSystemMixin",
     "SplashTextResourceSupplierMixin",
-    "StatusEffectAccessor",
     "StatusEffectInstanceAccessor",
     "StatusEffectInstanceMixin",
     "StringHelperMixin",
@@ -190,8 +188,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "GlResourceManagerMixin"
-  ]
+  }
 }
