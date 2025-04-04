@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
@@ -23,6 +24,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WFavorite;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.nbt.NbtCompound;
 
@@ -46,6 +48,12 @@ public class ModuleScreen extends WindowScreen {
     public void initWidgets() {
         // Description
         add(theme.label(module.description, getWindowWidth() / 2.0));
+
+        if (module.addon != null && module.addon != MeteorClient.ADDON) {
+            WHorizontalList addon = add(theme.horizontalList()).expandX().widget();
+            addon.add(theme.label("From: ").color(theme.textSecondaryColor())).widget();
+            addon.add(theme.label(module.addon.name).color(module.addon.color)).widget();
+        }
 
         // Settings
         if (!module.settings.groups.isEmpty()) {
@@ -101,10 +109,22 @@ public class ModuleScreen extends WindowScreen {
             if (module.isActive() != active.checked) module.toggle();
         };
 
-        if (module.addon != null && module.addon != MeteorClient.ADDON) {
-            bottom.add(theme.label("From: ")).right().widget();
-            bottom.add(theme.label(module.addon.name).color(theme.textSecondaryColor())).right().widget();
-        }
+        // Config sharing
+        WHorizontalList sharing = bottom.add(theme.horizontalList()).right().widget();
+        WButton copy = sharing.add(theme.button(GuiRenderer.COPY)).widget();
+        copy.action = () -> {
+            if (toClipboard()) {
+                OkPrompt.create()
+                    .title("Module copied!")
+                    .message("The settings for this module are now in your clipboard.")
+                    .message("You can also copy settings using Ctrl+C.")
+                    .message("Settings can be imported using Ctrl+V or the paste button.")
+                    .id("config-sharing-guide")
+                    .show();
+            }
+        };
+        WButton paste = sharing.add(theme.button(GuiRenderer.PASTE)).widget();
+        paste.action = this::fromClipboard;
     }
 
     @Override
@@ -131,18 +151,29 @@ public class ModuleScreen extends WindowScreen {
 
     @Override
     public boolean toClipboard() {
-        return NbtUtils.toClipboard(module.title, module.toTag());
+        NbtCompound tag = new NbtCompound();
+
+        tag.putString("name", module.name);
+        NbtCompound settingsTag = module.settings.toTag();
+        if (!settingsTag.isEmpty()) tag.put("settings", settingsTag);
+
+        return NbtUtils.toClipboard(tag);
     }
 
     @Override
     public boolean fromClipboard() {
-        NbtCompound clipboard = NbtUtils.fromClipboard(module.toTag());
+        NbtCompound tag = NbtUtils.fromClipboard();
+        if (tag == null
+            || !tag.contains("name")
+            || !tag.getString("name").equals(module.name)) return false;
 
-        if (clipboard != null) {
-            module.fromTag(clipboard);
-            return true;
+        module.settings.fromTag(tag.getCompound("settings"));
+
+        if (parent instanceof WidgetScreen p) {
+            p.reload();
         }
+        reload();
 
-        return false;
+        return true;
     }
 }

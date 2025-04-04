@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -19,9 +20,11 @@ import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
@@ -43,9 +46,17 @@ public class AutoLog extends Module {
     );
 
     private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
-        .name("smart")
+        .name("predict-incoming-damage")
         .description("Disconnects when it detects you're about to take enough damage to set you under the 'health' setting.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Integer> totemPops = sgGeneral.add(new IntSetting.Builder()
+        .name("totem-pops")
+        .description("Disconnects when you have popped this many totems. Set to 0 to disable.")
+        .defaultValue(0)
+        .min(0)
         .build()
     );
 
@@ -73,6 +84,13 @@ public class AutoLog extends Module {
     private final Setting<Boolean> toggleOff = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-off")
         .description("Disables Auto Log after usage.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> toggleAutoReconnect = sgGeneral.add(new BoolSetting.Builder()
+        .name("toggle-auto-reconnect")
+        .description("Whether to disable Auto Reconnect after a logout.")
         .defaultValue(true)
         .build()
     );
@@ -123,11 +141,33 @@ public class AutoLog extends Module {
         .build()
     );
 
-    //Declaring variables outside the loop for better efficiency
+    // Declaring variables outside the loop for better efficiency
     private final Object2IntMap<EntityType<?>> entityCounts = new Object2IntOpenHashMap<>();
+
+    private int pops;
 
     public AutoLog() {
         super(Categories.Combat, "auto-log", "Automatically disconnects you when certain requirements are met.");
+    }
+
+    @Override
+    public void onActivate() {
+        pops = 0;
+    }
+
+    @EventHandler
+    private void onReceivePacket(PacketEvent.Receive event) {
+        if (!(event.packet instanceof EntityStatusS2CPacket p)) return;
+        if (p.getStatus() != EntityStatuses.USE_TOTEM_OF_UNDYING) return;
+
+        Entity entity = p.getEntity(mc.world);
+        if (entity == null || !entity.equals(mc.player)) return;
+
+        pops++;
+        if (totemPops.get() > 0 && pops >= totemPops.get()) {
+            disconnect("Popped " + pops + " totems.");
+            if (toggleOff.get()) this.toggle();
+        }
     }
 
     @EventHandler
@@ -214,7 +254,7 @@ public class AutoLog extends Module {
         text.append(reason);
 
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
-        if (autoReconnect.isActive()) {
+        if (autoReconnect.isActive() && toggleAutoReconnect.get()) {
             text.append(Text.literal("\n\nINFO - AutoReconnect was disabled").withColor(Colors.GRAY));
             autoReconnect.toggle();
         }

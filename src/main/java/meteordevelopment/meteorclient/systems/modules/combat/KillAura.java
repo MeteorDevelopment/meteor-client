@@ -72,6 +72,14 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final Setting<Boolean> swapBack = sgGeneral.add(new BoolSetting.Builder()
+        .name("swap-back")
+        .description("Switches to your previous slot when done attacking the target.")
+        .defaultValue(false)
+        .visible(autoSwitch::get)
+        .build()
+    );
+
     private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-click")
         .description("Only attacks when holding left click.")
@@ -233,31 +241,54 @@ public class KillAura extends Module {
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
-    public boolean attacking;
+    public boolean attacking, swapped;
+    public static int previousSlot;
 
     public KillAura() {
         super(Categories.Combat, "kill-aura", "Attacks specified entities around you.");
     }
 
     @Override
+    public void onActivate() {
+        previousSlot = -1;
+        swapped = false;
+    }
+
+    @Override
     public void onDeactivate() {
         targets.clear();
-        attacking = false;
+        stopAttacking();
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
-        if (pauseOnUse.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) return;
-        if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
-        if (TickRate.INSTANCE.getTimeSinceLastTick() >= 1f && pauseOnLag.get()) return;
-        if (pauseOnCA.get() && Modules.get().get(CrystalAura.class).isActive() && Modules.get().get(CrystalAura.class).kaTimer > 0) return;
-
+        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) {
+            stopAttacking();
+            return;
+        }
+        if (pauseOnUse.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) {
+            stopAttacking();
+            return;
+        }
+        if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) {
+            stopAttacking();
+            return;
+        }
+        if (TickRate.INSTANCE.getTimeSinceLastTick() >= 1f && pauseOnLag.get()) {
+            stopAttacking();
+            return;
+        }
+        if (pauseOnCA.get() && Modules.get().get(CrystalAura.class).isActive() && Modules.get().get(CrystalAura.class).kaTimer > 0) {
+            stopAttacking();
+            return;
+        }
         if (onlyOnLook.get()) {
             Entity targeted = mc.targetedEntity;
 
-            if (targeted == null) return;
-            if (!entityCheck(targeted)) return;
+            if (targeted == null || !entityCheck(targeted)) {
+                stopAttacking();
+                return;
+            }
 
             targets.clear();
             targets.add(mc.targetedEntity);
@@ -267,11 +298,7 @@ public class KillAura extends Module {
         }
 
         if (targets.isEmpty()) {
-            attacking = false;
-            if (wasPathing) {
-                PathManagers.get().resume();
-                wasPathing = false;
-            }
+            stopAttacking();
             return;
         }
 
@@ -293,10 +320,17 @@ public class KillAura extends Module {
                 if (axeResult.found()) weaponResult = axeResult;
             }
 
+            if (!swapped) {
+                previousSlot  = mc.player.getInventory().selectedSlot;
+                swapped = true;
+            }
             InvUtils.swap(weaponResult.slot(), false);
         }
 
-        if (!itemInHand()) return;
+        if (!itemInHand()) {
+            stopAttacking();
+            return;
+        }
 
         attacking = true;
         if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
@@ -312,6 +346,20 @@ public class KillAura extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (event.packet instanceof UpdateSelectedSlotC2SPacket) {
             switchTimer = switchDelay.get();
+        }
+    }
+
+    private void stopAttacking() {
+        if (!attacking) return;
+
+        attacking = false;
+        if (wasPathing) {
+            PathManagers.get().resume();
+            wasPathing = false;
+        }
+        if (swapBack.get() && swapped) {
+            InvUtils.swap(previousSlot, false);
+            swapped = false;
         }
     }
 

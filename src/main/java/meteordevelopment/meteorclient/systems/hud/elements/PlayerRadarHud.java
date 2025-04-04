@@ -91,7 +91,7 @@ public class PlayerRadarHud extends HudElement {
 
     private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies custom text scale rather than the global one.")
+        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
         .build()
     );
@@ -210,6 +210,6 @@ public class PlayerRadarHud extends HudElement {
     }
 
     private double getScale() {
-        return customScale.get() ? scale.get() : -1;
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 }

@@ -77,7 +77,6 @@ public class Utils {
     public static final Color WHITE = new Color(255, 255, 255);
 
     private static final Random random = new Random();
-    public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
     public static boolean rendering3D = true;
     public static double frameTime;
@@ -514,6 +513,14 @@ public class Utils {
     }
 
     public static void leftClick() {
+        // check if a screen is open
+        // see net.minecraft.client.Mouse.lockCursor
+        // see net.minecraft.client.MinecraftClient.tick
+        int attackCooldown = ((MinecraftClientAccessor) mc).getAttackCooldown();
+        if (attackCooldown == 10000) {
+            ((MinecraftClientAccessor) mc).setAttackCooldown(0);
+        }
+
         mc.options.attackKey.setPressed(true);
         ((MinecraftClientAccessor) mc).leftClick();
         mc.options.attackKey.setPressed(false);

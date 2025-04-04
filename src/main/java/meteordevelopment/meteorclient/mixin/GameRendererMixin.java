@@ -75,7 +75,7 @@ public abstract class GameRendererMixin {
     private final MatrixStack matrices = new MatrixStack();
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
-    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 2) Matrix4f matrix4f3, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
+    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 2) Matrix4f view, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
         if (!Utils.canUpdate()) return;
 
         Profilers.get().push(MeteorClient.MOD_ID + "_render");
@@ -87,12 +87,12 @@ public abstract class GameRendererMixin {
 
         // Call utility classes
 
-        RenderUtils.updateScreenCenter();
-        NametagUtils.onRender(matrix4f3);
+        RenderUtils.updateScreenCenter(projection, view);
+        NametagUtils.onRender(view);
 
         // Update model view matrix
 
-        RenderSystem.getModelViewStack().pushMatrix().mul(matrix4f3);
+        RenderSystem.getModelViewStack().pushMatrix().mul(view);
 
         matrices.push();
 
