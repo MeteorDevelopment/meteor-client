@@ -119,15 +119,6 @@ public class Modules extends System<Modules> {
         return CATEGORIES;
     }
 
-    @Deprecated(forRemoval = true)
-    public static Category getCategoryByHash(int hash) {
-        for (Category category : CATEGORIES) {
-            if (category.hashCode() == hash) return category;
-        }
-
-        return null;
-    }
-
     @SuppressWarnings("unchecked")
     public <T extends Module> T get(Class<T> klass) {
         return (T) moduleInstances.get(klass);
