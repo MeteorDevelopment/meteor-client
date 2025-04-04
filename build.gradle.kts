@@ -75,6 +75,8 @@ dependencies {
     minecraft("com.mojang:minecraft:${properties["minecraft_version"] as String}")
     mappings("net.fabricmc:yarn:${properties["yarn_mappings"] as String}:v2")
     modImplementation("net.fabricmc:fabric-loader:${properties["loader_version"] as String}")
+
+    modInclude(fabricApi.module("fabric-api-base", properties["fapi_version"] as String))
     modInclude(fabricApi.module("fabric-resource-loader-v0", properties["fapi_version"] as String))
 
     // Compat fixes
