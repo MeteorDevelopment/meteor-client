@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
-import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
@@ -43,26 +42,15 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.random.Random;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Modules extends System<Modules> {
-    public static final ModuleRegistry REGISTRY = new ModuleRegistry();
-
     private static final List<Category> CATEGORIES = new ArrayList<>();
 
     private final List<Module> modules = new ArrayList<>();
@@ -582,120 +570,5 @@ public class Modules extends System<Modules> {
         add(new SoundBlocker());
         add(new Spam());
         add(new Swarm());
-    }
-
-    public static class ModuleRegistry extends SimpleRegistry<Module> {
-        public ModuleRegistry() {
-            super(RegistryKey.ofRegistry(MeteorClient.identifier("modules")), Lifecycle.stable());
-        }
-
-        @Override
-        public int size() {
-            return Modules.get().getAll().size();
-        }
-
-        @Override
-        public Identifier getId(Module entry) {
-            return null;
-        }
-
-        @Override
-        public Optional<RegistryKey<Module>> getKey(Module entry) {
-            return Optional.empty();
-        }
-
-        @Override
-        public int getRawId(Module entry) {
-            return 0;
-        }
-
-        @Override
-        public Module get(RegistryKey<Module> key) {
-            return null;
-        }
-
-        @Override
-        public Module get(Identifier id) {
-            return null;
-        }
-
-        @Override
-        public Lifecycle getLifecycle() {
-            return null;
-        }
-
-        @Override
-        public Set<Identifier> getIds() {
-            return null;
-        }
-        @Override
-        public boolean containsId(Identifier id) {
-            return false;
-        }
-
-        @Nullable
-        @Override
-        public Module get(int index) {
-            return null;
-        }
-
-        @Override
-        public @NotNull Iterator<Module> iterator() {
-            return new ModuleIterator();
-        }
-
-        @Override
-        public boolean contains(RegistryKey<Module> key) {
-            return false;
-        }
-
-        @Override
-        public Set<Map.Entry<RegistryKey<Module>, Module>> getEntrySet() {
-            return null;
-        }
-
-        @Override
-        public Set<RegistryKey<Module>> getKeys() {
-            return null;
-        }
-
-        @Override
-        public Optional<RegistryEntry.Reference<Module>> getRandom(Random random) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Registry<Module> freeze() {
-            return null;
-        }
-
-        @Override
-        public RegistryEntry.Reference<Module> createEntry(Module value) {
-            return null;
-        }
-
-        @Override
-        public Optional<RegistryEntry.Reference<Module>> getEntry(int rawId) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Stream<RegistryEntry.Reference<Module>> streamEntries() {
-            return null;
-        }
-
-        private static class ModuleIterator implements Iterator<Module> {
-            private final Iterator<Module> iterator = Modules.get().getAll().iterator();
-
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            @Override
-            public Module next() {
-                return iterator.next();
-            }
-        }
     }
 }

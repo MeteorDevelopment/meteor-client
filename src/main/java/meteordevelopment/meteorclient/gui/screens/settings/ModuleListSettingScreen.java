@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ModuleListSettingScreen extends CollectionListSettingScreen<Module> {
     public ModuleListSettingScreen(GuiTheme theme, Setting<List<Module>> setting) {
-        super(theme, "Select Modules", setting, setting.get(), Modules.REGISTRY);
+        super(theme, "Select Modules", setting, setting.get(), Modules.get().getAll());
     }
 
     @Override
