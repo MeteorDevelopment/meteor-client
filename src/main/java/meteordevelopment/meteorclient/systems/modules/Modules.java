@@ -81,7 +81,7 @@ public class Modules extends System<Modules> {
 
     @Override
     public void load(File folder) {
-        for (Module module : modules) {
+        for (Module module : getAll()) {
             for (SettingGroup group : module.settings) {
                 for (Setting<?> setting : group) setting.reset();
             }
@@ -133,6 +133,10 @@ public class Modules extends System<Modules> {
         return moduleInstances.values();
     }
 
+    /**
+     * @deprecated Use {@link Modules#getAll()} instead.
+     */
+    @Deprecated(forRemoval = true)
     public List<Module> getList() {
         return modules;
     }
@@ -292,7 +296,7 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameJoined(GameJoinedEvent event) {
         synchronized (active) {
-            for (Module module : modules) {
+            for (Module module : getAll()) {
                 if (module.isActive() && !module.runInMainMenu) {
                     MeteorClient.EVENT_BUS.subscribe(module);
                     module.onActivate();
@@ -304,7 +308,7 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
-            for (Module module : modules) {
+            for (Module module : getAll()) {
                 if (module.isActive() && !module.runInMainMenu) {
                     MeteorClient.EVENT_BUS.unsubscribe(module);
                     module.onDeactivate();
@@ -315,7 +319,7 @@ public class Modules extends System<Modules> {
 
     public void disableAll() {
         synchronized (active) {
-            for (Module module : modules) {
+            for (Module module : getAll()) {
                 if (module.isActive()) module.toggle();
             }
         }
