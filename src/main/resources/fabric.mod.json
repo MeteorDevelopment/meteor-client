@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "name": "Meteor Client",
-  "id": "meteor-client",
+  "name": "Motor Client",
+  "id": "motor-client",
   "version": "${version}",
   "description": "Based utility mod.",
   "authors": [
@@ -10,38 +10,38 @@
     "seasnail"
   ],
   "contact": {
-    "homepage": "https://meteorclient.com",
-    "issues": "https://github.com/MeteorDevelopment/meteor-client/issues",
-    "sources": "https://github.com/MeteorDevelopment/meteor-client",
-    "discord": "https://meteorclient.com/discord"
+    "homepage": "https://motorclient.com",
+    "issues": "https://github.com/motorDevelopment/motor-client/issues",
+    "sources": "https://github.com/motorDevelopment/motor-client",
+    "discord": "https://motorclient.com/discord"
   },
   "license": "GPL-3.0",
-  "icon": "assets/meteor-client/icon.png",
+  "icon": "assets/motor-client/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [
-      "meteordevelopment.meteorclient.MeteorClient"
+      "motordevelopment.motorclient.MotorClient"
     ],
     "modmenu": [
-      "meteordevelopment.meteorclient.ModMenuIntegration"
+      "motordevelopment.motorclient.ModMenuIntegration"
     ]
   },
   "mixins": [
-    "meteor-client.mixins.json",
-    "meteor-client-baritone.mixins.json",
-    "meteor-client-indigo.mixins.json",
-    "meteor-client-sodium.mixins.json",
-    "meteor-client-lithium.mixins.json",
-    "meteor-client-viafabricplus.mixins.json"
+    "motor-client.mixins.json",
+    "motor-client-baritone.mixins.json",
+    "motor-client-indigo.mixins.json",
+    "motor-client-sodium.mixins.json",
+    "motor-client-lithium.mixins.json",
+    "motor-client-viafabricplus.mixins.json"
   ],
-  "accessWidener": "meteor-client.accesswidener",
+  "accessWidener": "motor-client.accesswidener",
   "custom": {
-    "meteor-client:build_number": "${build_number}",
-    "meteor-client:color": "145,61,226",
-    "meteor-client:commit": "${commit}",
+    "motor-client:build_number": "${build_number}",
+    "motor-client:color": "145,61,226",
+    "motor-client:commit": "${commit}",
     "modmenu": {
       "links": {
-        "modmenu.discord": "https://meteorclient.com/discord"
+        "modmenu.discord": "https://motorclient.com/discord"
       }
     }
   },

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
- * Copyright (c) Meteor Development.
+ * This file is part of the motor Client distribution (https://github.com/motorDevelopment/motor-client).
+ * Copyright (c) motor Development.
  */
 
 import { getMcVersion } from "./mc_version.js"
@@ -26,23 +26,23 @@ function sendDiscordWebhook() {
             for (let i in res.commits) {
                 let commit = res.commits[i];
 
-                changes += "\n- [`" + commit.sha.substring(0, 7) + "`](https://github.com/MeteorDevelopment/meteor-client/commit/" + commit.sha + ") *" + commit.commit.message + "*";
+                changes += "\n- [`" + commit.sha.substring(0, 7) + "`](https://github.com/motorDevelopment/motor-client/commit/" + commit.sha + ") *" + commit.commit.message + "*";
                 hasChanges = true;
             }
             if (hasChanges) description += changes;
 
             if (success) {
-                description += "\n\nVisit our [website](https://meteorclient.com) for download";
+                description += "\n\nVisit our [website](https://motorclient.com) for download";
             }
 
             const webhook = {
                 username: "Builds",
-                avatar_url: "https://meteorclient.com/icon.png",
+                avatar_url: "https://motorclient.com/icon.png",
                 embeds: [
                     {
-                        title: "Meteor Client " + mcVersion + " build #" + buildNumber,
+                        title: "motor Client " + mcVersion + " build #" + buildNumber,
                         description: description,
-                        url: "https://meteorclient.com",
+                        url: "https://motorclient.com",
                             color: success ? 2672680 : 13117480
                     }
                 ]
@@ -59,7 +59,7 @@ function sendDiscordWebhook() {
 }
 
 if (success) {
-    fetch("https://meteorclient.com/api/recheckMaven", {
+    fetch("https://motorclient.com/api/recheckMaven", {
         method: "POST",
         headers: {
             "Authorization": process.env.SERVER_TOKEN

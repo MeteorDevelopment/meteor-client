@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "motordevelopment.motorclient.mixin.viafabricplus",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "motordevelopment.motorclient.MixinPlugin",
+  "client": [
+    "GeneralSettingsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

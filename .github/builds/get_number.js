@@ -1,13 +1,13 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
- * Copyright (c) Meteor Development.
+ * This file is part of the motor Client distribution (https://github.com/motorDevelopment/motor-client).
+ * Copyright (c) motor Development.
  */
 
 import { getMcVersion } from "./mc_version.js"
 
 const mcVersion = await getMcVersion();
 
-fetch("https://meteorclient.com/api/stats")
+fetch("https://motorclient.com/api/stats")
     .then(async res => {
         let stats = await res.json()
         let build = 0

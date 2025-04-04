@@ -1,5 +1,5 @@
 name: Suggestion
-description: Suggest a new feature or change for Meteor.
+description: Suggest a new feature or change for motor.
 labels: [ enhancement ]
 body:
   - type: textarea

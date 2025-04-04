@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-group = "meteordevelopment"
+group = "motordevelopment"
 version = "0.1.0"
 
 tasks {

@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "motordevelopment.motorclient.mixin.indigo",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "motordevelopment.motorclient.MixinPlugin",
+  "client": [
+    "AbstractBlockRenderContextMixin",
+    "AoCalculatorMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

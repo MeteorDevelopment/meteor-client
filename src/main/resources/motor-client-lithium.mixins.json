@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "motordevelopment.motorclient.mixin.lithium",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "motordevelopment.motorclient.MixinPlugin",
+  "client": [
+    "ChunkAwareBlockCollisionSweeperMixin",
+    "LithiumEntityCollisionsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

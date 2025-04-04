@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
- * Copyright (c) Meteor Development.
+ * This file is part of the motor Client distribution (https://github.com/motorDevelopment/motor-client).
+ * Copyright (c) motor Development.
  */
 
 import * as fs from "fs"

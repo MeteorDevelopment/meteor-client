@@ -47,20 +47,20 @@ jobs:
         if: ${{ failure() }}
         run: |
           cd .github/builds
-          npm run webhook -- ${{ steps.build-number.outputs.number }} ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} false
+          npm run webhook -- ${{ steps.build-number.outputs.number }} ${{ github.ref_name }} https://api.github.com/repos/motorDevelopment/motor-client/compare/${{ github.event.before }}...${{ github.event.after }} false
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
       - name: Publish
         run: ./gradlew publish -Pcommit=${{ github.sha }} -Pbuild_number=${{ steps.build-number.outputs.number }}
         env:
-          MAVEN_METEOR_ALIAS: ${{ secrets.MAVEN_METEOR_ALIAS }}
-          MAVEN_METEOR_TOKEN: ${{ secrets.MAVEN_METEOR_TOKEN }}
+          MAVEN_motor_ALIAS: ${{ secrets.MAVEN_motor_ALIAS }}
+          MAVEN_motor_TOKEN: ${{ secrets.MAVEN_motor_TOKEN }}
 
       - name: Discord webhook
         run: |
           cd .github/builds
-          npm run webhook -- ${{ steps.build-number.outputs.number }} ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} true
+          npm run webhook -- ${{ steps.build-number.outputs.number }} ${{ github.ref_name }} https://api.github.com/repos/motorDevelopment/motor-client/compare/${{ github.event.before }}...${{ github.event.after }} true
         env:
           SERVER_TOKEN: ${{ secrets.SERVER_TOKEN }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

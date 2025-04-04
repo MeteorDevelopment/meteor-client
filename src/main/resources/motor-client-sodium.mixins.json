@@ -1,0 +1,17 @@
+{
+  "required": false,
+  "package": "motordevelopment.motorclient.mixin.sodium",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "motordevelopment.motorclient.MixinPlugin",
+  "client": [
+    "SodiumLightDataAccessMixin",
+    "MeshVertexConsumerMixin",
+    "SodiumBlockOcclusionCacheMixin",
+    "SodiumBlockRendererMixin",
+    "SodiumFluidRendererImplMixin",
+    "SodiumFluidRendererImplDefaultRenderContextMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
