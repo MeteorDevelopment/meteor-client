@@ -85,7 +85,7 @@ dependencies {
     modCompileOnly("com.viaversion:viafabricplus:${properties["viafabricplus_version"] as String}") { isTransitive = false }
     modCompileOnly("com.viaversion:viafabricplus-api:${properties["viafabricplus_version"] as String}") { isTransitive = false }
 
-    // Baritone (https://github.com/MeteorDevelopment/baritone)
+    // Baritone (https://github.com/meteorDevelopment/baritone)
     modCompileOnly("meteordevelopment:baritone:${properties["baritone_version"] as String}-SNAPSHOT")
     // ModMenu (https://github.com/TerraformersMC/ModMenu)
     modCompileOnly("com.terraformersmc:modmenu:${properties["modmenu_version"] as String}")
@@ -104,7 +104,7 @@ dependencies {
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")
+    accessWidenerPath = file("src/main/resources/motor-client.accesswidener")
 }
 
 afterEvaluate {
@@ -139,7 +139,7 @@ tasks {
         }
 
         manifest {
-            attributes["Main-Class"] = "meteordevelopment.meteorclient.Main"
+            attributes["Main-Class"] = "motordevelopment.motorclient.Main"
         }
     }
 
@@ -196,7 +196,7 @@ publishing {
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
-            artifactId = "meteor-client"
+            artifactId = "motor-client"
 
             version = properties["minecraft_version"] as String + "-SNAPSHOT"
         }
@@ -207,8 +207,8 @@ publishing {
             name = "meteor-maven"
 
             credentials {
-                username = System.getenv("MAVEN_METEOR_ALIAS")
-                password = System.getenv("MAVEN_METEOR_TOKEN")
+                username = System.getenv("MAVEN_meteor_ALIAS")
+                password = System.getenv("MAVEN_meteor_TOKEN")
             }
 
             authentication {
