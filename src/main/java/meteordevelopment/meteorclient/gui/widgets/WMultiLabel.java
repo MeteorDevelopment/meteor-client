@@ -36,7 +36,6 @@ public abstract class WMultiLabel extends WLabel {
         int iInLine = 0;
 
         for (String line : textLines) {
-            System.out.println(Arrays.stream(textLines).toList());
             for (String word : line.split(" ")) {
                 double wordWidth = theme.textWidth(word, word.length(), title);
 
@@ -59,11 +58,10 @@ public abstract class WMultiLabel extends WLabel {
 
                     sb.append(word);
                     lineWidth += wordWidth;
-
-                    // now this line is not pointless!
-                    maxLineWidth = Math.max(maxLineWidth, lineWidth);
                     iInLine++;
                 }
+                // now this line is not pointless!
+                maxLineWidth = Math.max(maxLineWidth, lineWidth);
             }
             lines.add(sb.toString());
             sb.setLength(0);
