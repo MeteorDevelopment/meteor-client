@@ -39,7 +39,7 @@ public class AutoReplenish extends Module {
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
         .description("How long to wait between each inventory action.")
-        .defaultValue(1)
+        .defaultValue(0)
         .min(0)
         .build()
     );
@@ -75,7 +75,7 @@ public class AutoReplenish extends Module {
     private final Setting<Boolean> inInventory = sgGeneral.add(new BoolSetting.Builder()
         .name("in-inventory")
         .description("Replenish items even when in inventory screens")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
@@ -151,6 +151,8 @@ public class AutoReplenish extends Module {
         if (currentStack.isEmpty() && !prevStack.isEmpty() && !prevStack.isStackable() && unstackable.get()) {
             itemSlot = findItem(prevStack, slot);
         }
+
+        if (itemSlot ==-1) return;
 
         InvUtils.move().from(itemSlot).to(slot);
         items[itemsIndex] = currentStack.copy();
