@@ -378,11 +378,21 @@ public class Utils {
         if (mc.isInSingleplayer()) {
             if (mc.world == null) return "";
 
-            File folder = ((MinecraftServerAccessor) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey()).toFile();
-            if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
-                folder = folder.getParentFile();
+            try {
+                File folder = ((MinecraftServerAccessor) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey()).toFile();
+                if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
+                    folder = folder.getParentFile();
+                }
+
+                // return here if everything works
+                return folder.getName();
+            } catch (NullPointerException e) {
+                System.err.println("Something just attempted to get singleplayer world name after leaving causing a NullPointerException, printing stack trace.");
+                e.printStackTrace();
+
+                // return this if we caught an error
+                return "FAILED_BECAUSE_LEFT_WORLD";
             }
-            return folder.getName();
         }
 
         // Multiplayer
