@@ -123,8 +123,11 @@ public class ModuleScreen extends WindowScreen {
                     .show();
             }
         };
+        copy.tooltip = "Copy config";
+
         WButton paste = sharing.add(theme.button(GuiRenderer.PASTE)).widget();
         paste.action = this::fromClipboard;
+        paste.tooltip = "Paste config";
     }
 
     @Override
