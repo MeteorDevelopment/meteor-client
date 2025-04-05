@@ -25,15 +25,6 @@ public class IntSetting extends Setting<Integer> {
     }
 
     @Override
-    protected Integer parseImpl(String str) {
-        try {
-            return Integer.parseInt(str.trim());
-        } catch (NumberFormatException ignored) {
-            return null;
-        }
-    }
-
-    @Override
     protected boolean isValueValid(Integer value) {
         return value >= min && value <= max;
     }

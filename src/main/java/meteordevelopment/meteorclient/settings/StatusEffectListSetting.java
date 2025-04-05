@@ -29,26 +29,6 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
     }
 
     @Override
-    protected List<StatusEffect> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<StatusEffect> effects = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                StatusEffect effect = parseId(Registries.STATUS_EFFECT, value);
-                if (effect != null) effects.add(effect);
-            }
-        } catch (Exception ignored) {}
-
-        return effects;
-    }
-
-    @Override
-    protected boolean isValueValid(List<StatusEffect> value) {
-        return true;
-    }
-
-    @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
         return Registries.STATUS_EFFECT.getIds();
     }

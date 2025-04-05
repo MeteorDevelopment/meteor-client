@@ -71,19 +71,6 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return defaultValue;
     }
 
-    public boolean parse(String str) {
-        T newValue = parseImpl(str);
-
-        if (newValue != null) {
-            if (isValueValid(newValue)) {
-                value = newValue;
-                onChanged();
-            }
-        }
-
-        return newValue != null;
-    }
-
     public boolean wasChanged() {
         return !Objects.equals(value, defaultValue);
     }
@@ -100,9 +87,9 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return visible == null || visible.isVisible();
     }
 
-    protected abstract T parseImpl(String str);
-
-    protected abstract boolean isValueValid(T value);
+    protected boolean isValueValid(T value) {
+        return true;
+    }
 
     public Iterable<Identifier> getIdentifierSuggestions() {
         return null;

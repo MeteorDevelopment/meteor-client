@@ -29,15 +29,6 @@ public class DoubleSetting extends Setting<Double> {
     }
 
     @Override
-    protected Double parseImpl(String str) {
-        try {
-            return Double.parseDouble(str.trim());
-        } catch (NumberFormatException ignored) {
-            return null;
-        }
-    }
-
-    @Override
     protected boolean isValueValid(Double value) {
         return value >= min && value <= max;
     }

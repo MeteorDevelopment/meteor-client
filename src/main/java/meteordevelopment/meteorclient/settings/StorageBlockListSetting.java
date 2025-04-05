@@ -59,27 +59,6 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     }
 
     @Override
-    protected List<BlockEntityType<?>> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<BlockEntityType<?>> blocks = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                BlockEntityType<?> block = parseId(Registries.BLOCK_ENTITY_TYPE, value);
-                if (block != null) blocks.add(block);
-            }
-        } catch (Exception ignored) {
-        }
-
-        return blocks;
-    }
-
-    @Override
-    protected boolean isValueValid(List<BlockEntityType<?>> value) {
-        return true;
-    }
-
-    @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
         return Registries.BLOCK_ENTITY_TYPE.getIds();
     }

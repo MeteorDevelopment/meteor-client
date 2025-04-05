@@ -41,16 +41,6 @@ public class Vector3dSetting extends Setting<Vector3d> {
     }
 
     @Override
-    protected Vector3d parseImpl(String str) {
-        try {
-            String[] strs = str.split(" ");
-            return new Vector3d(Double.parseDouble(strs[0]), Double.parseDouble(strs[1]), Double.parseDouble(strs[2]));
-        } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
-            return null;
-        }
-    }
-
-    @Override
     protected boolean isValueValid(Vector3d value) {
         return value.x >= min && value.x <= max && value.y >= min && value.y <= max && value.z >= min && value.z <= max;
     }

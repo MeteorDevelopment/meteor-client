@@ -23,11 +23,6 @@ public class BlockSetting extends Setting<Block> {
     }
 
     @Override
-    protected Block parseImpl(String str) {
-        return parseId(Registries.BLOCK, str);
-    }
-
-    @Override
     protected boolean isValueValid(Block value) {
         return filter == null || filter.test(value);
     }

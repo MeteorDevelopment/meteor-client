@@ -34,26 +34,6 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
-    protected List<Block> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<Block> blocks = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                Block block = parseId(Registries.BLOCK, value);
-                if (block != null && (filter == null || filter.test(block))) blocks.add(block);
-            }
-        } catch (Exception ignored) {}
-
-        return blocks;
-    }
-
-    @Override
-    protected boolean isValueValid(List<Block> value) {
-        return true;
-    }
-
-    @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
         return Registries.BLOCK.getIds();
     }
