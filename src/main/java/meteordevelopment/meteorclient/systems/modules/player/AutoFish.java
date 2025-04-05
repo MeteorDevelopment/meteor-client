@@ -24,13 +24,6 @@ import net.minecraft.item.ItemStack;
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
-        .name("auto-cast")
-        .description("Automatically cast the fishing rod.")
-        .defaultValue(true)
-        .build()
-    );
-
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-switch")
         .description("Automatically switch to a fishing rod.")
@@ -41,6 +34,13 @@ public class AutoFish extends Module {
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
         .name("anti-break")
         .description("Avoid using rods that would break if they were cast.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-cast")
+        .description("Automatically cast the fishing rod.")
         .defaultValue(true)
         .build()
     );
