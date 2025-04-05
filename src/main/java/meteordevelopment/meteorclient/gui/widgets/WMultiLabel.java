@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.gui.widgets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class WMultiLabel extends WLabel {
@@ -23,7 +24,7 @@ public abstract class WMultiLabel extends WLabel {
     protected void onCalculateSize() {
         lines.clear();
 
-        String[] words = text.split(" ");
+        String[] textLines = text.split("\n");
         StringBuilder sb = new StringBuilder();
 
         double spaceWidth = theme.textWidth(" ", 1, title);
@@ -34,33 +35,38 @@ public abstract class WMultiLabel extends WLabel {
 
         int iInLine = 0;
 
-        for (int i = 0; i < words.length; i++) {
-            double wordWidth = theme.textWidth(words[i], words[i].length(), title);
+        for (String line : textLines) {
+            for (String word : line.split(" ")) {
+                double wordWidth = theme.textWidth(word, word.length(), title);
 
-            double toAdd = wordWidth;
-            if (iInLine > 0) toAdd += spaceWidth;
+                double toAdd = wordWidth;
+                if (iInLine > 0) toAdd += spaceWidth;
 
-            if (lineWidth + toAdd > maxWidth) {
-                lines.add(sb.toString());
-                sb.setLength(0);
+                if (lineWidth + toAdd > maxWidth) {
+                    lines.add(sb.toString());
+                    sb.setLength(0);
 
-                lineWidth = 0;
-                iInLine = 0;
+                    sb.append(word);
+                    lineWidth = wordWidth;
+                    iInLine = 1;
 
-                i--;
-            }
-            else {
-                if (iInLine > 0) {
-                    sb.append(' ');
-                    lineWidth += spaceWidth;
+                } else {
+                    if (iInLine > 0) {
+                        sb.append(' ');
+                        lineWidth += spaceWidth;
+                    }
+
+                    sb.append(word);
+                    lineWidth += wordWidth;
+                    iInLine++;
                 }
-
-                sb.append(words[i]);
-                lineWidth += wordWidth;
-
+                // now this line is not pointless!
                 maxLineWidth = Math.max(maxLineWidth, lineWidth);
-                iInLine++;
             }
+            lines.add(sb.toString());
+            sb.setLength(0);
+            lineWidth = 0;
+            iInLine = 0;
         }
 
         if (!sb.isEmpty()) lines.add(sb.toString());
