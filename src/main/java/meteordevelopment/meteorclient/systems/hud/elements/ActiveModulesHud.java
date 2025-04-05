@@ -188,7 +188,7 @@ public class ActiveModulesHud extends HudElement {
     private double rainbowHue1;
     private double rainbowHue2;
 
-    private double prevX;
+    private double lastX;
     private double emptySpace;
     private double prevTextLength;
     private Color prevColor = new Color();
@@ -247,14 +247,14 @@ public class ActiveModulesHud extends HudElement {
 
         rainbowHue2 = rainbowHue1;
 
-        prevX = x;
+        lastX = x;
         emptySpace = renderer.textWidth(" ", shadow.get(), getScale());
 
         for (int i = 0; i < modules.size(); i++) {
             double offset = alignX(getModuleWidth(renderer, modules.get(i)), alignment.get());
             renderModule(renderer, i, x + offset, y);
 
-            prevX = x + offset;
+            lastX = x + offset;
             y += renderer.textHeight(shadow.get(), getScale());
         }
     }
@@ -306,12 +306,12 @@ public class ActiveModulesHud extends HudElement {
                     textLength + 4 + 2 * outlineWidth.get(),
                     outlineWidth.get(), prevColor, prevColor, color, color);
             } else { // In-between quads are rendered above the current line so don't need for the top
-                renderer.quad(Math.min(prevX, x) - 2 - outlineWidth.get(), Math.max(prevX, x) == x ? y : y - outlineWidth.get(),
-                    (Math.max(prevX, x) - 2) - (Math.min(prevX, x) - 2 - outlineWidth.get()), outlineWidth.get(),
+                renderer.quad(Math.min(lastX, x) - 2 - outlineWidth.get(), Math.max(lastX, x) == x ? y : y - outlineWidth.get(),
+                    (Math.max(lastX, x) - 2) - (Math.min(lastX, x) - 2 - outlineWidth.get()), outlineWidth.get(),
                     prevColor, prevColor, color, color); // Left in-between quad
 
-                renderer.quad(Math.min(prevX + prevTextLength, x + textLength) + 2, Math.min(prevX + prevTextLength, x + textLength) == x + textLength ? y : y - outlineWidth.get(),
-                    (Math.max(prevX + prevTextLength, x + textLength) + 2 + outlineWidth.get()) - (Math.min(prevX + prevTextLength, x + textLength) + 2), outlineWidth.get(),
+                renderer.quad(Math.min(lastX + prevTextLength, x + textLength) + 2, Math.min(lastX + prevTextLength, x + textLength) == x + textLength ? y : y - outlineWidth.get(),
+                    (Math.max(lastX + prevTextLength, x + textLength) + 2 + outlineWidth.get()) - (Math.min(lastX + prevTextLength, x + textLength) + 2), outlineWidth.get(),
                     prevColor, prevColor, color, color); // Right in-between quad
             }
 

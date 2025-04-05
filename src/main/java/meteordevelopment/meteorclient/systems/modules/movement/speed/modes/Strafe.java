@@ -71,9 +71,9 @@ public class Strafe extends SpeedMode {
     }
 
     private Vector2d transformStrafe(double speed) {
-        float forward = mc.player.input.movementForward;
-        float side = mc.player.input.movementSideways;
-        float yaw = mc.player.prevYaw + (mc.player.getYaw() - mc.player.prevYaw) * mc.getRenderTickCounter().getTickDelta(true);
+        float forward = mc.player.input.getMovementInput().y;
+        float side = mc.player.input.getMovementInput().x;
+        float yaw = mc.player.lastYaw + (mc.player.getYaw() - mc.player.lastYaw) * mc.getRenderTickCounter().getTickProgress(true);
 
         double velX, velZ;
 
@@ -106,6 +106,6 @@ public class Strafe extends SpeedMode {
 
     @Override
     public void onTick() {
-        distance = Math.sqrt((mc.player.getX() - mc.player.prevX) * (mc.player.getX() - mc.player.prevX) + (mc.player.getZ() - mc.player.prevZ) * (mc.player.getZ() - mc.player.prevZ));
+        distance = Math.sqrt((mc.player.getX() - mc.player.lastX) * (mc.player.getX() - mc.player.lastX) + (mc.player.getZ() - mc.player.lastZ) * (mc.player.getZ() - mc.player.lastZ));
     }
 }

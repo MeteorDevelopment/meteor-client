@@ -51,11 +51,21 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if (event.isSet()) info.setReturnValue(event.isClip());
     }
 
-    @Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/ItemEntity;", at = @At("HEAD"), cancellable = true)
-    private void onDropItem(ItemStack stack, boolean bl, boolean bl2, CallbackInfoReturnable<ItemEntity> cir) {
+    @Inject(method = "dropItem", at = @At("HEAD"), cancellable = true)
+    private void onDropItem(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir) {
         if (getWorld().isClient && !stack.isEmpty()) {
             if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack)).isCancelled()) cir.setReturnValue(null);
         }
+    }
+
+    @Inject(method = "isSpectator", at = @At("HEAD"), cancellable = true)
+    private void onIsSpectator(CallbackInfoReturnable<Boolean> info) {
+        if (mc.getNetworkHandler() == null) info.setReturnValue(false);
+    }
+
+    @Inject(method = "isCreative", at = @At("HEAD"), cancellable = true)
+    private void onIsCreative(CallbackInfoReturnable<Boolean> info) {
+        if (mc.getNetworkHandler() == null) info.setReturnValue(false);
     }
 
     @ModifyReturnValue(method = "getBlockBreakingSpeed", at = @At(value = "RETURN"))

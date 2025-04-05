@@ -43,12 +43,12 @@ public class Trail extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (pause.get()
-            && mc.player.getX() == mc.player.prevX
-            && mc.player.getY() == mc.player.prevY
-            && mc.player.getZ() == mc.player.prevZ) return;
+            && mc.player.getX() == mc.player.lastX
+            && mc.player.getY() == mc.player.lastY
+            && mc.player.getZ() == mc.player.lastZ) return;
 
         for (ParticleType<?> particleType : particles.get()) {
-            mc.world.addParticle((ParticleEffect) particleType, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0, 0, 0);
+            mc.world.addParticleClient((ParticleEffect) particleType, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0, 0, 0);
         }
     }
 }

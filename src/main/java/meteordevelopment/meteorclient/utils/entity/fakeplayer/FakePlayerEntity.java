@@ -23,12 +23,12 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
 
         copyPositionAndRotation(player);
 
-        prevYaw = getYaw();
-        prevPitch = getPitch();
+        lastYaw = getYaw();
+        lastPitch = getPitch();
         headYaw = player.headYaw;
-        prevHeadYaw = headYaw;
+        lastHeadYaw = headYaw;
         bodyYaw = player.bodyYaw;
-        prevBodyYaw = bodyYaw;
+        lastBodyYaw = bodyYaw;
 
         Byte playerModel = player.getDataTracker().get(PlayerEntity.PLAYER_MODEL_PARTS);
         dataTracker.set(PlayerEntity.PLAYER_MODEL_PARTS, playerModel);

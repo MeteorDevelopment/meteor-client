@@ -70,12 +70,12 @@ public class Marker extends Module {
         super.fromTag(tag);
 
         markers.clear();
-        NbtList list = tag.getList("markers", 10);
+        NbtList list = tag.getListOrEmpty("markers");
 
         for (NbtElement tagII : list) {
             NbtCompound tagI = (NbtCompound) tagII;
 
-            String type = tagI.getString("type");
+            String type = tagI.getString("type", "");
             BaseMarker marker = factory.createMarker(type);
 
             if (marker != null) {

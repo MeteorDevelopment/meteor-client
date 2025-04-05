@@ -57,7 +57,7 @@ public abstract class Prompt<T> {
         if (id != null && Config.get().dontShowAgainPrompts.contains(id)) return false;
 
         if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(() -> mc.setScreen(new PromptScreen(theme)));
+            mc.execute(() -> mc.setScreen(new PromptScreen(theme)));
         }
         else {
             mc.setScreen(new PromptScreen(theme));

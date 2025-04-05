@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.CloseHandledScreenC2SPacketAccessor;
 import meteordevelopment.meteorclient.mixin.HandledScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -325,9 +324,9 @@ public class InventoryTweaks extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!xCarry.get() || !(event.packet instanceof CloseHandledScreenC2SPacket)) return;
+        if (!xCarry.get() || !(event.packet instanceof CloseHandledScreenC2SPacket packet)) return;
 
-        if (((CloseHandledScreenC2SPacketAccessor) event.packet).getSyncId() == mc.player.playerScreenHandler.syncId) {
+        if (packet.getSyncId() == mc.player.playerScreenHandler.syncId) {
             invOpened = true;
             event.cancel();
         }
@@ -421,7 +420,7 @@ public class InventoryTweaks extends Module {
     @EventHandler
     private void onInventory(InventoryEvent event) {
         ScreenHandler handler = mc.player.currentScreenHandler;
-        if (canSteal(handler) && event.packet.getSyncId() == handler.syncId) {
+        if (canSteal(handler) && event.packet.syncId() == handler.syncId) {
             if (autoSteal.get()) {
                 steal(handler);
             } else if (autoDump.get()) {

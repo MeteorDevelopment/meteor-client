@@ -15,7 +15,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
+import net.minecraft.registry.tag.ItemTags;
 
 public class AutoWeapon extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -53,15 +53,15 @@ public class AutoWeapon extends Module {
     }
 
     private int getBestWeapon(LivingEntity target) {
-        int slotS = mc.player.getInventory().selectedSlot;
-        int slotA = mc.player.getInventory().selectedSlot;
+        int slotS = mc.player.getInventory().getSelectedSlot();
+        int slotA = mc.player.getInventory().getSelectedSlot();
         double damageS = 0;
         double damageA = 0;
         double currentDamageS;
         double currentDamageA;
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
-            if (stack.getItem() instanceof SwordItem
+            if (stack.isIn(ItemTags.SWORDS)
                 && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
                 currentDamageS = DamageUtils.getAttackDamage(mc.player, target, stack);
                 if (currentDamageS > damageS) {
@@ -81,7 +81,7 @@ public class AutoWeapon extends Module {
         else if (weapon.get() == Weapon.Axe && threshold.get() > damageS - damageA) return slotA;
         else if (weapon.get() == Weapon.Sword && threshold.get() < damageA - damageS) return slotA;
         else if (weapon.get() == Weapon.Axe && threshold.get() < damageS - damageA) return slotS;
-        else return mc.player.getInventory().selectedSlot;
+        else return mc.player.getInventory().getSelectedSlot();
     }
 
     public enum Weapon {

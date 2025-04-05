@@ -15,7 +15,7 @@ import net.minecraft.nbt.StringNbtReader;
 import java.util.Collection;
 import java.util.List;
 
-import static net.minecraft.nbt.StringNbtReader.EXPECTED_VALUE;
+import static net.minecraft.nbt.StringNbtReader.EXPECTED_COMPOUND;
 
 public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
     private static final CompoundNbtTagArgumentType INSTANCE = new CompoundNbtTagArgumentType();
@@ -35,7 +35,7 @@ public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
     public NbtCompound parse(StringReader reader) throws CommandSyntaxException {
         reader.skipWhitespace();
         if (!reader.canRead()) {
-            throw EXPECTED_VALUE.createWithContext(reader);
+            throw EXPECTED_COMPOUND.createWithContext(reader);
         }
         StringBuilder b = new StringBuilder();
         int open = 0;
@@ -52,7 +52,7 @@ public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
         }
         reader.expect('}');
         b.append('}');
-        return StringNbtReader.parse(b.toString()
+        return StringNbtReader.readCompound(b.toString()
                 .replace("$", "§")
                 .replace("§§", "$")
         );

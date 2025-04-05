@@ -13,6 +13,8 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.ItemStackArgumentType;
+import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
@@ -42,25 +44,27 @@ public class DropCommand extends Command {
 
         // Main Inv
         builder.then(literal("inventory").executes(context -> drop(player -> {
-            for (int i = 9; i < player.getInventory().main.size(); i++) {
+            for (int i = 9; i < player.getInventory().getMainStacks().size(); i++) {
                 InvUtils.drop().slotMain(i - 9);
             }
         })));
 
         // Hotbar and main inv
         builder.then(literal("all").executes(context -> drop(player -> {
-                    for (int i = 0; i < player.getInventory().size(); i++) {
-                        InvUtils.drop().slot(i);
-                    }
-                    InvUtils.drop().slotOffhand();
-                })));
+            for (int i = 0; i < player.getInventory().size(); i++) {
+                InvUtils.drop().slot(i);
+            }
+            InvUtils.drop().slotOffhand();
+        })));
 
         // Armor
         builder.then(literal("armor").executes(context -> drop(player -> {
-                    for (int i = 0; i < player.getInventory().armor.size(); i++) {
-                        InvUtils.drop().slotArmor(i);
-                    }
-                })));
+            for (EquipmentSlot equipmentSlot : AttributeModifierSlot.ARMOR) {
+                if (equipmentSlot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+                    InvUtils.drop().slotArmor(equipmentSlot.getEntitySlotId());
+                }
+            }
+        })));
 
         // Specific item
         builder.then(argument("item", ItemStackArgumentType.itemStack(REGISTRY_ACCESS)).executes(context -> drop(player -> {

@@ -141,7 +141,7 @@ public class NoFall extends Module {
         // Airplace mode
         if (mode.get() == Mode.AirPlace) {
             // Test if fall damage setting is valid
-            if (!airPlaceMode.get().test(mc.player.fallDistance)) return;
+            if (!airPlaceMode.get().test((float) mc.player.fallDistance)) return;
 
             // Center and place block
             if (anchor.get()) PlayerUtils.centerPlayer();

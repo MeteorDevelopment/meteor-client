@@ -20,12 +20,13 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.ItemTags;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -80,10 +81,10 @@ public class AutoArmor extends Module {
 
     private final Object2IntMap<RegistryEntry<Enchantment>> enchantments = new Object2IntOpenHashMap<>();
     private final ArmorPiece[] armorPieces = new ArmorPiece[4];
-    private final ArmorPiece helmet = new ArmorPiece(3);
-    private final ArmorPiece chestplate = new ArmorPiece(2);
-    private final ArmorPiece leggings = new ArmorPiece(1);
-    private final ArmorPiece boots = new ArmorPiece(0);
+    private final ArmorPiece helmet = new ArmorPiece(EquipmentSlot.HEAD);
+    private final ArmorPiece chestplate = new ArmorPiece(EquipmentSlot.CHEST);
+    private final ArmorPiece leggings = new ArmorPiece(EquipmentSlot.LEGS);
+    private final ArmorPiece boots = new ArmorPiece(EquipmentSlot.FEET);
     private int timer;
 
     public AutoArmor() {
@@ -112,9 +113,9 @@ public class AutoArmor extends Module {
         for (ArmorPiece armorPiece : armorPieces) armorPiece.reset();
 
         // Loop through items in inventory
-        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
+        for (int i = 0; i < mc.player.getInventory().getMainStacks().size(); i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
-            if (itemStack.isEmpty() || !(itemStack.getItem() instanceof ArmorItem)) continue;
+            if (itemStack.isEmpty() || !isArmor(itemStack)) continue;
 
             // Check for durability if anti break is enabled
             if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) {
@@ -165,7 +166,7 @@ public class AutoArmor extends Module {
 
         // Prefer blast protection on leggings if enabled
         RegistryKey<Enchantment> protection = preferredProtection.get().enchantment;
-        if (itemStack.getItem() instanceof ArmorItem && blastLeggings.get() && getItemSlotId(itemStack) == 1) {
+        if (isArmor(itemStack) && blastLeggings.get() && getItemSlotId(itemStack) == 1) {
             protection = Enchantments.BLAST_PROTECTION;
         }
 
@@ -207,7 +208,7 @@ public class AutoArmor extends Module {
     }
 
     private void moveToEmpty(int armorSlotId) {
-        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
+        for (int i = 0; i < mc.player.getInventory().getMainStacks().size(); i++) {
             if (mc.player.getInventory().getStack(i).isEmpty()) {
                 InvUtils.move().fromArmor(armorSlotId).to(i);
 
@@ -217,6 +218,10 @@ public class AutoArmor extends Module {
                 break;
             }
         }
+    }
+
+    private boolean isArmor(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.FOOT_ARMOR) || itemStack.isIn(ItemTags.LEG_ARMOR) || itemStack.isIn(ItemTags.CHEST_ARMOR) || itemStack.isIn(ItemTags.HEAD_ARMOR);
     }
 
     public enum Protection {
@@ -233,7 +238,7 @@ public class AutoArmor extends Module {
     }
 
     private class ArmorPiece {
-        private final int id;
+        private final EquipmentSlot slot;
 
         private int bestSlot;
         private int bestScore;
@@ -241,8 +246,8 @@ public class AutoArmor extends Module {
         private int score;
         private int durability;
 
-        public ArmorPiece(int id) {
-            this.id = id;
+        public ArmorPiece(EquipmentSlot slot) {
+            this.slot = slot;
         }
 
         public void reset() {
@@ -265,7 +270,7 @@ public class AutoArmor extends Module {
         public void calculate() {
             if (cannotSwap()) return;
 
-            ItemStack itemStack = mc.player.getInventory().getArmorStack(id);
+            ItemStack itemStack = mc.player.getEquippedStack(slot);
 
             // Check if the item is an elytra
             if ((ignoreElytra.get() || Modules.get().isActive(ChestSwap.class)) && itemStack.getItem() == Items.ELYTRA) {
@@ -302,10 +307,10 @@ public class AutoArmor extends Module {
             if (cannotSwap() || score == Integer.MAX_VALUE) return;
 
             // Check if new score is better and swap if it is
-            if (bestScore > score) swap(bestSlot, id);
+            if (bestScore > score) swap(bestSlot, slot.getEntitySlotId());
             else if (antiBreak.get() && durability <= 10) {
                 // If no better piece has been found but current piece is broken find an empty slot and move it there
-                moveToEmpty(id);
+                moveToEmpty(slot.getEntitySlotId());
             }
         }
 

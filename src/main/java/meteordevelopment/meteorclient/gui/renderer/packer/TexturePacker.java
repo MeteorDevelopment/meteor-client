@@ -6,7 +6,9 @@
 package meteordevelopment.meteorclient.gui.renderer.packer;
 
 import com.mojang.blaze3d.platform.TextureUtil;
-import meteordevelopment.meteorclient.utils.render.ByteTexture;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.TextureFormat;
+import meteordevelopment.meteorclient.renderer.Texture;
 import net.minecraft.util.Identifier;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
@@ -86,7 +88,7 @@ public class TexturePacker {
         images.add(new Image(imageBuffer, region, width, height, false));
     }
 
-    public ByteTexture pack() {
+    public Texture pack() {
         // Calculate final width and height and image positions
         int width = 0;
         int height = 0;
@@ -139,7 +141,11 @@ public class TexturePacker {
         }
 
         ((Buffer) buffer).rewind();
-        return new ByteTexture(width, height, buffer, ByteTexture.Format.RGBA, ByteTexture.Filter.Linear, ByteTexture.Filter.Linear);
+
+        Texture texture = new Texture(width, height, TextureFormat.RGBA8, FilterMode.LINEAR, FilterMode.LINEAR);
+        texture.upload(buffer);
+
+        return texture;
     }
 
     private static class Image {

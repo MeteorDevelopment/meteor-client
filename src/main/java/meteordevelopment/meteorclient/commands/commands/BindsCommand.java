@@ -35,7 +35,7 @@ public class BindsCommand extends Command {
             ChatUtils.info("--- Bound Modules ((highlight)%d(default)) ---", modules.size());
 
             for (Module module : modules) {
-                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, getTooltip(module));
+                HoverEvent hoverEvent = new HoverEvent.ShowText(getTooltip(module));
 
                 MutableText text = Text.literal(module.title).formatted(Formatting.WHITE);
                 text.setStyle(text.getStyle().withHoverEvent(hoverEvent));

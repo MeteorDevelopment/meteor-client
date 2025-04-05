@@ -164,6 +164,7 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public abstract static class SettingBuilder<B, V, S> {
         protected String name = "undefined", description = "";
         protected V defaultValue;

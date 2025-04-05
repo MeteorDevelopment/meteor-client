@@ -43,7 +43,7 @@ public class StringSetting extends Setting<String> {
 
     @Override
     public String load(NbtCompound tag) {
-        set(tag.getString("value"));
+        set(tag.getString("value", ""));
 
         return get();
     }
