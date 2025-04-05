@@ -106,12 +106,16 @@ public class AutoReplenish extends Module {
 
         // Hotbar
         for (int i = 0; i < 9; i++) {
+            if (tickDelayLeft > 0) return;
+
             ItemStack stack = mc.player.getInventory().getStack(i);
             replenishSlot(i, stack);
         }
 
         // Offhand
         if (offhand.get() && !Modules.get().get(AutoTotem.class).isLocked()) {
+            if (tickDelayLeft > 0) return;
+
             ItemStack stack = mc.player.getOffHandStack();
             replenishSlot(SlotUtils.OFFHAND, stack);
         }
@@ -120,12 +124,13 @@ public class AutoReplenish extends Module {
     private void replenishSlot(int slot, ItemStack currentStack) {
         int itemsIndex = slot == SlotUtils.OFFHAND ? 9 : slot;
         ItemStack prevStack = items[itemsIndex];
-        Set<Integer> fromSlots = new IntArraySet();
+
+        int itemSlot = -1;
 
         // If you still have some left in the stack and just now crossed the threshold
         if (!currentStack.isEmpty() && currentStack.isStackable() && currentStack.getCount() <= threshold.get()) {
             if (excludedItems.get().contains(currentStack.getItem())) return;
-            fromSlots = findItem(currentStack, slot, threshold.get() - currentStack.getCount() + 1);
+            itemSlot = findItem(currentStack, slot);
         }
 
         // If you just went from above the threshold to zero in a single tick, which is possible
@@ -133,29 +138,20 @@ public class AutoReplenish extends Module {
         // e.g. surround or holefiller using obsidian
         if (currentStack.isEmpty() && !prevStack.isEmpty() && prevStack.isStackable()) {
             if (excludedItems.get().contains(prevStack.getItem())) return;
-            fromSlots = findItem(prevStack, slot, threshold.get() - currentStack.getCount());
+            itemSlot = findItem(prevStack, slot);
         }
 
         // Unstackable items
-        if (currentStack.isEmpty() && !prevStack.isEmpty() && !prevStack.isStackable()) {
+        if (currentStack.isEmpty() && !prevStack.isEmpty() && !prevStack.isStackable() && unstackable.get()) {
             if (excludedItems.get().contains(prevStack.getItem())) return;
-            fromSlots = findItem(prevStack, slot, 1);
+            itemSlot = findItem(prevStack, slot);
         }
 
-        for (int foundSlot: fromSlots) {
-            InvUtils.move().from(foundSlot).to(slot);
-
-            tickDelayLeft = tickDelay.get();
-            if (tickDelayLeft > 0) return;
-        }
-
+        InvUtils.move().from(itemSlot).to(slot);
         items[itemsIndex] = currentStack.copy();
     }
 
-    private IntArraySet findItem(ItemStack itemStack, int excludedSlot, int minimumCount) {
-        IntArraySet slots = new IntArraySet();
-        int totalCount = 0;
-
+    private int findItem(ItemStack itemStack, int excludedSlot) {
         for (int i = mc.player.getInventory().size() - 2; i >= (searchHotbar.get() ? 0 : 9); i--) {
             if (i == excludedSlot) continue;
 
@@ -164,14 +160,10 @@ public class AutoReplenish extends Module {
 
             if (sameEnchants.get() && !stack.getEnchantments().equals(itemStack.getEnchantments())) continue;
 
-            totalCount += stack.getCount();
-            slots.add(i);
-
-            if (!itemStack.isStackable() && unstackable.get()) break;
-            if (totalCount >= minimumCount) break;
+            return i;
         }
 
-        return slots;
+        return -1;
     }
 
     private void fillItems() {
