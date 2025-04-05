@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -20,7 +21,6 @@ import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.map.MapState;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
@@ -34,8 +34,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class SaveMapCommand extends Command {
-    private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(Text.literal("You must be holding a filled map."));
-    private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(Text.literal("Something went wrong."));
+    private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(new LiteralMessage("You must be holding a filled map."));
+    private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(new LiteralMessage("Something went wrong."));
 
     private final PointerBuffer filters;
 
