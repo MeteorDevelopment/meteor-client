@@ -83,6 +83,13 @@ public class InfinityMiner extends Module {
 
     // When Full
 
+    public final Setting<Boolean> ignoreFull = sgWhenFull.add(new BoolSetting.Builder()
+        .name("ignore-full-inventory")
+        .description("Continues mining even if your inventory is full. Makes both options below redundant if enabled.")
+        .defaultValue(false)
+        .build()
+    );
+
     public final Setting<Boolean> walkHome = sgWhenFull.add(new BoolSetting.Builder()
         .name("walk-home")
         .description("Will walk 'home' when your inventory is full.")
@@ -243,6 +250,6 @@ public class InfinityMiner extends Module {
             }
         }
 
-        return true;
+        return !ignoreFull.get();
     }
 }
