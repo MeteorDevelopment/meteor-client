@@ -137,6 +137,7 @@ public class AutoFish extends Module {
 
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
+            if (!(stack.getItem() instanceof FishingRodItem)) continue;
             if (antiBreak.get() && stack.getDamage() == stack.getMaxDamage() - 1) continue;
 
             int score = 0;
