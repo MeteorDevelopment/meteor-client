@@ -33,6 +33,7 @@ accessible   class   net/minecraft/client/render/RenderPhase$Target
 accessible field net/minecraft/entity/projectile/FishingBobberEntity caughtFish Z
 accessible class net/minecraft/entity/projectile/FishingBobberEntity$State
 accessible field net/minecraft/entity/projectile/FishingBobberEntity state Lnet/minecraft/entity/projectile/FishingBobberEntity$State;
+accessible field net/minecraft/entity/projectile/FishingBobberEntity hookedEntity Lnet/minecraft/entity/Entity;
 
 # Item Physics
 accessible field net/minecraft/client/render/item/ItemRenderState layers [Lnet/minecraft/client/render/item/ItemRenderState$LayerRenderState;

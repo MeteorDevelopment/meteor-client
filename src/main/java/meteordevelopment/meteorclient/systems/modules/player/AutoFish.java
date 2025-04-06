@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.Enchantments;
@@ -104,14 +103,16 @@ public class AutoFish extends Module {
             return;
         }
 
-        Utils.rightClick();
-
-        castDelayLeft = castDelay.get();
-        wasHooked = false;
+        useRod();
     }
 
     private void tryCatch() {
         if (mc.player.fishHook == null) return;
+        if (mc.player.fishHook.getHookedEntity() != null) {
+            useRod();
+            return;
+        }
+
         if (mc.player.fishHook.state != FishingBobberEntity.State.BOBBING) return;
 
         if (!wasHooked) {
@@ -128,9 +129,12 @@ public class AutoFish extends Module {
             return;
         }
 
+        useRod();
+    }
+    
+    private void useRod() {
         Utils.rightClick();
         wasHooked = false;
-
         castDelayLeft = castDelay.get();
     }
 
