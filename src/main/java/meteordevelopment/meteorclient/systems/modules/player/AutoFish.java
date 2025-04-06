@@ -103,7 +103,6 @@ public class AutoFish extends Module {
             return;
         }
 
-        info("Casting");
         Utils.rightClick();
         wasHooked = false;
     }
@@ -126,7 +125,6 @@ public class AutoFish extends Module {
             return;
         }
 
-        info("Catching");
         Utils.rightClick();
         wasHooked = false;
 
