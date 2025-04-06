@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.Enchantments;
@@ -104,6 +105,8 @@ public class AutoFish extends Module {
         }
 
         Utils.rightClick();
+
+        castDelayLeft = castDelay.get();
         wasHooked = false;
     }
 
