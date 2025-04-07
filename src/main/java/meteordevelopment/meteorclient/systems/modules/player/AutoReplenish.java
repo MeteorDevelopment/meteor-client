@@ -17,14 +17,15 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class AutoReplenish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Integer> threshold = sgGeneral.add(new IntSetting.Builder()
-        .name("threshold")
-        .description("The threshold of items left this actives at.")
+    private final Setting<Integer> minCount = sgGeneral.add(new IntSetting.Builder()
+        .name("min-count")
+        .description("Replenish a slot when it reaches this item count.")
         .defaultValue(8)
         .min(1)
         .sliderRange(1, 63)
@@ -33,7 +34,7 @@ public class AutoReplenish extends Module {
 
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("The tick delay to replenish your hotbar.")
+        .description("How long in ticks to wait between replenishing your hotbar.")
         .defaultValue(1)
         .min(0)
         .build()
@@ -41,14 +42,14 @@ public class AutoReplenish extends Module {
 
     private final Setting<Boolean> offhand = sgGeneral.add(new BoolSetting.Builder()
         .name("offhand")
-        .description("Whether or not to refill your offhand with items.")
+        .description("Whether or not to replenish items in your offhand.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> unstackable = sgGeneral.add(new BoolSetting.Builder()
         .name("unstackable")
-        .description("Replenishes unstackable items.")
+        .description("Replenish unstackable items.")
         .defaultValue(true)
         .build()
     );
@@ -57,19 +58,20 @@ public class AutoReplenish extends Module {
         .name("same-enchants")
         .description("Only replace unstackables with items that have the same enchants.")
         .defaultValue(true)
+        .visible(unstackable::get)
         .build()
     );
 
     private final Setting<Boolean> searchHotbar = sgGeneral.add(new BoolSetting.Builder()
         .name("search-hotbar")
-        .description("Uses items in your hotbar to replenish if they are the only ones left.")
+        .description("Combine stacks in your hotbar/offhand as a last resort.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<List<Item>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("excluded-items")
-        .description("Items that WILL NOT replenish.")
+        .description("Items that won't be replenished.")
         .build()
     );
 
@@ -84,7 +86,7 @@ public class AutoReplenish extends Module {
     public AutoReplenish() {
         super(Categories.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
 
-        for (int i = 0; i < items.length; i++) items[i] = new ItemStack(Items.AIR);
+        Arrays.fill(items, Items.AIR.getDefaultStack());
     }
 
     @Override
@@ -133,15 +135,15 @@ public class AutoReplenish extends Module {
         int fromSlot = -1;
 
         // If there are still items left in the stack, but it just crossed the threshold
-        if (stack.isStackable() && !stack.isEmpty() && stack.getCount() <= threshold.get()) {
-            fromSlot = findItem(stack, slot, threshold.get() - stack.getCount() + 1);
+        if (stack.isStackable() && !stack.isEmpty() && stack.getCount() <= minCount.get()) {
+            fromSlot = findItem(stack, slot, minCount.get() - stack.getCount() + 1);
         }
 
         // If the stack just went from above the threshold to empty in a single tick
         // this can happen if the threshold is set low enough while using modules that
         // place many blocks per tick, like surround or holefiller
         if (prevStack.isStackable() && stack.isEmpty() && !prevStack.isEmpty()) {
-            fromSlot = findItem(prevStack, slot, threshold.get() - stack.getCount() + 1);
+            fromSlot = findItem(prevStack, slot, minCount.get() - stack.getCount() + 1);
         }
 
         // Unstackable items
