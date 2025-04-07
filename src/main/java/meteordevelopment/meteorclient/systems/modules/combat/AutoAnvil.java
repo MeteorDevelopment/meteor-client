@@ -73,7 +73,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Boolean> multiPlace = sgGeneral.add(new BoolSetting.Builder()
         .name("multi-place")
-        .description("Places multiple anvils at once..")
+        .description("Places multiple anvils at once.")
         .defaultValue(true)
         .build()
     );
