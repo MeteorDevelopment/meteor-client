@@ -53,10 +53,17 @@ public class AutoReplenish extends Module {
         .build()
     );
 
+    private final Setting<Boolean> sameEnchants = sgGeneral.add(new BoolSetting.Builder()
+        .name("same-enchants")
+        .description("Only replace unstackables with items that have the same enchants.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> searchHotbar = sgGeneral.add(new BoolSetting.Builder()
         .name("search-hotbar")
         .description("Uses items in your hotbar to replenish if they are the only ones left.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
@@ -145,20 +152,23 @@ public class AutoReplenish extends Module {
         InvUtils.move().from(fromSlot).to(slot);
     }
 
-    private int findItem(ItemStack itemStack, int excludedSlot, int goodEnoughCount) {
+    private int findItem(ItemStack lookForStack, int excludedSlot, int goodEnoughCount) {
         int slot = -1;
         int count = 0;
 
         for (int i = mc.player.getInventory().size() - 2; i >= (searchHotbar.get() ? 0 : 9); i--) {
+            if (i == excludedSlot) continue;
+
             ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.getItem() != lookForStack.getItem()) continue;
 
-            if (i != excludedSlot && stack.getItem() == itemStack.getItem() && ItemStack.areItemsAndComponentsEqual(itemStack, stack)) {
-                if (stack.getCount() > count) {
-                    slot = i;
-                    count = stack.getCount();
+            if (sameEnchants.get() && !stack.getEnchantments().equals(lookForStack.getEnchantments())) continue;
 
-                    if (count >= goodEnoughCount) break;
-                }
+            if (stack.getCount() > count) {
+                slot = i;
+                count = stack.getCount();
+
+                if (count >= goodEnoughCount) break;
             }
         }
 
