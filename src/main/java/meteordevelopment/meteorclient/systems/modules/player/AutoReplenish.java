@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.ItemStackAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -137,7 +136,7 @@ public class AutoReplenish extends Module {
             }
         }
 
-        setItem(slot, stack);
+        items[slot] = stack.copy();
     }
 
     private int findItem(ItemStack itemStack, int excludedSlot, int goodEnoughCount) {
@@ -166,25 +165,15 @@ public class AutoReplenish extends Module {
 
     private void fillItems() {
         for (int i = 0; i < 9; i++) {
-            setItem(i, mc.player.getInventory().getStack(i));
+            items[i] = mc.player.getInventory().getStack(i).copy();
         }
 
-        setItem(SlotUtils.OFFHAND, mc.player.getOffHandStack());
+        items[9] = mc.player.getOffHandStack().copy();
     }
 
     private ItemStack getItem(int slot) {
         if (slot == SlotUtils.OFFHAND) slot = 9;
 
         return items[slot];
-    }
-
-    private void setItem(int slot, ItemStack stack) {
-        if (slot == SlotUtils.OFFHAND) slot = 9;
-
-        ItemStack s = items[slot];
-        ((ItemStackAccessor) (Object) s).setItem(stack.getItem());
-        s.setCount(stack.getCount());
-        s.applyComponentsFrom(stack.getComponents());
-        if (stack.isEmpty()) ((ItemStackAccessor) (Object) s).setItem(Items.AIR);
     }
 }
