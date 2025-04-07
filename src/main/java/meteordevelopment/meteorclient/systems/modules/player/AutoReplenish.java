@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.AutoTotem;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -119,27 +118,27 @@ public class AutoReplenish extends Module {
 
     private void checkSlot(int slot, ItemStack stack) {
         ItemStack prevStack = items[slot];
+        int fromSlot = -1;
 
         // Stackable items 1
         if (!stack.isEmpty() && stack.isStackable() && !excludedItems.get().contains(stack.getItem())) {
             if (stack.getCount() <= threshold.get()) {
-                addSlots(slot, findItem(stack, slot, threshold.get() - stack.getCount() + 1));
+                fromSlot = findItem(stack, slot, threshold.get() - stack.getCount() + 1);
             }
         }
 
         if (stack.isEmpty() && !prevStack.isEmpty() && !excludedItems.get().contains(prevStack.getItem())) {
             // Stackable items 2
             if (prevStack.isStackable()) {
-                addSlots(slot, findItem(prevStack, slot, threshold.get() - stack.getCount() + 1));
+                fromSlot = findItem(prevStack, slot, threshold.get() - stack.getCount() + 1);
             }
             // Unstackable items
-            else {
-                if (unstackable.get()) {
-                    addSlots(slot, findItem(prevStack, slot, 1));
-                }
+            else if (unstackable.get()) {
+                fromSlot = findItem(prevStack, slot, 1);
             }
         }
 
+        InvUtils.move().from(fromSlot).to(slot);
         items[slot] = stack.copy();
     }
 
@@ -161,10 +160,6 @@ public class AutoReplenish extends Module {
         }
 
         return slot;
-    }
-
-    private void addSlots(int to, int from) {
-        InvUtils.move().from(from).to(to);
     }
 
     private void fillItems() {
