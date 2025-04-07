@@ -96,50 +96,53 @@ public class AutoReplenish extends Module {
         prevHadOpenScreen = mc.currentScreen != null;
         if (mc.player.currentScreenHandler.getStacks().size() != 46 || mc.currentScreen != null) return;
 
-        if (tickDelayLeft <= 0) {
-            tickDelayLeft = tickDelay.get();
-
-            // Hotbar
-            for (int i = 0; i < 9; i++) {
-                ItemStack stack = mc.player.getInventory().getStack(i);
-                checkSlot(i, stack);
-            }
-
-            // Offhand
-            if (offhand.get() && !Modules.get().get(AutoTotem.class).isLocked()) {
-                ItemStack stack = mc.player.getOffHandStack();
-                checkSlot(9, stack);
-            }
-        }
-        else {
+        if (tickDelayLeft > 0) {
             tickDelayLeft--;
+            return;
         }
+
+        // Hotbar
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            checkSlot(i, stack);
+        }
+
+        // Offhand
+        if (offhand.get() && !Modules.get().get(AutoTotem.class).isLocked()) {
+            ItemStack stack = mc.player.getOffHandStack();
+            checkSlot(9, stack);
+        }
+
+        tickDelayLeft = tickDelay.get();
     }
 
     private void checkSlot(int slot, ItemStack stack) {
         ItemStack prevStack = items[slot];
+        items[slot] = stack.copy();
+
+        if (excludedItems.get().contains(stack.getItem())) return;
+        if (excludedItems.get().contains(prevStack.getItem())) return;
+
         int fromSlot = -1;
 
-        // Stackable items 1
-        if (!stack.isEmpty() && stack.isStackable() && !excludedItems.get().contains(stack.getItem())) {
-            if (stack.getCount() <= threshold.get()) {
-                fromSlot = findItem(stack, slot, threshold.get() - stack.getCount() + 1);
-            }
+        // If there are still items left in the stack, but it just crossed the threshold
+        if (stack.isStackable() && !stack.isEmpty() && stack.getCount() <= threshold.get()) {
+            fromSlot = findItem(stack, slot, threshold.get() - stack.getCount() + 1);
         }
 
-        if (stack.isEmpty() && !prevStack.isEmpty() && !excludedItems.get().contains(prevStack.getItem())) {
-            // Stackable items 2
-            if (prevStack.isStackable()) {
-                fromSlot = findItem(prevStack, slot, threshold.get() - stack.getCount() + 1);
-            }
-            // Unstackable items
-            else if (unstackable.get()) {
-                fromSlot = findItem(prevStack, slot, 1);
-            }
+        // If the stack just went from above the threshold to empty in a single tick
+        // this can happen if the threshold is set low enough while using modules that
+        // place many blocks per tick, like surround or holefiller
+        if (prevStack.isStackable() && stack.isEmpty() && !prevStack.isEmpty()) {
+            fromSlot = findItem(prevStack, slot, threshold.get() - stack.getCount() + 1);
+        }
+
+        // Unstackable items
+        if (unstackable.get() && !prevStack.isStackable() && stack.isEmpty() && !prevStack.isEmpty()) {
+            fromSlot = findItem(prevStack, slot, 1);
         }
 
         InvUtils.move().from(fromSlot).to(slot);
-        items[slot] = stack.copy();
     }
 
     private int findItem(ItemStack itemStack, int excludedSlot, int goodEnoughCount) {
