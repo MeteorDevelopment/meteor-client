@@ -231,11 +231,11 @@ public class Flight extends Module {
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
         if (!(event.packet instanceof PlayerAbilitiesS2CPacket packet) || mode.get() != Mode.Abilities) return;
-        event.setCancelled(true); // Cancel packet, so fly won't be toggled
-        mc.player.getAbilities().flying = true;
-        mc.player.getAbilities().allowFlying = true;
+        event.cancel(); // Cancel packet, so fly won't be toggled
+
         mc.player.getAbilities().invulnerable = packet.isInvulnerable();
         mc.player.getAbilities().creativeMode = packet.isCreativeMode();
+        mc.player.getAbilities().setWalkSpeed(packet.getWalkSpeed());
     }
 
     private boolean shouldFlyDown(double currentY, double lastY) {
