@@ -67,6 +67,10 @@ public class AutoReplenish extends Module {
         .build()
     );
 
+    /**
+     * Represents the items the player had last tick. Indices 0-8 represent the
+     * hotbar from left to right, index 9 represents the player's offhand
+     */
     private final ItemStack[] items = new ItemStack[10];
     private boolean prevHadOpenScreen;
     private int tickDelayLeft;
@@ -105,7 +109,7 @@ public class AutoReplenish extends Module {
             // Offhand
             if (offhand.get() && !Modules.get().get(AutoTotem.class).isLocked()) {
                 ItemStack stack = mc.player.getOffHandStack();
-                checkSlot(SlotUtils.OFFHAND, stack);
+                checkSlot(9, stack);
             }
         }
         else {
@@ -114,7 +118,7 @@ public class AutoReplenish extends Module {
     }
 
     private void checkSlot(int slot, ItemStack stack) {
-        ItemStack prevStack = getItem(slot);
+        ItemStack prevStack = items[slot];
 
         // Stackable items 1
         if (!stack.isEmpty() && stack.isStackable() && !excludedItems.get().contains(stack.getItem())) {
@@ -169,11 +173,5 @@ public class AutoReplenish extends Module {
         }
 
         items[9] = mc.player.getOffHandStack().copy();
-    }
-
-    private ItemStack getItem(int slot) {
-        if (slot == SlotUtils.OFFHAND) slot = 9;
-
-        return items[slot];
     }
 }
