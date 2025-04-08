@@ -22,6 +22,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.player.Multitask;
+import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CPSUtils;
@@ -36,6 +37,7 @@ import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.HitResult;
@@ -198,7 +200,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         lastTime = time;
     }
 
-    // multitask
+    // Multitask
 
     @ModifyExpressionValue(method = "doItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;isBreakingBlock()Z"))
     private boolean doItemUseModifyIsBreakingBlock(boolean original) {
@@ -221,6 +223,17 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
             if (!options.useKey.isPressed() && HB$stopUsingItem()) interactionManager.stopUsingItem(player);
             while (options.useKey.wasPressed());
         }
+    }
+
+    // Glow esp
+
+    @ModifyReturnValue(method = "hasOutline", at = @At("RETURN"))
+    private boolean hasOutlineModifyIsOutline(boolean original, Entity entity) {
+        ESP esp = Modules.get().get(ESP.class);
+        if (esp == null) return original;
+        if (!esp.isGlow() || esp.shouldSkip(entity)) return original;
+
+        return esp.getColor(entity) != null || original;
     }
 
     // Interface
