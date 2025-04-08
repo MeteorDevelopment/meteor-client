@@ -14,8 +14,8 @@ import meteordevelopment.meteorclient.systems.modules.movement.Sprint;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Bounce;
-import meteordevelopment.meteorclient.systems.modules.player.OffhandCrash;
 import meteordevelopment.meteorclient.systems.modules.player.NoStatusEffects;
+import meteordevelopment.meteorclient.systems.modules.player.OffhandCrash;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.component.DataComponentTypes;
@@ -121,8 +121,8 @@ public abstract class LivingEntityMixin extends Entity {
         if ((Object) this != mc.player) return original;
         if (!Modules.get().get(Sprint.class).rageSprint()) return original;
 
-        float forward = Math.signum(mc.player.input.getMovementInput().y);
-        float strafe = 90 * Math.signum(mc.player.input.getMovementInput().x);
+        float forward = Math.signum(mc.player.forwardSpeed);
+        float strafe = 90 * Math.signum(mc.player.sidewaysSpeed);
         if (forward != 0) strafe *= (forward * 0.5f);
 
         original -= strafe;
@@ -137,6 +137,6 @@ public abstract class LivingEntityMixin extends Entity {
         if (!Modules.get().get(Sprint.class).rageSprint()) return original;
 
         // only add the extra velocity if you're actually moving, otherwise you'll jump in place and move forward
-        return original && (Math.abs(mc.player.input.getMovementInput().y) > 1.0E-5F || Math.abs(mc.player.input.getMovementInput().x) > 1.0E-5F);
+        return original && (Math.abs(mc.player.forwardSpeed) > 1.0E-5F || Math.abs(mc.player.sidewaysSpeed) > 1.0E-5F);
     }
 }
