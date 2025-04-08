@@ -5,12 +5,13 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
+import net.minecraft.client.render.item.ItemRenderState;
+import net.minecraft.client.render.model.json.Transformation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(CloseHandledScreenC2SPacket.class)
-public interface CloseHandledScreenC2SPacketAccessor {
-    @Accessor("syncId")
-    int getSyncId();
+@Mixin(ItemRenderState.LayerRenderState.class)
+public interface LayerRenderStateAccessor {
+    @Accessor
+    Transformation getTransform();
 }

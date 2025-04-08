@@ -7,10 +7,9 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.renderer.DrawMode;
-import meteordevelopment.meteorclient.renderer.Mesh;
-import meteordevelopment.meteorclient.renderer.ShaderMesh;
-import meteordevelopment.meteorclient.renderer.Shaders;
+import meteordevelopment.meteorclient.renderer.MeshBuilder;
+import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -80,7 +79,7 @@ public class LightOverlay extends Module {
     private final Pool<Cross> crossPool = new Pool<>(Cross::new);
     private final List<Cross> crosses = new ArrayList<>();
 
-    private final Mesh mesh = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Lines, Mesh.Attrib.Vec3, Mesh.Attrib.Color);
+    private final MeshBuilder mesh = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED_LINES);
 
     public LightOverlay() {
         super(Categories.Render, "light-overlay", "Shows blocks where mobs can spawn.");
@@ -104,13 +103,19 @@ public class LightOverlay extends Module {
     private void onRender(Render3DEvent event) {
         if (crosses.isEmpty()) return;
 
-        mesh.depthTest = !seeThroughBlocks.get();
         mesh.begin();
 
-        for (Cross cross : crosses) cross.render();
+        for (Cross cross : crosses) {
+            cross.render();
+        }
 
         mesh.end();
-        mesh.render(event.matrices);
+
+        MeshRenderer.begin()
+            .attachments(mc.getFramebuffer())
+            .pipeline(seeThroughBlocks.get() ? MeteorRenderPipelines.WORLD_COLORED_LINES : MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH)
+            .mesh(mesh, event.matrices)
+            .end();
     }
 
     private void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {

@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import net.minecraft.item.ToolMaterial;
+public interface IRenderPipeline {
+    void meteor$setLineSmooth(boolean lineSmooth);
 
-public interface IMiningToolItem {
-    ToolMaterial meteor$getMaterial();
+    boolean meteor$getLineSmooth();
 }

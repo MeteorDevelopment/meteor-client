@@ -100,9 +100,9 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     public List<BlockEntityType<?>> load(NbtCompound tag) {
         get().clear();
 
-        NbtList valueTag = tag.getList("value", 8);
+        NbtList valueTag = tag.getListOrEmpty("value");
         for (NbtElement tagI : valueTag) {
-            BlockEntityType<?> type = Registries.BLOCK_ENTITY_TYPE.get(Identifier.of(tagI.asString()));
+            BlockEntityType<?> type = Registries.BLOCK_ENTITY_TYPE.get(Identifier.of(tagI.asString().orElse("")));
             if (type != null) get().add(type);
         }
 

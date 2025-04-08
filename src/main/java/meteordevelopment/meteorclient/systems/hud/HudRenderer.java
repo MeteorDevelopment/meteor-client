@@ -21,7 +21,6 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.lwjgl.BufferUtils;
@@ -31,6 +30,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class HudRenderer {
     public static final HudRenderer INSTANCE = new HudRenderer();
@@ -70,7 +71,7 @@ public class HudRenderer {
     }
 
     public void end() {
-        Renderer2D.COLOR.render(new MatrixStack());
+        Renderer2D.COLOR.render();
 
         if (hud.hasCustomFont()) {
             // Render fonts that were visited this frame and move to cache which weren't visited
@@ -78,8 +79,12 @@ public class HudRenderer {
                 FontHolder fontHolder = it.next();
 
                 if (fontHolder.visited) {
-                    GL.bindTexture(fontHolder.font.texture.getGlId());
-                    fontHolder.getMesh().render(null);
+                    MeshRenderer.begin()
+                        .attachments(mc.getFramebuffer())
+                        .pipeline(MeteorRenderPipelines.UI_TEXT)
+                        .mesh(fontHolder.getMesh())
+                        .setupCallback(pass -> pass.bindSampler("u_Texture", fontHolder.font.texture.getGlTexture()))
+                        .end();
                 }
                 else {
                     it.remove();
@@ -117,11 +122,9 @@ public class HudRenderer {
     }
 
     public void texture(Identifier id, double x, double y, double width, double height, Color color) {
-        GL.bindTexture(id);
-
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
-        Renderer2D.TEXTURE.render(null);
+        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTexture());
     }
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {
@@ -135,7 +138,7 @@ public class HudRenderer {
         FontHolder fontHolder = getFontHolder(scale, true);
 
         Font font = fontHolder.font;
-        Mesh mesh = fontHolder.getMesh();
+        MeshBuilder mesh = fontHolder.getMesh();
 
         double width;
 
@@ -261,21 +264,20 @@ public class HudRenderer {
         public final Font font;
         public boolean visited;
 
-        private Mesh mesh;
+        private MeshBuilder mesh;
 
         public FontHolder(Font font) {
             this.font = font;
         }
 
-        public Mesh getMesh() {
-            if (mesh == null) mesh = new ShaderMesh(Shaders.TEXT, DrawMode.Triangles, Mesh.Attrib.Vec2, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
+        public MeshBuilder getMesh() {
+            if (mesh == null) mesh = new MeshBuilder(MeteorRenderPipelines.UI_TEXT);
             if (!mesh.isBuilding()) mesh.begin();
             return mesh;
         }
 
         public void destroy() {
-            font.texture.clearGlId();
-            if (mesh != null) mesh.destroy();
+            font.texture.close();
         }
     }
 }

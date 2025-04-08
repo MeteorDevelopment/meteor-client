@@ -51,6 +51,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -575,10 +576,10 @@ public class HighwayBuilder extends Module {
     @EventHandler
     private void onPacket(PacketEvent.Receive event) {
         if (event.packet instanceof InventoryS2CPacket p) {
-            if (p.getSyncId() == 0 && suspended)
+            if (p.syncId() == 0 && suspended)
                 inventory = true;
             else
-                this.syncId = p.getSyncId();
+                this.syncId = p.syncId();
         }
     }
 
@@ -1083,7 +1084,7 @@ public class HighwayBuilder extends Module {
             protected void start(HighwayBuilder b) {
                 int biggestCount = 0;
 
-                for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
+                for (int i = 0; i < b.mc.player.getInventory().getMainStacks().size(); i++) {
                     ItemStack itemStack = b.mc.player.getInventory().getStack(i);
 
                     if (itemStack.getItem() instanceof BlockItem && b.trashItems.get().contains(itemStack.getItem()) && itemStack.getCount() > biggestCount) {
@@ -1122,7 +1123,7 @@ public class HighwayBuilder extends Module {
                     return;
                 }
 
-                for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
+                for (int i = 0; i < b.mc.player.getInventory().getMainStacks().size(); i++) {
                     if (i == skipSlot) continue;
 
                     ItemStack itemStack = b.mc.player.getInventory().getStack(i);
@@ -1141,7 +1142,7 @@ public class HighwayBuilder extends Module {
                                 eject = false;
                                 break;
                             }
-                            if (stack.getItem() instanceof PickaxeItem) {
+                            if (stack.isIn(ItemTags.PICKAXES)) {
                                 eject = false;
                                 break;
                             }
@@ -1204,7 +1205,7 @@ public class HighwayBuilder extends Module {
                 }
 
                 int emptySlots = 0;
-                for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
+                for (int i = 0; i < b.mc.player.getInventory().getMainStacks().size(); i++) {
                     if (b.mc.player.getInventory().getStack(i).isEmpty()) emptySlots++;
                 }
 
@@ -1252,7 +1253,7 @@ public class HighwayBuilder extends Module {
                     }
                 }
 
-                for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
+                for (int i = 0; i < b.mc.player.getInventory().getMainStacks().size(); i++) {
                     ItemStack itemStack = b.mc.player.getInventory().getStack(i);
                     if (itemStack.getItem() == Items.OBSIDIAN) obsidianCount += itemStack.getCount();
                 }
@@ -1333,7 +1334,7 @@ public class HighwayBuilder extends Module {
                         return;
                     }
 
-                    if (countItem(b, stack -> stack.getItem() instanceof PickaxeItem) <= b.savePickaxes.get()) {
+                    if (countItem(b, stack -> stack.isIn(ItemTags.PICKAXES)) <= b.savePickaxes.get()) {
                         if (b.searchEnderChest.get() || b.searchShulkers.get()) {
                             b.restockTask.setPickaxes();
                         }
@@ -1401,7 +1402,7 @@ public class HighwayBuilder extends Module {
                                     break;
                                 }
                             }
-                            if (b.restockTask.pickaxes && stack.getItem() instanceof PickaxeItem) {
+                            if (b.restockTask.pickaxes && stack.isIn(ItemTags.PICKAXES)) {
                                 stop = false;
                                 break;
                             }
@@ -1424,7 +1425,7 @@ public class HighwayBuilder extends Module {
                 if (slot == -1) {
                     boolean restockOccurred = (
                         (b.restockTask.materials && (hasItem(b, stack -> stack.getItem() instanceof BlockItem bi && b.blocksToPlace.get().contains(bi.getBlock())) || b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && countItem(b, itemStack -> itemStack.getItem() == Items.ENDER_CHEST) > b.saveEchests.get())) ||
-                        (b.restockTask.pickaxes && countItem(b, itemStack -> itemStack.getItem() instanceof PickaxeItem) > b.savePickaxes.get()) ||
+                        (b.restockTask.pickaxes && countItem(b, itemStack -> itemStack.isIn(ItemTags.PICKAXES)) > b.savePickaxes.get()) ||
                         (b.restockTask.food && hasItem(b, itemStack -> itemStack.contains(DataComponentTypes.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem())))
                     );
 
@@ -1436,7 +1437,7 @@ public class HighwayBuilder extends Module {
                 }
 
                 int restockSlots = -b.minEmpty.get();
-                for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
+                for (int i = 0; i < b.mc.player.getInventory().getMainStacks().size(); i++) {
                     if (b.mc.player.getInventory().getStack(i).isEmpty()) restockSlots++;
                 }
 
@@ -1499,7 +1500,7 @@ public class HighwayBuilder extends Module {
                     slotsPulled += countSlots(b, itemStack -> itemStack.getItem() instanceof BlockItem bi && b.blocksToPlace.get().contains(bi.getBlock()));
                     if (b.blocksToPlace.get().contains(Blocks.OBSIDIAN)) slotsPulled += ((countItem(b, itemStack -> itemStack.getItem() == Items.ENDER_CHEST) - b.saveEchests.get()) * 8) / 64;
                 }
-                if (b.restockTask.pickaxes) slotsPulled += countSlots(b, itemStack -> itemStack.getItem() instanceof PickaxeItem) - b.savePickaxes.get();
+                if (b.restockTask.pickaxes) slotsPulled += countSlots(b, itemStack -> itemStack.isIn(ItemTags.PICKAXES)) - b.savePickaxes.get();
                 if (b.restockTask.food) slotsPulled += countSlots(b, itemStack -> itemStack.contains(DataComponentTypes.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem()));
 
 
@@ -1613,7 +1614,7 @@ public class HighwayBuilder extends Module {
                     }
                 }
                 if (b.restockTask.pickaxes) {
-                    if (grabFromInventory(inv, itemStack -> itemStack.getItem() instanceof PickaxeItem)) return true;
+                    if (grabFromInventory(inv, itemStack -> itemStack.isIn(ItemTags.PICKAXES))) return true;
                 }
                 if (b.restockTask.food) {
                     return grabFromInventory(inv, itemStack -> itemStack.contains(DataComponentTypes.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem()));
@@ -1643,7 +1644,7 @@ public class HighwayBuilder extends Module {
                         if (b.restockTask.materials && stack.getItem() instanceof BlockItem bi) {
                             if (b.blocksToPlace.get().contains(bi.getBlock()) || (b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && bi == Items.ENDER_CHEST)) return true;
                         }
-                        if (b.restockTask.pickaxes && stack.getItem() instanceof PickaxeItem) return true;
+                        if (b.restockTask.pickaxes && stack.isIn(ItemTags.PICKAXES)) return true;
                         if (b.restockTask.food && stack.contains(DataComponentTypes.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(stack.getItem())) return true;
                     }
 
@@ -1674,7 +1675,7 @@ public class HighwayBuilder extends Module {
 
             private int countSlots(HighwayBuilder b, Predicate<ItemStack> predicate) {
                 int count = 0;
-                for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
+                for (int i = 0; i < b.mc.player.getInventory().getMainStacks().size(); i++) {
                     ItemStack stack = b.mc.player.getInventory().getStack(i);
                     if (predicate.test(stack)) count++;
                 }
@@ -1987,7 +1988,7 @@ public class HighwayBuilder extends Module {
         }
 
         private int findSlot(HighwayBuilder b, Predicate<ItemStack> predicate, boolean hotbar) {
-            for (int i = hotbar ? 0 : 9; i < (hotbar ? 9 : b.mc.player.getInventory().main.size()); i++) {
+            for (int i = hotbar ? 0 : 9; i < (hotbar ? 9 : b.mc.player.getInventory().getMainStacks().size()); i++) {
                 if (predicate.test(b.mc.player.getInventory().getStack(i))) return i;
             }
 
@@ -2036,7 +2037,7 @@ public class HighwayBuilder extends Module {
         }
 
         protected boolean hasItem(HighwayBuilder b, Predicate<ItemStack> predicate) {
-            for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
+            for (int i = 0; i < b.mc.player.getInventory().getMainStacks().size(); i++) {
                 if (predicate.test(b.mc.player.getInventory().getStack(i))) return true;
             }
 
@@ -2045,7 +2046,7 @@ public class HighwayBuilder extends Module {
 
         protected int countItem(HighwayBuilder b, Predicate<ItemStack> predicate) {
             int count = 0;
-            for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
+            for (int i = 0; i < b.mc.player.getInventory().getMainStacks().size(); i++) {
                 ItemStack stack = b.mc.player.getInventory().getStack(i);
                 if (predicate.test(stack)) count += stack.getCount();
             }
@@ -2077,13 +2078,13 @@ public class HighwayBuilder extends Module {
 
         protected int findAndMoveBestToolToHotbar(HighwayBuilder b, BlockState blockState, boolean noSilkTouch) {
             // Check for creative
-            if (b.mc.player.isCreative()) return b.mc.player.getInventory().selectedSlot;
+            if (b.mc.player.isCreative()) return b.mc.player.getInventory().getSelectedSlot();
 
             // Find best tool
             double bestScore = -1;
             int bestSlot = -1;
 
-            for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
+            for (int i = 0; i < b.mc.player.getInventory().getMainStacks().size(); i++) {
                 double score = AutoTool.getScore(b.mc.player.getInventory().getStack(i), blockState, false, false, AutoTool.EnchantPreference.None, itemStack -> {
                     if (noSilkTouch && Utils.hasEnchantment(itemStack, Enchantments.SILK_TOUCH)) return false;
                     return !b.dontBreakTools.get() || itemStack.getMaxDamage() - itemStack.getDamage() > (itemStack.getMaxDamage() * (b.breakDurability.get() / 100));
@@ -2095,11 +2096,11 @@ public class HighwayBuilder extends Module {
                 }
             }
 
-            if (bestSlot == -1) return b.mc.player.getInventory().selectedSlot;
+            if (bestSlot == -1) return b.mc.player.getInventory().getSelectedSlot();
 
             ItemStack bestStack = b.mc.player.getInventory().getStack(bestSlot);
-            if (bestStack.getItem() instanceof PickaxeItem) {
-                int count = countItem(b, stack -> stack.getItem() instanceof PickaxeItem);
+            if (bestStack.isIn(ItemTags.PICKAXES)) {
+                int count = countItem(b, stack -> stack.isIn(ItemTags.PICKAXES));
 
                 // If we are in the process of restocking pickaxes and happen to need one, we should allow using it
                 // as long as it has enough durability, since we will obtain more shortly thereafter
@@ -2827,7 +2828,7 @@ public class HighwayBuilder extends Module {
         }
 
         public double progress() {
-            int slot = b.mc.player.getInventory().selectedSlot;
+            int slot = b.mc.player.getInventory().getSelectedSlot();
             return BlockUtils.getBreakDelta(slot , blockState) * ((b.mc.player.age - (packet ? packetStartTime : normalStartTime)) + 1);
         }
 

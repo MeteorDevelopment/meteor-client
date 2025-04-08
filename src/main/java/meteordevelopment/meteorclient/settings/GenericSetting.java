@@ -42,7 +42,7 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
 
     @Override
     public T load(NbtCompound tag) {
-        get().fromTag(tag.getCompound("value"));
+        get().fromTag(tag.getCompoundOrEmpty("value"));
 
         return get();
     }

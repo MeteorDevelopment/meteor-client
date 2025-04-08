@@ -116,38 +116,20 @@ public class ServerCommand extends Command {
         if (ipv4.isEmpty()) {
             ipText = Text.literal(Formatting.GRAY + server.address);
             ipText.setStyle(ipText.getStyle()
-                .withClickEvent(new ClickEvent(
-                    ClickEvent.Action.COPY_TO_CLIPBOARD,
-                    server.address
-                ))
-                .withHoverEvent(new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
-                    Text.literal("Copy to clipboard")
-                ))
+                .withClickEvent(new ClickEvent.CopyToClipboard(server.address))
+                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
             );
         }
         else {
             ipText = Text.literal(Formatting.GRAY + server.address);
             ipText.setStyle(ipText.getStyle()
-                .withClickEvent(new ClickEvent(
-                    ClickEvent.Action.COPY_TO_CLIPBOARD,
-                    server.address
-                ))
-                .withHoverEvent(new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
-                    Text.literal("Copy to clipboard")
-                ))
+                .withClickEvent(new ClickEvent.CopyToClipboard(server.address))
+                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
             );
             MutableText ipv4Text = Text.literal(String.format("%s (%s)", Formatting.GRAY, ipv4));
             ipv4Text.setStyle(ipText.getStyle()
-                .withClickEvent(new ClickEvent(
-                    ClickEvent.Action.COPY_TO_CLIPBOARD,
-                    ipv4
-                ))
-                .withHoverEvent(new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
-                    Text.literal("Copy to clipboard")
-                ))
+                .withClickEvent(new ClickEvent.CopyToClipboard(ipv4))
+                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
             );
             ipText.append(ipv4Text);
         }

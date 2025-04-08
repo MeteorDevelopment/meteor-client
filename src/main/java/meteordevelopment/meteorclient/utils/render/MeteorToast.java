@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -29,7 +28,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class MeteorToast implements Toast {
     public static final int TITLE_COLOR = Color.fromRGBA(145, 61, 226, 255);
     public static final int TEXT_COLOR = Color.fromRGBA(220, 220, 220, 255);
-    private static final Identifier TEXTURE = Identifier.of("textures/gui/sprites/toast/advancement.png");
+    private static final Identifier TEXTURE = Identifier.of("toast/advancement");
 
     private ItemStack icon;
     private Text title, text;
@@ -73,8 +72,6 @@ public class MeteorToast implements Toast {
 
     @Override
     public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-
         context.drawGuiTexture(RenderLayer::getGuiTextured, TEXTURE, 0, 0, getWidth(), getHeight());
 
         int x = icon != null ? 28 : 12;

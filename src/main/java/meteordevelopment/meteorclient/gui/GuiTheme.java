@@ -113,6 +113,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
 
     public abstract <T> WDropdown<T> dropdown(T[] values, T value);
+    @SuppressWarnings("unchecked")
     public <T extends Enum<?>> WDropdown<T> dropdown(T value) {
         Class<?> klass = value.getDeclaringClass();
         T[] values = (T[]) klass.getEnumConstants();
@@ -325,12 +326,16 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
 
     @Override
     public GuiTheme fromTag(NbtCompound tag) {
-        settings.fromTag(tag.getCompound("settings"));
+        tag.getCompound("settings").ifPresent(settingsTag -> {
+            settings.fromTag(settingsTag);
 
-        NbtCompound configs = tag.getCompound("windowConfigs");
-        for (String id : configs.getKeys()) {
-            windowConfigs.put(id, new WindowConfig().fromTag(configs.getCompound(id)));
-        }
+            settingsTag.getCompound("windowConfigs").ifPresent(configs -> {
+                for (String id : configs.getKeys()) {
+                    windowConfigs.put(id, new WindowConfig().fromTag(configs.getCompound(id).get()));
+                }
+            });
+
+        });
 
         return this;
     }

@@ -129,12 +129,12 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
 
     // Fullbright
 
-    @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 0)
+    @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/client/render/WorldRenderer$BrightnessGetter;Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 0)
     private static int getLightmapCoordinatesModifySkyLight(int sky) {
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.SKY), sky);
     }
 
-    @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 1)
+    @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/client/render/WorldRenderer$BrightnessGetter;Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 1)
     private static int getLightmapCoordinatesModifyBlockLight(int sky) {
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.BLOCK), sky);
     }

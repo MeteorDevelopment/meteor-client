@@ -87,7 +87,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     @Override
     public Proxies fromTag(NbtCompound tag) {
-        proxies = NbtUtils.listFromTag(tag.getList("proxies", 10), Proxy::new);
+        proxies = NbtUtils.listFromTag(tag.getListOrEmpty("proxies"), Proxy::new);
 
         return this;
     }

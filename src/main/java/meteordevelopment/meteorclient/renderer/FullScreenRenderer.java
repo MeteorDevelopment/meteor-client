@@ -5,19 +5,17 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.utils.PreInit;
-import net.minecraft.client.util.math.MatrixStack;
 
-public class PostProcessRenderer {
-    private static Mesh mesh;
-    private static final MatrixStack matrices = new MatrixStack();
+public class FullScreenRenderer {
+    public static MeshBuilder mesh;
 
-    private PostProcessRenderer() {
-    }
+    private FullScreenRenderer() {}
 
     @PreInit
     public static void init() {
-        mesh = new Mesh(DrawMode.Triangles, Mesh.Attrib.Vec2);
+        mesh = new MeshBuilder(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES);
         mesh.begin();
 
         mesh.quad(
@@ -28,17 +26,5 @@ public class PostProcessRenderer {
         );
 
         mesh.end();
-    }
-
-    public static void beginRender() {
-        mesh.beginRender(matrices);
-    }
-
-    public static void render() {
-        mesh.render(matrices);
-    }
-
-    public static void endRender() {
-        mesh.endRender();
     }
 }

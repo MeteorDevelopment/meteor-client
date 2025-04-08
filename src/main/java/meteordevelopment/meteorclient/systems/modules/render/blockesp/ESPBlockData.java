@@ -99,14 +99,14 @@ public class ESPBlockData implements ICopyable<ESPBlockData>, ISerializable<ESPB
 
     @Override
     public ESPBlockData fromTag(NbtCompound tag) {
-        shapeMode = ShapeMode.valueOf(tag.getString("shapeMode"));
-        lineColor.fromTag(tag.getCompound("lineColor"));
-        sideColor.fromTag(tag.getCompound("sideColor"));
+        shapeMode = ShapeMode.valueOf(tag.getString("shapeMode", ""));
+        lineColor.fromTag(tag.getCompoundOrEmpty("lineColor"));
+        sideColor.fromTag(tag.getCompoundOrEmpty("sideColor"));
 
-        tracer = tag.getBoolean("tracer");
-        tracerColor.fromTag(tag.getCompound("tracerColor"));
+        tracer = tag.getBoolean("tracer", false);
+        tracerColor.fromTag(tag.getCompoundOrEmpty("tracerColor"));
 
-        changed = tag.getBoolean("changed");
+        changed = tag.getBoolean("changed", false);
 
         return this;
     }

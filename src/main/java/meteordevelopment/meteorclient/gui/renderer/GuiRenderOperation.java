@@ -18,6 +18,7 @@ public abstract class GuiRenderOperation<T extends GuiRenderOperation<T>> {
         this.color = color;
     }
 
+    @SuppressWarnings("unchecked")
     public void run(Pool<T> pool) {
         onRun();
         pool.free((T) this);

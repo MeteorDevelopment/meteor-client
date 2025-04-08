@@ -69,9 +69,11 @@ public class Vector3dSetting extends Setting<Vector3d> {
 
     @Override
     protected Vector3d load(NbtCompound tag) {
-        NbtCompound valueTag = tag.getCompound("value");
+        if (tag.getCompound("value").isEmpty()) return get();
 
-        set(valueTag.getDouble("x"), valueTag.getDouble("y"), valueTag.getDouble("z"));
+        NbtCompound valueTag = tag.getCompound("value").get();
+
+        set(valueTag.getDouble("x", 0.0), valueTag.getDouble("y", 0.0), valueTag.getDouble("z", 0.0));
 
         return get();
     }

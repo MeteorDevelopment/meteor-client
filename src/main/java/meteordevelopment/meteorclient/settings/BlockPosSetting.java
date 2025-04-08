@@ -43,8 +43,10 @@ public class BlockPosSetting extends Setting<BlockPos> {
 
     @Override
     protected BlockPos load(NbtCompound tag) {
-        int[] value = tag.getIntArray("value");
-        set(new BlockPos(value[0], value[1], value[2]));
+        if (tag.getIntArray("value").isPresent()) {
+            int[] value = tag.getIntArray("value").get();
+            set(new BlockPos(value[0], value[1], value[2]));
+        }
 
         return get();
     }

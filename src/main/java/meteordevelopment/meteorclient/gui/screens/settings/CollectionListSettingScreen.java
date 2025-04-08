@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.registry.Registry;
 import net.minecraft.util.Pair;
 
 import java.util.ArrayList;
@@ -23,17 +22,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class RegistryListSettingScreen<T> extends WindowScreen {
+public abstract class CollectionListSettingScreen<T> extends WindowScreen {
     protected final Setting<?> setting;
     protected final Collection<T> collection;
-    private final Registry<T> registry;
+    private final Iterable<T> registry;
 
     private WTextBox filter;
     private String filterText = "";
 
     private WTable table;
 
-    public RegistryListSettingScreen(GuiTheme theme, String title, Setting<?> setting, Collection<T> collection, Registry<T> registry) {
+    public CollectionListSettingScreen(GuiTheme theme, String title, Setting<?> setting, Collection<T> collection, Iterable<T> registry) {
         super(theme, title);
 
         this.registry = registry;
@@ -58,7 +57,7 @@ public abstract class RegistryListSettingScreen<T> extends WindowScreen {
         initWidgets(registry);
     }
 
-    private void initWidgets(Registry<T> registry) {
+    private void initWidgets(Iterable<T> registry) {
         // Left (all)
         WTable left = abc(pairs -> registry.forEach(t -> {
             if (skipValue(t) || collection.contains(t)) return;
@@ -92,7 +91,7 @@ public abstract class RegistryListSettingScreen<T> extends WindowScreen {
         });
     }
 
-    private void addValue(Registry<T> registry, T value) {
+    private void addValue(Iterable<T> registry, T value) {
         if (!collection.contains(value)) {
             collection.add(value);
 
@@ -102,7 +101,7 @@ public abstract class RegistryListSettingScreen<T> extends WindowScreen {
         }
     }
 
-    private void removeValue(Registry<T> registry, T value) {
+    private void removeValue(Iterable<T> registry, T value) {
         if (collection.remove(value)) {
             setting.onChanged();
             table.clear();

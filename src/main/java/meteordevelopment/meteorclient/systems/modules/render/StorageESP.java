@@ -11,13 +11,16 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.renderer.*;
+import meteordevelopment.meteorclient.renderer.MeshBuilder;
+import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
+import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.render.MeshVertexConsumerProvider;
+import meteordevelopment.meteorclient.utils.render.MeshBuilderVertexConsumerProvider;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.SimpleBlockRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -25,24 +28,27 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 public class StorageESP extends Module {
+    private static final MatrixStack MATRICES = new MatrixStack();
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgOpened = settings.createGroup("Opened Rendering");
     private final Set<BlockPos> interactedBlocks = new HashSet<>();
 
-    public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("Rendering mode.")
         .defaultValue(Mode.Shader)
@@ -172,14 +178,14 @@ public class StorageESP extends Module {
     private boolean render;
     private int count;
 
-    private final Mesh mesh;
-    private final MeshVertexConsumerProvider vertexConsumerProvider;
+    private final MeshBuilder mesh;
+    private final MeshBuilderVertexConsumerProvider vertexConsumerProvider;
 
     public StorageESP() {
         super(Categories.Render, "storage-esp", "Renders all specified storage blocks.");
 
-        mesh = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Triangles, Mesh.Attrib.Vec3, Mesh.Attrib.Color);
-        vertexConsumerProvider = new MeshVertexConsumerProvider(mesh);
+        mesh = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED);
+        vertexConsumerProvider = new MeshBuilderVertexConsumerProvider(mesh);
     }
 
     private void getBlockEntityColor(BlockEntity blockEntity) {
@@ -241,7 +247,9 @@ public class StorageESP extends Module {
     private void onRender(Render3DEvent event) {
         count = 0;
 
-        if (mode.get() == Mode.Shader) mesh.begin();
+        if (mode.get() == Mode.Shader) {
+            mesh.begin();
+        }
 
         for (BlockEntity blockEntity : Utils.blockEntities()) {
             // Check if the block has been interacted with (opened)
@@ -273,17 +281,30 @@ public class StorageESP extends Module {
                     event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5, lineColor);
                 }
 
-                if (mode.get() == Mode.Box && a >= 0.075) renderBox(event, blockEntity);
+                if (mode.get() == Mode.Box && a >= 0.075) {
+                    renderBox(event, blockEntity);
+                }
 
                 lineColor.a = prevLineA;
                 sideColor.a = prevSideA;
 
-                if (mode.get() == Mode.Shader) renderShader(event, blockEntity);
+                if (mode.get() == Mode.Shader) {
+                    renderShader(event, blockEntity);
+                }
 
                 count++;
             }
         }
-        if (mode.get() == Mode.Shader) PostProcessShaders.STORAGE_OUTLINE.endRender(() -> mesh.render(event.matrices));
+
+        if (mode.get() == Mode.Shader) {
+            PostProcessShaders.STORAGE_OUTLINE.endRender(() -> MeshRenderer.begin()
+                .attachments(mc.getFramebuffer())
+                .clearColor(Color.CLEAR)
+                .pipeline(MeteorRenderPipelines.WORLD_COLORED)
+                .mesh(mesh, event.matrices)
+                .end()
+            );
+        }
     }
 
 

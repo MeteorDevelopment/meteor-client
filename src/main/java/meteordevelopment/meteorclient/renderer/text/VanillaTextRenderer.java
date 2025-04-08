@@ -96,20 +96,17 @@ public class VanillaTextRenderer implements TextRenderer {
     }
 
     @Override
-    public void end(MatrixStack matrices) {
+    public void end() {
         if (!building) throw new RuntimeException("VanillaTextRenderer.end() called without calling begin()");
 
         Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
 
-        RenderSystem.disableDepthTest();
         matrixStack.pushMatrix();
-        if (matrices != null) matrixStack.mul(matrices.peek().getPositionMatrix());
         if (!scaleIndividually) matrixStack.scale((float) scale, (float) scale, 1);
 
         immediate.draw();
 
         matrixStack.popMatrix();
-        RenderSystem.enableDepthTest();
 
         this.scale = 2;
         this.building = false;

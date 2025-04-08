@@ -15,7 +15,7 @@ import net.minecraft.registry.Registries;
 
 import java.util.List;
 
-public class ParticleTypeListSettingScreen extends RegistryListSettingScreen<ParticleType<?>> {
+public class ParticleTypeListSettingScreen extends CollectionListSettingScreen<ParticleType<?>> {
     public ParticleTypeListSettingScreen(GuiTheme theme, Setting<List<ParticleType<?>>> setting) {
         super(theme, "Select Particles", setting, setting.get(), Registries.PARTICLE_TYPE);
     }

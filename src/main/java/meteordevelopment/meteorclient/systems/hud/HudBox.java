@@ -150,10 +150,10 @@ public class HudBox implements ISerializable<HudBox> {
 
     @Override
     public HudBox fromTag(NbtCompound tag) {
-        if (tag.contains("x-anchor")) xAnchor = XAnchor.valueOf(tag.getString("x-anchor"));
-        if (tag.contains("y-anchor")) yAnchor = YAnchor.valueOf(tag.getString("y-anchor"));
-        if (tag.contains("x")) x = tag.getInt("x");
-        if (tag.contains("y")) y = tag.getInt("y");
+        if (tag.getString("x-anchor").isPresent()) xAnchor = XAnchor.valueOf(tag.getString("x-anchor").get());
+        if (tag.getString("y-anchor").isPresent()) yAnchor = YAnchor.valueOf(tag.getString("y-anchor").get());
+        if (tag.getInt("x").isPresent()) x = tag.getInt("x").get();
+        if (tag.getInt("y").isPresent()) y = tag.getInt("y").get();
 
         return this;
     }

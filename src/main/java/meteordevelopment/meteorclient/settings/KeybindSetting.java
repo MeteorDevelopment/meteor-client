@@ -86,7 +86,7 @@ public class KeybindSetting extends Setting<Keybind> {
 
     @Override
     public Keybind load(NbtCompound tag) {
-        get().fromTag(tag.getCompound("value"));
+        get().fromTag(tag.getCompoundOrEmpty("value"));
 
         return get();
     }

@@ -54,7 +54,7 @@ public class EditBookTitleAndAuthorScreen extends WindowScreen {
             List<String> pages = new ArrayList<>(contents.getPageCount());
             for (int i = 0; i < contents.getPageCount(); i++) pages.add(contents.getPage(i).getString());
 
-            mc.getNetworkHandler().sendPacket(new BookUpdateC2SPacket(hand == Hand.MAIN_HAND ? mc.player.getInventory().selectedSlot : 40, pages, Optional.of(title.get())));
+            mc.getNetworkHandler().sendPacket(new BookUpdateC2SPacket(hand == Hand.MAIN_HAND ? mc.player.getInventory().getSelectedSlot() : 40, pages, Optional.of(title.get())));
 
             close();
         };

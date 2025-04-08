@@ -62,10 +62,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -101,9 +98,9 @@ public class Utils {
     public static Vec3d getPlayerSpeed() {
         if (mc.player == null) return Vec3d.ZERO;
 
-        double tX = mc.player.getX() - mc.player.prevX;
-        double tY = mc.player.getY() - mc.player.prevY;
-        double tZ = mc.player.getZ() - mc.player.prevZ;
+        double tX = mc.player.getX() - mc.player.lastX;
+        double tY = mc.player.getY() - mc.player.lastY;
+        double tZ = mc.player.getZ() - mc.player.lastZ;
 
         Timer timer = Modules.get().get(Timer.class);
         if (timer.isActive()) {
@@ -146,7 +143,7 @@ public class Utils {
 
         if (!itemStack.isEmpty()) {
             Set<Object2IntMap.Entry<RegistryEntry<Enchantment>>> itemEnchantments = itemStack.getItem() == Items.ENCHANTED_BOOK
-                ? itemStack.get(DataComponentTypes.STORED_ENCHANTMENTS).getEnchantmentEntries()
+                ? itemStack.getOrDefault(DataComponentTypes.STORED_ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT).getEnchantmentEntries()
                 : itemStack.getEnchantments().getEnchantmentEntries();
 
             for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : itemEnchantments) {
@@ -232,6 +229,7 @@ public class Utils {
         return false;
     }
 
+    @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static void getItemsInContainerItem(ItemStack itemStack, ItemStack[] items) {
         if (itemStack.getItem() == Items.ENDER_CHEST) {
             for (int i = 0; i < EChestMemory.ITEMS.size(); i++) {
@@ -257,11 +255,22 @@ public class Utils {
 
             if (nbt2.contains("Items")) {
                 NbtList nbt3 = (NbtList) nbt2.getNbt().get("Items");
+                if (nbt3 == null) return;
 
                 for (int i = 0; i < nbt3.size(); i++) {
-                    int slot = nbt3.getCompound(i).getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
+                    Optional<NbtCompound> compound = nbt3.getCompound(i);
+                    if (compound.isEmpty()) continue;
+
+                    Optional<Byte> slot = compound.get().getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
+                    if (slot.isEmpty()) continue;
+
                     // now NPEs when mc.world == null
-                    if (slot >= 0 && slot < items.length) items[slot] = ItemStack.fromNbtOrEmpty(mc.player.getRegistryManager(), nbt3.getCompound(i));
+                    if (slot.get() >= 0 && slot.get() < items.length) {
+                        Optional<ItemStack> stack = ItemStack.fromNbt(mc.player.getRegistryManager(), compound.get());
+                        if (stack.isEmpty()) stack = Optional.of(ItemStack.EMPTY);
+
+                        items[slot.get()] = stack.get();
+                    }
                 }
             }
         }
@@ -284,12 +293,13 @@ public class Utils {
         return WHITE;
     }
 
+    @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static boolean hasItems(ItemStack itemStack) {
         ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) itemStack.get(DataComponentTypes.CONTAINER));
         if (container != null && !container.getStacks().isEmpty()) return true;
 
         NbtCompound compoundTag = itemStack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).getNbt();
-        return compoundTag != null && compoundTag.contains("Items", 9);
+        return compoundTag != null && compoundTag.contains("Items");
     }
 
     public static Reference2IntMap<StatusEffect> createStatusEffectMap() {

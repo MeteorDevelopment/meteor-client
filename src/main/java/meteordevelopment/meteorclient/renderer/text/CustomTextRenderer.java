@@ -5,10 +5,12 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
-import meteordevelopment.meteorclient.renderer.*;
+import meteordevelopment.meteorclient.renderer.MeshBuilder;
+import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.MinecraftClient;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
@@ -16,7 +18,7 @@ import java.nio.ByteBuffer;
 public class CustomTextRenderer implements TextRenderer {
     public static final Color SHADOW_COLOR = new Color(60, 60, 60, 180);
 
-    private final Mesh mesh = new ShaderMesh(Shaders.TEXT, DrawMode.Triangles, Mesh.Attrib.Vec2, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
+    private final MeshBuilder mesh = new MeshBuilder(MeteorRenderPipelines.UI_TEXT);
 
     public final FontFace fontFace;
 
@@ -117,21 +119,23 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
-    public void end(MatrixStack matrices) {
+    public void end() {
         if (!building) throw new RuntimeException("CustomTextRenderer.end() called without calling begin()");
 
         if (!scaleOnly) {
             mesh.end();
 
-            GL.bindTexture(font.texture.getGlId());
-            mesh.render(matrices);
+            MeshRenderer.begin()
+                .attachments(MinecraftClient.getInstance().getFramebuffer())
+                .pipeline(MeteorRenderPipelines.UI_TEXT)
+                .mesh(mesh)
+                .setupCallback(pass -> pass.bindSampler("u_Texture", font.texture.getGlTexture()))
+                .end();
         }
 
         building = false;
         scale = 1;
     }
 
-    public void destroy() {
-        mesh.destroy();
-    }
+    public void destroy() {}
 }

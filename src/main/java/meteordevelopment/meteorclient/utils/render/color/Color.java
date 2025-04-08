@@ -16,7 +16,7 @@ import org.joml.Vector3f;
 
 @SuppressWarnings("unused")
 public class Color implements ICopyable<Color>, ISerializable<Color> {
-
+    public static final Color CLEAR = new Color(0, 0, 0, 0);
     public static final Color WHITE = new Color(java.awt.Color.WHITE);
     public static final Color LIGHT_GRAY = new Color(java.awt.Color.LIGHT_GRAY);
     public static final Color GRAY = new Color(java.awt.Color.GRAY);
@@ -328,10 +328,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
 
     @Override
     public Color fromTag(NbtCompound tag) {
-        r = tag.getInt("r");
-        g = tag.getInt("g");
-        b = tag.getInt("b");
-        a = tag.getInt("a");
+        r = tag.getInt("r", 0);
+        g = tag.getInt("g", 0);
+        b = tag.getInt("b", 0);
+        a = tag.getInt("a", 0);
 
         validate();
         return this;

@@ -78,14 +78,14 @@ public class EnchantmentListSetting extends Setting<Set<RegistryKey<Enchantment>
     public Set<RegistryKey<Enchantment>> load(NbtCompound tag) {
         get().clear();
 
-        NbtList valueTag = tag.getList("value", 8);
-        for (NbtElement tagI : valueTag) {
-            get().add(RegistryKey.of(RegistryKeys.ENCHANTMENT, Identifier.of(tagI.asString())));
+        for (NbtElement tagI : tag.getListOrEmpty("value")) {
+            get().add(RegistryKey.of(RegistryKeys.ENCHANTMENT, Identifier.of(tagI.asString().orElse(""))));
         }
 
         return get();
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static class Builder extends SettingBuilder<Builder, Set<RegistryKey<Enchantment>>, EnchantmentListSetting> {
         private static final Set<RegistryKey<Enchantment>> VANILLA_DEFAULTS;
 
@@ -108,7 +108,6 @@ public class EnchantmentListSetting extends Setting<Set<RegistryKey<Enchantment>
         }
 
         static {
-            //noinspection unchecked,rawtypes
             VANILLA_DEFAULTS = (Set) Arrays.stream(Enchantments.class.getDeclaredFields())
                 .filter(field -> field.accessFlags().containsAll(List.of(AccessFlag.PUBLIC, AccessFlag.STATIC, AccessFlag.FINAL)))
                 .filter(field -> field.getType() == RegistryKey.class)
