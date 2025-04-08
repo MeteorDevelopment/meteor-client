@@ -111,13 +111,6 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
         PostProcessShaders.endRender();
     }
 
-    @ModifyExpressionValue(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;hasOutline(Lnet/minecraft/entity/Entity;)Z"))
-    private boolean shouldMobGlow(boolean original, @Local Entity entity) {
-        if (!getESP().isGlow() || getESP().shouldSkip(entity)) return original;
-
-        return getESP().getColor(entity) != null || original;
-    }
-
     @WrapOperation(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;setColor(IIII)V"))
     private void setGlowColor(OutlineVertexConsumerProvider instance, int red, int green, int blue, int alpha, Operation<Void> original, @Local LocalRef<Entity> entity) {
         if (!getESP().isGlow() || getESP().shouldSkip(entity.get())) original.call(instance, red, green, blue, alpha);
