@@ -109,7 +109,6 @@
     "ItemGroupsMixin",
     "ItemMixin",
     "ItemRendererMixin",
-    "ItemStackAccessor",
     "ItemStackMixin",
     "KeyBindingAccessor",
     "KeyboardInputMixin",

@@ -66,9 +66,11 @@ public class GuiTab extends Tab {
 
             WButton copyButton = opts.add(theme.button(GuiRenderer.COPY)).widget();
             copyButton.action = this::toClipboard;
+            copyButton.tooltip = "Copy config";
 
             WButton pasteButton = opts.add(theme.button(GuiRenderer.PASTE)).right().widget();
             pasteButton.action = this::fromClipboard;
+            pasteButton.tooltip = "Paste config";
 
             add(theme.settings(theme.settings)).expandX();
         }

@@ -96,9 +96,11 @@ public class ColorSettingScreen extends WindowScreen {
 
         WButton copyButton = bottomList.add(theme.button(GuiRenderer.COPY)).widget();
         copyButton.action = this::toClipboard;
+        copyButton.tooltip = "Copy config";
 
         WButton pasteButton = bottomList.add(theme.button(GuiRenderer.PASTE)).widget();
         pasteButton.action = this::fromClipboard;
+        pasteButton.tooltip = "Paste config";
 
         WButton resetButton = bottomList.add(theme.button(GuiRenderer.RESET)).widget();
         resetButton.action = () -> {
