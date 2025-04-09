@@ -17,6 +17,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.resource.Resource;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -66,6 +67,8 @@ public class ChamsShader extends EntityShader {
                 STBImage.stbi_image_free(image);
                 STBImage.stbi_set_flip_vertically_on_load(false);
             }
+
+            MemoryUtil.memFree(data);
         }
         catch (IOException e) {
             e.printStackTrace();
