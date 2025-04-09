@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.text.Text;
+import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 
 public class DisconnectCommand extends Command {
@@ -21,7 +22,7 @@ public class DisconnectCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal("%s[%sDisconnectCommand%s] Disconnected by user.".formatted(Formatting.GRAY, Formatting.BLUE, Formatting.GRAY))));
+            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Texts.bracketed(Text.literal("DisconnectCommand").formatted(Formatting.BLUE)).append(" Disconnected by user.").formatted(Formatting.GRAY)));
             return SINGLE_SUCCESS;
         });
 
