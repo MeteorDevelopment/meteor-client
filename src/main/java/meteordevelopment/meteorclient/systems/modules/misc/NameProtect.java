@@ -5,12 +5,17 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.StringSetting;
+import com.mojang.authlib.yggdrasil.ProfileResult;
+import meteordevelopment.meteorclient.mixin.PlayerListEntryAccessor;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.DefaultSkinHelper;
+import net.minecraft.client.util.SkinTextures;
+
+import java.util.UUID;
+import java.util.function.Supplier;
 
 public class NameProtect extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -30,14 +35,25 @@ public class NameProtect extends Module {
         .build()
     );
 
-    private final Setting<Boolean> skinProtect = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<SkinProtect> skinProtect = sgGeneral.add(new EnumSetting.Builder<SkinProtect>()
         .name("skin-protect")
-        .description("Make players become Steves.")
-        .defaultValue(true)
+        .description("Modify your currently applied skin.")
+        .defaultValue(SkinProtect.DefaultSkin)
+        .build()
+    );
+
+    @SuppressWarnings("unused")
+    private final Setting<String> customSkinUuid = sgGeneral.add(new StringSetting.Builder()
+        .name("custom-skin-url")
+        .description("The UUID to use as the source of the skin.")
+        .defaultValue("3aa4fb57-2ef7-4304-b4d7-bd2187f48e1f")
+        .visible(() -> skinProtect.get() == SkinProtect.CustomSkin)
+        .onChanged(this::updateSkin)
         .build()
     );
 
     private String username = "If you see this, something is wrong.";
+    private Supplier<SkinTextures> skinTexture = () -> DefaultSkinHelper.getSkinTextures(MinecraftClient.getInstance().getGameProfile());
 
     public NameProtect() {
         super(Categories.Player, "name-protect", "Hide player names and skins.");
@@ -46,6 +62,16 @@ public class NameProtect extends Module {
     @Override
     public void onActivate() {
         username = mc.getSession().getUsername();
+    }
+
+    private void updateSkin(String uuidStr) {
+        try {
+            UUID uuid = UUID.fromString(uuidStr);
+            ProfileResult result = MinecraftClient.getInstance().getSessionService().fetchProfile(uuid, false);
+            if (result != null) {
+                skinTexture = PlayerListEntryAccessor.meteor$texturesSupplier(result.profile());
+            }
+        } catch (IllegalArgumentException ignored) {}
     }
 
     public String replaceName(String string) {
@@ -64,7 +90,17 @@ public class NameProtect extends Module {
         return original;
     }
 
-    public boolean skinProtect() {
-        return isActive() && skinProtect.get();
+    public boolean modifySkin() {
+        return isActive() && skinProtect.get() != SkinProtect.Disabled;
+    }
+
+    public SkinTextures getSkin() {
+        return skinProtect.get() == SkinProtect.DefaultSkin ? DefaultSkinHelper.getSkinTextures(MinecraftClient.getInstance().getGameProfile()) : skinTexture.get();
+    }
+
+    public enum SkinProtect {
+        Disabled,
+        DefaultSkin,
+        CustomSkin
     }
 }
