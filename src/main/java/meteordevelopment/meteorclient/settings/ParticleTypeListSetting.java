@@ -9,7 +9,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
@@ -27,26 +26,6 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     @Override
     public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-    }
-
-    @Override
-    protected List<ParticleType<?>> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<ParticleType<?>> particleTypes = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                ParticleType<?> particleType = parseId(Registries.PARTICLE_TYPE, value);
-                if (particleType instanceof ParticleEffect) particleTypes.add(particleType);
-            }
-        } catch (Exception ignored) {}
-
-        return particleTypes;
-    }
-
-    @Override
-    protected boolean isValueValid(List<ParticleType<?>> value) {
-        return true;
     }
 
     @Override

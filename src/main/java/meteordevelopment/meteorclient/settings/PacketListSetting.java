@@ -35,26 +35,6 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     }
 
     @Override
-    protected Set<Class<? extends Packet<?>>> parseImpl(String str) {
-        String[] values = str.split(",");
-        Set<Class<? extends Packet<?>>> packets = new ObjectOpenHashSet<>(values.length);
-
-        try {
-            for (String value : values) {
-                Class<? extends Packet<?>> packet = PacketUtils.getPacket(value.trim());
-                if (packet != null && (filter == null || filter.test(packet))) packets.add(packet);
-            }
-        } catch (Exception ignored) {}
-
-        return packets;
-    }
-
-    @Override
-    protected boolean isValueValid(Set<Class<? extends Packet<?>>> value) {
-        return true;
-    }
-
-    @Override
     public List<String> getSuggestions() {
         if (suggestions == null) {
             suggestions = new ArrayList<>(PacketUtils.getC2SPackets().size() + PacketUtils.getS2CPackets().size());

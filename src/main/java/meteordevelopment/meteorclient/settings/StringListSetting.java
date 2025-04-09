@@ -34,16 +34,6 @@ public class StringListSetting extends Setting<List<String>>{
     }
 
     @Override
-    protected List<String> parseImpl(String str) {
-        return Arrays.asList(str.split(","));
-    }
-
-    @Override
-    protected boolean isValueValid(List<String> value) {
-        return true;
-    }
-
-    @Override
     public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (int i = 0; i < this.value.size(); i++) {

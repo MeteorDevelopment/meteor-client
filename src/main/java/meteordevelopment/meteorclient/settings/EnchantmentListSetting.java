@@ -34,29 +34,6 @@ public class EnchantmentListSetting extends Setting<Set<RegistryKey<Enchantment>
     }
 
     @Override
-    protected Set<RegistryKey<Enchantment>> parseImpl(String str) {
-        String[] values = str.split(",");
-        Set<RegistryKey<Enchantment>> enchs = new ObjectOpenHashSet<>(values.length);
-
-        for (String value : values) {
-            String name = value.trim();
-
-            Identifier id;
-            if (name.contains(":")) id = Identifier.of(name);
-            else id = Identifier.ofVanilla(name);
-
-            enchs.add(RegistryKey.of(RegistryKeys.ENCHANTMENT, id));
-        }
-
-        return enchs;
-    }
-
-    @Override
-    protected boolean isValueValid(Set<RegistryKey<Enchantment>> value) {
-        return true;
-    }
-
-    @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
         return Optional.ofNullable(MinecraftClient.getInstance().getNetworkHandler())
             .flatMap(networkHandler -> networkHandler.getRegistryManager().getOptional(RegistryKeys.ENCHANTMENT))

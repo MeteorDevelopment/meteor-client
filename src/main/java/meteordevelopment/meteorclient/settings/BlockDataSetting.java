@@ -33,16 +33,6 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     }
 
     @Override
-    protected Map<Block, T> parseImpl(String str) {
-        return new HashMap<>(0);
-    }
-
-    @Override
-    protected boolean isValueValid(Map<Block, T> value) {
-        return true;
-    }
-
-    @Override
     protected NbtCompound save(NbtCompound tag) {
         NbtCompound valueTag = new NbtCompound();
         for (Block block : get().keySet()) {

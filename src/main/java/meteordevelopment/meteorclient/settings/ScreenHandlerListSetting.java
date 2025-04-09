@@ -29,27 +29,6 @@ public class ScreenHandlerListSetting extends Setting<List<ScreenHandlerType<?>>
     }
 
     @Override
-    protected List<ScreenHandlerType<?>> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<ScreenHandlerType<?>> handlers = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                ScreenHandlerType<?> handler = parseId(Registries.SCREEN_HANDLER, value);
-                if (handler != null) handlers.add(handler);
-            }
-        } catch (Exception ignored) {
-        }
-
-        return handlers;
-    }
-
-    @Override
-    protected boolean isValueValid(List<ScreenHandlerType<?>> value) {
-        return true;
-    }
-
-    @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
         return Registries.SCREEN_HANDLER.getIds();
     }

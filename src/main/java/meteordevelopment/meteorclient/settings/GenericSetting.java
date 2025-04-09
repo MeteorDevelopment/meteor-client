@@ -24,16 +24,6 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
     }
 
     @Override
-    protected T parseImpl(String str) {
-        return defaultValue.copy();
-    }
-
-    @Override
-    protected boolean isValueValid(T value) {
-        return true;
-    }
-
-    @Override
     public NbtCompound save(NbtCompound tag) {
         tag.put("value", get().toTag());
 

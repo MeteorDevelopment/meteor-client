@@ -64,20 +64,6 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @Override
-    protected Keybind parseImpl(String str) {
-        try {
-            return Keybind.fromKey(Integer.parseInt(str.trim()));
-        } catch (NumberFormatException ignored) {
-            return null;
-        }
-    }
-
-    @Override
-    protected boolean isValueValid(Keybind value) {
-        return true;
-    }
-
-    @Override
     public NbtCompound save(NbtCompound tag) {
         tag.put("value", get().toTag());
 

@@ -29,26 +29,6 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     }
 
     @Override
-    protected List<SoundEvent> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<SoundEvent> sounds = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                SoundEvent sound = parseId(Registries.SOUND_EVENT, value);
-                if (sound != null) sounds.add(sound);
-            }
-        } catch (Exception ignored) {}
-
-        return sounds;
-    }
-
-    @Override
-    protected boolean isValueValid(List<SoundEvent> value) {
-        return true;
-    }
-
-    @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
         return Registries.SOUND_EVENT.getIds();
     }

@@ -23,11 +23,6 @@ public class ItemSetting extends Setting<Item> {
     }
 
     @Override
-    protected Item parseImpl(String str) {
-        return parseId(Registries.ITEM, str);
-    }
-
-    @Override
     protected boolean isValueValid(Item value) {
         return filter == null || filter.test(value);
     }

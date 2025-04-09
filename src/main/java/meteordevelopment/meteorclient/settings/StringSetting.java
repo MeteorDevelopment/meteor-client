@@ -25,16 +25,6 @@ public class StringSetting extends Setting<String> {
     }
 
     @Override
-    protected String parseImpl(String str) {
-        return str;
-    }
-
-    @Override
-    protected boolean isValueValid(String value) {
-        return true;
-    }
-
-    @Override
     public NbtCompound save(NbtCompound tag) {
         tag.putString("value", get());
 

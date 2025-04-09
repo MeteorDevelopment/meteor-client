@@ -31,28 +31,8 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    protected List<Item> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<Item> items = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                Item item = parseId(Registries.ITEM, value);
-                if (item != null && (filter == null || filter.test(item))) items.add(item);
-            }
-        } catch (Exception ignored) {}
-
-        return items;
-    }
-
-    @Override
     public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-    }
-
-    @Override
-    protected boolean isValueValid(List<Item> value) {
-        return true;
     }
 
     @Override

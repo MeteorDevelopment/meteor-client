@@ -29,26 +29,6 @@ public class ModuleListSetting extends Setting<List<Module>> {
     }
 
     @Override
-    protected List<Module> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<Module> modules = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                Module module = Modules.get().get(value.trim());
-                if (module != null) modules.add(module);
-            }
-        } catch (Exception ignored) {}
-
-        return modules;
-    }
-
-    @Override
-    protected boolean isValueValid(List<Module> value) {
-        return true;
-    }
-
-    @Override
     public List<String> getSuggestions() {
         if (suggestions == null) {
             suggestions = new ArrayList<>(Modules.get().getAll().size());

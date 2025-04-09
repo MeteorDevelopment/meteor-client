@@ -14,6 +14,7 @@ import com.mojang.brigadier.exceptions.Dynamic3CommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.command.CommandSource;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
@@ -31,6 +32,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * An {@link ArgumentType} for dynamic registries, e.g. those available at runtime through {@link ClientPlayNetworkHandler#getRegistryManager()}.
+ * @author Crosby
+ */
 public class RegistryEntryReferenceArgumentType<T> implements ArgumentType<RegistryEntry.Reference<T>> {
     private static final RegistryEntryReferenceArgumentType<Enchantment> ENCHANTMENT = new RegistryEntryReferenceArgumentType<>(RegistryKeys.ENCHANTMENT);
     private static final RegistryEntryReferenceArgumentType<EntityAttribute> ENTITY_ATTRIBUTE = new RegistryEntryReferenceArgumentType<>(RegistryKeys.ATTRIBUTE);

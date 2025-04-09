@@ -28,30 +28,6 @@ public class StatusEffectAmplifierMapSetting extends Setting<Reference2IntMap<St
     }
 
     @Override
-    protected Reference2IntMap<StatusEffect> parseImpl(String str) {
-        String[] values = str.split(",");
-        Reference2IntMap<StatusEffect> effects = new Reference2IntOpenHashMap<>(EMPTY_STATUS_EFFECT_MAP);
-
-        try {
-            for (String value : values) {
-                String[] split = value.split(" ");
-
-                StatusEffect effect = parseId(Registries.STATUS_EFFECT, split[0]);
-                int level = Integer.parseInt(split[1]);
-
-                effects.put(effect, level);
-            }
-        } catch (Exception ignored) {}
-
-        return effects;
-    }
-
-    @Override
-    protected boolean isValueValid(Reference2IntMap<StatusEffect> value) {
-        return true;
-    }
-
-    @Override
     public NbtCompound save(NbtCompound tag) {
         NbtCompound valueTag = new NbtCompound();
         for (StatusEffect statusEffect : get().keySet()) {

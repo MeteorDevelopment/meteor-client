@@ -24,18 +24,12 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
         for (T value : values) suggestions.add(value.toString());
     }
 
-    @Override
     protected T parseImpl(String str) {
         for (T possibleValue : values) {
             if (str.equalsIgnoreCase(possibleValue.toString())) return possibleValue;
         }
 
         return null;
-    }
-
-    @Override
-    protected boolean isValueValid(T value) {
-        return true;
     }
 
     @Override
@@ -52,9 +46,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
 
     @Override
     public T load(NbtCompound tag) {
-        parse(tag.getString("value"));
-
-        return get();
+        return parseImpl(tag.getString("value")); // todo
     }
 
     public static class Builder<T extends Enum<?>> extends SettingBuilder<Builder<T>, T, EnumSetting<T>> {
