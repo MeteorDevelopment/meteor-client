@@ -123,7 +123,7 @@ public class PlayerModelHud extends HudElement {
 
             float offset = centerOrientation.get() == CenterOrientation.North ? 180 : 0;
 
-            float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.getYaw() - player.prevYaw) * mc.getRenderTickCounter().getTickDelta(true) + offset) : (float) customYaw.get();
+            float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.lastYaw + (player.getYaw() - player.lastYaw) * mc.getRenderTickCounter().getTickProgress(true) + offset) : (float) customYaw.get();
             float pitch = copyPitch.get() ? player.getPitch() : (float) customPitch.get();
 
             drawEntity(renderer.drawContext, x, y, (int) (30 * getScale()), -yaw, -pitch, player);
@@ -166,15 +166,15 @@ public class PlayerModelHud extends HudElement {
         float previousBodyYaw = entity.bodyYaw;
         float previousYaw = entity.getYaw();
         float previousPitch = entity.getPitch();
-        float previousPrevHeadYaw = entity.prevHeadYaw; // A perplexing name, I know!
-        float prevHeadYaw = entity.headYaw;
+        float previousPrevHeadYaw = entity.lastHeadYaw; // A perplexing name, I know!
+        float lastHeadYaw = entity.headYaw;
 
         // Apply the rotation parameters
         entity.bodyYaw = 180.0f + tanYaw * 20.0f;
         entity.setYaw(180.0f + tanYaw * 40.0f);
         entity.setPitch(-tanPitch * 20.0f);
         entity.headYaw = entity.getYaw();
-        entity.prevHeadYaw = entity.getYaw();
+        entity.lastHeadYaw = entity.getYaw();
 
         // Recall the player's origin is now the bottom-center corner, so we'll have to offset the draw by half the width
         // to get it to render in the center.
@@ -189,8 +189,8 @@ public class PlayerModelHud extends HudElement {
         entity.bodyYaw = previousBodyYaw;
         entity.setYaw(previousYaw);
         entity.setPitch(previousPitch);
-        entity.prevHeadYaw = previousPrevHeadYaw;
-        entity.headYaw = prevHeadYaw;
+        entity.lastHeadYaw = previousPrevHeadYaw;
+        entity.headYaw = lastHeadYaw;
     }
 
     private double getScale() {

@@ -5,29 +5,32 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.blaze3d.textures.GpuTexture;
 import meteordevelopment.meteorclient.gui.renderer.packer.TextureRegion;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.MinecraftClient;
+
+import java.util.function.Consumer;
 
 public class Renderer2D {
     public static Renderer2D COLOR;
     public static Renderer2D TEXTURE;
 
-    public final Mesh triangles;
-    public final Mesh lines;
+    private final boolean textured;
 
-    public Renderer2D(boolean texture) {
-        triangles = new ShaderMesh(
-            texture ? Shaders.POS_TEX_COLOR : Shaders.POS_COLOR,
-            DrawMode.Triangles,
-            texture ? new Mesh.Attrib[]{Mesh.Attrib.Vec2, Mesh.Attrib.Vec2, Mesh.Attrib.Color} : new Mesh.Attrib[]{Mesh.Attrib.Vec2, Mesh.Attrib.Color}
-        );
+    public final MeshBuilder triangles;
+    public final MeshBuilder lines;
 
-        lines = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Lines, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
+    public Renderer2D(boolean textured) {
+        this.textured = textured;
+
+        triangles = new MeshBuilder(textured ? MeteorRenderPipelines.UI_TEXTURED : MeteorRenderPipelines.UI_COLORED);
+        lines = new MeshBuilder(MeteorRenderPipelines.UI_COLORED_LINES);
     }
 
-    @PreInit(dependencies = Shaders.class)
+    @PreInit
     public static void init() {
         COLOR = new Renderer2D(false);
         TEXTURE = new Renderer2D(true);
@@ -47,9 +50,33 @@ public class Renderer2D {
         lines.end();
     }
 
-    public void render(MatrixStack matrices) {
-        triangles.render(matrices);
-        lines.render(matrices);
+    public void render() {
+        render((Consumer<RenderPass>) null);
+    }
+
+    public void render(GpuTexture texture) {
+        if (!textured)
+            throw new IllegalStateException("Tried to render with a texture with a non-textured Renderer2D");
+
+        render(pass -> pass.bindSampler("u_Texture", texture));
+    }
+
+    public void render(Consumer<RenderPass> setupCallback) {
+        if (lines.isBuilding()) lines.end();
+        if (triangles.isBuilding()) triangles.end();
+
+        MeshRenderer.begin()
+            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .pipeline(MeteorRenderPipelines.UI_COLORED_LINES)
+            .mesh(lines)
+            .end();
+
+        MeshRenderer.begin()
+            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .pipeline(textured ? MeteorRenderPipelines.UI_TEXTURED : MeteorRenderPipelines.UI_COLORED)
+            .mesh(triangles)
+            .setupCallback(setupCallback)
+            .end();
     }
 
     // Tris

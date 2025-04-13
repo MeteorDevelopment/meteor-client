@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
@@ -118,7 +117,7 @@ public class Freecam extends Module {
     private double speedValue;
 
     public float yaw, pitch;
-    public float prevYaw, prevPitch;
+    public float lastYaw, lastPitch;
 
     private double fovScale;
     private boolean bobView;
@@ -151,8 +150,8 @@ public class Freecam extends Module {
             pitch *= -1;
         }
 
-        prevYaw = yaw;
-        prevPitch = pitch;
+        lastYaw = yaw;
+        lastPitch = pitch;
 
         forward = mc.options.forwardKey.isPressed();
         backward = mc.options.backKey.isPressed();
@@ -168,11 +167,13 @@ public class Freecam extends Module {
     @Override
     public void onDeactivate() {
         if (reloadChunks.get()) {
-            if (!RenderSystem.isOnRenderThread()) RenderSystem.recordRenderCall(mc.worldRenderer::reload);
-            else mc.worldRenderer.reload();
+            mc.execute(mc.worldRenderer::reload);
         }
+
         mc.options.setPerspective(perspective);
+
         if (staticView.get()) {
+
             mc.options.getFovEffectScale().setValue(fovScale);
             mc.options.getBobView().setValue(bobView);
         }
@@ -183,8 +184,8 @@ public class Freecam extends Module {
         unpress();
 
         prevPos.set(pos);
-        prevYaw = yaw;
-        prevPitch = pitch;
+        lastYaw = yaw;
+        lastPitch = pitch;
     }
 
     private void unpress() {
@@ -390,8 +391,8 @@ public class Freecam extends Module {
     }
 
     public void changeLookDirection(double deltaX, double deltaY) {
-        prevYaw = yaw;
-        prevPitch = pitch;
+        lastYaw = yaw;
+        lastPitch = pitch;
 
         yaw += (float) deltaX;
         pitch += (float) deltaY;
@@ -414,9 +415,9 @@ public class Freecam extends Module {
     }
 
     public double getYaw(float tickDelta) {
-        return MathHelper.lerp(tickDelta, prevYaw, yaw);
+        return MathHelper.lerp(tickDelta, lastYaw, yaw);
     }
     public double getPitch(float tickDelta) {
-        return MathHelper.lerp(tickDelta, prevPitch, pitch);
+        return MathHelper.lerp(tickDelta, lastPitch, pitch);
     }
 }

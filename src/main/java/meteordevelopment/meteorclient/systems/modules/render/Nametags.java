@@ -697,10 +697,10 @@ public class Nametags extends Module {
     private ItemStack getItem(PlayerEntity entity, int index) {
         return switch (index) {
             case 0 -> entity.getMainHandStack();
-            case 1 -> entity.getInventory().armor.get(3);
-            case 2 -> entity.getInventory().armor.get(2);
-            case 3 -> entity.getInventory().armor.get(1);
-            case 4 -> entity.getInventory().armor.get(0);
+            case 1 -> entity.getEquippedStack(EquipmentSlot.HEAD);
+            case 2 -> entity.getEquippedStack(EquipmentSlot.CHEST);
+            case 3 -> entity.getEquippedStack(EquipmentSlot.LEGS);
+            case 4 -> entity.getEquippedStack(EquipmentSlot.FEET);
             case 5 -> entity.getOffHandStack();
             default -> ItemStack.EMPTY;
         };
@@ -709,7 +709,7 @@ public class Nametags extends Module {
     private void drawBg(double x, double y, double width, double height) {
         Renderer2D.COLOR.begin();
         Renderer2D.COLOR.quad(x - 1, y - 1, width + 2, height + 2, background.get());
-        Renderer2D.COLOR.render(null);
+        Renderer2D.COLOR.render();
     }
 
     public enum Position {

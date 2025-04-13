@@ -63,7 +63,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
             if (file.getName().endsWith(".png")) {
                 try {
                     String name = file.getName().replace(".png", "");
-                    AbstractTexture texture = new NativeImageBackedTexture(NativeImage.read(new FileInputStream(file)));
+                    AbstractTexture texture = new NativeImageBackedTexture(null, NativeImage.read(new FileInputStream(file)));
                     icons.put(name, texture);
                 }
                 catch (IOException e) {
@@ -165,7 +165,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     public Waypoints fromTag(NbtCompound tag) {
         waypoints.clear();
 
-        for (NbtElement waypointTag : tag.getList("waypoints", 10)) {
+        for (NbtElement waypointTag : tag.getListOrEmpty("waypoints")) {
             waypoints.add(new Waypoint(waypointTag));
         }
 

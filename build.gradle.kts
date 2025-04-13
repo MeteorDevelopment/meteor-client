@@ -1,7 +1,7 @@
 plugins {
-    id("fabric-loom") version "1.9-SNAPSHOT"
+    id("fabric-loom") version "1.10-SNAPSHOT"
     id("maven-publish")
-    id("com.gradleup.shadow") version "9.0.0-beta4"
+    id("com.gradleup.shadow") version "9.0.0-beta11"
 }
 
 base {
@@ -75,6 +75,8 @@ dependencies {
     minecraft("com.mojang:minecraft:${properties["minecraft_version"] as String}")
     mappings("net.fabricmc:yarn:${properties["yarn_mappings"] as String}:v2")
     modImplementation("net.fabricmc:fabric-loader:${properties["loader_version"] as String}")
+
+    modInclude(fabricApi.module("fabric-api-base", properties["fapi_version"] as String))
     modInclude(fabricApi.module("fabric-resource-loader-v0", properties["fapi_version"] as String))
 
     // Compat fixes
@@ -155,6 +157,8 @@ tasks {
 
     withType<JavaCompile> {
         options.release = 21
+        options.compilerArgs.add("-Xlint:deprecation")
+        options.compilerArgs.add("-Xlint:unchecked")
     }
 
     shadowJar {

@@ -7,27 +7,32 @@ package meteordevelopment.meteorclient.renderer;
 
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.Dir;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
 public class Renderer3D {
-    public final Mesh lines = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Lines, Mesh.Attrib.Vec3, Mesh.Attrib.Color);
-    public final Mesh triangles = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Triangles, Mesh.Attrib.Vec3, Mesh.Attrib.Color);
+    public final MeshBuilder lines = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED_LINES);
+    public final MeshBuilder triangles = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED);
 
     public void begin() {
         lines.begin();
         triangles.begin();
     }
 
-    public void end() {
-        lines.end();
-        triangles.end();
-    }
-
     public void render(MatrixStack matrices) {
-        lines.render(matrices);
-        triangles.render(matrices);
+        MeshRenderer.begin()
+            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .pipeline(MeteorRenderPipelines.WORLD_COLORED_LINES)
+            .mesh(lines, matrices)
+            .end();
+
+        MeshRenderer.begin()
+            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .pipeline(MeteorRenderPipelines.WORLD_COLORED)
+            .mesh(triangles, matrices)
+            .end();
     }
 
     // Lines

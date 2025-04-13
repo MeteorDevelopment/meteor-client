@@ -330,9 +330,9 @@ public class Trajectories extends Module {
 
             // Render entity
             if (collidingEntity != null) {
-                double x = (collidingEntity.getX() - collidingEntity.prevX) * event.tickDelta;
-                double y = (collidingEntity.getY() - collidingEntity.prevY) * event.tickDelta;
-                double z = (collidingEntity.getZ() - collidingEntity.prevZ) * event.tickDelta;
+                double x = (collidingEntity.getX() - collidingEntity.lastX) * event.tickDelta;
+                double y = (collidingEntity.getY() - collidingEntity.lastY) * event.tickDelta;
+                double z = (collidingEntity.getZ() - collidingEntity.lastZ) * event.tickDelta;
 
                 Box box = collidingEntity.getBoundingBox();
                 event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);

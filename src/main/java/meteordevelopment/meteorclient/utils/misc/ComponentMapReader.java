@@ -42,6 +42,7 @@ public class ComponentMapReader {
     private static final Dynamic2CommandExceptionType MALFORMED_COMPONENT_EXCEPTION = new Dynamic2CommandExceptionType(
         (type, error) -> Text.stringifiedTranslatable("arguments.item.component.malformed", type, error)
     );
+    private static final StringNbtReader<NbtElement> SNBT_READER = StringNbtReader.fromOps(NbtOps.INSTANCE);
     private final DynamicOps<NbtElement> nbtOps;
 
     public ComponentMapReader(CommandRegistryAccess commandRegistryAccess) {
@@ -153,7 +154,7 @@ public class ComponentMapReader {
 
         private <T> void readComponentValue(StringReader reader, ComponentMap.Builder builder, ComponentType<T> type) throws CommandSyntaxException {
             int i = reader.getCursor();
-            NbtElement nbtElement = new StringNbtReader(reader).parseElement();
+            NbtElement nbtElement = SNBT_READER.read(reader);
             DataResult<T> dataResult = type.getCodecOrThrow().parse(this.nbtOps, nbtElement);
             builder.add(type, dataResult.getOrThrow(error -> {
                 reader.setCursor(i);

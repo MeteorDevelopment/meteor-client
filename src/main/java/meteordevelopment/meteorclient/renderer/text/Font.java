@@ -5,11 +5,12 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.TextureFormat;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import meteordevelopment.meteorclient.renderer.Mesh;
-import meteordevelopment.meteorclient.utils.render.ByteTexture;
+import meteordevelopment.meteorclient.renderer.MeshBuilder;
+import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.texture.AbstractTexture;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.*;
 import org.lwjgl.system.MemoryStack;
@@ -18,7 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 public class Font {
-    public AbstractTexture texture;
+    public Texture texture;
     private final int height;
     private final float scale;
     private final float ascent;
@@ -62,7 +63,8 @@ public class Font {
         STBTruetype.stbtt_PackEnd(packContext);
 
         // Create texture object and get font scale
-        texture = new ByteTexture(size, size, bitmap, ByteTexture.Format.A, ByteTexture.Filter.Linear, ByteTexture.Filter.Linear);
+        texture = new Texture(size, size, TextureFormat.RED8, FilterMode.LINEAR, FilterMode.LINEAR);
+        texture.upload(bitmap);
         scale = STBTruetype.stbtt_ScaleForPixelHeight(fontInfo, height);
 
         // Get font vertical ascent
@@ -115,7 +117,7 @@ public class Font {
         return height;
     }
 
-    public double render(Mesh mesh, String string, double x, double y, Color color, double scale) {
+    public double render(MeshBuilder mesh, String string, double x, double y, Color color, double scale) {
         y += ascent * this.scale * scale;
 
         for (int i = 0; i < string.length(); i++) {

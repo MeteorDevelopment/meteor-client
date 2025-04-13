@@ -17,7 +17,6 @@ import meteordevelopment.meteorclient.utils.other.Snapper;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
@@ -279,7 +278,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         Renderer2D.COLOR.begin();
         onRender(mouseX, mouseY);
-        Renderer2D.COLOR.render(new MatrixStack());
+        Renderer2D.COLOR.render();
 
         Utils.scaledProjection();
         runAfterRenderTasks();
@@ -327,7 +326,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         SPLIT_LINES_COLOR.a = prevA;
 
-        renderer.render(new MatrixStack());
+        renderer.render();
     }
 
     private void renderSplitLine(Renderer2D renderer, double x, double y, double destX, double destY) {
@@ -412,14 +411,14 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         @Override
         public void move(int deltaX, int deltaY) {
-            int prevX = x;
-            int prevY = y;
+            int lastX = x;
+            int lastY = y;
 
             int border = Hud.get().border.get();
             x = MathHelper.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
             y = MathHelper.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
 
-            for (HudElement element : selection) element.move(x - prevX, y - prevY);
+            for (HudElement element : selection) element.move(x - lastX, y - lastY);
         }
     }
 }

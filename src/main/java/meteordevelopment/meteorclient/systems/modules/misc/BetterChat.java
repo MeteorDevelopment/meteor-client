@@ -32,7 +32,10 @@ import net.minecraft.client.gui.PlayerSkinDrawer;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.text.*;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
@@ -418,13 +421,9 @@ public class BetterChat extends Module {
 
         // Only draw the first line of multi line messages
         if (((IChatHudLineVisible) (Object) line).meteor$isStartOfEntry())  {
-            RenderSystem.enableBlend();
             RenderSystem.setShaderColor(1, 1, 1, Color.toRGBAA(color) / 255f);
-
             drawTexture(context, (IChatHudLine) (Object) line, y);
-
             RenderSystem.setShaderColor(1, 1, 1, 1);
-            RenderSystem.disableBlend();
         }
 
         // Offset
@@ -446,7 +445,7 @@ public class BetterChat extends Module {
         for (CustomHeadEntry entry : CUSTOM_HEAD_ENTRIES) {
             // Check prefix
             if (text.startsWith(entry.prefix(), startOffset)) {
-                context.drawTexture(RenderLayer::getGuiTextured, entry.texture(), 0, y, 8, 8, 0, 0, 64, 64, 64, 64);
+                context.drawTexture(RenderLayer::getGuiTextured, entry.texture(), 0, y, 0, 0, 8, 8, 64, 64, 64, 64);
                 return;
             }
         }
@@ -558,12 +557,8 @@ public class BetterChat extends Module {
 
         sendButton.setStyle(sendButton.getStyle()
             .withFormatting(Formatting.DARK_RED)
-            .withClickEvent(new MeteorClickEvent(
-                ClickEvent.Action.RUN_COMMAND,
-                Commands.get("say").toString(message)
-            ))
-            .withHoverEvent(new HoverEvent(
-                HoverEvent.Action.SHOW_TEXT,
+            .withClickEvent(new MeteorClickEvent(Commands.get("say").toString(message)))
+            .withHoverEvent(new HoverEvent.ShowText(
                 hintBaseText
             )));
         return sendButton;

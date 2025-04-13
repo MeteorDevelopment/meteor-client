@@ -173,8 +173,8 @@ public class LongJump extends Module {
 
                 if (onlyOnGround.get() && !mc.player.isOnGround() && stage == 0) return;
 
-                double xDist = mc.player.getX() - mc.player.prevX;
-                double zDist = mc.player.getZ() - mc.player.prevZ;
+                double xDist = mc.player.getX() - mc.player.lastX;
+                double zDist = mc.player.getZ() - mc.player.lastZ;
                 double lastDist = Math.sqrt((xDist * xDist) + (zDist * zDist));
 
                 if (PlayerUtils.isMoving() && (!onJump.get() || mc.options.jumpKey.isPressed()) && !mc.player.isInLava() && !mc.player.isTouchingWater()) {

@@ -12,8 +12,7 @@ public class PostProcessShaders {
 
     public static boolean rendering;
 
-    private PostProcessShaders() {
-    }
+    private PostProcessShaders() {}
 
     @PreInit
     public static void init() {

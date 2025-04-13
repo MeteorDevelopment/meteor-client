@@ -11,12 +11,10 @@ import meteordevelopment.meteorclient.gui.renderer.operations.TextOperation;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 import meteordevelopment.meteorclient.gui.renderer.packer.TexturePacker;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
-import meteordevelopment.meteorclient.utils.render.ByteTexture;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.DrawContext;
@@ -35,7 +33,7 @@ public class GuiRenderer {
     private static final Color WHITE = new Color(255, 255, 255);
 
     private static final TexturePacker TEXTURE_PACKER = new TexturePacker();
-    private static ByteTexture TEXTURE;
+    private static Texture TEXTURE;
 
     public static GuiTexture CIRCLE;
     public static GuiTexture TRIANGLE;
@@ -85,8 +83,6 @@ public class GuiRenderer {
     public void begin(DrawContext drawContext) {
         this.drawContext = drawContext;
 
-        GL.enableBlend();
-        GL.enableScissorTest();
         scissorStart(0, 0, getWindowWidth(), getWindowHeight());
     }
 
@@ -95,8 +91,6 @@ public class GuiRenderer {
 
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
-
-        GL.disableScissorTest();
     }
 
     public void beginRender() {
@@ -105,29 +99,35 @@ public class GuiRenderer {
     }
 
     public void endRender() {
+        endRender(null);
+    }
+
+    public void endRender(Scissor scissor) {
+        if (scissor != null) scissor.push();
+
         r.end();
         rTex.end();
 
-        r.render(drawContext.getMatrices());
-
-        GL.bindTexture(TEXTURE.getGlId());
-        rTex.render(drawContext.getMatrices());
+        r.render();
+        rTex.render(pass -> pass.bindSampler("u_Texture", TEXTURE.getGlTexture()));
 
         // Normal text
         theme.textRenderer().begin(theme.scale(1));
         for (TextOperation text : texts) {
             if (!text.title) text.run(textPool);
         }
-        theme.textRenderer().end(drawContext.getMatrices());
+        theme.textRenderer().end();
 
         // Title text
         theme.textRenderer().begin(theme.scale(1.25));
         for (TextOperation text : texts) {
             if (text.title) text.run(textPool);
         }
-        theme.textRenderer().end(drawContext.getMatrices());
+        theme.textRenderer().end();
 
         texts.clear();
+
+        if (scissor != null) scissor.pop();
     }
 
     public void scissorStart(double x, double y, double width, double height) {
@@ -140,8 +140,7 @@ public class GuiRenderer {
             if (y < parent.y) y = parent.y;
             else if (y + height > parent.y + parent.height) height -= (y + height) - (parent.y + parent.height);
 
-            parent.apply();
-            endRender();
+            endRender(parent);
         }
 
         scissorStack.push(scissorPool.get().set(x, y, width, height));
@@ -151,9 +150,12 @@ public class GuiRenderer {
     public void scissorEnd() {
         Scissor scissor = scissorStack.pop();
 
-        scissor.apply();
-        endRender();
+        endRender(scissor);
+
+        scissor.push();
         for (Runnable task : scissor.postTasks) task.run();
+        scissor.pop();
+
         if (!scissorStack.isEmpty()) beginRender();
 
         scissorPool.free(scissor);
@@ -234,8 +236,7 @@ public class GuiRenderer {
             rTex.texQuad(x, y, width, height, rotation, 0, 0, 1, 1, WHITE);
             rTex.end();
 
-            texture.bind();
-            rTex.render(drawContext.getMatrices());
+            rTex.render(texture.getGlTexture());
         });
     }
 

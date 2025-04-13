@@ -33,6 +33,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.GameMode;
@@ -261,7 +262,7 @@ public class Jesus extends Module {
         if (mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.fallDistance > 3f || !isOverLiquid()) return;
 
         // If not actually moving, cancel packet
-        if (mc.player.input.movementForward == 0 && mc.player.input.movementSideways == 0) {
+        if (mc.player.input.getMovementInput().equals(Vec2f.ZERO)) {
             event.cancel();
             return;
         }

@@ -275,7 +275,7 @@ public class ESP extends Module {
             count++;
         }
 
-        Renderer2D.COLOR.render(null);
+        Renderer2D.COLOR.render();
     }
 
     private boolean checkCorner(double x, double y, double z, Vector3d min, Vector3d max) {

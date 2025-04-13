@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class MultiPhaseParametersMixin implements IMultiPhaseParameters {
     @Shadow
     @Final
-    private RenderPhase.Target target;
+    RenderPhase.Target target;
 
     @Override
     public RenderPhase.Target meteor$getTarget() {

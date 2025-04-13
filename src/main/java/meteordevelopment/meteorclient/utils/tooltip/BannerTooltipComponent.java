@@ -73,7 +73,7 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
         matrices.scale(5, 5, 5);
         VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
         bannerField.pitch = 0f;
-        bannerField.pivotY = -32f;
+        bannerField.originY = -32f;
         BannerBlockEntityRenderer.renderCanvas(
             matrices,
             immediate,

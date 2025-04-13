@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -133,8 +134,8 @@ public class ArmorHud extends HudElement {
 
         // default order is from boots to helmet
         ItemStack[] armor = flipOrder.get() ?
-            new ItemStack[]{getItem(3), getItem(2), getItem(1), getItem(0)} :
-            new ItemStack[]{getItem(0), getItem(1), getItem(2), getItem(3)};
+            new ItemStack[]{getItem(EquipmentSlot.HEAD), getItem(EquipmentSlot.CHEST), getItem(EquipmentSlot.LEGS), getItem(EquipmentSlot.FEET)} :
+            new ItemStack[]{getItem(EquipmentSlot.FEET), getItem(EquipmentSlot.LEGS), getItem(EquipmentSlot.CHEST), getItem(EquipmentSlot.HEAD)};
 
         for (ItemStack stack : armor) {
             if (stack.isEmpty()) emptySlots++;
@@ -186,9 +187,9 @@ public class ArmorHud extends HudElement {
         });
     }
 
-    private ItemStack getItem(int i) {
+    private ItemStack getItem(EquipmentSlot slot) {
         if (isInEditor()) {
-            return switch (i) {
+            return switch (slot.getEntitySlotId()) {
                 case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
                 case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
                 case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
@@ -196,7 +197,7 @@ public class ArmorHud extends HudElement {
             };
         }
 
-        ItemStack stack = mc.player.getInventory().getArmorStack(i);
+        ItemStack stack = mc.player.getEquippedStack(slot);
         return stack.isEmpty() && showEmpty.get() ? Items.BARRIER.getDefaultStack() : stack;
     }
 

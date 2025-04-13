@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightMode;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -31,7 +32,7 @@ public class Packet extends ElytraFlightMode {
     public void onTick() {
         super.onTick();
 
-        if (mc.player.getInventory().getArmorStack(2).getItem() != Items.ELYTRA || mc.player.fallDistance <= 0.2 || mc.options.sneakKey.isPressed()) return;
+        if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA || mc.player.fallDistance <= 0.2 || mc.options.sneakKey.isPressed()) return;
 
         if (mc.options.forwardKey.isPressed()) {
             vec3d.add(0, 0, elytraFly.horizontalSpeed.get());
