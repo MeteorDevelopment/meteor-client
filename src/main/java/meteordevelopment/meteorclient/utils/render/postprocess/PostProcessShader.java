@@ -32,8 +32,8 @@ public abstract class PostProcessShader {
 
     protected abstract void setupPass(RenderPass pass);
 
-    public void beginRender() {
-        if (!shouldDraw()) return;
+    public boolean beginRender() {
+        return shouldDraw();
     }
 
     public void endRender(Runnable draw) {

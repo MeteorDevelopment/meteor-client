@@ -9,9 +9,17 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class EntityShader extends PostProcessShader {
     @Override
-    protected void preDraw() {
-        RenderSystem.getDevice().createCommandEncoder().createRenderPass(framebuffer.getColorAttachment(), OptionalInt.of(0)).close();
+    public boolean beginRender() {
+        if (super.beginRender()) {
+            RenderSystem.getDevice().createCommandEncoder().createRenderPass(framebuffer.getColorAttachment(), OptionalInt.of(0)).close();
+            return true;
+        }
 
+        return false;
+    }
+
+    @Override
+    protected void preDraw() {
         ((IWorldRenderer) mc.worldRenderer).meteor$pushEntityOutlineFramebuffer(framebuffer);
     }
 
