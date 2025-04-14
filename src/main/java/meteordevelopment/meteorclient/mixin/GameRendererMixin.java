@@ -43,7 +43,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
@@ -126,15 +125,12 @@ public abstract class GameRendererMixin {
         return original;
     }
 
-    @Redirect(method = "findCrosshairTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
-    private HitResult updateTargetedEntityEntityRayTraceProxy(Entity entity, double maxDistance, float tickDelta, boolean includeFluids) {
-        if (Modules.get().isActive(LiquidInteract.class)) {
-            HitResult result = entity.raycast(maxDistance, tickDelta, includeFluids);
-            if (result.getType() != HitResult.Type.MISS) return result;
+    @ModifyExpressionValue(method = "findCrosshairTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
+    private HitResult modifyRaycastResult(HitResult original, Entity entity, double blockInteractionRange, double entityInteractionRange, float tickProgress, @Local(ordinal = 0, argsOnly = true) double maxDistance) {
+        if (!Modules.get().isActive(LiquidInteract.class)) return original;
+        if (original.getType() != HitResult.Type.MISS) return original;
 
-            return entity.raycast(maxDistance, tickDelta, true);
-        }
-        return entity.raycast(maxDistance, tickDelta, includeFluids);
+        return entity.raycast(maxDistance, tickProgress, true);
     }
 
     @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
@@ -149,7 +145,7 @@ public abstract class GameRendererMixin {
         return Modules.get().get(NoRender.class).noNausea() ? 0 : original;
     }
 
-    @ModifyReturnValue(method = "getFov",at = @At("RETURN"))
+    @ModifyReturnValue(method = "getFov", at = @At("RETURN"))
     private float modifyFov(float original) {
         return MeteorClient.EVENT_BUS.post(GetFovEvent.get(original)).fov;
     }
