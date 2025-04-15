@@ -18,7 +18,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -183,7 +182,9 @@ public class PlayerModelHud extends HudElement {
         // The vector3 parameter applies a translation to the player's model. Given that we're simply offsetting
         // the draw in the x and y parameters, we won't really need this, so we'll set it to default.
         // It doesn't seem like quaternionf2 does anything, so we'll leave it null to save some computation.
-        InventoryScreen.drawEntity(context, x + getWidth() / 2, y + getHeight() * 0.9f, size, new Vector3f(), quaternion, null, entity);
+
+        // todo dumb magic numbers
+        InventoryScreen.drawEntity(context, (x + getWidth() / 2) + 26, (int) (y + getHeight() * 0.9f) + 8, (x + getWidth() / 2) + 75, (int) (y + getHeight() * 0.9f) + 78, size, 0.0625f, 0f, 0f, mc.player);
 
         // Restore the previous values
         entity.bodyYaw = previousBodyYaw;

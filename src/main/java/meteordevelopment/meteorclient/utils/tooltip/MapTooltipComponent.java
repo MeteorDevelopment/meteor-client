@@ -8,10 +8,10 @@ package meteordevelopment.meteorclient.utils.tooltip;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.MapRenderState;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.type.MapIdComponent;
@@ -57,7 +57,7 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
         matrices.translate(x, y, 0);
         matrices.scale((float) (scale) * 2, (float) (scale) * 2, 0);
         matrices.scale((64 + 8) / 64f, (64 + 8) / 64f, 0);
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE_MAP_BACKGROUND, 0, 0, 0, 0, 0, 64, 64, 64, 64);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE_MAP_BACKGROUND, 0, 0, 0, 0, 0, 64, 64, 64, 64);
         matrices.pop();
 
         // Contents

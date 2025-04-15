@@ -59,7 +59,9 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        DiffuseLighting.disableGuiDepthLighting();
+        // todo ????
+        mc.gameRenderer.method_71114().method_71034(DiffuseLighting.class_11274.ITEMS_FLAT);
+
         MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.translate(x + 8, y + 8, 0);
@@ -89,6 +91,5 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
         matrices.pop();
         immediate.draw();
         matrices.pop();
-        DiffuseLighting.enableGuiDepthLighting();
     }
 }

@@ -6,9 +6,9 @@
 package meteordevelopment.meteorclient.utils.tooltip;
 
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
@@ -41,7 +41,7 @@ public class BookTooltipComponent implements TooltipComponent, MeteorTooltipData
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
         // Background
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE_BOOK_BACKGROUND, x, y, 0, 12, 0, 112, 134, 179, 179);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE_BOOK_BACKGROUND, x, y, 0, 12, 0, 112, 134, 179, 179);
 
         // Content
         MatrixStack matrices = context.getMatrices();

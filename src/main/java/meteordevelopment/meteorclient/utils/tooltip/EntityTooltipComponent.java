@@ -57,11 +57,14 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
 
     protected void renderEntity(MatrixStack matrices, int x, int y) {
         if (mc.player == null) return;
+
+        // todo ???
+        mc.gameRenderer.method_71114().method_71034(DiffuseLighting.class_11274.ENTITY_IN_UI);
+
         float size = 24;
         if (Math.max(entity.getWidth(), entity.getHeight()) > 1.0) {
             size /= Math.max(entity.getWidth(), entity.getHeight());
         }
-        DiffuseLighting.disableGuiDepthLighting();
         matrices.push();
         int yOffset = 16;
 
@@ -90,7 +93,6 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
         immediate.draw();
         entityRenderDispatcher.setRenderShadows(true);
         matrices.pop();
-        DiffuseLighting.enableGuiDepthLighting();
     }
 
     public void hamiltonProduct(Quaternionf q, Quaternionf other) {

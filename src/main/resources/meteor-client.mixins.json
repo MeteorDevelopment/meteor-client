@@ -95,7 +95,7 @@
     "GameOptionsMixin",
     "GameRendererMixin",
     "GlBackendMixin",
-    "GlResourceManagerMixin",
+    "GlCommandEncoderMixin",
     "HandledScreenAccessor",
     "HandledScreenMixin",
     "HeadFeatureRendererMixin",
