@@ -49,7 +49,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         return client.currentScreen;
     }
 
-    @ModifyExpressionValue(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"))
+    @ModifyExpressionValue(method = "applyMovementSpeedFactors", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"))
     private boolean redirectUsingItem(boolean isUsingItem) {
         if (Modules.get().get(NoSlow.class).items()) return false;
         return isUsingItem;
