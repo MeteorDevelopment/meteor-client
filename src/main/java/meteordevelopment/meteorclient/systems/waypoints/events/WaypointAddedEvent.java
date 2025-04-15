@@ -5,10 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.waypoints.events;
 
-import meteordevelopment.meteorclient.events.Cancellable;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 
-public class WaypointAddedEvent extends Cancellable {
+public class WaypointAddedEvent {
 
     public final Waypoint waypoint;
 
