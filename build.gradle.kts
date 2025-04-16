@@ -99,9 +99,6 @@ dependencies {
     library("io.netty:netty-handler-proxy:${properties["netty_version"] as String}") { isTransitive = false }
     library("io.netty:netty-codec-socks:${properties["netty_version"] as String}") { isTransitive = false }
     library("de.florianmichael:WaybackAuthLib:${properties["waybackauthlib_version"] as String}")
-
-    // Launch sub project
-    include(project(":launch"))
 }
 
 loom {
@@ -139,6 +136,7 @@ tasks {
             rename { "${it}_${licenseSuffix}" }
         }
 
+        // Launch sub project
         dependsOn(":launch:compileJava")
         from(project(":launch").layout.buildDirectory.dir("classes/java/main"))
 
