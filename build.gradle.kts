@@ -56,9 +56,15 @@ configurations {
     modImplementation.configure {
         extendsFrom(modInclude)
     }
+    include.configure {
+        extendsFrom(modInclude)
+    }
 
     // include libraries
     implementation.configure {
+        extendsFrom(library)
+    }
+    include.configure {
         extendsFrom(library)
     }
 }
