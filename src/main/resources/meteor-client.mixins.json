@@ -96,6 +96,7 @@
     "GameRendererMixin",
     "GlBackendMixin",
     "GlResourceManagerMixin",
+    "GpuTextureMixin",
     "HandledScreenAccessor",
     "HandledScreenMixin",
     "HeadFeatureRendererMixin",
