@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
@@ -50,6 +51,11 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 
     @ModifyReturnValue(method = "getBlockLight", at = @At("RETURN"))
     private int onGetBlockLight(int original) {
+        return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.BLOCK), original);
+    }
+
+    @ModifyExpressionValue(method = "updateRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getLightLevel(Lnet/minecraft/world/LightType;Lnet/minecraft/util/math/BlockPos;)I"))
+    private int onGetLightLevel(int original) {
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.BLOCK), original);
     }
 }
