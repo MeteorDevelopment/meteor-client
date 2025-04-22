@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(BackgroundRenderer.class)
 public abstract class BackgroundRendererMixin {
-    @ModifyArgs(method = "applyFog", at = @At("HEAD"))
+    @ModifyArgs(method = "applyFog(Lnet/minecraft/client/render/Camera;Lorg/joml/Vector4f;FZF)V", at = @At("HEAD"))
     private void modifyFogDistance(Args args) {
         Ambience ambience = Modules.get().get(Ambience.class);
         if (ambience.isActive() && ambience.customFogColor.get()) {
@@ -30,7 +30,7 @@ public abstract class BackgroundRendererMixin {
         }
     }
 
-    @ModifyExpressionValue(method = "method_71109", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/BackgroundRenderer;fogEnabled:Z"))
+    @ModifyExpressionValue(method = "getFogBuffer", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/BackgroundRenderer;fogEnabled:Z"))
     private boolean modifyFogEnabled(boolean original) {
         return original && !Modules.get().get(NoRender.class).noFog();
     }

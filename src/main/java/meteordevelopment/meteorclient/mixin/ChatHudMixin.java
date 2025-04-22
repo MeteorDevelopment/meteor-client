@@ -151,7 +151,7 @@ public abstract class ChatHudMixin implements IChatHud {
         return getBetterChat().modifyChatWidth(width);
     }
 
-    @ModifyReceiver(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/OrderedText;III)I"))
+    @ModifyReceiver(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/OrderedText;III)V"))
     private DrawContext onRender_beforeDrawTextWithShadow(DrawContext context, TextRenderer textRenderer, OrderedText text, int x, int y, int color, @Local ChatHudLine.Visible line) {
         getBetterChat().drawPlayerHead(context, line, y, color);
         return context;
