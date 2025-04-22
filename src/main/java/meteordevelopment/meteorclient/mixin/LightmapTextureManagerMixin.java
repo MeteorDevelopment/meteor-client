@@ -33,7 +33,7 @@ public abstract class LightmapTextureManagerMixin {
     @Inject(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;pop()V", shift = At.Shift.BEFORE))
     private void update$clear(float tickProgress, CallbackInfo info) {
         if (Modules.get().get(Fullbright.class).getGamma() || Modules.get().isActive(Xray.class)) {
-            RenderSystem.getDevice().createCommandEncoder().createRenderPass(glTexture, OptionalInt.of(ColorHelper.getArgb(255, 255, 255, 255))).close();
+            RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor Fullbright", glTexture, OptionalInt.of(ColorHelper.getArgb(255, 255, 255, 255))).close();
         }
     }
 

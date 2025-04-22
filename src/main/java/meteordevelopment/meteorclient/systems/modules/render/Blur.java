@@ -135,7 +135,7 @@ public class Blur extends Module {
         int width = (int) (mc.getWindow().getFramebufferWidth() * scale);
         int height = (int) (mc.getWindow().getFramebufferHeight() * scale);
 
-        return RenderSystem.getDevice().createTexture("Blur - " + i, TextureFormat.RGBA8, width, height, 1);
+        return RenderSystem.getDevice().createTexture("Blur - " + i, 15,  TextureFormat.RGBA8, width, height, 1);
     }
 
     private void onRenderAfterWorld() {

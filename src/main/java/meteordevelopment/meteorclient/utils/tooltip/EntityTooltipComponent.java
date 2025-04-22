@@ -59,7 +59,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
         if (mc.player == null) return;
 
         // todo ???
-        mc.gameRenderer.method_71114().method_71034(DiffuseLighting.class_11274.ENTITY_IN_UI);
+        mc.gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ENTITY_IN_UI);
 
         float size = 24;
         if (Math.max(entity.getWidth(), entity.getHeight()) > 1.0) {

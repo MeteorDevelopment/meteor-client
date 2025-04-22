@@ -115,8 +115,8 @@ public class MeshRenderer {
                     OptionalInt.empty();
 
                 RenderPass pass = (depthAttachment != null && pipeline.wantsDepthTexture()) ?
-                    RenderSystem.getDevice().createCommandEncoder().createRenderPass(colorAttachment, clearColor, depthAttachment, OptionalDouble.empty()) :
-                    RenderSystem.getDevice().createCommandEncoder().createRenderPass(colorAttachment, clearColor);
+                    RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor MeshRenderer", colorAttachment, clearColor, depthAttachment, OptionalDouble.empty()) :
+                    RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor MeshRenderer", colorAttachment, clearColor);
 
                 pass.setPipeline(pipeline);
                 pass.setUniform("u_Proj", RenderSystem.getProjectionMatrix());

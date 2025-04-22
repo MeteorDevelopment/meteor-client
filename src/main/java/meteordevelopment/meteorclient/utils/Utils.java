@@ -32,6 +32,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.render.ProjectionMatrix2;
 import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
@@ -55,7 +56,6 @@ import net.minecraft.world.chunk.Chunk;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Range;
-import org.joml.Matrix4f;
 import org.joml.Vector3d;
 
 import java.io.File;
@@ -78,6 +78,8 @@ public class Utils {
     public static boolean rendering3D = true;
     public static double frameTime;
     public static Screen screenToOpen;
+
+    private static final ProjectionMatrix2 matrix = new ProjectionMatrix2("meteor-projection-matrix", 1000, 21000, true);
 
     private Utils() {
     }
@@ -205,12 +207,12 @@ public class Utils {
     }
 
     public static void unscaledProjection() {
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), 0, 1000, 21000), ProjectionType.ORTHOGRAPHIC);
+        RenderSystem.setProjectionMatrix(matrix.set(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight()), ProjectionType.ORTHOGRAPHIC);
         rendering3D = false;
     }
 
     public static void scaledProjection() {
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor()), (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor()), 0, 1000, 21000), ProjectionType.PERSPECTIVE);
+        RenderSystem.setProjectionMatrix(matrix.set((float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor()), (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor())), ProjectionType.PERSPECTIVE);
         rendering3D = true;
     }
 
