@@ -117,7 +117,6 @@ public class MeshBuilder {
         memPutInt(p + 4, i2);
 
         indicesCount += 2;
-        growIfNeeded();
     }
 
     public void quad(int i1, int i2, int i3, int i4) {
@@ -132,7 +131,6 @@ public class MeshBuilder {
         memPutInt(p + 20, i1);
 
         indicesCount += 6;
-        growIfNeeded();
     }
 
     public void triangle(int i1, int i2, int i3) {
@@ -143,16 +141,24 @@ public class MeshBuilder {
         memPutInt(p + 8, i3);
 
         indicesCount += 3;
-        growIfNeeded();
     }
 
-    public void growIfNeeded() {
-        // Vertices
-        if ((vertexI + 1) * primitiveVerticesSize >= vertices.capacity()) {
-            int offset = getVerticesOffset();
+    public void ensureQuadCapacity() {
+        ensureCapacity(4, 6);
+    }
 
+    public void ensureTriCapacity() {
+        ensureCapacity(3, 3);
+    }
+
+    public void ensureLineCapacity() {
+        ensureCapacity(2, 2);
+    }
+
+    public void ensureCapacity(int vertexCount, int indexCount) {
+        if ((vertexI + vertexCount) * primitiveVerticesSize >= vertices.capacity()) {
+            int offset = getVerticesOffset();
             int newSize = vertices.capacity() * 2;
-            if (newSize % primitiveVerticesSize != 0) newSize += newSize % primitiveVerticesSize;
 
             ByteBuffer newVertices = BufferUtils.createByteBuffer(newSize);
             memCopy(memAddress0(vertices), memAddress0(newVertices), offset);
@@ -162,10 +168,8 @@ public class MeshBuilder {
             verticesPointer = verticesPointerStart + offset;
         }
 
-        // Indices
-        if (indicesCount * 4 >= indices.capacity()) {
+        if ((indicesCount + indexCount) * 4 >= indices.capacity()) {
             int newSize = indices.capacity() * 2;
-            if (newSize % primitiveIndicesCount != 0) newSize += newSize % (primitiveIndicesCount * 4);
 
             ByteBuffer newIndices = BufferUtils.createByteBuffer(newSize);
             memCopy(memAddress0(indices), memAddress0(newIndices), indicesCount * 4L);

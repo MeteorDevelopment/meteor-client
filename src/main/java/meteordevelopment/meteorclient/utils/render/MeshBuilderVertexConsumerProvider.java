@@ -60,6 +60,8 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
             zs[i] = (double) offsetZ + z;
 
             if (++i >= 4) {
+                mesh.ensureQuadCapacity();
+
                 mesh.quad(
                     mesh.vec3(xs[0], ys[0], zs[0]).color(color).next(),
                     mesh.vec3(xs[1], ys[1], zs[1]).color(color).next(),
