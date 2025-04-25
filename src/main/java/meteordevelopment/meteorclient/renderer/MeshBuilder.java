@@ -25,10 +25,10 @@ public class MeshBuilder {
     private final int primitiveVerticesSize;
     private final int primitiveIndicesCount;
 
-    private ByteBuffer vertices;
+    private ByteBuffer vertices = null;
     private long verticesPointerStart, verticesPointer;
 
-    private ByteBuffer indices;
+    private ByteBuffer indices = null;
     private long indicesPointer;
 
     private int vertexI, indicesCount;
@@ -44,12 +44,6 @@ public class MeshBuilder {
         this.format = format;
         primitiveVerticesSize = format.getVertexSize() * drawMode.firstVertexCount;
         primitiveIndicesCount = drawMode.firstVertexCount;
-
-        vertices = BufferUtils.createByteBuffer(primitiveVerticesSize * 256 * 4);
-        verticesPointerStart = memAddress0(vertices);
-
-        indices = BufferUtils.createByteBuffer(primitiveIndicesCount * 512 * 4);
-        indicesPointer = memAddress0(indices);
     }
 
     public void begin() {
@@ -156,6 +150,16 @@ public class MeshBuilder {
     }
 
     public void ensureCapacity(int vertexCount, int indexCount) {
+        if (vertices == null || indices == null) {
+            vertices = BufferUtils.createByteBuffer(primitiveVerticesSize * 256 * 4);
+            verticesPointer = verticesPointerStart = memAddress0(vertices);
+
+            indices = BufferUtils.createByteBuffer(primitiveIndicesCount * 512 * 4);
+            indicesPointer = memAddress0(indices);
+
+            return;
+        }
+
         if ((vertexI + vertexCount) * primitiveVerticesSize >= vertices.capacity()) {
             int offset = getVerticesOffset();
             int newSize = vertices.capacity() * 2;
