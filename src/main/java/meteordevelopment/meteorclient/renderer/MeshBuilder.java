@@ -46,6 +46,11 @@ public class MeshBuilder {
         primitiveIndicesCount = drawMode.firstVertexCount;
     }
 
+    public MeshBuilder(VertexFormat format, VertexFormat.DrawMode drawMode, int vertexCapacity, int indexCapacity) {
+        this(format, drawMode);
+        allocateBuffers(vertexCapacity, indexCapacity);
+    }
+
     public void begin() {
         if (building) throw new IllegalStateException("Mesh.begin() called while already building.");
 
@@ -151,12 +156,7 @@ public class MeshBuilder {
 
     public void ensureCapacity(int vertexCount, int indexCount) {
         if (vertices == null || indices == null) {
-            vertices = BufferUtils.createByteBuffer(primitiveVerticesSize * 256 * 4);
-            verticesPointer = verticesPointerStart = memAddress0(vertices);
-
-            indices = BufferUtils.createByteBuffer(primitiveIndicesCount * 512 * 4);
-            indicesPointer = memAddress0(indices);
-
+            allocateBuffers(256 * 4, 512 * 4);
             return;
         }
 
@@ -181,6 +181,14 @@ public class MeshBuilder {
             indices = newIndices;
             indicesPointer = memAddress0(indices);
         }
+    }
+
+    private void allocateBuffers(int vertexCount, int indexCount) {
+        vertices = BufferUtils.createByteBuffer(primitiveVerticesSize * vertexCount);
+        verticesPointer = verticesPointerStart = memAddress0(vertices);
+
+        indices = BufferUtils.createByteBuffer(primitiveIndicesCount * indexCount);
+        indicesPointer = memAddress0(indices);
     }
 
     public void end() {
