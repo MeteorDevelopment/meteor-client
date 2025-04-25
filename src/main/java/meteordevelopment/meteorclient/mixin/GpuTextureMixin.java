@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(GpuTexture.class)
 public abstract class GpuTextureMixin implements IGpuTexture {
-    @Shadow
+    @Shadow(remap = false)
     protected AddressMode addressModeU;
 
-    @Shadow
+    @Shadow(remap = false)
     protected AddressMode addressModeV;
 
     @Override
