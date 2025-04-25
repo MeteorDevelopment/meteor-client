@@ -60,7 +60,7 @@ public class PlayerHeadTexture extends Texture {
                         i++;
                     }
                 }
-                else i += 3;
+                else i += 4;
             }
         }
 
