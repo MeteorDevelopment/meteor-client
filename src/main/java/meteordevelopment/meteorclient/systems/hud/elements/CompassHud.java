@@ -31,16 +31,6 @@ public class CompassHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("The scale.")
-        .defaultValue(1)
-        .min(1)
-        .sliderRange(1, 5)
-        .onChanged(aDouble -> calculateSize())
-        .build()
-    );
-
     private final Setting<SettingColor> colorNorth = sgGeneral.add(new ColorSetting.Builder()
         .name("color-north")
         .description("Color of north.")
