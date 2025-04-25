@@ -18,6 +18,8 @@ public class FullScreenRenderer {
         mesh = new MeshBuilder(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES);
         mesh.begin();
 
+        mesh.ensureQuadCapacity();
+
         mesh.quad(
             mesh.vec2(-1, -1).next(),
             mesh.vec2(-1, 1).next(),
