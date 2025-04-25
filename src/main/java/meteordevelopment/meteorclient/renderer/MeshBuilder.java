@@ -46,9 +46,9 @@ public class MeshBuilder {
         primitiveIndicesCount = drawMode.firstVertexCount;
     }
 
-    public MeshBuilder(VertexFormat format, VertexFormat.DrawMode drawMode, int vertexCapacity, int indexCapacity) {
+    public MeshBuilder(VertexFormat format, VertexFormat.DrawMode drawMode, int vertexCount, int indexCount) {
         this(format, drawMode);
-        allocateBuffers(vertexCapacity, indexCapacity);
+        allocateBuffers(vertexCount, indexCount);
     }
 
     public void begin() {
