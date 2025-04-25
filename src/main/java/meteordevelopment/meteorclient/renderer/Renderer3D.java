@@ -53,13 +53,23 @@ public class Renderer3D {
 
     // Lines
 
-    public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color1, Color color2) {
-        lines.ensureLineCapacity();
+    public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color1, Color color2, boolean depth) {
+        MeshBuilder buffers = depth ? linesDepth : lines;
 
-        lines.line(
-            lines.vec3(x1, y1, z1).color(color1).next(),
-            lines.vec3(x2, y2, z2).color(color2).next()
+        buffers.ensureLineCapacity();
+
+        buffers.line(
+            buffers.vec3(x1, y1, z1).color(color1).next(),
+            buffers.vec3(x2, y2, z2).color(color2).next()
         );
+    }
+
+    public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color1, Color color2) {
+        line(x1, y1, z1, x2, y2, z2, color1, color2, false);
+    }
+
+    public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color, boolean depth) {
+        line(x1, y1, z1, x2, y2, z2, color, color, depth);
     }
 
     public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
@@ -80,15 +90,25 @@ public class Renderer3D {
 
     // Quads
 
-    public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color topLeft, Color topRight, Color bottomRight, Color bottomLeft) {
-        triangles.ensureQuadCapacity();
+    public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color topLeft, Color topRight, Color bottomRight, Color bottomLeft, boolean depth) {
+        MeshBuilder buffers = depth ? trianglesDepth : triangles;
 
-        triangles.quad(
-            triangles.vec3(x1, y1, z1).color(bottomLeft).next(),
-            triangles.vec3(x2, y2, z2).color(topLeft).next(),
-            triangles.vec3(x3, y3, z3).color(topRight).next(),
-            triangles.vec3(x4, y4, z4).color(bottomRight).next()
+        buffers.ensureQuadCapacity();
+
+        buffers.quad(
+            buffers.vec3(x1, y1, z1).color(bottomLeft).next(),
+            buffers.vec3(x2, y2, z2).color(topLeft).next(),
+            buffers.vec3(x3, y3, z3).color(topRight).next(),
+            buffers.vec3(x4, y4, z4).color(bottomRight).next()
         );
+    }
+
+    public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color topLeft, Color topRight, Color bottomRight, Color bottomLeft) {
+        quad(x1, y1 ,z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, topLeft, topRight, bottomRight, bottomLeft, false);
+    }
+
+    public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color color, boolean depth) {
+        quad(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, color, color, color, color, depth);
     }
 
     public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color color) {
