@@ -99,8 +99,10 @@ public class LightOverlay extends Module {
     private void onRender(Render3DEvent event) {
         if (crosses.isEmpty()) return;
 
+        Renderer3D renderer = seeThroughBlocks.get() ? event.renderer : event.depthRenderer;
+
         for (Cross cross : crosses) {
-            cross.render(event.renderer);
+            cross.render(renderer);
         }
     }
 
@@ -120,10 +122,9 @@ public class LightOverlay extends Module {
 
         public void render(Renderer3D renderer) {
             Color c = potential ? potentialColor.get() : color.get();
-            boolean depth = !seeThroughBlocks.get();
 
-            renderer.line(x, y, z, x + 1, y, z + 1, c, depth);
-            renderer.line(x + 1, y, z, x, y, z + 1, c, depth);
+            renderer.line(x, y, z, x + 1, y, z + 1, c);
+            renderer.line(x + 1, y, z, x, y, z + 1, c);
         }
     }
 

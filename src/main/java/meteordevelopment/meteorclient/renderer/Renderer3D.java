@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import net.minecraft.client.MinecraftClient;
@@ -13,75 +14,103 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
 public class Renderer3D {
-    public final MeshBuilder lines = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED_LINES);
-    public final MeshBuilder triangles = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED);
-    public final MeshBuilder linesDepth = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH);
-    public final MeshBuilder trianglesDepth = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED_DEPTH);
+    public final MeshBuilder lines;
+    public final MeshBuilder triangles;
+    private final RenderPipeline linesPipeline;
+    private final RenderPipeline trianglesPipeline;
+
+    public Renderer3D(RenderPipeline lines, RenderPipeline triangles) {
+        this.lines = new MeshBuilder(lines);
+        this.triangles = new MeshBuilder(triangles);
+        this.linesPipeline = lines;
+        this.trianglesPipeline = triangles;
+    }
 
     public void begin() {
         lines.begin();
         triangles.begin();
-        linesDepth.begin();
-        trianglesDepth.begin();
     }
 
     public void render(MatrixStack matrices) {
         MeshRenderer.begin()
             .attachments(MinecraftClient.getInstance().getFramebuffer())
-            .pipeline(MeteorRenderPipelines.WORLD_COLORED_LINES)
+            .pipeline(linesPipeline)
             .mesh(lines, matrices)
             .end();
 
         MeshRenderer.begin()
             .attachments(MinecraftClient.getInstance().getFramebuffer())
-            .pipeline(MeteorRenderPipelines.WORLD_COLORED)
+            .pipeline(trianglesPipeline)
             .mesh(triangles, matrices)
-            .end();
-
-        MeshRenderer.begin()
-            .attachments(MinecraftClient.getInstance().getFramebuffer())
-            .pipeline(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH)
-            .mesh(linesDepth, matrices)
-            .end();
-
-        MeshRenderer.begin()
-            .attachments(MinecraftClient.getInstance().getFramebuffer())
-            .pipeline(MeteorRenderPipelines.WORLD_COLORED_DEPTH)
-            .mesh(trianglesDepth, matrices)
             .end();
     }
 
     // Lines
 
-    public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color1, Color color2, boolean depth) {
-        MeshBuilder buffers = depth ? linesDepth : lines;
-
-        buffers.ensureLineCapacity();
-
-        buffers.line(
-            buffers.vec3(x1, y1, z1).color(color1).next(),
-            buffers.vec3(x2, y2, z2).color(color2).next()
-        );
-    }
-
     public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color1, Color color2) {
-        line(x1, y1, z1, x2, y2, z2, color1, color2, false);
-    }
+        lines.ensureLineCapacity();
 
-    public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color, boolean depth) {
-        line(x1, y1, z1, x2, y2, z2, color, color, depth);
+        lines.line(
+            lines.vec3(x1, y1, z1).color(color1).next(),
+            lines.vec3(x2, y2, z2).color(color2).next()
+        );
     }
 
     public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
         line(x1, y1, z1, x2, y2, z2, color, color);
     }
 
+    @SuppressWarnings("Duplicates")
     public void boxLines(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {
-        internalBoxLines(lines, x1, y1, z1, x2, y2, z2, color, excludeDir);
-    }
+        lines.ensureCapacity(8, 24);
 
-    public void boxLines(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir, boolean depth) {
-        internalBoxLines(depth ? linesDepth : lines, x1, y1, z1, x2, y2, z2, color, excludeDir);
+        int blb = lines.vec3(x1, y1, z1).color(color).next();
+        int blf = lines.vec3(x1, y1, z2).color(color).next();
+        int brb = lines.vec3(x2, y1, z1).color(color).next();
+        int brf = lines.vec3(x2, y1, z2).color(color).next();
+        int tlb = lines.vec3(x1, y2, z1).color(color).next();
+        int tlf = lines.vec3(x1, y2, z2).color(color).next();
+        int trb = lines.vec3(x2, y2, z1).color(color).next();
+        int trf = lines.vec3(x2, y2, z2).color(color).next();
+
+        if (excludeDir == 0) {
+            // Bottom to top
+            lines.line(blb, tlb);
+            lines.line(blf, tlf);
+            lines.line(brb, trb);
+            lines.line(brf, trf);
+
+            // Bottom loop
+            lines.line(blb, blf);
+            lines.line(brb, brf);
+            lines.line(blb, brb);
+            lines.line(blf, brf);
+
+            // Top loop
+            lines.line(tlb, tlf);
+            lines.line(trb, trf);
+            lines.line(tlb, trb);
+            lines.line(tlf, trf);
+        }
+        else {
+            // Bottom to top
+            if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.NORTH)) lines.line(blb, tlb);
+            if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.SOUTH)) lines.line(blf, tlf);
+            if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.NORTH)) lines.line(brb, trb);
+            if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.SOUTH)) lines.line(brf, trf);
+
+            // Bottom loop
+            if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.DOWN)) lines.line(blb, blf);
+            if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.DOWN)) lines.line(brb, brf);
+            if (Dir.isNot(excludeDir, Dir.NORTH) && Dir.isNot(excludeDir, Dir.DOWN)) lines.line(blb, brb);
+            if (Dir.isNot(excludeDir, Dir.SOUTH) && Dir.isNot(excludeDir, Dir.DOWN)) lines.line(blf, brf);
+
+            // Top loop
+            if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.UP)) lines.line(tlb, tlf);
+            if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.UP)) lines.line(trb, trf);
+            if (Dir.isNot(excludeDir, Dir.NORTH) && Dir.isNot(excludeDir, Dir.UP)) lines.line(tlb, trb);
+            if (Dir.isNot(excludeDir, Dir.SOUTH) && Dir.isNot(excludeDir, Dir.UP)) lines.line(tlf, trf);
+        }
     }
 
     public void blockLines(int x, int y, int z, Color color, int excludeDir) {
@@ -90,25 +119,15 @@ public class Renderer3D {
 
     // Quads
 
-    public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color topLeft, Color topRight, Color bottomRight, Color bottomLeft, boolean depth) {
-        MeshBuilder buffers = depth ? trianglesDepth : triangles;
-
-        buffers.ensureQuadCapacity();
-
-        buffers.quad(
-            buffers.vec3(x1, y1, z1).color(bottomLeft).next(),
-            buffers.vec3(x2, y2, z2).color(topLeft).next(),
-            buffers.vec3(x3, y3, z3).color(topRight).next(),
-            buffers.vec3(x4, y4, z4).color(bottomRight).next()
-        );
-    }
-
     public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color topLeft, Color topRight, Color bottomRight, Color bottomLeft) {
-        quad(x1, y1 ,z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, topLeft, topRight, bottomRight, bottomLeft, false);
-    }
+        triangles.ensureQuadCapacity();
 
-    public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color color, boolean depth) {
-        quad(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, color, color, color, color, depth);
+        triangles.quad(
+            triangles.vec3(x1, y1, z1).color(bottomLeft).next(),
+            triangles.vec3(x2, y2, z2).color(topLeft).next(),
+            triangles.vec3(x3, y3, z3).color(topRight).next(),
+            triangles.vec3(x4, y4, z4).color(bottomRight).next()
+        );
     }
 
     public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color color) {
@@ -160,12 +179,45 @@ public class Renderer3D {
 
     // Boxes
 
+    @SuppressWarnings("Duplicates")
     public void boxSides(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {
-        internalBoxSides(triangles, x1, y1, z1, x2, y2, z2, color, excludeDir);
-    }
+        triangles.ensureCapacity(8, 36);
 
-    public void boxSides(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir, boolean depth) {
-        internalBoxSides(depth ? trianglesDepth : triangles, x1, y1, z1, x2, y2, z2, color, excludeDir);
+        int blb = triangles.vec3(x1, y1, z1).color(color).next();
+        int blf = triangles.vec3(x1, y1, z2).color(color).next();
+        int brb = triangles.vec3(x2, y1, z1).color(color).next();
+        int brf = triangles.vec3(x2, y1, z2).color(color).next();
+        int tlb = triangles.vec3(x1, y2, z1).color(color).next();
+        int tlf = triangles.vec3(x1, y2, z2).color(color).next();
+        int trb = triangles.vec3(x2, y2, z1).color(color).next();
+        int trf = triangles.vec3(x2, y2, z2).color(color).next();
+
+        if (excludeDir == 0) {
+            // Bottom to top
+            triangles.quad(blb, blf, tlf, tlb);
+            triangles.quad(brb, trb, trf, brf);
+            triangles.quad(blb, tlb, trb, brb);
+            triangles.quad(blf, brf, trf, tlf);
+
+            // Bottom
+            triangles.quad(blb, brb, brf, blf);
+
+            // Top
+            triangles.quad(tlb, tlf, trf, trb);
+        }
+        else {
+            // Bottom to top
+            if (Dir.isNot(excludeDir, Dir.WEST)) triangles.quad(blb, blf, tlf, tlb);
+            if (Dir.isNot(excludeDir, Dir.EAST)) triangles.quad(brb, trb, trf, brf);
+            if (Dir.isNot(excludeDir, Dir.NORTH)) triangles.quad(blb, tlb, trb, brb);
+            if (Dir.isNot(excludeDir, Dir.SOUTH)) triangles.quad(blf, brf, trf, tlf);
+
+            // Bottom
+            if (Dir.isNot(excludeDir, Dir.DOWN)) triangles.quad(blb, brb, brf, blf);
+
+            // Top
+            if (Dir.isNot(excludeDir, Dir.UP)) triangles.quad(tlb, tlf, trf, trb);
+        }
     }
 
     public void blockSides(int x, int y, int z, Color color, int excludeDir) {
@@ -185,101 +237,5 @@ public class Renderer3D {
     public void box(Box box, Color sideColor, Color lineColor, ShapeMode mode, int excludeDir) {
         if (mode.lines()) boxLines(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, lineColor, excludeDir);
         if (mode.sides()) boxSides(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sideColor, excludeDir);
-    }
-
-    // Internal
-
-    @SuppressWarnings("Duplicates")
-    private void internalBoxLines(MeshBuilder buffers, double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {
-        buffers.ensureCapacity(8, 24);
-
-        int blb = buffers.vec3(x1, y1, z1).color(color).next();
-        int blf = buffers.vec3(x1, y1, z2).color(color).next();
-        int brb = buffers.vec3(x2, y1, z1).color(color).next();
-        int brf = buffers.vec3(x2, y1, z2).color(color).next();
-        int tlb = buffers.vec3(x1, y2, z1).color(color).next();
-        int tlf = buffers.vec3(x1, y2, z2).color(color).next();
-        int trb = buffers.vec3(x2, y2, z1).color(color).next();
-        int trf = buffers.vec3(x2, y2, z2).color(color).next();
-
-        if (excludeDir == 0) {
-            // Bottom to top
-            buffers.line(blb, tlb);
-            buffers.line(blf, tlf);
-            buffers.line(brb, trb);
-            buffers.line(brf, trf);
-
-            // Bottom loop
-            buffers.line(blb, blf);
-            buffers.line(brb, brf);
-            buffers.line(blb, brb);
-            buffers.line(blf, brf);
-
-            // Top loop
-            buffers.line(tlb, tlf);
-            buffers.line(trb, trf);
-            buffers.line(tlb, trb);
-            buffers.line(tlf, trf);
-        }
-        else {
-            // Bottom to top
-            if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.NORTH)) buffers.line(blb, tlb);
-            if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.SOUTH)) buffers.line(blf, tlf);
-            if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.NORTH)) buffers.line(brb, trb);
-            if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.SOUTH)) buffers.line(brf, trf);
-
-            // Bottom loop
-            if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.DOWN)) buffers.line(blb, blf);
-            if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.DOWN)) buffers.line(brb, brf);
-            if (Dir.isNot(excludeDir, Dir.NORTH) && Dir.isNot(excludeDir, Dir.DOWN)) buffers.line(blb, brb);
-            if (Dir.isNot(excludeDir, Dir.SOUTH) && Dir.isNot(excludeDir, Dir.DOWN)) buffers.line(blf, brf);
-
-            // Top loop
-            if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.UP)) buffers.line(tlb, tlf);
-            if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.UP)) buffers.line(trb, trf);
-            if (Dir.isNot(excludeDir, Dir.NORTH) && Dir.isNot(excludeDir, Dir.UP)) buffers.line(tlb, trb);
-            if (Dir.isNot(excludeDir, Dir.SOUTH) && Dir.isNot(excludeDir, Dir.UP)) buffers.line(tlf, trf);
-        }
-    }
-
-    @SuppressWarnings("Duplicates")
-    private void internalBoxSides(MeshBuilder buffers, double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {
-        buffers.ensureCapacity(8, 36);
-
-        int blb = buffers.vec3(x1, y1, z1).color(color).next();
-        int blf = buffers.vec3(x1, y1, z2).color(color).next();
-        int brb = buffers.vec3(x2, y1, z1).color(color).next();
-        int brf = buffers.vec3(x2, y1, z2).color(color).next();
-        int tlb = buffers.vec3(x1, y2, z1).color(color).next();
-        int tlf = buffers.vec3(x1, y2, z2).color(color).next();
-        int trb = buffers.vec3(x2, y2, z1).color(color).next();
-        int trf = buffers.vec3(x2, y2, z2).color(color).next();
-
-        if (excludeDir == 0) {
-            // Bottom to top
-            buffers.quad(blb, blf, tlf, tlb);
-            buffers.quad(brb, trb, trf, brf);
-            buffers.quad(blb, tlb, trb, brb);
-            buffers.quad(blf, brf, trf, tlf);
-
-            // Bottom
-            buffers.quad(blb, brb, brf, blf);
-
-            // Top
-            buffers.quad(tlb, tlf, trf, trb);
-        }
-        else {
-            // Bottom to top
-            if (Dir.isNot(excludeDir, Dir.WEST)) buffers.quad(blb, blf, tlf, tlb);
-            if (Dir.isNot(excludeDir, Dir.EAST)) buffers.quad(brb, trb, trf, brf);
-            if (Dir.isNot(excludeDir, Dir.NORTH)) buffers.quad(blb, tlb, trb, brb);
-            if (Dir.isNot(excludeDir, Dir.SOUTH)) buffers.quad(blf, brf, trf, tlf);
-
-            // Bottom
-            if (Dir.isNot(excludeDir, Dir.DOWN)) buffers.quad(blb, brb, brf, blf);
-
-            // Top
-            if (Dir.isNot(excludeDir, Dir.UP)) buffers.quad(tlb, tlf, trf, trb);
-        }
     }
 }
