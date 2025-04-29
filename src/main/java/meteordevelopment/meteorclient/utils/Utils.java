@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -28,6 +29,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.class_11343;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -45,6 +47,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.DyeColor;
@@ -252,26 +255,25 @@ public class Utils {
                 if (i >= 0 && i < items.length) items[i] = stacks.get(i);
             }
         }
+        // todo should we remove this? are there still instances where we might get presented container items in this
+        //  format? maybe on servers with weird multiversion setups - if they exist, test this code to ensure it works
         else if (components.contains(DataComponentTypes.BLOCK_ENTITY_DATA)) {
-            NbtComponent nbt2 = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+            NbtComponent nbt2 = components.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT);
+            NbtList nbt3 = nbt2.getNbt().getListOrEmpty("Items");
 
-            if (nbt2.contains("Items")) {
-                NbtList nbt3 = (NbtList) nbt2.getNbt().get("Items");
-                if (nbt3 == null) return;
+            for (int i = 0; i < nbt3.size(); i++) {
+                Optional<NbtCompound> compound = nbt3.getCompound(i);
+                if (compound.isEmpty()) continue;
 
-                for (int i = 0; i < nbt3.size(); i++) {
-                    Optional<NbtCompound> compound = nbt3.getCompound(i);
-                    if (compound.isEmpty()) continue;
+                Optional<Byte> slot = compound.get().getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
+                if (slot.isEmpty()) continue;
 
-                    Optional<Byte> slot = compound.get().getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
-                    if (slot.isEmpty()) continue;
-
-                    // now NPEs when mc.world == null
-                    if (slot.get() >= 0 && slot.get() < items.length) {
-                        Optional<ItemStack> stack = ItemStack.fromNbt(mc.player.getRegistryManager(), compound.get());
-                        if (stack.isEmpty()) stack = Optional.of(ItemStack.EMPTY);
-
-                        items[slot.get()] = stack.get();
+                // now NPEs when mc.world == null
+                if (slot.get() >= 0 && slot.get() < items.length) {
+                    switch (class_11343.field_60354.parse(mc.player.getRegistryManager().getOps(NbtOps.INSTANCE), compound.get())) {
+                        case DataResult.Success<class_11343> success -> items[slot.get()] = success.value().stack();
+                        case DataResult.Error<class_11343> error -> items[slot.get()] = ItemStack.EMPTY;
+                        default -> throw new MatchException(null, null);
                     }
                 }
             }
