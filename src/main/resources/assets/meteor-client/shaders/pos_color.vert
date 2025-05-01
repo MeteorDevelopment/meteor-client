@@ -3,13 +3,15 @@
 layout (location = 0) in vec4 pos;
 layout (location = 1) in vec4 color;
 
-uniform mat4 u_Proj;
-uniform mat4 u_ModelView;
+uniform MeshData {
+    mat4 proj;
+    mat4 modelView;
+} u_Mesh;
 
 out vec4 v_Color;
 
 void main() {
-    gl_Position = u_Proj * u_ModelView * pos;
+    gl_Position = u_Mesh.proj * u_Mesh.modelView * pos;
 
     v_Color = color;
 }

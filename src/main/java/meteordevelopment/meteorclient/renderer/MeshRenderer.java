@@ -12,6 +12,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -119,15 +120,14 @@ public class MeshRenderer {
                     RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor MeshRenderer", colorAttachment, clearColor);
 
                 pass.setPipeline(pipeline);
-                pass.setUniform("u_Proj", RenderSystem.getProjectionMatrix());
-                pass.setUniform("u_ModelView", RenderSystem.getModelViewStack());
+                pass.setUniform("u_Mesh", MeshUniforms.write(RenderUtils.projection, RenderSystem.getModelViewStack()));
 
                 if (setupCallback != null)
                     setupCallback.accept(pass);
 
                 pass.setVertexBuffer(0, vertexBuffer);
                 pass.setIndexBuffer(indexBuffer, VertexFormat.IndexType.INT);
-                pass.drawIndexed(0, mesh.getIndicesCount());
+                pass.drawIndexed(0, 0, mesh.getIndicesCount(), 1);
 
                 pass.close();
             }

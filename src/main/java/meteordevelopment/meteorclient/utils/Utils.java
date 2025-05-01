@@ -29,7 +29,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.class_11343;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -44,6 +43,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.inventory.StackWithSlot;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -270,9 +270,9 @@ public class Utils {
 
                 // now NPEs when mc.world == null
                 if (slot.get() >= 0 && slot.get() < items.length) {
-                    switch (class_11343.field_60354.parse(mc.player.getRegistryManager().getOps(NbtOps.INSTANCE), compound.get())) {
-                        case DataResult.Success<class_11343> success -> items[slot.get()] = success.value().stack();
-                        case DataResult.Error<class_11343> error -> items[slot.get()] = ItemStack.EMPTY;
+                    switch (StackWithSlot.CODEC.parse(mc.player.getRegistryManager().getOps(NbtOps.INSTANCE), compound.get())) {
+                        case DataResult.Success<StackWithSlot> success -> items[slot.get()] = success.value().stack();
+                        case DataResult.Error<StackWithSlot> error -> items[slot.get()] = ItemStack.EMPTY;
                         default -> throw new MatchException(null, null);
                     }
                 }

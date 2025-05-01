@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import com.mojang.blaze3d.buffers.Std140Builder;
+import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -24,9 +26,12 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.listeners.ConsumerListener;
+import net.minecraft.client.gl.DynamicUniformStorage;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+
+import java.nio.ByteBuffer;
 
 public class Blur extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -215,9 +220,11 @@ public class Blur extends Module {
             .pipeline(pipeline)
             .mesh(FullScreenRenderer.mesh)
             .setupCallback(pass -> {
-                pass.bindSampler("uTexture", sourceTexture);
-                pass.setUniform("uHalfTexelSize", 0.5f / targetFbo.getWidth(0), 0.5f / targetFbo.getHeight(0));
-                pass.setUniform("uOffset", (float) offset);
+                pass.bindSampler("u_Texture", sourceTexture);
+                pass.setUniform("u_Blur", UNIFORM_STORAGE.write(new UniformData(
+                    0.5f / targetFbo.getWidth(0), 0.5f / targetFbo.getHeight(0),
+                    (float) offset
+                )));
             })
             .end();
     }
@@ -232,5 +239,27 @@ public class Blur extends Module {
         if (screen != null) return other.get();
 
         return false;
+    }
+
+    // Uniforms
+
+    private static final int UNIFORM_SIZE = new Std140SizeCalculator()
+        .putVec2()
+        .putFloat()
+        .get();
+
+    private static final DynamicUniformStorage<UniformData> UNIFORM_STORAGE = new DynamicUniformStorage<>("Meteor - Blur UBO", UNIFORM_SIZE, 16);
+
+    public static void flipFrame() {
+        UNIFORM_STORAGE.clear();
+    }
+
+    private record UniformData(float halfTexelSizeX, float halfTexelSizeY, float offset) implements DynamicUniformStorage.Uploadable {
+        @Override
+        public void write(ByteBuffer buffer) {
+            Std140Builder.intoBuffer(buffer)
+                .putVec2(halfTexelSizeX, halfTexelSizeY)
+                .putFloat(offset);
+        }
     }
 }

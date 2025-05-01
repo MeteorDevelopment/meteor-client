@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -20,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.glfw.GLFW;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -80,10 +80,8 @@ public class PeekScreen extends ShulkerBoxScreen {
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
         Color color = Utils.getShulkerColor(storageBlock);
 
-        RenderSystem.setShaderColor(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
         int i = (width - backgroundWidth) / 2;
         int j = (height - backgroundHeight) / 2;
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, i, j, 0f, 0f, backgroundWidth, backgroundHeight, 256, 256);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, i, j, 0f, 0f, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight, 256, 256, ColorHelper.fromFloats(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f));
     }
 }

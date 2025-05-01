@@ -5,11 +5,14 @@ in vec2 v_OneTexel;
 
 uniform sampler2D u_Texture;
 uniform sampler2D u_TextureI;
-uniform vec4 u_Color;
+
+uniform ImageData {
+    vec4 color;
+} u_Image;
 
 out vec4 color;
 
 void main() {
     if (texture(u_Texture, v_TexCoord).a == 0.0) discard;
-    color = texture(u_TextureI, v_TexCoord) * u_Color;
+    color = texture(u_TextureI, v_TexCoord) * u_Image.color;
 }

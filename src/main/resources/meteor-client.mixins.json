@@ -150,6 +150,7 @@
     "ReloadStateAccessor",
     "RenderLayersMixin",
     "RenderPipelineMixin",
+    "RenderSystemMixin",
     "RenderTickCounterDynamicMixin",
     "ResourceReloadLoggerAccessor",
     "ScreenMixin",
