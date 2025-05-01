@@ -17,6 +17,7 @@ import net.minecraft.client.gui.hud.ClientBossBar;
 import net.minecraft.text.Text;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 public class BossStack extends Module {
@@ -44,7 +45,7 @@ public class BossStack extends Module {
         .build()
     );
 
-    public static final WeakHashMap<ClientBossBar, Integer> barMap = new WeakHashMap<>();
+    public static final Map<ClientBossBar, Integer> barMap = new WeakHashMap<>();
 
     public BossStack() {
         super(Categories.Render, "boss-stack", "Stacks boss bars to make your HUD less cluttered.");
@@ -53,7 +54,7 @@ public class BossStack extends Module {
     @EventHandler
     private void onFetchText(RenderBossBarEvent.BossText event) {
         if (hideName.get()) {
-            event.name = Text.of("");
+            event.name = Text.empty();
             return;
         } else if (barMap.isEmpty() || !stack.get()) return;
         ClientBossBar bar = event.bossBar;

@@ -303,7 +303,7 @@ public class InventoryTweaks extends Module {
     @EventHandler
     private void onTickPost(TickEvent.Post event) {
         // Auto Drop
-        if (mc.currentScreen instanceof HandledScreen<?> || autoDropItems.get().isEmpty()) return;
+        if (!Utils.canUpdate() || mc.currentScreen instanceof HandledScreen<?> || autoDropItems.get().isEmpty()) return;
 
         for (int i = autoDropExcludeHotbar.get() ? 9 : 0; i < mc.player.getInventory().size(); i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);

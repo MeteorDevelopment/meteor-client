@@ -9,6 +9,7 @@ import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
 import it.unimi.dsi.fastutil.ints.IntDoubleImmutablePair;
@@ -16,6 +17,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResolutionChangedEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.mixininterface.IGpuTexture;
 import meteordevelopment.meteorclient.renderer.FullScreenRenderer;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
@@ -215,6 +217,11 @@ public class Blur extends Module {
     }
 
     private void renderToFbo(GpuTexture targetFbo, GpuTexture sourceTexture, RenderPipeline pipeline, double offset) {
+        AddressMode prevAddressModeU = ((IGpuTexture) sourceTexture).meteor$getAddressModeU();
+        AddressMode prevAddressModeV = ((IGpuTexture) sourceTexture).meteor$getAddressModeV();
+
+        sourceTexture.setAddressMode(AddressMode.CLAMP_TO_EDGE);
+
         MeshRenderer.begin()
             .attachments(targetFbo, null)
             .pipeline(pipeline)
@@ -227,6 +234,8 @@ public class Blur extends Module {
                 )));
             })
             .end();
+
+        sourceTexture.setAddressMode(prevAddressModeU, prevAddressModeV);
     }
 
     private boolean shouldRender() {

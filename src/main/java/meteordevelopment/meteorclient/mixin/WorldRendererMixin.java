@@ -14,7 +14,10 @@ import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.mixininterface.IWorldRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.*;
+import meteordevelopment.meteorclient.systems.modules.render.BlockSelection;
+import meteordevelopment.meteorclient.systems.modules.render.ESP;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.postprocess.EntityShader;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
@@ -27,7 +30,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 import org.joml.Matrix4f;
@@ -38,7 +40,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -127,18 +128,6 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     @Inject(method = "onResized", at = @At("HEAD"))
     private void onResized(int width, int height, CallbackInfo info) {
         PostProcessShaders.onResized(width, height);
-    }
-
-    // Fullbright
-
-    @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/client/render/WorldRenderer$BrightnessGetter;Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 0)
-    private static int getLightmapCoordinatesModifySkyLight(int sky) {
-        return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.SKY), sky);
-    }
-
-    @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/client/render/WorldRenderer$BrightnessGetter;Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 1)
-    private static int getLightmapCoordinatesModifyBlockLight(int sky) {
-        return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.BLOCK), sky);
     }
 
     @Unique

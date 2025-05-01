@@ -5,30 +5,37 @@
 
 package meteordevelopment.meteorclient.mixin.lithium;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
 import net.caffeinemc.mods.lithium.common.entity.movement.ChunkAwareBlockCollisionSweeper;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.CollisionView;
+import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(value = ChunkAwareBlockCollisionSweeper.class)
 public abstract class ChunkAwareBlockCollisionSweeperMixin {
-    @Redirect(method = "computeNext()Lnet/minecraft/util/shape/VoxelShape;", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/ShapeContext;getCollisionShape(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/CollisionView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/shape/VoxelShape;"))
-    private VoxelShape onComputeNextCollisionBox(ShapeContext context, BlockState state, CollisionView collisionView, BlockPos pos) {
-        VoxelShape shape = context.getCollisionShape(state, collisionView, pos);
+    @Shadow
+    @Final
+    private World world;
 
-        if (collisionView != MinecraftClient.getInstance().world)
-            return shape;
+    @Final
+    @Shadow
+    private BlockPos.Mutable pos;
 
-        CollisionShapeEvent event = MeteorClient.EVENT_BUS.post(CollisionShapeEvent.get(state, pos, shape));
+    @ModifyExpressionValue(method = "computeNext()Lnet/minecraft/util/shape/VoxelShape;", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/ShapeContext;getCollisionShape(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/CollisionView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/shape/VoxelShape;"))
+    private VoxelShape modifyCollisionShape(VoxelShape original, @Local BlockState state) {
+        if (world != MinecraftClient.getInstance().world) return original;
+
+        CollisionShapeEvent event = MeteorClient.EVENT_BUS.post(CollisionShapeEvent.get(state, pos, original));
         return event.isCancelled() ? VoxelShapes.empty() : event.shape;
     }
 }

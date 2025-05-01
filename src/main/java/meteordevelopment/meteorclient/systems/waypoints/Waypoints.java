@@ -10,6 +10,8 @@ import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.systems.waypoints.events.WaypointAddedEvent;
+import meteordevelopment.meteorclient.systems.waypoints.events.WaypointRemovedEvent;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.files.StreamUtils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
@@ -86,12 +88,17 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         waypoints.add(waypoint);
         save();
 
+        MeteorClient.EVENT_BUS.post(new WaypointAddedEvent(waypoint));
+
         return false;
     }
 
     public boolean remove(Waypoint waypoint) {
         boolean removed = waypoints.remove(waypoint);
-        if (removed) save();
+        if (removed) {
+            save();
+            MeteorClient.EVENT_BUS.post(new WaypointRemovedEvent(waypoint));
+        }
 
         return removed;
     }

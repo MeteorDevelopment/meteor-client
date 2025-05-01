@@ -12,6 +12,8 @@ import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadUtils;
 import net.minecraft.nbt.NbtCompound;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 public class AccountCache implements ISerializable<AccountCache> {
     public String username = "";
     public String uuid = "";
@@ -23,7 +25,7 @@ public class AccountCache implements ISerializable<AccountCache> {
 
     public void loadHead() {
         if (uuid == null || uuid.isBlank()) return;
-        headTexture = PlayerHeadUtils.fetchHead(UndashedUuid.fromStringLenient(uuid));
+        mc.execute(() -> headTexture = PlayerHeadUtils.fetchHead(UndashedUuid.fromStringLenient(uuid)));
     }
 
     @Override

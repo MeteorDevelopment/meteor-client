@@ -387,10 +387,14 @@ public class Utils {
         return FILE_NAME_INVALID_CHARS_PATTERN.matcher(getWorldName()).replaceAll("_");
     }
 
+    /**
+     * Use {@link Utils#getFileWorldName()} if you are using the world name as a file/directory name
+     */
     public static String getWorldName() {
         // Singleplayer
         if (mc.isInSingleplayer()) {
             if (mc.world == null) return "";
+            if (mc.getServer() == null) return "FAILED_BECAUSE_LEFT_WORLD";
 
             File folder = ((MinecraftServerAccessor) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey()).toFile();
             if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
