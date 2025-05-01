@@ -13,6 +13,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.MapRenderState;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.map.MapState;
@@ -69,7 +70,8 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
         matrices.scale((float) scale, (float) scale);
         matrices.translate(8, 8);
         mc.getMapRenderer().update(new MapIdComponent(mapId), mapState, mapRenderState);
-        mc.getMapRenderer().draw(mapRenderState, matrices, consumer, false, 0xF000F0);
+        // todo fix differing matrixstacks
+        mc.getMapRenderer().draw(mapRenderState, new MatrixStack(), consumer, false, 0xF000F0);
         consumer.draw();
         matrices.popMatrix();
     }
