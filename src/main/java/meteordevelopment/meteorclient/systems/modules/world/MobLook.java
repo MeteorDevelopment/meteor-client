@@ -43,7 +43,7 @@ public class MobLook extends Module {
 
     private final Setting<Boolean> stunCreaking = sgGeneral.add(new BoolSetting.Builder()
         .name("stun-creaking")
-        .description("Automatically stares at hostile endermen to stun them in place.")
+        .description("Automatically stares at hostile creaking to stun them in place.")
         .defaultValue(true)
         .build()
     );
