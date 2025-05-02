@@ -9,6 +9,7 @@ run
 bin
 logs
 .github/builds/node_modules
+.github/moderation/node_modules
 *.iws
 *.ipr
 *.iml
