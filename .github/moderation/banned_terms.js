@@ -44,7 +44,6 @@ const token = process.env.GITHUB_TOKEN;
 const octokit = github.getOctokit(token);
 const context = github.context
 
-
 const title = context.payload.issue.title;
 const body = context.payload.issue.body;
 
@@ -56,7 +55,7 @@ async function run() {
 
         const otherModMessage =
             'Meteor does not offer support for "legit clients" like Lunar or Feather, or for launchers that ' +
-            'support cracked accounts or work on non-desktop devices. The mod likely won\' run in tandem with ' +
+            'support cracked accounts, or work on non-desktop devices. The mod likely won\' run in tandem with ' +
             'them, and if you experience any issues while doing so you must troubleshoot any issues yourself.'
 
         await closeIssue(otherModMessage, octokit, context, term);
