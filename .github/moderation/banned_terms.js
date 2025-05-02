@@ -55,7 +55,7 @@ async function run() {
 
         const otherModMessage =
             'Meteor does not offer support for "legit clients" like Lunar or Feather, or for launchers that ' +
-            'support cracked accounts, or work on non-desktop devices. The mod likely won\' run in tandem with ' +
+            'support cracked accounts, or work on non-desktop devices. The mod likely won\'t run in tandem with ' +
             'them, and if you experience any issues while doing so you must troubleshoot any issues yourself.'
 
         await closeIssue(otherModMessage, octokit, context, term);
@@ -138,7 +138,7 @@ async function closeIssue(message, octokit, context, foundTerm) {
 
     try {
         await octokit['rest'].issues.update({
-            owner, repo, issue_number: issueNumber, state: 'closed'
+            owner, repo, issue_number: issueNumber, state: 'closed', state_reason: 'not_planned'
         });
 
         core.info('Closed issue successfully.');

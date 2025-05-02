@@ -24,7 +24,7 @@ jobs:
           node-version: 22
 
       - name: Install Dependencies
-        working-directory: ./.github/moderation
+        working-directory: .github/moderation
         run: npm install
 
       - name: Check Banned Terms
