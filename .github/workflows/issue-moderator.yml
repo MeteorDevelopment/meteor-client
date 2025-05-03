@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: .github/moderation
-        run: npm install
+        run: npm ci
 
       - name: Check Banned Terms
         run: node .github/moderation/banned_terms.js
