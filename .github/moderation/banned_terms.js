@@ -3,42 +3,46 @@ import * as core from "@actions/core";
 
 const otherModTerms = [
     "feather",
-    "lunar",
     "labymod",
-    "tlauncher",
-    "pojav",
-    "optifine",
+    "lunar",
     "optifabric",
-    "wurst",
-    "origins"
+    "optifine",
+    "origins",
+    "pojav",
+    "tlauncher",
+    "wurst"
 ];
 
 const anticheatTerms = [
-    "matrix",
-    "disabler",
+    "aac",
+    "anti xray",
+    "anti aura",
+    "anticheataddition",
     "bypass",
+    "disabler",
+    "donut",
+    "godseye",
+    "grim",
+    "matrix",
     "ncp",
     "nocheat plus",
+    "spartan",
     "vulcan",
-    "grim",
-    "wraith",
-    "antiaura",
-    "anticheataddition",
-    "godseye",
-    "anti xray"
+    "watchdog",
+    "wraith"
 ];
 
 const featureTerms = [
-    "infinite reach",
-    "godmode",
-    "portal godmode",
-    "dupe",
-    "ping bypass",
-    "tp aura",
-    "force op",
     ".panic",
-    "anti vanish"
-];
+    "anti vanish",
+    "dupe",
+    "force op",
+    "god mode",
+    "infinite reach",
+    "ping bypass",
+    "portal godmode",
+    "tp aura"
+]
 
 const token = process.env.GITHUB_TOKEN;
 const octokit = github.getOctokit(token);
