@@ -124,18 +124,18 @@ public class AutoEat extends Module {
             // If we are eating check if we should still be eating
             if (shouldEat()) {
                 // Check if the item in current slot is not food
-                if (mc.player.getInventory().getStack(slot).get(DataComponentTypes.FOOD) != null) {
+                if (mc.player.getInventory().getStack(slot).get(DataComponentTypes.FOOD) == null) {
                     // If not try finding a new slot
-                    int slot = findSlot();
+                    int newSlot = findSlot();
 
                     // If no valid slot was found then stop eating
-                    if (slot == -1) {
+                    if (newSlot == -1) {
                         stopEating();
                         return;
                     }
                     // Otherwise change to the new slot
                     else {
-                        changeSlot(slot);
+                        changeSlot(newSlot);
                     }
                 }
 
