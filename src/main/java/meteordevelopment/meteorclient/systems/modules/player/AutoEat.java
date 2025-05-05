@@ -131,7 +131,7 @@ public class AutoEat extends Module {
                 return;
             }
 
-            // Check if current item is still valid food
+            // Check if the item in current slot is not food anymore
             if (mc.player.getInventory().getStack(slot).get(DataComponentTypes.FOOD) == null) {
                 int newSlot = findSlot();
 
