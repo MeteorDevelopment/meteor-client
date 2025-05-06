@@ -6,10 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.ItemListSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -50,6 +47,15 @@ public class AutoSmelter extends Module {
         .build()
     );
 
+    private final Setting<Integer> fuelAmount = sgGeneral.add(new IntSetting.Builder()
+        .name("fuel-amount")
+        .description("Amount of fuel to insert in each furnace (1-64).")
+        .defaultValue(32)
+        .range(1, 64)
+        .sliderMax(64)
+        .build()
+    );
+
     public AutoSmelter() {
         super(Categories.World, "auto-smelter", "Automatically smelts items from your inventory");
     }
@@ -78,6 +84,12 @@ public class AutoSmelter extends Module {
         insertItems(c);
     }
 
+    /**
+     * Checks and refills the fuel slot in the furnace.
+     * Will add fuel up to the specified fuel amount setting.
+     *
+     * @param c The furnace screen handler
+     */
     private void insertItems(AbstractFurnaceScreenHandler c) {
         ItemStack inputItemStack = c.slots.getFirst().getStack();
         if (!inputItemStack.isEmpty()) return;
@@ -103,12 +115,25 @@ public class AutoSmelter extends Module {
         InvUtils.move().fromId(slot).toId(0);
     }
 
+    /**
+     * Checks and refills the fuel slot in the furnace.
+     *
+     * @param c The furnace screen handler
+     */
     private void checkFuel(AbstractFurnaceScreenHandler c) {
         ItemStack fuelStack = c.slots.get(1).getStack();
 
+        // If the furnace is burning, don't do anything
         if (c.getFuelProgress() > 0) return;
         if (!fuelStack.isEmpty()) return;
 
+        // Check if we already have the maximum amount of fuel
+        if (!fuelStack.isEmpty() && fuelStack.getCount() >= fuelAmount.get()) return;
+
+        // Calculate how much more fuel we need
+        int neededFuelCount = fuelStack.isEmpty() ? fuelAmount.get() : fuelAmount.get() - fuelStack.getCount();
+
+        // Find fuel in inventory
         int slot = -1;
         for (int i = 3; i < c.slots.size(); i++) {
             ItemStack item = c.slots.get(i).getStack();
@@ -125,9 +150,15 @@ public class AutoSmelter extends Module {
             return;
         }
 
-        InvUtils.move().fromId(slot).toId(1);
+        InvUtils.move(neededFuelCount).fromId(slot).toId(1);
     }
 
+    /**
+     * Takes the smelted results from the furnace output slot.
+     * Disables the module if inventory is full and can't take results.
+     *
+     * @param c The furnace screen handler
+     */
     private void takeResults(AbstractFurnaceScreenHandler c) {
         ItemStack resultStack = c.slots.get(2).getStack();
         if (resultStack.isEmpty()) return;
