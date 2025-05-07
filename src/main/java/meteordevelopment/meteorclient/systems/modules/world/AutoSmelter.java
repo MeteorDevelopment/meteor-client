@@ -18,6 +18,7 @@ import net.minecraft.recipe.RecipePropertySet;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class AutoSmelter extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -26,7 +27,7 @@ public class AutoSmelter extends Module {
         .name("fuel-items")
         .description("Items to use as fuel")
         .defaultValue(Items.COAL, Items.CHARCOAL)
-        .filter(this::fuelItemFilter)
+        .filter(this::isFuelItem)
         .bypassFilterWhenSavingAndLoading()
         .build()
     );
@@ -35,7 +36,7 @@ public class AutoSmelter extends Module {
         .name("smeltable-items")
         .description("Items to smelt")
         .defaultValue(Items.IRON_ORE, Items.GOLD_ORE, Items.COPPER_ORE, Items.RAW_IRON, Items.RAW_COPPER, Items.RAW_GOLD)
-        .filter(this::smeltableItemFilter)
+        .filter(this::isSmeltableItem)
         .bypassFilterWhenSavingAndLoading()
         .build()
     );
@@ -60,14 +61,14 @@ public class AutoSmelter extends Module {
         super(Categories.World, "auto-smelter", "Automatically smelts items from your inventory");
     }
 
-    private boolean fuelItemFilter(Item item) {
-        if (!Utils.canUpdate()) return false;
-
-        return mc.getNetworkHandler().getFuelRegistry().getFuelItems().contains(item);
+    private boolean isFuelItem(Item item) {
+        return Utils.canUpdate() && mc.getNetworkHandler().getFuelRegistry().getFuelItems().contains(item);
     }
 
-    private boolean smeltableItemFilter(Item item) {
-        return mc.world != null && mc.world.getRecipeManager().getPropertySet(RecipePropertySet.FURNACE_INPUT).canUse(item.getDefaultStack());
+    private boolean isSmeltableItem(Item item) {
+        return mc.world != null && mc.world.getRecipeManager()
+            .getPropertySet(RecipePropertySet.FURNACE_INPUT)
+            .canUse(item.getDefaultStack());
     }
 
     public void tick(AbstractFurnaceScreenHandler c) {
@@ -94,18 +95,7 @@ public class AutoSmelter extends Module {
         ItemStack inputItemStack = c.slots.getFirst().getStack();
         if (!inputItemStack.isEmpty()) return;
 
-        int slot = -1;
-
-        for (int i = 3; i < c.slots.size(); i++) {
-            ItemStack item = c.slots.get(i).getStack();
-            if (!((IAbstractFurnaceScreenHandler) c).meteor$isItemSmeltable(item)) continue;
-            if (!smeltableItems.get().contains(item.getItem())) continue;
-            if (!smeltableItemFilter(item.getItem())) continue;
-
-            slot = i;
-            break;
-        }
-
+        int slot = findSlot(c, smeltableItems.get(), this::isSmeltableItem);
         if (disableWhenOutOfItems.get() && slot == -1) {
             error("You do not have any items in your inventory that can be smelted. Disabling.");
             toggle();
@@ -130,26 +120,16 @@ public class AutoSmelter extends Module {
         // Check if we already have the maximum amount of fuel
         if (!fuelStack.isEmpty() && fuelStack.getCount() >= fuelAmount.get()) return;
 
-        // Calculate how much more fuel we need
-        int neededFuelCount = fuelStack.isEmpty() ? fuelAmount.get() : fuelAmount.get() - fuelStack.getCount();
-
         // Find fuel in inventory
-        int slot = -1;
-        for (int i = 3; i < c.slots.size(); i++) {
-            ItemStack item = c.slots.get(i).getStack();
-            if (!fuelItems.get().contains(item.getItem())) continue;
-            if (!fuelItemFilter(item.getItem())) continue;
-
-            slot = i;
-            break;
-        }
-
+        int slot = findSlot(c, fuelItems.get(), this::isFuelItem);
         if (disableWhenOutOfItems.get() && slot == -1) {
             error("You do not have any fuel in your inventory. Disabling.");
             toggle();
             return;
         }
 
+        // Calculate how much more fuel we need
+        int neededFuelCount = fuelAmount.get() - fuelStack.getCount();
         InvUtils.move(neededFuelCount).fromId(slot).toId(1);
     }
 
@@ -164,10 +144,26 @@ public class AutoSmelter extends Module {
         if (resultStack.isEmpty()) return;
 
         InvUtils.shiftClick().slotId(2);
-
         if (!resultStack.isEmpty()) {
             error("Your inventory is full. Disabling.");
             toggle();
         }
+    }
+
+    /**
+     * Finds a slot in the player's inventory containing an item from the specified list
+     * that also satisfies the given filter condition.
+     *
+     * @param c The furnace screen handler
+     * @param items List of items to search for
+     * @param filter Additional condition the item must satisfy
+     * @return The slot ID containing a matching item, or -1 if none found
+     */
+    private int findSlot(AbstractFurnaceScreenHandler c, List<Item> items, Predicate<Item> filter) {
+        for (int i = 3; i < c.slots.size(); i++) {
+            ItemStack item = c.slots.get(i).getStack();
+            if (items.contains(item.getItem()) && filter.test(item.getItem())) return i;
+        }
+        return -1;
     }
 }
