@@ -118,7 +118,7 @@ public class AutoSmelter extends Module {
         if (!fuelStack.isEmpty()) return;
 
         // Check if we already have the maximum amount of fuel
-        if (!fuelStack.isEmpty() && fuelStack.getCount() >= fuelAmount.get()) return;
+        if (fuelStack.getCount() >= fuelAmount.get()) return;
 
         // Find fuel in inventory
         int slot = findSlot(c, fuelItems.get(), this::isFuelItem);
