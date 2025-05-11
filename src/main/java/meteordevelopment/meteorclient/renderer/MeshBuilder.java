@@ -41,7 +41,7 @@ public class MeshBuilder {
 
     public MeshBuilder(VertexFormat format, VertexFormat.DrawMode drawMode) {
         this.format = format;
-        primitiveVerticesSize = format.getVertexSize() * drawMode.firstVertexCount;
+        primitiveVerticesSize = format.getVertexSize();
     }
 
     public MeshBuilder(VertexFormat format, VertexFormat.DrawMode drawMode, int vertexCount, int indexCount) {
