@@ -101,6 +101,8 @@ public class MeshBuilder {
     }
 
     public MeshBuilder color(Color c) {
+        debugVertexBufferCapacity();
+
         long p = verticesPointer;
 
         memPutByte(p, (byte) c.r);
