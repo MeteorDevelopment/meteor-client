@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.utils;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import org.reflections.Reflections;
@@ -24,8 +23,6 @@ public class ReflectInit {
     }
 
     public static void registerPackages() {
-        add(MeteorClient.ADDON);
-
         for (MeteorAddon addon : AddonManager.ADDONS) {
             try {
                 add(addon);

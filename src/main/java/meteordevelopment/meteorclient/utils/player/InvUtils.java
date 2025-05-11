@@ -94,7 +94,7 @@ public class InvUtils {
         }
 
         if (testInMainHand(isGood)) {
-            return new FindItemResult(mc.player.getInventory().selectedSlot, mc.player.getMainHandStack().getCount());
+            return new FindItemResult(mc.player.getInventory().getSelectedSlot(), mc.player.getMainHandStack().getCount());
         }
 
         return find(isGood, 0, 8);
@@ -154,10 +154,10 @@ public class InvUtils {
     public static boolean swap(int slot, boolean swapBack) {
         if (slot == SlotUtils.OFFHAND) return true;
         if (slot < 0 || slot > 8) return false;
-        if (swapBack && previousSlot == -1) previousSlot = mc.player.getInventory().selectedSlot;
+        if (swapBack && previousSlot == -1) previousSlot = mc.player.getInventory().getSelectedSlot();
         else if (!swapBack) previousSlot = -1;
 
-        mc.player.getInventory().selectedSlot = slot;
+        mc.player.getInventory().setSelectedSlot(slot);
         ((IClientPlayerInteractionManager) mc.interactionManager).meteor$syncSelected();
         return true;
     }
@@ -185,7 +185,6 @@ public class InvUtils {
      * When writing code with quickSwap, both to and from should provide the ID of a slot, not the index.
      * From should be the slot in the hotbar, to should be the slot you're switching an item from.
      */
-
     public static Action quickSwap() {
         ACTION.type = SlotActionType.SWAP;
         return ACTION;

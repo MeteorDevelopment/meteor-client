@@ -21,6 +21,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.BlockItem;
@@ -76,7 +77,7 @@ public class BlockUtils {
 
     public static boolean place(BlockPos blockPos, FindItemResult findItemResult, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
         if (findItemResult.isOffhand()) {
-            return place(blockPos, Hand.OFF_HAND, mc.player.getInventory().selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
+            return place(blockPos, Hand.OFF_HAND, mc.player.getInventory().getSelectedSlot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
         } else if (findItemResult.isHotbar()) {
             return place(blockPos, Hand.MAIN_HAND, findItemResult.slot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
         }
@@ -127,17 +128,17 @@ public class BlockUtils {
     }
 
     public static void interact(BlockHitResult blockHitResult, Hand hand, boolean swing) {
-        boolean wasSneaking = mc.player.input.sneaking;
-        mc.player.input.sneaking = false;
+        boolean wasSneaking = mc.player.isSneaking();
+        mc.player.setSneaking(false);
 
         ActionResult result = mc.interactionManager.interactBlock(mc.player, hand, blockHitResult);
 
-        if (result.shouldSwingHand()) {
+        if (result.isAccepted()) {
             if (swing) mc.player.swingHand(hand);
             else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
         }
 
-        mc.player.input.sneaking = wasSneaking;
+        mc.player.setSneaking(wasSneaking);
     }
 
     public static boolean canPlaceBlock(BlockPos blockPos, boolean checkEntities, Block block) {
@@ -319,7 +320,7 @@ public class BlockUtils {
         if (!topSurface(downState)) {
             if (downState.getCollisionShape(mc.world, down) != VoxelShapes.fullCube())
                 return MobSpawn.Never;
-            if (downState.isTransparent(mc.world, down)) return MobSpawn.Never;
+            if (downState.isTransparent()) return MobSpawn.Never;
         }
 
         if (mc.world.getLightLevel(LightType.BLOCK, blockPos) > spawnLightLimit) return MobSpawn.Never;
@@ -364,12 +365,15 @@ public class BlockUtils {
         float hardness = state.getHardness(null, null);
         if (hardness == -1) return 0;
         else {
-            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.getInventory().main.get(slot).isSuitableFor(state) ? 30 : 100);
+            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.getInventory().getMainStacks().get(slot).isSuitableFor(state) ? 30 : 100);
         }
     }
 
+    /**
+     * @see net.minecraft.entity.player.PlayerEntity#getBlockBreakingSpeed(BlockState)
+     */
     private static double getBlockBreakingSpeed(int slot, BlockState block) {
-        double speed = mc.player.getInventory().main.get(slot).getMiningSpeedMultiplier(block);
+        double speed = mc.player.getInventory().getMainStacks().get(slot).getMiningSpeedMultiplier(block);
 
         if (speed > 1) {
             ItemStack tool = mc.player.getInventory().getStack(slot);
@@ -394,8 +398,8 @@ public class BlockUtils {
             speed *= k;
         }
 
-        if (mc.player.isSubmergedIn(FluidTags.WATER) /*fixme && !EnchantmentHelper.hasAquaAffinity(mc.player)*/) {
-            speed /= 5.0F;
+        if (mc.player.isSubmergedIn(FluidTags.WATER)) {
+            speed *= mc.player.getAttributeValue(EntityAttributes.SUBMERGED_MINING_SPEED);
         }
 
         if (!mc.player.isOnGround()) {

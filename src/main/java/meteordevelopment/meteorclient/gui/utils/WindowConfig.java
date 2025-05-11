@@ -28,9 +28,9 @@ public class WindowConfig implements ISerializable<WindowConfig> {
 
     @Override
     public WindowConfig fromTag(NbtCompound tag) {
-        expanded = tag.getBoolean("expanded");
-        x = tag.getDouble("x");
-        y = tag.getDouble("y");
+        tag.getBoolean("expanded").ifPresent(bool -> expanded = bool);
+        tag.getDouble("x").ifPresent(x1 -> x = x1);
+        tag.getDouble("y").ifPresent(y1 -> y = y1);
 
         return this;
     }

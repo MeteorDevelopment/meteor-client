@@ -5,8 +5,7 @@
 
 package meteordevelopment.meteorclient.asm;
 
-import meteordevelopment.meteorclient.asm.transformers.CanvasWorldRendererTransformer;
-import meteordevelopment.meteorclient.asm.transformers.GameRendererTransformer;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.asm.transformers.PacketInflaterTransformer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.ClassReader;
@@ -25,7 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** When mixins are just not good enough **/
+/**
+ * When mixins are just not good enough
+ **/
 public class Asm {
     public static Asm INSTANCE;
 
@@ -40,8 +41,6 @@ public class Asm {
         if (INSTANCE != null) return;
 
         INSTANCE = new Asm(System.getProperty("meteor.asm.export") != null);
-        INSTANCE.add(new GameRendererTransformer());
-        INSTANCE.add(new CanvasWorldRendererTransformer());
         INSTANCE.add(new PacketInflaterTransformer());
     }
 
@@ -66,7 +65,7 @@ public class Asm {
             export(name, bytes);
         }
 
-        return  bytes;
+        return bytes;
     }
 
     private void export(String name, byte[] bytes) {
@@ -76,7 +75,7 @@ public class Asm {
                 new File(path.toUri()).getParentFile().mkdirs();
                 Files.write(path, bytes);
             } catch (IOException e) {
-                e.printStackTrace();
+                MeteorClient.LOG.error("Failed to export transformer '{}': ", name, e);
             }
         }
     }

@@ -4,8 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
-    "AbstractBlockRenderContextMixin",
-    "AoCalculatorMixin"
+    "AbstractTerrainRenderContextMixin"
   ],
   "injectors": {
     "defaultRequire": 1

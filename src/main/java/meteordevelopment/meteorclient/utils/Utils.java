@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.utils;
 
+import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.systems.VertexSorter;
 import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -62,10 +62,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -77,12 +74,10 @@ public class Utils {
     public static final Color WHITE = new Color(255, 255, 255);
 
     private static final Random random = new Random();
-    public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
     public static boolean rendering3D = true;
     public static double frameTime;
     public static Screen screenToOpen;
-    public static VertexSorter vertexSorter;
 
     private Utils() {
     }
@@ -103,9 +98,9 @@ public class Utils {
     public static Vec3d getPlayerSpeed() {
         if (mc.player == null) return Vec3d.ZERO;
 
-        double tX = mc.player.getX() - mc.player.prevX;
-        double tY = mc.player.getY() - mc.player.prevY;
-        double tZ = mc.player.getZ() - mc.player.prevZ;
+        double tX = mc.player.getX() - mc.player.lastX;
+        double tY = mc.player.getY() - mc.player.lastY;
+        double tZ = mc.player.getZ() - mc.player.lastZ;
 
         Timer timer = Modules.get().get(Timer.class);
         if (timer.isActive()) {
@@ -148,7 +143,7 @@ public class Utils {
 
         if (!itemStack.isEmpty()) {
             Set<Object2IntMap.Entry<RegistryEntry<Enchantment>>> itemEnchantments = itemStack.getItem() == Items.ENCHANTED_BOOK
-                ? itemStack.get(DataComponentTypes.STORED_ENCHANTMENTS).getEnchantmentEntries()
+                ? itemStack.getOrDefault(DataComponentTypes.STORED_ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT).getEnchantmentEntries()
                 : itemStack.getEnchantments().getEnchantmentEntries();
 
             for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : itemEnchantments) {
@@ -210,13 +205,12 @@ public class Utils {
     }
 
     public static void unscaledProjection() {
-        vertexSorter = RenderSystem.getVertexSorting();
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), 0, 1000, 21000), VertexSorter.BY_Z);
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), 0, 1000, 21000), ProjectionType.ORTHOGRAPHIC);
         rendering3D = false;
     }
 
     public static void scaledProjection() {
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor()), (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor()), 0, 1000, 21000), vertexSorter);
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor()), (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor()), 0, 1000, 21000), ProjectionType.PERSPECTIVE);
         rendering3D = true;
     }
 
@@ -235,6 +229,7 @@ public class Utils {
         return false;
     }
 
+    @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static void getItemsInContainerItem(ItemStack itemStack, ItemStack[] items) {
         if (itemStack.getItem() == Items.ENDER_CHEST) {
             for (int i = 0; i < EChestMemory.ITEMS.size(); i++) {
@@ -260,11 +255,22 @@ public class Utils {
 
             if (nbt2.contains("Items")) {
                 NbtList nbt3 = (NbtList) nbt2.getNbt().get("Items");
+                if (nbt3 == null) return;
 
                 for (int i = 0; i < nbt3.size(); i++) {
-                    int slot = nbt3.getCompound(i).getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
+                    Optional<NbtCompound> compound = nbt3.getCompound(i);
+                    if (compound.isEmpty()) continue;
+
+                    Optional<Byte> slot = compound.get().getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
+                    if (slot.isEmpty()) continue;
+
                     // now NPEs when mc.world == null
-                    if (slot >= 0 && slot < items.length) items[slot] = ItemStack.fromNbtOrEmpty(mc.player.getRegistryManager(), nbt3.getCompound(i));
+                    if (slot.get() >= 0 && slot.get() < items.length) {
+                        Optional<ItemStack> stack = ItemStack.fromNbt(mc.player.getRegistryManager(), compound.get());
+                        if (stack.isEmpty()) stack = Optional.of(ItemStack.EMPTY);
+
+                        items[slot.get()] = stack.get();
+                    }
                 }
             }
         }
@@ -274,22 +280,26 @@ public class Utils {
         if (shulkerItem.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
             if (block == Blocks.ENDER_CHEST) return BetterTooltips.ECHEST_COLOR;
+
             if (block instanceof ShulkerBoxBlock shulkerBlock) {
                 DyeColor dye = shulkerBlock.getColor();
                 if (dye == null) return WHITE;
+
                 final int color = dye.getEntityColor();
-                return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 1f);
+                return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 255);
             }
         }
+
         return WHITE;
     }
 
+    @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static boolean hasItems(ItemStack itemStack) {
         ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) itemStack.get(DataComponentTypes.CONTAINER));
         if (container != null && !container.getStacks().isEmpty()) return true;
 
         NbtCompound compoundTag = itemStack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).getNbt();
-        return compoundTag != null && compoundTag.contains("Items", 9);
+        return compoundTag != null && compoundTag.contains("Items");
     }
 
     public static Reference2IntMap<StatusEffect> createStatusEffectMap() {
@@ -373,10 +383,14 @@ public class Utils {
         return FILE_NAME_INVALID_CHARS_PATTERN.matcher(getWorldName()).replaceAll("_");
     }
 
+    /**
+     * Use {@link Utils#getFileWorldName()} if you are using the world name as a file/directory name
+     */
     public static String getWorldName() {
         // Singleplayer
         if (mc.isInSingleplayer()) {
             if (mc.world == null) return "";
+            if (mc.getServer() == null) return "FAILED_BECAUSE_LEFT_WORLD";
 
             File folder = ((MinecraftServerAccessor) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey()).toFile();
             if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
@@ -513,13 +527,21 @@ public class Utils {
     }
 
     public static void leftClick() {
+        // check if a screen is open
+        // see net.minecraft.client.Mouse.lockCursor
+        // see net.minecraft.client.MinecraftClient.tick
+        int attackCooldown = ((MinecraftClientAccessor) mc).getAttackCooldown();
+        if (attackCooldown == 10000) {
+            ((MinecraftClientAccessor) mc).setAttackCooldown(0);
+        }
+
         mc.options.attackKey.setPressed(true);
         ((MinecraftClientAccessor) mc).leftClick();
         mc.options.attackKey.setPressed(false);
     }
 
     public static void rightClick() {
-        ((IMinecraftClient) mc).rightClick();
+        ((IMinecraftClient) mc).meteor$rightClick();
     }
 
     public static boolean isShulker(Item item) {

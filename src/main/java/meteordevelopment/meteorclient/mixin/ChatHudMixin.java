@@ -34,7 +34,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.List;
 
@@ -116,7 +115,7 @@ public abstract class ChatHudMixin implements IChatHud {
             for (int i = messages.size() - 1; i > -1; i--) {
                 if (((IChatHudLine) (Object) messages.get(i)).meteor$getId() == nextId && nextId != 0) {
                     messages.remove(i);
-                    Modules.get().get(BetterChat.class).lines.removeInt(i);
+                    getBetterChat().removeLine(i);
                 }
             }
 
@@ -167,8 +166,8 @@ public abstract class ChatHudMixin implements IChatHud {
 
     // Anti spam
 
-    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;isChatFocused()Z"), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, int i, MessageIndicator.Icon icon, List<OrderedText> list) {
+    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;isChatFocused()Z"))
+    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, @Local List<OrderedText> list) {
         if (Modules.get() == null) return; // baritone calls addMessage before we initialise
 
         getBetterChat().lines.addFirst(list.size());

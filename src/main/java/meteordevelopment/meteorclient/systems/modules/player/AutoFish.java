@@ -5,163 +5,164 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
-import meteordevelopment.meteorclient.events.world.PlaySoundEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.sound.SoundInstance;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.item.Items;
+import net.minecraft.item.FishingRodItem;
+import net.minecraft.item.ItemStack;
 
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Detection");
 
-    // General
-
-    private final Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
-        .name("auto-cast")
-        .description("Automatically casts when not fishing.")
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-switch")
+        .description("Automatically switch to a fishing rod.")
         .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Integer> ticksAutoCast = sgGeneral.add(new IntSetting.Builder()
-        .name("ticks-auto-cast")
-        .description("The amount of ticks to wait before recasting automatically.")
-        .defaultValue(10)
-        .min(0)
-        .sliderMax(60)
-        .build()
-    );
-
-    private final Setting<Integer> ticksCatch = sgGeneral.add(new IntSetting.Builder()
-        .name("catch-delay")
-        .description("The amount of ticks to wait before catching the fish.")
-        .defaultValue(6)
-        .min(0)
-        .sliderMax(60)
-        .build()
-    );
-
-    private final Setting<Integer> ticksThrow = sgGeneral.add(new IntSetting.Builder()
-        .name("throw-delay")
-        .description("The amount of ticks to wait before throwing the bobber.")
-        .defaultValue(14)
-        .min(0)
-        .sliderMax(60)
         .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
         .name("anti-break")
-        .description("Prevents fishing rod from being broken.")
-        .defaultValue(false)
+        .description("Avoid using rods that would break if they were cast.")
+        .defaultValue(true)
         .build()
     );
 
-    // Splash Detection
-
-    private final Setting<Boolean> splashDetectionRangeEnabled = sgSplashRangeDetection.add(new BoolSetting.Builder()
-        .name("splash-detection-range-enabled")
-        .description("Allows you to use multiple accounts next to each other.")
-        .defaultValue(false)
+    private final Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-cast")
+        .description("Automatically cast the fishing rod.")
+        .defaultValue(true)
         .build()
     );
 
-    private final Setting<Double> splashDetectionRange = sgSplashRangeDetection.add(new DoubleSetting.Builder()
-        .name("splash-detection-range")
-        .description("The detection range of a splash. Lower values will not work when the TPS is low.")
-        .defaultValue(10)
-        .min(0)
+    private final Setting<Integer> castDelay = sgGeneral.add(new IntSetting.Builder()
+        .name("cast-delay")
+        .description("How long to wait between recasts if the bobber fails to land in water.")
+        .defaultValue(14)
+        .min(1)
+        .sliderMax(60)
         .build()
     );
 
-    private boolean ticksEnabled;
-    private int ticksToRightClick;
-    private int ticksData;
-
-    private int autoCastTimer;
-    private boolean autoCastEnabled;
-
-    private int autoCastCheckTimer;
+    private final Setting<Integer> catchDelay = sgGeneral.add(new IntSetting.Builder()
+        .name("catch-delay")
+        .description("How long to wait after hooking a fish to reel it in.")
+        .defaultValue(6)
+        .min(1)
+        .sliderMax(20)
+        .build()
+    );
 
     public AutoFish() {
         super(Categories.Player, "auto-fish", "Automatically fishes for you.");
     }
 
+    private double castDelayLeft = 0.0;
+    private double catchDelayLeft = 0.0;
+    private boolean wasHooked = false;
+
     @Override
     public void onActivate() {
-        ticksEnabled = false;
-        autoCastEnabled = false;
-        autoCastCheckTimer = 0;
+        castDelayLeft = 0.0;
+        catchDelayLeft = 0.0;
+
+        wasHooked = false;
     }
 
     @EventHandler
-    private void onPlaySound(PlaySoundEvent event) {
-        SoundInstance p = event.sound;
-        FishingBobberEntity b = mc.player.fishHook;
+    private void onTick(TickEvent.Pre event) {
+        int bestRodSlot = findBestRod();
 
-        if (p.getId().getPath().equals("entity.fishing_bobber.splash")) {
-            if (!splashDetectionRangeEnabled.get() || Utils.distance(b.getX(), b.getY(), b.getZ(), p.getX(), p.getY(), p.getZ()) <= splashDetectionRange.get()) {
-                ticksEnabled = true;
-                ticksToRightClick = ticksCatch.get();
-                ticksData = 0;
-            }
+        if (autoSwitch.get() && bestRodSlot != -1 && mc.player.getInventory().getSelectedSlot() != bestRodSlot) {
+            InvUtils.swap(bestRodSlot, false);
         }
+
+        if (!(mc.player.getMainHandStack().getItem() instanceof FishingRodItem)) return;
+
+        tryCast();
+        tryCatch();
     }
 
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        // Auto cast
-        if (autoCastCheckTimer <= 0) {
-            autoCastCheckTimer = 30;
+    private void tryCast() {
+        if (mc.player.fishHook != null) return;
 
-            if (autoCast.get() && !ticksEnabled && !autoCastEnabled && mc.player.fishHook == null && hasFishingRod()) {
-                autoCastTimer = 0;
-                autoCastEnabled = true;
-            }
-        } else {
-            autoCastCheckTimer--;
+        if (!autoCast.get()) return;
+
+        if (castDelayLeft > 0) {
+            castDelayLeft -= TickRate.INSTANCE.getTickRate() / 20.0;
+            return;
         }
 
-        // Check for auto cast timer
-        if (autoCastEnabled) {
-            autoCastTimer++;
-
-            if (autoCastTimer > ticksAutoCast.get()) {
-                autoCastEnabled = false;
-                Utils.rightClick();
-            }
-        }
-
-        // Handle logic
-        if (ticksEnabled && ticksToRightClick <= 0) {
-            if (ticksData == 0) {
-                Utils.rightClick();
-                ticksToRightClick = ticksThrow.get();
-                ticksData = 1;
-            }
-            else if (ticksData == 1) {
-                Utils.rightClick();
-                ticksEnabled = false;
-            }
-        }
-
-        ticksToRightClick--;
+        useRod();
     }
 
-    @EventHandler
-    private void onKey(KeyEvent event) {
-        if (mc.options.useKey.isPressed()) ticksEnabled = false;
+    private void tryCatch() {
+        if (mc.player.fishHook == null) return;
+        if (mc.player.fishHook.getHookedEntity() != null) {
+            useRod();
+            return;
+        }
+
+        if (mc.player.fishHook.state != FishingBobberEntity.State.BOBBING) return;
+
+        if (!wasHooked) {
+            if (mc.player.fishHook.caughtFish) {
+                catchDelayLeft = catchDelay.get();
+                wasHooked = true;
+            }
+
+            return;
+        }
+
+        if (catchDelayLeft > 0) {
+            catchDelayLeft -= TickRate.INSTANCE.getTickRate() / 20.0;
+            return;
+        }
+
+        useRod();
     }
 
-    private boolean hasFishingRod() {
-        return InvUtils.swap(InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.FISHING_ROD && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1)).slot(), false);
+    private void useRod() {
+        Utils.rightClick();
+        wasHooked = false;
+        castDelayLeft = castDelay.get();
+    }
+
+    private int findBestRod() {
+        int bestSlot = -1;
+        int bestScore = -1;
+
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (!(stack.getItem() instanceof FishingRodItem)) continue;
+            if (antiBreak.get() && stack.getDamage() == stack.getMaxDamage() - 1) continue;
+
+            int score = 0;
+
+            score += Utils.getEnchantmentLevel(stack, Enchantments.LUCK_OF_THE_SEA);
+            score += Utils.getEnchantmentLevel(stack, Enchantments.LURE);
+            score += Utils.getEnchantmentLevel(stack, Enchantments.MENDING);
+            score += Utils.getEnchantmentLevel(stack, Enchantments.UNBREAKING);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestSlot = i;
+            }
+
+            // Found a maxed out rod
+            if (score == 10) break;
+        }
+
+        return bestSlot;
     }
 }

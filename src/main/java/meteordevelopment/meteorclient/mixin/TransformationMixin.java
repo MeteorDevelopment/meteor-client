@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Transformation.class)
 public abstract class TransformationMixin {
     @Inject(method = "apply", at = @At("HEAD"), cancellable = true)
-    private void onApply(boolean leftHanded, MatrixStack matrices, CallbackInfo info) {
-        ApplyTransformationEvent event = MeteorClient.EVENT_BUS.post(ApplyTransformationEvent.get((Transformation) (Object) this, leftHanded, matrices));
+    private void onApply(boolean leftHanded, MatrixStack.Entry entry, CallbackInfo info) {
+        ApplyTransformationEvent event = MeteorClient.EVENT_BUS.post(ApplyTransformationEvent.get((Transformation) (Object) this, leftHanded));
         if (event.isCancelled()) info.cancel();
     }
 }

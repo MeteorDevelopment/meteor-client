@@ -76,8 +76,8 @@ public abstract class System<T> implements ISerializable<T> {
                     String backupName = FilenameUtils.removeExtension(file.getName()) + "-" + ZonedDateTime.now().format(DATE_TIME_FORMATTER) + ".backup.nbt";
                     File backup = new File(file.getParentFile(), backupName);
                     StreamUtils.copy(file, backup);
-                    MeteorClient.LOG.error("Error loading " + this.name + ". Possibly corrupted?");
-                    MeteorClient.LOG.info("Saved settings backup to '" + backup + "'.");
+                    MeteorClient.LOG.error("Error loading {}. Possibly corrupted?", this.name);
+                    MeteorClient.LOG.info("Saved settings backup to '{}'.", backup);
                     e.printStackTrace();
                 }
             }

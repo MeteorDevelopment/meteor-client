@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Bounce;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Packet;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Pitch40;
-import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Bounce;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.systems.modules.player.Rotation;
@@ -26,10 +26,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ElytraItem;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.MathHelper;
@@ -183,9 +183,9 @@ public class ElytraFly extends Module {
     public final Setting<Double> pitch40rotationSpeed = sgGeneral.add(new DoubleSetting.Builder()
         .name("pitch40-rotate-speed")
         .description("The speed for pitch rotation (degrees per tick)")
-        .defaultValue(4)
+        .defaultValue(15)
         .min(1)
-        .sliderMax(6)
+        .sliderMax(20)
         .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
         .build()
     );
@@ -358,7 +358,7 @@ public class ElytraFly extends Module {
             enableGroundListener();
         }
 
-        if (mc.player.isFallFlying() && instaDrop.get()) {
+        if (mc.player.isGliding() && instaDrop.get()) {
             enableInstaDropListener();
         }
 
@@ -367,11 +367,11 @@ public class ElytraFly extends Module {
 
     @EventHandler
     private void onPlayerMove(PlayerMoveEvent event) {
-        if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem)) return;
+        if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).contains(DataComponentTypes.GLIDER))) return;
 
         currentMode.autoTakeoff();
 
-        if (mc.player.isFallFlying()) {
+        if (mc.player.isGliding()) {
 
             if (flightMode.get() != ElytraFlightModes.Bounce) {
                 currentMode.velX = 0;
@@ -398,11 +398,12 @@ public class ElytraFly extends Module {
             int chunkZ = (int) ((mc.player.getZ() + currentMode.velZ) / 16);
             if (dontGoIntoUnloadedChunks.get()) {
                 if (mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) {
-                    if (flightMode.get() != ElytraFlightModes.Bounce) ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
+                    if (flightMode.get() != ElytraFlightModes.Bounce) ((IVec3d) event.movement).meteor$set(currentMode.velX, currentMode.velY, currentMode.velZ);
                 } else {
-                    ((IVec3d) event.movement).set(0, currentMode.velY, 0);
+                    currentMode.zeroAcceleration();
+                    ((IVec3d) event.movement).meteor$set(0, currentMode.velY, 0);
                 }
-            } else if (flightMode.get() != ElytraFlightModes.Bounce) ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
+            } else if (flightMode.get() != ElytraFlightModes.Bounce) ((IVec3d) event.movement).meteor$set(currentMode.velX, currentMode.velY, currentMode.velZ);
 
             if (flightMode.get() != ElytraFlightModes.Bounce) currentMode.onPlayerMove();
         } else {
@@ -412,16 +413,16 @@ public class ElytraFly extends Module {
             }
         }
 
-        if (noCrash.get() && mc.player.isFallFlying() && flightMode.get() != ElytraFlightModes.Bounce) {
+        if (noCrash.get() && mc.player.isGliding() && flightMode.get() != ElytraFlightModes.Bounce) {
             Vec3d lookAheadPos = mc.player.getPos().add(mc.player.getVelocity().normalize().multiply(crashLookAhead.get()));
             RaycastContext raycastContext = new RaycastContext(mc.player.getPos(), new Vec3d(lookAheadPos.getX(), mc.player.getY(), lookAheadPos.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
             BlockHitResult hitResult = mc.world.raycast(raycastContext);
             if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
-                ((IVec3d) event.movement).set(0, currentMode.velY, 0);
+                ((IVec3d) event.movement).meteor$set(0, currentMode.velY, 0);
             }
         }
 
-        if (autoHover.get() && mc.player.input.sneaking && !Modules.get().get(Freecam.class).isActive() && mc.player.isFallFlying() && flightMode.get() != ElytraFlightModes.Bounce) {
+        if (autoHover.get() && mc.player.input.playerInput.sneak() && !Modules.get().get(Freecam.class).isActive() && mc.player.isGliding() && flightMode.get() != ElytraFlightModes.Bounce) {
             BlockState underState = mc.world.getBlockState(mc.player.getBlockPos().down());
             Block under = underState.getBlock();
             BlockState under2State = mc.world.getBlockState(mc.player.getBlockPos().down().down());
@@ -431,27 +432,26 @@ public class ElytraFly extends Module {
             final boolean under2Collidable = under2.collidable || !under2State.getFluidState().isEmpty();
 
             if (!underCollidable && under2Collidable) {
-                ((IVec3d)event.movement).set(event.movement.x, -0.1f, event.movement.z);
+                ((IVec3d)event.movement).meteor$set(event.movement.x, -0.1f, event.movement.z);
 
                 mc.player.setPitch(MathHelper.clamp(mc.player.getPitch(0), -50.f, 20.f)); // clamp between -50 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
             }
 
             if (underCollidable) {
-                ((IVec3d)event.movement).set(event.movement.x, -0.03f, event.movement.z);
+                ((IVec3d)event.movement).meteor$set(event.movement.x, -0.03f, event.movement.z);
 
                 mc.player.setPitch(MathHelper.clamp(mc.player.getPitch(0), -50.f, 20.f));
 
                 if (mc.player.getPos().y <= mc.player.getBlockPos().down().getY() + 1.34f) {
-                    ((IVec3d)event.movement).set(event.movement.x, 0, event.movement.z);
+                    ((IVec3d)event.movement).meteor$set(event.movement.x, 0, event.movement.z);
                     mc.player.setSneaking(false);
-                    mc.player.input.sneaking = false;
                 }
             }
         }
     }
 
     public boolean canPacketEfly() {
-        return isActive() && flightMode.get() == ElytraFlightModes.Packet && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem && !mc.player.isOnGround();
+        return isActive() && flightMode.get() == ElytraFlightModes.Packet && mc.player.getEquippedStack(EquipmentSlot.CHEST).contains(DataComponentTypes.GLIDER) && !mc.player.isOnGround();
     }
 
     @EventHandler
@@ -471,6 +471,8 @@ public class ElytraFly extends Module {
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
+        if (event.packet instanceof PlayerPositionLookS2CPacket) currentMode.zeroAcceleration();
+
         currentMode.onPacketReceive(event);
     }
 
@@ -513,9 +515,9 @@ public class ElytraFly extends Module {
     private class StaticInstaDropListener {
         @EventHandler
         private void onInstadropTick(TickEvent.Post event) {
-            if (mc.player != null && mc.player.isFallFlying()) {
+            if (mc.player != null && mc.player.isGliding()) {
                 mc.player.setVelocity(0, 0, 0);
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
             } else {
                 disableInstaDropListener();
             }

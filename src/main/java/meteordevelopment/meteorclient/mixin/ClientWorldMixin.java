@@ -60,11 +60,11 @@ public abstract class ClientWorldMixin {
      * @author Walaryne
      */
     @Inject(method = "getSkyColor", at = @At("HEAD"), cancellable = true)
-    private void onGetSkyColor(Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Vec3d> info) {
+    private void onGetSkyColor(Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Integer> cir) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customSkyColor.get()) {
-            info.setReturnValue(ambience.skyColor().getVec3d());
+            cir.setReturnValue(ambience.skyColor().getPacked());
         }
     }
 
@@ -72,11 +72,11 @@ public abstract class ClientWorldMixin {
      * @author Walaryne
      */
     @Inject(method = "getCloudsColor", at = @At("HEAD"), cancellable = true)
-    private void onGetCloudsColor(float tickDelta, CallbackInfoReturnable<Vec3d> info) {
+    private void onGetCloudsColor(float tickDelta, CallbackInfoReturnable<Integer> info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customCloudColor.get()) {
-            info.setReturnValue(ambience.cloudColor.get().getVec3d());
+            info.setReturnValue(ambience.cloudColor.get().getPacked());
         }
     }
 

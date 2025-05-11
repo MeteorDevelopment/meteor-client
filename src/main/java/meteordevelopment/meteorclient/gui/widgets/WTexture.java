@@ -28,6 +28,6 @@ public class WTexture extends WWidget {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        if (texture.isValid()) renderer.texture(x, y, super.width, super.height, rotation, texture);
+        renderer.texture(x, y, super.width, super.height, rotation, texture);
     }
 }

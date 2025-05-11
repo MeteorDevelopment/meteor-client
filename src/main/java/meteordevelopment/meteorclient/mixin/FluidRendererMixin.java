@@ -25,30 +25,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(FluidRenderer.class)
 public abstract class FluidRendererMixin {
     @Unique private final ThreadLocal<Integer> alphas = new ThreadLocal<>();
+    @Unique private final ThreadLocal<Boolean> ambient = ThreadLocal.withInitial(() -> false);
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void onRender(BlockRenderView world, BlockPos pos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState, CallbackInfo info) {
         Ambience ambience = Modules.get().get(Ambience.class);
+        ambient.set(ambience.isActive() && ambience.customLavaColor.get() && fluidState.isIn(FluidTags.LAVA));
 
-        if (ambience.isActive() && ambience.customLavaColor.get() && fluidState.isIn(FluidTags.LAVA)) {
-            alphas.set(-2);
-        }
-        else {
-            // Xray and Wallhack
-            int alpha = Xray.getAlpha(fluidState.getBlockState(), pos);
+        // Xray and Wallhack
+        int alpha = Xray.getAlpha(fluidState.getBlockState(), pos);
 
-            if (alpha == 0) info.cancel();
-            else alphas.set(alpha);
-        }
+        if (alpha == 0) info.cancel();
+        else alphas.set(alpha);
     }
 
     @Inject(method = "vertex", at = @At("HEAD"), cancellable = true)
     private void onVertex(VertexConsumer vertexConsumer, float x, float y, float z, float red, float green, float blue, float u, float v, int light, CallbackInfo info) {
         int alpha = alphas.get();
 
-        if (alpha == -2) {
+        if (ambient.get()) {
             Color color = Modules.get().get(Ambience.class).lavaColor.get();
-            vertex(vertexConsumer, x, y, z, color.r, color.g, color.b, color.a, u, v, light);
+            vertex(vertexConsumer, x, y, z, color.r, color.g, color.b, (alpha != -1 ? alpha : color.a), u, v, light);
             info.cancel();
         }
         else if (alpha != -1) {

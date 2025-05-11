@@ -114,7 +114,7 @@ public class MiddleClickExtra extends Module {
             return;
         }
 
-        selectedSlot = mc.player.getInventory().selectedSlot;
+        selectedSlot = mc.player.getInventory().getSelectedSlot();
         itemSlot = result.slot();
         wasHeld = result.isMainHand();
 

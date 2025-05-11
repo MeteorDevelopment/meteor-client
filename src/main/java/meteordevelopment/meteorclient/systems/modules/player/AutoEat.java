@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
+    @SuppressWarnings("unchecked")
     private static final Class<? extends Module>[] MODULELIST = new Class[]{KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class, Nuker.class, InfinityMiner.class, AutoFish.class};
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -41,7 +42,7 @@ public class AutoEat extends Module {
 
     // General
 
-    private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+    public final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
         .name("blacklist")
         .description("Which items to not eat.")
         .defaultValue(
@@ -166,7 +167,7 @@ public class AutoEat extends Module {
     }
 
     private void startEating() {
-        prevSlot = mc.player.getInventory().selectedSlot;
+        prevSlot = mc.player.getInventory().getSelectedSlot();
         eat();
 
         // Pause Auras, Nuker, InfinityMiner and AutoFish

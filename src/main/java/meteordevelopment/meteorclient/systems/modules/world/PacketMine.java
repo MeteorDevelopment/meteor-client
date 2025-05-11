@@ -134,7 +134,7 @@ public class PacketMine extends Module {
         for (MyBlock block : blocks) blockPool.free(block);
         blocks.clear();
         if (shouldUpdateSlot) {
-            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
+            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().getSelectedSlot()));
             shouldUpdateSlot = false;
         }
     }
@@ -165,7 +165,7 @@ public class PacketMine extends Module {
         blocks.removeIf(MyBlock::shouldRemove);
 
         if (shouldUpdateSlot) {
-            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
+            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().getSelectedSlot()));
             shouldUpdateSlot = false;
         }
 
@@ -175,7 +175,7 @@ public class PacketMine extends Module {
             for (MyBlock block : blocks) {
                 if (block.isReady()) {
                     FindItemResult slot = InvUtils.findFastestTool(block.blockState);
-                    if (!slot.found() || mc.player.getInventory().selectedSlot == slot.slot()) continue;
+                    if (!slot.found() || mc.player.getInventory().getSelectedSlot() == slot.slot()) continue;
                     mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot.slot()));
                     swapped = true;
                     shouldUpdateSlot = true;
@@ -250,7 +250,7 @@ public class PacketMine extends Module {
                 }
             }
 
-            progress += BlockUtils.getBreakDelta(bestSlot != -1 ? bestSlot : mc.player.getInventory().selectedSlot, blockState);
+            progress += BlockUtils.getBreakDelta(bestSlot != -1 ? bestSlot : mc.player.getInventory().getSelectedSlot(), blockState);
         }
 
         private void sendMinePackets() {

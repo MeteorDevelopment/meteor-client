@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.ApplyTransformationEvent;
 import meteordevelopment.meteorclient.events.render.RenderItemEntityEvent;
+import meteordevelopment.meteorclient.mixin.LayerRenderStateAccessor;
 import meteordevelopment.meteorclient.mixininterface.IBakedQuad;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -15,18 +16,17 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.render.model.json.Transformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.random.Random;
+import org.joml.Vector3f;
+
+import java.util.List;
 
 public class ItemPhysics extends Module {
     private static final Direction[] FACES = { null, Direction.UP, Direction.DOWN, Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
@@ -42,7 +42,7 @@ public class ItemPhysics extends Module {
     );
 
     private final Random random = Random.createLocal();
-    private boolean renderingItem;
+    private boolean skipTransformation;
 
     public ItemPhysics() {
         super(Categories.Render, "item-physics", "Applies physics to items on the ground.");
@@ -50,58 +50,63 @@ public class ItemPhysics extends Module {
 
     @EventHandler
     private void onRenderItemEntity(RenderItemEntityEvent event) {
-        MatrixStack matrices = event.matrixStack;
-        matrices.push();
-
-        ItemStack itemStack = event.itemEntity.getStack();
-        BakedModel model = getModel(event.itemEntity);
-        ModelInfo info = getInfo(model);
-
-        random.setSeed(event.itemEntity.getId() * 2365798L);
-
-        applyTransformation(matrices, model);
-        matrices.translate(0, info.offsetY, 0);
-        offsetInWater(matrices, event.itemEntity);
-        preventZFighting(matrices, event.itemEntity);
-
-        if (info.flat) {
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
-            matrices.translate(0, 0, info.offsetZ);
-        }
-
-        if (randomRotation.get()) {
-            RotationAxis axis = RotationAxis.POSITIVE_Y;
-            if (info.flat) axis = RotationAxis.POSITIVE_Z;
-
-            float degrees = (random.nextFloat() * 2 - 1) * 90;
-            matrices.multiply(axis.rotationDegrees(degrees));
-        }
-
-        renderItem(event, matrices, itemStack, model, info);
-
-        matrices.pop();
         event.cancel();
+
+        if (event.renderState.itemRenderState.isEmpty())
+            return;
+
+        MatrixStack matrices = event.matrixStack;
+
+        random.setSeed(event.renderState.seed);
+
+        for (int i = 0; i < event.renderState.itemRenderState.layerCount; i++) {
+            ItemRenderState.LayerRenderState layer = event.renderState.itemRenderState.layers[i];
+            ModelInfo info = getInfo(layer.getQuads());
+
+            matrices.push();
+            applyTransformation(matrices, ((LayerRenderStateAccessor) layer).getTransform());
+            matrices.translate(0, info.offsetY, 0);
+            offsetInWater(matrices, event.itemEntity);
+
+            if (info.flat) {
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
+                matrices.translate(0, 0, info.offsetZ);
+            }
+
+            if (randomRotation.get()) {
+                RotationAxis axis = RotationAxis.POSITIVE_Y;
+                if (info.flat) axis = RotationAxis.POSITIVE_Z;
+
+                float degrees = (random.nextFloat() * 2 - 1) * 90;
+                matrices.multiply(axis.rotationDegrees(degrees));
+            }
+
+            renderLayer(event, info);
+
+            matrices.pop();
+        }
     }
 
     @EventHandler
     private void onApplyTransformation(ApplyTransformationEvent event) {
-        if (renderingItem) event.cancel();
+        if (skipTransformation)
+            event.cancel();
     }
 
-    private void renderItem(RenderItemEntityEvent event, MatrixStack matrices, ItemStack itemStack, BakedModel model, ModelInfo info) {
-        renderingItem = true;
-        int count = getRenderedCount(itemStack);
+    private void renderLayer(RenderItemEntityEvent event, ModelInfo info) {
+        MatrixStack matrices = event.matrixStack;
+        skipTransformation = true;
 
-        for (int i = 0; i < count; i++) {
+        for (int j = 0; j < event.renderState.renderedAmount; j++) {
             matrices.push();
 
-            if (i > 0) {
+            if (j > 0) {
                 float x = (random.nextFloat() * 2 - 1) * 0.25f;
                 float z = (random.nextFloat() * 2 - 1) * 0.25f;
                 translate(matrices, info, x, 0, z);
             }
 
-            event.itemRenderer.renderItem(itemStack, ModelTransformationMode.GROUND, false, matrices, event.vertexConsumerProvider, event.light, OverlayTexture.DEFAULT_UV, model);
+            event.renderState.itemRenderState.render(matrices, event.vertexConsumerProvider, event.light, OverlayTexture.DEFAULT_UV);
 
             matrices.pop();
 
@@ -109,7 +114,7 @@ public class ItemPhysics extends Module {
             translate(matrices, info, 0, y, 0);
         }
 
-        renderingItem = false;
+        skipTransformation = false;
     }
 
     private void translate(MatrixStack matrices, ModelInfo info, float x, float y, float z) {
@@ -122,26 +127,14 @@ public class ItemPhysics extends Module {
         matrices.translate(x, y, z);
     }
 
-    private int getRenderedCount(ItemStack stack) {
-        int i = 1;
+    private void applyTransformation(MatrixStack matrices, Transformation transform) {
+        transform = new Transformation(
+            transform.rotation(),
+            new Vector3f(transform.translation().x(), 0, transform.translation().z()),
+            transform.scale()
+        );
 
-        if (stack.getCount() > 48) i = 5;
-        else if (stack.getCount() > 32) i = 4;
-        else if (stack.getCount() > 16) i = 3;
-        else if (stack.getCount() > 1) i = 2;
-
-        return i;
-    }
-
-    private void applyTransformation(MatrixStack matrices, BakedModel model) {
-        Transformation transformation = model.getTransformation().ground;
-
-        float prevY = transformation.translation.y;
-        transformation.translation.y = 0;
-
-        transformation.apply(false, matrices);
-
-        transformation.translation.y = prevY;
+        transform.apply(false, matrices.peek());
     }
 
     private void offsetInWater(MatrixStack matrices, ItemEntity entity) {
@@ -150,45 +143,22 @@ public class ItemPhysics extends Module {
         }
     }
 
-    private void preventZFighting(MatrixStack matrices, ItemEntity entity) {
-        float offset = 0.0001f;
-
-        float distance = (float) mc.gameRenderer.getCamera().getPos().distanceTo(entity.getPos());
-        offset = Math.min(offset * Math.max(1, distance), 0.01f); // Ensure distance is at least 1 and that final offset is not bigger than 0.01
-
-        matrices.translate(0, offset, 0);
-    }
-
-    private BakedModel getModel(ItemEntity entity) {
-        ItemStack itemStack = entity.getStack();
-
-        // Mojang be like
-        if (itemStack.isOf(Items.TRIDENT)) return mc.getItemRenderer().getModels().getModelManager().getModel(ItemRenderer.TRIDENT);
-        if (itemStack.isOf(Items.SPYGLASS)) return mc.getItemRenderer().getModels().getModelManager().getModel(ItemRenderer.SPYGLASS);
-
-        return mc.getItemRenderer().getModel(itemStack, entity.getWorld(), null, entity.getId());
-    }
-
-    private ModelInfo getInfo(BakedModel model) {
-        Random random = Random.createLocal();
-
+    private ModelInfo getInfo(List<BakedQuad> quads) {
         float minX = Float.MAX_VALUE, maxX = Float.MIN_VALUE;
         float minY = Float.MAX_VALUE, maxY = Float.MIN_VALUE;
         float minZ = Float.MAX_VALUE, maxZ = Float.MIN_VALUE;
 
-        for (Direction face : FACES) {
-            for (BakedQuad _quad : model.getQuads(null, face, random)) {
-                IBakedQuad quad = (IBakedQuad) _quad;
+        for (BakedQuad _quad : quads) {
+            IBakedQuad quad = (IBakedQuad) (Object) _quad;
 
-                for (int i = 0; i < 4; i++) {
-                    switch (_quad.getFace()) {
-                        case DOWN -> minY = Math.min(minY, quad.meteor$getY(i));
-                        case UP -> maxY = Math.max(maxY, quad.meteor$getY(i));
-                        case NORTH -> minZ = Math.min(minZ, quad.meteor$getZ(i));
-                        case SOUTH -> maxZ = Math.max(maxZ, quad.meteor$getZ(i));
-                        case WEST -> minX = Math.min(minX, quad.meteor$getX(i));
-                        case EAST -> maxX = Math.max(maxX, quad.meteor$getX(i));
-                    }
+            for (int i = 0; i < 4; i++) {
+                switch (_quad.face()) {
+                    case DOWN -> minY = Math.min(minY, quad.meteor$getY(i));
+                    case UP -> maxY = Math.max(maxY, quad.meteor$getY(i));
+                    case NORTH -> minZ = Math.min(minZ, quad.meteor$getZ(i));
+                    case SOUTH -> maxZ = Math.max(maxZ, quad.meteor$getZ(i));
+                    case WEST -> minX = Math.min(minX, quad.meteor$getX(i));
+                    case EAST -> maxX = Math.max(maxX, quad.meteor$getX(i));
                 }
             }
         }

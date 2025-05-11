@@ -46,12 +46,12 @@ public abstract class ClientConnectionMixin {
     private void onHandlePacket(ChannelHandlerContext channelHandlerContext, Packet<?> packet, CallbackInfo ci) {
         if (packet instanceof BundleS2CPacket bundle) {
             for (Iterator<Packet<? super ClientPlayPacketListener>> it = bundle.getPackets().iterator(); it.hasNext(); ) {
-                if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(it.next(), (ClientConnection) (Object) this)).isCancelled()) it.remove();
+                if (MeteorClient.EVENT_BUS.post(new PacketEvent.Receive(it.next(), (ClientConnection) (Object) this)).isCancelled()) it.remove();
             }
-        } else if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet, (ClientConnection) (Object) this)).isCancelled()) ci.cancel();
+        } else if (MeteorClient.EVENT_BUS.post(new PacketEvent.Receive(packet, (ClientConnection) (Object) this)).isCancelled()) ci.cancel();
     }
 
-    @Inject(method = "disconnect", at = @At("HEAD"))
+    @Inject(method = "disconnect(Lnet/minecraft/text/Text;)V", at = @At("HEAD"))
     private void disconnect(Text disconnectReason, CallbackInfo ci) {
         if (Modules.get().get(HighwayBuilder.class).isActive()) {
             MutableText text = Text.literal("%n%n%s[%sHighway Builder%s] Statistics:%n".formatted(Formatting.GRAY, Formatting.BLUE, Formatting.GRAY));
@@ -68,14 +68,14 @@ public abstract class ClientConnectionMixin {
 
     @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/PacketCallbacks;)V", cancellable = true)
     private void onSendPacketHead(Packet<?> packet, PacketCallbacks callbacks, CallbackInfo ci) {
-        if (MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet, (ClientConnection) (Object) this)).isCancelled()) {
+        if (MeteorClient.EVENT_BUS.post(new PacketEvent.Send(packet, (ClientConnection) (Object) this)).isCancelled()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "send(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/PacketCallbacks;)V", at = @At("TAIL"))
     private void onSendPacketTail(Packet<?> packet, @Nullable PacketCallbacks callbacks, CallbackInfo ci) {
-        MeteorClient.EVENT_BUS.post(PacketEvent.Sent.get(packet, (ClientConnection) (Object) this));
+        MeteorClient.EVENT_BUS.post(new PacketEvent.Sent(packet, (ClientConnection) (Object) this));
     }
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)

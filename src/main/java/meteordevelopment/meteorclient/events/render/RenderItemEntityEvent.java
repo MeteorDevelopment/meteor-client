@@ -6,34 +6,33 @@
 package meteordevelopment.meteorclient.events.render;
 
 import meteordevelopment.meteorclient.events.Cancellable;
+import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
+import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.render.entity.state.ItemEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.util.math.random.Random;
 
 public class RenderItemEntityEvent extends Cancellable {
     private static final RenderItemEntityEvent INSTANCE = new RenderItemEntityEvent();
 
     public ItemEntity itemEntity;
-    public float f;
+    public ItemEntityRenderState renderState;
     public float tickDelta;
     public MatrixStack matrixStack;
     public VertexConsumerProvider vertexConsumerProvider;
     public int light;
-    public Random random;
-    public ItemRenderer itemRenderer;
+    public ItemModelManager itemModelManager;
 
-    public static RenderItemEntityEvent get(ItemEntity itemEntity, float f, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, Random random, ItemRenderer itemRenderer) {
+    public static RenderItemEntityEvent get(ItemEntityRenderState renderState, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, ItemModelManager itemModelManager) {
         INSTANCE.setCancelled(false);
-        INSTANCE.itemEntity = itemEntity;
-        INSTANCE.f = f;
+        INSTANCE.itemEntity = (ItemEntity) ((IEntityRenderState) renderState).meteor$getEntity();
+        INSTANCE.renderState = renderState;
         INSTANCE.tickDelta = tickDelta;
         INSTANCE.matrixStack = matrixStack;
         INSTANCE.vertexConsumerProvider = vertexConsumerProvider;
         INSTANCE.light = light;
-        INSTANCE.random = random;
-        INSTANCE.itemRenderer = itemRenderer;
+        INSTANCE.itemModelManager = itemModelManager;
         return INSTANCE;
     }
 }

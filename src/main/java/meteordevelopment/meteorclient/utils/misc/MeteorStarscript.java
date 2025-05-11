@@ -87,7 +87,7 @@ public class MeteorStarscript {
         // Meteor
         ss.set("meteor", new ValueMap()
             .set("name", MeteorClient.NAME)
-            .set("version", MeteorClient.VERSION != null ? (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION.toString() : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD) : "")
+            .set("version", MeteorClient.VERSION != null ? (MeteorClient.BUILD_NUMBER.isEmpty() ? MeteorClient.VERSION.toString() : MeteorClient.VERSION + " " + MeteorClient.BUILD_NUMBER) : "")
             .set("modules", () -> Value.number(Modules.get().getAll().size()))
             .set("active_modules", () -> Value.number(Modules.get().getActive().size()))
             .set("is_module_active", MeteorStarscript::isModuleActive)
@@ -133,6 +133,7 @@ public class MeteorStarscript {
             .set("health", () -> Value.number(mc.player != null ? mc.player.getHealth() : 0))
             .set("absorption", () -> Value.number(mc.player != null ? mc.player.getAbsorptionAmount() : 0))
             .set("hunger", () -> Value.number(mc.player != null ? mc.player.getHungerManager().getFoodLevel() : 0))
+            .set("saturation", () -> Value.number(mc.player != null ? mc.player.getHungerManager().getSaturationLevel() : 0))
 
             .set("speed", () -> Value.number(Utils.getPlayerSpeed().horizontalLength()))
             .set("speed_all", new ValueMap()
@@ -148,7 +149,7 @@ public class MeteorStarscript {
             .set("dimension", () -> Value.string(PlayerUtils.getDimension().name()))
             .set("opposite_dimension", () -> Value.string(PlayerUtils.getDimension().opposite().name()))
 
-            .set("gamemode", () -> mc.player != null ? Value.string(StringUtils.capitalize(PlayerUtils.getGameMode().getName())) : Value.null_())
+            .set("gamemode", () -> PlayerUtils.getGameMode() != null ? Value.string(StringUtils.capitalize(PlayerUtils.getGameMode().getId())) : Value.null_())
 
             .set("pos", new ValueMap()
                 .set("_toString", () -> posString(false, false))
@@ -231,6 +232,7 @@ public class MeteorStarscript {
     public static Section runSection(Script script) {
         return runSection(script, new StringBuilder());
     }
+
     public static String run(Script script) {
         return run(script, new StringBuilder());
     }
@@ -387,6 +389,7 @@ public class MeteorStarscript {
         if (argCount != 1) ss.error("player.get_item() requires 1 argument, got %d.", argCount);
 
         int i = (int) ss.popNumber("First argument to player.get_item() needs to be a number.");
+        if (i < 0) ss.error("First argument to player.get_item() needs to be a non-negative integer.", i);
         return mc.player != null ? wrap(mc.player.getInventory().getStack(i)) : Value.null_();
     }
 
@@ -507,10 +510,13 @@ public class MeteorStarscript {
         if (mc.player == null || mc.world == null) return Value.string("");
 
         BP.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
-        Identifier id = mc.world.getRegistryManager().get(RegistryKeys.BIOME).getId(mc.world.getBiome(BP).value());
-        if (id == null) return Value.string("Unknown");
-
-        return Value.string(Arrays.stream(id.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" ")));
+        return mc.world.getRegistryManager().getOptional(RegistryKeys.BIOME)
+            .map(biomeRegistry -> {
+                Identifier id = biomeRegistry.getId(mc.world.getBiome(BP).value());
+                if (id == null) return Value.string("Unknown");
+                return Value.string(Arrays.stream(id.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" ")));
+            })
+            .orElse(Value.string("Unknown"));
     }
 
     private static Value handOrOffhand() {

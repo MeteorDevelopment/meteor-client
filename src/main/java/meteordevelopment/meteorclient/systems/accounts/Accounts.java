@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.systems.accounts;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
-import meteordevelopment.meteorclient.systems.accounts.types.EasyMCAccount;
 import meteordevelopment.meteorclient.systems.accounts.types.MicrosoftAccount;
 import meteordevelopment.meteorclient.systems.accounts.types.TheAlteningAccount;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
@@ -67,26 +66,21 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
 
     @Override
     public Accounts fromTag(NbtCompound tag) {
-        MeteorExecutor.execute(() -> accounts = NbtUtils.listFromTag(tag.getList("accounts", 10), tag1 -> {
+        MeteorExecutor.execute(() -> accounts = NbtUtils.listFromTag(tag.getListOrEmpty("accounts"), tag1 -> {
             NbtCompound t = (NbtCompound) tag1;
             if (!t.contains("type")) return null;
 
-            AccountType type = AccountType.valueOf(t.getString("type"));
+            AccountType type = AccountType.valueOf(t.getString("type", ""));
 
             try {
-                Account<?> account = switch (type) {
+                return switch (type) {
                     case Cracked ->     new CrackedAccount(null).fromTag(t);
                     case Microsoft ->   new MicrosoftAccount(null).fromTag(t);
                     case TheAltening -> new TheAlteningAccount(null).fromTag(t);
-                    case EasyMC -> new EasyMCAccount(null).fromTag(t);
                 };
-
-                if (account.fetchInfo()) return account;
             } catch (NbtException e) {
                 return null;
             }
-
-            return null;
         }));
 
         return this;

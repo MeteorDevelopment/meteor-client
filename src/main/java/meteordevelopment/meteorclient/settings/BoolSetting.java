@@ -44,7 +44,7 @@ public class BoolSetting extends Setting<Boolean> {
 
     @Override
     public Boolean load(NbtCompound tag) {
-        set(tag.getBoolean("value"));
+        set(tag.getBoolean("value", false));
 
         return get();
     }

@@ -124,14 +124,14 @@ public class Quiver extends Module {
 
         if (!bow.isMainHand()) {
             if (wasHotbar) InvUtils.swap(bow.slot(), true);
-            else InvUtils.move().from(mc.player.getInventory().selectedSlot).to(prevSlot);
+            else InvUtils.move().from(mc.player.getInventory().getSelectedSlot()).to(prevSlot);
         } else wasMainhand = true;
 
         arrowSlots.clear();
         List<StatusEffect> usedEffects = new ArrayList<>();
 
         for (int i = mc.player.getInventory().size(); i > 0; i--) {
-            if (i == mc.player.getInventory().selectedSlot) continue;
+            if (i == mc.player.getInventory().getSelectedSlot()) continue;
 
             ItemStack item = mc.player.getInventory().getStack(i);
 
@@ -156,7 +156,7 @@ public class Quiver extends Module {
     public void onDeactivate() {
         if (!wasMainhand) {
             if (wasHotbar) InvUtils.swapBack();
-            else InvUtils.move().from(mc.player.getInventory().selectedSlot).to(prevSlot);
+            else InvUtils.move().from(mc.player.getInventory().getSelectedSlot()).to(prevSlot);
         }
     }
 
@@ -184,7 +184,7 @@ public class Quiver extends Module {
                 int targetSlot = arrowSlots.getFirst();
                 arrowSlots.removeFirst();
 
-                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround()));
+                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround(), mc.player.horizontalCollision));
                 mc.options.useKey.setPressed(false);
                 mc.interactionManager.stopUsingItem(mc.player);
                 if (targetSlot != 9) InvUtils.move().from(9).to(targetSlot);

@@ -71,7 +71,7 @@ public class VanillaTextRenderer implements TextRenderer {
         y += 0.5 * scale;
 
         int preA = color.a;
-        color.a = (int) ((color.a / 255 * alpha) * 255);
+        color.a = (int) (((double) color.a / 255 * alpha) * 255);
 
         Matrix4f matrix = emptyMatrix;
         if (scaleIndividually) {
@@ -96,22 +96,17 @@ public class VanillaTextRenderer implements TextRenderer {
     }
 
     @Override
-    public void end(MatrixStack matrices) {
+    public void end() {
         if (!building) throw new RuntimeException("VanillaTextRenderer.end() called without calling begin()");
 
         Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
 
-        RenderSystem.disableDepthTest();
         matrixStack.pushMatrix();
-        if (matrices != null) matrixStack.mul(matrices.peek().getPositionMatrix());
         if (!scaleIndividually) matrixStack.scale((float) scale, (float) scale, 1);
-        RenderSystem.applyModelViewMatrix();
 
         immediate.draw();
 
         matrixStack.popMatrix();
-        RenderSystem.enableDepthTest();
-        RenderSystem.applyModelViewMatrix();
 
         this.scale = 2;
         this.building = false;

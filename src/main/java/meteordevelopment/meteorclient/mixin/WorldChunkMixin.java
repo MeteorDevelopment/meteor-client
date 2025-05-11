@@ -23,7 +23,7 @@ public abstract class WorldChunkMixin {
     @Shadow @Final World world;
 
     @Inject(method = "setBlockState", at = @At("TAIL"))
-    private void onSetBlockState(BlockPos pos, BlockState state, boolean moved, CallbackInfoReturnable<BlockState> info) {
+    private void onSetBlockState(BlockPos pos, BlockState state, int flags, CallbackInfoReturnable<BlockState> info) {
         if (world.isClient) MeteorClient.EVENT_BUS.post(BlockUpdateEvent.get(pos, info.getReturnValue(), state));
     }
 }

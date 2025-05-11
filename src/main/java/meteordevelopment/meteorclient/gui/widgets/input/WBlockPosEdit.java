@@ -12,13 +12,13 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static meteordevelopment.meteorclient.utils.Utils.canUpdate;
 
 public class WBlockPosEdit extends WHorizontalList {
     public Runnable action;
@@ -41,7 +41,7 @@ public class WBlockPosEdit extends WHorizontalList {
     public void init() {
         addTextBox();
 
-        if (canUpdate()) {
+        if (Utils.canUpdate()) {
             WButton click = add(theme.button("Click")).expandX().widget();
             click.action = () -> {
                 String sb = "Click!\nRight click to pick a new position.\nLeft click to cancel.";
@@ -82,6 +82,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             set(event.result.getBlockPos());
             newValueCheck();
+
+            clear();
+            init();
 
             clicking = false;
             event.cancel();
@@ -128,7 +131,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             if (textBoxX.get().isEmpty()) set(new BlockPos(0, 0, 0));
             else {
-                set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
+                try {
+                    set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
+                } catch (NumberFormatException ignored) {}
             }
             newValueCheck();
         };
@@ -137,7 +142,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             if (textBoxY.get().isEmpty()) set(new BlockPos(0, 0, 0));
             else {
-                set(new BlockPos(value.getX(), Integer.parseInt(textBoxY.get()), value.getZ()));
+                try {
+                    set(new BlockPos(value.getX(), Integer.parseInt(textBoxY.get()), value.getZ()));
+                } catch (NumberFormatException ignored) {}
             }
             newValueCheck();
         };
@@ -146,7 +153,9 @@ public class WBlockPosEdit extends WHorizontalList {
             lastValue = value;
             if (textBoxZ.get().isEmpty()) set(new BlockPos(0, 0, 0));
             else {
-                set(new BlockPos(value.getX(), value.getY(), Integer.parseInt(textBoxZ.get())));
+                try {
+                    set(new BlockPos(value.getX(), value.getY(), Integer.parseInt(textBoxZ.get())));
+                } catch (NumberFormatException ignored) {}
             }
             newValueCheck();
         };
