@@ -189,7 +189,7 @@ public class MeshBuilder {
             verticesPointer = verticesPointerStart + offset;
         }
 
-        if ((indicesCount + indexCount) * 4 >= indices.capacity()) {
+        if ((indicesCount + indexCount) * Integer.BYTES >= indices.capacity()) {
             int newSize = indices.capacity() * 2;
 
             ByteBuffer newIndices = BufferUtils.createByteBuffer(newSize);
@@ -204,7 +204,7 @@ public class MeshBuilder {
         vertices = BufferUtils.createByteBuffer(primitiveVerticesSize * vertexCount);
         verticesPointer = verticesPointerStart = memAddress0(vertices);
 
-        indices = BufferUtils.createByteBuffer(indexCount * 4);
+        indices = BufferUtils.createByteBuffer(indexCount * Integer.BYTES);
         indicesPointer = memAddress0(indices);
     }
 
@@ -224,7 +224,7 @@ public class MeshBuilder {
     }
 
     public GpuBuffer getIndexBuffer() {
-        indices.limit(indicesCount * 4);
+        indices.limit(indicesCount * Integer.BYTES);
         return format.uploadImmediateIndexBuffer(indices);
     }
 
@@ -243,7 +243,7 @@ public class MeshBuilder {
     }
 
     private void debugIndexBufferCapacity() {
-        if (DEBUG && indicesCount * 4 >= indices.capacity()) {
+        if (DEBUG && indicesCount * Integer.BYTES >= indices.capacity()) {
             throw new IndexOutOfBoundsException("Indices written to MeshBuilder without calling 'ensureCapacity()' first!");
         }
     }
