@@ -7,9 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.renderer.MeshBuilder;
-import meteordevelopment.meteorclient.renderer.MeshRenderer;
-import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
+import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -79,8 +77,6 @@ public class LightOverlay extends Module {
     private final Pool<Cross> crossPool = new Pool<>(Cross::new);
     private final List<Cross> crosses = new ArrayList<>();
 
-    private final MeshBuilder mesh = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED_LINES);
-
     public LightOverlay() {
         super(Categories.Render, "light-overlay", "Shows blocks where mobs can spawn.");
     }
@@ -103,26 +99,11 @@ public class LightOverlay extends Module {
     private void onRender(Render3DEvent event) {
         if (crosses.isEmpty()) return;
 
-        mesh.begin();
+        Renderer3D renderer = seeThroughBlocks.get() ? event.renderer : event.depthRenderer;
 
         for (Cross cross : crosses) {
-            cross.render();
+            cross.render(renderer);
         }
-
-        mesh.end();
-
-        MeshRenderer.begin()
-            .attachments(mc.getFramebuffer())
-            .pipeline(seeThroughBlocks.get() ? MeteorRenderPipelines.WORLD_COLORED_LINES : MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH)
-            .mesh(mesh, event.matrices)
-            .end();
-    }
-
-    private void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
-        mesh.line(
-            mesh.vec3(x1, y1, z1).color(color).next(),
-            mesh.vec3(x2, y2, z2).color(color).next()
-        );
     }
 
     private class Cross {
@@ -139,11 +120,11 @@ public class LightOverlay extends Module {
             return this;
         }
 
-        public void render() {
+        public void render(Renderer3D renderer) {
             Color c = potential ? potentialColor.get() : color.get();
 
-            line(x, y, z, x + 1, y, z + 1, c);
-            line(x + 1, y, z, x, y, z + 1, c);
+            renderer.line(x, y, z, x + 1, y, z + 1, c);
+            renderer.line(x + 1, y, z, x, y, z + 1, c);
         }
     }
 

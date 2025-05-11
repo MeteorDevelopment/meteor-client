@@ -81,6 +81,8 @@ public class Renderer2D {
 
     // Tris
     public void triangle(double x1, double y1, double x2, double y2, double x3, double y3, Color color) {
+        triangles.ensureTriCapacity();
+
         triangles.triangle(
             triangles.vec2(x1, y1).color(color).next(),
             triangles.vec2(x2, y2).color(color).next(),
@@ -91,6 +93,8 @@ public class Renderer2D {
     // Lines
 
     public void line(double x1, double y1, double x2, double y2, Color color) {
+        lines.ensureLineCapacity();
+
         lines.line(
             lines.vec2(x1, y1).color(color).next(),
             lines.vec2(x2, y2).color(color).next()
@@ -98,6 +102,8 @@ public class Renderer2D {
     }
 
     public void boxLines(double x, double y, double width, double height, Color color) {
+        lines.ensureCapacity(4, 8);
+
         int i1 = lines.vec2(x, y).color(color).next();
         int i2 = lines.vec2(x, y + height).color(color).next();
         int i3 = lines.vec2(x + width, y + height).color(color).next();
@@ -112,6 +118,8 @@ public class Renderer2D {
     // Quads
 
     public void quad(double x, double y, double width, double height, Color cTopLeft, Color cTopRight, Color cBottomRight, Color cBottomLeft) {
+        triangles.ensureQuadCapacity();
+
         triangles.quad(
             triangles.vec2(x, y).color(cTopLeft).next(),
             triangles.vec2(x, y + height).color(cBottomLeft).next(),
@@ -127,6 +135,8 @@ public class Renderer2D {
     // Textured quads
 
     public void texQuad(double x, double y, double width, double height, Color color) {
+        triangles.ensureQuadCapacity();
+
         triangles.quad(
             triangles.vec2(x, y).vec2(0, 0).color(color).next(),
             triangles.vec2(x, y + height).vec2(0, 1).color(color).next(),
@@ -136,6 +146,8 @@ public class Renderer2D {
     }
 
     public void texQuad(double x, double y, double width, double height, TextureRegion texture, Color color) {
+        triangles.ensureQuadCapacity();
+
         triangles.quad(
             triangles.vec2(x, y).vec2(texture.x1, texture.y1).color(color).next(),
             triangles.vec2(x, y + height).vec2(texture.x1, texture.y2).color(color).next(),
@@ -145,6 +157,8 @@ public class Renderer2D {
     }
 
     public void texQuad(double x, double y, double width, double height, double rotation, double texX1, double texY1, double texX2, double texY2, Color color) {
+        triangles.ensureQuadCapacity();
+
         double rad = Math.toRadians(rotation);
         double cos = Math.cos(rad);
         double sin = Math.sin(rad);
