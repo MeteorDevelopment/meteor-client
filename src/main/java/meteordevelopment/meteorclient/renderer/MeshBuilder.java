@@ -23,7 +23,6 @@ public class MeshBuilder {
 
     private final VertexFormat format;
     private final int primitiveVerticesSize;
-    private final int primitiveIndicesCount;
 
     private ByteBuffer vertices = null;
     private long verticesPointerStart, verticesPointer;
@@ -43,7 +42,6 @@ public class MeshBuilder {
     public MeshBuilder(VertexFormat format, VertexFormat.DrawMode drawMode) {
         this.format = format;
         primitiveVerticesSize = format.getVertexSize() * drawMode.firstVertexCount;
-        primitiveIndicesCount = drawMode.firstVertexCount;
     }
 
     public MeshBuilder(VertexFormat format, VertexFormat.DrawMode drawMode, int vertexCount, int indexCount) {
@@ -187,7 +185,7 @@ public class MeshBuilder {
         vertices = BufferUtils.createByteBuffer(primitiveVerticesSize * vertexCount);
         verticesPointer = verticesPointerStart = memAddress0(vertices);
 
-        indices = BufferUtils.createByteBuffer(primitiveIndicesCount * indexCount);
+        indices = BufferUtils.createByteBuffer(indexCount * 4);
         indicesPointer = memAddress0(indices);
     }
 
