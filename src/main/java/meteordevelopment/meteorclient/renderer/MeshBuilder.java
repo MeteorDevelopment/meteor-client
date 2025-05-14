@@ -239,13 +239,13 @@ public class MeshBuilder {
     }
 
     private void debugVertexBufferCapacity() {
-        if (DEBUG && vertexI * primitiveVerticesSize >= vertices.capacity()) {
+        if (DEBUG && (vertices == null || vertexI * primitiveVerticesSize >= vertices.capacity())) {
             throw new IndexOutOfBoundsException("Vertices written to MeshBuilder without calling 'ensureCapacity()' first!");
         }
     }
 
     private void debugIndexBufferCapacity() {
-        if (DEBUG && indicesCount * Integer.BYTES >= indices.capacity()) {
+        if (DEBUG && (indices == null || indicesCount * Integer.BYTES >= indices.capacity())) {
             throw new IndexOutOfBoundsException("Indices written to MeshBuilder without calling 'ensureCapacity()' first!");
         }
     }
