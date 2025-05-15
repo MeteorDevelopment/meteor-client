@@ -25,11 +25,13 @@ import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.item.ItemStack;
@@ -40,6 +42,8 @@ import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix4fStack;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -258,14 +262,11 @@ public class CombatHud extends HudElement {
             Renderer2D.COLOR.render();
 
             // Player Model
-            InventoryScreen.drawEntity(
+            drawEntity(
                 renderer.drawContext,
                 (int) x,
                 (int) y,
-                (int) (x + (25 * getScale())),
-                (int) (y + (66 * getScale())),
                 (int) (30 * getScale()),
-                0,
                 -MathHelper.wrapDegrees(playerEntity.lastYaw + (playerEntity.getYaw() - playerEntity.lastYaw) * mc.getRenderTickCounter().getTickProgress(true)),
                 -playerEntity.getPitch(),
                 playerEntity
@@ -487,5 +488,33 @@ public class CombatHud extends HudElement {
 
     private double getScale() {
         return customScale.get() ? scale.get() : Hud.get().getTextScale();
+    }
+
+    private void drawEntity(DrawContext context, int x, int y, int size, float yaw, float pitch, LivingEntity entity) {
+        float tanYaw = (float) Math.atan(yaw / 40.0f);
+        float tanPitch = (float) Math.atan(pitch / 40.0f);
+        Quaternionf quaternion = new Quaternionf().rotateZ((float) Math.PI);
+
+        float prevBodyYaw = entity.bodyYaw;
+        float prevYaw = entity.getYaw();
+        float prevPitch = entity.getPitch();
+        float prevLastHeadYaw = entity.lastHeadYaw;
+        float prevHeadYaw = entity.headYaw;
+
+        entity.bodyYaw = 180.0f + tanYaw * 20.0f;
+        entity.setYaw(180.0f + tanYaw * 40.0f);
+        entity.setPitch(-tanPitch * 20.0f);
+        entity.lastHeadYaw = entity.getYaw();
+        entity.headYaw = entity.getYaw();
+
+        int drawX = x + (int) (25 * getScale());
+        int drawY = (int) (y + (65 * getScale()));
+        InventoryScreen.drawEntity(context, drawX, drawY, size, new Vector3f(), quaternion, null, entity);
+
+        entity.bodyYaw = prevBodyYaw;
+        entity.setYaw(prevYaw);
+        entity.setPitch(prevPitch);
+        entity.lastHeadYaw = prevLastHeadYaw;
+        entity.headYaw = prevHeadYaw;
     }
 }
