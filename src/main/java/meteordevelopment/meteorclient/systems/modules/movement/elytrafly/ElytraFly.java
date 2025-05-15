@@ -252,6 +252,22 @@ public class ElytraFly extends Module {
         .build()
     );
 
+    public final Setting<Boolean> pitchUnlock = sgGeneral.add(new BoolSetting.Builder()
+        .name("pitch-unlock")
+        .description("Does not lock the pitch angle, allowing player to jump around freely")
+        .defaultValue(false)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
+        .build()
+    );
+
+    public final Setting<Boolean> manualTakeoff = sgGeneral.add(new BoolSetting.Builder()
+        .name("manual-takeoff")
+        .description("Does not automatically take off")
+        .defaultValue(false)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
+        .build()
+    );
+
     // Inventory
 
     public final Setting<Boolean> replace = sgInventory.add(new BoolSetting.Builder()
