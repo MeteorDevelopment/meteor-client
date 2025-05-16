@@ -147,7 +147,7 @@ public class AutoSmelter extends Module {
     private void checkFuel(AbstractFurnaceScreenHandler c) {
         ItemStack fuelStack = c.slots.get(1).getStack();
 
-        // If the furnace is burning, don't do anything
+        // If the furnace is burning or has fuel, don't do anything
         if (!fuelStack.isEmpty() || c.getFuelProgress() > 0) return;
 
         // If smart fuel is enabled, calculate how much fuel we need based on smeltable items
@@ -162,16 +162,30 @@ public class AutoSmelter extends Module {
             if (neededFuelCount == 0) return;
         }
 
-        // Find fuel in inventory
-        int slot = findSlot(c, fuelItems.get(), this::isFuelItem);
-        if (disableWhenOutOfItems.get() && slot == -1) {
-            error("You do not have any fuel in your inventory. Disabling.");
-            toggle();
-            return;
+        // Track how much fuel we've added so far
+        int remainingToAdd = neededFuelCount;
+        boolean foundAnyFuel = false;
+
+        // Check inventory slots for fuel
+        for (int i = 3; i < c.slots.size() && remainingToAdd > 0; i++) {
+            ItemStack stack = c.slots.get(i).getStack();
+
+            // Skip empty stacks or non-fuel items
+            if (stack.isEmpty() || !fuelItems.get().contains(stack.getItem()) || !isFuelItem(stack.getItem())) continue;
+
+            // Take as many items as needed (or available)
+            int amountToTake = Math.min(stack.getCount(), remainingToAdd);
+            InvUtils.move(amountToTake).fromId(i).toId(1);
+
+            remainingToAdd -= amountToTake;
+            foundAnyFuel = true;
         }
 
-        // Move the calculated amount of fuel to the furnace
-        InvUtils.move(neededFuelCount).fromId(slot).toId(1);
+        // If we couldn't find any fuel and the setting is enabled, disable the module
+        if (!foundAnyFuel && disableWhenOutOfItems.get()) {
+            error("You do not have any fuel in your inventory. Disabling.");
+            toggle();
+        }
     }
 
     /**
