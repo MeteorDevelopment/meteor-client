@@ -84,6 +84,8 @@ public class ElytraFlightMode {
     }
 
     public void autoTakeoff() {
+        if (elytraFly.manualTakeoff.get()) return;
+
         if (incrementJumpTimer) jumpTimer++;
 
         boolean jumpPressed = mc.options.jumpKey.isPressed();

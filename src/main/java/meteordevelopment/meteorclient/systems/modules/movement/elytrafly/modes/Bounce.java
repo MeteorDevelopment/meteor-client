@@ -37,7 +37,7 @@ public class Bounce extends ElytraFlightMode {
     public void onTick() {
         super.onTick();
 
-        if (mc.options.jumpKey.isPressed() && !mc.player.isGliding()) mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+        if (mc.options.jumpKey.isPressed() && !mc.player.isGliding() && !elytraFly.manualTakeoff.get()) mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
 
         // Make sure all the conditions are met (player has an elytra, isn't in water, etc)
         if (checkConditions(mc.player)) {
@@ -47,7 +47,7 @@ public class Bounce extends ElytraFlightMode {
                 if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
                 setPressed(mc.options.forwardKey, true);
                 mc.player.setYaw(getYawDirection());
-                mc.player.setPitch(elytraFly.pitch.get().floatValue());
+                if (!elytraFly.pitchUnlock.get()) mc.player.setPitch(elytraFly.pitch.get().floatValue());
             }
 
             if (!elytraFly.sprint.get()) {
