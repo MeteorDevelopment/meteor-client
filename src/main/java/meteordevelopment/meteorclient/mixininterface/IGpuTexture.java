@@ -5,8 +5,9 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import net.minecraft.item.ToolMaterial;
+import com.mojang.blaze3d.textures.AddressMode;
 
-public interface IMiningToolItem {
-    ToolMaterial meteor$getMaterial();
+public interface IGpuTexture {
+    AddressMode  meteor$getAddressModeU();
+    AddressMode  meteor$getAddressModeV();
 }

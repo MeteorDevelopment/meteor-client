@@ -22,7 +22,7 @@ public abstract class ComeCommandMixin {
     private void getComeCommandTarget(Args args) {
         Freecam freecam = Modules.get().get(Freecam.class);
         if (freecam.isActive()) {
-            float tickDelta = mc.getRenderTickCounter().getTickDelta(true);
+            float tickDelta = mc.getRenderTickCounter().getTickProgress(true);
             args.set(0, new GoalBlock((int) freecam.getX(tickDelta), (int) freecam.getY(tickDelta), (int) freecam.getZ(tickDelta)));
         }
     }

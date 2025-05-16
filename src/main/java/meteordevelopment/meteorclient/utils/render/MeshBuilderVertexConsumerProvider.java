@@ -5,16 +5,16 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import meteordevelopment.meteorclient.renderer.Mesh;
+import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 
-public class MeshVertexConsumerProvider implements IVertexConsumerProvider {
-    private final MeshVertexConsumer vertexConsumer;
+public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvider {
+    private final MeshBuilderVertexConsumer vertexConsumer;
 
-    public MeshVertexConsumerProvider(Mesh mesh) {
-        vertexConsumer = new MeshVertexConsumer(mesh);
+    public MeshBuilderVertexConsumerProvider(MeshBuilder mesh) {
+        vertexConsumer = new MeshBuilderVertexConsumer(mesh);
     }
 
     @Override
@@ -31,8 +31,8 @@ public class MeshVertexConsumerProvider implements IVertexConsumerProvider {
         vertexConsumer.setOffset(offsetX, offsetY, offsetZ);
     }
 
-    public static class MeshVertexConsumer implements VertexConsumer {
-        private final Mesh mesh;
+    public static class MeshBuilderVertexConsumer implements VertexConsumer {
+        private final MeshBuilder mesh;
 
         private int offsetX, offsetY, offsetZ;
 
@@ -43,7 +43,7 @@ public class MeshVertexConsumerProvider implements IVertexConsumerProvider {
 
         private int i;
 
-        public MeshVertexConsumer(Mesh mesh) {
+        public MeshBuilderVertexConsumer(MeshBuilder mesh) {
             this.mesh = mesh;
         }
 
@@ -60,6 +60,8 @@ public class MeshVertexConsumerProvider implements IVertexConsumerProvider {
             zs[i] = (double) offsetZ + z;
 
             if (++i >= 4) {
+                mesh.ensureQuadCapacity();
+
                 mesh.quad(
                     mesh.vec3(xs[0], ys[0], zs[0]).color(color).next(),
                     mesh.vec3(xs[1], ys[1], zs[1]).color(color).next(),

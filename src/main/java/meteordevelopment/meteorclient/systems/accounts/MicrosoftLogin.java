@@ -50,11 +50,14 @@ public class MicrosoftLogin {
     private static HttpServer server;
     private static Consumer<String> callback;
 
-    public static void getRefreshToken(Consumer<String> callback) {
+    public static String getRefreshToken(Consumer<String> callback) {
         MicrosoftLogin.callback = callback;
 
         startServer();
-        Util.getOperatingSystem().open("https://login.live.com/oauth20_authorize.srf?client_id=" + CLIENT_ID + "&response_type=code&redirect_uri=http://127.0.0.1:" + PORT + "&scope=XboxLive.signin%20offline_access&prompt=select_account");
+        String url = "https://login.live.com/oauth20_authorize.srf?client_id=" + CLIENT_ID + "&response_type=code&redirect_uri=http://127.0.0.1:" + PORT + "&scope=XboxLive.signin%20offline_access&prompt=select_account";
+        Util.getOperatingSystem().open(url);
+
+        return url;
     }
 
     public static LoginData login(String refreshToken) {

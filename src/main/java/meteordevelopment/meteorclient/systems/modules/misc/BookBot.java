@@ -182,7 +182,7 @@ public class BookBot extends Module {
 
         // Move the book into hand
         if (!InvUtils.testInMainHand(bookPredicate)) {
-            InvUtils.move().from(writableBook.slot()).toHotbar(mc.player.getInventory().selectedSlot);
+            InvUtils.move().from(writableBook.slot()).toHotbar(mc.player.getInventory().getSelectedSlot());
             return;
         }
 
@@ -222,7 +222,7 @@ public class BookBot extends Module {
                 message.append(Text.literal("Click here to edit it.")
                     .setStyle(Style.EMPTY
                         .withFormatting(Formatting.UNDERLINE, Formatting.RED)
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()))
+                        .withClickEvent(new ClickEvent.OpenFile(file.getAbsolutePath()))
                     )
                 );
                 info(message);
@@ -320,7 +320,7 @@ public class BookBot extends Module {
         mc.player.getMainHandStack().set(DataComponentTypes.WRITTEN_BOOK_CONTENT, new WrittenBookContentComponent(RawFilteredPair.of(title), mc.player.getGameProfile().getName(), 0, filteredPages, true));
 
         // Send book update to server
-        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pages, sign.get() ? Optional.of(title) : Optional.empty()));
+        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().getSelectedSlot(), pages, sign.get() ? Optional.of(title) : Optional.empty()));
 
         bookCount++;
     }
@@ -339,7 +339,7 @@ public class BookBot extends Module {
     @Override
     public Module fromTag(NbtCompound tag) {
         if (tag.contains("file")) {
-            file = new File(tag.getString("file"));
+            file = new File(tag.getString("file", ""));
         }
 
         return super.fromTag(tag);

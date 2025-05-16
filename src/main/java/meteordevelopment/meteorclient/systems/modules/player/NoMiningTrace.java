@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.item.PickaxeItem;
+import net.minecraft.registry.tag.ItemTags;
 
 import java.util.Set;
 
@@ -41,7 +41,7 @@ public class NoMiningTrace extends Module {
     public boolean canWork(Entity entity) {
         if (!isActive()) return false;
 
-        return (!onlyWhenHoldingPickaxe.get() || mc.player.getMainHandStack().getItem() instanceof PickaxeItem || mc.player.getOffHandStack().getItem() instanceof PickaxeItem) &&
+        return (!onlyWhenHoldingPickaxe.get() || mc.player.getMainHandStack().isIn(ItemTags.PICKAXES) || mc.player.getOffHandStack().isIn(ItemTags.PICKAXES)) &&
             (entity == null || !entities.get().contains(entity.getType()));
     }
 }

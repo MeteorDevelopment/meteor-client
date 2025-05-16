@@ -74,7 +74,8 @@ public class ProjectileEntitySimulator {
             case EggItem ignored                -> set(user, 0, 1.5, simulated, 0.03, 0.8, accurate, tickDelta, EntityType.EGG);
             case EnderPearlItem ignored         -> set(user, 0, 1.5, simulated, 0.03, 0.8, accurate, tickDelta, EntityType.ENDER_PEARL);
             case ExperienceBottleItem ignored   -> set(user, -20, 0.7, simulated, 0.07, 0.8, accurate, tickDelta, EntityType.EXPERIENCE_BOTTLE);
-            case ThrowablePotionItem ignored    -> set(user, -20, 0.5, simulated, 0.05, 0.8, accurate, tickDelta, EntityType.POTION);
+            case SplashPotionItem ignored       -> set(user, -20, 0.5, simulated, 0.05, 0.8, accurate, tickDelta, EntityType.SPLASH_POTION);
+            case LingeringPotionItem ignored       -> set(user, -20, 0.5, simulated, 0.05, 0.8, accurate, tickDelta, EntityType.LINGERING_POTION);
             default -> {
                 return false;
             }

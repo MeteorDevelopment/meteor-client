@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
@@ -77,6 +76,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         return createGroup(name, true);
     }
 
+    @SuppressWarnings("unchecked")
     public void registerColorSettings(Module module) {
         for (SettingGroup group : this) {
             for (Setting<?> setting : group) {
@@ -92,6 +92,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void unregisterColorSettings() {
         for (SettingGroup group : this) {
             for (Setting<?> setting : group) {
@@ -129,19 +130,25 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
 
-        tag.put("groups", NbtUtils.listToTag(groups));
+        NbtList groupsTag = new NbtList();
+        for (SettingGroup group : groups) {
+            if (group.wasChanged()) groupsTag.add(group.toTag());
+        }
+        if (!groupsTag.isEmpty()) tag.put("groups", groupsTag);
 
         return tag;
     }
 
     @Override
     public Settings fromTag(NbtCompound tag) {
-        NbtList groupsTag = tag.getList("groups", 10);
+        reset();
+
+        NbtList groupsTag = tag.getListOrEmpty("groups");
 
         for (NbtElement t : groupsTag) {
             NbtCompound groupTag = (NbtCompound) t;
 
-            SettingGroup sg = getGroup(groupTag.getString("name"));
+            SettingGroup sg = getGroup(groupTag.getString("name", ""));
             if (sg != null) sg.fromTag(groupTag);
         }
 

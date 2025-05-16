@@ -5,30 +5,22 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
-import com.mojang.serialization.Lifecycle;
+import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
-import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.random.Random;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.Map;
+import java.util.Set;
 
 public class PacketUtils {
-    public static final Registry<Class<? extends Packet<?>>> REGISTRY = new PacketRegistry();
-
     private static final Map<Class<? extends Packet<?>>, String> S2C_PACKETS = new Reference2ObjectOpenHashMap<>();
     private static final Map<Class<? extends Packet<?>>, String> C2S_PACKETS = new Reference2ObjectOpenHashMap<>();
 
     private static final Map<String, Class<? extends Packet<?>>> S2C_PACKETS_R = new Object2ReferenceOpenHashMap<>();
     private static final Map<String, Class<? extends Packet<?>>> C2S_PACKETS_R = new Object2ReferenceOpenHashMap<>();
+
+    public static final Set<Class<? extends Packet<?>>> PACKETS = Sets.union(getC2SPackets(), getS2CPackets());
 
     static {
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket.class, "AcknowledgeChunksC2SPacket");
@@ -145,12 +137,16 @@ public class PacketUtils {
         C2S_PACKETS_R.put("SelectKnownPacksC2SPacket", net.minecraft.network.packet.c2s.config.SelectKnownPacksC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class, "SelectMerchantTradeC2SPacket");
         C2S_PACKETS_R.put("SelectMerchantTradeC2SPacket", net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SetTestBlockC2SPacket.class, "SetTestBlockC2SPacket");
+        C2S_PACKETS_R.put("SetTestBlockC2SPacket", net.minecraft.network.packet.c2s.play.SetTestBlockC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SlotChangedStateC2SPacket.class, "SlotChangedStateC2SPacket");
         C2S_PACKETS_R.put("SlotChangedStateC2SPacket", net.minecraft.network.packet.c2s.play.SlotChangedStateC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SpectatorTeleportC2SPacket.class, "SpectatorTeleportC2SPacket");
         C2S_PACKETS_R.put("SpectatorTeleportC2SPacket", net.minecraft.network.packet.c2s.play.SpectatorTeleportC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket.class, "TeleportConfirmC2SPacket");
         C2S_PACKETS_R.put("TeleportConfirmC2SPacket", net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.TestInstanceBlockActionC2SPacket.class, "TestInstanceBlockActionC2SPacket");
+        C2S_PACKETS_R.put("TestInstanceBlockActionC2SPacket", net.minecraft.network.packet.c2s.play.TestInstanceBlockActionC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket.class, "UpdateBeaconC2SPacket");
         C2S_PACKETS_R.put("UpdateBeaconC2SPacket", net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateCommandBlockC2SPacket.class, "UpdateCommandBlockC2SPacket");
@@ -186,10 +182,6 @@ public class PacketUtils {
         S2C_PACKETS_R.put("BlockUpdateS2CPacket", net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BossBarS2CPacket.class, "BossBarS2CPacket");
         S2C_PACKETS_R.put("BossBarS2CPacket", net.minecraft.network.packet.s2c.play.BossBarS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BundleDelimiterS2CPacket.class, "BundleDelimiterS2CPacket");
-        S2C_PACKETS_R.put("BundleDelimiterS2CPacket", net.minecraft.network.packet.s2c.play.BundleDelimiterS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BundleS2CPacket.class, "BundleS2CPacket");
-        S2C_PACKETS_R.put("BundleS2CPacket", net.minecraft.network.packet.s2c.play.BundleS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket.class, "ChatMessageS2CPacket");
         S2C_PACKETS_R.put("ChatMessageS2CPacket", net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChatSuggestionsS2CPacket.class, "ChatSuggestionsS2CPacket");
@@ -284,8 +276,6 @@ public class PacketUtils {
         S2C_PACKETS_R.put("EntityVelocityUpdateS2CPacket", net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ExperienceBarUpdateS2CPacket.class, "ExperienceBarUpdateS2CPacket");
         S2C_PACKETS_R.put("ExperienceBarUpdateS2CPacket", net.minecraft.network.packet.s2c.play.ExperienceBarUpdateS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket.class, "ExperienceOrbSpawnS2CPacket");
-        S2C_PACKETS_R.put("ExperienceOrbSpawnS2CPacket", net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ExplosionS2CPacket.class, "ExplosionS2CPacket");
         S2C_PACKETS_R.put("ExplosionS2CPacket", net.minecraft.network.packet.s2c.play.ExplosionS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.config.FeaturesS2CPacket.class, "FeaturesS2CPacket");
@@ -432,6 +422,8 @@ public class PacketUtils {
         S2C_PACKETS_R.put("SynchronizeTagsS2CPacket", net.minecraft.network.packet.s2c.common.SynchronizeTagsS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TeamS2CPacket.class, "TeamS2CPacket");
         S2C_PACKETS_R.put("TeamS2CPacket", net.minecraft.network.packet.s2c.play.TeamS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TestInstanceBlockStatusS2CPacket.class, "TestInstanceBlockStatusS2CPacket");
+        S2C_PACKETS_R.put("TestInstanceBlockStatusS2CPacket", net.minecraft.network.packet.s2c.play.TestInstanceBlockStatusS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TickStepS2CPacket.class, "TickStepS2CPacket");
         S2C_PACKETS_R.put("TickStepS2CPacket", net.minecraft.network.packet.s2c.play.TickStepS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket.class, "TitleFadeS2CPacket");
@@ -485,107 +477,5 @@ public class PacketUtils {
 
     public static Set<Class<? extends Packet<?>>> getC2SPackets() {
         return C2S_PACKETS.keySet();
-    }
-
-    private static class PacketRegistry extends SimpleRegistry<Class<? extends Packet<?>>> {
-        public PacketRegistry() {
-            super(RegistryKey.ofRegistry(MeteorClient.identifier("packets")), Lifecycle.stable());
-        }
-
-        @Override
-        public int size() {
-            return S2C_PACKETS.keySet().size() + C2S_PACKETS.keySet().size();
-        }
-
-        @Override
-        public Identifier getId(Class<? extends Packet<?>> entry) {
-            return null;
-        }
-
-        @Override
-        public Optional<RegistryKey<Class<? extends Packet<?>>>> getKey(Class<? extends Packet<?>> entry) {
-            return Optional.empty();
-        }
-
-        @Override
-        public int getRawId(Class<? extends Packet<?>> entry) {
-            return 0;
-        }
-
-        @Override
-        public Class<? extends Packet<?>> get(RegistryKey<Class<? extends Packet<?>>> key) {
-            return null;
-        }
-
-        @Override
-        public Class<? extends Packet<?>> get(Identifier id) {
-            return null;
-        }
-
-        @Override
-        public Lifecycle getLifecycle() {
-            return null;
-        }
-
-        @Override
-        public Set<Identifier> getIds() {
-            return Collections.emptySet();
-        }
-
-        @Override
-        public boolean containsId(Identifier id) {
-            return false;
-        }
-
-        @Override
-        public Class<? extends Packet<?>> get(int index) {
-            return null;
-        }
-
-        @NotNull
-        @Override
-        public Iterator<Class<? extends Packet<?>>> iterator() {
-            return Stream.concat(S2C_PACKETS.keySet().stream(), C2S_PACKETS.keySet().stream()).iterator();
-        }
-
-        @Override
-        public boolean contains(RegistryKey<Class<? extends Packet<?>>> key) {
-            return false;
-        }
-
-        @Override
-        public Set<Map.Entry<RegistryKey<Class<? extends Packet<?>>>, Class<? extends Packet<?>>>> getEntrySet() {
-            return Collections.emptySet();
-        }
-
-        @Override
-        public Optional<RegistryEntry.Reference<Class<? extends Packet<?>>>> getRandom(Random random) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Registry<Class<? extends Packet<?>>> freeze() {
-            return null;
-        }
-
-        @Override
-        public RegistryEntry.Reference<Class<? extends Packet<?>>> createEntry(Class<? extends Packet<?>> value) {
-            return null;
-        }
-
-        @Override
-        public Optional<RegistryEntry.Reference<Class<? extends Packet<?>>>> getEntry(int rawId) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Stream<RegistryEntry.Reference<Class<? extends Packet<?>>>> streamEntries() {
-            return null;
-        }
-
-        @Override
-        public Set<RegistryKey<Class<? extends Packet<?>>>> getKeys() {
-            return Collections.emptySet();
-        }
     }
 }

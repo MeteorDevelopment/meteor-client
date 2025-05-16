@@ -290,17 +290,17 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
             return this;
         }
 
-        active = tag.getBoolean("active");
-        settings.fromTag(tag.getCompound("settings"));
+        tag.getBoolean("active").ifPresent(active1 -> active = active1);
+        settings.fromTag(tag.getCompoundOrEmpty("settings"));
 
         // Elements
         elements.clear();
 
-        for (NbtElement e : tag.getList("elements", NbtElement.COMPOUND_TYPE)) {
+        for (NbtElement e : tag.getListOrEmpty("elements")) {
             NbtCompound c = (NbtCompound) e;
-            if (!c.contains("name")) continue;
+            if (c.getString("name").isEmpty()) continue;
 
-            HudElementInfo<?> info = infos.get(c.getString("name"));
+            HudElementInfo<?> info = infos.get(c.getString("name").get());
             if (info != null) {
                 HudElement element = info.create();
                 element.fromTag(c);

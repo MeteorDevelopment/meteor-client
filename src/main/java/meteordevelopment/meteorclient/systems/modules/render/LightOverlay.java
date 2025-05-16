@@ -7,10 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.renderer.DrawMode;
-import meteordevelopment.meteorclient.renderer.Mesh;
-import meteordevelopment.meteorclient.renderer.ShaderMesh;
-import meteordevelopment.meteorclient.renderer.Shaders;
+import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -80,8 +77,6 @@ public class LightOverlay extends Module {
     private final Pool<Cross> crossPool = new Pool<>(Cross::new);
     private final List<Cross> crosses = new ArrayList<>();
 
-    private final Mesh mesh = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Lines, Mesh.Attrib.Vec3, Mesh.Attrib.Color);
-
     public LightOverlay() {
         super(Categories.Render, "light-overlay", "Shows blocks where mobs can spawn.");
     }
@@ -104,20 +99,11 @@ public class LightOverlay extends Module {
     private void onRender(Render3DEvent event) {
         if (crosses.isEmpty()) return;
 
-        mesh.depthTest = !seeThroughBlocks.get();
-        mesh.begin();
+        Renderer3D renderer = seeThroughBlocks.get() ? event.renderer : event.depthRenderer;
 
-        for (Cross cross : crosses) cross.render();
-
-        mesh.end();
-        mesh.render(event.matrices);
-    }
-
-    private void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
-        mesh.line(
-            mesh.vec3(x1, y1, z1).color(color).next(),
-            mesh.vec3(x2, y2, z2).color(color).next()
-        );
+        for (Cross cross : crosses) {
+            cross.render(renderer);
+        }
     }
 
     private class Cross {
@@ -134,11 +120,11 @@ public class LightOverlay extends Module {
             return this;
         }
 
-        public void render() {
+        public void render(Renderer3D renderer) {
             Color c = potential ? potentialColor.get() : color.get();
 
-            line(x, y, z, x + 1, y, z + 1, c);
-            line(x + 1, y, z, x, y, z + 1, c);
+            renderer.line(x, y, z, x + 1, y, z + 1, c);
+            renderer.line(x + 1, y, z, x, y, z + 1, c);
         }
     }
 

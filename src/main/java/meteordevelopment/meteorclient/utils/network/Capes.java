@@ -172,7 +172,7 @@ public class Capes {
         }
 
         public void register() {
-            mc.getTextureManager().registerTexture(identifier, new NativeImageBackedTexture(img));
+            mc.getTextureManager().registerTexture(identifier, new NativeImageBackedTexture(null, img));
             img = null;
 
             downloading = false;

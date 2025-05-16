@@ -23,14 +23,4 @@ public abstract class AbstractClientPlayerEntityMixin {
     private void onGetPlayerListEntry(CallbackInfoReturnable<PlayerListEntry> info) {
         if (mc.getNetworkHandler() == null) info.setReturnValue(FakeClientPlayer.getPlayerListEntry());
     }
-
-    @Inject(method = "isSpectator", at = @At("HEAD"), cancellable = true)
-    private void onIsSpectator(CallbackInfoReturnable<Boolean> info) {
-        if (mc.getNetworkHandler() == null) info.setReturnValue(false);
-    }
-
-    @Inject(method = "isCreative", at = @At("HEAD"), cancellable = true)
-    private void onIsCreative(CallbackInfoReturnable<Boolean> info) {
-        if (mc.getNetworkHandler() == null) info.setReturnValue(false);
-    }
 }

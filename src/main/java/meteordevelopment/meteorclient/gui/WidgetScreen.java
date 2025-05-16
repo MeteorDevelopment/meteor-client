@@ -20,7 +20,6 @@ import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 
@@ -217,17 +216,8 @@ public abstract class WidgetScreen extends Screen {
 
         boolean control = MinecraftClient.IS_SYSTEM_MAC ? modifiers == GLFW_MOD_SUPER : modifiers == GLFW_MOD_CONTROL;
 
-        if (control && keyCode == GLFW_KEY_C && toClipboard()) {
-            return true;
-        } else if (control && keyCode == GLFW_KEY_V && fromClipboard()) {
-            reload();
-            if (parent instanceof WidgetScreen wScreen) {
-                wScreen.reload();
-            }
-            return true;
-        }
-
-        return false;
+        return (control && keyCode == GLFW_KEY_C && toClipboard())
+            || (control && keyCode == GLFW_KEY_V && fromClipboard());
     }
 
     public void keyRepeated(int key, int modifiers) {
@@ -274,10 +264,8 @@ public abstract class WidgetScreen extends Screen {
         boolean tooltip = RENDERER.renderTooltip(context, mouseX, mouseY, delta / 20);
 
         if (debug) {
-            MatrixStack matrices = context.getMatrices();
-
-            DEBUG_RENDERER.render(root, matrices);
-            if (tooltip) DEBUG_RENDERER.render(RENDERER.tooltipWidget, matrices);
+            DEBUG_RENDERER.render(root);
+            if (tooltip) DEBUG_RENDERER.render(RENDERER.tooltipWidget);
         }
 
         context.draw();

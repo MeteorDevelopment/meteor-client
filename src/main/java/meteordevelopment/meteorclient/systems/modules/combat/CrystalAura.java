@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IBox;
-import meteordevelopment.meteorclient.mixininterface.IMiningToolItem;
 import meteordevelopment.meteorclient.mixininterface.IRaycastContext;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -41,14 +40,18 @@ import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Blocks;
+import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -817,9 +820,9 @@ public class CrystalAura extends Module {
             // Check for strength
             if (weakness != null && (strength == null || strength.getAmplifier() <= weakness.getAmplifier())) {
                 // Check if the item in your hand is already valid
-                if (!isValidWeaknessItem(mc.player.getMainHandStack())) {
+                if (!isValidWeaknessItem(mc.player.getMainHandStack(), crystal)) {
                     // Find valid item to break with
-                    if (!InvUtils.swap(InvUtils.findInHotbar(this::isValidWeaknessItem).slot(), false)) return;
+                    if (!InvUtils.swap(InvUtils.findInHotbar(stack -> isValidWeaknessItem(stack, crystal)).slot(), false)) return;
 
                     switchTimer = 1;
                     return;
@@ -861,11 +864,8 @@ public class CrystalAura extends Module {
         }
     }
 
-    private boolean isValidWeaknessItem(ItemStack itemStack) {
-        if (!(itemStack.getItem() instanceof IMiningToolItem) || itemStack.getItem() instanceof HoeItem) return false;
-
-        ToolMaterial material = ((IMiningToolItem) itemStack.getItem()).meteor$getMaterial();
-        return material == ToolMaterial.DIAMOND || material == ToolMaterial.NETHERITE;
+    private boolean isValidWeaknessItem(ItemStack itemStack, Entity crystal) {
+        return DamageUtils.getAttackDamage(mc.player, crystal, itemStack) > 0;
     }
 
     private void attackCrystal(Entity entity) {
@@ -1026,7 +1026,7 @@ public class CrystalAura extends Module {
         FindItemResult item = InvUtils.findInHotbar(targetItem);
         if (!item.found()) return;
 
-        int prevSlot = mc.player.getInventory().selectedSlot;
+        int prevSlot = mc.player.getInventory().getSelectedSlot();
 
         if (autoSwitch.get() != AutoSwitchMode.None && !item.isOffhand()) InvUtils.swap(item.slot(), false);
 
@@ -1123,7 +1123,9 @@ public class CrystalAura extends Module {
         for (LivingEntity target : targets) {
             if (EntityUtils.getTotalHealth(target) <= facePlaceHealth.get()) return true;
 
-            for (ItemStack itemStack : target.getArmorItems()) {
+            for (EquipmentSlot slot : AttributeModifierSlot.ARMOR) {
+                ItemStack itemStack = target.getEquippedStack(slot);
+
                 if (itemStack == null || itemStack.isEmpty()) {
                     if (facePlaceArmor.get()) return true;
                 }
@@ -1223,10 +1225,10 @@ public class CrystalAura extends Module {
                 if (ignoreNakeds.get()) {
                     if (player.getOffHandStack().isEmpty()
                         && player.getMainHandStack().isEmpty()
-                        && player.getInventory().armor.get(0).isEmpty()
-                        && player.getInventory().armor.get(1).isEmpty()
-                        && player.getInventory().armor.get(2).isEmpty()
-                        && player.getInventory().armor.get(3).isEmpty()
+                        && player.getEquippedStack(EquipmentSlot.FEET).isEmpty()
+                        && player.getEquippedStack(EquipmentSlot.LEGS).isEmpty()
+                        && player.getEquippedStack(EquipmentSlot.CHEST).isEmpty()
+                        && player.getEquippedStack(EquipmentSlot.HEAD).isEmpty()
                     ) continue;
                 }
             }

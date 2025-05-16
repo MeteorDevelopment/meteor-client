@@ -63,6 +63,7 @@ public class SaveMapCommand extends Command {
         }));
     }
 
+    @SuppressWarnings("deprecation") // Use of NativeImage#makePixelArray
     private void saveMap(int scale) throws CommandSyntaxException {
         ItemStack map = getMap();
         MapState state = getMapState();

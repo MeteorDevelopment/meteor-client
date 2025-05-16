@@ -30,8 +30,15 @@ accessible   field   net/minecraft/client/render/RenderPhase ITEM_ENTITY_TARGET 
 accessible   class   net/minecraft/client/render/RenderLayer$MultiPhaseParameters
 accessible   class   net/minecraft/client/render/RenderPhase$Target
 
+accessible   class   com/mojang/blaze3d/opengl/GlStateManager$CapabilityTracker
+accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder <init> ()V
+accessible   method   com/mojang/blaze3d/pipeline/RenderPipeline$Builder withSnippet (Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;)V
+
+# Auto Fish
+accessible field net/minecraft/entity/projectile/FishingBobberEntity caughtFish Z
+accessible class net/minecraft/entity/projectile/FishingBobberEntity$State
+accessible field net/minecraft/entity/projectile/FishingBobberEntity state Lnet/minecraft/entity/projectile/FishingBobberEntity$State;
+
 # Item Physics
 accessible field net/minecraft/client/render/item/ItemRenderState layers [Lnet/minecraft/client/render/item/ItemRenderState$LayerRenderState;
 accessible field net/minecraft/client/render/item/ItemRenderState layerCount I
-accessible field net/minecraft/client/render/item/ItemRenderState$LayerRenderState model Lnet/minecraft/client/render/model/BakedModel;
-accessible method net/minecraft/client/render/item/ItemRenderState$LayerRenderState getTransformation ()Lnet/minecraft/client/render/model/json/Transformation;

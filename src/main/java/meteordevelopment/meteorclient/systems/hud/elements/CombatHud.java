@@ -29,18 +29,21 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.EnchantmentTags;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix4fStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -53,16 +56,12 @@ public class CombatHud extends HudElement {
     public static final HudElementInfo<CombatHud> INFO = new HudElementInfo<>(Hud.GROUP, "combat", "Displays information about your combat target.", CombatHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("The scale.")
-        .defaultValue(2)
-        .min(1)
-        .sliderRange(1, 5)
-        .onChanged(aDouble -> calculateSize())
-        .build()
-    );
+    private final SettingGroup sgEnchantments = settings.createGroup("Enchantments");
+    private final SettingGroup sgHealth = settings.createGroup("Health");
+    private final SettingGroup sgDistance = settings.createGroup("Distance");
+    private final SettingGroup sgPing = settings.createGroup("Ping");
+    private final SettingGroup sgScale = settings.createGroup("Scale");
+    private final SettingGroup sgBackground = settings.createGroup("Background");
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
         .name("range")
@@ -73,42 +72,55 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<Boolean> displayPing = sgGeneral.add(new BoolSetting.Builder()
-        .name("ping")
-        .description("Shows the player's ping.")
-        .defaultValue(true)
+    // Health
+
+    private final Setting<SettingColor> healthColor1 = sgHealth.add(new ColorSetting.Builder()
+        .name("health-stage-1")
+        .description("The color on the left of the health gradient.")
+        .defaultValue(new SettingColor(255, 15, 15))
         .build()
     );
 
-    private final Setting<Boolean> displayDistance = sgGeneral.add(new BoolSetting.Builder()
-        .name("distance")
-        .description("Shows the distance between you and the player.")
-        .defaultValue(true)
+    private final Setting<SettingColor> healthColor2 = sgHealth.add(new ColorSetting.Builder()
+        .name("health-stage-2")
+        .description("The color in the middle of the health gradient.")
+        .defaultValue(new SettingColor(255, 150, 15))
         .build()
     );
 
-    private final Setting<Set<RegistryKey<Enchantment>>> displayedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<SettingColor> healthColor3 = sgHealth.add(new ColorSetting.Builder()
+        .name("health-stage-3")
+        .description("The color on the right of the health gradient.")
+        .defaultValue(new SettingColor(15, 255, 15))
+        .build()
+    );
+
+    // Enchantments
+
+    private final Setting<Set<RegistryKey<Enchantment>>> displayedEnchantments = sgEnchantments.add(new EnchantmentListSetting.Builder()
         .name("displayed-enchantments")
         .description("The enchantments that are shown on nametags.")
         .vanillaDefaults()
         .build()
     );
 
-    private final Setting<SettingColor> backgroundColor = sgGeneral.add(new ColorSetting.Builder()
-        .name("background-color")
-        .description("Color of background.")
-        .defaultValue(new SettingColor(0, 0, 0, 64))
-        .build()
-    );
-
-    private final Setting<SettingColor> enchantmentTextColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> enchantmentTextColor = sgEnchantments.add(new ColorSetting.Builder()
         .name("enchantment-color")
         .description("Color of enchantment text.")
         .defaultValue(new SettingColor(255, 255, 255))
         .build()
     );
 
-    private final Setting<SettingColor> pingColor1 = sgGeneral.add(new ColorSetting.Builder()
+    // Ping
+
+    private final Setting<Boolean> displayPing = sgPing.add(new BoolSetting.Builder()
+        .name("ping")
+        .description("Shows the player's ping.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<SettingColor> pingColor1 = sgPing.add(new ColorSetting.Builder()
         .name("ping-stage-1")
         .description("Color of ping text when under 75.")
         .defaultValue(new SettingColor(15, 255, 15))
@@ -116,7 +128,7 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> pingColor2 = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> pingColor2 = sgPing.add(new ColorSetting.Builder()
         .name("ping-stage-2")
         .description("Color of ping text when between 75 and 200.")
         .defaultValue(new SettingColor(255, 150, 15))
@@ -124,7 +136,7 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> pingColor3 = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> pingColor3 = sgPing.add(new ColorSetting.Builder()
         .name("ping-stage-3")
         .description("Color of ping text when over 200.")
         .defaultValue(new SettingColor(255, 15, 15))
@@ -132,7 +144,16 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> distColor1 = sgGeneral.add(new ColorSetting.Builder()
+    // Distance
+
+    private final Setting<Boolean> displayDistance = sgDistance.add(new BoolSetting.Builder()
+        .name("distance")
+        .description("Shows the distance between you and the player.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<SettingColor> distColor1 = sgDistance.add(new ColorSetting.Builder()
         .name("distance-stage-1")
         .description("The color when a player is within 10 blocks of you.")
         .defaultValue(new SettingColor(255, 15, 15))
@@ -140,7 +161,7 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> distColor2 = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> distColor2 = sgDistance.add(new ColorSetting.Builder()
         .name("distance-stage-2")
         .description("The color when a player is within 50 blocks of you.")
         .defaultValue(new SettingColor(255, 150, 15))
@@ -148,7 +169,7 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> distColor3 = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> distColor3 = sgDistance.add(new ColorSetting.Builder()
         .name("distance-stage-3")
         .description("The color when a player is greater then 50 blocks away from you.")
         .defaultValue(new SettingColor(15, 255, 15))
@@ -156,24 +177,41 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private final Setting<SettingColor> healthColor1 = sgGeneral.add(new ColorSetting.Builder()
-        .name("health-stage-1")
-        .description("The color on the left of the health gradient.")
-        .defaultValue(new SettingColor(255, 15, 15))
+    // Scale
+
+    public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
+        .name("custom-scale")
+        .description("Applies a custom scale to this hud element.")
+        .defaultValue(false)
+        .onChanged(aBoolean -> calculateSize())
         .build()
     );
 
-    private final Setting<SettingColor> healthColor2 = sgGeneral.add(new ColorSetting.Builder()
-        .name("health-stage-2")
-        .description("The color in the middle of the health gradient.")
-        .defaultValue(new SettingColor(255, 150, 15))
+    public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Custom scale.")
+        .visible(customScale::get)
+        .defaultValue(2)
+        .onChanged(aDouble -> calculateSize())
+        .min(0.5)
+        .sliderRange(0.5, 3)
         .build()
     );
 
-    private final Setting<SettingColor> healthColor3 = sgGeneral.add(new ColorSetting.Builder()
-        .name("health-stage-3")
-        .description("The color on the right of the health gradient.")
-        .defaultValue(new SettingColor(15, 255, 15))
+    // Background
+
+    public final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
+        .name("background")
+        .description("Displays background.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
+        .name("background-color")
+        .description("Color used for the background.")
+        .visible(background::get)
+        .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()
     );
 
@@ -186,7 +224,7 @@ public class CombatHud extends HudElement {
     }
 
     private void calculateSize() {
-        setSize(175 * scale.get(), 95 * scale.get());
+        setSize(175 * getScale(), 95 * getScale());
     }
 
     @Override
@@ -204,37 +242,38 @@ public class CombatHud extends HudElement {
 
             if (playerEntity == null && !isInEditor()) return;
 
-            // Background
-            Renderer2D.COLOR.begin();
-            Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
+            if (background.get()) {
+                Renderer2D.COLOR.begin();
+                Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
+            }
 
             if (playerEntity == null) {
                 if (isInEditor()) {
                     renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
                     renderer.line(x + getWidth(), y, x, y + getHeight(), Color.GRAY);
-                    Renderer2D.COLOR.render(null); // i know, ill fix it soon
+                    Renderer2D.COLOR.render(); // I know, ill fix it soon
                 }
                 return;
             }
-            Renderer2D.COLOR.render(null);
+            Renderer2D.COLOR.render();
 
             // Player Model
             InventoryScreen.drawEntity(
                 renderer.drawContext,
                 (int) x,
                 (int) y,
-                (int) (x + (25 * scale.get())),
-                (int) (y + (66 * scale.get())),
-                (int) (30 * scale.get()),
+                (int) (x + (25 * getScale())),
+                (int) (y + (66 * getScale())),
+                (int) (30 * getScale()),
                 0,
-                -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.getYaw() - playerEntity.prevYaw) * mc.getRenderTickCounter().getTickDelta(true)),
+                -MathHelper.wrapDegrees(playerEntity.lastYaw + (playerEntity.getYaw() - playerEntity.lastYaw) * mc.getRenderTickCounter().getTickProgress(true)),
                 -playerEntity.getPitch(),
                 playerEntity
             );
 
             // Moving pos to past player model
-            x += 50 * scale.get();
-            y += 5 * scale.get();
+            x += 50 * getScale();
+            y += 5 * getScale();
 
             // Setting up texts
             String breakText = " | ";
@@ -288,7 +327,7 @@ public class CombatHud extends HudElement {
                     for (int position = 5; position >= 0; position--) {
                         ItemStack itemStack = getItem(position);
 
-                        if (itemStack.getItem() instanceof SwordItem
+                        if (itemStack.isIn(ItemTags.SWORDS)
                             || itemStack.getItem() == Items.END_CRYSTAL
                             || itemStack.getItem() == Items.RESPAWN_ANCHOR
                             || itemStack.getItem() instanceof BedItem) threat = true;
@@ -301,7 +340,7 @@ public class CombatHud extends HudElement {
                 }
             }
 
-            TextRenderer.get().begin(0.45 * scale.get(), false, true);
+            TextRenderer.get().begin(0.45 * getScale(), false, true);
 
             double breakWidth = TextRenderer.get().getWidth(breakText);
             double pingWidth = TextRenderer.get().getWidth(pingText);
@@ -329,7 +368,7 @@ public class CombatHud extends HudElement {
             TextRenderer.get().end();
 
             // Moving pos down for armor
-            y += 10 * scale.get();
+            y += 10 * getScale();
 
             double armorX;
             double armorY;
@@ -339,10 +378,10 @@ public class CombatHud extends HudElement {
             Matrix4fStack matrices = RenderSystem.getModelViewStack();
 
             matrices.pushMatrix();
-            matrices.scale(scale.get().floatValue(), scale.get().floatValue(), 1);
+            matrices.scale((float) getScale(), (float) getScale(), 1);
 
-            x /= scale.get();
-            y /= scale.get();
+            x /= getScale();
+            y /= getScale();
 
             TextRenderer.get().begin(0.35, false, true);
 
@@ -377,20 +416,20 @@ public class CombatHud extends HudElement {
 
             TextRenderer.get().end();
 
-            y = (int) (this.y + 75 * scale.get());
+            y = (int) (this.y + 75 * getScale());
             x = this.x;
 
             // Health bar
 
-            x /= scale.get();
-            y /= scale.get();
+            x /= getScale();
+            y /= getScale();
 
             x += 5;
             y += 5;
 
             Renderer2D.COLOR.begin();
             Renderer2D.COLOR.boxLines(x, y, 165, 11, BLACK);
-            Renderer2D.COLOR.render(null);
+            Renderer2D.COLOR.render();
 
             x += 2;
             y += 2;
@@ -414,7 +453,7 @@ public class CombatHud extends HudElement {
             Renderer2D.COLOR.begin();
             Renderer2D.COLOR.quad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get(), healthColor2.get(), healthColor1.get());
             Renderer2D.COLOR.quad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get(), healthColor3.get(), healthColor2.get());
-            Renderer2D.COLOR.render(null);
+            Renderer2D.COLOR.render();
 
             matrices.popMatrix();
         });
@@ -436,9 +475,17 @@ public class CombatHud extends HudElement {
         if (playerEntity == null) return ItemStack.EMPTY;
 
         return switch (i) {
-            case 4 -> playerEntity.getOffHandStack();
             case 5 -> playerEntity.getMainHandStack();
-            default -> playerEntity.getInventory().getArmorStack(i);
+            case 4 -> playerEntity.getOffHandStack();
+            case 3 -> playerEntity.getEquippedStack(EquipmentSlot.HEAD);
+            case 2 -> playerEntity.getEquippedStack(EquipmentSlot.CHEST);
+            case 1 -> playerEntity.getEquippedStack(EquipmentSlot.FEET);
+            case 0 -> playerEntity.getEquippedStack(EquipmentSlot.LEGS);
+            default -> ItemStack.EMPTY;
         };
+    }
+
+    private double getScale() {
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 }

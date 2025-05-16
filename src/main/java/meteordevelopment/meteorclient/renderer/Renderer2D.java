@@ -5,29 +5,32 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.blaze3d.textures.GpuTexture;
 import meteordevelopment.meteorclient.gui.renderer.packer.TextureRegion;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.MinecraftClient;
+
+import java.util.function.Consumer;
 
 public class Renderer2D {
     public static Renderer2D COLOR;
     public static Renderer2D TEXTURE;
 
-    public final Mesh triangles;
-    public final Mesh lines;
+    private final boolean textured;
 
-    public Renderer2D(boolean texture) {
-        triangles = new ShaderMesh(
-            texture ? Shaders.POS_TEX_COLOR : Shaders.POS_COLOR,
-            DrawMode.Triangles,
-            texture ? new Mesh.Attrib[]{Mesh.Attrib.Vec2, Mesh.Attrib.Vec2, Mesh.Attrib.Color} : new Mesh.Attrib[]{Mesh.Attrib.Vec2, Mesh.Attrib.Color}
-        );
+    public final MeshBuilder triangles;
+    public final MeshBuilder lines;
 
-        lines = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Lines, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
+    public Renderer2D(boolean textured) {
+        this.textured = textured;
+
+        triangles = new MeshBuilder(textured ? MeteorRenderPipelines.UI_TEXTURED : MeteorRenderPipelines.UI_COLORED);
+        lines = new MeshBuilder(MeteorRenderPipelines.UI_COLORED_LINES);
     }
 
-    @PreInit(dependencies = Shaders.class)
+    @PreInit
     public static void init() {
         COLOR = new Renderer2D(false);
         TEXTURE = new Renderer2D(true);
@@ -47,13 +50,39 @@ public class Renderer2D {
         lines.end();
     }
 
-    public void render(MatrixStack matrices) {
-        triangles.render(matrices);
-        lines.render(matrices);
+    public void render() {
+        render((Consumer<RenderPass>) null);
+    }
+
+    public void render(GpuTexture texture) {
+        if (!textured)
+            throw new IllegalStateException("Tried to render with a texture with a non-textured Renderer2D");
+
+        render(pass -> pass.bindSampler("u_Texture", texture));
+    }
+
+    public void render(Consumer<RenderPass> setupCallback) {
+        if (lines.isBuilding()) lines.end();
+        if (triangles.isBuilding()) triangles.end();
+
+        MeshRenderer.begin()
+            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .pipeline(MeteorRenderPipelines.UI_COLORED_LINES)
+            .mesh(lines)
+            .end();
+
+        MeshRenderer.begin()
+            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .pipeline(textured ? MeteorRenderPipelines.UI_TEXTURED : MeteorRenderPipelines.UI_COLORED)
+            .mesh(triangles)
+            .setupCallback(setupCallback)
+            .end();
     }
 
     // Tris
     public void triangle(double x1, double y1, double x2, double y2, double x3, double y3, Color color) {
+        triangles.ensureTriCapacity();
+
         triangles.triangle(
             triangles.vec2(x1, y1).color(color).next(),
             triangles.vec2(x2, y2).color(color).next(),
@@ -64,6 +93,8 @@ public class Renderer2D {
     // Lines
 
     public void line(double x1, double y1, double x2, double y2, Color color) {
+        lines.ensureLineCapacity();
+
         lines.line(
             lines.vec2(x1, y1).color(color).next(),
             lines.vec2(x2, y2).color(color).next()
@@ -71,6 +102,8 @@ public class Renderer2D {
     }
 
     public void boxLines(double x, double y, double width, double height, Color color) {
+        lines.ensureCapacity(4, 8);
+
         int i1 = lines.vec2(x, y).color(color).next();
         int i2 = lines.vec2(x, y + height).color(color).next();
         int i3 = lines.vec2(x + width, y + height).color(color).next();
@@ -85,6 +118,8 @@ public class Renderer2D {
     // Quads
 
     public void quad(double x, double y, double width, double height, Color cTopLeft, Color cTopRight, Color cBottomRight, Color cBottomLeft) {
+        triangles.ensureQuadCapacity();
+
         triangles.quad(
             triangles.vec2(x, y).color(cTopLeft).next(),
             triangles.vec2(x, y + height).color(cBottomLeft).next(),
@@ -100,6 +135,8 @@ public class Renderer2D {
     // Textured quads
 
     public void texQuad(double x, double y, double width, double height, Color color) {
+        triangles.ensureQuadCapacity();
+
         triangles.quad(
             triangles.vec2(x, y).vec2(0, 0).color(color).next(),
             triangles.vec2(x, y + height).vec2(0, 1).color(color).next(),
@@ -109,6 +146,8 @@ public class Renderer2D {
     }
 
     public void texQuad(double x, double y, double width, double height, TextureRegion texture, Color color) {
+        triangles.ensureQuadCapacity();
+
         triangles.quad(
             triangles.vec2(x, y).vec2(texture.x1, texture.y1).color(color).next(),
             triangles.vec2(x, y + height).vec2(texture.x1, texture.y2).color(color).next(),
@@ -118,6 +157,8 @@ public class Renderer2D {
     }
 
     public void texQuad(double x, double y, double width, double height, double rotation, double texX1, double texY1, double texX2, double texY2, Color color) {
+        triangles.ensureQuadCapacity();
+
         double rad = Math.toRadians(rotation);
         double cos = Math.cos(rad);
         double sin = Math.sin(rad);
