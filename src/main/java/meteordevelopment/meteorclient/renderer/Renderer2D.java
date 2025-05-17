@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.renderer;
 
 import com.mojang.blaze3d.systems.RenderPass;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import meteordevelopment.meteorclient.gui.renderer.packer.TextureRegion;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -54,11 +54,11 @@ public class Renderer2D {
         render((Consumer<RenderPass>) null);
     }
 
-    public void render(GpuTexture texture) {
+    public void render(GpuTextureView textureView) {
         if (!textured)
             throw new IllegalStateException("Tried to render with a texture with a non-textured Renderer2D");
 
-        render(pass -> pass.bindSampler("u_Texture", texture));
+        render(pass -> pass.bindSampler("u_Texture", textureView));
     }
 
     public void render(Consumer<RenderPass> setupCallback) {

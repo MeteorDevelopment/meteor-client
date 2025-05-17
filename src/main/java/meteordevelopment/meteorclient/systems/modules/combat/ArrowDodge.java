@@ -116,7 +116,8 @@ public class ArrowDodge extends Module {
             if (!(e instanceof ProjectileEntity)) continue;
             if (!allProjectiles.get() && !(e instanceof ArrowEntity)) continue;
             if (ignoreOwn.get()) {
-                UUID owner = ((ProjectileEntityAccessor) e).getOwnerUuid();
+                // todo should we change this to LazyEntityReference#resolve
+                UUID owner = ((ProjectileEntityAccessor) e).getOwner().getUuid();
                 if (owner != null && owner.equals(mc.player.getUuid())) continue;
             }
             if (!simulator.set(e, accurate.get())) continue;

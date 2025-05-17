@@ -53,7 +53,7 @@ public abstract class PostProcessShader {
             .pipeline(pipeline)
             .mesh(FullScreenRenderer.mesh)
             .setupCallback(pass -> {
-                pass.bindSampler("u_Texture", framebuffer.getColorAttachment());
+                pass.bindSampler("u_Texture", framebuffer.getColorAttachmentView());
                 pass.setUniform("u_Post", UNIFORM_STORAGE.write(new UniformData(
                     (float) mc.getWindow().getFramebufferWidth(), (float) mc.getWindow().getFramebufferHeight(),
                     (float) glfwGetTime()

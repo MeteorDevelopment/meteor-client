@@ -10,7 +10,7 @@ import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.AddressMode;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.textures.TextureFormat;
 import it.unimi.dsi.fastutil.ints.IntDoubleImmutablePair;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -112,7 +112,7 @@ public class Blur extends Module {
         .build()
     );
 
-    private final GpuTexture[] fbos = new GpuTexture[6];
+    private final GpuTextureView[] fbos = new GpuTextureView[6];
     private boolean initialized;
 
     private boolean enabled;
@@ -136,13 +136,13 @@ public class Blur extends Module {
         MeteorClient.EVENT_BUS.subscribe(new ConsumerListener<>(RenderAfterWorldEvent.class, event -> onRenderAfterWorld()));
     }
 
-    private GpuTexture createFbo(int i) {
+    private GpuTextureView createFbo(int i) {
         double scale = 1 / Math.pow(2, i);
 
         int width = (int) (mc.getWindow().getFramebufferWidth() * scale);
         int height = (int) (mc.getWindow().getFramebufferHeight() * scale);
 
-        return RenderSystem.getDevice().createTexture("Blur - " + i, 15,  TextureFormat.RGBA8, width, height, 1);
+        return RenderSystem.getDevice().createTextureView(RenderSystem.getDevice().createTexture("Blur - " + i, 15,  TextureFormat.RGBA8, width, height, 1, 1));
     }
 
     private void onRenderAfterWorld() {
@@ -195,7 +195,7 @@ public class Blur extends Module {
         double offset = strength.rightDouble();
 
         // Initial downsample
-        renderToFbo(fbos[0], mc.getFramebuffer().getColorAttachment(), MeteorRenderPipelines.BLUR_DOWN, offset);
+        renderToFbo(fbos[0], mc.getFramebuffer().getColorAttachmentView(), MeteorRenderPipelines.BLUR_DOWN, offset);
 
         // Downsample
         for (int i = 0; i < iterations; i++) {
@@ -216,11 +216,11 @@ public class Blur extends Module {
             .end();
     }
 
-    private void renderToFbo(GpuTexture targetFbo, GpuTexture sourceTexture, RenderPipeline pipeline, double offset) {
+    private void renderToFbo(GpuTextureView targetFbo, GpuTextureView sourceTexture, RenderPipeline pipeline, double offset) {
         AddressMode prevAddressModeU = ((IGpuTexture) sourceTexture).meteor$getAddressModeU();
         AddressMode prevAddressModeV = ((IGpuTexture) sourceTexture).meteor$getAddressModeV();
 
-        sourceTexture.setAddressMode(AddressMode.CLAMP_TO_EDGE);
+        sourceTexture.texture().setAddressMode(AddressMode.CLAMP_TO_EDGE);
 
         MeshRenderer.begin()
             .attachments(targetFbo, null)
@@ -235,7 +235,7 @@ public class Blur extends Module {
             })
             .end();
 
-        sourceTexture.setAddressMode(prevAddressModeU, prevAddressModeV);
+        sourceTexture.texture().setAddressMode(prevAddressModeU, prevAddressModeV);
     }
 
     private boolean shouldRender() {

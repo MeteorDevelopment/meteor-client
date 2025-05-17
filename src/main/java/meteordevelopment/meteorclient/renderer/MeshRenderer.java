@@ -9,7 +9,7 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -31,8 +31,8 @@ public class MeshRenderer {
 
     private static boolean taken;
 
-    private GpuTexture colorAttachment;
-    private GpuTexture depthAttachment;
+    private GpuTextureView colorAttachment;
+    private GpuTextureView depthAttachment;
     private Color clearColor;
     private RenderPipeline pipeline;
     private MeshBuilder mesh;
@@ -49,15 +49,15 @@ public class MeshRenderer {
         return INSTANCE;
     }
 
-    public MeshRenderer attachments(GpuTexture color, GpuTexture depth) {
+    public MeshRenderer attachments(GpuTextureView color, GpuTextureView depth) {
         colorAttachment = color;
         depthAttachment = depth;
         return this;
     }
 
     public MeshRenderer attachments(Framebuffer framebuffer) {
-        colorAttachment = framebuffer.getColorAttachment();
-        depthAttachment = framebuffer.getDepthAttachment();
+        colorAttachment = framebuffer.getColorAttachmentView();
+        depthAttachment = framebuffer.getDepthAttachmentView();
         return this;
     }
 

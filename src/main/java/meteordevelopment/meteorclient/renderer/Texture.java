@@ -31,7 +31,7 @@ public class Texture extends AbstractTexture {
          *  the texture usage and if it isn't marked appropriately it throws an exception. Just leaving it as 15 for now
          *  because that should pass all the checks.
          */
-        glTexture = RenderSystem.getDevice().createTexture("", 15, format, width, height, 1);
+        glTexture = RenderSystem.getDevice().createTexture("", 15, format, width, height, 1, 1);
         glTexture.setTextureFilter(min, mag, false);
     }
 
@@ -56,6 +56,7 @@ public class Texture extends AbstractTexture {
         RenderSystem.getDevice().createCommandEncoder().writeToTexture(
             glTexture,
             image,
+            0,
             0,
             0,
             0,

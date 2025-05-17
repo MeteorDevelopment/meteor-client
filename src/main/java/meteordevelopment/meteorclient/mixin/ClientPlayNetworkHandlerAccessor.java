@@ -5,9 +5,11 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.message.LastSeenMessagesCollector;
 import net.minecraft.network.message.MessageChain;
+import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,4 +31,7 @@ public interface ClientPlayNetworkHandlerAccessor {
 
     @Accessor("enabledFeatures")
     FeatureSet getEnabledFeatures();
+
+    @Accessor("COMMAND_NODE_FACTORY")
+    CommandTreeS2CPacket.NodeFactory<ClientCommandSource> getCommandNodeFactory();
 }

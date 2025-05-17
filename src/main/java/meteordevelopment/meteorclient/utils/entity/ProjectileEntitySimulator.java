@@ -124,7 +124,8 @@ public class ProjectileEntitySimulator {
             velocity.add(vel.x, user.isOnGround() ? 0.0D : vel.y, vel.z);
         }
 
-        this.simulatingEntity = user;
+        // todo test this
+        this.simulatingEntity = type.create(mc.world, null);
         this.gravity = gravity;
         this.airDrag = 0.99;
         this.waterDrag = waterDrag;
@@ -212,7 +213,7 @@ public class ProjectileEntitySimulator {
         double l = velocity.length();
         velocity.mul(0.6 / l + 0.5, 0.6 / l + 0.5, 0.6 / l + 0.5);
 
-        simulatingEntity = user;
+        simulatingEntity = EntityType.FISHING_BOBBER.create(mc.world, null);
         gravity = 0.03;
         airDrag = 0.92;
         waterDrag = 0;
@@ -265,7 +266,13 @@ public class ProjectileEntitySimulator {
         Box box = new Box(prevPos3d.x - (width / 2f), prevPos3d.y, prevPos3d.z - (width / 2f), prevPos3d.x + (width / 2f), prevPos3d.y + height, prevPos3d.z + (width / 2f))
             .stretch(velocity.x, velocity.y, velocity.z).expand(1.0D);
         HitResult hitResult2 = ProjectileUtil.getEntityCollision(
-            mc.world, simulatingEntity == mc.player ? null : simulatingEntity, prevPos3d, pos3d, box, entity -> !entity.isSpectator() && entity.isAlive() && entity.canHit()
+            mc.world,
+            simulatingEntity,
+            prevPos3d,
+            pos3d,
+            box,
+            entity -> !entity.isSpectator() && entity.isAlive() && entity.canHit(),
+            ProjectileUtil.getToleranceMargin(simulatingEntity)
         );
         if (hitResult2 != null) {
             hitResult = hitResult2;

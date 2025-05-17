@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
@@ -28,12 +28,12 @@ import java.util.OptionalInt;
 public abstract class LightmapTextureManagerMixin {
     @Shadow
     @Final
-    private GpuTexture glTexture;
+    private GpuTextureView glTextureView;
 
     @Inject(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;pop()V", shift = At.Shift.BEFORE))
     private void update$clear(float tickProgress, CallbackInfo info) {
         if (Modules.get().get(Fullbright.class).getGamma() || Modules.get().isActive(Xray.class)) {
-            RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor Fullbright", glTexture, OptionalInt.of(ColorHelper.getArgb(255, 255, 255, 255))).close();
+            RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor Fullbright", glTextureView, OptionalInt.of(ColorHelper.getArgb(255, 255, 255, 255))).close();
         }
     }
 

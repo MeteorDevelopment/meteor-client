@@ -83,7 +83,7 @@ public class HudRenderer {
                         .attachments(mc.getFramebuffer())
                         .pipeline(MeteorRenderPipelines.UI_TEXT)
                         .mesh(fontHolder.getMesh())
-                        .setupCallback(pass -> pass.bindSampler("u_Texture", fontHolder.font.texture.getGlTexture()))
+                        .setupCallback(pass -> pass.bindSampler("u_Texture", fontHolder.font.texture.getGlTextureView()))
                         .end();
                 }
                 else {
@@ -124,7 +124,7 @@ public class HudRenderer {
     public void texture(Identifier id, double x, double y, double width, double height, Color color) {
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
-        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTexture());
+        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTextureView());
     }
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {

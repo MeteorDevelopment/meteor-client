@@ -15,8 +15,10 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,11 +47,11 @@ public abstract class ScreenMixin {
         cir.setReturnValue(true);
     }
 
-    @Inject(method = "handleTextClick", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", ordinal = 1, remap = false), cancellable = true)
-    private void onRunCommand(Style style, CallbackInfoReturnable<Boolean> cir) {
-        if (style.getClickEvent() instanceof MeteorClickEvent clickEvent && clickEvent.value.startsWith(Config.get().prefix.get())) {
+    @Inject(method = "handleClickEvent(Lnet/minecraft/text/ClickEvent;Lnet/minecraft/client/MinecraftClient;Lnet/minecraft/client/gui/screen/Screen;)Z", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V",remap = false), cancellable = true)
+    private static void onRunCommand(ClickEvent clickEvent, MinecraftClient client, Screen screen, CallbackInfoReturnable<Boolean> cir) {
+        if (clickEvent instanceof MeteorClickEvent meteorClickEvent && meteorClickEvent.value.startsWith(Config.get().prefix.get())) {
             try {
-                Commands.dispatch(clickEvent.value.substring(Config.get().prefix.get().length()));
+                Commands.dispatch(meteorClickEvent.value.substring(Config.get().prefix.get().length()));
                 cir.setReturnValue(true);
             } catch (CommandSyntaxException e) {
                 MeteorClient.LOG.error("Failed to run command", e);

@@ -93,7 +93,7 @@ public class ChamsShader extends EntityShader {
         )));
 
         if (chams.isShader() && chams.shader.get() == Chams.Shader.Image && IMAGE_TEX != null) {
-            pass.bindSampler("u_TextureI", IMAGE_TEX.getGlTexture());
+            pass.bindSampler("u_TextureI", IMAGE_TEX.getGlTextureView());
         }
     }
 
