@@ -42,19 +42,56 @@ public class ProxiesImportScreen extends WindowScreen {
             try {
                 int pog = 0, bruh = 0;
                 for (String line : Files.readAllLines(file.toPath())) {
-                    Matcher matcher = Proxies.PROXY_PATTERN.matcher(line);
+                    Matcher matcher;
+                    Proxy proxy = null;
 
-                    if (matcher.matches()) {
+                    matcher = Proxies.PROXY_PATTERN.matcher(line);
+                    if (proxy == null && matcher.matches()) {
                         String address = matcher.group(2).replaceAll("\\b0+\\B", "");
                         int port = Integer.parseInt(matcher.group(3));
 
-                        Proxy proxy = new Proxy.Builder()
+                        proxy = new Proxy.Builder()
                             .address(address)
                             .port(port)
                             .name(matcher.group(1) != null ? matcher.group(1) : address + ":" + port)
                             .type(matcher.group(4) != null ? ProxyType.parse(matcher.group(4)) : ProxyType.Socks4)
                             .build();
+                    }
 
+                    matcher = Proxies.PROXY_PATTERN_WEBSHARE.matcher(line);
+                    if (proxy == null && matcher.matches()) {
+                        String address = matcher.group(1).replaceAll("\\b0+\\B", "");
+                        int port = Integer.parseInt(matcher.group(2));
+
+                        proxy = new Proxy.Builder()
+                            .address(address)
+                            .port(port)
+                            .name(address + ":" + port)
+                            .username(matcher.group(3) != null ? matcher.group(3) : "")
+                            .password(matcher.group(4) != null ? matcher.group(4) : "")
+                            .type(ProxyType.Socks5)
+                            .build();
+                    }
+
+                    matcher = Proxies.PROXY_PATTERN_URI.matcher(line);
+                    if (proxy == null && matcher.matches()) {
+                        String address = matcher.group("addr").replaceAll("\\b0+\\B", "");
+                        int port = Integer.parseInt(matcher.group("port"));
+
+                        proxy = new Proxy.Builder()
+                            .address(address)
+                            .port(port)
+                            .name(address + ":" + port)
+                            .username(matcher.group("user") != null ? matcher.group("user") : "")
+                            .password(matcher.group("pass") != null ? matcher.group("pass") : "")
+                            .type(matcher.group(1) != null && matcher.group(1).equals("socks4") ? ProxyType.Socks4 : ProxyType.Socks5)
+                            .build();
+                    }
+
+                    if (proxy == null) {
+                        list.add(theme.label("Unrecognised proxy format: " + line).color(Color.RED));
+                        bruh++;
+                    } else {
                         if (proxies.add(proxy)) {
                             list.add(theme.label("Imported proxy: " + proxy.name.get()).color(Color.GREEN));
                             pog++;
@@ -63,10 +100,6 @@ public class ProxiesImportScreen extends WindowScreen {
                             list.add(theme.label("Proxy already exists: " + proxy.name.get()).color(Color.ORANGE));
                             bruh++;
                         }
-                    }
-                    else {
-                        list.add(theme.label("Invalid proxy: " + line).color(Color.RED));
-                        bruh++;
                     }
                 }
                 add(theme
