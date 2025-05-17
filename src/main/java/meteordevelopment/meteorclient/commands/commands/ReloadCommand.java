@@ -28,7 +28,7 @@ public class ReloadCommand extends Command {
             Systems.load();
             Capes.init();
             Fonts.refresh();
-            MeteorExecutor.execute(() -> Friends.get().forEach(Friend::updateInfo));
+            Friends.get().refresh();
 
             return SINGLE_SUCCESS;
         });

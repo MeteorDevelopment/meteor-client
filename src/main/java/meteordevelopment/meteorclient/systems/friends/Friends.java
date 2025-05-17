@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 public class Friends extends System<Friends> implements Iterable<Friend> {
     private final List<Friend> friends = new ArrayList<>();
@@ -127,8 +131,23 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
         Collections.sort(friends);
 
-        MeteorExecutor.execute(() -> friends.forEach(Friend::updateInfo));
+        refresh();
 
         return this;
+    }
+
+    public void refresh() {
+        MeteorExecutor.execute(() -> {
+            try (ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("Friend refresh").factory())) {
+                Iterator<Friend> iterator = Friends.get().iterator();
+                scheduler.scheduleAtFixedRate(() -> {
+                    if (iterator.hasNext()) {
+                        iterator.next().updateInfo();
+                    } else {
+                        scheduler.shutdown();
+                    }
+                }, 0, 1, TimeUnit.SECONDS);
+            }
+        });
     }
 }
