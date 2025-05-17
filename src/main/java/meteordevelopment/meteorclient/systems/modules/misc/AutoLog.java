@@ -73,6 +73,22 @@ public class AutoLog extends Module {
         .defaultValue(false)
         .build()
     );
+	
+	private final Setting<Boolean> height = sgGeneral.add(new BoolSetting.Builder()
+        .name("height")
+        .description("Disconnects when player's height is lower than certain threshold.")
+        .defaultValue(false)
+        .build()
+    );
+	
+	private final Setting<Integer> heightThreshold = sgGeneral.add(new IntSetting.Builder()
+        .name("height-threshold")
+        .description("The minimum height that is required to stay logged in.")
+        .defaultValue(0)
+        .sliderRange(-64, 320)
+        .visible(() -> height.get())
+        .build()
+    );
 
     private final Setting<Boolean> smartToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("smart-toggle")
@@ -188,6 +204,12 @@ public class AutoLog extends Module {
 
         if (smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()) {
             disconnect("Health was going to be lower than " + health.get() + ".");
+            if (toggleOff.get()) this.toggle();
+            return;
+        }
+        
+        if (height.get() && mc.player.getY() < heightThreshold.get()){
+            disconnect("Height was lower than " + heightThreshold.get() + ".");
             if (toggleOff.get()) this.toggle();
             return;
         }
