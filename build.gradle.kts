@@ -1,7 +1,6 @@
 plugins {
     id("fabric-loom") version "1.10-SNAPSHOT"
     id("maven-publish")
-    id("com.gradleup.shadow") version "9.0.0-beta11"
 }
 
 base {
@@ -65,7 +64,7 @@ configurations {
     implementation.configure {
         extendsFrom(library)
     }
-    shadow.configure {
+    include.configure {
         extendsFrom(library)
     }
 }
@@ -100,9 +99,6 @@ dependencies {
     library("io.netty:netty-handler-proxy:${properties["netty_version"] as String}") { isTransitive = false }
     library("io.netty:netty-codec-socks:${properties["netty_version"] as String}") { isTransitive = false }
     library("de.florianmichael:WaybackAuthLib:${properties["waybackauthlib_version"] as String}")
-
-    // Launch sub project
-    shadow(project(":launch"))
 }
 
 loom {
@@ -140,6 +136,10 @@ tasks {
             rename { "${it}_${licenseSuffix}" }
         }
 
+        // Launch sub project
+        dependsOn(":launch:compileJava")
+        from(project(":launch").layout.buildDirectory.dir("classes/java/main"))
+
         manifest {
             attributes["Main-Class"] = "meteordevelopment.meteorclient.Main"
         }
@@ -159,26 +159,6 @@ tasks {
         options.release = 21
         options.compilerArgs.add("-Xlint:deprecation")
         options.compilerArgs.add("-Xlint:unchecked")
-    }
-
-    shadowJar {
-        configurations = listOf(project.configurations.shadow.get())
-
-        val licenseSuffix = project.base.archivesName.get()
-        from("LICENSE") {
-            rename { "${it}_${licenseSuffix}" }
-        }
-
-        dependencies {
-            exclude {
-                it.moduleGroup == "org.slf4j"
-            }
-        }
-    }
-
-    remapJar {
-        dependsOn(shadowJar)
-        inputFile.set(shadowJar.get().archiveFile)
     }
 
     javadoc {
