@@ -1,26 +1,33 @@
-name: Issue automatic actions
+name: Issue Automatic Actions
 
 on:
   issues:
-    types: [opened]
-
-permissions:
-  issues: write
+    types: [ opened ]
 
 jobs:
   issue-moderator:
     runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      contents: read
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - name: Automatically close issues that don't follow the issue template
-        uses: lucasbento/auto-close-issues@v1.0.2
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-close-message: |
-            @${issue.user.login}: hello! :wave:
-            This issue is being automatically closed because it does not follow the issue template."
-          closed-issues-label: "invalid"
+          node-version: 22
+
+      - name: Install Dependencies
+        working-directory: .github/moderation
+        run: npm ci
+
+      - name: Check Banned Terms
+        run: node .github/moderation/banned_terms.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
