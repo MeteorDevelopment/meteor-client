@@ -14,11 +14,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     // https://regex101.com/r/gRHjnd/latest
     public static final Pattern PROXY_PATTERN = Pattern.compile("^(?:([\\w\\s]+)=)?((?:0*(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!:)|)){4}):(?!0)(\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])(?i:@(socks[45]))?$", Pattern.MULTILINE);
+    // https://regex101.com/r/QXATIS/1
+    public static final Pattern PROXY_PATTERN_WEBSHARE = Pattern.compile("^((?:0*(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!:)|)){4}):(?!0)(\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])(?::([^:]+)(?::(.+))?)$", Pattern.MULTILINE);
+    // https://regex101.com/r/7M2LFx/1
+    public static final Pattern PROXY_PATTERN_URI = Pattern.compile("^(?:(socks|socks4|socks5)://)?(?:(?<user>[\\w~-]+)(:(?<pass>[\\w~-]+))?@)?(?<addr>(?:0*(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!:)|)){4}):(?!0)(?<port>\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])$", Pattern.MULTILINE);
 
     private List<Proxy> proxies = new ArrayList<>();
 
@@ -32,7 +37,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public boolean add(Proxy proxy) {
         for (Proxy p : proxies) {
-            if (p.type.get().equals(proxy.type.get()) && p.address.get().equals(proxy.address.get()) && p.port.get() == proxy.port.get()) return false;
+            if (p.type.get().equals(proxy.type.get()) && p.address.get().equals(proxy.address.get()) && Objects.equals(p.port.get(), proxy.port.get())) return false;
         }
 
         if (proxies.isEmpty()) proxy.enabled.set(true);

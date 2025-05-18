@@ -86,6 +86,7 @@ public class Proxy implements ISerializable<Proxy> {
         protected int port = 0;
         protected String name = "";
         protected String username = "";
+        protected String password = "";
         protected boolean enabled = false;
 
         public Builder type(ProxyType type) {
@@ -113,6 +114,11 @@ public class Proxy implements ISerializable<Proxy> {
             return this;
         }
 
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
         public Builder enabled(boolean enabled) {
             this.enabled = enabled;
             return this;
@@ -126,6 +132,7 @@ public class Proxy implements ISerializable<Proxy> {
             if (port != proxy.port.getDefaultValue()) proxy.port.set(port);
             if (!name.equals(proxy.name.getDefaultValue())) proxy.name.set(name);
             if (!username.equals(proxy.username.getDefaultValue())) proxy.username.set(username);
+            if (!password.equals(proxy.password.getDefaultValue())) proxy.password.set(password);
             if (enabled != proxy.enabled.getDefaultValue()) proxy.enabled.set(enabled);
 
             return proxy;
