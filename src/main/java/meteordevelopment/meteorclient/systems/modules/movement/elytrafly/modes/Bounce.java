@@ -41,13 +41,12 @@ public class Bounce extends ElytraFlightMode {
 
         // Make sure all the conditions are met (player has an elytra, isn't in water, etc)
         if (checkConditions(mc.player)) {
-
             if (!rubberbanded) {
                 if (prevFov != 0 && !elytraFly.sprint.get()) mc.options.getFovEffectScale().setValue(0.0); // This stops the FOV effects from constantly going on and off.
                 if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
                 setPressed(mc.options.forwardKey, true);
                 mc.player.setYaw(getYawDirection());
-                if (!elytraFly.pitchUnlock.get()) mc.player.setPitch(elytraFly.pitch.get().floatValue());
+                if (elytraFly.lockPitch.get()) mc.player.setPitch(elytraFly.pitch.get().floatValue());
             }
 
             if (!elytraFly.sprint.get()) {

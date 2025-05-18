@@ -84,13 +84,12 @@ public class ElytraFlightMode {
     }
 
     public void autoTakeoff() {
-        if (elytraFly.manualTakeoff.get()) return;
-
         if (incrementJumpTimer) jumpTimer++;
 
         boolean jumpPressed = mc.options.jumpKey.isPressed();
 
-        if (elytraFly.autoTakeOff.get() && jumpPressed) {
+        if ((elytraFly.autoTakeOff.get() && elytraFly.flightMode.get() != ElytraFlightModes.Pitch40 && elytraFly.flightMode.get() != ElytraFlightModes.Bounce) ||
+            (!elytraFly.manualTakeoff.get() && elytraFly.flightMode.get() == ElytraFlightModes.Bounce) && jumpPressed) {
             if (!lastJumpPressed && !mc.player.isGliding()) {
                 jumpTimer = 0;
                 incrementJumpTimer = true;
