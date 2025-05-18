@@ -118,6 +118,7 @@ public class Proxy implements ISerializable<Proxy> {
             this.password = password;
             return this;
         }
+
         public Builder enabled(boolean enabled) {
             this.enabled = enabled;
             return this;
