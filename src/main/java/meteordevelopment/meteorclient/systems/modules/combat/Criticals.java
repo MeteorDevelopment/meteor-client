@@ -64,6 +64,8 @@ public class Criticals extends Module {
     private HandSwingC2SPacket swingPacket;
     private boolean sendPackets;
     private int sendTimer;
+    private double lastY;
+    private boolean waitingForPeak;
 
     public Criticals() {
         super(Categories.Combat, "criticals", "Performs critical attacks when you hit your target.");
@@ -75,6 +77,8 @@ public class Criticals extends Module {
         swingPacket = null;
         sendPackets = false;
         sendTimer = 0;
+        lastY = 0;
+        waitingForPeak = false;
     }
 
     @EventHandler
@@ -107,11 +111,16 @@ public class Criticals extends Module {
                     case Jump, MiniJump -> {
                         if (!sendPackets) {
                             sendPackets = true;
-                            sendTimer = mode.get() == Mode.Jump ? 6 : 4;
                             attackPacket = (PlayerInteractEntityC2SPacket) event.packet;
 
-                            if (mode.get() == Mode.Jump) mc.player.jump();
-                            else ((IVec3d) mc.player.getVelocity()).meteor$setY(0.25);
+                            if (mode.get() == Mode.Jump) {
+                                mc.player.jump();
+                                waitingForPeak = true;
+                                lastY = mc.player.getY();
+                            } else {
+                                ((IVec3d) mc.player.getVelocity()).meteor$setY(0.25);
+                                sendTimer = 4;
+                            }
                             event.cancel();
                         }
                     }
@@ -123,7 +132,6 @@ public class Criticals extends Module {
 
             if (sendPackets && swingPacket == null) {
                 swingPacket = (HandSwingC2SPacket) event.packet;
-
                 event.cancel();
             }
         }
@@ -132,6 +140,16 @@ public class Criticals extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (sendPackets) {
+            if (mode.get() == Mode.Jump && waitingForPeak) {
+                double currentY = mc.player.getY();
+                if (currentY <= lastY) {
+                    waitingForPeak = false;
+                    sendTimer = 0; // Attack on next tick after reaching peak
+                }
+                lastY = currentY;
+                return;
+            }
+
             if (sendTimer <= 0) {
                 sendPackets = false;
 
