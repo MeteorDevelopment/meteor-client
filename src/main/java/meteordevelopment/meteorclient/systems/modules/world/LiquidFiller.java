@@ -228,15 +228,18 @@ public class LiquidFiller extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
+        if (!isWithinShape(blockPos, placeRange.get())) return true;
+
         RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), blockPos.toCenterPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
         BlockHitResult result = mc.world.raycast(raycastContext);
-
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !isWithinShape(blockPos, placeWallsRange.get());
-        return !isWithinShape(blockPos, placeRange.get());
+
+        return false;
     }
 
     private boolean isWithinShape(BlockPos blockPos, double range) {
+        // Cube shape
         if (shape.get() == Shape.UniformCube) {
             BlockPos playerBlockPos = mc.player.getBlockPos();
             double dX = Math.ceil(Math.abs(blockPos.getX() - playerBlockPos.getX()));
@@ -246,6 +249,7 @@ public class LiquidFiller extends Module {
             return maxDist <= Math.floor(range);
         }
 
+        // Spherical shape
         return PlayerUtils.isWithin(blockPos.toCenterPos(), range);
     }
 }
