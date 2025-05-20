@@ -73,7 +73,7 @@ configurations {
 dependencies {
     // Fabric
     // todo change this when appropriate
-    minecraft("com.mojang:minecraft:25w20a")
+    minecraft("com.mojang:minecraft:25w21a")
     mappings("net.fabricmc:yarn:${properties["yarn_mappings"] as String}:v2")
     modImplementation("net.fabricmc:fabric-loader:${properties["loader_version"] as String}")
 
