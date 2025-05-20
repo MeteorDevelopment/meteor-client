@@ -226,7 +226,7 @@ public class HoleFiller extends Module {
     private final Setting<SettingColor> nextLineColor = sgRender.add(new ColorSetting.Builder()
         .name("next-line-color")
         .description("The line color of the next block to be placed.")
-        .defaultValue(new SettingColor(227, 196, 245))
+        .defaultValue(new SettingColor(5, 139, 221))
         .visible(() -> render.get() && shapeMode.get().lines())
         .build()
     );
@@ -307,16 +307,12 @@ public class HoleFiller extends Module {
     private void onRender(Render3DEvent event) {
         if (!render.get() || holes.isEmpty()) return;
 
-        for (Hole hole : holes) {
-            boolean isNext = false;
-            for (int i = 0; i < holes.size(); i++) {
-                if (!holes.get(i).equals(hole)) continue;
-                if (i < blocksPerTick.get()) isNext = true;
-            }
-
+        for (int i = 0; i < holes.size(); i++) {
+            boolean isNext = i < blocksPerTick.get();
             Color side = isNext ? nextSideColor.get() : sideColor.get();
             Color line = isNext ? nextLineColor.get() : lineColor.get();
 
+            Hole hole = holes.get(i);
             event.renderer.box(hole.blockPos, side, line, shapeMode.get(), hole.exclude);
         }
     }
