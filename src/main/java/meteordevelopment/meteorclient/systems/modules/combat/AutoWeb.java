@@ -51,6 +51,15 @@ public class AutoWeb extends Module {
         .build()
     );
 
+    private final Setting<Double> targetRange = sgGeneral.add(new DoubleSetting.Builder()
+        .name("target-range")
+        .description("The maximum distance to target players.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(30)
+        .build()
+    );
+
     private final Setting<Boolean> predict = sgGeneral.add(new BoolSetting.Builder()
         .name("predict")
         .description("Predict target movement to account for ping.")
@@ -90,9 +99,9 @@ public class AutoWeb extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (TargetUtils.isBadTarget(target, placeRange.get())) {
-            target = TargetUtils.getPlayerTarget(placeRange.get(), priority.get());
-            if (TargetUtils.isBadTarget(target, placeRange.get())) return;
+        if (TargetUtils.isBadTarget(target, targetRange.get())) {
+            target = TargetUtils.getPlayerTarget(targetRange.get(), priority.get());
+            if (TargetUtils.isBadTarget(target, targetRange.get())) return;
         }
 
         // Grab webs from hotbar
