@@ -138,6 +138,16 @@ public class HoleFiller extends Module {
         .build()
     );
 
+    private final Setting<Double> ticksToPredict = sgSmart.add(new DoubleSetting.Builder()
+        .name("ticks-to-predict")
+        .description("How many ticks ahead we should predict for.")
+        .defaultValue(10)
+        .min(1)
+        .sliderMax(30)
+        .visible(predict::get)
+        .build()
+    );
+
     private final Setting<Boolean> ignoreSafe = sgSmart.add(new BoolSetting.Builder()
         .name("ignore-safe")
         .description("Ignore players in safe holes.")
@@ -378,12 +388,12 @@ public class HoleFiller extends Module {
     private boolean isCloseToHolePos(PlayerEntity target, BlockPos blockPos) {
         Vec3d pos = target.getPos();
 
+        // Prediction mode via target's movement delta
         if (predict.get()) {
-            pos.add(
-                target.getX() - target.lastX,
-                target.getY() - target.lastY,
-                target.getZ() - target.lastZ
-            );
+            double dx = target.getX() - target.lastX;
+            double dy = target.getY() - target.lastY;
+            double dz = target.getZ() - target.lastZ;
+            pos = pos.add(dx * ticksToPredict.get(), dy * ticksToPredict.get(), dz * ticksToPredict.get());
         }
 
         double i = pos.x - (blockPos.getX() + 0.5);
