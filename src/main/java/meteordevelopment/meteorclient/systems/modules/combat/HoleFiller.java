@@ -144,7 +144,7 @@ public class HoleFiller extends Module {
         .defaultValue(10)
         .min(1)
         .sliderMax(30)
-        .visible(predict::get)
+        .visible(() -> smart.get() && predict.get())
         .build()
     );
 
