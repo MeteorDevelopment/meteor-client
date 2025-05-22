@@ -140,6 +140,7 @@ public class AutoTrap extends Module {
         .name("shape-mode")
         .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
+        .visible(render::get)
         .build()
     );
 
@@ -147,6 +148,7 @@ public class AutoTrap extends Module {
         .name("side-color")
         .description("The side color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232, 10))
+        .visible(() -> render.get() && shapeMode.get().sides())
         .build()
     );
 
@@ -154,6 +156,7 @@ public class AutoTrap extends Module {
         .name("line-color")
         .description("The line color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232))
+        .visible(() -> render.get() && shapeMode.get().lines())
         .build()
     );
 
@@ -161,6 +164,7 @@ public class AutoTrap extends Module {
         .name("next-side-color")
         .description("The side color of the next block to be placed.")
         .defaultValue(new SettingColor(227, 196, 245, 10))
+        .visible(() -> render.get() && shapeMode.get().sides())
         .build()
     );
 
@@ -168,6 +172,7 @@ public class AutoTrap extends Module {
         .name("next-line-color")
         .description("The line color of the next block to be placed.")
         .defaultValue(new SettingColor(5, 139, 221))
+        .visible(() -> render.get() && shapeMode.get().lines())
         .build()
     );
 
