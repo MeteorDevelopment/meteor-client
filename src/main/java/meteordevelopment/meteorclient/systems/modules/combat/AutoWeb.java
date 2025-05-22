@@ -103,7 +103,7 @@ public class AutoWeb extends Module {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
-        .description("Renders an overlay where blocks will be placed.")
+        .description("Renders an overlay where webs are placed.")
         .defaultValue(true)
         .build()
     );
@@ -118,7 +118,7 @@ public class AutoWeb extends Module {
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color of the target block rendering.")
+        .description("The side color of the placed web rendering.")
         .defaultValue(new SettingColor(239, 231, 244, 31))
         .visible(() -> render.get() && shapeMode.get().sides())
         .build()
@@ -126,7 +126,7 @@ public class AutoWeb extends Module {
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color of the target block rendering.")
+        .description("The line color of the placed web rendering.")
         .defaultValue(new SettingColor(255, 255, 255))
         .visible(() -> render.get() && shapeMode.get().lines())
         .build()
