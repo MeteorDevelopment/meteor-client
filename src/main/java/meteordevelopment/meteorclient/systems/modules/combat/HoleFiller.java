@@ -130,8 +130,8 @@ public class HoleFiller extends Module {
         .build()
     );
 
-    private final Setting<Boolean> predict = sgSmart.add(new BoolSetting.Builder()
-        .name("predict")
+    private final Setting<Boolean> predictMovement = sgSmart.add(new BoolSetting.Builder()
+        .name("predict-movement")
         .description("Predict target movement to account for ping.")
         .defaultValue(true)
         .visible(smart::get)
@@ -144,7 +144,7 @@ public class HoleFiller extends Module {
         .defaultValue(10)
         .min(1)
         .sliderMax(30)
-        .visible(() -> smart.get() && predict.get())
+        .visible(() -> smart.get() && predictMovement.get())
         .build()
     );
 
@@ -389,7 +389,7 @@ public class HoleFiller extends Module {
         Vec3d pos = target.getPos();
 
         // Prediction mode via target's movement delta
-        if (predict.get()) {
+        if (predictMovement.get()) {
             double dx = target.getX() - target.lastX;
             double dy = target.getY() - target.lastY;
             double dz = target.getZ() - target.lastZ;
