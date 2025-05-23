@@ -68,8 +68,8 @@ public class AutoWeb extends Module {
         .build()
     );
 
-    private final Setting<Boolean> predict = sgGeneral.add(new BoolSetting.Builder()
-        .name("predict")
+    private final Setting<Boolean> predictMovement = sgGeneral.add(new BoolSetting.Builder()
+        .name("predict-movement")
         .description("Predict target movement to account for ping.")
         .defaultValue(true)
         .build()
@@ -81,7 +81,7 @@ public class AutoWeb extends Module {
         .defaultValue(10)
         .min(1)
         .sliderMax(30)
-        .visible(predict::get)
+        .visible(predictMovement::get)
         .build()
     );
 
@@ -165,7 +165,7 @@ public class AutoWeb extends Module {
         Vec3d pos = target.getPos();
 
         // Prediction mode via target's movement delta
-        if (predict.get()) {
+        if (predictMovement.get()) {
             double dx = target.getX() - target.lastX;
             double dy = target.getY() - target.lastY;
             double dz = target.getZ() - target.lastZ;
