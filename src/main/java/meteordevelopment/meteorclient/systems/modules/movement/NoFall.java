@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -19,6 +20,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
+import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -88,10 +90,40 @@ public class NoFall extends Module {
         .build()
     );
 
+    private final Setting<Boolean> waterBucket = sgGeneral.add(new BoolSetting.Builder()
+        .name("water-bucket")
+        .description("MLG water bucket when predicted fall damage is high.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> waterBucketDamage = sgGeneral.add(new DoubleSetting.Builder()
+        .name("water-bucket-damage")
+        .description("Fall damage threshold to trigger the water bucket.")
+        .defaultValue(6)
+        .range(0, 40)
+        .sliderRange(0, 40)
+        .visible(waterBucket::get)
+        .build()
+    );
+
+    private final Setting<Double> waterBucketDistance = sgGeneral.add(new DoubleSetting.Builder()
+        .name("water-bucket-distance")
+        .description("How far below to predict the block for placing the water bucket.")
+        .defaultValue(5)
+        .range(1, 10)
+        .sliderRange(1, 10)
+        .visible(waterBucket::get)
+        .build()
+    );
+
     private boolean placedWater;
     private BlockPos targetPos;
+    private BlockPos waterPlacePos;
     private int timer;
     private boolean prePathManagerNoFall;
+    private int bucketFromSlot = -1;
+    private int bucketHotbarSlot = -1;
 
     public NoFall() {
         super(Categories.Movement, "no-fall", "Attempts to prevent you from taking fall damage.");
@@ -103,6 +135,8 @@ public class NoFall extends Module {
         if (mode.get() == Mode.Packet) PathManagers.get().getSettings().getNoFall().set(true);
 
         placedWater = false;
+        waterPlacePos = null;
+        timer = 0;
     }
 
     @Override
@@ -132,6 +166,7 @@ public class NoFall extends Module {
     private void onTick(TickEvent.Pre event) {
         if (timer > 20) {
             placedWater = false;
+            waterPlacePos = null;
             timer = 0;
         }
 
@@ -166,15 +201,9 @@ public class NoFall extends Module {
                 FindItemResult findItemResult = InvUtils.findInHotbar(item);
                 if (!findItemResult.found()) return;
 
-                // Center player
-                if (anchor.get()) PlayerUtils.centerPlayer();
-
-                // Check if there is a block within 5 blocks
-                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
-
-                // Place
-                if (result != null && result.getType() == HitResult.Type.BLOCK) {
-                    targetPos = result.getBlockPos().up();
+                BlockPos pos = predictPlacePos(waterBucketDistance.get());
+                if (pos != null) {
+                    targetPos = pos;
                     if (placedItem1 == PlacedItem.Bucket)
                         useItem(findItemResult, true, targetPos, true);
                     else {
@@ -186,10 +215,50 @@ public class NoFall extends Module {
             // Remove placed
             if (placedWater) {
                 timer++;
-                if (mc.player.getBlockStateAtPos().getBlock() == placedItem1.block) {
-                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos, true);
-                } else if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == Blocks.POWDER_SNOW && mc.player.fallDistance==0 && placedItem1.block==Blocks.POWDER_SNOW){ //check if the powder snow block is still there and the player is on the ground
-                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos.down(), true);
+                if (waterPlacePos != null && mc.world.getBlockState(waterPlacePos).getBlock() == placedItem1.block && mc.player.fallDistance == 0) {
+                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, waterPlacePos, true);
+                    waterPlacePos = null;
+                } else if (waterPlacePos != null && mc.world.getBlockState(waterPlacePos).getBlock() == Blocks.POWDER_SNOW && mc.player.fallDistance == 0 && placedItem1.block == Blocks.POWDER_SNOW) {
+                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, waterPlacePos.down(), true);
+                    waterPlacePos = null;
+                }
+            }
+        }
+        // Water bucket setting
+        else if (waterBucket.get()) {
+            double dmg = DamageUtils.fallDamage(mc.player);
+            if (mc.player.fallDistance > 3 && dmg >= waterBucketDamage.get() && !EntityUtils.isAboveWater(mc.player)) {
+                FindItemResult bucket = InvUtils.find(Items.WATER_BUCKET);
+                if (bucket.found()) {
+                    BlockPos pos = predictPlacePos(waterBucketDistance.get());
+                    if (pos != null) {
+                        targetPos = pos;
+
+                        bucketFromSlot = bucket.slot();
+                        bucketHotbarSlot = bucket.isHotbar() ? bucket.slot() : mc.player.getInventory().getSelectedSlot();
+                        if (!bucket.isHotbar()) {
+                            InvUtils.move().from(bucket.slot()).toHotbar(bucketHotbarSlot);
+                            InvUtils.dropHand();
+                        }
+
+                        useItem(new FindItemResult(bucketHotbarSlot, bucket.count()), true, targetPos, true);
+                    }
+                }
+            }
+
+            if (placedWater) {
+                timer++;
+                if (waterPlacePos != null && mc.world.getBlockState(waterPlacePos).getBlock() == Blocks.WATER && mc.player.fallDistance == 0) {
+                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, waterPlacePos, true);
+
+                    if (bucketFromSlot != -1 && bucketHotbarSlot != -1 && bucketFromSlot != bucketHotbarSlot) {
+                        InvUtils.move().fromHotbar(bucketHotbarSlot).to(bucketFromSlot);
+                        InvUtils.dropHand();
+                    }
+
+                    bucketFromSlot = -1;
+                    bucketHotbarSlot = -1;
+                    waterPlacePos = null;
                 }
             }
         }
@@ -217,6 +286,21 @@ public class NoFall extends Module {
         }
 
         this.placedWater = placedWater;
+        if (placedWater) this.waterPlacePos = blockPos;
+    }
+
+    private BlockPos predictPlacePos(double distance) {
+        if (distance <= 0) return null;
+        var vel = mc.player.getVelocity();
+        double fallSpeed = Math.max(Math.abs(vel.y), 0.1);
+        double t = distance / fallSpeed;
+        var start = mc.player.getPos().add(vel.x * t, 0, vel.z * t);
+        var end = start.subtract(0, distance, 0);
+        BlockHitResult result = mc.world.raycast(new RaycastContext(start, end, RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+        if (result != null && result.getType() == HitResult.Type.BLOCK) {
+            return result.getBlockPos().up();
+        }
+        return null;
     }
 
     @Override
