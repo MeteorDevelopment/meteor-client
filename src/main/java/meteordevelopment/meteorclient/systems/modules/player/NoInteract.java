@@ -42,7 +42,7 @@ public class NoInteract extends Module {
     private final Setting<ListMode> blockMineMode = sgBlocks.add(new EnumSetting.Builder<ListMode>()
         .name("block-mine-mode")
         .description("List mode to use for block mine.")
-        .defaultValue(ListMode.BlackList)
+        .defaultValue(ListMode.BlockList)
         .build()
     );
 
@@ -55,7 +55,7 @@ public class NoInteract extends Module {
     private final Setting<ListMode> blockInteractMode = sgBlocks.add(new EnumSetting.Builder<ListMode>()
         .name("block-interact-mode")
         .description("List mode to use for block interact.")
-        .defaultValue(ListMode.BlackList)
+        .defaultValue(ListMode.BlockList)
         .build()
     );
 
@@ -78,7 +78,7 @@ public class NoInteract extends Module {
     private final Setting<ListMode> entityHitMode = sgEntities.add(new EnumSetting.Builder<ListMode>()
         .name("entity-hit-mode")
         .description("List mode to use for entity hit.")
-        .defaultValue(ListMode.BlackList)
+        .defaultValue(ListMode.BlockList)
         .build()
     );
 
@@ -92,7 +92,7 @@ public class NoInteract extends Module {
     private final Setting<ListMode> entityInteractMode = sgEntities.add(new EnumSetting.Builder<ListMode>()
         .name("entity-interact-mode")
         .description("List mode to use for entity interact.")
-        .defaultValue(ListMode.BlackList)
+        .defaultValue(ListMode.BlockList)
         .build()
     );
 
@@ -149,12 +149,12 @@ public class NoInteract extends Module {
     }
 
     private boolean shouldAttackBlock(BlockPos blockPos) {
-        if (blockMineMode.get() == ListMode.WhiteList &&
+        if (blockMineMode.get() == ListMode.AllowList &&
             blockMine.get().contains(mc.world.getBlockState(blockPos).getBlock())) {
             return false;
         }
 
-        return blockMineMode.get() != ListMode.BlackList ||
+        return blockMineMode.get() != ListMode.BlockList ||
             !blockMine.get().contains(mc.world.getBlockState(blockPos).getBlock());
     }
 
@@ -167,12 +167,12 @@ public class NoInteract extends Module {
         }
 
         // Blocks
-        if (blockInteractMode.get() == ListMode.BlackList &&
+        if (blockInteractMode.get() == ListMode.BlockList &&
             blockInteract.get().contains(mc.world.getBlockState(hitResult.getBlockPos()).getBlock())) {
             return false;
         }
 
-        return blockInteractMode.get() != ListMode.WhiteList ||
+        return blockInteractMode.get() != ListMode.AllowList ||
             blockInteract.get().contains(mc.world.getBlockState(hitResult.getBlockPos()).getBlock());
     }
 
@@ -193,12 +193,12 @@ public class NoInteract extends Module {
         if ((nametagged.get() == InteractMode.Both || nametagged.get() == InteractMode.Hit) && entity.hasCustomName()) return false;
 
         // Entities
-        if (entityHitMode.get() == ListMode.BlackList &&
+        if (entityHitMode.get() == ListMode.BlockList &&
             entityHit.get().contains(entity.getType())) {
             return false;
         }
 
-        else return entityHitMode.get() != ListMode.WhiteList ||
+        else return entityHitMode.get() != ListMode.AllowList ||
             entityHit.get().contains(entity.getType());
     }
 
@@ -226,11 +226,11 @@ public class NoInteract extends Module {
         if ((nametagged.get() == InteractMode.Both || nametagged.get() == InteractMode.Interact) && entity.hasCustomName()) return false;
 
         // Entities
-        if (entityInteractMode.get() == ListMode.BlackList &&
+        if (entityInteractMode.get() == ListMode.BlockList &&
             entityInteract.get().contains(entity.getType())) {
             return false;
         }
-        else return entityInteractMode.get() != ListMode.WhiteList ||
+        else return entityInteractMode.get() != ListMode.AllowList ||
             entityInteract.get().contains(entity.getType());
     }
 
@@ -242,8 +242,8 @@ public class NoInteract extends Module {
     }
 
     public enum ListMode {
-        WhiteList,
-        BlackList
+        AllowList,
+        BlockList
     }
 
     public enum InteractMode {

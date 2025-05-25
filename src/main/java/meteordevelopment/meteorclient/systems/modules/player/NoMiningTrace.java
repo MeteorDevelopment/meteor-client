@@ -21,7 +21,7 @@ public class NoMiningTrace extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-        .name("blacklisted-entities")
+        .name("blocklisted-entities")
         .description("Entities you will interact with as normal.")
         .defaultValue()
         .build()

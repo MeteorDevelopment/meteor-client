@@ -368,14 +368,14 @@ public class InventoryTweaks extends Module {
 
             Item item = handler.getSlot(i).getStack().getItem();
             if (steal) {
-                if (stealFilter.get() == ListMode.Whitelist && !stealItems.get().contains(item))
+                if (stealFilter.get() == ListMode.Allowlist && !stealItems.get().contains(item))
                     continue;
-                if (stealFilter.get() == ListMode.Blacklist && stealItems.get().contains(item))
+                if (stealFilter.get() == ListMode.Blocklist && stealItems.get().contains(item))
                     continue;
             } else {
-                if (dumpFilter.get() == ListMode.Whitelist && !dumpItems.get().contains(item))
+                if (dumpFilter.get() == ListMode.Allowlist && !dumpItems.get().contains(item))
                     continue;
-                if (dumpFilter.get() == ListMode.Blacklist && dumpItems.get().contains(item))
+                if (dumpFilter.get() == ListMode.Blocklist && dumpItems.get().contains(item))
                     continue;
             }
 
@@ -430,8 +430,8 @@ public class InventoryTweaks extends Module {
     }
 
     public enum ListMode {
-        Whitelist,
-        Blacklist,
+        Allowlist,
+        Blocklist,
         None
     }
 }

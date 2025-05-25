@@ -62,7 +62,7 @@ public class VeinMiner extends Module {
     private final Setting<ListMode> mode = sgGeneral.add(new EnumSetting.Builder<ListMode>()
         .name("mode")
         .description("Selection mode.")
-        .defaultValue(ListMode.Blacklist)
+        .defaultValue(ListMode.Blocklist)
         .build()
     );
 
@@ -159,9 +159,9 @@ public class VeinMiner extends Module {
 
         if (state.getHardness(mc.world, event.blockPos) < 0)
             return;
-        if (mode.get() == ListMode.Whitelist && !selectedBlocks.get().contains(state.getBlock()))
+        if (mode.get() == ListMode.Allowlist && !selectedBlocks.get().contains(state.getBlock()))
             return;
-        if (mode.get() == ListMode.Blacklist && selectedBlocks.get().contains(state.getBlock()))
+        if (mode.get() == ListMode.Blocklist && selectedBlocks.get().contains(state.getBlock()))
             return;
 
         foundBlockPositions.clear();
@@ -277,7 +277,7 @@ public class VeinMiner extends Module {
     }
 
     public enum ListMode {
-        Whitelist,
-        Blacklist
+        Allowlist,
+        Blocklist
     }
 }

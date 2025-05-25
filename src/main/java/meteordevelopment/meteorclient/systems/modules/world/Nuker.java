@@ -33,7 +33,7 @@ import java.util.List;
 
 public class Nuker extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
+    private final SettingGroup sgAllowlist = settings.createGroup("Allowlist");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     // General
@@ -159,26 +159,26 @@ public class Nuker extends Module {
             .build()
     );
 
-    // Whitelist and blacklist
+    // Allowlist and blocklist
 
-    private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
+    private final Setting<ListMode> listMode = sgAllowlist.add(new EnumSetting.Builder<ListMode>()
             .name("list-mode")
             .description("Selection mode.")
-            .defaultValue(ListMode.Blacklist)
+            .defaultValue(ListMode.Blocklist)
             .build()
     );
 
-    private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
-            .name("blacklist")
+    private final Setting<List<Block>> blocklist = sgAllowlist.add(new BlockListSetting.Builder()
+            .name("blocklist")
             .description("The blocks you don't want to mine.")
-            .visible(() -> listMode.get() == ListMode.Blacklist)
+            .visible(() -> listMode.get() == ListMode.Blocklist)
             .build()
     );
 
-    private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
-            .name("whitelist")
+    private final Setting<List<Block>> allowlist = sgAllowlist.add(new BlockListSetting.Builder()
+            .name("allowlist")
             .description("The blocks you want to mine.")
-            .visible(() -> listMode.get() == ListMode.Whitelist)
+            .visible(() -> listMode.get() == ListMode.Allowlist)
             .build()
     );
 
@@ -373,9 +373,9 @@ public class Nuker extends Module {
             // Smash
             if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0) return;
 
-            // Check whitelist or blacklist
-            if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(blockState.getBlock())) return;
-            if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(blockState.getBlock())) return;
+            // Check allowlist or blocklist
+            if (listMode.get() == ListMode.Allowlist && !allowlist.get().contains(blockState.getBlock())) return;
+            if (listMode.get() == ListMode.Blocklist && blocklist.get().contains(blockState.getBlock())) return;
 
             // Add block
             blocks.add(blockPos.toImmutable());
@@ -450,8 +450,8 @@ public class Nuker extends Module {
     }
 
     public enum ListMode {
-        Whitelist,
-        Blacklist
+        Allowlist,
+        Blocklist
     }
 
     public enum Mode {

@@ -39,8 +39,8 @@ public class AutoEat extends Module {
 
     // General
 
-    public final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
-        .name("blacklist")
+    public final Setting<List<Item>> blocklist = sgGeneral.add(new ItemListSetting.Builder()
+        .name("blocklist")
         .description("Which items to not eat.")
         .defaultValue(
             Items.ENCHANTED_GOLDEN_APPLE,
@@ -248,8 +248,8 @@ public class AutoEat extends Module {
             // Check if hunger value is better
             int hunger = foodComponent.nutrition();
             if (hunger > bestHunger) {
-                // Skip if item is in blacklist
-                if (blacklist.get().contains(item)) continue;
+                // Skip if item is in blocklist
+                if (blocklist.get().contains(item)) continue;
 
                 // Select the current item
                 slot = i;
@@ -258,7 +258,7 @@ public class AutoEat extends Module {
         }
 
         Item offHandItem = mc.player.getOffHandStack().getItem();
-        if (offHandItem.getComponents().get(DataComponentTypes.FOOD) != null && !blacklist.get().contains(offHandItem) && offHandItem.getComponents().get(DataComponentTypes.FOOD).nutrition() > bestHunger)
+        if (offHandItem.getComponents().get(DataComponentTypes.FOOD) != null && !blocklist.get().contains(offHandItem) && offHandItem.getComponents().get(DataComponentTypes.FOOD).nutrition() > bestHunger)
             slot = SlotUtils.OFFHAND;
 
         return slot;

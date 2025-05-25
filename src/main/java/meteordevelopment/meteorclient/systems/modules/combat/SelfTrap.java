@@ -44,7 +44,7 @@ public class SelfTrap extends Module {
     // General
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
-        .name("whitelist")
+        .name("allowlist")
         .description("Which blocks to use.")
         .defaultValue(Blocks.OBSIDIAN, Blocks.NETHERITE_BLOCK)
         .build()

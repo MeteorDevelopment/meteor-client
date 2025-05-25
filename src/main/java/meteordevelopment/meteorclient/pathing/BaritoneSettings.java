@@ -260,7 +260,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
         addDescription("axisHeight", "The \"axis\" command (aka GoalAxis) will go to a axis, or diagonal axis, at this Y level.");
         addDescription("backfill", "Fill in blocks behind you (stealth +100)");
         addDescription("backtrackCostFavoringCoefficient", "Set to 1.0 to effectively disable this feature");
-        addDescription("blacklistClosestOnFailure", "When GetToBlockProcess or MineProcess fails to calculate a path, instead of just giving up, mark the closest instance of that block as \"unreachable\" and go towards the next closest.");
+        addDescription("blocklistClosestOnFailure", "When GetToBlockProcess or MineProcess fails to calculate a path, instead of just giving up, mark the closest instance of that block as \"unreachable\" and go towards the next closest.");
         addDescription("blockBreakAdditionalPenalty", "This is just a tiebreaker to make it less likely to break blocks if it can avoid it.");
         addDescription("blockPlacementPenalty", "It doesn't actually take twenty ticks to place a block, this cost is so high because we want to generally conserve blocks which might be limited.");
         addDescription("blockReachDistance", "Block reach distance");

@@ -43,7 +43,7 @@ public class SpeedMine extends Module {
     private final Setting<ListMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<ListMode>()
         .name("blocks-filter")
         .description("How to use the blocks setting.")
-        .defaultValue(ListMode.Blacklist)
+        .defaultValue(ListMode.Blocklist)
         .visible(() -> mode.get() != Mode.Haste)
         .build()
     );
@@ -132,8 +132,8 @@ public class SpeedMine extends Module {
     }
 
     public boolean filter(Block block) {
-        if (blocksFilter.get() == ListMode.Blacklist && !blocks.get().contains(block)) return true;
-        return blocksFilter.get() == ListMode.Whitelist && blocks.get().contains(block);
+        if (blocksFilter.get() == ListMode.Blocklist && !blocks.get().contains(block)) return true;
+        return blocksFilter.get() == ListMode.Allowlist && blocks.get().contains(block);
     }
 
     public boolean instamine() {
@@ -147,7 +147,7 @@ public class SpeedMine extends Module {
     }
 
     public enum ListMode {
-        Whitelist,
-        Blacklist
+        Allowlist,
+        Blocklist
     }
 }

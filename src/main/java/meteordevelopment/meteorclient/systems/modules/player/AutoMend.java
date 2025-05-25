@@ -25,9 +25,9 @@ import java.util.List;
 public class AutoMend extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
-        .name("blacklist")
-        .description("Item blacklist.")
+    private final Setting<List<Item>> blocklist = sgGeneral.add(new ItemListSetting.Builder()
+        .name("blocklist")
+        .description("Item blocklist.")
         .filter(item -> item.getComponents().get(DataComponentTypes.DAMAGE) != null)
         .build()
     );
@@ -95,7 +95,7 @@ public class AutoMend extends Module {
     private int getSlot() {
         for (int i = 0; i < mc.player.getInventory().getMainStacks().size(); i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
-            if (blacklist.get().contains(itemStack.getItem())) continue;
+            if (blocklist.get().contains(itemStack.getItem())) continue;
 
             if (Utils.hasEnchantments(itemStack, Enchantments.MENDING) && itemStack.getDamage() > 0) {
                 return i;

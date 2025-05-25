@@ -33,7 +33,7 @@ import java.util.function.Predicate;
 
 public class AutoTool extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
+    private final SettingGroup sgAllowlist = settings.createGroup("Allowlist");
 
     // General
 
@@ -89,27 +89,27 @@ public class AutoTool extends Module {
         .build()
     ));
 
-    // Whitelist and blacklist
+    // Allowlist and Blocklist
 
-    private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
+    private final Setting<ListMode> listMode = sgAllowlist.add(new EnumSetting.Builder<ListMode>()
         .name("list-mode")
         .description("Selection mode.")
-        .defaultValue(ListMode.Blacklist)
+        .defaultValue(ListMode.Blocklist)
         .build()
     );
 
-    private final Setting<List<Item>> whitelist = sgWhitelist.add(new ItemListSetting.Builder()
-        .name("whitelist")
+    private final Setting<List<Item>> allowlist = sgAllowlist.add(new ItemListSetting.Builder()
+        .name("allowlist")
         .description("The tools you want to use.")
-        .visible(() -> listMode.get() == ListMode.Whitelist)
+        .visible(() -> listMode.get() == ListMode.Allowlist)
         .filter(AutoTool::isTool)
         .build()
     );
 
-    private final Setting<List<Item>> blacklist = sgWhitelist.add(new ItemListSetting.Builder()
-        .name("blacklist")
+    private final Setting<List<Item>> blocklist = sgAllowlist.add(new ItemListSetting.Builder()
+        .name("blocklist")
         .description("The tools you don't want to use.")
-        .visible(() -> listMode.get() == ListMode.Blacklist)
+        .visible(() -> listMode.get() == ListMode.Blocklist)
         .filter(AutoTool::isTool)
         .build()
     );
@@ -160,8 +160,8 @@ public class AutoTool extends Module {
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
 
-            if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
-            if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(itemStack.getItem())) continue;
+            if (listMode.get() == ListMode.Allowlist && !allowlist.get().contains(itemStack.getItem())) continue;
+            if (listMode.get() == ListMode.Blocklist && blocklist.get().contains(itemStack.getItem())) continue;
 
             double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
             if (score < 0) continue;
@@ -245,7 +245,7 @@ public class AutoTool extends Module {
     }
 
     public enum ListMode {
-        Whitelist,
-        Blacklist
+        Allowlist,
+        Blocklist
     }
 }

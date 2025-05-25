@@ -28,7 +28,7 @@ import java.util.List;
 
 public class LiquidFiller extends Module {
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
-    private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
+    private final SettingGroup sgAllowlist = settings.createGroup("Allowlist");
 
     private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
         .name("place-in")
@@ -83,17 +83,17 @@ public class LiquidFiller extends Module {
         .build()
     );
 
-    // Whitelist and blacklist
+    // Allowlist and blocklist
 
-    private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
+    private final Setting<ListMode> listMode = sgAllowlist.add(new EnumSetting.Builder<ListMode>()
         .name("list-mode")
         .description("Selection mode.")
-        .defaultValue(ListMode.Whitelist)
+        .defaultValue(ListMode.Allowlist)
         .build()
     );
 
-    private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
-        .name("whitelist")
+    private final Setting<List<Block>> allowlist = sgAllowlist.add(new BlockListSetting.Builder()
+        .name("allowlist")
         .description("The allowed blocks that it will use to fill up the liquid.")
         .defaultValue(
             Blocks.DIRT,
@@ -104,14 +104,14 @@ public class LiquidFiller extends Module {
             Blocks.GRANITE,
             Blocks.ANDESITE
         )
-        .visible(() -> listMode.get() == ListMode.Whitelist)
+        .visible(() -> listMode.get() == ListMode.Allowlist)
         .build()
     );
 
-    private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
-        .name("blacklist")
+    private final Setting<List<Block>> blocklist = sgAllowlist.add(new BlockListSetting.Builder()
+        .name("blocklist")
         .description("The denied blocks that it not will use to fill up the liquid.")
-        .visible(() -> listMode.get() == ListMode.Blacklist)
+        .visible(() -> listMode.get() == ListMode.Blocklist)
         .build()
     );
 
@@ -149,10 +149,10 @@ public class LiquidFiller extends Module {
 
         // Find slot with a block
         FindItemResult item;
-        if (listMode.get() == ListMode.Whitelist) {
-            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && whitelist.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        if (listMode.get() == ListMode.Allowlist) {
+            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && allowlist.get().contains(Block.getBlockFromItem(itemStack.getItem())));
         } else {
-            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && !blacklist.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && !blocklist.get().contains(Block.getBlockFromItem(itemStack.getItem())));
         }
         if (!item.found()) return;
 
@@ -197,8 +197,8 @@ public class LiquidFiller extends Module {
     }
 
     public enum ListMode {
-        Whitelist,
-        Blacklist
+        Allowlist,
+        Blocklist
     }
 
     public enum PlaceIn {
