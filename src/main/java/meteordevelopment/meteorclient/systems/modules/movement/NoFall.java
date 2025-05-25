@@ -272,6 +272,9 @@ public class NoFall extends Module {
         if (!item.found()) return;
 
         if (interactItem) {
+            float yaw = mc.player.getYaw();
+            float pitch = mc.player.getPitch();
+
             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 10, true, () -> {
                 if (item.isOffhand()) {
                     mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
@@ -281,6 +284,9 @@ public class NoFall extends Module {
                     InvUtils.swapBack();
                 }
             });
+
+            // Send actual head rotation back to the server after interacting
+            Rotations.rotate(yaw, pitch, 9, true, null);
         } else {
             BlockUtils.place(blockPos, item, true, 10, true);
         }
