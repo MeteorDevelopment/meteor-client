@@ -54,7 +54,6 @@
     "optifabric": "*",
     "feather": "*",
     "origins": "*",
-    "wurst": "*",
     "sodium": "<0.6.12",
     "morechathistory": "*"
   }
