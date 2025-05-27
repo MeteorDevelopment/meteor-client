@@ -172,6 +172,7 @@ public class HoleESP extends Module {
         for (Hole hole : holes) holePool.free(hole);
         holes.clear();
 
+        // Probe for holes
         BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
             if (!validHole(blockPos)) return;
 
@@ -181,19 +182,19 @@ public class HoleESP extends Module {
             for (Direction direction : Direction.values()) {
                 if (direction == Direction.UP) continue;
                 BlockPos offsetPos = blockPos.offset(direction);
-                BlockState state = mc.world.getBlockState(offsetPos);
+                Block block = mc.world.getBlockState(offsetPos).getBlock();
 
-                if (state.getBlock() == Blocks.BEDROCK) bedrock++;
-                else if (state.getBlock() == Blocks.OBSIDIAN) obsidian++;
+                if (((AbstractBlockAccessor) block).isCollidable() && block.getHardness() < 0) bedrock++;
+                else if (block.getBlastResistance() >= 600) obsidian++;
                 else if (direction == Direction.DOWN) return;
                 else if (doubles.get() && air == null && validHole(offsetPos)) {
                     for (Direction dir : Direction.values()) {
                         if (dir == direction.getOpposite() || dir == Direction.UP) continue;
 
-                        BlockState blockState1 = mc.world.getBlockState(offsetPos.offset(dir));
+                        Block block1 = mc.world.getBlockState(offsetPos.offset(dir)).getBlock();
 
-                        if (blockState1.getBlock() == Blocks.BEDROCK) bedrock++;
-                        else if (blockState1.getBlock() == Blocks.OBSIDIAN) obsidian++;
+                        if (((AbstractBlockAccessor) block1).isCollidable() && block1.getHardness() < 0) bedrock++;
+                        else if (block1.getBlastResistance() >= 600) obsidian++;
                         else return;
                     }
 
