@@ -25,8 +25,8 @@ public abstract class SoundSystemMixin {
     @Shadow
     public abstract void stop(SoundInstance sound);
 
-    @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)Lnet/minecraft/client/sound/SoundSystem$class_11518;", at = @At("HEAD"), cancellable = true)
-    private void onPlay(SoundInstance soundInstance, CallbackInfoReturnable<SoundSystem.class_11518> cir) {
+    @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)Lnet/minecraft/client/sound/SoundSystem$PlayResult;", at = @At("HEAD"), cancellable = true)
+    private void onPlay(SoundInstance soundInstance, CallbackInfoReturnable<SoundSystem.PlayResult> cir) {
         PlaySoundEvent event = MeteorClient.EVENT_BUS.post(PlaySoundEvent.get(soundInstance));
 
         if (event.isCancelled()) cir.cancel();

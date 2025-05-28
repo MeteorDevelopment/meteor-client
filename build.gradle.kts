@@ -72,8 +72,7 @@ configurations {
 
 dependencies {
     // Fabric
-    // todo change this when appropriate
-    minecraft("com.mojang:minecraft:25w21a")
+    minecraft("com.mojang:minecraft:${properties["minecraft_version"] as String}")
     mappings("net.fabricmc:yarn:${properties["yarn_mappings"] as String}:v2")
     modImplementation("net.fabricmc:fabric-loader:${properties["loader_version"] as String}")
 
@@ -81,7 +80,7 @@ dependencies {
     modInclude(fabricApi.module("fabric-resource-loader-v0", properties["fapi_version"] as String))
 
     // Compat fixes
-    modCompileOnly(fabricApi.module("fabric-renderer-indigo", properties["fapi_version"] as String))
+    // modCompileOnly(fabricApi.module("fabric-renderer-indigo", properties["fapi_version"] as String))
     modCompileOnly("maven.modrinth:sodium:${properties["sodium_version"] as String}") { isTransitive = false }
     modCompileOnly("maven.modrinth:lithium:${properties["lithium_version"] as String}") { isTransitive = false }
     modCompileOnly("maven.modrinth:iris:${properties["iris_version"] as String}") { isTransitive = false }
