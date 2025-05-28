@@ -18,7 +18,9 @@ import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
+import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.state.property.Properties;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -27,7 +29,13 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket.Mode;
+
 import org.jetbrains.annotations.Nullable;
+import com.google.common.util.concurrent.AtomicDouble;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AnchorAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -40,10 +48,10 @@ public class AnchorAura extends Module {
 
     private final Setting<Double> targetRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("target-range")
-        .description("The radius in which players get targeted.")
-        .defaultValue(4)
+        .description("Range in which to target players.")
+        .defaultValue(10)
         .min(0)
-        .sliderMax(5)
+        .sliderMax(16)
         .build()
     );
 
@@ -54,24 +62,33 @@ public class AnchorAura extends Module {
         .build()
     );
 
-    private final Setting<RotationMode> rotationMode = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
-        .name("rotation-mode")
-        .description("The mode to rotate you server-side.")
-        .defaultValue(RotationMode.Both)
+    private final Setting<Double> minDamage = sgGeneral.add(new DoubleSetting.Builder()
+        .name("min-damage")
+        .description("The minimum damage to inflict on your target.")
+        .defaultValue(7)
+        .range(0, 36)
         .build()
     );
 
-    private final Setting<Double> maxDamage = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> maxSelfDamage = sgGeneral.add(new DoubleSetting.Builder()
         .name("max-self-damage")
-        .description("The maximum self-damage allowed.")
-        .defaultValue(8)
+        .description("The maximum damage to inflict on yourself.")
+        .defaultValue(7)
+        .range(0, 36)
         .build()
     );
 
-    private final Setting<Double> minHealth = sgGeneral.add(new DoubleSetting.Builder()
-        .name("min-health")
-        .description("The minimum health you have to be for Anchor Aura to work.")
-        .defaultValue(15)
+    private final Setting<Boolean> antiSuicide = sgGeneral.add(new BoolSetting.Builder()
+        .name("anti-suicide")
+        .description("Will not place and break anchors if they will kill you.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+        .name("rotate")
+        .description("Rotates server-side towards the anchors being placed/broken.")
+        .defaultValue(true)
         .build()
     );
 
@@ -87,34 +104,34 @@ public class AnchorAura extends Module {
     private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
         .name("place-delay")
         .description("The tick delay between placing anchors.")
-        .defaultValue(2)
+        .defaultValue(5)
         .range(0, 10)
-        .visible(place::get)
-        .build()
-    );
-
-    private final Setting<Safety> placeMode = sgPlace.add(new EnumSetting.Builder<Safety>()
-        .name("place-mode")
-        .description("The way anchors are allowed to be placed near you.")
-        .defaultValue(Safety.Safe)
         .visible(place::get)
         .build()
     );
 
     private final Setting<Double> placeRange = sgPlace.add(new DoubleSetting.Builder()
         .name("place-range")
-        .description("The radius in which anchors are placed in.")
-        .defaultValue(5)
-        .min(0)
-        .sliderMax(5)
+        .description("The range at which anchors can be placed.")
+        .defaultValue(4)
+        .range(0, 6)
         .visible(place::get)
         .build()
     );
 
-    private final Setting<PlaceMode> placePositions = sgPlace.add(new EnumSetting.Builder<PlaceMode>()
-        .name("placement-positions")
-        .description("Where the Anchors will be placed on the entity.")
-        .defaultValue(PlaceMode.AboveAndBelow)
+    private final Setting<Double> placeWallsRange = sgPlace.add(new DoubleSetting.Builder()
+        .name("walls-range")
+        .description("Range in which to place anchors when behind blocks.")
+        .defaultValue(4)
+        .range(0, 6)
+        .visible(place::get)
+        .build()
+    );
+
+    private final Setting<Boolean> airPlace = sgPlace.add(new BoolSetting.Builder()
+        .name("air-place")
+        .description("Allows Anchor Aura to place anchors in the air.")
+        .defaultValue(true)
         .visible(place::get)
         .build()
     );
@@ -124,24 +141,26 @@ public class AnchorAura extends Module {
     private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
         .name("break-delay")
         .description("The tick delay between breaking anchors.")
-        .defaultValue(10)
+        .defaultValue(1)
         .range(0, 10)
-        .build()
-    );
-
-    private final Setting<Safety> breakMode = sgBreak.add(new EnumSetting.Builder<Safety>()
-        .name("break-mode")
-        .description("The way anchors are allowed to be broken near you.")
-        .defaultValue(Safety.Safe)
         .build()
     );
 
     private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
         .name("break-range")
-        .description("The radius in which anchors are broken in.")
-        .defaultValue(5)
+        .description("Range in which to break anchors.")
+        .defaultValue(4.5)
         .min(0)
-        .sliderMax(5)
+        .sliderMax(6)
+        .build()
+    );
+
+    private final Setting<Double> breakWallsRange = sgBreak.add(new DoubleSetting.Builder()
+        .name("walls-range")
+        .description("Range in which to break anchors when behind blocks.")
+        .defaultValue(4.5)
+        .min(0)
+        .sliderMax(6)
         .build()
     );
 
@@ -170,63 +189,47 @@ public class AnchorAura extends Module {
 
     // Render
 
-    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-        .name("shape-mode")
-        .description("How the shapes are rendered.")
-        .defaultValue(ShapeMode.Both)
+    private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
+        .name("swing")
+        .description("Whether to swing hand client-side.")
+        .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> renderPlace = sgRender.add(new BoolSetting.Builder()
-        .name("render-place")
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+        .name("render")
         .description("Renders the block where it is placing an anchor.")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<SettingColor> placeSideColor = sgRender.add(new ColorSetting.Builder()
-        .name("place-side-color")
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .visible(render::get)
+        .build()
+    );
+
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+        .name("side-color")
         .description("The side color for positions to be placed.")
-        .defaultValue(new SettingColor(255, 0, 0, 75))
-        .visible(renderPlace::get)
+        .defaultValue(new SettingColor(15, 255, 211, 41))
+        .visible(() -> render.get() && shapeMode.get().sides())
         .build()
     );
 
-    private final Setting<SettingColor> placeLineColor = sgRender.add(new ColorSetting.Builder()
-        .name("place-line-color")
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+        .name("line-color")
         .description("The line color for positions to be placed.")
-        .defaultValue(new SettingColor(255, 0, 0, 255))
-        .visible(renderPlace::get)
+        .defaultValue(new SettingColor(15, 255, 211))
+        .visible(() -> render.get() && shapeMode.get().lines())
         .build()
     );
 
-    private final Setting<Boolean> renderBreak = sgRender.add(new BoolSetting.Builder()
-        .name("render-break")
-        .description("Renders the block where it is breaking an anchor.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<SettingColor> breakSideColor = sgRender.add(new ColorSetting.Builder()
-        .name("break-side-color")
-        .description("The side color for anchors to be broken.")
-        .defaultValue(new SettingColor(255, 0, 0, 75))
-        .visible(renderBreak::get)
-        .build()
-    );
-
-    private final Setting<SettingColor> breakLineColor = sgRender.add(new ColorSetting.Builder()
-        .name("break-line-color")
-        .description("The line color for anchors to be broken.")
-        .defaultValue(new SettingColor(255, 0, 0, 255))
-        .visible(renderBreak::get)
-        .build()
-    );
-
-    private int placeDelayLeft;
-    private int breakDelayLeft;
+    private BlockPos renderBlockPos;
+    private int placeDelayLeft, breakDelayLeft;
     private PlayerEntity target;
-    private final BlockPos.Mutable mutable = new BlockPos.Mutable();
 
     public AnchorAura() {
         super(Categories.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");
@@ -234,9 +237,15 @@ public class AnchorAura extends Module {
 
     @Override
     public void onActivate() {
-        placeDelayLeft = 0;
+        renderBlockPos = null;
+        placeDelayLeft = placeDelay.get();
         breakDelayLeft = 0;
         target = null;
+    }
+
+    @Override
+    public void onDeactivate() {
+        renderBlockPos = null;
     }
 
     @EventHandler
@@ -247,166 +256,152 @@ public class AnchorAura extends Module {
             return;
         }
 
+        // Pause
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
-        if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
+        // Find a target
         if (TargetUtils.isBadTarget(target, targetRange.get())) {
+            renderBlockPos = null;
             target = TargetUtils.getPlayerTarget(targetRange.get(), targetPriority.get());
             if (TargetUtils.isBadTarget(target, targetRange.get())) return;
         }
 
-        FindItemResult anchor = InvUtils.findInHotbar(Items.RESPAWN_ANCHOR);
-        FindItemResult glowStone = InvUtils.findInHotbar(Items.GLOWSTONE);
+        doAnchorAura();
+    }
 
-        if (!anchor.found() || !glowStone.found()) return;
+    private void doAnchorAura() {
+        AtomicDouble bestPlaceDamage = new AtomicDouble(0);
+        AtomicReference<BlockPos.Mutable> bestPlaceBlockPos = new AtomicReference<>(new BlockPos.Mutable());
 
-        if (breakDelayLeft >= breakDelay.get()) {
-            BlockPos breakPos = findBreakPos(target.getBlockPos());
-            if (breakPos != null) {
-                breakDelayLeft = 0;
+        AtomicDouble bestBreakDamage = new AtomicDouble(0);
+        AtomicReference<BlockPos.Mutable> bestBreakBlockPos = new AtomicReference<>(new BlockPos.Mutable());
 
-                if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Break) {
-                    BlockPos immutableBreakPos = breakPos.toImmutable();
-                    Rotations.rotate(Rotations.getYaw(breakPos), Rotations.getPitch(breakPos), 50, () -> breakAnchor(immutableBreakPos, anchor, glowStone));
-                } else breakAnchor(breakPos, anchor, glowStone);
+        // Find best positions to place new anchors or break existing anchors
+        int iterationSize = (int) Math.ceil(Math.max(placeRange.get(), breakRange.get()));
+        BlockIterator.register(iterationSize, iterationSize, (blockPos, blockState) -> {
+            boolean isPlacing = blockState.getBlock() != Blocks.RESPAWN_ANCHOR;
+
+            // Check raycast and range
+            double baseRange = isPlacing ? placeRange.get() : breakRange.get();
+            double wallsRange = isPlacing ? placeWallsRange.get() : breakWallsRange.get();
+            if (isOutOfRange(blockPos, baseRange, wallsRange)) return;
+
+            // Check placement requirements
+            if (isPlacing) {
+                if (!BlockUtils.canPlace(blockPos)) return;
+
+                if (!airPlace.get() && !hasNeighborBlock(blockPos)) return;
             }
+
+            float bestDamage = isPlacing ? bestPlaceDamage.floatValue() : bestBreakDamage.floatValue();
+            float selfDamage = DamageUtils.anchorDamage(mc.player, blockPos.toCenterPos());
+            float targetDamage = DamageUtils.anchorDamage(target, blockPos.toCenterPos());
+
+            // Is the anchor optimal?
+            if (targetDamage >= minDamage.get() && targetDamage > bestDamage
+                && (!antiSuicide.get() || selfDamage <= maxSelfDamage.get())
+                && (!antiSuicide.get() || PlayerUtils.getTotalHealth() - selfDamage > 0)) {
+
+                if (isPlacing) {
+                    bestPlaceDamage.set(targetDamage);
+                    bestPlaceBlockPos.get().set(blockPos);
+                } else {
+                    bestBreakDamage.set(targetDamage);
+                    bestBreakBlockPos.get().set(blockPos);
+                }
+            }
+        });
+
+        BlockIterator.after(() -> {
+            renderBlockPos = null;
+
+            FindItemResult anchor = InvUtils.findInHotbar(Items.RESPAWN_ANCHOR);
+            FindItemResult glowStone = InvUtils.findInHotbar(Items.GLOWSTONE);
+            if (!anchor.found() || !glowStone.found()) return;
+
+            if (bestPlaceDamage.get() > 0 && place.get()) {
+                doPlace(bestPlaceBlockPos.get(), anchor);
+            }
+
+            if (bestBreakDamage.get() > 0) {
+                doBreak(bestBreakBlockPos.get(), anchor, glowStone);
+            }
+
+            placeDelayLeft++;
+        });
+    }
+
+    private void doPlace(BlockPos blockPos, FindItemResult anchor) {
+        // Set render info
+        renderBlockPos = blockPos;
+
+        if (placeDelayLeft < placeDelay.get()) return;
+
+        // Place anchor!
+        BlockUtils.place(blockPos, anchor, rotate.get(), 50, swing.get());
+
+        placeDelayLeft = 0;
+    }
+
+    private void doBreak(BlockPos blockPos, FindItemResult anchor, FindItemResult glowStone) {
+        // Set render info
+        renderBlockPos = blockPos;
+
+        if (breakDelayLeft++ < breakDelay.get()) return;
+
+        // Stop sneaking so interactions with the anchor are successful
+        if (mc.player.isSneaking()) {
+            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, Mode.RELEASE_SHIFT_KEY));
         }
 
-        if (placeDelayLeft >= placeDelay.get() && place.get()) {
-            BlockPos placePos = findPlacePos(target.getBlockPos());
+        Vec3d center = blockPos.toCenterPos();
 
-            if (placePos != null) {
-                placeDelayLeft = 0;
-                BlockUtils.place(placePos.toImmutable(), anchor, (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both), 50);
-            }
+        // Charge the anchor
+        if (mc.world.getBlockState(blockPos).get(Properties.CHARGES) == 0) {
+            InvUtils.swap(glowStone.slot(), true);
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, Direction.UP, blockPos, true));
         }
 
-        placeDelayLeft++;
-        breakDelayLeft++;
+        // Explode the anchor when charged
+        if (mc.world.getBlockState(blockPos).get(Properties.CHARGES) > 0) {
+            InvUtils.swap(anchor.slot(), true);
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, Direction.UP, blockPos, true));
+        }
+
+        InvUtils.swapBack();
+
+        breakDelayLeft = 0;
+    }
+
+    private boolean isOutOfRange(BlockPos blockPos, double baseRange, double wallsRange) {
+        Vec3d pos = blockPos.toCenterPos();
+        if (!PlayerUtils.isWithin(pos, baseRange)) return true;
+
+        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+        BlockHitResult result = mc.world.raycast(raycastContext);
+        if (result == null || !result.getBlockPos().equals(blockPos))
+            return !PlayerUtils.isWithin(pos, wallsRange);
+
+        return false;
+    }
+
+    private boolean hasNeighborBlock(BlockPos blockPos)
+    {
+        for (Direction direction : Direction.values()) {
+            if (!mc.world.getBlockState(blockPos.offset(direction)).isReplaceable()) return true;
+        }
+        return false;
     }
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (target == null) return;
+        if (!render.get() || renderBlockPos == null) return;
 
-        if (renderPlace.get()) {
-            BlockPos placePos = findPlacePos(target.getBlockPos());
-            if (placePos == null) return;
-
-            event.renderer.box(placePos, placeSideColor.get(), placeLineColor.get(), shapeMode.get(), 0);
-        }
-
-        if (renderBreak.get()) {
-            BlockPos breakPos = findBreakPos(target.getBlockPos());
-            if (breakPos == null) return;
-
-            event.renderer.box(breakPos, breakSideColor.get(), breakLineColor.get(), shapeMode.get(), 0);
-        }
-    }
-
-    @Nullable
-    private BlockPos findPlacePos(BlockPos targetPlacePos) {
-        switch (placePositions.get()) {
-            case All -> {
-                if (isValidPlace(targetPlacePos, 0, -1, 0)) return mutable;
-                else if (isValidPlace(targetPlacePos, 0, 2, 0)) return mutable;
-                else if (isValidPlace(targetPlacePos, 1, 0, 0)) return mutable;
-                else if (isValidPlace(targetPlacePos, -1, 0, 0)) return mutable;
-                else if (isValidPlace(targetPlacePos, 0, 0, 1)) return mutable;
-                else if (isValidPlace(targetPlacePos, 0, 0, -1)) return mutable;
-                else if (isValidPlace(targetPlacePos, 1, 1, 0)) return mutable;
-                else if (isValidPlace(targetPlacePos, -1, -1, 0)) return mutable;
-                else if (isValidPlace(targetPlacePos, 0, 1, 1)) return mutable;
-                else if (isValidPlace(targetPlacePos, 0, 0, -1)) return mutable;
-            }
-            case Above -> {
-                if (isValidPlace(targetPlacePos, 0, 2, 0)) return mutable;
-            }
-            case AboveAndBelow -> {
-                if (isValidPlace(targetPlacePos, 0, -1, 0)) return mutable;
-                else if (isValidPlace(targetPlacePos, 0, 2, 0)) return mutable;
-            }
-            case Around -> {
-                if (isValidPlace(targetPlacePos, 0, 0, -1)) return mutable;
-                else if (isValidPlace(targetPlacePos, 1, 0, 0)) return mutable;
-                else if (isValidPlace(targetPlacePos, -1, 0, 0)) return mutable;
-                else if (isValidPlace(targetPlacePos, 0, 0, 1)) return mutable;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    private BlockPos findBreakPos(BlockPos targetPos) {
-        if (isValidBreak(targetPos, 0, -1, 0)) return mutable;
-        else if (isValidBreak(targetPos, 0, 2, 0)) return mutable;
-        else if (isValidBreak(targetPos, 1, 0, 0)) return mutable;
-        else if (isValidBreak(targetPos, -1, 0, 0)) return mutable;
-        else if (isValidBreak(targetPos, 0, 0, 1)) return mutable;
-        else if (isValidBreak(targetPos, 0, 0, -1)) return mutable;
-        else if (isValidBreak(targetPos, 1, 1, 0)) return mutable;
-        else if (isValidBreak(targetPos, -1, -1, 0)) return mutable;
-        else if (isValidBreak(targetPos, 0, 1, 1)) return mutable;
-        else if (isValidBreak(targetPos, 0, 0, -1)) return mutable;
-        return null;
-    }
-
-    private boolean getDamagePlace(BlockPos pos) {
-        return placeMode.get() == Safety.Suicide || DamageUtils.bedDamage(mc.player, pos.toCenterPos()) <= maxDamage.get();
-    }
-
-    private boolean getDamageBreak(BlockPos pos) {
-        return breakMode.get() == Safety.Suicide || DamageUtils.anchorDamage(mc.player, pos.toCenterPos()) <= maxDamage.get();
-    }
-
-    private boolean isValidPlace(BlockPos origin, int xOffset, int yOffset, int zOffset) {
-    	BlockUtils.mutateAround(mutable, origin, xOffset, yOffset, zOffset);
-        return Math.sqrt(mc.player.getBlockPos().getSquaredDistance(mutable)) <= placeRange.get() && getDamagePlace(mutable) && BlockUtils.canPlace(mutable);
-    }
-
-    private boolean isValidBreak(BlockPos origin, int xOffset, int yOffset, int zOffset) {
-    	BlockUtils.mutateAround(mutable, origin, xOffset, yOffset, zOffset);
-        return mc.world.getBlockState(mutable).getBlock() == Blocks.RESPAWN_ANCHOR && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(mutable)) <= breakRange.get() && getDamageBreak(mutable);
-    }
-
-    private void breakAnchor(BlockPos pos, FindItemResult anchor, FindItemResult glowStone) {
-        if (pos == null || mc.world.getBlockState(pos).getBlock() != Blocks.RESPAWN_ANCHOR) return;
-
-        mc.player.setSneaking(false);
-
-        if (glowStone.isOffhand()) {
-            mc.interactionManager.interactBlock(mc.player, Hand.OFF_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
-        } else {
-            InvUtils.swap(glowStone.slot(), true);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
-        }
-
-        if (anchor.isOffhand()) {
-            mc.interactionManager.interactBlock(mc.player, Hand.OFF_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
-        } else {
-            InvUtils.swap(anchor.slot(), true);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
-        }
-
-        InvUtils.swapBack();
+        event.renderer.box(renderBlockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 
     @Override
     public String getInfoString() {
         return EntityUtils.getName(target);
-    }
-
-    public enum PlaceMode {
-        Above,
-        Around,
-        AboveAndBelow,
-        All
-    }
-
-    public enum RotationMode {
-        Place,
-        Break,
-        Both,
-        None
     }
 }
