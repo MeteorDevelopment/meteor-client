@@ -16,10 +16,10 @@ import net.minecraft.world.BlockRenderView;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.List;
 
@@ -36,9 +36,9 @@ public abstract class BlockModelRendererMixin {
         else alphas.set(alpha);
     }
 
-    @ModifyConstant(method = "renderQuad", constant = @Constant(floatValue = 1, ordinal = 3))
-    private float renderQuad_modifyAlpha(float original) {
-        int alpha = alphas.get();
-        return alpha == -1 ? original : alpha / 255f;
+    @ModifyArgs(method = "renderQuad", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/VertexConsumer;quad(Lnet/minecraft/client/util/math/MatrixStack$Entry;Lnet/minecraft/client/render/model/BakedQuad;[FFFFF[IIZ)V"))
+    private void modifyXrayAlpha(final Args args) {
+        final int alpha = alphas.get();
+        args.set(6, alpha == -1 ? args.get(6) : alpha / 255f);
     }
 }

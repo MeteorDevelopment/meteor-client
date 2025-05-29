@@ -99,6 +99,8 @@ public class Breadcrumbs extends Module {
         int iLast = -1;
 
         for (Section section : sections) {
+            event.renderer.lines.ensureLineCapacity();
+
             if (iLast == -1) {
                 iLast = event.renderer.lines.vec3(section.x1, section.y1, section.z1).color(color.get()).next();
             }

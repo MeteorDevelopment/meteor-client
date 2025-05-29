@@ -31,7 +31,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -78,11 +80,11 @@ public abstract class LivingEntityMixin extends Entity {
         return hand;
     }
 
-    @ModifyConstant(method = "getHandSwingDuration", constant = @Constant(intValue = 6))
-    private int getHandSwingDuration(int constant) {
-        if ((Object) this != mc.player) return constant;
+    @ModifyExpressionValue(method = "getHandSwingDuration", at = @At(value = "CONSTANT", args = "intValue=6"))
+    private int getHandSwingDuration(int original) {
+        if ((Object) this != mc.player) return original;
 
-        return Modules.get().get(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : constant;
+        return Modules.get().get(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : original;
     }
 
     @ModifyReturnValue(method = "isGliding", at = @At("RETURN"))
