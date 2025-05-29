@@ -35,7 +35,6 @@ import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
-import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
@@ -74,16 +73,12 @@ import org.joml.Vector3d;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.Predicate;
 
 @SuppressWarnings("ConstantConditions")
 public class HighwayBuilder extends Module {
-    public enum Floor {
-        Replace,
-        PlaceMissing
-    }
-
     public enum Rotation {
         None(false, false),
         Mine(true, false),
@@ -111,8 +106,8 @@ public class HighwayBuilder extends Module {
         .name("width")
         .description("Width of the highway.")
         .defaultValue(4)
-        .range(1, 5)
-        .sliderRange(1, 5)
+        .range(1, 9)
+        .sliderRange(1, 9)
         .build()
     );
 
@@ -125,17 +120,19 @@ public class HighwayBuilder extends Module {
         .build()
     );
 
-    private final Setting<Floor> floor = sgGeneral.add(new EnumSetting.Builder<Floor>()
-        .name("floor")
-        .description("What floor placement mode to use.")
-        .defaultValue(Floor.Replace)
+    private final Setting<Boolean> onlyPlaceMissing = sgGeneral.add(new BoolSetting.Builder()
+        .name("only-place-missing")
+        .description("Not replace full blocks that are already present.")
+        .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> railings = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Integer> railings = sgGeneral.add(new IntSetting.Builder()
         .name("railings")
-        .description("Builds railings next to the highway.")
-        .defaultValue(true)
+        .description("Height of the railings next to the highway.")
+        .defaultValue(1)
+        .range(0, 4)
+        .sliderRange(0, 4)
         .build()
     );
 
@@ -143,14 +140,7 @@ public class HighwayBuilder extends Module {
         .name("corner-support-block")
         .description("Places a support block underneath the railings, to prevent air placing.")
         .defaultValue(true)
-        .visible(railings::get)
-        .build()
-    );
-
-    private final Setting<Boolean> mineAboveRailings = sgGeneral.add(new BoolSetting.Builder()
-        .name("mine-above-railings")
-        .description("Mines blocks above railings.")
-        .defaultValue(true)
+        .visible(() -> railings.get() > 0)
         .build()
     );
 
@@ -229,8 +219,9 @@ public class HighwayBuilder extends Module {
     private final Setting<Integer> breakDelay = sgDigging.add(new IntSetting.Builder()
         .name("break-delay")
         .description("The delay between breaking blocks.")
-        .defaultValue(0)
-        .min(0)
+        .defaultValue(1)
+        .range(1, 5)
+        .sliderRange(1, 5)
         .build()
     );
 
@@ -264,8 +255,9 @@ public class HighwayBuilder extends Module {
     private final Setting<Integer> placeDelay = sgPaving.add(new IntSetting.Builder()
         .name("place-delay")
         .description("The delay between placing blocks.")
-        .defaultValue(0)
-        .min(0)
+        .defaultValue(1)
+        .range(1, 4)
+        .sliderRange(1, 4)
         .build()
     );
 
@@ -426,16 +418,11 @@ public class HighwayBuilder extends Module {
     private HorizontalDirection leftDir;
     private HorizontalDirection rightDir;
 
-    private IBlockPosProvider blockPosProvider;
-
     private final MBlockPos start = new MBlockPos();
     private final MBlockPos currentPos = new MBlockPos();
     private final MBlockPos movePos = new MBlockPos();
     private final MBlockPos lastBreakingPos = new MBlockPos();
 
-    private boolean displayInfo;
-    private boolean suspended;
-    private boolean inventory;
     public boolean drawingBow;
 
     private int blocksBroken;
@@ -457,6 +444,11 @@ public class HighwayBuilder extends Module {
 
     private State state;
 
+    private final LinkedHashSet<MBlockPos> breakQueue = new LinkedHashSet<>();
+    private final LinkedHashSet<MBlockPos> placeQueue = new LinkedHashSet<>();
+    private final LinkedHashSet<MBlockPos> breakQueueCurrent = new LinkedHashSet<>();
+    private final LinkedHashSet<MBlockPos> placeQueueCurrent = new LinkedHashSet<>();
+
     public HighwayBuilder() {
         super(Categories.World, "highway-builder", "Automatically builds highways.");
         runInMainMenu = true;
@@ -476,19 +468,13 @@ public class HighwayBuilder extends Module {
         updateVariables();
 
         dir = HorizontalDirection.get(mc.player.getYaw());
-        leftDir = dir.rotateLeftSkipOne();
+        leftDir = dir.diagonal ? dir.rotateLeft() : dir.rotateLeftSkipOne();
         rightDir = leftDir.opposite();
-
-        blockPosProvider = dir.diagonal ? new DiagonalBlockPosProvider() : new StraightBlockPosProvider();
 
         start.set(playerPos());
         currentPos.set(start);
         movePos.set(start);
         lastBreakingPos.set(0, 0, 0);
-
-        displayInfo = true;
-        suspended = true;
-        inventory = true;
 
         blocksBroken = 0;
         blocksPlaced = 0;
@@ -507,13 +493,12 @@ public class HighwayBuilder extends Module {
 
         restockTask.complete();
 
-        if (blocksPerTick.get() > 1 && rotation.get().mine) warning("With rotations enabled, you can break at most 1 block per tick.");
-        if (placementsPerTick.get() > 1 && rotation.get().place) warning("With rotations enabled, you can place at most 1 block per tick.");
-
         if (Modules.get().get(InstantRebreak.class).isActive()) warning("It's recommended to disable the Instant Rebreak module and instead use the 'instantly-rebreak-echests' setting to avoid errors.");
 
-        state = State.CheckTasks;
-        setState(State.CheckTasks);
+        state = State.Wait;
+
+        breakQueue.clear();
+        placeQueue.clear();
     }
 
     @Override
@@ -525,57 +510,32 @@ public class HighwayBuilder extends Module {
         BaritoneAPI.getSettings().allowPlace.value = btSettingAllowPlace;
         BaritoneAPI.getSettings().renderGoal.value = btSettingRenderGoal;
 
-        if (displayInfo) {
-            info("Distance: (highlight)%.0f", distance(start, currentPos));
-            info("Blocks broken: (highlight)%d", blocksBroken);
-            info("Blocks placed: (highlight)%d", blocksPlaced);
-        }
+        info("Distance: (highlight)%.0f", distance(start, currentPos));
+        info("Blocks broken: (highlight)%d", blocksBroken);
+        info("Blocks placed: (highlight)%d", blocksPlaced);
     }
 
     @Override
     public void error(String message, Object... args) {
         super.error(message, args);
-        toggle();
+        if (Modules.get().get(HighwayBuilder.class).isActive())
+            toggle();
 
-        if (disconnectOnToggle.get()) {
+        if (disconnectOnToggle.get())
             disconnect(message, args);
-        }
-    }
-
-    private void errorEarly(String message, Object... args) {
-        super.error(message, args);
-
-        displayInfo = false;
-        toggle();
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (dir == null) {
-            onActivate();
-            return;
-        }
+        if (!Utils.canUpdate()) return;
 
-        if (suspended) {
-            if (inventory && Utils.canUpdate()) {
-                updateVariables();
-                suspended = false;
-            }
-            else return;
-        }
+        if (dir == null) onActivate();
 
-        if (width.get() < 3 && dir.diagonal) {
-            errorEarly("Diagonal highways with width less than 3 are not supported.");
+        if (Modules.get().get(AutoEat.class).eating || Modules.get().get(AutoGap.class).isEating() || Modules.get().get(KillAura.class).attacking)
             return;
-        }
 
-        if (Modules.get().get(AutoEat.class).eating || Modules.get().get(AutoGap.class).isEating() || Modules.get().get(KillAura.class).attacking) {
+        if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1.5f)
             return;
-        }
-
-        if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1.5f) {
-            return;
-        }
 
         if (state == State.Collect || state == State.ReLevel) {
             BaritoneAPI.getSettings().allowBreak.value = true;
@@ -590,8 +550,6 @@ public class HighwayBuilder extends Module {
         if (state != State.Collect)
             movePos.set(currentPos);
 
-        count = 0;
-
         // don't let the current state keep ticking, switch to re-levelling straight away
         if (state != State.Collect && state != State.ReLevel) {
             if (mc.player.getY() < start.y - 0.5)
@@ -599,31 +557,66 @@ public class HighwayBuilder extends Module {
         }
 
         tickDoubleMine();
+        refreshTasks();
         state.tick(this);
 
         if (breakTimer > 0) breakTimer--;
         if (placeTimer > 0) placeTimer--;
+        count = 0;
+
+        if (state != State.Wait)
+            return;
+
+        if (breakQueue.iterator().hasNext()) {
+            if (breakTimer > 0)
+                return;
+            while (count < blocksPerTick.get() && breakQueue.iterator().hasNext()) {
+                count++;
+                MBlockPos pos = findClosest(breakQueue);
+                BlockPos mcPos = pos.getBlockPos();
+                int slot = state.findAndMoveBestToolToHotbar(this, mc.world.getBlockState(mcPos), false);
+                if (slot == -1) return;
+                InvUtils.swap(slot, false);
+                if (!BlockUtils.canInstaBreak(mcPos))
+                    count = blocksPerTick.get();
+                if (rotation.get().mine && count == blocksPerTick.get())
+                    Rotations.rotate(Rotations.getYaw(mcPos), Rotations.getPitch(mcPos), () -> BlockUtils.breakBlock(mcPos, true));
+                else
+                    BlockUtils.breakBlock(mcPos, true);
+                breakQueueCurrent.add(pos);
+                breakTimer = breakDelay.get();
+            }
+        } else if (placeQueue.iterator().hasNext()) {
+            if (placeTimer > 0)
+                return;
+            while (count < placementsPerTick.get() && placeQueue.iterator().hasNext()) {
+                count++;
+                MBlockPos pos = findClosest(placeQueue);
+                int slot = state.findBlocksToPlace(this);
+                if (slot == -1) return;
+                BlockUtils.place(pos.getBlockPos(), Hand.MAIN_HAND, slot, rotation.get().place && count == placementsPerTick.get(), 0, true, true, false);
+                placeQueueCurrent.add(pos);
+                placeTimer = placeDelay.get();
+            }
+        }
     }
 
     @EventHandler
     private void onPacket(PacketEvent.Receive event) {
         if (event.packet instanceof InventoryS2CPacket p) {
-            if (p.syncId() == 0 && suspended)
-                inventory = true;
-            else
+            if (p.syncId() != 0)
                 this.syncId = p.syncId();
         }
     }
 
     @EventHandler
     private void onGameLeave(GameLeftEvent event) {
-        suspended = true;
-        inventory = false;
+        updateVariables();
     }
 
     @EventHandler
     private void onRender2d(Render2DEvent event) {
-        if (suspended || !renderMine.get()) return;
+        if (!Utils.canUpdate() || !renderMine.get()) return;
 
         if (normalMining != null) normalMining.renderLetter();
         if (packetMining != null) packetMining.renderLetter();
@@ -631,67 +624,22 @@ public class HighwayBuilder extends Module {
 
     @EventHandler
     private void onRender3D(Render3DEvent event) {
-        if (suspended || blockPosProvider == null) return; // prevents a fascinating crash
+        if (!Utils.canUpdate()) return;
 
         if (renderMine.get()) {
-            render(event, blockPosProvider.getFront(), mBlockPos -> canMine(mBlockPos, true), true);
-            if (floor.get() == Floor.Replace) render(event, blockPosProvider.getFloor(), mBlockPos -> canMine(mBlockPos, false), true);
-            if (railings.get()) render(event, blockPosProvider.getRailings(0), mBlockPos -> canMine(mBlockPos, false), true);
-            if (mineAboveRailings.get()) render(event, blockPosProvider.getRailings(1), mBlockPos -> canMine(mBlockPos, true), true);
+            for (MBlockPos pos : breakQueue)
+                event.renderer.box(pos.getBlockPos(), renderMineSideColor.get(), renderMineLineColor.get(), renderMineShape.get(), 0);
+
+            for (MBlockPos pos : breakQueueCurrent)
+                event.renderer.box(pos.getBlockPos(), new Color(255, 255, 25, 25), new Color(255, 255, 25), renderMineShape.get(), 0);
         }
 
         if (renderPlace.get()) {
-            render(event, blockPosProvider.getLiquids(), mBlockPos -> canPlace(mBlockPos, true), false);
+            for (MBlockPos pos : placeQueue)
+                event.renderer.box(pos.getBlockPos(), renderPlaceSideColor.get(), renderPlaceLineColor.get(), renderPlaceShape.get(), 0);
 
-            if (railings.get()) {
-                render(event, blockPosProvider.getRailings(0), mBlockPos -> canPlace(mBlockPos, false), false);
-
-                if (cornerBlock.get()) {
-                    // make sure we only render corner support blocks if we are actually planning to place a block there
-                    render(event, blockPosProvider.getRailings(-1), mBlockPos -> {
-                        boolean valid = false;
-                        for (MBlockPos pos : blockPosProvider.getRailings(0)) {
-                            if (!blocksToPlace.get().contains(pos.getState().getBlock()) && pos.add(0, -1, 0).equals(mBlockPos)) {
-                                valid = true;
-                                break;
-                            }
-                        }
-
-                        return valid && canPlace(mBlockPos, false);
-                    }, false);
-                }
-            }
-
-            render(event, blockPosProvider.getFloor(), mBlockPos -> canPlace(mBlockPos, false), false);
-        }
-    }
-
-    private void render(Render3DEvent event, MBPIterator it, Predicate<MBlockPos> predicate, boolean mine) {
-        Color sideColor = mine ? renderMineSideColor.get() : renderPlaceSideColor.get();
-        Color lineColor = mine ? renderMineLineColor.get() : renderPlaceLineColor.get();
-        ShapeMode shapeMode = mine ? renderMineShape.get() : renderPlaceShape.get();
-
-        MBlockPos posRender1 = new MBlockPos();
-        MBlockPos posRender2 = new MBlockPos();
-
-        for (MBlockPos pos : it) {
-            posRender1.set(pos);
-
-            if (predicate.test(posRender1)) {
-                int excludeDir = 0;
-
-                for (Direction side : Direction.values()) {
-                    posRender2.set(posRender1).add(side.getOffsetX(), side.getOffsetY(), side.getOffsetZ());
-
-                    it.save();
-                    for (MBlockPos p : it) {
-                        if (p.equals(posRender2) && predicate.test(p)) excludeDir |= Dir.get(side);
-                    }
-                    it.restore();
-                }
-
-                event.renderer.box(posRender1.getBlockPos(), sideColor, lineColor, shapeMode, excludeDir);
-            }
+            for (MBlockPos pos : placeQueueCurrent)
+                event.renderer.box(pos.getBlockPos(), new Color(25, 255, 25, 25), new Color(25, 255, 25), renderPlaceShape.get(), 0);
         }
     }
 
@@ -707,32 +655,6 @@ public class HighwayBuilder extends Module {
         this.state = state;
         state.start(this);
         state.tick(this);
-    }
-
-    private int getWidthLeft() {
-        return switch (width.get()) {
-            case 5, 4 -> 2;
-            case 3, 2 -> 1;
-            default -> 0;
-        };
-    }
-
-    private int getWidthRight() {
-        return switch (width.get()) {
-            case 5 -> 2;
-            case 4, 3 -> 1;
-            default -> 0;
-        };
-    }
-
-    private boolean canMine(MBlockPos pos, boolean mineBlocksToPlace) {
-        BlockState state = pos.getState();
-        return BlockUtils.canBreak(pos.getBlockPos(), state) && (mineBlocksToPlace || !blocksToPlace.get().contains(state.getBlock()));
-    }
-
-    private boolean canPlace(MBlockPos pos, boolean liquids) {
-        if (pos.getBlockPos().getSquaredDistance(mc.player.getEyePos()) > placeRange.get() * placeRange.get()) return false;
-        return liquids ? !pos.getState().getFluidState().isEmpty() : BlockUtils.canPlace(pos.getBlockPos());
     }
 
     private void disconnect(String message, Object... args) {
@@ -803,7 +725,7 @@ public class HighwayBuilder extends Module {
 
         if (distance(next, playerPos()) < 3) {
             currentPos.set(next);
-            setState(State.CheckTasks);
+            setState(State.Wait);
         }
     }
 
@@ -842,59 +764,123 @@ public class HighwayBuilder extends Module {
         }
     }
 
+    private int checkBlock(MBlockPos block, boolean place) {
+        if (!block.getBlockPos().isWithinDistance(mc.player.getEyePos(), placeRange.get()))
+            return 0;
+
+        if (place) {
+            if (BlockUtils.canBreak(block.getBlockPos())) {
+                if (onlyPlaceMissing.get()) {
+                    if (!block.getState().isFullCube(mc.world, block.getBlockPos()))
+                        breakQueue.add(block);
+                } else if (!blocksToPlace.get().contains(block.getState().getBlock())) {
+                    breakQueue.add(block);
+                }
+            } else if (block.getState().isAir()) {
+                placeQueue.add(block);
+            }
+        } else {
+            if (BlockUtils.canBreak(block.getBlockPos()))
+                breakQueue.add(block);
+        }
+
+        return 1;
+    }
+
+    private void refreshTasks() {
+        breakQueue.clear();
+        placeQueue.clear();
+        for (MBlockPos pos : breakQueueCurrent)
+            if (pos.getState().isAir())
+                blocksBroken++;
+        breakQueueCurrent.clear();
+        for (MBlockPos pos : placeQueueCurrent)
+            if (!pos.getState().isAir())
+                blocksPlaced++;
+        placeQueueCurrent.clear();
+
+        MBlockPos origin = new MBlockPos().set(currentPos).add(0, -1, 0).offset(dir);
+        int addedBlocks = 1;
+        int direction = 0;
+        while (addedBlocks > 0) {
+            addedBlocks = 0;
+            int heightCounter = 0;
+            while (heightCounter <= height.get()) {
+                int widthCounter = width.get();
+                if (railings.get() > 0 && (heightCounter > 0 || cornerBlock.get()))
+                    widthCounter += 2;
+
+                MBlockPos pos = new MBlockPos().set(origin).add(0, heightCounter, 0).offset(leftDir, widthCounter / 2);
+
+                if (heightCounter == 0) {
+                    while (widthCounter > 0) {
+                        addedBlocks += checkBlock(pos, true);
+                        pos = new MBlockPos().set(pos).offset(rightDir);
+                        widthCounter--;
+                    }
+
+                    heightCounter++;
+                    continue;
+                }
+
+                if (railings.get() >= heightCounter) {
+                    addedBlocks += checkBlock(pos, true);
+                    widthCounter--;
+                    while (widthCounter > 1) {
+                        pos = new MBlockPos().set(pos).offset(rightDir);
+                        addedBlocks += checkBlock(pos, false);
+                        widthCounter--;
+                    }
+                    pos = new MBlockPos().set(pos).offset(rightDir);
+                    addedBlocks += checkBlock(pos, true);
+                    heightCounter++;
+                    continue;
+                }
+
+                addedBlocks += checkBlock(pos, false);
+                widthCounter--;
+
+                while (widthCounter > 0) {
+                    pos = new MBlockPos().set(pos).offset(rightDir);
+                    addedBlocks += checkBlock(pos, false);
+                    widthCounter--;
+                }
+
+                heightCounter++;
+            }
+
+            if (addedBlocks == 0 && direction == 0) {
+                direction = 1;
+                addedBlocks = 1;
+                origin.set(currentPos).add(0, -1, 0).offset(dir);
+                if (!breakQueue.iterator().hasNext() && !placeQueue.iterator().hasNext())
+                    updatePosition();
+                continue;
+            }
+
+            if (direction == 0)
+                origin.offset(dir, -1);
+            else
+                origin.offset(dir);
+        }
+    }
+
+    private MBlockPos findClosest(LinkedHashSet<MBlockPos> set) {
+        MBlockPos pos = set.getFirst();
+        double distance = pos.getBlockPos().getSquaredDistance(mc.player.getEyePos());
+        for (MBlockPos current : set) {
+            double currentDistance = current.getBlockPos().getSquaredDistance(mc.player.getEyePos());
+            if (currentDistance < distance) {
+                pos = current;
+                distance = currentDistance;
+            }
+        }
+
+        set.remove(pos);
+        return pos;
+    }
+
     private enum State {
-        CheckTasks {
-            @Override
-            protected void tick(HighwayBuilder b) {
-                if (b.destroyCrystalTraps.get() && isCrystalTrap(b)) b.setState(DefuseCrystalTraps); // Destroy crystal traps
-                else if (needsToPlace(b, b.blockPosProvider.getLiquids(), true)) b.setState(FillLiquids); // Fill Liquids
-                else if (needsToMine(b, b.blockPosProvider.getFront(), true)) b.setState(MineFront); // Mine Front
-                else if (b.floor.get() == Floor.Replace && needsToMine(b, b.blockPosProvider.getFloor(), false)) b.setState(MineFloor); // Mine Floor
-                else if (b.railings.get() && needsToMine(b, b.blockPosProvider.getRailings(0), false)) b.setState(MineRailings); // Mine Railings
-                else if (b.mineAboveRailings.get() && needsToMine(b, b.blockPosProvider.getRailings(1), true)) b.setState(MineAboveRailings); // Mine above railings
-                else if (b.railings.get() && needsToPlace(b, b.blockPosProvider.getRailings(0), false)) {
-                    if (b.cornerBlock.get() && needsToPlace(b, b.blockPosProvider.getRailings(-1), false)) b.setState(PlaceCornerBlock); // Place corner support block
-                    else b.setState(PlaceRailings); // Place Railings
-                }
-                else if (needsToPlace(b, b.blockPosProvider.getFloor(), false)) b.setState(PlaceFloor); // Place Floor
-                else b.updatePosition();
-            }
-
-            private boolean needsToMine(HighwayBuilder b, MBPIterator it, boolean mineBlocksToPlace) {
-                for (MBlockPos pos : it) {
-                    if (b.canMine(pos, mineBlocksToPlace)) return true;
-                }
-
-                return false;
-            }
-
-            private boolean needsToPlace(HighwayBuilder b, MBPIterator it, boolean liquids) {
-                for (MBlockPos pos : it) {
-                    if (b.canPlace(pos, liquids)) return true;
-                }
-
-                return false;
-            }
-
-            private boolean isCrystalTrap(HighwayBuilder b) {
-                for (Entity entity : b.mc.world.getEntities()) {
-                    if (!(entity instanceof EndCrystalEntity endCrystal)) continue;
-                    if (PlayerUtils.isWithin(endCrystal, 12) || !PlayerUtils.isWithin(endCrystal, 24)) continue;
-                    if (b.ignoreCrystals.contains(endCrystal)) continue;
-
-                    Vec3d vec1 = new Vec3d(0, 0, 0);
-                    Vec3d vec2 = new Vec3d(0, 0, 0);
-
-                    // todo add a better raytrace check
-                    ((IVec3d) vec1).meteor$set(b.mc.player.getX(), b.mc.player.getY() + b.mc.player.getStandingEyeHeight(), b.mc.player.getZ());
-                    ((IVec3d) vec2).meteor$set(entity.getX(), entity.getY() + 0.5, entity.getZ());
-                    return b.mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, b.mc.player)).getType() == HitResult.Type.MISS;
-                }
-
-                return false;
-            }
-        },
-
         ReLevel {
             @Override
             protected void start(HighwayBuilder b) {
@@ -904,7 +890,7 @@ public class HighwayBuilder extends Module {
             @Override
             protected void tick(HighwayBuilder b) {
                 if (b.distance(b.movePos, b.playerPos()) <= 1) {
-                    b.setState(CheckTasks);
+                    b.setState(Wait);
                     return;
                 }
 
@@ -922,74 +908,6 @@ public class HighwayBuilder extends Module {
                     return;
 
                 BlockUtils.place(bp2, Hand.MAIN_HAND, slot, b.rotation.get().place, 100, true, true, false);
-            }
-        },
-
-        FillLiquids {
-            @Override
-            protected void tick(HighwayBuilder b) {
-                int slot = findBlocksToPlacePrioritizeTrash(b);
-                if (slot == -1) return;
-
-                place(b, new MBPIteratorFilter(b.blockPosProvider.getLiquids(), pos -> !pos.getState().getFluidState().isEmpty()), slot);
-            }
-        },
-
-        MineFront {
-            @Override
-            protected void tick(HighwayBuilder b) {
-                mine(b, b.blockPosProvider.getFront(), true);
-            }
-        },
-
-        MineFloor {
-            @Override
-            protected void tick(HighwayBuilder b) {
-                mine(b, b.blockPosProvider.getFloor(), false);
-            }
-        },
-
-        MineRailings {
-            @Override
-            protected void tick(HighwayBuilder b) {
-                mine(b, b.blockPosProvider.getRailings(0), false);
-            }
-        },
-
-        MineAboveRailings {
-            @Override
-            protected void tick(HighwayBuilder b) {
-                mine(b, b.blockPosProvider.getRailings(1), true);
-            }
-        },
-
-        PlaceCornerBlock {
-            @Override
-            protected void tick(HighwayBuilder b) {
-                int slot = findBlocksToPlacePrioritizeTrash(b);
-                if (slot == -1) return;
-
-                place(b, b.blockPosProvider.getRailings(-1), slot);
-            }
-        },
-
-        PlaceRailings {
-            @Override
-            protected void tick(HighwayBuilder b) {
-                int slot = findBlocksToPlace(b);
-                if (slot == -1) return;
-
-                place(b, b.blockPosProvider.getRailings(0), slot);
-            }
-        },
-
-        PlaceFloor {
-            @Override
-            protected void tick(HighwayBuilder b) {
-                int slot = findBlocksToPlace(b);
-                if (slot == -1) return;
-
-                place(b, b.blockPosProvider.getFloor(), slot);
             }
         },
 
@@ -1033,7 +951,7 @@ public class HighwayBuilder extends Module {
                     b.movePos.set(itemPos);
                 } else {
                     b.movePos.set(b.currentPos);
-                    b.setState(CheckTasks);
+                    b.setState(Wait);
                     return;
                 }
 
@@ -1069,7 +987,7 @@ public class HighwayBuilder extends Module {
 
                 if (timer == 0) {
                     b.movePos.set(b.currentPos);
-                    b.setState(CheckTasks);
+                    b.setState(Wait);
                 }
             }
         },
@@ -1204,7 +1122,7 @@ public class HighwayBuilder extends Module {
                 if (shulkerPredicate == null) setShulkerPredicate(b);
 
                 if (b.restockTask.tasksInactive()) {
-                    b.setState(CheckTasks);
+                    b.setState(Wait);
                     return;
                 }
 
@@ -1305,7 +1223,7 @@ public class HighwayBuilder extends Module {
 
                 // prevent tasks executing when they shouldn't
                 if (b.restockTask.tasksInactive()) {
-                    b.setState(CheckTasks);
+                    b.setState(Wait);
                     return;
                 }
 
@@ -1513,7 +1431,7 @@ public class HighwayBuilder extends Module {
                 if (!InvUtils.find(Items.BOW).found() || (!InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found() && !b.mc.player.getAbilities().creativeMode)) {
                     b.destroyCrystalTraps.set(false);
                     b.warning("No bow found to destroy crystal traps with. Toggling the setting off.");
-                    b.setState(CheckTasks);
+                    b.setState(Wait);
                 }
 
                 shots = cooldown = 0;
@@ -1542,7 +1460,7 @@ public class HighwayBuilder extends Module {
                     if (slot == -1) {
                         b.destroyCrystalTraps.set(false);
                         b.warning("No bow found to destroy crystal traps with. Toggling the setting off.");
-                        b.setState(CheckTasks);
+                        b.setState(Wait);
                         b.mc.interactionManager.stopUsingItem(b.mc.player);
                         b.drawingBow = false;
                         return;
@@ -1566,7 +1484,7 @@ public class HighwayBuilder extends Module {
 
                 if (target == null || target.isRemoved()) {
                     if (potentialTarget == null) {
-                        b.setState(CheckTasks);
+                        b.setState(Wait);
                         b.mc.interactionManager.stopUsingItem(b.mc.player);
                         b.drawingBow = false;
                         return;
@@ -1580,7 +1498,7 @@ public class HighwayBuilder extends Module {
                 if (shots >= 3) {
                     b.ignoreCrystals.add(target);
                     b.warning("Detected potential hangup on a crystal. Adding it to ignore list and continuing forward.");
-                    b.setState(CheckTasks);
+                    b.setState(Wait);
                     b.mc.interactionManager.stopUsingItem(b.mc.player);
                     b.drawingBow = false;
                     return;
@@ -1623,6 +1541,11 @@ public class HighwayBuilder extends Module {
 
                 return (float) -Math.toDegrees(Math.atan((velocitySq - Math.sqrt(velocitySq * velocitySq - g * (g * hDistanceSq + 2 * relativeY * velocitySq))) / (g * hDistance)));
             }
+        },
+
+        Wait {
+            @Override
+            protected void tick(HighwayBuilder b) {}
         };
 
         protected void start(HighwayBuilder b) {}
@@ -1714,7 +1637,7 @@ public class HighwayBuilder extends Module {
             // we quickly jump to the next state, to remove micro delays in the process and allow us to break blocks
             // between tasks if we can multi break
             if (finishedBreaking || !breaking) {
-                b.setState(State.CheckTasks);
+                b.setState(State.Wait);
             }
         }
 
@@ -1766,7 +1689,7 @@ public class HighwayBuilder extends Module {
             }
 
             if (finishedPlacing || !placed)
-                b.setState(State.CheckTasks);
+                b.setState(State.Wait);
         }
 
         private int findSlot(HighwayBuilder b, Predicate<ItemStack> predicate, boolean hotbar) {
@@ -1957,479 +1880,6 @@ public class HighwayBuilder extends Module {
 
         default int placementsPerTick(HighwayBuilder b) {
             return b.placementsPerTick.get();
-        }
-    }
-
-    private static class MBPIteratorFilter implements MBPIterator {
-        private final MBPIterator it;
-        private final Predicate<MBlockPos> predicate;
-
-        private MBlockPos pos;
-        private boolean isOld = true;
-
-        private boolean pisOld = true;
-
-        public MBPIteratorFilter(MBPIterator it, Predicate<MBlockPos> predicate) {
-            this.it = it;
-            this.predicate = predicate;
-        }
-
-        @Override
-        public void save() {
-            it.save();
-            pisOld = isOld;
-            isOld = true;
-        }
-
-        @Override
-        public void restore() {
-            it.restore();
-            isOld = pisOld;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (isOld) {
-                isOld = false;
-                pos = null;
-
-                while (it.hasNext()) {
-                    pos = it.next();
-
-                    if (predicate.test(pos)) return true;
-                    else pos = null;
-                }
-            }
-
-            return pos != null && predicate.test(pos);
-        }
-
-        @Override
-        public MBlockPos next() {
-            isOld = true;
-            return pos;
-        }
-    }
-
-    private interface IBlockPosProvider {
-        MBPIterator getFront();
-        MBPIterator getFloor();
-
-        /**
-         * state:
-         *  1 for above the railings,
-         *  0 for the railings themselves,
-         *  -1 for the block under the railings
-         */
-        MBPIterator getRailings(int state);
-
-        MBPIterator getLiquids();
-    }
-
-    private class StraightBlockPosProvider implements IBlockPosProvider {
-        private final MBlockPos pos = new MBlockPos();
-        private final MBlockPos pos2 = new MBlockPos();
-
-        @Override
-        public MBPIterator getFront() {
-            pos.set(currentPos).offset(dir).offset(leftDir, getWidthLeft());
-
-            return new MBPIterator() {
-                private int w, y;
-                private int pw, py;
-
-                @Override
-                public boolean hasNext() {
-                    return w < width.get() && y < height.get();
-                }
-
-                @Override
-                public MBlockPos next() {
-                    pos2.set(pos).offset(rightDir, w).add(0, y, 0);
-
-                    w++;
-                    if (w >= width.get()) {
-                        w = 0;
-                        y++;
-                    }
-
-                    return pos2;
-                }
-
-                @Override
-                public void save() {
-                    pw = w;
-                    py = y;
-                    w = y = 0;
-                }
-
-                @Override
-                public void restore() {
-                    w = pw;
-                    y = py;
-                }
-            };
-        }
-
-        @Override
-        public MBPIterator getFloor() {
-            pos.set(currentPos).offset(dir).offset(leftDir, getWidthLeft()).add(0, -1, 0);
-
-            return new MBPIterator() {
-                private int w;
-                private int pw;
-
-                @Override
-                public boolean hasNext() {
-                    return w < width.get();
-                }
-
-                @Override
-                public MBlockPos next() {
-                    return pos2.set(pos).offset(rightDir, w++);
-                }
-
-                @Override
-                public void save() {
-                    pw = w;
-                    w = 0;
-                }
-
-                @Override
-                public void restore() {
-                    w = pw;
-                }
-            };
-        }
-
-        @Override
-        public MBPIterator getRailings(int state) {
-            pos.set(currentPos).offset(dir);
-
-            return new MBPIterator() {
-                private int i, y = state;
-                private int pi, py;
-
-                @Override
-                public boolean hasNext() {
-                    // state == 1 : height
-                    // state == 0 : 1
-                    // state == -1 : 0
-                    return i < 2 && y < (state == 1 ? height.get() : state + 1);
-                }
-
-                @Override
-                public MBlockPos next() {
-                    if (i == 0) pos2.set(pos).offset(leftDir, getWidthLeft() + 1).add(0, y, 0);
-                    else pos2.set(pos).offset(rightDir, getWidthRight() + 1).add(0, y, 0);
-
-                    y++;
-                    if (y >= (state == 1 ? height.get() : state + 1)) {
-                        y = state;
-                        i++;
-                    }
-
-                    return pos2;
-                }
-
-                @Override
-                public void save() {
-                    pi = i;
-                    py = y;
-                    i = 0;
-                    y = state;
-                }
-
-                @Override
-                public void restore() {
-                    i = pi;
-                    y = py;
-                }
-            };
-        }
-
-        @Override
-        public MBPIterator getLiquids() {
-            pos.set(currentPos).offset(dir, 2).offset(leftDir, getWidthLeft() + (mineAboveRailings.get() ? 2 : 1));
-
-            return new MBPIterator() {
-                private int w, y;
-                private int pw, py;
-
-                private int getWidth() {
-                    return width.get() + (mineAboveRailings.get() ? 2 : 0);
-                }
-
-                @Override
-                public boolean hasNext() {
-                    return w < getWidth() + 2 && y < height.get() + 1;
-                }
-
-                @Override
-                public MBlockPos next() {
-                    pos2.set(pos).offset(rightDir, w).add(0, y, 0);
-
-                    w++;
-                    if (w >= getWidth() + 2) {
-                        w = 0;
-                        y++;
-                    }
-
-                    return pos2;
-                }
-
-                @Override
-                public void save() {
-                    pw = w;
-                    py = y;
-                    w = y = 0;
-                }
-
-                @Override
-                public void restore() {
-                    w = pw;
-                    y = py;
-                }
-            };
-        }
-    }
-
-    private class DiagonalBlockPosProvider implements IBlockPosProvider {
-        private final MBlockPos pos = new MBlockPos();
-        private final MBlockPos pos2 = new MBlockPos();
-
-        @Override
-        public MBPIterator getFront() {
-            pos.set(currentPos).offset(dir.rotateLeft()).offset(leftDir, getWidthLeft() - 1);
-
-            return new MBPIterator() {
-                private int i, w, y;
-                private int pi, pw, py;
-
-                @Override
-                public boolean hasNext() {
-                    return i < 2 && w < width.get() && y < height.get();
-                }
-
-                @Override
-                public MBlockPos next() {
-                    pos2.set(pos).offset(rightDir, w).add(0, y++, 0);
-
-                    if (y >= height.get()) {
-                        y = 0;
-                        w++;
-
-                        if (w >= (i == 0 ? width.get() - 1 : width.get())) {
-                            w = 0;
-                            i++;
-
-                            pos.set(currentPos).offset(dir).offset(leftDir, getWidthLeft());
-                        }
-                    }
-
-                    return pos2;
-                }
-
-                private void initPos() {
-                    if (i == 0) pos.set(currentPos).offset(dir.rotateLeft()).offset(leftDir, getWidthLeft() - 1);
-                    else pos.set(currentPos).offset(dir).offset(leftDir, getWidthLeft());
-                }
-
-                @Override
-                public void save() {
-                    pi = i;
-                    pw = w;
-                    py = y;
-                    i = w = y = 0;
-
-                    initPos();
-                }
-
-                @Override
-                public void restore() {
-                    i = pi;
-                    w = pw;
-                    y = py;
-
-                    initPos();
-                }
-            };
-        }
-
-        @Override
-        public MBPIterator getFloor() {
-            pos.set(currentPos).add(0, -1, 0).offset(dir.rotateLeft()).offset(leftDir, getWidthLeft() - 1);
-
-            return new MBPIterator() {
-                private int i, w;
-                private int pi, pw;
-
-                @Override
-                public boolean hasNext() {
-                    return i < 2 && w < width.get();
-                }
-
-                @Override
-                public MBlockPos next() {
-                    pos2.set(pos).offset(rightDir, w++);
-
-                    if (w >= (i == 0 ? width.get() - 1 : width.get())) {
-                        w = 0;
-                        i++;
-
-                        pos.set(currentPos).add(0, -1, 0).offset(dir).offset(leftDir, getWidthLeft());
-                    }
-
-                    return pos2;
-                }
-
-                private void initPos() {
-                    if (i == 0) pos.set(currentPos).add(0, -1, 0).offset(dir.rotateLeft()).offset(leftDir, getWidthLeft() - 1);
-                    else pos.set(currentPos).add(0, -1, 0).offset(dir).offset(leftDir, getWidthLeft());
-                }
-
-                @Override
-                public void save() {
-                    pi = i;
-                    pw = w;
-                    i = w = 0;
-
-                    initPos();
-                }
-
-                @Override
-                public void restore() {
-                    i = pi;
-                    w = pw;
-
-                    initPos();
-                }
-            };
-        }
-
-        @Override
-        public MBPIterator getRailings(int state) {
-            pos.set(currentPos).offset(dir.rotateLeft()).offset(leftDir, getWidthLeft());
-
-            return new MBPIterator() {
-                private int i, y = state;
-                private int pi, py;
-
-                @Override
-                public boolean hasNext() {
-                    return i < 2 && y < (state == 1 ? height.get() : state + 1);
-                }
-
-                @Override
-                public MBlockPos next() {
-                    pos2.set(pos).add(0, y++, 0);
-
-                    if (y >= (state == 1 ? height.get() : state + 1)) {
-                        y = state;
-                        i++;
-
-                        pos.set(currentPos).offset(dir.rotateRight()).offset(rightDir, getWidthRight());
-                    }
-
-                    return pos2;
-                }
-
-                private void initPos() {
-                    if (i == 0) pos.set(currentPos).offset(dir.rotateLeft()).offset(leftDir, getWidthLeft());
-                    else pos.set(currentPos).offset(dir.rotateRight()).offset(rightDir, getWidthRight());
-                }
-
-                @Override
-                public void save() {
-                    pi = i;
-                    py = y;
-                    i = 0;
-                    y = state;
-
-                    initPos();
-                }
-
-                @Override
-                public void restore() {
-                    i = pi;
-                    y = py;
-
-                    initPos();
-                }
-            };
-        }
-
-        @Override
-        public MBPIterator getLiquids() {
-            boolean m = mineAboveRailings.get();
-            pos.set(currentPos).offset(dir).offset(dir.rotateLeft()).offset(leftDir, getWidthLeft());
-
-            return new MBPIterator() {
-                private int i, w, y;
-                private int pi, pw, py;
-
-                private int getWidth() {
-                    return width.get() + (i == 0 ? 1 : 0) + (m && i == 1 ? 2 : 0);
-                }
-
-                @Override
-                public boolean hasNext() {
-                    if (m && i == 1 && y == height.get() &&  w == getWidth() - 1) return false;
-                    return i < 2 && w < getWidth() && y < height.get() + 1;
-                }
-
-                private void updateW() {
-                    w++;
-
-                    if (w >= getWidth()) {
-                        w = 0;
-                        i++;
-
-                        pos.set(currentPos).offset(dir, 2).offset(leftDir, getWidthLeft() + (m ? 1 : 0));
-                    }
-                }
-
-                @Override
-                public MBlockPos next() {
-                    if (i == (m ? 1 : 0) && y == height.get() && (w == 0 || w == getWidth() - 1)) {
-                        y = 0;
-                        updateW();
-                    }
-
-                    pos2.set(pos).offset(rightDir, w).add(0, y++, 0);
-
-                    if (y >= height.get() + 1) {
-                        y = 0;
-                        updateW();
-                    }
-
-                    return pos2;
-                }
-
-                private void initPos() {
-                    if (i == 0) pos.set(currentPos).offset(dir).offset(dir.rotateLeft()).offset(leftDir, getWidthLeft());
-                    else pos.set(currentPos).offset(dir, 2).offset(leftDir, getWidthLeft() + (m ? 1 : 0));
-                }
-
-                @Override
-                public void save() {
-                    pi = i;
-                    pw = w;
-                    py = y;
-                    i = w = y = 0;
-
-                    initPos();
-                }
-
-                @Override
-                public void restore() {
-                    i = pi;
-                    w = pw;
-                    y = py;
-
-                    initPos();
-                }
-            };
         }
     }
 
