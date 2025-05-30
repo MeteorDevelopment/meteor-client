@@ -5,10 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.pathing.NopPathManager;
 import meteordevelopment.meteorclient.pathing.PathManagers;
-import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -51,6 +53,29 @@ public class AutoWalk extends Module {
         .build()
     );
 
+    private final Setting<Boolean> disableOnInput = sgGeneral.add(new BoolSetting.Builder()
+        .name("disable-on-input")
+        .description("Disable module on manual movement input")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> disableOnY = sgGeneral.add(new BoolSetting.Builder()
+        .name("disable-on-y-change")
+        .description("Disable module if player moves vertically")
+        .defaultValue(false)
+        .visible(() -> mode.get() == Mode.Simple)
+        .build()
+    );
+
+    private final Setting<Boolean> waitForChunks = sgGeneral.add(new BoolSetting.Builder()
+        .name("no-unloaded-chunks")
+        .description("Do not allow movement into unloaded chunks")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Simple)
+        .build()
+    );
+
     public AutoWalk() {
         super(Categories.Movement, "auto-walk", "Automatically walks forward.");
     }
@@ -68,7 +93,17 @@ public class AutoWalk extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onTick(TickEvent.Pre event) {
+        if (disableOnInput.get() && movementInput()) {
+            toggle();
+            return;
+        }
+
         if (mode.get() == Mode.Simple) {
+            if (disableOnY.get() && mc.player.lastY != mc.player.getY()) {
+                toggle();
+                return;
+            }
+
             switch (direction.get()) {
                 case Forwards -> setPressed(mc.options.forwardKey, true);
                 case Backwards -> setPressed(mc.options.backKey, true);
@@ -83,6 +118,22 @@ public class AutoWalk extends Module {
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGH)
+    private void afterTick(TickEvent.Post event) {
+        unpress();
+    }
+
+    @EventHandler
+    private void onPlayerMove(PlayerMoveEvent event) {
+        if (mode.get() == Mode.Simple && waitForChunks.get()) {
+            int chunkX = (int) ((mc.player.getX() + event.movement.x * 2) / 16);
+            int chunkZ = (int) ((mc.player.getZ() + event.movement.z * 2) / 16);
+            if (!mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) {
+                ((IVec3d) event.movement).meteor$set(0, event.movement.y, 0);
+            }
+        }
+    }
+
     private void unpress() {
         setPressed(mc.options.forwardKey, false);
         setPressed(mc.options.backKey, false);
@@ -93,6 +144,15 @@ public class AutoWalk extends Module {
     private void setPressed(KeyBinding key, boolean pressed) {
         key.setPressed(pressed);
         Input.setKeyState(key, pressed);
+    }
+
+    private boolean movementInput() {
+        return mc.options.forwardKey.isPressed()
+            || mc.options.backKey.isPressed()
+            || mc.options.leftKey.isPressed()
+            || mc.options.rightKey.isPressed()
+            || mc.options.sneakKey.isPressed()
+            || mc.options.jumpKey.isPressed();
     }
 
     private void createGoal() {
