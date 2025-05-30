@@ -11,7 +11,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
-import javassist.bytecode.Opcode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.mixininterface.IChatHud;
@@ -27,8 +26,10 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.gui.hud.MessageIndicator;
+import net.minecraft.client.util.ChatMessages;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.OrderedText;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -168,17 +169,18 @@ public abstract class ChatHudMixin implements IChatHud {
     // Get the variable `j` for later usage at onAddMessage_modifyChatHudLineVisible
 
     @ModifyArg(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;"))
-    private int captureIndex(int index, @Share("jRef") LocalIntRef jRef) {
+    private int addVisibleMessage_captureIndex(int index, @Share("jRef") LocalIntRef jRef) {
         jRef.set(index);
         return index;
     }
 
     // Get list for later usage at anti-spam
 
-    @ModifyVariable(method = "addVisibleMessage", at = @At(value = "STORE", target = "Lnet/minecraft/client/util/ChatMessages;breakRenderedChatMessageLines(Lnet/minecraft/text/StringVisitable;ILnet/minecraft/client/font/TextRenderer;)Ljava/util/List;", opcode = Opcode.ASTORE))
-    private List<OrderedText> injected(List<OrderedText> value, @Share("listRef") LocalRef<List<OrderedText>> listRef) {
-        listRef.set(value);
-        return value;
+    @Redirect(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/ChatMessages;breakRenderedChatMessageLines(Lnet/minecraft/text/StringVisitable;ILnet/minecraft/client/font/TextRenderer;)Ljava/util/List;"))
+    private List<OrderedText> addVisibleMessage_captureList(StringVisitable message, int width, TextRenderer textRenderer, @Share("listRef") LocalRef<List<OrderedText>> listRef) {
+        List<OrderedText> list = ChatMessages.breakRenderedChatMessageLines(message, width, textRenderer);
+        listRef.set(list);
+        return list;
     }
 
     // Anti spam
