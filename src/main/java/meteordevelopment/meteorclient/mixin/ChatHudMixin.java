@@ -23,9 +23,11 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.gui.hud.MessageIndicator;
+import net.minecraft.client.util.ChatMessages;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -55,12 +57,20 @@ public abstract class ChatHudMixin implements IChatHud {
     private int nextId;
     @Unique
     private boolean skipOnAddMessage;
+    @Unique
+    private boolean isEntryMessage;
 
     @Shadow
     public abstract void addMessage(Text message, @Nullable MessageSignatureData signatureData, @Nullable MessageIndicator indicator);
 
     @Shadow
     public abstract void addMessage(Text message);
+
+    @Shadow
+    public abstract int getWidth();
+
+    @Shadow
+    public abstract double getChatScale();
 
     @Override
     public void meteor$add(Text message, int id) {
@@ -79,16 +89,20 @@ public abstract class ChatHudMixin implements IChatHud {
         ((IChatHudLine) (Object) messages.getFirst()).meteor$setId(nextId);
     }
 
-    @SuppressWarnings("DataFlowIssue")
     @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
-    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Local(ordinal = 1) int j) {
+    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
-        if (handler == null) return line;
-
         IChatHudLineVisible meteorLine = (IChatHudLineVisible) (Object) line;
+        if (meteorLine == null) return line;
 
         meteorLine.meteor$setSender(handler.meteor$getSender());
-        meteorLine.meteor$setStartOfEntry(j == 0);
+
+        // This is the equivalent of j == 0 since isEntryMessage gets set before the for-loop so this will only be true at the first iteration
+        boolean isStartOfEntry = isEntryMessage;
+        if (isEntryMessage) {
+            isEntryMessage = false;
+        }
+        meteorLine.meteor$setStartOfEntry(isStartOfEntry);
 
         return line;
     }
@@ -167,10 +181,21 @@ public abstract class ChatHudMixin implements IChatHud {
     // Anti spam
 
     @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;isChatFocused()Z"))
-    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, @Local List<OrderedText> list) {
+    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci) {
         if (Modules.get() == null) return; // baritone calls addMessage before we initialise
 
+        // We make the list variable on our own as using @Local breaks compatibility with Feather client
+        int i = MathHelper.floor((double)this.getWidth() / this.getChatScale());
+        MessageIndicator.Icon icon = message.getIcon();
+        if (icon != null) {
+            i -= icon.width + 4 + 2;
+        }
+
+        List<OrderedText> list = ChatMessages.breakRenderedChatMessageLines(message.content(), i, this.client.textRenderer);
         getBetterChat().lines.addFirst(list.size());
+
+        // We set isEntryMessage here to true since it's the last function called before the for-loop begins
+        isEntryMessage = true;
     }
 
     @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;"))
