@@ -8,6 +8,8 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.mixininterface.IChatHud;
@@ -57,8 +59,6 @@ public abstract class ChatHudMixin implements IChatHud {
     private int nextId;
     @Unique
     private boolean skipOnAddMessage;
-    @Unique
-    private boolean isEntryMessage;
 
     @Shadow
     public abstract void addMessage(Text message, @Nullable MessageSignatureData signatureData, @Nullable MessageIndicator indicator);
@@ -90,7 +90,7 @@ public abstract class ChatHudMixin implements IChatHud {
     }
 
     @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
-    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line) {
+    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Share("isEntryMessage") LocalBooleanRef isEntryMessage) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
         IChatHudLineVisible meteorLine = (IChatHudLineVisible) (Object) line;
         if (meteorLine == null) return line;
@@ -98,9 +98,9 @@ public abstract class ChatHudMixin implements IChatHud {
         meteorLine.meteor$setSender(handler.meteor$getSender());
 
         // This is the equivalent of j == 0 since isEntryMessage gets set before the for-loop so this will only be true at the first iteration
-        boolean isStartOfEntry = isEntryMessage;
-        if (isEntryMessage) {
-            isEntryMessage = false;
+        boolean isStartOfEntry = isEntryMessage.get();
+        if (isStartOfEntry) {
+            isEntryMessage.set(false);
         }
         meteorLine.meteor$setStartOfEntry(isStartOfEntry);
 
@@ -181,7 +181,7 @@ public abstract class ChatHudMixin implements IChatHud {
     // Anti spam
 
     @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;isChatFocused()Z"))
-    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci) {
+    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, @Share("isEntryMessage") LocalBooleanRef isEntryMessage) {
         if (Modules.get() == null) return; // baritone calls addMessage before we initialise
 
         // We make the list variable on our own as using @Local breaks compatibility with Feather client
@@ -195,7 +195,7 @@ public abstract class ChatHudMixin implements IChatHud {
         getBetterChat().lines.addFirst(list.size());
 
         // We set isEntryMessage here to true since it's the last function called before the for-loop begins
-        isEntryMessage = true;
+        isEntryMessage.set(true);
     }
 
     @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;"))
