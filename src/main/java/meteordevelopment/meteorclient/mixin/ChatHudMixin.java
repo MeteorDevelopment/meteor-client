@@ -9,7 +9,9 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import javassist.bytecode.Opcode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.mixininterface.IChatHud;
@@ -25,18 +27,15 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.gui.hud.MessageIndicator;
-import net.minecraft.client.util.ChatMessages;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
@@ -66,12 +65,6 @@ public abstract class ChatHudMixin implements IChatHud {
     @Shadow
     public abstract void addMessage(Text message);
 
-    @Shadow
-    public abstract int getWidth();
-
-    @Shadow
-    public abstract double getChatScale();
-
     @Override
     public void meteor$add(Text message, int id) {
         nextId = id;
@@ -90,19 +83,13 @@ public abstract class ChatHudMixin implements IChatHud {
     }
 
     @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
-    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Share("isEntryMessage") LocalBooleanRef isEntryMessage) {
+    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Share("jRef") LocalIntRef jRef) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
         IChatHudLineVisible meteorLine = (IChatHudLineVisible) (Object) line;
         if (meteorLine == null) return line;
 
         meteorLine.meteor$setSender(handler.meteor$getSender());
-
-        // This is the equivalent of j == 0 since isEntryMessage gets set before the for-loop so this will only be true at the first iteration
-        boolean isStartOfEntry = isEntryMessage.get();
-        if (isStartOfEntry) {
-            isEntryMessage.set(false);
-        }
-        meteorLine.meteor$setStartOfEntry(isStartOfEntry);
+        meteorLine.meteor$setStartOfEntry(jRef.get() == 0);
 
         return line;
     }
@@ -178,24 +165,30 @@ public abstract class ChatHudMixin implements IChatHud {
         return Modules.get().get(NoRender.class).noMessageSignatureIndicator() ? null : indicator;
     }
 
+    // Get the variable `j` for later usage at onAddMessage_modifyChatHudLineVisible
+
+    @ModifyArg(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;"))
+    private int captureIndex(int index, @Share("jRef") LocalIntRef jRef) {
+        jRef.set(index);
+        return index;
+    }
+
+    // Get list for later usage at anti-spam
+
+    @ModifyVariable(method = "addVisibleMessage", at = @At(value = "STORE", target = "Lnet/minecraft/client/util/ChatMessages;breakRenderedChatMessageLines(Lnet/minecraft/text/StringVisitable;ILnet/minecraft/client/font/TextRenderer;)Ljava/util/List;", opcode = Opcode.ASTORE))
+    private List<OrderedText> injected(List<OrderedText> value, @Share("listRef") LocalRef<List<OrderedText>> listRef) {
+        listRef.set(value);
+        return value;
+    }
+
     // Anti spam
 
     @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;isChatFocused()Z"))
-    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, @Share("isEntryMessage") LocalBooleanRef isEntryMessage) {
+    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, @Share("listRef") LocalRef<List<OrderedText>> listRef) {
         if (Modules.get() == null) return; // baritone calls addMessage before we initialise
 
-        // We make the list variable on our own as using @Local breaks compatibility with Feather client
-        int i = MathHelper.floor((double)this.getWidth() / this.getChatScale());
-        MessageIndicator.Icon icon = message.getIcon();
-        if (icon != null) {
-            i -= icon.width + 4 + 2;
-        }
-
-        List<OrderedText> list = ChatMessages.breakRenderedChatMessageLines(message.content(), i, this.client.textRenderer);
+        List<OrderedText> list = listRef.get();
         getBetterChat().lines.addFirst(list.size());
-
-        // We set isEntryMessage here to true since it's the last function called before the for-loop begins
-        isEntryMessage.set(true);
     }
 
     @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;"))
