@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.pathing.NopPathManager;
 import meteordevelopment.meteorclient.pathing.PathManagers;
@@ -15,8 +16,11 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
+import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.option.KeyBinding;
@@ -93,11 +97,6 @@ public class AutoWalk extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onTick(TickEvent.Pre event) {
-        if (disableOnInput.get() && movementInput()) {
-            toggle();
-            return;
-        }
-
         if (mode.get() == Mode.Simple) {
             if (disableOnY.get() && mc.player.lastY != mc.player.getY()) {
                 toggle();
@@ -118,9 +117,17 @@ public class AutoWalk extends Module {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    private void afterTick(TickEvent.Post event) {
-        unpress();
+    @EventHandler
+    private void onKey(KeyEvent event) {
+        if (!disableOnInput.get()) return;
+        if (mc.currentScreen != null) {
+            GUIMove guiMove = Modules.get().get(GUIMove.class);
+            if (!guiMove.isActive()) return;
+            if (guiMove.skip()) return;
+        }
+        if (isMovementKey(event.key) && event.action == KeyAction.Press) {
+           toggle();
+        }
     }
 
     @EventHandler
@@ -146,13 +153,13 @@ public class AutoWalk extends Module {
         Input.setKeyState(key, pressed);
     }
 
-    private boolean movementInput() {
-        return mc.options.forwardKey.isPressed()
-            || mc.options.backKey.isPressed()
-            || mc.options.leftKey.isPressed()
-            || mc.options.rightKey.isPressed()
-            || mc.options.sneakKey.isPressed()
-            || mc.options.jumpKey.isPressed();
+    private boolean isMovementKey(int key) {
+        return mc.options.forwardKey.matchesKey(key, 0)
+            || mc.options.backKey.matchesKey(key, 0)
+            || mc.options.leftKey.matchesKey(key, 0)
+            || mc.options.rightKey.matchesKey(key, 0)
+            || mc.options.sneakKey.matchesKey(key, 0)
+            || mc.options.jumpKey.matchesKey(key, 0);
     }
 
     private void createGoal() {
