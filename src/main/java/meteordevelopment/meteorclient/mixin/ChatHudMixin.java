@@ -169,7 +169,7 @@ public abstract class ChatHudMixin implements IChatHud {
     // Get the variable `j` for later usage at onAddMessage_modifyChatHudLineVisible
 
     @ModifyArg(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;"))
-    private int addVisibleMessage_captureIndex(int index, @Share("jRef") LocalIntRef jRef) {
+    private int addVisibleMessage_captureIndex(int index, @Share("index") LocalIntRef indexRef) {
         jRef.set(index);
         return index;
     }
