@@ -90,7 +90,7 @@ public abstract class ChatHudMixin implements IChatHud {
         if (meteorLine == null) return line;
 
         meteorLine.meteor$setSender(handler.meteor$getSender());
-        meteorLine.meteor$setStartOfEntry(jRef.get() == 0);
+        meteorLine.meteor$setStartOfEntry(indexRef.get() == 0);
 
         return line;
     }
