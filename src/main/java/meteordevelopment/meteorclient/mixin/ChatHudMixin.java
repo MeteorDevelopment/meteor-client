@@ -84,7 +84,7 @@ public abstract class ChatHudMixin implements IChatHud {
     }
 
     @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
-    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Share("jRef") LocalIntRef jRef) {
+    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Share("index") LocalIntRef indexRef) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
         IChatHudLineVisible meteorLine = (IChatHudLineVisible) (Object) line;
         if (meteorLine == null) return line;
