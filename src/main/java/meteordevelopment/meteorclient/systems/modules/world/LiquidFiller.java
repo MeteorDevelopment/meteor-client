@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -21,6 +22,8 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,11 +47,21 @@ public class LiquidFiller extends Module {
         .build()
     );
 
-    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-        .name("range")
-        .description("The place range.")
-        .defaultValue(4)
+    private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
+        .name("place-range")
+        .description("The range at which blocks can be placed.")
+        .defaultValue(4.5)
         .min(0)
+        .sliderMax(6)
+        .build()
+    );
+
+    private final Setting<Double> placeWallsRange = sgGeneral.add(new DoubleSetting.Builder()
+        .name("walls-range")
+        .description("Range in which to place when behind blocks.")
+        .defaultValue(4.5)
+        .min(0)
+        .sliderMax(6)
         .build()
     );
 
@@ -72,7 +85,7 @@ public class LiquidFiller extends Module {
     private final Setting<SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<SortMode>()
         .name("sort-mode")
         .description("The blocks you want to place first.")
-        .defaultValue(SortMode.Closest)
+        .defaultValue(SortMode.Furthest)
         .build()
     );
 
@@ -143,10 +156,6 @@ public class LiquidFiller extends Module {
         double pY = mc.player.getY();
         double pZ = mc.player.getZ();
 
-        double rangeSq = Math.pow(range.get(), 2);
-
-        if (shape.get() == Shape.UniformCube) range.set((double) Math.round(range.get()));
-
         // Find slot with a block
         FindItemResult item;
         if (listMode.get() == ListMode.Whitelist) {
@@ -157,12 +166,10 @@ public class LiquidFiller extends Module {
         if (!item.found()) return;
 
         // Loop blocks around the player
-        BlockIterator.register((int) Math.ceil(range.get()+1), (int) Math.ceil(range.get()), (blockPos, blockState) -> {
-            boolean toofarSphere = Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5) > rangeSq;
-            boolean toofarUniformCube = maxDist(Math.floor(pX), Math.floor(pY), Math.floor(pZ), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= range.get();
+        BlockIterator.register((int) Math.ceil(placeRange.get()+1), (int) Math.ceil(placeRange.get()), (blockPos, blockState) -> {
 
-            // Check distance
-            if ((toofarSphere && shape.get() == Shape.Sphere) || (toofarUniformCube && shape.get() == Shape.UniformCube)) return;
+            // Check raycast and range
+            if (isOutOfRange(blockPos)) return;
 
             // Check if the block is a source block and set to be filled
             Fluid fluid = blockState.getFluidState().getFluid();
@@ -220,11 +227,29 @@ public class LiquidFiller extends Module {
         UniformCube
     }
 
-    private static double maxDist(double x1, double y1, double z1, double x2, double y2, double z2) {
-        // Gets the largest X, Y or Z difference, manhattan style
-        double dX = Math.ceil(Math.abs(x2 - x1));
-        double dY = Math.ceil(Math.abs(y2 - y1));
-        double dZ = Math.ceil(Math.abs(z2 - z1));
-        return Math.max(Math.max(dX, dY), dZ);
+    private boolean isOutOfRange(BlockPos blockPos) {
+        if (!isWithinShape(blockPos, placeRange.get())) return true;
+
+        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), blockPos.toCenterPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+        BlockHitResult result = mc.world.raycast(raycastContext);
+        if (result == null || !result.getBlockPos().equals(blockPos))
+            return !isWithinShape(blockPos, placeWallsRange.get());
+
+        return false;
+    }
+
+    private boolean isWithinShape(BlockPos blockPos, double range) {
+        // Cube shape
+        if (shape.get() == Shape.UniformCube) {
+            BlockPos playerBlockPos = mc.player.getBlockPos();
+            double dX = Math.ceil(Math.abs(blockPos.getX() - playerBlockPos.getX()));
+            double dY = Math.ceil(Math.abs(blockPos.getY() - playerBlockPos.getY()));
+            double dZ = Math.ceil(Math.abs(blockPos.getZ() - playerBlockPos.getZ()));
+            double maxDist = Math.max(Math.max(dX, dY), dZ);
+            return maxDist <= Math.floor(range);
+        }
+
+        // Spherical shape
+        return PlayerUtils.isWithin(blockPos.toCenterPos(), range);
     }
 }
