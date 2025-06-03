@@ -6,8 +6,9 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.pathing.NopPathManager;
 import meteordevelopment.meteorclient.pathing.PathManagers;
@@ -117,17 +118,24 @@ public class AutoWalk extends Module {
         }
     }
 
-    @EventHandler
-    private void onKey(KeyEvent event) {
+    private void onMovement() {
         if (!disableOnInput.get()) return;
         if (mc.currentScreen != null) {
             GUIMove guiMove = Modules.get().get(GUIMove.class);
             if (!guiMove.isActive()) return;
             if (guiMove.skip()) return;
         }
-        if (isMovementKey(event.key) && event.action == KeyAction.Press) {
-           toggle();
-        }
+        toggle();
+    }
+
+    @EventHandler
+    private void onKey(KeyEvent event) {
+        if (isMovementKey(event.key) && event.action == KeyAction.Press) onMovement();
+    }
+
+     @EventHandler
+    private void onMouseButton(MouseButtonEvent event) {
+        if (isMovementButton(event.button) && event.action == KeyAction.Press) onMovement();
     }
 
     @EventHandler
@@ -160,6 +168,15 @@ public class AutoWalk extends Module {
             || mc.options.rightKey.matchesKey(key, 0)
             || mc.options.sneakKey.matchesKey(key, 0)
             || mc.options.jumpKey.matchesKey(key, 0);
+    }
+
+    private boolean isMovementButton(int button) {
+        return mc.options.forwardKey.matchesMouse(button)
+            || mc.options.backKey.matchesMouse(button)
+            || mc.options.leftKey.matchesMouse(button)
+            || mc.options.rightKey.matchesMouse(button)
+            || mc.options.sneakKey.matchesMouse(button)
+            || mc.options.jumpKey.matchesMouse(button);
     }
 
     private void createGoal() {
