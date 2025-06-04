@@ -408,6 +408,7 @@ public class Modules extends System<Modules> {
         add(new HoleFiller());
         add(new KillAura());
         add(new Offhand());
+        add(new PearlPhase());
         add(new Quiver());
         add(new SelfAnvil());
         add(new SelfTrap());
