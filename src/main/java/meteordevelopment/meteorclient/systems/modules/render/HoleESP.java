@@ -183,18 +183,20 @@ public class HoleESP extends Module {
                 if (direction == Direction.UP) continue;
                 BlockPos offsetPos = blockPos.offset(direction);
                 Block block = mc.world.getBlockState(offsetPos).getBlock();
+                boolean breakable = block.getHardness() >= 0;
 
-                if (((AbstractBlockAccessor) block).isCollidable() && block.getHardness() < 0) bedrock++;
-                else if (block.getBlastResistance() >= 600) obsidian++;
+                if (((AbstractBlockAccessor) block).isCollidable() && !breakable) bedrock++;
+                else if (block.getBlastResistance() >= 600 && breakable) obsidian++;
                 else if (direction == Direction.DOWN) return;
                 else if (doubles.get() && air == null && validHole(offsetPos)) {
                     for (Direction dir : Direction.values()) {
                         if (dir == direction.getOpposite() || dir == Direction.UP) continue;
 
-                        Block block1 = mc.world.getBlockState(offsetPos.offset(dir)).getBlock();
+                        block = mc.world.getBlockState(offsetPos.offset(dir)).getBlock();
+                        breakable = block.getHardness() >= 0;
 
-                        if (((AbstractBlockAccessor) block1).isCollidable() && block1.getHardness() < 0) bedrock++;
-                        else if (block1.getBlastResistance() >= 600) obsidian++;
+                        if (((AbstractBlockAccessor) block).isCollidable() && !breakable) bedrock++;
+                        else if (block.getBlastResistance() >= 600 && breakable) obsidian++;
                         else return;
                     }
 
