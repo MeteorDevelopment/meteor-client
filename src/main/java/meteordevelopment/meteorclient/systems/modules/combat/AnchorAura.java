@@ -385,8 +385,7 @@ public class AnchorAura extends Module {
         return false;
     }
 
-    private boolean hasNeighborBlock(BlockPos blockPos)
-    {
+    private boolean hasNeighborBlock(BlockPos blockPos) {
         for (Direction direction : Direction.values()) {
             if (!mc.world.getBlockState(blockPos.offset(direction)).isReplaceable()) return true;
         }
