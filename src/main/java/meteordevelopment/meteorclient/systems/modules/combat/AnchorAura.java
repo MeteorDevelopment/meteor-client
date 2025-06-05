@@ -250,7 +250,7 @@ public class AnchorAura extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (mc.world.getDimension().respawnAnchorWorks()) {
             error("You are in the Nether... disabling.");
             toggle();
@@ -258,7 +258,10 @@ public class AnchorAura extends Module {
         }
 
         // Pause
-        if (shouldPause()) return;
+        if (shouldPause()) {
+            renderBlockPos = null;
+            return;
+        }
 
         // Find a target
         if (TargetUtils.isBadTarget(target, targetRange.get())) {
@@ -278,8 +281,8 @@ public class AnchorAura extends Module {
         AtomicReference<BlockPos.Mutable> bestBreakBlockPos = new AtomicReference<>(new BlockPos.Mutable());
 
         // Find best positions to place new anchors or break existing anchors
-        int iterationSize = (int) Math.ceil(Math.max(placeRange.get(), breakRange.get()));
-        BlockIterator.register(iterationSize, iterationSize, (blockPos, blockState) -> {
+        int iteratorRange = (int) Math.ceil(Math.max(placeRange.get(), breakRange.get()));
+        BlockIterator.register(iteratorRange, iteratorRange, (blockPos, blockState) -> {
             boolean isPlacing = blockState.getBlock() != Blocks.RESPAWN_ANCHOR;
 
             // Check raycast and range
@@ -320,15 +323,11 @@ public class AnchorAura extends Module {
             FindItemResult glowStone = InvUtils.findInHotbar(Items.GLOWSTONE);
             if (!anchor.found() || !glowStone.found()) return;
 
-            if (bestPlaceDamage.get() > 0 && place.get()) {
-                doPlace(bestPlaceBlockPos.get(), anchor);
-            }
-
             if (bestBreakDamage.get() > 0) {
                 doBreak(bestBreakBlockPos.get(), anchor, glowStone);
+            } else if (bestPlaceDamage.get() > 0 && place.get()) {
+                doPlace(bestPlaceBlockPos.get(), anchor);
             }
-
-            placeDelayLeft++;
         });
     }
 
@@ -336,7 +335,7 @@ public class AnchorAura extends Module {
         // Set render info
         renderBlockPos = blockPos;
 
-        if (placeDelayLeft < placeDelay.get()) return;
+        if (placeDelayLeft++ < placeDelay.get()) return;
 
         // Place anchor!
         BlockUtils.place(blockPos, anchor, rotate.get(), 50, swing.get());
