@@ -13,18 +13,17 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
@@ -189,9 +188,7 @@ public class AutoWeb extends Module {
         if (!mc.world.getBlockState(blockPos).isReplaceable()) return false;
 
         // Check raycast and range
-        if (isOutOfRange(blockPos)) return false;
-
-        return true;
+        return !isOutOfRange(blockPos);
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {

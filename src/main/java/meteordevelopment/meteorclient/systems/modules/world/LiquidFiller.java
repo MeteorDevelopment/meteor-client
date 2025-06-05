@@ -21,8 +21,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItem;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
@@ -242,9 +242,9 @@ public class LiquidFiller extends Module {
         // Cube shape
         if (shape.get() == Shape.UniformCube) {
             BlockPos playerBlockPos = mc.player.getBlockPos();
-            double dX = Math.ceil(Math.abs(blockPos.getX() - playerBlockPos.getX()));
-            double dY = Math.ceil(Math.abs(blockPos.getY() - playerBlockPos.getY()));
-            double dZ = Math.ceil(Math.abs(blockPos.getZ() - playerBlockPos.getZ()));
+            double dX = Math.abs(blockPos.getX() - playerBlockPos.getX());
+            double dY = Math.abs(blockPos.getY() - playerBlockPos.getY());
+            double dZ = Math.abs(blockPos.getZ() - playerBlockPos.getZ());
             double maxDist = Math.max(Math.max(dX, dY), dZ);
             return maxDist <= Math.floor(range);
         }
