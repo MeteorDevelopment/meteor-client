@@ -40,6 +40,7 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
@@ -80,6 +81,11 @@ public class MeteorClient implements ClientModInitializer {
         if (INSTANCE == null) {
             INSTANCE = this;
             return;
+        }
+
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            LOG.info("Force loading mixins");
+            MixinEnvironment.getCurrentEnvironment().audit();
         }
 
         LOG.info("Initializing {}", NAME);
