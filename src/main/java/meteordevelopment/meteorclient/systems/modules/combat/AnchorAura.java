@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
@@ -166,24 +167,24 @@ public class AnchorAura extends Module {
 
     // Pause
 
-    private final Setting<Boolean> pauseOnEat = sgPause.add(new BoolSetting.Builder()
-        .name("pause-on-eat")
-        .description("Pauses while eating.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> pauseOnDrink = sgPause.add(new BoolSetting.Builder()
-        .name("pause-on-drink")
-        .description("Pauses while drinking potions.")
-        .defaultValue(false)
+    private final Setting<Boolean> pauseOnUse = sgPause.add(new BoolSetting.Builder()
+        .name("pause-on-use")
+        .description("Pauses while using an item.")
+        .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> pauseOnMine = sgPause.add(new BoolSetting.Builder()
         .name("pause-on-mine")
         .description("Pauses while mining blocks.")
-        .defaultValue(false)
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> pauseOnCA = sgPause.add(new BoolSetting.Builder()
+        .name("pause-on-CA")
+        .description("Pauses while Crystal Aura is placing.")
+        .defaultValue(true)
         .build()
     );
 
@@ -257,7 +258,7 @@ public class AnchorAura extends Module {
         }
 
         // Pause
-        if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
+        if (shouldPause()) return;
 
         // Find a target
         if (TargetUtils.isBadTarget(target, targetRange.get())) {
@@ -290,7 +291,7 @@ public class AnchorAura extends Module {
             if (isPlacing) {
                 if (!BlockUtils.canPlace(blockPos)) return;
 
-                if (!airPlace.get() && !hasNeighborBlock(blockPos)) return;
+                if (!airPlace.get() && isAirPlace(blockPos)) return;
             }
 
             float bestDamage = isPlacing ? bestPlaceDamage.floatValue() : bestBreakDamage.floatValue();
@@ -385,10 +386,21 @@ public class AnchorAura extends Module {
         return false;
     }
 
-    private boolean hasNeighborBlock(BlockPos blockPos) {
+    private boolean isAirPlace(BlockPos blockPos) {
         for (Direction direction : Direction.values()) {
-            if (!mc.world.getBlockState(blockPos.offset(direction)).isReplaceable()) return true;
+            if (!mc.world.getBlockState(blockPos.offset(direction)).isReplaceable()) return false;
         }
+        return true;
+    }
+
+    private boolean shouldPause() {
+        if (pauseOnUse.get() && mc.player.isUsingItem()) return true;
+
+        if (pauseOnMine.get() && mc.interactionManager.isBreakingBlock()) return true;
+
+        CrystalAura CA = Modules.get().get(CrystalAura.class);
+        if (pauseOnCA.get() && CA.isActive() && CA.kaTimer > 0) return true;
+
         return false;
     }
 
