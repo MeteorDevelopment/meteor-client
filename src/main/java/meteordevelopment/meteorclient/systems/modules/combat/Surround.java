@@ -341,7 +341,7 @@ public class Surround extends Module {
             BlockPos placePos = playerPos.offset(direction);
 
             // Place support blocks if air place is disabled
-            if (!airPlace.get() && !hasNeighborBlock(placePos) && mc.world.getBlockState(placePos).isReplaceable()){
+            if (!airPlace.get() && isAirPlace(placePos) && mc.world.getBlockState(placePos).isReplaceable()){
                 if (place(placePos.down(), block) && ++placedCount >= blocksPerTick.get()) break;
             }
 
@@ -449,11 +449,11 @@ public class Surround extends Module {
         };
     }
 
-    private boolean hasNeighborBlock(BlockPos blockPos) {
+    private boolean isAirPlace(BlockPos blockPos) {
         for (Direction direction : Direction.values()) {
-            if (!mc.world.getBlockState(blockPos.offset(direction)).isReplaceable()) return true;
+            if (!mc.world.getBlockState(blockPos.offset(direction)).isReplaceable()) return false;
         }
-        return false;
+        return true;
     }
 
     private boolean blockFilter(Block block) {
