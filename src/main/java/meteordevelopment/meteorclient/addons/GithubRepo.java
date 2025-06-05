@@ -18,6 +18,10 @@ public record GithubRepo(String owner, String name, String branch, @Nullable Str
         this(owner, name, "master", null);
     }
 
+    public GithubRepo(String owner, String name, String branch) {
+        this(owner, name, branch, null);
+    }
+
     public String getOwnerName() {
         return owner + "/" + name;
     }
