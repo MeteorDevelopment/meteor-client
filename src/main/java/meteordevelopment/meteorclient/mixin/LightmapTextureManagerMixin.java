@@ -30,7 +30,7 @@ public abstract class LightmapTextureManagerMixin {
     @Final
     private GpuTexture glTexture;
 
-    @Inject(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;push(Ljava/lang/String;)V"), cancellable = true)
+    @Inject(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;push(Ljava/lang/String;)V", shift = At.Shift.AFTER), cancellable = true)
     private void update$skip(float tickProgress, CallbackInfo ci, @Local Profiler profiler) {
         if (Modules.get().get(Fullbright.class).getGamma() || Modules.get().isActive(Xray.class)) {
             RenderSystem.getDevice().createCommandEncoder().clearColorTexture(glTexture, ColorHelper.getArgb(255, 255, 255, 255));
