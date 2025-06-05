@@ -35,9 +35,6 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket.Mode;
 
-import com.google.common.util.concurrent.AtomicDouble;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class BedAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTargeting = settings.createGroup("Targeting");
@@ -251,12 +248,12 @@ public class BedAura extends Module {
         .build()
     );
 
-    private AtomicDouble bestPlaceDamage = new AtomicDouble(0);
-    private AtomicReference<BlockPos.Mutable> bestPlacePos = new AtomicReference<>(new BlockPos.Mutable());
-    private AtomicReference<Direction> bestPlaceDirection = new AtomicReference<>(Direction.NORTH);
+    private double bestPlaceDamage;
+    private BlockPos.Mutable bestPlacePos = new BlockPos.Mutable();
+    private Direction bestPlaceDirection;
 
-    private AtomicDouble bestBreakDamage = new AtomicDouble(0);
-    private AtomicReference<BlockPos.Mutable> bestBreakPos = new AtomicReference<>(new BlockPos.Mutable());
+    private double bestBreakDamage;
+    private BlockPos.Mutable bestBreakPos = new BlockPos.Mutable();
 
     private BlockPos renderBlockPos;
     private Direction renderDirection;
@@ -270,7 +267,6 @@ public class BedAura extends Module {
     @Override
     public void onActivate() {
         renderBlockPos = null;
-        renderDirection = Direction.NORTH;
         placeDelayLeft = placeDelay.get();
         breakDelayLeft = 0;
         target = null;
@@ -316,8 +312,8 @@ public class BedAura extends Module {
     }
 
     private void doBedAura() {
-        bestPlaceDamage.set(0);
-        bestBreakDamage.set(0);
+        bestPlaceDamage = 0;
+        bestBreakDamage = 0;
 
         // Find best position to place or break the bed
         int iteratorRange = (int) Math.ceil(placeRange.get());
@@ -333,10 +329,10 @@ public class BedAura extends Module {
         BlockIterator.after(() -> {
             renderBlockPos = null;
 
-            if (bestBreakDamage.get() > 0) {
-                breakBed();
-            } else if (bestPlaceDamage.get() > 0) {
-                placeBed();
+            if (bestBreakDamage > 0) {
+                doBreak();
+            } else if (bestPlaceDamage > 0) {
+                doPlace();
             }
         });
     }
@@ -360,10 +356,10 @@ public class BedAura extends Module {
             if (strictDirection.get() && placeDirection != rotateDirection) continue;
 
             float targetDamage = DamageUtils.bedDamage(target, headPos.toCenterPos());
-            if (isBestDamage(headPos, targetDamage, bestPlaceDamage.get())) {
-                bestPlaceDamage.set(targetDamage);
-                bestPlaceDirection.set(placeDirection);
-                bestPlacePos.get().set(footPos);
+            if (isBestDamage(headPos, targetDamage, bestPlaceDamage)) {
+                bestPlaceDamage = targetDamage;
+                bestPlaceDirection = placeDirection;
+                bestPlacePos.set(footPos);
             }
         }
     }
@@ -376,9 +372,9 @@ public class BedAura extends Module {
         BlockPos headPos = blockState.get(BedBlock.PART) == BedPart.HEAD ? blockPos : otherPos;
 
         float targetDamage = DamageUtils.bedDamage(target, headPos.toCenterPos());
-        if (isBestDamage(headPos, targetDamage, bestBreakDamage.get())) {
-            bestBreakDamage.set(targetDamage);
-            bestBreakPos.get().set(blockPos);
+        if (isBestDamage(headPos, targetDamage, bestBreakDamage)) {
+            bestBreakDamage = targetDamage;
+            bestBreakPos.set(blockPos);
         }
     }
 
@@ -391,27 +387,27 @@ public class BedAura extends Module {
             && (!antiSuicide.get() || PlayerUtils.getTotalHealth() - selfDamage > 0);
     }
 
-    private void placeBed() {
+    private void doPlace() {
         FindItemResult bed = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BedItem);
         if (!bed.found()) return;
 
         // Set render info
-        renderBlockPos = bestPlacePos.get();
-        renderDirection = bestPlaceDirection.get();
+        renderBlockPos = bestPlacePos;
+        renderDirection = bestPlaceDirection;
 
         if (placeDelayLeft++ < placeDelay.get()) return;
 
         if (autoSwitch.get()) InvUtils.swap(bed.slot(), swapBack.get());
 
         // Get rotation to use depending on what direction we are doing
-        double yaw = Direction.getHorizontalDegreesOrThrow(bestPlaceDirection.get());
+        double yaw = Direction.getHorizontalDegreesOrThrow(bestPlaceDirection);
 
         // Use legit rotation if strict direction is enabled
-        if (strictDirection.get()) yaw = Rotations.getYaw(bestPlacePos.get()); 
+        if (strictDirection.get()) yaw = Rotations.getYaw(bestPlacePos);
 
         // Place bed!
-        Rotations.rotate(yaw, Rotations.getPitch(bestPlacePos.get()), () -> {
-            BlockUtils.place(bestPlacePos.get(), bed, false, 0, swing.get(), true);
+        Rotations.rotate(yaw, Rotations.getPitch(bestPlacePos), () -> {
+            BlockUtils.place(bestPlacePos, bed, false, 0, swing.get(), true);
         });
 
         if (swapBack.get()) InvUtils.swapBack();
@@ -419,9 +415,9 @@ public class BedAura extends Module {
         placeDelayLeft = 0;
     }
 
-    private void breakBed() {
+    private void doBreak() {
         // Set render info
-        renderBlockPos = bestBreakPos.get();
+        renderBlockPos = bestBreakPos;
         renderDirection = BedBlock.getOppositePartDirection(mc.world.getBlockState(renderBlockPos));
 
         if (breakDelayLeft++ < breakDelay.get()) return;
@@ -433,11 +429,11 @@ public class BedAura extends Module {
 
         // Break bed!
         if (rotate.get()) {
-            Rotations.rotate(Rotations.getYaw(bestBreakPos.get()), Rotations.getPitch(bestBreakPos.get()), () -> {
-                BlockUtils.interact(new BlockHitResult(bestBreakPos.get().toCenterPos(), Direction.UP, bestBreakPos.get(), true), Hand.MAIN_HAND, swing.get());
+            Rotations.rotate(Rotations.getYaw(bestBreakPos), Rotations.getPitch(bestBreakPos), () -> {
+                BlockUtils.interact(new BlockHitResult(bestBreakPos.toCenterPos(), Direction.UP, bestBreakPos, true), Hand.MAIN_HAND, swing.get());
             });
         } else {
-            BlockUtils.interact(new BlockHitResult(bestBreakPos.get().toCenterPos(), Direction.UP, bestBreakPos.get(), true), Hand.MAIN_HAND, swing.get());
+            BlockUtils.interact(new BlockHitResult(bestBreakPos.toCenterPos(), Direction.UP, bestBreakPos, true), Hand.MAIN_HAND, swing.get());
         }
 
         breakDelayLeft = 0;
