@@ -42,6 +42,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> Setting<T> get(String name, Class<T> tClass) {
         for (SettingGroup sg : this) {
             for (Setting<?> setting : sg) {
