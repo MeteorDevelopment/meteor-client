@@ -340,10 +340,8 @@ public class AutoCity extends Module {
 
         // Sort blocks
         if (sortMode.get() != SortMode.None) {
-            double pX = mc.player.getX();
-            double pY = mc.player.getY();
-            double pZ = mc.player.getZ();
-            blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? -1 : 1)));
+            double x = mc.player.getX(), y = mc.player.getY(), z = mc.player.getZ();
+            blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(x, y, z, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? -1 : 1)));
         }
 
         return blocks.getLast();
@@ -355,9 +353,7 @@ public class AutoCity extends Module {
         if (block.getBlastResistance() < 600 || block.getHardness() < 0) return false;
 
         // Check range and raycast
-        if (isOutOfRange(blockPos, breakRange.get(), breakWallsRange.get())) return false;
-
-        return true;
+        return !isOutOfRange(blockPos, breakRange.get(), breakWallsRange.get());
     }
 
     private boolean isRiskyBreak(BlockPos blockPos) {
