@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
+import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
+import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
@@ -23,7 +25,10 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
+import net.minecraft.block.DecoratedPotBlock;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
@@ -54,6 +59,13 @@ public class InventoryTweaks extends Module {
     private final Setting<List<Item>> antiDropItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("anti-drop-items")
         .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
+        .build()
+    );
+
+    private final Setting<Boolean> antiItemFrame = sgGeneral.add(new BoolSetting.Builder()
+        .name("anti-drop-item-frames")
+        .description("Items in anti-drop list will also be prevented from being placed in item frames or pots")
+        .defaultValue(true)
         .build()
     );
 
@@ -324,9 +336,30 @@ public class InventoryTweaks extends Module {
         }
     }
 
+    // Anti Drop
+
     @EventHandler
     private void onDropItems(DropItemsEvent event) {
         if (antiDropItems.get().contains(event.itemStack.getItem())) event.cancel();
+    }
+
+    @EventHandler
+    private void onInteractEntity(InteractEntityEvent event) {
+        if (!antiItemFrame.get()) return;
+        if (!(event.entity instanceof ItemFrameEntity)) return;
+
+        Item item = mc.player.getStackInHand(event.hand).getItem();
+        if (antiDropItems.get().contains(item)) event.cancel();
+    }
+
+    @EventHandler
+    private void onInteractBlock(InteractBlockEvent event) {
+        if (!antiItemFrame.get()) return;
+        Block block = mc.world.getBlockState(event.result.getBlockPos()).getBlock();
+        if (!(block instanceof DecoratedPotBlock)) return;
+
+        Item item = mc.player.getStackInHand(event.hand).getItem();
+        if (antiDropItems.get().contains(item)) event.cancel();
     }
 
     // XCarry
