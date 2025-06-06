@@ -47,24 +47,12 @@ public class InventoryTweaks extends Module {
     private final SettingGroup sgStealDump = settings.createGroup("Steal and Dump");
     private final SettingGroup sgAutoSteal = settings.createGroup("Auto Steal");
 
+
     // General
 
     private final Setting<Boolean> mouseDragItemMove = sgGeneral.add(new BoolSetting.Builder()
         .name("mouse-drag-item-move")
         .description("Moving mouse over items while holding shift will transfer it to the other container.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<List<Item>> antiDropItems = sgGeneral.add(new ItemListSetting.Builder()
-        .name("anti-drop-items")
-        .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
-        .build()
-    );
-
-    private final Setting<Boolean> antiItemFrame = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-drop-item-frames")
-        .description("Items in anti-drop list will also be prevented from being placed in item frames or pots")
         .defaultValue(true)
         .build()
     );
@@ -85,6 +73,27 @@ public class InventoryTweaks extends Module {
         .name("armor-storage")
         .description("Allows you to put normal items in your armor slots.")
         .defaultValue(true)
+        .build()
+    );
+
+    // Anti drop (in sgGeneral to avoid breaking existing configs)
+
+    private final Setting<List<Item>> antiDropItems = sgGeneral.add(new ItemListSetting.Builder()
+        .name("anti-drop-items")
+        .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
+        .build()
+    );
+
+    private final Setting<Boolean> antiItemFrame = sgGeneral.add(new BoolSetting.Builder()
+        .name("anti-drop-item-frames")
+        .description("Prevent anti-drop items from being placed in item frames or pots")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Keybind> antiDropOverrideBind = sgGeneral.add(new KeybindSetting.Builder()
+        .name("anti-drop-override")
+        .description("Hold this bind to temporarily bypass anti-drop")
         .build()
     );
 
@@ -340,12 +349,13 @@ public class InventoryTweaks extends Module {
 
     @EventHandler
     private void onDropItems(DropItemsEvent event) {
+        if (antiDropOverrideBind.get().isPressed()) return;
         if (antiDropItems.get().contains(event.itemStack.getItem())) event.cancel();
     }
 
     @EventHandler
     private void onInteractEntity(InteractEntityEvent event) {
-        if (!antiItemFrame.get()) return;
+        if (!antiItemFrame.get() || antiDropOverrideBind.get().isPressed()) return;
         if (!(event.entity instanceof ItemFrameEntity)) return;
 
         Item item = mc.player.getStackInHand(event.hand).getItem();
@@ -354,7 +364,7 @@ public class InventoryTweaks extends Module {
 
     @EventHandler
     private void onInteractBlock(InteractBlockEvent event) {
-        if (!antiItemFrame.get()) return;
+        if (!antiItemFrame.get() || antiDropOverrideBind.get().isPressed()) return;
         Block block = mc.world.getBlockState(event.result.getBlockPos()).getBlock();
         if (!(block instanceof DecoratedPotBlock)) return;
 
