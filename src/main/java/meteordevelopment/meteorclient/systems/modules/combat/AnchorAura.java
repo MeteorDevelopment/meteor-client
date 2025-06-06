@@ -34,10 +34,6 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket.Mode;
 
-import org.jetbrains.annotations.Nullable;
-import com.google.common.util.concurrent.AtomicDouble;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class AnchorAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
@@ -228,6 +224,12 @@ public class AnchorAura extends Module {
         .build()
     );
 
+    private double bestPlaceDamage;
+    private BlockPos.Mutable bestPlacePos = new BlockPos.Mutable();
+
+    private double bestBreakDamage;
+    private BlockPos.Mutable bestBreakPos = new BlockPos.Mutable();
+
     private BlockPos renderBlockPos;
     private int placeDelayLeft, breakDelayLeft;
     private PlayerEntity target;
@@ -274,11 +276,8 @@ public class AnchorAura extends Module {
     }
 
     private void doAnchorAura() {
-        AtomicDouble bestPlaceDamage = new AtomicDouble(0);
-        AtomicReference<BlockPos.Mutable> bestPlaceBlockPos = new AtomicReference<>(new BlockPos.Mutable());
-
-        AtomicDouble bestBreakDamage = new AtomicDouble(0);
-        AtomicReference<BlockPos.Mutable> bestBreakBlockPos = new AtomicReference<>(new BlockPos.Mutable());
+        bestPlaceDamage = 0;
+        bestBreakDamage = 0;
 
         // Find best positions to place new anchors or break existing anchors
         int iteratorRange = (int) Math.ceil(Math.max(placeRange.get(), breakRange.get()));
@@ -297,7 +296,7 @@ public class AnchorAura extends Module {
                 if (!airPlace.get() && isAirPlace(blockPos)) return;
             }
 
-            float bestDamage = isPlacing ? bestPlaceDamage.floatValue() : bestBreakDamage.floatValue();
+            float bestDamage = isPlacing ? (float) bestPlaceDamage : (float) bestBreakDamage;
             float selfDamage = DamageUtils.anchorDamage(mc.player, blockPos.toCenterPos());
             float targetDamage = DamageUtils.anchorDamage(target, blockPos.toCenterPos());
 
@@ -307,11 +306,11 @@ public class AnchorAura extends Module {
                 && (!antiSuicide.get() || PlayerUtils.getTotalHealth() - selfDamage > 0)) {
 
                 if (isPlacing) {
-                    bestPlaceDamage.set(targetDamage);
-                    bestPlaceBlockPos.get().set(blockPos);
+                    bestPlaceDamage = targetDamage;
+                    bestPlacePos.set(blockPos);
                 } else {
-                    bestBreakDamage.set(targetDamage);
-                    bestBreakBlockPos.get().set(blockPos);
+                    bestBreakDamage = targetDamage;
+                    bestBreakPos.set(blockPos);
                 }
             }
         });
@@ -323,29 +322,29 @@ public class AnchorAura extends Module {
             FindItemResult glowStone = InvUtils.findInHotbar(Items.GLOWSTONE);
             if (!anchor.found() || !glowStone.found()) return;
 
-            if (bestBreakDamage.get() > 0) {
-                doBreak(bestBreakBlockPos.get(), anchor, glowStone);
-            } else if (bestPlaceDamage.get() > 0 && place.get()) {
-                doPlace(bestPlaceBlockPos.get(), anchor);
+            if (bestBreakDamage > 0) {
+                doBreak(anchor, glowStone);
+            } else if (bestPlaceDamage > 0 && place.get()) {
+                doPlace(anchor);
             }
         });
     }
 
-    private void doPlace(BlockPos blockPos, FindItemResult anchor) {
+    private void doPlace(FindItemResult anchor) {
         // Set render info
-        renderBlockPos = blockPos;
+        renderBlockPos = bestPlacePos;
 
         if (placeDelayLeft++ < placeDelay.get()) return;
 
         // Place anchor!
-        BlockUtils.place(blockPos, anchor, rotate.get(), 50, swing.get());
+        BlockUtils.place(bestPlacePos, anchor, rotate.get(), 50, swing.get());
 
         placeDelayLeft = 0;
     }
 
-    private void doBreak(BlockPos blockPos, FindItemResult anchor, FindItemResult glowStone) {
+    private void doBreak(FindItemResult anchor, FindItemResult glowStone) {
         // Set render info
-        renderBlockPos = blockPos;
+        renderBlockPos = bestBreakPos;
 
         if (breakDelayLeft++ < breakDelay.get()) return;
 
@@ -354,18 +353,18 @@ public class AnchorAura extends Module {
             mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, Mode.RELEASE_SHIFT_KEY));
         }
 
-        Vec3d center = blockPos.toCenterPos();
+        Vec3d center = bestBreakPos.toCenterPos();
 
         // Charge the anchor
-        if (mc.world.getBlockState(blockPos).get(Properties.CHARGES) == 0) {
+        if (mc.world.getBlockState(bestBreakPos).get(Properties.CHARGES) == 0) {
             InvUtils.swap(glowStone.slot(), true);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, Direction.UP, blockPos, true));
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, Direction.UP, bestBreakPos, true));
         }
 
         // Explode the anchor when charged
-        if (mc.world.getBlockState(blockPos).get(Properties.CHARGES) > 0) {
+        if (mc.world.getBlockState(bestBreakPos).get(Properties.CHARGES) > 0) {
             InvUtils.swap(anchor.slot(), true);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, Direction.UP, blockPos, true));
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, Direction.UP, bestBreakPos, true));
         }
 
         InvUtils.swapBack();
