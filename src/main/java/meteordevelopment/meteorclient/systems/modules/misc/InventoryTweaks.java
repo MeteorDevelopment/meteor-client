@@ -35,6 +35,7 @@ import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.Hand;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -365,6 +366,7 @@ public class InventoryTweaks extends Module {
     @EventHandler
     private void onInteractBlock(InteractBlockEvent event) {
         if (!antiItemFrame.get() || antiDropOverrideBind.get().isPressed()) return;
+        if (event.hand != Hand.MAIN_HAND) return;
         Block block = mc.world.getBlockState(event.result.getBlockPos()).getBlock();
         if (!(block instanceof DecoratedPotBlock)) return;
 
