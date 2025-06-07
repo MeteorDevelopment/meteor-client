@@ -43,8 +43,8 @@ public class Bounce extends ElytraFlightMode {
         if (checkConditions(mc.player)) {
             if (!rubberbanded) {
                 if (prevFov != 0 && !elytraFly.sprint.get()) mc.options.getFovEffectScale().setValue(0.0); // This stops the FOV effects from constantly going on and off.
-                if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
-                setPressed(mc.options.forwardKey, true);
+                if (elytraFly.autoJump.get()) mc.options.jumpKey.setPressed(true);
+                mc.options.forwardKey.setPressed(true);
                 mc.player.setYaw(getYawDirection());
                 if (elytraFly.lockPitch.get()) mc.player.setPitch(elytraFly.pitch.get().floatValue());
             }
@@ -76,8 +76,8 @@ public class Bounce extends ElytraFlightMode {
     }
 
     private void unpress() {
-        setPressed(mc.options.forwardKey, false);
-        if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, false);
+        mc.options.forwardKey.setPressed(false);
+        if (elytraFly.autoJump.get()) mc.options.jumpKey.setPressed(false);
     }
 
     @Override
@@ -93,12 +93,6 @@ public class Bounce extends ElytraFlightMode {
         if (event.packet instanceof ClientCommandC2SPacket && ((ClientCommandC2SPacket) event.packet).getMode().equals(ClientCommandC2SPacket.Mode.START_FALL_FLYING) && !elytraFly.sprint.get()) {
             mc.player.setSprinting(true);
         }
-    }
-
-
-    private void setPressed(KeyBinding key, boolean pressed) {
-        key.setPressed(pressed);
-        Input.setKeyState(key, pressed);
     }
 
     public static boolean recastElytra(ClientPlayerEntity player) {
