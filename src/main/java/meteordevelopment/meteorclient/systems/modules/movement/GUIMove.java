@@ -5,23 +5,24 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.entity.player.PlayerTickMovementEvent;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
-import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.util.math.MathHelper;
 
@@ -43,22 +44,22 @@ public class GUIMove extends Module {
         .build()
     );
 
-    private final Setting<Boolean> jump = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> jump = sgGeneral.add(new BoolSetting.Builder()
         .name("jump")
         .description("Allows you to jump while in GUIs.")
         .defaultValue(true)
         .onChanged(aBoolean -> {
-            if (isActive() && !aBoolean) set(mc.options.jumpKey, false);
+            if (isActive() && !aBoolean) mc.options.jumpKey.setPressed(false);
         })
         .build()
     );
 
-    private final Setting<Boolean> sneak = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> sneak = sgGeneral.add(new BoolSetting.Builder()
         .name("sneak")
         .description("Allows you to sneak while in GUIs.")
         .defaultValue(true)
         .onChanged(aBoolean -> {
-            if (isActive() && !aBoolean) set(mc.options.sneakKey, false);
+            if (isActive() && !aBoolean) mc.options.sneakKey.setPressed(false);
         })
         .build()
     );
@@ -68,7 +69,7 @@ public class GUIMove extends Module {
         .description("Allows you to sprint while in GUIs.")
         .defaultValue(true)
         .onChanged(aBoolean -> {
-            if (isActive() && !aBoolean) set(mc.options.sprintKey, false);
+            if (isActive() && !aBoolean) mc.options.sprintKey.setPressed(false);
         })
         .build()
     );
@@ -94,14 +95,14 @@ public class GUIMove extends Module {
 
     @Override
     public void onDeactivate() {
-        set(mc.options.forwardKey, false);
-        set(mc.options.backKey, false);
-        set(mc.options.leftKey, false);
-        set(mc.options.rightKey, false);
+        mc.options.forwardKey.setPressed(false);
+        mc.options.backKey.setPressed(false);
+        mc.options.leftKey.setPressed(false);
+        mc.options.rightKey.setPressed(false);
 
-        if (jump.get()) set(mc.options.jumpKey, false);
-        if (sneak.get()) set(mc.options.sneakKey, false);
-        if (sprint.get()) set(mc.options.sprintKey, false);
+        if (jump.get()) mc.options.jumpKey.setPressed(false);
+        if (sneak.get()) mc.options.sneakKey.setPressed(false);
+        if (sprint.get()) mc.options.sprintKey.setPressed(false);
     }
 
     public boolean disableSpace() {
@@ -111,20 +112,29 @@ public class GUIMove extends Module {
         return isActive() && arrowsRotate.get();
     }
 
-    @EventHandler
-    private void onPlayerMoveEvent(PlayerTickMovementEvent event) {
+    private void onInput(int key, KeyAction action, boolean mouse) {
         if (skip()) return;
         if (screens.get() == Screens.GUI && !(mc.currentScreen instanceof WidgetScreen)) return;
         if (screens.get() == Screens.Inventory && mc.currentScreen instanceof WidgetScreen) return;
 
-        set(mc.options.forwardKey, Input.isPressed(mc.options.forwardKey));
-        set(mc.options.backKey, Input.isPressed(mc.options.backKey));
-        set(mc.options.leftKey, Input.isPressed(mc.options.leftKey));
-        set(mc.options.rightKey, Input.isPressed(mc.options.rightKey));
+        pass(mc.options.forwardKey, key, action, mouse);
+        pass(mc.options.backKey, key, action, mouse);
+        pass(mc.options.leftKey, key, action, mouse);
+        pass(mc.options.rightKey, key, action, mouse);
 
-        if (jump.get()) set(mc.options.jumpKey, Input.isPressed(mc.options.jumpKey));
-        if (sneak.get()) set(mc.options.sneakKey, Input.isPressed(mc.options.sneakKey));
-        if (sprint.get()) set(mc.options.sprintKey, Input.isPressed(mc.options.sprintKey));
+        if (jump.get()) pass(mc.options.jumpKey, key, action, mouse);
+        if (sneak.get()) pass(mc.options.sneakKey, key, action, mouse);
+        if (sprint.get()) pass(mc.options.sprintKey, key, action, mouse);
+    }
+
+    @EventHandler
+    private void onKey(KeyEvent event) {
+        onInput(event.key, event.action, false);
+    }
+
+    @EventHandler
+    private void onButton(MouseButtonEvent event) {
+        onInput(event.button, event.action, true);
     }
 
     @EventHandler
@@ -135,31 +145,40 @@ public class GUIMove extends Module {
 
         float rotationDelta = Math.min((float) (rotateSpeed.get() * event.frameTime * 20f), 100);
 
+        Freecam freecam = Modules.get().get(Freecam.class);
+
         if (arrowsRotate.get()) {
-            float yaw = mc.player.getYaw();
-            float pitch = mc.player.getPitch();
+            if (!freecam.isActive()) {
+                float yaw = mc.player.getYaw();
+                float pitch = mc.player.getPitch();
 
-            if (Input.isKeyPressed(GLFW_KEY_LEFT)) yaw -= rotationDelta;
-            if (Input.isKeyPressed(GLFW_KEY_RIGHT)) yaw += rotationDelta;
-            if (Input.isKeyPressed(GLFW_KEY_UP)) pitch -= rotationDelta;
-            if (Input.isKeyPressed(GLFW_KEY_DOWN)) pitch += rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_LEFT)) yaw -= rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_RIGHT)) yaw += rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_UP)) pitch -= rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_DOWN)) pitch += rotationDelta;
 
+                pitch = MathHelper.clamp(pitch, -90, 90);
 
-            pitch = MathHelper.clamp(pitch, -90, 90);
+                mc.player.setYaw(yaw);
+                mc.player.setPitch(pitch);
+            } else {
+                double dy = 0, dx = 0;
 
-            mc.player.setYaw(yaw);
-            mc.player.setPitch(pitch);
+                if (Input.isKeyPressed(GLFW_KEY_LEFT)) dy = -rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_RIGHT)) dy = rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_UP)) dx = -rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_DOWN)) dx = rotationDelta;
+
+                freecam.changeLookDirection(dy, dx);
+            }
         }
     }
 
-    private void set(KeyBinding bind, boolean pressed) {
-        boolean wasPressed = bind.isPressed();
-        bind.setPressed(pressed);
-
-        InputUtil.Key key = ((KeyBindingAccessor) bind).getKey();
-        if (wasPressed != pressed && key.getCategory() == InputUtil.Type.KEYSYM) {
-            MeteorClient.EVENT_BUS.post(KeyEvent.get(key.getCode(), 0, pressed ? KeyAction.Press : KeyAction.Release));
-        }
+    private void pass(KeyBinding bind, int key, KeyAction action, boolean mouse) {
+        if (!mouse && !bind.matchesKey(key, 0)) return;
+        if (mouse && !bind.matchesMouse(key)) return;
+        if (action == KeyAction.Press) bind.setPressed(true);
+        if (action == KeyAction.Release) bind.setPressed(false);
     }
 
     public boolean skip() {
