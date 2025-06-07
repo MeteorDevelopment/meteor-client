@@ -63,7 +63,7 @@ public class Freecam extends Module {
 
     private final Setting<Boolean> staySneaking = sgGeneral.add(new BoolSetting.Builder()
         .name("stay-sneaking")
-        .description("Stays sneaking while in freecam.")
+        .description("If you are sneaking when you enter freecam, whether your player should remain sneaking.")
         .defaultValue(true)
         .build()
     );
