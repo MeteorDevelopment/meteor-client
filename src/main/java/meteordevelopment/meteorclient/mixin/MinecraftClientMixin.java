@@ -160,13 +160,15 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
             op.call();
             return;
         }
+
         GUIMove guimove = modules.get(GUIMove.class);
         if (guimove == null || !guimove.isActive() || guimove.skip()) {
             op.call();
             return;
         }
+
         GameOptions options = MeteorClient.mc.options;
-        for(KeyBinding kb : KeyBindingAccessor.getKeysById().values()) {
+        for (KeyBinding kb : KeyBindingAccessor.getKeysById().values()) {
             if (kb == options.forwardKey) continue;
             if (kb == options.leftKey) continue;
             if (kb == options.rightKey) continue;
