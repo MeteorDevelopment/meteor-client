@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -18,6 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.option.KeyBinding;
@@ -42,7 +44,7 @@ public class GUIMove extends Module {
         .build()
     );
 
-    private final Setting<Boolean> jump = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> jump = sgGeneral.add(new BoolSetting.Builder()
         .name("jump")
         .description("Allows you to jump while in GUIs.")
         .defaultValue(true)
@@ -52,7 +54,7 @@ public class GUIMove extends Module {
         .build()
     );
 
-    private final Setting<Boolean> sneak = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> sneak = sgGeneral.add(new BoolSetting.Builder()
         .name("sneak")
         .description("Allows you to sneak while in GUIs.")
         .defaultValue(true)
@@ -109,7 +111,6 @@ public class GUIMove extends Module {
     public boolean disableArrows() {
         return isActive() && arrowsRotate.get();
     }
-
 
     private void onInput(int key, KeyAction action, boolean mouse) {
         if (skip()) return;
