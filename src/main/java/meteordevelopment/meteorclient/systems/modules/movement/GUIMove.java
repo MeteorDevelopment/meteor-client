@@ -144,20 +144,32 @@ public class GUIMove extends Module {
 
         float rotationDelta = Math.min((float) (rotateSpeed.get() * event.frameTime * 20f), 100);
 
+        Freecam freecam = Modules.get().get(Freecam.class);
+
         if (arrowsRotate.get()) {
-            float yaw = mc.player.getYaw();
-            float pitch = mc.player.getPitch();
+            if (!freecam.isActive()) {
+                float yaw = mc.player.getYaw();
+                float pitch = mc.player.getPitch();
 
-            if (Input.isKeyPressed(GLFW_KEY_LEFT)) yaw -= rotationDelta;
-            if (Input.isKeyPressed(GLFW_KEY_RIGHT)) yaw += rotationDelta;
-            if (Input.isKeyPressed(GLFW_KEY_UP)) pitch -= rotationDelta;
-            if (Input.isKeyPressed(GLFW_KEY_DOWN)) pitch += rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_LEFT)) yaw -= rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_RIGHT)) yaw += rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_UP)) pitch -= rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_DOWN)) pitch += rotationDelta;
 
+                pitch = MathHelper.clamp(pitch, -90, 90);
 
-            pitch = MathHelper.clamp(pitch, -90, 90);
+                mc.player.setYaw(yaw);
+                mc.player.setPitch(pitch);
+            } else {
+                double dy = 0, dx = 0;
 
-            mc.player.setYaw(yaw);
-            mc.player.setPitch(pitch);
+                if (Input.isKeyPressed(GLFW_KEY_LEFT)) dy = -rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_RIGHT)) dy = rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_UP)) dx = -rotationDelta;
+                if (Input.isKeyPressed(GLFW_KEY_DOWN)) dx = rotationDelta;
+
+                freecam.changeLookDirection(dy, dx);
+            }
         }
     }
 
