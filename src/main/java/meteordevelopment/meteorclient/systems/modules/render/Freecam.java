@@ -160,7 +160,7 @@ public class Freecam extends Module {
         lastYaw = yaw;
         lastPitch = pitch;
 
-        isSneaking = mc.options.sneakKey.isPressed(); ;
+        isSneaking = mc.options.sneakKey.isPressed();
 
         forward = mc.options.forwardKey.isPressed();
         backward = mc.options.backKey.isPressed();
