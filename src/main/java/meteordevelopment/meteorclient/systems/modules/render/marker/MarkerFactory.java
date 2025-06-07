@@ -22,10 +22,10 @@ public class MarkerFactory {
         factories = new HashMap<>();
         factories.put(CuboidMarker.type, CuboidMarker::new);
         factories.put(Sphere2dMarker.type, Sphere2dMarker::new);
+        factories.put(Sphere3dMarker.type, Sphere3dMarker::new);
+        factories.put(CylinderMarker.type, CylinderMarker::new);
 
-        names = new String[factories.size()];
-        int i = 0;
-        for (String key : factories.keySet()) names[i++] = key;
+        names = factories.keySet().toArray(new String[0]);
     }
 
     public String[] getNames() {
