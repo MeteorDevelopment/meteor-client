@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -100,6 +101,20 @@ public class BedAura extends Module {
         .defaultValue(2)
         .min(0)
         .sliderMax(10)
+        .build()
+    );
+
+    private final Setting<Boolean> spoofPlace = sgGeneral.add(new BoolSetting.Builder()
+        .name("spoof-place")
+        .description("Places the entire bed synchronically on your client.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> spoofBreak = sgGeneral.add(new BoolSetting.Builder()
+        .name("spoof-break")
+        .description("Breaks the entire bed synchronically on your client.")
+        .defaultValue(true)
         .build()
     );
 
@@ -318,7 +333,7 @@ public class BedAura extends Module {
         // Find best position to place or break the bed
         int iteratorRange = (int) Math.ceil(placeRange.get());
         BlockIterator.register(iteratorRange, iteratorRange, (blockPos, blockState) -> {
-            if (blockState.getBlock() instanceof BedBlock && !isGhostBed(blockPos)) {
+            if (blockState.getBlock() instanceof BedBlock) {
                 setBreakInfo(blockPos, blockState);
             } else if (place.get()) {
                 setPlaceInfo(blockPos);
@@ -338,7 +353,7 @@ public class BedAura extends Module {
     }
 
     private void setPlaceInfo(BlockPos footPos) {
-        if (!BlockUtils.canPlace(footPos) && !isGhostBed(footPos)) return;
+        if (!BlockUtils.canPlace(footPos)) return;
 
         // Air place check
         if (!airPlace.get() && isAirPlace(footPos)) return;
@@ -350,7 +365,7 @@ public class BedAura extends Module {
 
         for (Direction placeDirection : Direction.HORIZONTAL) {
             BlockPos headPos = footPos.offset(placeDirection);
-            if (!mc.world.getBlockState(headPos).isReplaceable() && !isGhostBed(headPos)) continue;
+            if (!mc.world.getBlockState(headPos).isReplaceable()) continue;
 
             // Match our player's horizontal facing if we are using strict direction
             if (strictDirection.get() && placeDirection != rotateDirection) continue;
@@ -422,21 +437,23 @@ public class BedAura extends Module {
 
         if (breakDelayLeft++ < breakDelay.get()) return;
 
+        // Break bed!
+        if (rotate.get()) {
+            Rotations.rotate(Rotations.getYaw(bestBreakPos), Rotations.getPitch(bestBreakPos), () -> { doInteract(); });
+        } else {
+            doInteract();
+        }
+
+        breakDelayLeft = 0;
+    }
+
+    private void doInteract() {
         // Stop sneaking so interactions with the bed are successful
         if (mc.player.isSneaking()) {
             mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, Mode.RELEASE_SHIFT_KEY));
         }
 
-        // Break bed!
-        if (rotate.get()) {
-            Rotations.rotate(Rotations.getYaw(bestBreakPos), Rotations.getPitch(bestBreakPos), () -> {
-                BlockUtils.interact(new BlockHitResult(bestBreakPos.toCenterPos(), Direction.UP, bestBreakPos, true), Hand.MAIN_HAND, swing.get());
-            });
-        } else {
-            BlockUtils.interact(new BlockHitResult(bestBreakPos.toCenterPos(), Direction.UP, bestBreakPos, true), Hand.MAIN_HAND, swing.get());
-        }
-
-        breakDelayLeft = 0;
+        BlockUtils.interact(new BlockHitResult(bestBreakPos.toCenterPos(), BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), Hand.MAIN_HAND, swing.get());
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
@@ -458,14 +475,6 @@ public class BedAura extends Module {
         return true;
     }
 
-    private boolean isGhostBed(BlockPos blockPos) {
-        BlockState blockState = mc.world.getBlockState(blockPos);
-        if (!(blockState.getBlock() instanceof BedBlock)) return false;
-
-        BlockPos otherPos = blockPos.offset(BedBlock.getOppositePartDirection(blockState));
-        return !(mc.world.getBlockState(otherPos).getBlock() instanceof BedBlock);
-    }
-
     private boolean shouldPause() {
         if (pauseOnUse.get() && mc.player.isUsingItem()) return true;
 
@@ -475,6 +484,24 @@ public class BedAura extends Module {
         if (pauseOnCA.get() && CA.isActive() && CA.kaTimer > 0) return true;
 
         return false;
+    }
+
+    @EventHandler
+    private void onBlockUpdate(BlockUpdateEvent event) {
+        // Spoof placement for instantaneous bed sync
+        if (spoofPlace.get() && event.newState.getBlock() instanceof BedBlock && event.oldState.isReplaceable()) {
+            BlockPos otherPos = event.pos.offset(BedBlock.getOppositePartDirection(event.newState));
+            if (mc.world.getBlockState(otherPos).isReplaceable()) {
+                mc.world.setBlockState(otherPos, event.newState.with(BedBlock.PART, BedPart.HEAD), 0);
+            }
+        }
+        // Spoof bed breaking for instantaneous bed sync
+        if (spoofBreak.get() && event.oldState.getBlock() instanceof BedBlock && event.newState.isReplaceable()) {
+            BlockPos otherPos = event.pos.offset(BedBlock.getOppositePartDirection(event.oldState));
+            if (mc.world.getBlockState(otherPos).getBlock() instanceof BedBlock) {
+                mc.world.setBlockState(otherPos, mc.world.getFluidState(otherPos).getBlockState(), 0);
+            }
+        }
     }
 
     @EventHandler
