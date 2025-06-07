@@ -61,6 +61,13 @@ public class Freecam extends Module {
         .build()
     );
 
+    private final Setting<Boolean> staySneaking = sgGeneral.add(new BoolSetting.Builder()
+        .name("stay-sneaking")
+        .description("If you are sneaking when you enter freecam, whether your player should remain sneaking.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> toggleOnDamage = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-on-damage")
         .description("Disables freecam when you take damage.")
@@ -122,7 +129,7 @@ public class Freecam extends Module {
     private double fovScale;
     private boolean bobView;
 
-    private boolean forward, backward, right, left, up, down;
+    private boolean forward, backward, right, left, up, down, isSneaking;
 
     public Freecam() {
         super(Categories.Render, "freecam", "Allows the camera to move away from the player.");
@@ -153,6 +160,8 @@ public class Freecam extends Module {
         lastYaw = yaw;
         lastPitch = pitch;
 
+        isSneaking = mc.options.sneakKey.isPressed();
+
         forward = mc.options.forwardKey.isPressed();
         backward = mc.options.backKey.isPressed();
         right = mc.options.rightKey.isPressed();
@@ -173,10 +182,11 @@ public class Freecam extends Module {
         mc.options.setPerspective(perspective);
 
         if (staticView.get()) {
-
             mc.options.getFovEffectScale().setValue(fovScale);
             mc.options.getBobView().setValue(bobView);
         }
+
+        isSneaking = false;
     }
 
     @EventHandler
@@ -402,6 +412,10 @@ public class Freecam extends Module {
 
     public boolean renderHands() {
         return !isActive() || renderHands.get();
+    }
+
+    public boolean staySneaking() {
+        return isActive() && !mc.player.getAbilities().flying && staySneaking.get() && isSneaking;
     }
 
     public double getX(float tickDelta) {
