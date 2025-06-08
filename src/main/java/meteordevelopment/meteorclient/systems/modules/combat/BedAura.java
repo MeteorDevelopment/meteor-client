@@ -39,7 +39,7 @@ import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket.Mode;
 public class BedAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTargeting = settings.createGroup("Targeting");
-    private final SettingGroup sgAutoMove = settings.createGroup("Inventory");
+    private final SettingGroup sgInventory = settings.createGroup("Inventory");
     private final SettingGroup sgPause = settings.createGroup("Pause");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -89,7 +89,7 @@ public class BedAura extends Module {
     private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
         .name("place-delay")
         .description("The delay between placing beds in ticks.")
-        .defaultValue(10)
+        .defaultValue(5)
         .range(0, 10)
         .visible(place::get)
         .build()
@@ -98,7 +98,7 @@ public class BedAura extends Module {
     private final Setting<Integer> breakDelay = sgGeneral.add(new IntSetting.Builder()
         .name("break-delay")
         .description("The tick delay between exploding beds.")
-        .defaultValue(2)
+        .defaultValue(0)
         .min(0)
         .sliderMax(10)
         .build()
@@ -168,14 +168,14 @@ public class BedAura extends Module {
 
     // Inventory
 
-    private final Setting<Boolean> autoMove = sgAutoMove.add(new BoolSetting.Builder()
+    private final Setting<Boolean> autoMove = sgInventory.add(new BoolSetting.Builder()
         .name("auto-move")
         .description("Moves beds into a selected hotbar slot.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Integer> autoMoveSlot = sgAutoMove.add(new IntSetting.Builder()
+    private final Setting<Integer> autoMoveSlot = sgInventory.add(new IntSetting.Builder()
         .name("auto-move-slot")
         .description("The slot auto move moves beds to.")
         .defaultValue(9)
@@ -185,14 +185,14 @@ public class BedAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> autoSwitch = sgAutoMove.add(new BoolSetting.Builder()
+    private final Setting<Boolean> autoSwitch = sgInventory.add(new BoolSetting.Builder()
         .name("auto-switch")
         .description("Switches to beds automatically.")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> swapBack = sgAutoMove.add(new BoolSetting.Builder()
+    private final Setting<Boolean> swapBack = sgInventory.add(new BoolSetting.Builder()
         .name("swap-back")
         .description("Switches to your previous slot after using beds.")
         .defaultValue(true)
@@ -314,12 +314,12 @@ public class BedAura extends Module {
             if (TargetUtils.isBadTarget(target, targetRange.get())) return;
         }
 
-        // Auto move
+        // Auto move beds from inventory
         if (autoMove.get()) {
             FindItemResult bed = InvUtils.find(itemStack -> itemStack.getItem() instanceof BedItem);
             boolean alreadyHasBed = mc.player.getInventory().getStack(autoMoveSlot.get() - 1).getItem() instanceof BedItem;
             if (bed.found() && !bed.isHotbar() && !alreadyHasBed) {
-                InvUtils.move().from(bed.slot()).toHotbar(autoMoveSlot.get() - 1);
+                InvUtils.quickSwap().fromId(autoMoveSlot.get() - 1).to(bed.slot());
             }
         }
 
@@ -414,6 +414,8 @@ public class BedAura extends Module {
 
         if (autoSwitch.get()) InvUtils.swap(bed.slot(), swapBack.get());
 
+        if (!mc.player.isHolding(itemStack -> itemStack.getItem() instanceof BedItem)) return;
+
         // Get rotation to use depending on what direction we are doing
         double yaw = Direction.getHorizontalDegreesOrThrow(bestPlaceDirection);
 
@@ -422,12 +424,9 @@ public class BedAura extends Module {
 
         // Place bed!
         Rotations.rotate(yaw, Rotations.getPitch(bestPlacePos), () -> {
-            BlockUtils.place(bestPlacePos, bed, false, 0, swing.get(), true);
+            BlockUtils.place(bestPlacePos, bed, false, 0, swing.get(), true, swapBack.get());
+            placeDelayLeft = 0;
         });
-
-        if (swapBack.get()) InvUtils.swapBack();
-
-        placeDelayLeft = 0;
     }
 
     private void doBreak() {
@@ -443,8 +442,6 @@ public class BedAura extends Module {
         } else {
             doInteract();
         }
-
-        breakDelayLeft = 0;
     }
 
     private void doInteract() {
@@ -454,6 +451,7 @@ public class BedAura extends Module {
         }
 
         BlockUtils.interact(new BlockHitResult(bestBreakPos.toCenterPos(), BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), Hand.MAIN_HAND, swing.get());
+        breakDelayLeft = 0;
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
