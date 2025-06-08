@@ -358,13 +358,13 @@ public class AnchorAura extends Module {
         // Charge the anchor
         if (mc.world.getBlockState(bestBreakPos).get(Properties.CHARGES) == 0) {
             InvUtils.swap(glowStone.slot(), true);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, Direction.UP, bestBreakPos, true));
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true));
         }
 
         // Explode the anchor when charged
         if (mc.world.getBlockState(bestBreakPos).get(Properties.CHARGES) > 0) {
             InvUtils.swap(anchor.slot(), true);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, Direction.UP, bestBreakPos, true));
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true));
         }
 
         InvUtils.swapBack();
