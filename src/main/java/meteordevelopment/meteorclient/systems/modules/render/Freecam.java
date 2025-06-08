@@ -264,7 +264,7 @@ public class Freecam extends Module {
         double velY = 0;
         double velZ = 0;
 
-        if (rotate.get()) {
+        if (rotate.get() && shouldChangeCrosshairTarget()) {
             BlockPos crossHairPos;
             Vec3d crossHairPosition;
 
