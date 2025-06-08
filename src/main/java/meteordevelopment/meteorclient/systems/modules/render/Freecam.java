@@ -14,20 +14,19 @@ import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.DoubleSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
@@ -42,6 +41,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgControl = settings.createGroup("Controls");
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
@@ -117,8 +117,42 @@ public class Freecam extends Module {
         .build()
     );
 
-    public final Vector3d pos = new Vector3d();
-    public final Vector3d prevPos = new Vector3d();
+    private final Setting<Boolean> relativePos = sgGeneral.add(new BoolSetting.Builder()
+        .name("relative")
+        .description("Camera moves along with the player")
+        .defaultValue(false)
+        .onChanged(this::onRelativeToggle)
+        .build()
+    );
+
+    private final Setting<Keybind> relativeBind = sgControl.add(new KeybindSetting.Builder()
+        .name("toggle-relative")
+        .description("Press this bind to toggle the relative setting (bind will not trigger other actions)")
+        .build()
+    );
+
+    private final Setting<Keybind> returnBind = sgControl.add(new KeybindSetting.Builder()
+        .name("return")
+        .description("Press this bind to return camera to player (bind will not trigger other actions)")
+        .build()
+    );
+
+    private final Setting<Keybind> overrideBind = sgControl.add(new KeybindSetting.Builder()
+        .name("switch-control")
+        .description("Press this bind to switch control between player and camera (bind will not trigger other actions)")
+        .build()
+    );
+
+    private final Setting<Boolean> overrideBindHold = sgControl.add(new BoolSetting.Builder()
+        .name("switch-back-on-release")
+        .description("Switch control back when bind is released")
+        .defaultValue(true)
+        .build()
+    );
+
+    // Will be relative to player if relativePos is set
+    private final Vector3d pos = new Vector3d();
+    private final Vector3d prevPos = new Vector3d();
 
     private Perspective perspective;
     private double speedValue;
@@ -130,6 +164,8 @@ public class Freecam extends Module {
     private boolean bobView;
 
     private boolean forward, backward, right, left, up, down, isSneaking;
+
+    private boolean override = false;
 
     public Freecam() {
         super(Categories.Render, "freecam", "Allows the camera to move away from the player.");
@@ -169,8 +205,11 @@ public class Freecam extends Module {
         up = mc.options.jumpKey.isPressed();
         down = mc.options.sneakKey.isPressed();
 
+        override = false;
+
         unpress();
         if (reloadChunks.get()) mc.worldRenderer.reload();
+        resetCamera();
     }
 
     @Override
@@ -277,12 +316,44 @@ public class Freecam extends Module {
 
         prevPos.set(pos);
         pos.set(pos.x + velX, pos.y + velY, pos.z + velZ);
+        if (relativePos.get()) {
+            Vec3d delta = mc.player.getPos().subtract(mc.player.getLastRenderPos());
+            prevPos.sub(delta.x, delta.y, delta.z);
+        }
+    }
+
+    // Shadow other keybinds to not waste keyboard space when freecam is off
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onKeyHigh(KeyEvent event) {
+
+        if (mc.options.chatKey.matchesKey(event.key, 0)) return;
+        if (KeyBinding.byId("key.meteor-client.open-gui").matchesKey(event.key, 0)) return;
+
+        if (checkGuiMove()) return;
+        if (handleOverrideBind()) event.cancel();
+        if (override) return;
+        if (handleReturnBind()) event.cancel();
+        if (handleRelativeBind()) event.cancel();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onMouseButtonHigh(MouseButtonEvent event) {
+
+        if (mc.options.chatKey.matchesMouse(event.button)) return;
+        if (KeyBinding.byId("key.meteor-client.open-gui").matchesMouse(event.button)) return;
+
+        if (checkGuiMove()) return;
+        if (handleOverrideBind()) event.cancel();
+        if (override) return;
+        if (handleReturnBind()) event.cancel();
+        if (handleRelativeBind()) event.cancel();
     }
 
     @EventHandler
     public void onKey(KeyEvent event) {
         if (Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
         if (checkGuiMove()) return;
+        if (override) return;
 
         boolean cancel = true;
 
@@ -320,6 +391,7 @@ public class Freecam extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (checkGuiMove()) return;
+        if (override) return;
 
         boolean cancel = true;
 
@@ -356,6 +428,8 @@ public class Freecam extends Module {
 
     @EventHandler(priority = EventPriority.LOW)
     private void onMouseScroll(MouseScrollEvent event) {
+        if (override) return;
+
         if (speedScrollSensitivity.get() > 0 && mc.currentScreen == null) {
             speedValue += event.value * 0.25 * (speedScrollSensitivity.get() * speedValue);
             if (speedValue < 0.1) speedValue = 0.1;
@@ -393,11 +467,61 @@ public class Freecam extends Module {
         }
     }
 
+    private void onRelativeToggle(boolean relative) {
+        if (mc.cameraEntity == null) return;
+        if (relative) {
+            pos.sub(mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
+            prevPos.sub(mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
+        } else {
+            pos.add(mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
+            prevPos.add(mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
+        }
+    }
+
     private boolean checkGuiMove() {
         // TODO: This is very bad but you all can cope :cope:
         GUIMove guiMove = Modules.get().get(GUIMove.class);
         if (mc.currentScreen != null && !guiMove.isActive()) return true;
         return (mc.currentScreen != null && guiMove.isActive() && guiMove.skip());
+    }
+
+    private void resetCamera() {
+        if (mc.cameraEntity == null) return;
+        if (relativePos.get()) pos.set(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0);
+        else pos.set(mc.cameraEntity.getX(), mc.cameraEntity.getEyeY(), mc.cameraEntity.getZ());
+        pitch = mc.cameraEntity.getPitch();
+        yaw = mc.cameraEntity.getYaw();
+
+        prevPos.set(pos);
+        lastYaw = yaw;
+        lastPitch = pitch;
+    }
+
+    private boolean overrideBindIsHeld = false;
+    private boolean handleOverrideBind() {
+        if (overrideBindIsHeld == overrideBind.get().isPressed()) return false;
+        overrideBindIsHeld = overrideBind.get().isPressed();
+        if (overrideBindIsHeld || (overrideBindHold.get() && !overrideBindIsHeld)) {
+            up = down = left = right = forward = backward = false;
+            override ^= true;
+        }
+        return true;
+    }
+
+    private boolean returnBindIsHeld = false;
+    private boolean handleReturnBind() {
+        boolean changed = returnBindIsHeld != returnBind.get().isPressed();
+        returnBindIsHeld = returnBind.get().isPressed();
+        if (changed && returnBindIsHeld) resetCamera();
+        return changed;
+    }
+
+    private boolean relativeBindIsHeld = false;
+    private boolean handleRelativeBind() {
+        boolean changed = relativeBindIsHeld != relativeBind.get().isPressed();
+        relativeBindIsHeld = relativeBind.get().isPressed();
+        if (changed && relativeBindIsHeld) relativePos.set(!relativePos.get());
+        return changed;
     }
 
     public void changeLookDirection(double deltaX, double deltaY) {
@@ -419,19 +543,31 @@ public class Freecam extends Module {
     }
 
     public double getX(float tickDelta) {
-        return MathHelper.lerp(tickDelta, prevPos.x, pos.x);
+        double x =  MathHelper.lerp(tickDelta, prevPos.x, pos.x);
+        if (relativePos.get()) x += mc.cameraEntity.getX();
+        return x;
     }
     public double getY(float tickDelta) {
-        return MathHelper.lerp(tickDelta, prevPos.y, pos.y);
+        double y =  MathHelper.lerp(tickDelta, prevPos.y, pos.y);
+        if (relativePos.get()) y += mc.cameraEntity.getY();
+        return y;
     }
     public double getZ(float tickDelta) {
-        return MathHelper.lerp(tickDelta, prevPos.z, pos.z);
+        double z = MathHelper.lerp(tickDelta, prevPos.z, pos.z);
+        if (relativePos.get()) z += mc.cameraEntity.getZ();
+        return z;
     }
 
     public double getYaw(float tickDelta) {
+        if (override || !mc.isWindowFocused()) return yaw;
         return MathHelper.lerp(tickDelta, lastYaw, yaw);
     }
     public double getPitch(float tickDelta) {
+        if (override || !mc.isWindowFocused()) return pitch;
         return MathHelper.lerp(tickDelta, lastPitch, pitch);
+    }
+
+    public boolean getOverride() {
+        return override;
     }
 }

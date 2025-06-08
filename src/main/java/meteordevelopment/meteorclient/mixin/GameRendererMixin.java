@@ -167,7 +167,7 @@ public abstract class GameRendererMixin {
         Freecam freecam = Modules.get().get(Freecam.class);
         boolean highwayBuilder = Modules.get().isActive(HighwayBuilder.class);
 
-        if ((freecam.isActive() || highwayBuilder) && client.getCameraEntity() != null && !freecamSet) {
+        if (((freecam.isActive() && !freecam.getOverride()) || highwayBuilder) && client.getCameraEntity() != null && !freecamSet) {
             info.cancel();
             Entity cameraE = client.getCameraEntity();
 
@@ -186,10 +186,10 @@ public abstract class GameRendererMixin {
                 cameraE.setYaw(camera.getYaw());
                 cameraE.setPitch(camera.getPitch());
             } else {
-                ((IVec3d) cameraE.getPos()).meteor$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
-                cameraE.lastX = freecam.prevPos.x;
-                cameraE.lastY = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
-                cameraE.lastZ = freecam.prevPos.z;
+                ((IVec3d) cameraE.getPos()).meteor$set(freecam.getX(1), freecam.getY(1) - cameraE.getEyeHeight(cameraE.getPose()), freecam.getZ(1));
+                cameraE.lastX = freecam.getX(0);
+                cameraE.lastY = freecam.getY(0) - cameraE.getEyeHeight(cameraE.getPose());
+                cameraE.lastZ = freecam.getZ(0);
                 cameraE.setYaw(freecam.yaw);
                 cameraE.setPitch(freecam.pitch);
                 cameraE.lastYaw = freecam.lastYaw;

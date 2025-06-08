@@ -212,8 +212,10 @@ public abstract class EntityMixin {
         FreeLook freeLook = Modules.get().get(FreeLook.class);
 
         if (freecam.isActive()) {
-            freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
-            ci.cancel();
+            if (!freecam.getOverride()) {
+                freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
+                ci.cancel();
+            }
         }
         else if (Modules.get().isActive(HighwayBuilder.class)) {
             Camera camera = mc.gameRenderer.getCamera();
