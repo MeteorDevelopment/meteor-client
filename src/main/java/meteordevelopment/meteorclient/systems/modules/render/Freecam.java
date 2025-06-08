@@ -68,6 +68,13 @@ public class Freecam extends Module {
         .build()
     );
 
+    private final Setting<Boolean> preserveTarget = sgGeneral.add(new BoolSetting.Builder()
+        .name("preserve-crosshair-target")
+        .description("Target the block the player is looking at instead of the block the camera is looking at")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> toggleOnDamage = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-on-damage")
         .description("Disables freecam when you take damage.")
@@ -569,5 +576,9 @@ public class Freecam extends Module {
 
     public boolean getOverride() {
         return override;
+    }
+
+    public boolean shouldChangeCrosshairTarget() {
+        return isActive() && !override && !preserveTarget.get();
     }
 }
