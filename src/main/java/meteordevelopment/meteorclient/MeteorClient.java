@@ -83,15 +83,15 @@ public class MeteorClient implements ClientModInitializer {
             return;
         }
 
+        // Global minecraft client accessor
+        mc = MinecraftClient.getInstance();
+
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             LOG.info("Force loading mixins");
             MixinEnvironment.getCurrentEnvironment().audit();
         }
 
         LOG.info("Initializing {}", NAME);
-
-        // Global minecraft client accessor
-        mc = MinecraftClient.getInstance();
 
         // Pre-load
         if (!FOLDER.exists()) {
