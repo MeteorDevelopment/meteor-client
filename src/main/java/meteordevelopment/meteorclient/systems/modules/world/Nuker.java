@@ -27,6 +27,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Block;
+import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Direction;
@@ -157,13 +158,6 @@ public class Nuker extends Module {
             .build()
     );
 
-    private final Setting<Boolean> swingHand = sgGeneral.add(new BoolSetting.Builder()
-            .name("swing-hand")
-            .description("Swing hand client side.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<Boolean> packetMine = sgGeneral.add(new BoolSetting.Builder()
             .name("packet-mine")
             .description("Attempt to instamine everything at once.")
@@ -223,6 +217,13 @@ public class Nuker extends Module {
     );
 
     // Rendering
+
+    private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
+            .name("swing")
+            .description("Whether to swing hand client-side.")
+            .defaultValue(true)
+            .build()
+    );
 
     private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
             .name("bounding-box")
@@ -485,15 +486,18 @@ public class Nuker extends Module {
     private void breakBlock(BlockPos blockPos) {
         if (interact.get()) {
             // Interact mode
-            BlockUtils.interact(new BlockHitResult(blockPos.toCenterPos(), BlockUtils.getDirection(blockPos), blockPos, true), Hand.MAIN_HAND, swingHand.get());
+            BlockUtils.interact(new BlockHitResult(blockPos.toCenterPos(), BlockUtils.getDirection(blockPos), blockPos, true), Hand.MAIN_HAND, swing.get());
         } else if (packetMine.get()) {
             // Packet mine mode
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos)));
-            mc.player.swingHand(Hand.MAIN_HAND);
+
+            if (swing.get()) mc.player.swingHand(Hand.MAIN_HAND);
+            else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos)));
         } else {
             // Legit mine mode
-            BlockUtils.breakBlock(blockPos, swingHand.get());
+            BlockUtils.breakBlock(blockPos, swing.get());
         }
     }
 
