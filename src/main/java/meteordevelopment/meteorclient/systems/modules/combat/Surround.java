@@ -457,11 +457,7 @@ public class Surround extends Module {
     }
 
     private boolean blockFilter(Block block) {
-        return block == Blocks.OBSIDIAN ||
-            block == Blocks.CRYING_OBSIDIAN ||
-            block == Blocks.NETHERITE_BLOCK ||
-            block == Blocks.ENDER_CHEST ||
-            block == Blocks.RESPAWN_ANCHOR;
+        return block.getBlastResistance() >= 600 && block.getHardness() >= 0 && block != Blocks.REINFORCED_DEEPSLATE;
     }
 
     public enum Center {
