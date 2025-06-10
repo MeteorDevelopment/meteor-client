@@ -211,7 +211,7 @@ public class AutoCity extends Module {
     );
 
     private PlayerEntity target;
-    private BlockPos breakPos;
+    public BlockPos breakPos;
     private double progress;
     private Block lastBlock;
     private boolean mining;
@@ -252,7 +252,7 @@ public class AutoCity extends Module {
             placeSupport(oldBreakPos.down());
         }
 
-        breakPos = getBlockToMine();
+        breakPos = getBlockToMine(target);
         if (breakPos == null) return;
 
         // Reset break progress if block changed
@@ -291,7 +291,7 @@ public class AutoCity extends Module {
         }
     }
 
-    public void packetMineBlock(FindItemResult tool, boolean start) {
+    private void packetMineBlock(FindItemResult tool, boolean start) {
         if (autoSwitch.get()) InvUtils.swap(tool.slot(), swapBack.get());
 
         Direction direction = BlockUtils.getDirection(breakPos);
@@ -312,7 +312,7 @@ public class AutoCity extends Module {
         if (swapBack.get()) InvUtils.swapBack();
     }
 
-    public void mineBlock(FindItemResult tool) {
+    private void mineBlock(FindItemResult tool) {
         if (autoSwitch.get()) InvUtils.swap(tool.slot(), swapBack.get());
 
         BlockUtils.breakBlock(breakPos, swing.get());
@@ -320,11 +320,11 @@ public class AutoCity extends Module {
         if (swapBack.get()) InvUtils.swapBack();
     }
 
-    private BlockPos getBlockToMine() {
+    public BlockPos getBlockToMine(PlayerEntity player) {
         if (breakPos != null && canMineBlock(breakPos)) return breakPos;
 
         // Burrow block is first priority to break
-        BlockPos targetPos = target.getBlockPos();
+        BlockPos targetPos = player.getBlockPos();
         if (canMineBlock(targetPos)) return targetPos;
 
         // Otherwise, break their surround blocks
