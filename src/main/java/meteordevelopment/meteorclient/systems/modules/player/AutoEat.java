@@ -32,7 +32,7 @@ import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
     @SuppressWarnings("unchecked")
-    private static final Class<? extends Module>[] AURAS = new Class[]{KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class};
+    private static final Class<? extends Module>[] AURAS = new Class[]{ KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
 
     // Settings groups
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -243,6 +243,9 @@ public class AutoEat extends Module {
             FoodComponent foodComponent = item.getComponents().get(DataComponentTypes.FOOD);
             if (foodComponent == null) continue;
 
+            boolean isHungry = mc.player.getHungerManager().getFoodLevel() >= 20;
+            if (isHungry && !foodComponent.canAlwaysEat()) continue;
+
             // Check if hunger value is better
             int hunger = foodComponent.nutrition();
             if (hunger > bestHunger) {
@@ -256,8 +259,10 @@ public class AutoEat extends Module {
         }
 
         Item offHandItem = mc.player.getOffHandStack().getItem();
-        if (offHandItem.getComponents().get(DataComponentTypes.FOOD) != null && !blacklist.get().contains(offHandItem) && offHandItem.getComponents().get(DataComponentTypes.FOOD).nutrition() > bestHunger)
+        FoodComponent offHandFood = offHandItem.getComponents().get(DataComponentTypes.FOOD);
+        if (offHandFood != null && !blacklist.get().contains(offHandItem) && offHandFood.nutrition() > bestHunger) {
             slot = SlotUtils.OFFHAND;
+        }
 
         return slot;
     }
