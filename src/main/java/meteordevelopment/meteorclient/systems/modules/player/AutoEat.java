@@ -151,8 +151,7 @@ public class AutoEat extends Module {
 
         // case 2: Not eating yet but should start
         if (shouldEat()) {
-            slot = findSlot();
-            if (slot != -1) startEating();
+            startEating();
         }
     }
 
@@ -227,10 +226,17 @@ public class AutoEat extends Module {
     }
 
     public boolean shouldEat() {
-        boolean health = mc.player.getHealth() <= healthThreshold.get();
-        boolean hunger = mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
+        boolean healthLow = mc.player.getHealth() <= healthThreshold.get();
+        boolean hungerLow = mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
+        slot = findSlot();
+        int foodSlot = findSlot();
+        if (foodSlot == -1) return false;
 
-        return thresholdMode.get().test(health, hunger);
+        FoodComponent food = mc.player.getInventory().getStack(foodSlot).get(DataComponentTypes.FOOD);
+        if (food == null) return false;
+
+        return thresholdMode.get().test(healthLow, hungerLow)
+            && (mc.player.getHungerManager().isNotFull() ||  food.canAlwaysEat());
     }
 
     private int findSlot() {
@@ -242,9 +248,6 @@ public class AutoEat extends Module {
             Item item = mc.player.getInventory().getStack(i).getItem();
             FoodComponent foodComponent = item.getComponents().get(DataComponentTypes.FOOD);
             if (foodComponent == null) continue;
-
-            boolean isHungry = mc.player.getHungerManager().getFoodLevel() >= 20;
-            if (isHungry && !foodComponent.canAlwaysEat()) continue;
 
             // Check if hunger value is better
             int hunger = foodComponent.nutrition();
