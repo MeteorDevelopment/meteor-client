@@ -23,6 +23,8 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Block;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -182,6 +184,8 @@ public class Nuker extends Module {
             .build()
     );
 
+    private Block autoSelectBlock = null; // Internal field to store the selected block for AutoSelect mode
+
     // Rendering
 
     private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
@@ -201,14 +205,14 @@ public class Nuker extends Module {
     private final Setting<SettingColor> sideColorBox = sgRender.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 100))
+            .defaultValue(new SettingColor(16, 106, 144, 100))
             .build()
     );
 
     private final Setting<SettingColor> lineColorBox = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 255))
+            .defaultValue(new SettingColor(16, 106, 144, 255))
             .build()
     );
 
@@ -265,6 +269,24 @@ public class Nuker extends Module {
         firstBlock = true;
         timer = 0;
         noBlockTimer = 0;
+
+        if (listMode.get() == ListMode.AutoSelect) {
+            HitResult hitResult = mc.crosshairTarget;
+            if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
+                BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
+                autoSelectBlock = mc.world.getBlockState(pos).getBlock();
+            } else {
+                autoSelectBlock = null;
+                warning("No block is being targeted for auto-select mode.");
+            }
+        }
+    }
+
+    @Override
+    public void onDeactivate() {
+        if (listMode.get() == ListMode.AutoSelect) {
+            autoSelectBlock = null;
+        }
     }
 
     @EventHandler
@@ -351,35 +373,57 @@ public class Nuker extends Module {
         Box box = new Box(pos1.toCenterPos(), pos2.toCenterPos());
 
         // Find blocks to break
-        BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
-            // Check for air, unbreakable blocks and distance
-            switch (shape.get()) {
-                case Sphere -> {
-                    if (Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5) > rangeSq) return;
-                }
-                case UniformCube -> {
-                    if (chebyshevDist(mc.player.getBlockPos().getX(), mc.player.getBlockPos().getY(), mc.player.getBlockPos().getZ(), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= range.get()) return;
-                }
-                case Cube -> {
-                    if (!box.contains(Vec3d.ofCenter(blockPos))) return;
-                }
-            }
+        BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh),
+                Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
+                    // Check for air, unbreakable blocks and distance
+                    switch (shape.get()) {
+                        case Sphere -> {
+                            if (Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5,
+                                    blockPos.getZ() + 0.5) > rangeSq)
+                                return;
+                        }
+                        case UniformCube -> {
+                            if (chebyshevDist(mc.player.getBlockPos().getX(), mc.player.getBlockPos().getY(),
+                                    mc.player.getBlockPos().getZ(), blockPos.getX(), blockPos.getY(),
+                                    blockPos.getZ()) >= range.get())
+                                return;
+                        }
+                        case Cube -> {
+                            if (!box.contains(Vec3d.ofCenter(blockPos)))
+                                return;
+                        }
+                    }
 
-            if (!BlockUtils.canBreak(blockPos, blockState)) return;
+                    if (!BlockUtils.canBreak(blockPos, blockState))
+                        return;
 
-            // Flatten
-            if (mode.get() == Mode.Flatten && blockPos.getY() < Math.floor(mc.player.getY())) return;
+                    // Flatten
+                    if (mode.get() == Mode.Flatten && blockPos.getY() < Math.floor(mc.player.getY()))
+                        return;
 
-            // Smash
-            if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0) return;
+                    // Smash
+                    if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0)
+                        return;
 
-            // Check whitelist or blacklist
-            if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(blockState.getBlock())) return;
-            if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(blockState.getBlock())) return;
+                    // Check list mode
+                    switch (listMode.get()) {
+                        case AutoSelect -> {
+                            if (autoSelectBlock == null || !blockState.getBlock().equals(autoSelectBlock))
+                                return;
+                        }
+                        case Whitelist -> {
+                            if (!whitelist.get().contains(blockState.getBlock()))
+                                return;
+                        }
+                        case Blacklist -> {
+                            if (blacklist.get().contains(blockState.getBlock()))
+                                return;
+                        }
+                    }
 
-            // Add block
-            blocks.add(blockPos.toImmutable());
-        });
+                    // Add block
+                    blocks.add(blockPos.toImmutable());
+                });
 
         // Break block if found
         BlockIterator.after(() -> {
@@ -449,9 +493,15 @@ public class Nuker extends Module {
         event.cooldown = 0;
     }
 
+    // Getter for GUI display
+    public Block getAutoSelectBlock() {
+        return autoSelectBlock;
+    }
+
     public enum ListMode {
         Whitelist,
-        Blacklist
+        Blacklist,
+        AutoSelect
     }
 
     public enum Mode {
