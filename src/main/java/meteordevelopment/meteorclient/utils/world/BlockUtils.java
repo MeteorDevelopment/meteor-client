@@ -306,22 +306,12 @@ public class BlockUtils {
             || block instanceof TrapdoorBlock;
     }
 
-    public static MobSpawn isValidMobSpawn(BlockPos blockPos, boolean newMobSpawnLightLevel) {
-        return isValidMobSpawn(blockPos, mc.world.getBlockState(blockPos), newMobSpawnLightLevel ? 0 : 7);
-    }
 
     public static MobSpawn isValidMobSpawn(BlockPos blockPos, BlockState blockState, int spawnLightLimit) {
-        if (!(blockState.getBlock() instanceof AirBlock)) return MobSpawn.Never;
+        boolean snow = blockState.getBlock() instanceof SnowBlock && blockState.get(SnowBlock.LAYERS) == 1;
+        if (!blockState.isAir() && !snow) return MobSpawn.Never;
 
-        BlockPos down = blockPos.down();
-        BlockState downState = mc.world.getBlockState(down);
-        if (downState.getBlock() == Blocks.BEDROCK) return MobSpawn.Never;
-
-        if (!topSurface(downState)) {
-            if (downState.getCollisionShape(mc.world, down) != VoxelShapes.fullCube())
-                return MobSpawn.Never;
-            if (downState.isTransparent()) return MobSpawn.Never;
-        }
+        if (!isValidSpawnBlock(mc.world.getBlockState(blockPos.down()))) return MobSpawn.Never;
 
         if (mc.world.getLightLevel(LightType.BLOCK, blockPos) > spawnLightLimit) return MobSpawn.Never;
         else if (mc.world.getLightLevel(LightType.SKY, blockPos) > spawnLightLimit) return  MobSpawn.Potential;
@@ -329,9 +319,19 @@ public class BlockUtils {
         return MobSpawn.Always;
     }
 
-    public static boolean topSurface(BlockState blockState) {
-        if (blockState.getBlock() instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
-        else return blockState.getBlock() instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP;
+    public static boolean isValidSpawnBlock(BlockState blockState) {
+        Block block = blockState.getBlock();
+
+        if (block == Blocks.BEDROCK
+            || block == Blocks.BARRIER
+            || block instanceof TransparentBlock
+            || block instanceof ScaffoldingBlock) return false;
+
+        if (block == Blocks.SOUL_SAND || block == Blocks.MUD) return true;
+        if (block instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
+        if (block instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP) return true;
+
+        return blockState.isOpaqueFullCube();
     }
 
     // Finds the best block direction to get when interacting with the block.
