@@ -151,7 +151,7 @@ public class SpawnProofer extends Module {
 
         int placedCount = 0;
 
-        // Sort blocks to use lowest light level spawns first
+        // Sort blocks to use the lowest light level spawns first
         if (isLightSource(Block.getBlockFromItem(mc.player.getInventory().getStack(block.slot()).getItem()))) {
             spawns.sort(Comparator.comparingInt(blockPos -> mc.world.getLightLevel(blockPos)));
             placedCount = blocksPerTick.get() - 1; // Force only one light source per tick to stop unnecessary placements

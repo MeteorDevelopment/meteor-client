@@ -321,7 +321,12 @@ public class BlockUtils {
 
     public static boolean isValidSpawnBlock(BlockState blockState) {
         Block block = blockState.getBlock();
-        if (block == Blocks.BEDROCK) return false;
+
+        if (block == Blocks.BEDROCK
+            || block == Blocks.BARRIER
+            || block instanceof TransparentBlock
+            || block instanceof ScaffoldingBlock) return false;
+
         if (block == Blocks.SOUL_SAND || block == Blocks.MUD) return true;
         if (block instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
         if (block instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP) return true;
