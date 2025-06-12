@@ -147,7 +147,8 @@ public class BedAura extends Module {
         .name("min-damage")
         .description("The minimum damage to inflict on your target.")
         .defaultValue(7)
-        .range(0, 36)
+        .min(0)
+        .sliderMax(36)
         .build()
     );
 
@@ -155,7 +156,8 @@ public class BedAura extends Module {
         .name("max-self-damage")
         .description("The maximum damage to inflict on yourself.")
         .defaultValue(7)
-        .range(0, 36)
+        .min(0)
+        .sliderMax(36)
         .build()
     );
 
