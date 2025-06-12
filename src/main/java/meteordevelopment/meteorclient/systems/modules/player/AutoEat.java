@@ -229,10 +229,9 @@ public class AutoEat extends Module {
         boolean healthLow = mc.player.getHealth() <= healthThreshold.get();
         boolean hungerLow = mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
         slot = findSlot();
-        int foodSlot = findSlot();
-        if (foodSlot == -1) return false;
+        if (slot == -1) return false;
 
-        FoodComponent food = mc.player.getInventory().getStack(foodSlot).get(DataComponentTypes.FOOD);
+        FoodComponent food = mc.player.getInventory().getStack(slot).get(DataComponentTypes.FOOD);
         if (food == null) return false;
 
         return thresholdMode.get().test(healthLow, hungerLow)
