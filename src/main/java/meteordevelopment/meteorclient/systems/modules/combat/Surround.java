@@ -238,7 +238,7 @@ public class Surround extends Module {
     );
 
     public ArrayList<Module> toActivate = new ArrayList<>();
-    private int ticks;
+    private int timer;
 
     public Surround() {
         super(Categories.Combat, "surround", "Surrounds you in blocks to prevent massive crystal damage.");
@@ -280,7 +280,7 @@ public class Surround extends Module {
         if (center.get() == Center.OnActivate) PlayerUtils.centerPlayer();
 
         // Reset delay
-        ticks = 0;
+        timer = delay.get();
 
         if (toggleModules.get() && !modules.get().isEmpty() && mc.world != null && mc.player != null) {
             for (Module module : modules.get()) {
@@ -305,14 +305,8 @@ public class Surround extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        // Tick the placement timer, should always happen
-        if (ticks > 0) {
-            ticks--;
-            return;
-        }
-        else {
-            ticks = delay.get();
-        }
+        // Delay
+        if (timer++ < delay.get()) return;
 
         // Toggle if Y level changed
         if (toggleOnYChange.get() && mc.player.lastY != mc.player.getY()) {
@@ -357,6 +351,8 @@ public class Surround extends Module {
                 safe++;
             }
         }
+
+        timer = 0;
 
         boolean complete = safe == (doubleHeight.get() ? 8 : 4);
 
