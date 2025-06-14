@@ -23,6 +23,7 @@ import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.state.property.Properties;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
@@ -84,6 +85,13 @@ public class AnchorAura extends Module {
         .build()
     );
 
+    private final Setting<Boolean> swapBack = sgGeneral.add(new BoolSetting.Builder()
+        .name("swap-back")
+        .description("Switches to your previous slot after using anchors.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
         .description("Rotates server-side towards the anchors being placed/broken.")
@@ -137,9 +145,17 @@ public class AnchorAura extends Module {
 
     // Break
 
+    private final Setting<Integer> chargeDelay = sgBreak.add(new IntSetting.Builder()
+        .name("charge-delay")
+        .description("The tick delay it takes to charge anchors.")
+        .defaultValue(1)
+        .range(0, 10)
+        .build()
+    );
+
     private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
         .name("break-delay")
-        .description("The tick delay between breaking anchors.")
+        .description("The tick delay it takes to break anchors.")
         .defaultValue(1)
         .range(0, 10)
         .build()
@@ -233,7 +249,7 @@ public class AnchorAura extends Module {
     private BlockPos.Mutable bestBreakPos = new BlockPos.Mutable();
 
     private BlockPos renderBlockPos;
-    private int placeDelayLeft, breakDelayLeft;
+    private int placeDelayLeft, chargeDelayLeft, breakDelayLeft;
     private PlayerEntity target;
 
     public AnchorAura() {
@@ -244,6 +260,7 @@ public class AnchorAura extends Module {
     public void onActivate() {
         renderBlockPos = null;
         placeDelayLeft = placeDelay.get();
+        chargeDelayLeft = 0;
         breakDelayLeft = 0;
         target = null;
     }
@@ -339,7 +356,7 @@ public class AnchorAura extends Module {
         if (placeDelayLeft++ < placeDelay.get()) return;
 
         // Place anchor!
-        BlockUtils.place(bestPlacePos, anchor, rotate.get(), 50, swing.get());
+        BlockUtils.place(bestPlacePos, anchor, rotate.get(), 50, swing.get(), false, swapBack.get());
 
         placeDelayLeft = 0;
     }
@@ -348,30 +365,49 @@ public class AnchorAura extends Module {
         // Set render info
         renderBlockPos = bestBreakPos;
 
-        if (breakDelayLeft++ < breakDelay.get()) return;
-
-        // Stop sneaking so interactions with the anchor are successful
-        if (mc.player.isSneaking()) {
-            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, Mode.RELEASE_SHIFT_KEY));
+        if (rotate.get()) {
+            Rotations.rotate(Rotations.getYaw(bestBreakPos), Rotations.getPitch(bestBreakPos), 40, () -> { doInteract(anchor, glowStone); });
+        } else {
+            doInteract(anchor, glowStone);
         }
+    }
+
+    private void doInteract(FindItemResult anchor, FindItemResult glowStone) {
+        BlockState blockState = mc.world.getBlockState(bestBreakPos);
+        if (blockState.getBlock() != Blocks.RESPAWN_ANCHOR) return;
 
         Vec3d center = bestBreakPos.toCenterPos();
+        int charges = blockState.get(Properties.CHARGES);
+        boolean sneaked = false;
 
         // Charge the anchor
-        if (mc.world.getBlockState(bestBreakPos).get(Properties.CHARGES) == 0) {
-            InvUtils.swap(glowStone.slot(), true);
+        if (charges == 0 && chargeDelayLeft++ >= chargeDelay.get()) {
+            InvUtils.swap(glowStone.slot(), swapBack.get());
+            stopSneaking();
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true));
+            chargeDelayLeft = 0;
+            charges++;
+            sneaked = true;
         }
 
         // Explode the anchor when charged
-        if (mc.world.getBlockState(bestBreakPos).get(Properties.CHARGES) > 0) {
-            InvUtils.swap(anchor.slot(), true);
+        if (charges > 0 && breakDelayLeft++ >= breakDelay.get()) {
+            InvUtils.swap(anchor.slot(), swapBack.get());
+            if (!sneaked) stopSneaking();
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true));
+            breakDelayLeft = 0;
+
+            // Instantly break the anchor on client, stops invalid block placements
+            mc.world.setBlockState(bestBreakPos, mc.world.getFluidState(bestBreakPos).getBlockState(), 0);
         }
 
-        InvUtils.swapBack();
+        if (swapBack.get()) InvUtils.swapBack();
+    }
 
-        breakDelayLeft = 0;
+    private void stopSneaking() {
+        if (mc.player.isSneaking()) { 
+            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, Mode.RELEASE_SHIFT_KEY));
+        }
     }
 
     private boolean isOutOfRange(BlockPos blockPos, double baseRange, double wallsRange) {
