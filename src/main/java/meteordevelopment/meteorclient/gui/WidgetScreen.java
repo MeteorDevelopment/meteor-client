@@ -235,9 +235,7 @@ public abstract class WidgetScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) renderBackground(context, mouseX, mouseY, delta);
-
-        double s = mc.getWindow().getScaleFactor();
+        int s = mc.getWindow().getScaleFactor();
         mouseX *= s;
         mouseY *= s;
 

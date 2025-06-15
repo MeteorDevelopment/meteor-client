@@ -139,19 +139,12 @@ public class ServerCommand extends Command {
         );
 
         info("Port: %d", ServerAddress.parse(server.address).getPort());
-
         info("Type: %s", mc.getNetworkHandler().getBrand() != null ? mc.getNetworkHandler().getBrand() : "unknown");
-
         info("Motd: %s", server.label != null ? server.label.getString() : "unknown");
-
         info("Version: %s", server.version.getString());
-
         info("Protocol version: %d", server.protocolVersion);
-
         info("Difficulty: %s (Local: %.2f)", mc.world.getDifficulty().getTranslatableName().getString(), mc.world.getLocalDifficulty(mc.player.getBlockPos()).getLocalDifficulty());
-
         info("Day: %d", mc.world.getTimeOfDay() / 24000L);
-
         info("Permission level: %s", formatPerms());
     }
 
@@ -214,7 +207,7 @@ public class ServerCommand extends Command {
             // LiteralCommandNode, so we don't need to worry about checking or casting and can just grab the name
             packet.getCommandTree(
                 CommandRegistryAccess.of(handler.getCombinedDynamicRegistries(), handler.getEnabledFeatures()),
-                handler.getCommandNodeFactory()
+                ClientPlayNetworkHandlerAccessor.getCommandNodeFactory()
             ).getChildren().forEach(node -> {
                 String[] split = node.getName().split(":");
                 if (split.length > 1) {

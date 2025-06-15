@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.renderer;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -115,12 +116,14 @@ public class MeshRenderer {
                     OptionalInt.of(ColorHelper.getArgb(this.clearColor.a, this.clearColor.r, this.clearColor.g, this.clearColor.b)) :
                     OptionalInt.empty();
 
+                GpuBufferSlice u_Mesh = MeshUniforms.write(RenderUtils.projection, RenderSystem.getModelViewStack());
+
                 RenderPass pass = (depthAttachment != null && pipeline.wantsDepthTexture()) ?
                     RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor MeshRenderer", colorAttachment, clearColor, depthAttachment, OptionalDouble.empty()) :
                     RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor MeshRenderer", colorAttachment, clearColor);
 
                 pass.setPipeline(pipeline);
-                pass.setUniform("u_Mesh", MeshUniforms.write(RenderUtils.projection, RenderSystem.getModelViewStack()));
+                pass.setUniform("u_Mesh", u_Mesh);
 
                 if (setupCallback != null)
                     setupCallback.accept(pass);

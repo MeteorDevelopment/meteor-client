@@ -33,6 +33,8 @@ public class Texture extends AbstractTexture {
          */
         glTexture = RenderSystem.getDevice().createTexture("", 15, format, width, height, 1, 1);
         glTexture.setTextureFilter(min, mag, false);
+
+        glTextureView = RenderSystem.getDevice().createTextureView(glTexture);
     }
 
     public int getWidth() {
@@ -53,18 +55,7 @@ public class Texture extends AbstractTexture {
         buffer.rewind();
         MemoryUtil.memCopy(MemoryUtil.memAddress(buffer), image.imageId(), buffer.remaining());
 
-        RenderSystem.getDevice().createCommandEncoder().writeToTexture(
-            glTexture,
-            image,
-            0,
-            0,
-            0,
-            0,
-            getWidth(),
-            getHeight(),
-            0,
-            0
-        );
+        RenderSystem.getDevice().createCommandEncoder().writeToTexture(glTexture, image);
 
         image.close();
     }

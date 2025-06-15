@@ -33,5 +33,7 @@ public interface ClientPlayNetworkHandlerAccessor {
     FeatureSet getEnabledFeatures();
 
     @Accessor("COMMAND_NODE_FACTORY")
-    CommandTreeS2CPacket.NodeFactory<ClientCommandSource> getCommandNodeFactory();
+    static CommandTreeS2CPacket.NodeFactory<ClientCommandSource> getCommandNodeFactory() {
+        return null;
+    }
 }
