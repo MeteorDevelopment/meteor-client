@@ -45,11 +45,11 @@ public class MeteorToast implements Toast {
     private Visibility visibility = Visibility.HIDE;
 
     private MeteorToast(Builder builder) {
-        this.icon = builder.icon;
         this.title = builder.title;
         this.text = builder.text;
-        this.duration = builder.duration;
+        this.icon = builder.icon;
         this.customSound = builder.customSound;
+        this.duration = builder.duration;
     }
 
     public static class Builder {
