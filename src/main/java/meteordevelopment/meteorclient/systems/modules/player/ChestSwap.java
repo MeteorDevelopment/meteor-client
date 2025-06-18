@@ -40,7 +40,7 @@ public class ChestSwap extends Module {
     private final Setting<Boolean> closeInventory = sgGeneral.add(new BoolSetting.Builder()
         .name("close-inventory")
         .description("Sends inventory close after swap.")
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
@@ -98,6 +99,14 @@ public class InventoryTweaks extends Module {
         .visible(sortingEnabled::get)
         .defaultValue(1)
         .min(0)
+        .build()
+    );
+
+    private final Setting<Boolean> disableInCreative = sgSorting.add(new BoolSetting.Builder()
+        .name("disable-in-creative")
+        .description("Disables the inventory sorter when in creative mode.")
+        .defaultValue(true)
+        .visible(sortingEnabled::get)
         .build()
     );
 
@@ -272,7 +281,7 @@ public class InventoryTweaks extends Module {
     }
 
     private boolean sort() {
-        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null)
+        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null || (mc.player.isCreative() && disableInCreative.get()))
             return false;
 
         if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
@@ -359,7 +368,7 @@ public class InventoryTweaks extends Module {
                 try {
                     Thread.sleep(sleep);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    MeteorClient.LOG.error("Error when sleeping the slot mover", e);
                 }
             }
 

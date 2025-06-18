@@ -25,7 +25,6 @@ import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -258,14 +257,11 @@ public class CombatHud extends HudElement {
             Renderer2D.COLOR.render();
 
             // Player Model
-            InventoryScreen.drawEntity(
+            renderer.entity(
                 renderer.drawContext,
-                (int) x,
-                (int) y,
-                (int) (x + (25 * getScale())),
-                (int) (y + (66 * getScale())),
+                (float) (x + (25 * getScale())),
+                (float) (y + (65 * getScale())),
                 (int) (30 * getScale()),
-                0,
                 -MathHelper.wrapDegrees(playerEntity.lastYaw + (playerEntity.getYaw() - playerEntity.lastYaw) * mc.getRenderTickCounter().getTickProgress(true)),
                 -playerEntity.getPitch(),
                 playerEntity

@@ -229,7 +229,7 @@ public class Jesus extends Module {
 
     @EventHandler
     private void onCanWalkOnFluid(CanWalkOnFluidEvent event) {
-        if (mc.player != null && mc.player.isInSwimmingPose()) return;
+        if (mc.player != null && mc.player.isSwimming()) return;
         if ((event.fluidState.getFluid() == Fluids.WATER || event.fluidState.getFluid() == Fluids.FLOWING_WATER) && waterShouldBeSolid()) {
             event.walkOnFluid = true;
         }

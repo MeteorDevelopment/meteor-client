@@ -15,8 +15,10 @@ public class FullScreenRenderer {
 
     @PreInit
     public static void init() {
-        mesh = new MeshBuilder(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES);
+        mesh = new MeshBuilder(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES, 4, 6);
+
         mesh.begin();
+        mesh.ensureQuadCapacity();
 
         mesh.quad(
             mesh.vec2(-1, -1).next(),

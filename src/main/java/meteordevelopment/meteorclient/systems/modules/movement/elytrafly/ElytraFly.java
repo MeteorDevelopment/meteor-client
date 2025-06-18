@@ -199,11 +199,29 @@ public class ElytraFly extends Module {
     );
 
     public final Setting<Rotation.LockMode> yawLockMode = sgGeneral.add(new EnumSetting.Builder<Rotation.LockMode>()
-            .name("yaw-lock")
-            .description("Whether to enable yaw lock or not")
-            .defaultValue(Rotation.LockMode.Smart)
-            .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
-            .build()
+        .name("yaw-lock")
+        .description("Whether to enable yaw lock or not")
+        .defaultValue(Rotation.LockMode.Smart)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
+        .build()
+    );
+
+    public final Setting<Double> yaw = sgGeneral.add(new DoubleSetting.Builder()
+        .name("yaw")
+        .description("The yaw angle to look at when using simple rotation lock in bounce mode.")
+        .defaultValue(0)
+        .range(0, 360)
+        .sliderRange(0,360)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce && yawLockMode.get() == Rotation.LockMode.Simple)
+        .build()
+    );
+
+    public final Setting<Boolean> lockPitch = sgGeneral.add(new BoolSetting.Builder()
+        .name("pitch-lock")
+        .description("Whether to lock your pitch angle.")
+        .defaultValue(true)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
+        .build()
     );
 
     public final Setting<Double> pitch = sgGeneral.add(new DoubleSetting.Builder()
@@ -212,18 +230,8 @@ public class ElytraFly extends Module {
         .defaultValue(85)
         .range(0, 90)
         .sliderRange(0, 90)
-        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce && lockPitch.get())
         .build()
-    );
-
-    public final Setting<Double> yaw = sgGeneral.add(new DoubleSetting.Builder()
-            .name("yaw")
-            .description("The yaw angle to look at when using simple rotation lock in bounce mode.")
-            .defaultValue(0)
-            .range(0, 360)
-            .sliderRange(0,360)
-            .visible(() -> flightMode.get() == ElytraFlightModes.Bounce && yawLockMode.get() == Rotation.LockMode.Simple)
-            .build()
     );
 
     public final Setting<Boolean> restart = sgGeneral.add(new BoolSetting.Builder()
@@ -245,9 +253,17 @@ public class ElytraFly extends Module {
     );
 
     public final Setting<Boolean> sprint = sgGeneral.add(new BoolSetting.Builder()
-        .name("sprint")
+        .name("sprint-constantly")
         .description("Sprints all the time. If turned off, it will only sprint when the player is touching the ground.")
         .defaultValue(true)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
+        .build()
+    );
+
+    public final Setting<Boolean> manualTakeoff = sgGeneral.add(new BoolSetting.Builder()
+        .name("manual-takeoff")
+        .description("Does not automatically take off.")
+        .defaultValue(false)
         .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
         .build()
     );
@@ -265,8 +281,8 @@ public class ElytraFly extends Module {
         .name("replace-durability")
         .description("The durability threshold your elytra will be replaced at.")
         .defaultValue(2)
-        .range(1, Items.ELYTRA.getComponents().get(DataComponentTypes.MAX_DAMAGE) - 1)
-        .sliderRange(1, Items.ELYTRA.getComponents().get(DataComponentTypes.MAX_DAMAGE) - 1)
+        .range(1, Items.ELYTRA.getComponents().getOrDefault(DataComponentTypes.MAX_DAMAGE, 432) - 1)
+        .sliderRange(1, Items.ELYTRA.getComponents().getOrDefault(DataComponentTypes.MAX_DAMAGE, 432) - 1)
         .visible(replace::get)
         .build()
     );

@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.other.Snapper;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.DrawContext;
@@ -162,6 +163,21 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
                 else {
                     for (HudElement element : selection) element.remove();
                     selection.clear();
+                }
+            } else if (!selection.isEmpty()) {
+                int pixels = (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL) || Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT_CONTROL)) ? 10 : 1;
+                int dx = 0, dy = 0;
+
+                switch (keyCode) {
+                    case GLFW.GLFW_KEY_UP -> dy = -pixels;
+                    case GLFW.GLFW_KEY_DOWN -> dy = pixels;
+                    case GLFW.GLFW_KEY_RIGHT -> dx = pixels;
+                    case GLFW.GLFW_KEY_LEFT -> dx = -pixels;
+                }
+
+                // manually move selection to bypass snapping
+                for (HudElement element : selection) {
+                    element.move(dx, dy);
                 }
             }
         }
