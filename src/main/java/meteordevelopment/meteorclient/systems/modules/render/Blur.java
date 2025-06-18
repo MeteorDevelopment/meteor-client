@@ -212,13 +212,13 @@ public class Blur extends Module {
             .attachments(mc.getFramebuffer())
             .pipeline(MeteorRenderPipelines.BLUR_PASSTHROUGH)
             .mesh(FullScreenRenderer.mesh)
-            .setupCallback(pass -> pass.bindSampler("uTexture", fbos[0]))
+            .sampler("u_Texture", fbos[0])
             .end();
     }
 
     private void renderToFbo(GpuTextureView targetFbo, GpuTextureView sourceTexture, RenderPipeline pipeline, double offset) {
-        AddressMode prevAddressModeU = ((IGpuTexture) sourceTexture).meteor$getAddressModeU();
-        AddressMode prevAddressModeV = ((IGpuTexture) sourceTexture).meteor$getAddressModeV();
+        AddressMode prevAddressModeU = ((IGpuTexture) sourceTexture.texture()).meteor$getAddressModeU();
+        AddressMode prevAddressModeV = ((IGpuTexture) sourceTexture.texture()).meteor$getAddressModeV();
 
         sourceTexture.texture().setAddressMode(AddressMode.CLAMP_TO_EDGE);
 
@@ -226,13 +226,11 @@ public class Blur extends Module {
             .attachments(targetFbo, null)
             .pipeline(pipeline)
             .mesh(FullScreenRenderer.mesh)
-            .setupCallback(pass -> {
-                pass.bindSampler("u_Texture", sourceTexture);
-                pass.setUniform("u_Blur", UNIFORM_STORAGE.write(new UniformData(
-                    0.5f / targetFbo.getWidth(0), 0.5f / targetFbo.getHeight(0),
-                    (float) offset
-                )));
-            })
+            .uniform("BlurData", UNIFORM_STORAGE.write(new UniformData(
+                0.5f / targetFbo.getWidth(0), 0.5f / targetFbo.getHeight(0),
+                (float) offset
+            )))
+            .sampler("u_Texture", sourceTexture)
             .end();
 
         sourceTexture.texture().setAddressMode(prevAddressModeU, prevAddressModeV);

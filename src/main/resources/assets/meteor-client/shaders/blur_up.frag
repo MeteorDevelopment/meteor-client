@@ -7,21 +7,21 @@ out vec4 color;
 
 uniform sampler2D u_Texture;
 
-uniform BlurData {
-    vec2 halfTexelSize;
-    float offset;
-} u_Blur;
+layout (std140) uniform BlurData {
+    vec2 u_HalfTexelSize;
+    float u_Offset;
+};
 
 void main() {
     color = (
-        texture(u_Texture, uv + vec2(- u_Blur.halfTexelSize.x * 2, 0) * u_Blur.offset) +
-        texture(u_Texture, uv + vec2(- u_Blur.halfTexelSize.x, u_Blur.halfTexelSize.y) * u_Blur.offset) * 2 +
-        texture(u_Texture, uv + vec2(0, u_Blur.halfTexelSize.y * 2) * u_Blur.offset) +
-        texture(u_Texture, uv + u_Blur.halfTexelSize * u_Blur.offset) * 2 +
-        texture(u_Texture, uv + vec2(u_Blur.halfTexelSize.x * 2, 0) * u_Blur.offset) +
-        texture(u_Texture, uv + vec2(u_Blur.halfTexelSize.x, -u_Blur.halfTexelSize.y) * u_Blur.offset) * 2 +
-        texture(u_Texture, uv + vec2(0, -u_Blur.halfTexelSize.y * 2) * u_Blur.offset) +
-        texture(u_Texture, uv - u_Blur.halfTexelSize * u_Blur.offset) * 2
+        texture(u_Texture, uv + vec2(- u_HalfTexelSize.x * 2, 0) * u_Offset) +
+        texture(u_Texture, uv + vec2(- u_HalfTexelSize.x, u_HalfTexelSize.y) * u_Offset) * 2 +
+        texture(u_Texture, uv + vec2(0, u_HalfTexelSize.y * 2) * u_Offset) +
+        texture(u_Texture, uv + u_HalfTexelSize * u_Offset) * 2 +
+        texture(u_Texture, uv + vec2(u_HalfTexelSize.x * 2, 0) * u_Offset) +
+        texture(u_Texture, uv + vec2(u_HalfTexelSize.x, -u_HalfTexelSize.y) * u_Offset) * 2 +
+        texture(u_Texture, uv + vec2(0, -u_HalfTexelSize.y * 2) * u_Offset) +
+        texture(u_Texture, uv - u_HalfTexelSize * u_Offset) * 2
     ) / 12;
     color.a = 1;
 }

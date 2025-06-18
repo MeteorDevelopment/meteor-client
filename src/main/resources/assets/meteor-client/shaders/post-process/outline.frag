@@ -5,7 +5,7 @@ in vec2 v_OneTexel;
 
 uniform sampler2D u_Texture;
 
-uniform OutlineData {
+layout (std140) uniform OutlineData {
     int width;
     float fillOpacity;
     int shapeMode;

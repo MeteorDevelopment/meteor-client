@@ -83,7 +83,7 @@ public class HudRenderer {
                         .attachments(mc.getFramebuffer())
                         .pipeline(MeteorRenderPipelines.UI_TEXT)
                         .mesh(fontHolder.getMesh())
-                        .setupCallback(pass -> pass.bindSampler("u_Texture", fontHolder.font.texture.getGlTextureView()))
+                        .sampler("u_Texture", fontHolder.font.texture.getGlTextureView())
                         .end();
                 }
                 else {

@@ -109,7 +109,7 @@ public class GuiRenderer {
         rTex.end();
 
         r.render();
-        rTex.render(pass -> pass.bindSampler("u_Texture", TEXTURE.getGlTextureView()));
+        rTex.render("u_Texture", TEXTURE.getGlTextureView());
 
         // Normal text
         theme.textRenderer().begin(theme.scale(1));

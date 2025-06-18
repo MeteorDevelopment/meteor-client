@@ -6,13 +6,13 @@ in vec2 v_OneTexel;
 uniform sampler2D u_Texture;
 uniform sampler2D u_TextureI;
 
-uniform ImageData {
-    vec4 color;
-} u_Image;
+layout (std140) uniform ImageData {
+    vec4 u_Color;
+};
 
 out vec4 color;
 
 void main() {
     if (texture(u_Texture, v_TexCoord).a == 0.0) discard;
-    color = texture(u_TextureI, v_TexCoord) * u_Image.color;
+    color = texture(u_TextureI, v_TexCoord) * u_Color;
 }

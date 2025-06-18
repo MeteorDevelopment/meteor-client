@@ -8,11 +8,11 @@ package meteordevelopment.meteorclient.utils.render.postprocess;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.platform.TextureUtil;
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
+import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
@@ -85,15 +85,15 @@ public class ChamsShader extends EntityShader {
     }
 
     @Override
-    protected void setupPass(RenderPass pass) {
+    protected void setupPass(MeshRenderer renderer) {
         Color color = chams.shaderColor.get();
 
-        pass.setUniform("u_Image", UNIFORM_STORAGE.write(new UniformData(
+        renderer.uniform("ImageData", UNIFORM_STORAGE.write(new UniformData(
             color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f
         )));
 
         if (chams.isShader() && chams.shader.get() == Chams.Shader.Image && IMAGE_TEX != null) {
-            pass.bindSampler("u_TextureI", IMAGE_TEX.getGlTextureView());
+            renderer.sampler("u_TextureI", IMAGE_TEX.getGlTextureView());
         }
     }
 

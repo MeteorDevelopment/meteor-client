@@ -29,7 +29,7 @@ public abstract class MeteorRenderPipelines {
     // Snippets
 
     private static final RenderPipeline.Snippet MESH_UNIFORMS = RenderPipeline.builder()
-        .withUniform("u_Mesh", UniformType.UNIFORM_BUFFER)
+        .withUniform("MeshData", UniformType.UNIFORM_BUFFER)
         .buildSnippet();
 
     // World
@@ -144,8 +144,8 @@ public abstract class MeteorRenderPipelines {
         .withVertexShader(MeteorClient.identifier("shaders/post-process/base.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/post-process/outline.frag"))
         .withSampler("u_Texture")
-        .withUniform("u_Post", UniformType.UNIFORM_BUFFER)
-        .withUniform("u_Outline", UniformType.UNIFORM_BUFFER)
+        .withUniform("PostData", UniformType.UNIFORM_BUFFER)
+        .withUniform("OutlineData", UniformType.UNIFORM_BUFFER)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withDepthWrite(false)
         .withBlend(BlendFunction.TRANSLUCENT)
@@ -160,8 +160,8 @@ public abstract class MeteorRenderPipelines {
         .withFragmentShader(MeteorClient.identifier("shaders/post-process/image.frag"))
         .withSampler("u_Texture")
         .withSampler("u_TextureI")
-        .withUniform("u_Post", UniformType.UNIFORM_BUFFER)
-        .withUniform("u_Image", UniformType.UNIFORM_BUFFER)
+        .withUniform("PostData", UniformType.UNIFORM_BUFFER)
+        .withUniform("ImageData", UniformType.UNIFORM_BUFFER)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withDepthWrite(false)
         .withBlend(BlendFunction.TRANSLUCENT)
@@ -177,7 +177,7 @@ public abstract class MeteorRenderPipelines {
         .withVertexShader(MeteorClient.identifier("shaders/blur.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/blur_down.frag"))
         .withSampler("u_Texture")
-        .withUniform("u_Blur", UniformType.UNIFORM_BUFFER)
+        .withUniform("BlurData", UniformType.UNIFORM_BUFFER)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withDepthWrite(false)
         .withBlend(BlendFunction.TRANSLUCENT)
@@ -191,7 +191,7 @@ public abstract class MeteorRenderPipelines {
         .withVertexShader(MeteorClient.identifier("shaders/blur.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/blur_up.frag"))
         .withSampler("u_Texture")
-        .withUniform("u_Blur", UniformType.UNIFORM_BUFFER)
+        .withUniform("BlurData", UniformType.UNIFORM_BUFFER)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withDepthWrite(false)
         .withBlend(BlendFunction.TRANSLUCENT)

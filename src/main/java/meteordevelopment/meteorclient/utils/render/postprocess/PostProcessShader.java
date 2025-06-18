@@ -3,7 +3,6 @@ package meteordevelopment.meteorclient.utils.render.postprocess;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderPass;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.FullScreenRenderer;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
@@ -35,7 +34,7 @@ public abstract class PostProcessShader {
     protected void preDraw() {}
     protected void postDraw() {}
 
-    protected abstract void setupPass(RenderPass pass);
+    protected abstract void setupPass(MeshRenderer renderer);
 
     public boolean beginRender() {
         return shouldDraw();
@@ -48,20 +47,19 @@ public abstract class PostProcessShader {
         draw.run();
         postDraw();
 
-        MeshRenderer.begin()
+        var renderer = MeshRenderer.begin()
             .attachments(mc.getFramebuffer())
             .pipeline(pipeline)
             .mesh(FullScreenRenderer.mesh)
-            .setupCallback(pass -> {
-                pass.bindSampler("u_Texture", framebuffer.getColorAttachmentView());
-                pass.setUniform("u_Post", UNIFORM_STORAGE.write(new UniformData(
-                    (float) mc.getWindow().getFramebufferWidth(), (float) mc.getWindow().getFramebufferHeight(),
-                    (float) glfwGetTime()
-                )));
+            .uniform("PostData", UNIFORM_STORAGE.write(new UniformData(
+                (float) mc.getWindow().getFramebufferWidth(), (float) mc.getWindow().getFramebufferHeight(),
+                (float) glfwGetTime()
+            )))
+            .sampler("u_Texture", framebuffer.getColorAttachmentView());
 
-                setupPass(pass);
-            })
-            .end();
+        setupPass(renderer);
+
+        renderer.end();
     }
 
     public void onResized(int width, int height) {

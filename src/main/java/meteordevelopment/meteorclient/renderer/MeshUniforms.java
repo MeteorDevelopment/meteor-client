@@ -19,6 +19,8 @@ public class MeshUniforms {
         .putMat4f()
         .get();
 
+    private static final Data DATA = new Data();
+
     private static final DynamicUniformStorage<Data> STORAGE = new DynamicUniformStorage<>("Meteor - Mesh UBO", SIZE, 16);
 
     public static void flipFrame() {
@@ -26,15 +28,26 @@ public class MeshUniforms {
     }
 
     public static GpuBufferSlice write(Matrix4f proj, Matrix4f modelView) {
-        return STORAGE.write(new Data(proj, modelView));
+        DATA.proj = proj;
+        DATA.modelView = modelView;
+
+        return STORAGE.write(DATA);
     }
 
-    private record Data(Matrix4f proj, Matrix4f modelView) implements DynamicUniformStorage.Uploadable {
+    private static final class Data implements DynamicUniformStorage.Uploadable {
+        private Matrix4f proj;
+        private Matrix4f modelView;
+
         @Override
         public void write(ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)
                 .putMat4f(proj)
                 .putMat4f(modelView);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return false;
         }
     }
 }

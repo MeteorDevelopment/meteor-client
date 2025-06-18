@@ -234,6 +234,13 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+        if (this.client.world == null) {
+            this.renderPanoramaBackground(context, deltaTicks);
+        }
+    }
+
+    @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         int s = mc.getWindow().getScaleFactor();
         mouseX *= s;

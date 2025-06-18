@@ -1,6 +1,6 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
-import com.mojang.blaze3d.systems.RenderPass;
+import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
@@ -26,8 +26,8 @@ public class EntityOutlineShader extends EntityShader {
     }
 
     @Override
-    protected void setupPass(RenderPass pass) {
-        pass.setUniform("u_Outline", OutlineUniforms.write(
+    protected void setupPass(MeshRenderer renderer) {
+        renderer.uniform("OutlineData", OutlineUniforms.write(
             esp.outlineWidth.get(),
             esp.fillOpacity.get().floatValue(),
             esp.shapeMode.get().ordinal(),

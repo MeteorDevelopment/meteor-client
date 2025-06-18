@@ -147,6 +147,7 @@
     "PowderSnowBlockMixin",
     "ProjectileEntityAccessor",
     "ProjectileInGroundAccessor",
+    "ProjectionMatrix2Accessor",
     "RaycastContextMixin",
     "RegistriesMixin",
     "ReloadStateAccessor",

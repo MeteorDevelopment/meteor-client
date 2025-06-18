@@ -21,9 +21,9 @@ import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 
+import java.util.HashMap;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
-import java.util.function.Consumer;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -38,7 +38,8 @@ public class MeshRenderer {
     private RenderPipeline pipeline;
     private MeshBuilder mesh;
     private Matrix4f matrix;
-    private Consumer<RenderPass> setupCallback;
+    private final HashMap<String, GpuBufferSlice> uniforms = new HashMap<>();
+    private final HashMap<String, GpuTextureView> samplers = new HashMap<>();
 
     private MeshRenderer() {}
 
@@ -89,24 +90,36 @@ public class MeshRenderer {
         return this;
     }
 
-    public MeshRenderer setupCallback(Consumer<RenderPass> callback) {
-        setupCallback = callback;
+    public MeshRenderer uniform(String name, GpuBufferSlice slice) {
+        uniforms.put(name, slice);
+        return this;
+    }
+
+    public MeshRenderer sampler(String name, GpuTextureView view) {
+        if (name != null && view != null) {
+            samplers.put(name, view);
+        }
+
         return this;
     }
 
     public void end() {
-        if (mesh.isBuilding())
+        if (mesh.isBuilding()) {
             mesh.end();
+        }
 
         if (mesh.getIndicesCount() > 0) {
-            if (Utils.rendering3D || matrix != null)
+            if (Utils.rendering3D || matrix != null) {
                 RenderSystem.getModelViewStack().pushMatrix();
+            }
 
-            if (matrix != null)
+            if (matrix != null) {
                 RenderSystem.getModelViewStack().mul(matrix);
+            }
 
-            if (Utils.rendering3D)
+            if (Utils.rendering3D) {
                 applyCameraPos();
+            }
 
             GpuBuffer vertexBuffer = mesh.getVertexBuffer();
             GpuBuffer indexBuffer = mesh.getIndexBuffer();
@@ -116,17 +129,22 @@ public class MeshRenderer {
                     OptionalInt.of(ColorHelper.getArgb(this.clearColor.a, this.clearColor.r, this.clearColor.g, this.clearColor.b)) :
                     OptionalInt.empty();
 
-                GpuBufferSlice u_Mesh = MeshUniforms.write(RenderUtils.projection, RenderSystem.getModelViewStack());
+                GpuBufferSlice meshData = MeshUniforms.write(RenderUtils.projection, RenderSystem.getModelViewStack());
 
                 RenderPass pass = (depthAttachment != null && pipeline.wantsDepthTexture()) ?
                     RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor MeshRenderer", colorAttachment, clearColor, depthAttachment, OptionalDouble.empty()) :
                     RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Meteor MeshRenderer", colorAttachment, clearColor);
 
                 pass.setPipeline(pipeline);
-                pass.setUniform("u_Mesh", u_Mesh);
+                pass.setUniform("MeshData", meshData);
 
-                if (setupCallback != null)
-                    setupCallback.accept(pass);
+                for (var name : uniforms.keySet()) {
+                    pass.setUniform(name, uniforms.get(name));
+                }
+
+                for (var name : samplers.keySet()) {
+                    pass.bindSampler(name, samplers.get(name));
+                }
 
                 pass.setVertexBuffer(0, vertexBuffer);
                 pass.setIndexBuffer(indexBuffer, VertexFormat.IndexType.INT);
@@ -135,8 +153,9 @@ public class MeshRenderer {
                 pass.close();
             }
 
-            if (Utils.rendering3D || matrix != null)
+            if (Utils.rendering3D || matrix != null) {
                 RenderSystem.getModelViewStack().popMatrix();
+            }
         }
 
         colorAttachment = null;
@@ -145,7 +164,8 @@ public class MeshRenderer {
         pipeline = null;
         mesh = null;
         matrix = null;
-        setupCallback = null;
+        uniforms.clear();
+        samplers.clear();
 
         taken = false;
     }

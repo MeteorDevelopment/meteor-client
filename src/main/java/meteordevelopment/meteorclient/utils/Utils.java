@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.PeekScreen;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockEntityIterator;
 import meteordevelopment.meteorclient.utils.world.ChunkIterator;
@@ -82,7 +83,7 @@ public class Utils {
     public static double frameTime;
     public static Screen screenToOpen;
 
-    private static final ProjectionMatrix2 matrix = new ProjectionMatrix2("meteor-projection-matrix", 1000, 21000, true);
+    private static final ProjectionMatrix2 matrix = new ProjectionMatrix2("meteor-projection-matrix", 0, 100, true);
 
     private Utils() {
     }
@@ -210,12 +211,22 @@ public class Utils {
     }
 
     public static void unscaledProjection() {
-        RenderSystem.setProjectionMatrix(matrix.set(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight()), ProjectionType.ORTHOGRAPHIC);
+        float width = mc.getWindow().getFramebufferWidth();
+        float height = mc.getWindow().getFramebufferHeight();
+
+        RenderSystem.setProjectionMatrix(matrix.set(width, height), ProjectionType.ORTHOGRAPHIC);
+        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).callGetMatrix(width, height));
+
         rendering3D = false;
     }
 
     public static void scaledProjection() {
-        RenderSystem.setProjectionMatrix(matrix.set((float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor()), (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor())), ProjectionType.PERSPECTIVE);
+        float width = (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor());
+        float height = (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor());
+
+        RenderSystem.setProjectionMatrix(matrix.set(width, height), ProjectionType.PERSPECTIVE);
+        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).callGetMatrix(width, height));
+
         rendering3D = true;
     }
 
