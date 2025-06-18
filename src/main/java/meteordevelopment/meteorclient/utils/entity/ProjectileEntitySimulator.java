@@ -124,7 +124,6 @@ public class ProjectileEntitySimulator {
             velocity.add(vel.x, user.isOnGround() ? 0.0D : vel.y, vel.z);
         }
 
-        // todo test this
         this.simulatingEntity = type.create(mc.world, null);
         this.gravity = gravity;
         this.airDrag = 0.99;

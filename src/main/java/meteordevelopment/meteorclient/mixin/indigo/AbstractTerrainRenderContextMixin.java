@@ -5,10 +5,8 @@
 
 package meteordevelopment.meteorclient.mixin.indigo;
 
-/*
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
-
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractTerrainRenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import org.spongepowered.asm.mixin.Final;
@@ -21,11 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @SuppressWarnings("UnstableApiUsage")
 @Mixin(AbstractTerrainRenderContext.class)
-*/
-
-// todo fix this when they add the indigo module back
 public abstract class AbstractTerrainRenderContextMixin {
-    /*
     @Final @Shadow(remap = false)
     protected BlockRenderInfo blockInfo;
 
@@ -45,5 +39,4 @@ public abstract class AbstractTerrainRenderContextMixin {
     private int rewriteQuadAlpha(int color, int alpha) {
         return ((alpha & 0xFF) << 24) | (color & 0x00FFFFFF);
     }
-     */
 }

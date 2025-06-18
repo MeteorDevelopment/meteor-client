@@ -21,7 +21,6 @@ import net.minecraft.component.type.BannerPatternsComponent;
 import net.minecraft.item.BannerItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DyeColor;
-import org.joml.Matrix3x2fStack;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -60,27 +59,27 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        // todo ????
+        // todo fix the strange lighting
         mc.gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ITEMS_FLAT);
 
-        Matrix3x2fStack matrices = context.getMatrices();
-        matrices.pushMatrix();
-        matrices.translate(x + 8, y + 8);
+        MatrixStack matrices = new MatrixStack();
+        matrices.push();
+        matrices.translate(x + 8, y + 8, 0);
 
-        matrices.pushMatrix();
-        matrices.translate(0.5f, 16f);
-        matrices.scale(6, -6);
-        matrices.scale(2, -2);
-        matrices.pushMatrix();
-        matrices.translate(2.5f, 8.5f);
-        matrices.scale(5, 5);
+        matrices.push();
+        matrices.translate(0.5f, 16f, 0);
+        matrices.scale(6, -6, 0);
+        matrices.scale(2, -2, 0);
+        matrices.push();
+        matrices.translate(2.5f, 8.5f, 0);
+        matrices.scale(5, 5, 0);
         VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
         bannerField.pitch = 0f;
         bannerField.originY = -32f;
         BannerBlockEntityRenderer.renderCanvas(
-            new MatrixStack(), // todo fix differing matrixstacks
+            matrices,
             immediate,
-            0xF000F0,
+            15728880,
             OverlayTexture.DEFAULT_UV,
             bannerField,
             ModelBaker.BANNER_BASE,
@@ -88,9 +87,9 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
             color,
             patterns
         );
-        matrices.popMatrix();
-        matrices.popMatrix();
+        matrices.pop();
+        matrices.pop();
         immediate.draw();
-        matrices.popMatrix();
+        matrices.pop();
     }
 }

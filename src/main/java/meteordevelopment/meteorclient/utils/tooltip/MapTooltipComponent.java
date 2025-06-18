@@ -18,7 +18,6 @@ import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.map.MapState;
 import net.minecraft.util.Identifier;
-import org.joml.Matrix3x2fStack;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -53,26 +52,23 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
         double scale = Modules.get().get(BetterTooltips.class).mapsScale.get();
 
         // Background
-        Matrix3x2fStack matrices = context.getMatrices();
-        matrices.pushMatrix();
-        matrices.translate(x, y);
-        matrices.scale((float) (scale) * 2, (float) (scale) * 2);
-        matrices.scale((64 + 8) / 64f, (64 + 8) / 64f);
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE_MAP_BACKGROUND, 0, 0, 0, 0, 0, 64, 64, 64, 64);
-        matrices.popMatrix();
+        int size = (int) ((128 + 16) * scale);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE_MAP_BACKGROUND, x, y, 0,0, size, size, size, size);
 
         // Contents
-        VertexConsumerProvider.Immediate consumer = mc.getBufferBuilders().getEntityVertexConsumers();
         MapState mapState = FilledMapItem.getMapState(new MapIdComponent(mapId), mc.world);
         if (mapState == null) return;
-        matrices.pushMatrix();
-        matrices.translate(x, y);
-        matrices.scale((float) scale, (float) scale);
-        matrices.translate(8, 8);
+
+        MatrixStack matrices2 = new MatrixStack();
+        VertexConsumerProvider.Immediate consumer = mc.getBufferBuilders().getEntityVertexConsumers();
+
+        matrices2.push();
+        matrices2.translate(x, y, 0);
+        matrices2.scale((float) scale, (float) scale, 0);
+        matrices2.translate(8, 8, 0);
         mc.getMapRenderer().update(new MapIdComponent(mapId), mapState, mapRenderState);
-        // todo fix differing matrixstacks
-        mc.getMapRenderer().draw(mapRenderState, new MatrixStack(), consumer, false, 0xF000F0);
+        mc.getMapRenderer().draw(mapRenderState, matrices2, consumer, false, 0xF000F0);
         consumer.draw();
-        matrices.popMatrix();
+        matrices2.pop();
     }
 }
