@@ -135,7 +135,6 @@
     "MutableTextMixin",
     "PacketByteBufMixin",
     "ParticleManagerMixin",
-    "PlayerArmorSlotMixin",
     "PlayerEntityAccessor",
     "PlayerEntityMixin",
     "PlayerEntityRendererMixin",
