@@ -120,8 +120,8 @@ public class PlayerModelHud extends HudElement {
 
             float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.lastYaw + (player.getYaw() - player.lastYaw) * mc.getRenderTickCounter().getTickProgress(true) + offset) : (float) customYaw.get();
             float pitch = copyPitch.get() ? player.getPitch() : (float) customPitch.get();
-
-            renderer.entity(renderer.drawContext, x + getWidth() / 2f, y + getHeight() * 0.9f, (int) (30 * getScale()), -yaw, -pitch, player);
+            // todo fix this
+            renderer.entity(renderer.drawContext, (int) (x + getWidth() / 2f), (int) (y + getHeight() * 0.9f), x + getWidth(), (int) (y + getHeight() * 1.8f), (float) (30 * getScale()), -yaw, -pitch, player);
         });
 
         if (background.get()) {

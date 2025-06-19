@@ -17,7 +17,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.GoatEntity;
 import net.minecraft.entity.passive.SquidEntity;
 import net.minecraft.util.math.RotationAxis;
-import org.joml.Matrix3x2fStack;
 import org.joml.Quaternionf;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -48,12 +47,12 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        Matrix3x2fStack matrices = context.getMatrices();
-        matrices.pushMatrix();
-        matrices.translate(15, 2);
+        MatrixStack matrices = new MatrixStack();
+        matrices.push();
+        matrices.translate(15, 2, 0);
         entity.setVelocity(1.f, 1.f, 1.f);
-        renderEntity(new MatrixStack(), x, y); // todo fix differing matrixstacks
-        matrices.popMatrix();
+        renderEntity(matrices, x, y); // todo fix
+        matrices.pop();
     }
 
     protected void renderEntity(MatrixStack matrices, int x, int y) {

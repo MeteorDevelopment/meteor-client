@@ -222,8 +222,7 @@ public class HudRenderer {
      * Additionally, it uses OpenGL scissors, which causes the player model to get cut when the Minecraft GUI scale is not 1x.
      * This version should fix these issues.
      */
-    public void entity(DrawContext context, float x, float y, int size, float yaw, float pitch, LivingEntity entity) {
-
+    public void entity(DrawContext context, int x, int y, int x2, int y2, float size, float yaw, float pitch, LivingEntity entity) {
         float tanYaw = (float) Math.atan((yaw) / 40.0f);
         float tanPitch = (float) Math.atan((pitch) / 40.0f);
 
@@ -255,7 +254,7 @@ public class HudRenderer {
         // The vector3 parameter applies a translation to the player's model. Given that we're simply offsetting
         // the draw in the x and y parameters, we won't really need this, so we'll set it to default.
         // It doesn't seem like quaternionf2 does anything, so we'll leave it null to save some computation.
-        InventoryScreen.drawEntity(context, x, y, size, new Vector3f(), quaternion, null, entity);
+        InventoryScreen.drawEntity(context, x, y, x2, y2, size, new Vector3f(), quaternion, null, entity);
 
         // Restore the previous values
         entity.bodyYaw = previousBodyYaw;
