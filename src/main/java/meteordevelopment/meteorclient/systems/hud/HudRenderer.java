@@ -242,7 +242,7 @@ public class HudRenderer {
         entity.lastHeadYaw = lastLastHeadYaw;
         entity.headYaw = lastHeadYaw;
 
-        float s = 1.0f / mc.options.getGuiScale().getValue();
+        float s = 1.0f / mc.getWindow().getScaleFactor();
         int x1 = (int) (x * s);
         int y1 = (int) (y * s);
         int x2 = (int) ((x + width) * s);

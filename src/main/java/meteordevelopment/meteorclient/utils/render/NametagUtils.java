@@ -90,7 +90,7 @@ public class NametagUtils {
 
         Matrix3x2fStack matrices = drawContext.getMatrices();
         matrices.pushMatrix();
-        matrices.scale(1.0f / mc.options.getGuiScale().getValue());
+        matrices.scale(1.0f / mc.getWindow().getScaleFactor());
         matrices.translate((float) pos.x, (float) pos.y);
         matrices.scale((float) scale, (float) scale);
     }

@@ -87,7 +87,7 @@ public class GuiRenderer {
 
         var matrices = drawContext.getMatrices();
         matrices.pushMatrix();
-        matrices.scale(1.0f / mc.options.getGuiScale().getValue());
+        matrices.scale(1.0f / mc.getWindow().getScaleFactor());
 
         scissorStart(0, 0, getWindowWidth(), getWindowHeight());
     }

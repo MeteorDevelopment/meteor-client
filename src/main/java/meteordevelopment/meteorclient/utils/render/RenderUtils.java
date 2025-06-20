@@ -48,7 +48,7 @@ public class RenderUtils {
         matrices.pushMatrix();
 
         if (disableGuiScale) {
-            matrices.scale(1.0f / mc.options.getGuiScale().getValue());
+            matrices.scale(1.0f / mc.getWindow().getScaleFactor());
         }
 
         matrices.scale(scale, scale);
