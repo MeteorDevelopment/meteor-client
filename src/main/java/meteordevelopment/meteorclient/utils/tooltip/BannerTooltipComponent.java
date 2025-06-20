@@ -49,7 +49,7 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
 
     @Override
     public int getHeight(TextRenderer textRenderer) {
-        return 32 * 5 -2;
+        return 32 * 5;
     }
 
     @Override
@@ -59,23 +59,26 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        // todo fix the strange lighting
         mc.gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ITEMS_FLAT);
+
+        bannerField.pitch = 0f;
+        bannerField.originY = -32f;
+
+        // the width and height provided to this method seem to be the dimensions of the entire tooltip,
+        // not just this component
+        int totalWidth = width;
+        width = getWidth(null);
+        height = getHeight(null);
 
         MatrixStack matrices = new MatrixStack();
         matrices.push();
-        matrices.translate(x + 8, y + 8, 0);
+        matrices.translate(x + width / 2f + (totalWidth - width) / 2f, y + height * 0.775f, 0);
 
-        matrices.push();
-        matrices.translate(0.5f, 16f, 0);
-        matrices.scale(6, -6, 0);
-        matrices.scale(2, -2, 0);
-        matrices.push();
-        matrices.translate(2.5f, 8.5f, 0);
-        matrices.scale(5, 5, 0);
+        float s = Math.min(width, height);
+        matrices.scale(s * 0.75f, s * 0.75f, 1);
+
         VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
-        bannerField.pitch = 0f;
-        bannerField.originY = -32f;
+
         BannerBlockEntityRenderer.renderCanvas(
             matrices,
             immediate,
@@ -87,9 +90,9 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
             color,
             patterns
         );
-        matrices.pop();
-        matrices.pop();
+
         immediate.draw();
+
         matrices.pop();
     }
 }
