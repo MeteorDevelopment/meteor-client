@@ -414,7 +414,7 @@ public class BetterChat extends Module {
         return width;
     }
 
-    public void drawPlayerHead(DrawContext context, ChatHudLine.Visible line, int y, int color) {
+    public void beforeDrawMessage(DrawContext context, ChatHudLine.Visible line, int y, int color) {
         if (!isActive() || !playerHeads.get()) return;
 
         // Only draw the first line of multi line messages
@@ -423,7 +423,14 @@ public class BetterChat extends Module {
         }
 
         // Offset
+        context.getMatrices().pushMatrix();
         context.getMatrices().translate(10, 0);
+    }
+
+    public void afterDrawMessage(DrawContext context) {
+        if (!isActive() || !playerHeads.get()) return;
+
+        context.getMatrices().popMatrix();
     }
 
     private void drawTexture(DrawContext context, IChatHudLine line, int y, int color) {
