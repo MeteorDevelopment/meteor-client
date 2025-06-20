@@ -181,8 +181,7 @@ public class MeshBuilder {
 
         if ((vertexI + vertexCount) * primitiveVerticesSize >= vertices.capacity()) {
             int offset = getVerticesOffset();
-            int newSize = vertices.capacity() * 2;
-
+            int newSize = Math.max(vertices.capacity() * 2, vertices.capacity() + vertexCount * primitiveVerticesSize);
             ByteBuffer newVertices = BufferUtils.createByteBuffer(newSize);
             memCopy(memAddress0(vertices), memAddress0(newVertices), offset);
 
@@ -192,7 +191,7 @@ public class MeshBuilder {
         }
 
         if ((indicesCount + indexCount) * Integer.BYTES >= indices.capacity()) {
-            int newSize = indices.capacity() * 2;
+            int newSize = Math.max(indices.capacity() * 2, indices.capacity() + indexCount * Integer.BYTES);
 
             ByteBuffer newIndices = BufferUtils.createByteBuffer(newSize);
             memCopy(memAddress0(indices), memAddress0(newIndices), indicesCount * 4L);
