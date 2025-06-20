@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
@@ -82,6 +83,11 @@ public class GuiRenderer {
 
     public void begin(DrawContext drawContext) {
         this.drawContext = drawContext;
+        this.drawContext.createNewRootLayer();
+
+        var matrices = drawContext.getMatrices();
+        matrices.pushMatrix();
+        matrices.scale(1.0f / mc.options.getGuiScale().getValue());
 
         scissorStart(0, 0, getWindowWidth(), getWindowHeight());
     }
@@ -91,6 +97,9 @@ public class GuiRenderer {
 
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
+
+        drawContext.getMatrices().popMatrix();
+        drawContext.createNewRootLayer();
     }
 
     public void beginRender() {
@@ -144,6 +153,8 @@ public class GuiRenderer {
         }
 
         scissorStack.push(scissorPool.get().set(x, y, width, height));
+        drawContext.enableScissor((int) x, (int) y, (int) (x + width), (int) (y + height));
+
         beginRender();
     }
 
@@ -156,6 +167,7 @@ public class GuiRenderer {
         for (Runnable task : scissor.postTasks) task.run();
         scissor.pop();
 
+        drawContext.disableScissor();
         if (!scissorStack.isEmpty()) beginRender();
 
         scissorPool.free(scissor);
@@ -245,7 +257,7 @@ public class GuiRenderer {
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay);
+        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay, null, false);
     }
 
     public void absolutePost(Runnable task) {

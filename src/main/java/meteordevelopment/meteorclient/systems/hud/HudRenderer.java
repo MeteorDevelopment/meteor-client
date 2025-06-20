@@ -68,6 +68,8 @@ public class HudRenderer {
         this.drawContext = drawContext;
         this.delta = Utils.frameTime;
 
+        drawContext.createNewRootLayer();
+
         if (!hud.hasCustomFont()) {
             VanillaTextRenderer.INSTANCE.scaleIndividually = true;
             VanillaTextRenderer.INSTANCE.begin();
@@ -106,7 +108,9 @@ public class HudRenderer {
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
 
-        this.drawContext = null;
+        drawContext.createNewRootLayer();
+
+        drawContext = null;
     }
 
     public void line(double x1, double y1, double x2, double y2, Color color) {
@@ -207,7 +211,7 @@ public class HudRenderer {
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverlay) {
-        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay, countOverlay);
+        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay, countOverlay, true);
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {

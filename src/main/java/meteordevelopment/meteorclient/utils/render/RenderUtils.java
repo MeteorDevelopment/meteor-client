@@ -43,9 +43,14 @@ public class RenderUtils {
     }
 
     // Items
-    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride) {
+    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride, boolean disableGuiScale) {
         Matrix3x2fStack matrices = drawContext.getMatrices();
         matrices.pushMatrix();
+
+        if (disableGuiScale) {
+            matrices.scale(1.0f / mc.options.getGuiScale().getValue());
+        }
+
         matrices.scale(scale, scale);
 
         int scaledX = (int) (x / scale);
@@ -58,7 +63,7 @@ public class RenderUtils {
     }
 
     public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        drawItem(drawContext, itemStack, x, y, scale, overlay, null);
+        drawItem(drawContext, itemStack, x, y, scale, overlay, null, true);
     }
 
     public static void updateScreenCenter(Matrix4f projection, Matrix4f view) {

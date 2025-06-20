@@ -252,7 +252,6 @@ public abstract class WidgetScreen extends Screen {
         GuiKeyEvents.canUseKeys = true;
 
         // Apply projection without scaling
-        //context.draw();
         Utils.unscaledProjection();
 
         onRenderBefore(context, delta);
@@ -273,7 +272,6 @@ public abstract class WidgetScreen extends Screen {
             if (tooltip) DEBUG_RENDERER.render(RENDERER.tooltipWidget);
         }
 
-        //context.draw();
         Utils.scaledProjection();
 
         runAfterRenderTasks();
