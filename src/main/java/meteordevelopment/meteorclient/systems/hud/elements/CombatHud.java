@@ -257,17 +257,14 @@ public class CombatHud extends HudElement {
             Renderer2D.COLOR.render();
 
             // Player Model
-            // todo fix this
             renderer.entity(
-                renderer.drawContext,
-                (int) (x + (25 * getScale())),
-                (int) (y + (65 * getScale())),
-                (int) (x + (25 * getScale())),
-                (int) (y + (65 * getScale())),
-                (float) (30 * getScale()),
+                playerEntity,
+                (int) (x + 5 * getScale()),
+                (int) (y + 10 * getScale()),
+                (int) (50 * getScale()),
+                (int) (60 * getScale()),
                 -MathHelper.wrapDegrees(playerEntity.lastYaw + (playerEntity.getYaw() - playerEntity.lastYaw) * mc.getRenderTickCounter().getTickProgress(true)),
-                -playerEntity.getPitch(),
-                playerEntity
+                -playerEntity.getPitch()
             );
 
             // Moving pos to past player model
