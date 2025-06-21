@@ -28,14 +28,13 @@ public abstract class MeteorRenderPipelines {
 
     // Snippets
 
-    private static final RenderPipeline.Snippet UNIFORMS = RenderPipeline.builder()
-        .withUniform("u_Proj", UniformType.MATRIX4X4)
-        .withUniform("u_ModelView", UniformType.MATRIX4X4)
+    private static final RenderPipeline.Snippet MESH_UNIFORMS = RenderPipeline.builder()
+        .withUniform("MeshData", UniformType.UNIFORM_BUFFER)
         .buildSnippet();
 
     // World
 
-    public static final RenderPipeline WORLD_COLORED = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline WORLD_COLORED = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/world_colored"))
         .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
@@ -47,7 +46,7 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
-    public static final RenderPipeline WORLD_COLORED_LINES = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline WORLD_COLORED_LINES = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLineSmooth()
         .withLocation(MeteorClient.identifier("pipeline/world_colored_lines"))
         .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.DEBUG_LINES)
@@ -60,7 +59,7 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
-    public static final RenderPipeline WORLD_COLORED_DEPTH = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline WORLD_COLORED_DEPTH = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/world_colored_depth"))
         .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
@@ -72,7 +71,7 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
-    public static final RenderPipeline WORLD_COLORED_LINES_DEPTH = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline WORLD_COLORED_LINES_DEPTH = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLineSmooth()
         .withLocation(MeteorClient.identifier("pipeline/world_colored_lines_depth"))
         .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.DEBUG_LINES)
@@ -87,7 +86,7 @@ public abstract class MeteorRenderPipelines {
 
     // UI
 
-    public static final RenderPipeline UI_COLORED = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline UI_COLORED = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/ui_colored"))
         .withVertexFormat(MeteorVertexFormats.POS2_COLOR, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
@@ -99,7 +98,7 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
-    public static final RenderPipeline UI_COLORED_LINES = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline UI_COLORED_LINES = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/ui_colored_lines"))
         .withVertexFormat(MeteorVertexFormats.POS2_COLOR, VertexFormat.DrawMode.DEBUG_LINES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_color.vert"))
@@ -111,7 +110,7 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
-    public static final RenderPipeline UI_TEXTURED = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline UI_TEXTURED = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/ui_textured"))
         .withVertexFormat(MeteorVertexFormats.POS2_TEXTURE_COLOR, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_tex_color.vert"))
@@ -124,7 +123,7 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
-    public static final RenderPipeline UI_TEXT = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline UI_TEXT = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/ui_text"))
         .withVertexFormat(MeteorVertexFormats.POS2_TEXTURE_COLOR, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/text.vert"))
@@ -144,12 +143,9 @@ public abstract class MeteorRenderPipelines {
         .withVertexFormat(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/post-process/base.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/post-process/outline.frag"))
-        .withUniform("u_Size", UniformType.VEC2)
         .withSampler("u_Texture")
-        .withUniform("u_Width", UniformType.INT)
-        .withUniform("u_FillOpacity", UniformType.FLOAT)
-        .withUniform("u_ShapeMode", UniformType.INT)
-        .withUniform("u_GlowMultiplier", UniformType.FLOAT)
+        .withUniform("PostData", UniformType.UNIFORM_BUFFER)
+        .withUniform("OutlineData", UniformType.UNIFORM_BUFFER)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withDepthWrite(false)
         .withBlend(BlendFunction.TRANSLUCENT)
@@ -157,15 +153,15 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
-    public static final RenderPipeline POST_IMAGE = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline POST_IMAGE = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/post/image"))
         .withVertexFormat(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/post-process/base.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/post-process/image.frag"))
-        .withUniform("u_Size", UniformType.VEC2)
         .withSampler("u_Texture")
         .withSampler("u_TextureI")
-        .withUniform("u_Color", UniformType.VEC4)
+        .withUniform("PostData", UniformType.UNIFORM_BUFFER)
+        .withUniform("ImageData", UniformType.UNIFORM_BUFFER)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withDepthWrite(false)
         .withBlend(BlendFunction.TRANSLUCENT)
@@ -175,14 +171,13 @@ public abstract class MeteorRenderPipelines {
 
     // Blur
 
-    public static final RenderPipeline BLUR_DOWN = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline BLUR_DOWN = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/blur/down"))
         .withVertexFormat(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/blur.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/blur_down.frag"))
-        .withSampler("uTexture")
-        .withUniform("uHalfTexelSize", UniformType.VEC2)
-        .withUniform("uOffset", UniformType.FLOAT)
+        .withSampler("u_Texture")
+        .withUniform("BlurData", UniformType.UNIFORM_BUFFER)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withDepthWrite(false)
         .withBlend(BlendFunction.TRANSLUCENT)
@@ -190,14 +185,13 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
-    public static final RenderPipeline BLUR_UP = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline BLUR_UP = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/blur/up"))
         .withVertexFormat(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/blur.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/blur_up.frag"))
-        .withSampler("uTexture")
-        .withUniform("uHalfTexelSize", UniformType.VEC2)
-        .withUniform("uOffset", UniformType.FLOAT)
+        .withSampler("u_Texture")
+        .withUniform("BlurData", UniformType.UNIFORM_BUFFER)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withDepthWrite(false)
         .withBlend(BlendFunction.TRANSLUCENT)
@@ -205,12 +199,12 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
-    public static final RenderPipeline BLUR_PASSTHROUGH = add(new ExtendedRenderPipelineBuilder(UNIFORMS)
+    public static final RenderPipeline BLUR_PASSTHROUGH = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/blur/up"))
         .withVertexFormat(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/passthrough.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/passthrough.frag"))
-        .withSampler("uTexture")
+        .withSampler("u_Texture")
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withDepthWrite(false)
         .withBlend(BlendFunction.TRANSLUCENT)

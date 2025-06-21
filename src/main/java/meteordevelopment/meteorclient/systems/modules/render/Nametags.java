@@ -391,7 +391,7 @@ public class Nametags extends Module {
 
     private void renderNametagPlayer(Render2DEvent event, PlayerEntity player, boolean shadow) {
         TextRenderer text = TextRenderer.get();
-        NametagUtils.begin(pos);
+        NametagUtils.begin(pos, event.drawContext);
 
         // Gamemode
         GameMode gm = EntityUtils.getGameMode(player);
@@ -516,7 +516,7 @@ public class Nametags extends Module {
             for (int i = 0; i < 6; i++) {
                 ItemStack stack = getItem(player, i);
 
-                RenderUtils.drawItem(event.drawContext, stack, (int) x, (int) y, 2, true);
+                RenderUtils.drawItem(event.drawContext, stack, (int) x, (int) y, 2, true, null, false);
 
                 if (stack.isDamageable() && itemDurability.get() != Durability.None) {
                     text.begin(0.75, false, true);
@@ -577,7 +577,7 @@ public class Nametags extends Module {
             }
         } else if (displayEnchants.get()) displayEnchants.set(false);
 
-        NametagUtils.end();
+        NametagUtils.end(event.drawContext);
     }
 
     private void renderNametagItem(ItemStack stack, boolean shadow) {

@@ -2,7 +2,10 @@
 
 layout (location = 0) in vec4 pos;
 
-uniform vec2 u_Size;
+layout (std140) uniform PostData {
+    vec2 u_Size;
+    float u_Time;
+};
 
 out vec2 v_TexCoord;
 out vec2 v_OneTexel;

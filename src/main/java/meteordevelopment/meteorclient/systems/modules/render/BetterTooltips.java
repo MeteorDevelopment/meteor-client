@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
@@ -24,14 +25,13 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
-import net.minecraft.entity.Bucketable;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.*;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.RawFilteredPair;
@@ -227,20 +227,28 @@ public class BetterTooltips extends Module {
 
         // Item size tooltip
         if (byteSize.get()) {
-            try {
-                event.itemStack().toNbt(mc.player.getRegistryManager()).write(ByteCountDataOutput.INSTANCE);
+            switch (ItemStack.CODEC.encodeStart(mc.player.getRegistryManager().getOps(NbtOps.INSTANCE), event.itemStack())) {
+                case DataResult.Success<NbtElement> success -> {
+                    try {
+                        success.value().write(ByteCountDataOutput.INSTANCE);
 
-                int byteCount = ByteCountDataOutput.INSTANCE.getCount();
-                String count;
+                        int byteCount = ByteCountDataOutput.INSTANCE.getCount();
+                        String count;
 
-                ByteCountDataOutput.INSTANCE.reset();
+                        ByteCountDataOutput.INSTANCE.reset();
 
-                if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
-                else count = String.format("%d bytes", byteCount);
+                        if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
+                        else count = String.format("%d bytes", byteCount);
 
-                event.appendEnd(Text.literal(count).formatted(Formatting.GRAY));
-            } catch (Exception e) {
-                event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
+                        event.appendEnd(Text.literal(count).formatted(Formatting.GRAY));
+                    } catch (Exception e) {
+                        event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
+                    }
+                }
+                case DataResult.Error<NbtElement> error ->
+                    event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
+                default ->
+                    throw new MatchException(null, null);
             }
         }
 
@@ -289,10 +297,11 @@ public class BetterTooltips extends Module {
         // Fish peek
         else if (event.itemStack.getItem() instanceof EntityBucketItem bucketItem && previewEntities()) {
             EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).getEntityType();
-            Entity entity = type.create(mc.world, SpawnReason.NATURAL);
+            LivingEntity entity = (LivingEntity) type.create(mc.world, SpawnReason.NATURAL);
+
             if (entity != null) {
-                NbtComponent nbtComponent = event.itemStack.getOrDefault(DataComponentTypes.BUCKET_ENTITY_DATA, NbtComponent.DEFAULT);
-                if (nbtComponent.isEmpty()) {
+                NbtComponent nbtComponent = event.itemStack.getOrDefault(DataComponentTypes.BUCKET_ENTITY_DATA, null);
+                if (nbtComponent == null) {
                     return;
                 }
 

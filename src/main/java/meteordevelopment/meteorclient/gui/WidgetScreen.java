@@ -234,10 +234,15 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) renderBackground(context, mouseX, mouseY, delta);
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+        if (this.client.world == null) {
+            this.renderPanoramaBackground(context, deltaTicks);
+        }
+    }
 
-        double s = mc.getWindow().getScaleFactor();
+    @Override
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        int s = mc.getWindow().getScaleFactor();
         mouseX *= s;
         mouseY *= s;
 
@@ -247,7 +252,6 @@ public abstract class WidgetScreen extends Screen {
         GuiKeyEvents.canUseKeys = true;
 
         // Apply projection without scaling
-        context.draw();
         Utils.unscaledProjection();
 
         onRenderBefore(context, delta);
@@ -268,7 +272,6 @@ public abstract class WidgetScreen extends Screen {
             if (tooltip) DEBUG_RENDERER.render(RENDERER.tooltipWidget);
         }
 
-        context.draw();
         Utils.scaledProjection();
 
         runAfterRenderTasks();

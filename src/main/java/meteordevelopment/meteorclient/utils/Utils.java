@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -20,6 +21,7 @@ import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.PeekScreen;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockEntityIterator;
 import meteordevelopment.meteorclient.utils.world.ChunkIterator;
@@ -32,6 +34,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.render.ProjectionMatrix2;
 import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
@@ -41,9 +44,11 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.inventory.StackWithSlot;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.DyeColor;
@@ -55,7 +60,6 @@ import net.minecraft.world.chunk.Chunk;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Range;
-import org.joml.Matrix4f;
 import org.joml.Vector3d;
 
 import java.io.File;
@@ -78,6 +82,8 @@ public class Utils {
     public static boolean rendering3D = true;
     public static double frameTime;
     public static Screen screenToOpen;
+
+    private static final ProjectionMatrix2 matrix = new ProjectionMatrix2("meteor-projection-matrix", -10, 100, true);
 
     private Utils() {
     }
@@ -205,12 +211,22 @@ public class Utils {
     }
 
     public static void unscaledProjection() {
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), 0, 1000, 21000), ProjectionType.ORTHOGRAPHIC);
+        float width = mc.getWindow().getFramebufferWidth();
+        float height = mc.getWindow().getFramebufferHeight();
+
+        RenderSystem.setProjectionMatrix(matrix.set(width, height), ProjectionType.ORTHOGRAPHIC);
+        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).callGetMatrix(width, height));
+
         rendering3D = false;
     }
 
     public static void scaledProjection() {
-        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor()), (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor()), 0, 1000, 21000), ProjectionType.PERSPECTIVE);
+        float width = (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor());
+        float height = (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor());
+
+        RenderSystem.setProjectionMatrix(matrix.set(width, height), ProjectionType.PERSPECTIVE);
+        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).callGetMatrix(width, height));
+
         rendering3D = true;
     }
 
@@ -250,26 +266,25 @@ public class Utils {
                 if (i >= 0 && i < items.length) items[i] = stacks.get(i);
             }
         }
+        // todo should we remove this? are there still instances where we might get presented container items in this
+        //  format? maybe on servers with weird multiversion setups - if they exist, test this code to ensure it works
         else if (components.contains(DataComponentTypes.BLOCK_ENTITY_DATA)) {
-            NbtComponent nbt2 = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+            NbtComponent nbt2 = components.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT);
+            NbtList nbt3 = nbt2.getNbt().getListOrEmpty("Items");
 
-            if (nbt2.contains("Items")) {
-                NbtList nbt3 = (NbtList) nbt2.getNbt().get("Items");
-                if (nbt3 == null) return;
+            for (int i = 0; i < nbt3.size(); i++) {
+                Optional<NbtCompound> compound = nbt3.getCompound(i);
+                if (compound.isEmpty()) continue;
 
-                for (int i = 0; i < nbt3.size(); i++) {
-                    Optional<NbtCompound> compound = nbt3.getCompound(i);
-                    if (compound.isEmpty()) continue;
+                Optional<Byte> slot = compound.get().getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
+                if (slot.isEmpty()) continue;
 
-                    Optional<Byte> slot = compound.get().getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
-                    if (slot.isEmpty()) continue;
-
-                    // now NPEs when mc.world == null
-                    if (slot.get() >= 0 && slot.get() < items.length) {
-                        Optional<ItemStack> stack = ItemStack.fromNbt(mc.player.getRegistryManager(), compound.get());
-                        if (stack.isEmpty()) stack = Optional.of(ItemStack.EMPTY);
-
-                        items[slot.get()] = stack.get();
+                // now NPEs when mc.world == null
+                if (slot.get() >= 0 && slot.get() < items.length) {
+                    switch (StackWithSlot.CODEC.parse(mc.player.getRegistryManager().getOps(NbtOps.INSTANCE), compound.get())) {
+                        case DataResult.Success<StackWithSlot> success -> items[slot.get()] = success.value().stack();
+                        case DataResult.Error<StackWithSlot> error -> items[slot.get()] = ItemStack.EMPTY;
+                        default -> throw new MatchException(null, null);
                     }
                 }
             }
