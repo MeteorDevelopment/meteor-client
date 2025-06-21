@@ -37,6 +37,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
     public int getWidth(TextRenderer textRenderer) {
         return 64;
     }
+
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
         var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).getAndUpdateRenderState(entity, 1);
@@ -57,6 +58,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
         Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
 
         context.addEntity(state, scale, translation, rotation, null, x, y, x + width, y + height);
-        spin += 0.05;
+        spin += (System.currentTimeMillis() - spin);
+        spin /= 10;
     }
 }
