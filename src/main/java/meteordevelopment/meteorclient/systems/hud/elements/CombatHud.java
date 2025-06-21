@@ -376,20 +376,17 @@ public class CombatHud extends HudElement {
             matrices.pushMatrix();
             matrices.scale((float) getScale(), (float) getScale(), 1);
 
-            x /= getScale();
-            y /= getScale();
-
             TextRenderer.get().begin(0.35, false, true);
 
             for (int position = 0; position < 6; position++) {
-                armorX = x + position * 20;
+                armorX = x + (position * 20 * getScale());
                 armorY = y;
 
                 ItemStack itemStack = getItem(slot);
 
-                renderer.item(itemStack, (int) (armorX), (int) (armorY), 1, true);
+                renderer.item(itemStack, (int) (armorX), (int) (armorY), (float) getScale(), true);
 
-                armorY += 18;
+                armorY = (y / getScale()) + 18;
 
                 ItemEnchantmentsComponent enchantments = EnchantmentHelper.getEnchantments(itemStack);
                 List<ObjectIntPair<RegistryEntry<Enchantment>>> enchantmentsToShow = new ArrayList<>();
@@ -403,7 +400,7 @@ public class CombatHud extends HudElement {
                 for (ObjectIntPair<RegistryEntry<Enchantment>> entry : enchantmentsToShow) {
                     String enchantName = Utils.getEnchantSimpleName(entry.left(), 3) + " " + entry.rightInt();
 
-                    double enchX = (armorX + 8) - (TextRenderer.get().getWidth(enchantName) / 2);
+                    double enchX = (((x / getScale()) + position * 20) + 8) - (TextRenderer.get().getWidth(enchantName) / 2);
                     TextRenderer.get().render(enchantName, enchX, armorY, entry.left().isIn(EnchantmentTags.CURSE) ? RED : enchantmentTextColor.get());
                     armorY += TextRenderer.get().getHeight();
                 }
