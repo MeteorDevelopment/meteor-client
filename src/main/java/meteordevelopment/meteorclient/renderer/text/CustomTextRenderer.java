@@ -137,5 +137,9 @@ public class CustomTextRenderer implements TextRenderer {
         scale = 1;
     }
 
-    public void destroy() {}
+    public void destroy() {
+        for (Font font : this.fonts) {
+            font.texture.close();
+        }
+    }
 }
