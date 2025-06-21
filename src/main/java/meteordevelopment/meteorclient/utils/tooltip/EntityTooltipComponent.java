@@ -17,6 +17,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EntityTooltipComponent implements MeteorTooltipData, TooltipComponent {
     protected final LivingEntity entity;
+    private static double spin;
 
     public EntityTooltipComponent(LivingEntity entity) {
         this.entity = entity;
@@ -29,20 +30,19 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
 
     @Override
     public int getHeight(TextRenderer textRenderer) {
-        return 24;
+        return 48;
     }
 
     @Override
     public int getWidth(TextRenderer textRenderer) {
         return 64;
     }
-
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
         var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).getAndUpdateRenderState(entity, 1);
         state.hitbox = null;
 
-        state.bodyYaw = 90;
+        state.bodyYaw = (float) (spin % 360);
         state.relativeHeadYaw = 0;
         state.pitch = 0;
 
@@ -53,9 +53,10 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
         height = getHeight(null);
 
         float scale = Math.max(width, height) / 2f * 1.25f;
-        Vector3f translation = new Vector3f(0, 0, 0);
+        Vector3f translation = new Vector3f(0, 0.1f, 0);
         Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
 
         context.addEntity(state, scale, translation, rotation, null, x, y, x + width, y + height);
+        spin += 0.05;
     }
 }
