@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.systems.hud.elements.TextHud;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import meteordevelopment.starscript.compiler.Parser;
+import org.meteordev.starscript.compiler.Parser;
 
 import java.util.ArrayList;
 import java.util.List;
