@@ -58,7 +58,6 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
         Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
 
         context.addEntity(state, scale, translation, rotation, null, x, y, x + width, y + height);
-        spin += (System.currentTimeMillis() - spin);
-        spin /= 10;
+        spin += 3 * mc.getRenderTickCounter().getDynamicDeltaTicks();
     }
 }
