@@ -122,6 +122,8 @@
     "LivingEntityRendererMixin",
     "MapRendererMixin",
     "MapTextureManagerAccessor",
+    "MerchantScreenMixin",
+    "MerchantScreenHandlerAccessor",
     "MessageHandlerMixin",
     "MinecraftClientAccessor",
     "MinecraftClientMixin",
