@@ -20,7 +20,6 @@ import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
-import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
@@ -98,11 +97,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
         firstFrame = true;
-    }
-
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/ReloadableResourceManagerImpl;reload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/resource/ResourceReload;", shift = At.Shift.BEFORE))
-    private void init$beforeReload(CallbackInfo info) {
-        resourceManager.registerReloader(new MeteorRenderPipelines.Reloader());
     }
 
     @Inject(at = @At("HEAD"), method = "tick")

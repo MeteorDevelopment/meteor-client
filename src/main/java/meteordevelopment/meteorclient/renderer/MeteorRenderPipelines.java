@@ -12,10 +12,10 @@ import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.MeteorClient;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.UniformType;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SynchronousResourceReloader;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -217,24 +217,22 @@ public abstract class MeteorRenderPipelines {
         return pipeline;
     }
 
-    private MeteorRenderPipelines() {}
+    public static void precompile() {
+        GpuDevice device = RenderSystem.getDevice();
+        ResourceManager resources = MinecraftClient.getInstance().getResourceManager();
 
-    public static class Reloader implements SynchronousResourceReloader {
-        @Override
-        public void reload(ResourceManager manager) {
-            GpuDevice device = RenderSystem.getDevice();
+        for (RenderPipeline pipeline : PIPELINES) {
+            device.precompilePipeline(pipeline, (identifier, shaderType) -> {
+                var resource = resources.getResource(identifier).get();
 
-            for (RenderPipeline pipeline : PIPELINES) {
-                device.precompilePipeline(pipeline, (identifier, shaderType) -> {
-                    var resource = manager.getResource(identifier).get();
-
-                    try (var in = resource.getInputStream()) {
-                        return IOUtils.toString(in, StandardCharsets.UTF_8);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
+                try (var in = resource.getInputStream()) {
+                    return IOUtils.toString(in, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
     }
+
+    private MeteorRenderPipelines() {}
 }
