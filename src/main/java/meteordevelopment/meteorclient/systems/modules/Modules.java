@@ -426,7 +426,6 @@ public class Modules extends System<Modules> {
         add(new AutoTool());
         add(new BreakDelay());
         add(new ChestSwap());
-        add(new ClickTrough());
         add(new EXPThrower());
         add(new FakePlayer());
         add(new FastUse());
