@@ -49,7 +49,7 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
 
     @Override
     public int getHeight(TextRenderer textRenderer) {
-        return 32 * 5 -2;
+        return 32 * 5;
     }
 
     @Override
@@ -59,25 +59,30 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        DiffuseLighting.disableGuiDepthLighting();
-        MatrixStack matrices = context.getMatrices();
-        matrices.push();
-        matrices.translate(x + 8, y + 8, 0);
+        mc.gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ITEMS_FLAT);
 
-        matrices.push();
-        matrices.translate(0.5, 16, 0);
-        matrices.scale(6, -6, 1);
-        matrices.scale(2, -2, -2);
-        matrices.push();
-        matrices.translate(2.5, 8.5, 0);
-        matrices.scale(5, 5, 5);
-        VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
         bannerField.pitch = 0f;
         bannerField.originY = -32f;
+
+        // the width and height provided to this method seem to be the dimensions of the entire tooltip,
+        // not just this component
+        int totalWidth = width;
+        width = getWidth(null);
+        height = getHeight(null);
+
+        MatrixStack matrices = new MatrixStack();
+        matrices.push();
+        matrices.translate(x + width / 2f + (totalWidth - width) / 2f, y + height * 0.775f, 0);
+
+        float s = Math.min(width, height);
+        matrices.scale(s * 0.75f, s * 0.75f, 1);
+
+        VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
+
         BannerBlockEntityRenderer.renderCanvas(
             matrices,
             immediate,
-            0xF000F0,
+            15728880,
             OverlayTexture.DEFAULT_UV,
             bannerField,
             ModelBaker.BANNER_BASE,
@@ -85,10 +90,9 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
             color,
             patterns
         );
-        matrices.pop();
-        matrices.pop();
+
         immediate.draw();
+
         matrices.pop();
-        DiffuseLighting.enableGuiDepthLighting();
     }
 }

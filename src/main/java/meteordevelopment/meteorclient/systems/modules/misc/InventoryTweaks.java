@@ -44,10 +44,10 @@ import java.util.concurrent.ThreadLocalRandom;
 public class InventoryTweaks extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSorting = settings.createGroup("Sorting");
+    private final SettingGroup sgAntiDrop = settings.createGroup("Anti Drop");
     private final SettingGroup sgAutoDrop = settings.createGroup("Auto Drop");
     private final SettingGroup sgStealDump = settings.createGroup("Steal and Dump");
     private final SettingGroup sgAutoSteal = settings.createGroup("Auto Steal");
-
 
     // General
 
@@ -67,34 +67,6 @@ public class InventoryTweaks extends Module {
             mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
             invOpened = false;
         })
-        .build()
-    );
-
-    private final Setting<Boolean> armorStorage = sgGeneral.add(new BoolSetting.Builder()
-        .name("armor-storage")
-        .description("Allows you to put normal items in your armor slots.")
-        .defaultValue(true)
-        .build()
-    );
-
-    // Anti drop (in sgGeneral to avoid breaking existing configs)
-
-    private final Setting<List<Item>> antiDropItems = sgGeneral.add(new ItemListSetting.Builder()
-        .name("anti-drop-items")
-        .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
-        .build()
-    );
-
-    private final Setting<Boolean> antiItemFrame = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-drop-item-frames")
-        .description("Prevent anti-drop items from being placed in item frames or pots")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Keybind> antiDropOverrideBind = sgGeneral.add(new KeybindSetting.Builder()
-        .name("anti-drop-override")
-        .description("Hold this bind to temporarily bypass anti-drop")
         .build()
     );
 
@@ -129,6 +101,27 @@ public class InventoryTweaks extends Module {
         .description("Disables the inventory sorter when in creative mode.")
         .defaultValue(true)
         .visible(sortingEnabled::get)
+        .build()
+    );
+
+    // Anti drop
+
+    private final Setting<List<Item>> antiDropItems = sgAntiDrop.add(new ItemListSetting.Builder()
+        .name("anti-drop-items")
+        .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
+        .build()
+    );
+
+    private final Setting<Boolean> antiItemFrame = sgAntiDrop.add(new BoolSetting.Builder()
+        .name("item-frames")
+        .description("Prevent anti-drop items from being placed in item frames or pots")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Keybind> antiDropOverrideBind = sgAntiDrop.add(new KeybindSetting.Builder()
+        .name("override-bind")
+        .description("Hold this bind to temporarily bypass anti-drop")
         .build()
     );
 
@@ -457,10 +450,6 @@ public class InventoryTweaks extends Module {
 
     public boolean mouseDragItemMove() {
         return isActive() && mouseDragItemMove.get();
-    }
-
-    public boolean armorStorage() {
-        return isActive() && armorStorage.get();
     }
 
     public boolean canSteal(ScreenHandler handler) {

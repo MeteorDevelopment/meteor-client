@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.mixin.indigo;
 
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
-
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractTerrainRenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import org.spongepowered.asm.mixin.Final;

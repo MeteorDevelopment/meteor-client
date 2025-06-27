@@ -80,10 +80,12 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         return constant;
     }
 
+    /*
     @ModifyExpressionValue(method = "sendSneakingPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSneaking()Z"))
     private boolean isSneaking(boolean sneaking) {
         return Modules.get().get(Sneak.class).doPacket() || Modules.get().get(NoSlow.class).airStrict() || sneaking;
     }
+     */
 
     @Inject(method = "tickMovement", at = @At("HEAD"))
     private void preTickMovement(CallbackInfo ci) {
