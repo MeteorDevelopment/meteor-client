@@ -147,7 +147,6 @@ public class Nuker extends Module {
             .description("Maximum blocks to try to break per tick. Useful when insta mining.")
             .defaultValue(1)
             .min(1)
-            .sliderRange(1, 6)
             .build()
     );
 
@@ -357,6 +356,8 @@ public class Nuker extends Module {
             pX_ += 1; // weird position stuff
             pos1.set(pX_ - r, pY - r + 1, pZ - r + 1); // down
             pos2.set(pX_ + r - 1, pY + r, pZ + r); // up
+            maxh = 0;
+            maxv = 0;
         } else {
             // Only change me if you want to mess with 3D rotations:
             // I messed with it
@@ -410,17 +411,20 @@ public class Nuker extends Module {
                 }
             }
 
+            // Flatten
+            if (mode.get() == Mode.Flatten && blockPos.getY() + 0.5 < pY) return;
+
+            // Smash
+            if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0) return;
+
             // Use only optimal tools
-            if (!mc.player.getMainHandStack().isSuitableFor(blockState) && !interact.get()) return;
+            if (optimalTool.get() && !interact.get() && !mc.player.getMainHandStack().isSuitableFor(blockState)) return;
 
             // Block must be breakable
             if (!BlockUtils.canBreak(blockPos, blockState) && !interact.get()) return;
 
             // Raycast to block
             if (isOutOfRange(blockPos)) return;
-
-            // Smash
-            if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0) return;
 
             // Check whitelist or blacklist
             if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(blockState.getBlock())) return;
