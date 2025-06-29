@@ -15,6 +15,8 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.BlockItem;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
@@ -24,10 +26,13 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
 public class GhostHand extends Module {
+    private static final Logger log = LoggerFactory.getLogger(GhostHand.class);
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<ActiveWhen> activeWhen = sgGeneral.add(new EnumSetting.Builder<ActiveWhen>()
@@ -73,21 +78,48 @@ public class GhostHand extends Module {
         if (activeWhen.get() == ActiveWhen.Sneaking && !mc.player.isSneaking()) return;
         if (activeWhen.get() == ActiveWhen.NotSneaking && mc.player.isSneaking()) return;
 
+        // why tf is this always false
         if (mc.world.getBlockState(BlockPos.ofFloored(mc.player.raycast(mc.player.getBlockInteractionRange(), mc.getRenderTickCounter().getTickProgress(true), false).getPos())).hasBlockEntity()) return;
 
-        Vec3d direction = new Vec3d(0, 0, 0.1)
-                .rotateX(-(float) Math.toRadians(mc.player.getPitch()))
-                .rotateY(-(float) Math.toRadians(mc.player.getYaw()));
+        info("1");
+
+        Vec3d direction = null;
+
+        if (Modules.get().isActive(Freecam.class)) {
+            direction = new Vec3d(0, 0, 0.1)
+                    .rotateX(-(float) Math.toRadians(Modules.get().get(Freecam.class).getPitch(mc.getRenderTickCounter().getTickProgress(true))))
+                    .rotateY(-(float) Math.toRadians(Modules.get().get(Freecam.class).getYaw(mc.getRenderTickCounter().getTickProgress(true))));
+        } else {
+            direction = new Vec3d(0, 0, 0.1)
+                    .rotateX(-(float) Math.toRadians(mc.player.getPitch()))
+                    .rotateY(-(float) Math.toRadians(mc.player.getYaw()));
+        }
+
+        info(String.valueOf(direction));
 
         posList.clear();
 
         for (int i = 1; i < mc.player.getBlockInteractionRange() * 10; i++) {
-            BlockPos pos = BlockPos.ofFloored(mc.player.getCameraPosVec(mc.getRenderTickCounter().getTickProgress(true)).add(direction.multiply(i)));
+            BlockPos pos = null;
+            float tickDelta = mc.getRenderTickCounter().getTickProgress(true);
+            if (Modules.get().isActive(Freecam.class)) {
+                pos = BlockPos.ofFloored(new Vec3d(
+                        Modules.get().get(Freecam.class).getX(tickDelta),
+                        Modules.get().get(Freecam.class).getY(tickDelta),
+                        Modules.get().get(Freecam.class).getZ(tickDelta)
+                ).add(direction.multiply(i)));
+            } else {
+                 pos = BlockPos.ofFloored(mc.player.getCameraPosVec(tickDelta).add(direction.multiply(i)));
+            }
+
+            info(String.valueOf(Modules.get().isActive(Freecam.class)));
+            info(String.valueOf(pos));
 
             if (posList.contains(pos)) continue;
             posList.add(pos);
 
             if (mc.world.getBlockState(pos).hasBlockEntity()) {
+                warning("HIT: " + pos);
                 if (!prioritizeItemUse.get()) mc.interactionManager.stopUsingItem(mc.player);
                 if (mc.player.isSneaking() && staySneaking.get()) isSneaking = true;
                 if (swingHand.get()) mc.player.swingHand(Hand.MAIN_HAND);
