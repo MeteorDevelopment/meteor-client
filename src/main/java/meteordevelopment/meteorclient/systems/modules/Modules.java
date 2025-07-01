@@ -536,7 +536,7 @@ public class Modules extends System<Modules> {
         add(new BuildHeight());
         add(new Collisions());
         add(new EChestFarmer());
-        add(new EndermanLook());
+        add(new MobLook());
         add(new Flamethrower());
         add(new HighwayBuilder());
         add(new LiquidFiller());
