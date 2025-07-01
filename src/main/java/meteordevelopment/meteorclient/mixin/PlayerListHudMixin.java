@@ -16,24 +16,38 @@ import net.minecraft.client.gui.hud.PlayerListHud;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Mixin(PlayerListHud.class)
 public abstract class PlayerListHudMixin {
     @Shadow
+    @Final
+    private MinecraftClient client;
+
+    @Shadow
+    @Final
+    private static Comparator<PlayerListEntry> ENTRY_ORDERING;
+
+    @Shadow
     protected abstract List<PlayerListEntry> collectPlayerEntries();
 
-    @ModifyConstant(constant = @Constant(longValue = 80L), method = "collectPlayerEntries")
-    private long modifyCount(long count) {
+    @Inject(method = "collectPlayerEntries", at = @At("HEAD"), cancellable = true)
+    private void modifyCount(CallbackInfoReturnable<List<PlayerListEntry>> cir) {
         BetterTab module = Modules.get().get(BetterTab.class);
 
-        return module.isActive() ? module.tabSize.get() : count;
+        if (client.player == null) return;
+
+        if (module.isActive()) {
+            cir.setReturnValue(client.player.networkHandler.getListedPlayerListEntries().stream().sorted(ENTRY_ORDERING).limit(module.tabSize.get()).toList());
+        }
     }
 
     @Inject(method = "getPlayerName", at = @At("HEAD"), cancellable = true)
