@@ -443,6 +443,7 @@ public class Modules extends System<Modules> {
         add(new PotionSaver());
         add(new Reach());
         add(new Rotation());
+        add(new SilentMine());
         add(new SpeedMine());
     }
 
