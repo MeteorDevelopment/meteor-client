@@ -20,18 +20,8 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.systems.modules.combat.*;
-import meteordevelopment.meteorclient.systems.modules.misc.*;
-import meteordevelopment.meteorclient.systems.modules.misc.swarm.Swarm;
-import meteordevelopment.meteorclient.systems.modules.movement.*;
-import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
-import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
-import meteordevelopment.meteorclient.systems.modules.player.*;
-import meteordevelopment.meteorclient.systems.modules.render.*;
-import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
-import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
-import meteordevelopment.meteorclient.systems.modules.world.Timer;
-import meteordevelopment.meteorclient.systems.modules.world.*;
+import meteordevelopment.meteorclient.systems.modules.world.Excavator;
+import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
@@ -43,17 +33,33 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import org.lwjgl.glfw.GLFW;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ConfigurationBuilder;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Modules extends System<Modules> {
     private static final List<Category> CATEGORIES = new ArrayList<>();
+    private static final Set<String> SCAN_PACKAGES = new HashSet<>();
+    private static final Map<String, Supplier<Boolean>> CONDITIONAL_MODULES = new HashMap<>();
 
-    private final List<Module> modules = new ArrayList<>();
+    static {
+        registerModulePackage("meteordevelopment.meteorclient.systems.modules");
+
+        registerConditionalModule(Excavator.class, () -> BaritoneUtils.IS_AVAILABLE);
+        registerConditionalModule(InfinityMiner.class, () -> BaritoneUtils.IS_AVAILABLE);
+    }
+
     private final Map<Class<? extends Module>, Module> moduleInstances = new Reference2ReferenceOpenHashMap<>();
     private final Map<Category, List<Module>> groups = new Reference2ReferenceOpenHashMap<>();
 
@@ -71,12 +77,7 @@ public class Modules extends System<Modules> {
 
     @Override
     public void init() {
-        initCombat();
-        initPlayer();
-        initMovement();
-        initRender();
-        initWorld();
-        initMisc();
+        loadModules();
     }
 
     @Override
@@ -90,11 +91,90 @@ public class Modules extends System<Modules> {
         super.load(folder);
     }
 
+    /**
+     * Registers a package to scan for modules.
+     * This should be called by addons during their initialization.
+     */
+    public static void registerModulePackage(String packageName) {
+        SCAN_PACKAGES.add(packageName);
+    }
+
+    /**
+     * Registers a module to be loaded conditionally.
+     *
+     * @param moduleClass The class of the module to register
+     * @param condition   A supplier that returns true if the module should be loaded
+     */
+    public static void registerConditionalModule(Class<? extends Module> moduleClass, Supplier<Boolean> condition) {
+        CONDITIONAL_MODULES.put(moduleClass.getName(), condition);
+    }
+
+    public void loadModules() {
+        try {
+            long startTime = java.lang.System.currentTimeMillis();
+
+            ConfigurationBuilder config = new ConfigurationBuilder()
+                .forPackages(SCAN_PACKAGES.toArray(new String[0]))
+                .setScanners(Scanners.SubTypes)
+                .setParallel(true)
+                .setExpandSuperTypes(false);
+
+            Reflections reflections = new Reflections(config);
+            Set<Class<? extends Module>> moduleClasses = reflections.getSubTypesOf(Module.class);
+
+            moduleClasses = moduleClasses.stream()
+                .filter(moduleClass -> SCAN_PACKAGES.stream().anyMatch(pkg -> moduleClass.getName().startsWith(pkg)))
+                .collect(Collectors.toSet());
+
+            Map<String, List<Class<? extends Module>>> modulesByPackage = new HashMap<>();
+            for (Class<? extends Module> moduleClass : moduleClasses) {
+                String packageName = moduleClass.getPackage().getName();
+                modulesByPackage.computeIfAbsent(packageName, k -> new ArrayList<>()).add(moduleClass);
+            }
+
+            int totalCount = 0;
+            int skippedCount = 0;
+            for (Class<? extends Module> moduleClass : moduleClasses) {
+                String className = moduleClass.getName();
+                if (CONDITIONAL_MODULES.containsKey(className) && !CONDITIONAL_MODULES.get(className).get()) {
+                    MeteorClient.LOG.info("Skipping conditional module: {}", className);
+                    skippedCount++;
+                    continue;
+                }
+
+                try {
+                    if (Modifier.isAbstract(moduleClass.getModifiers()) || moduleClass.isInterface()) continue;
+
+                    Constructor<? extends Module> constructor = moduleClass.getDeclaredConstructor();
+                    constructor.setAccessible(true);
+                    Module module = constructor.newInstance();
+                    add(module);
+                    totalCount++;
+                } catch (NoSuchMethodException ignored) {
+                    MeteorClient.LOG.error("Module {} does not have a no-args constructor", moduleClass.getName());
+                } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                    MeteorClient.LOG.error("Failed to load module: {}", moduleClass.getName(), e);
+                }
+            }
+
+            long endTime = java.lang.System.currentTimeMillis();
+
+            for (Map.Entry<String, List<Class<? extends Module>>> entry : modulesByPackage.entrySet()) {
+                String packageName = entry.getKey();
+                int count = entry.getValue().size();
+                MeteorClient.LOG.info("Found {} modules in {}", count, packageName);
+            }
+
+            MeteorClient.LOG.info("Loaded {} modules ({} skipped) in {}ms", totalCount, skippedCount, endTime - startTime);
+        } catch (Exception e) {
+            MeteorClient.LOG.error("Failed to load modules", e);
+        }
+    }
+
     public void sortModules() {
         for (List<Module> modules : groups.values()) {
             modules.sort(Comparator.comparing(o -> o.title));
         }
-        modules.sort(Comparator.comparing(o -> o.title));
     }
 
     public static void registerCategory(Category category) {
@@ -131,14 +211,6 @@ public class Modules extends System<Modules> {
 
     public Collection<Module> getAll() {
         return moduleInstances.values();
-    }
-
-    /**
-     * @deprecated Use {@link Modules#getAll()} instead.
-     */
-    @Deprecated(forRemoval = true)
-    public List<Module> getList() {
-        return modules;
     }
 
     public int getCount() {
@@ -243,12 +315,10 @@ public class Modules extends System<Modules> {
         if (moduleToBind.keybind.canBindTo(isKey, value, modifiers)) {
             moduleToBind.keybind.set(isKey, value, modifiers);
             moduleToBind.info("Bound to (highlight)%s(default).", moduleToBind.keybind);
-        }
-        else if (value == GLFW.GLFW_KEY_ESCAPE) {
+        } else if (value == GLFW.GLFW_KEY_ESCAPE) {
             moduleToBind.keybind.set(Keybind.none());
             moduleToBind.info("Removed bind.");
-        }
-        else return false;
+        } else return false;
 
         MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
         moduleToBind = null;
@@ -378,201 +448,9 @@ public class Modules extends System<Modules> {
 
         // Add the module
         moduleInstances.put(module.getClass(), module);
-        modules.add(module);
         getGroup(module.category).add(module);
 
         // Register color settings for the module
         module.settings.registerColorSettings(module);
-    }
-
-    private void initCombat() {
-        add(new AnchorAura());
-        add(new AntiAnvil());
-        add(new AntiBed());
-        add(new ArrowDodge());
-        add(new AutoAnvil());
-        add(new AutoArmor());
-        add(new AutoCity());
-        add(new AutoEXP());
-        add(new AutoTotem());
-        add(new AutoTrap());
-        add(new AutoWeapon());
-        add(new AutoWeb());
-        add(new BedAura());
-        add(new BowAimbot());
-        add(new BowSpam());
-        add(new Burrow());
-        add(new Criticals());
-        add(new CrystalAura());
-        add(new Hitboxes());
-        add(new HoleFiller());
-        add(new KillAura());
-        add(new Offhand());
-        add(new Quiver());
-        add(new SelfAnvil());
-        add(new SelfTrap());
-        add(new SelfWeb());
-        add(new Surround());
-    }
-
-    private void initPlayer() {
-        add(new AntiHunger());
-        add(new AutoEat());
-        add(new AutoClicker());
-        add(new AutoFish());
-        add(new AutoGap());
-        add(new AutoMend());
-        add(new AutoReplenish());
-        add(new AutoTool());
-        add(new BreakDelay());
-        add(new ChestSwap());
-        add(new EXPThrower());
-        add(new FakePlayer());
-        add(new FastUse());
-        add(new GhostHand());
-        add(new InstantRebreak());
-        add(new LiquidInteract());
-        add(new MiddleClickExtra());
-        add(new Multitask());
-        add(new NoInteract());
-        add(new NoMiningTrace());
-        add(new NoRotate());
-        add(new NoStatusEffects());
-        add(new OffhandCrash());
-        add(new Portals());
-        add(new PotionSaver());
-        add(new Reach());
-        add(new Rotation());
-        add(new SpeedMine());
-    }
-
-    private void initMovement() {
-        add(new AirJump());
-        add(new Anchor());
-        add(new AntiAFK());
-        add(new AntiVoid());
-        add(new AutoJump());
-        add(new AutoWalk());
-        add(new AutoWasp());
-        add(new Blink());
-        add(new BoatFly());
-        add(new ClickTP());
-        add(new ElytraBoost());
-        add(new ElytraFly());
-        add(new EntityControl());
-        add(new EntitySpeed());
-        add(new FastClimb());
-        add(new Flight());
-        add(new GUIMove());
-        add(new HighJump());
-        add(new Jesus());
-        add(new LongJump());
-        add(new NoFall());
-        add(new NoSlow());
-        add(new Parkour());
-        add(new ReverseStep());
-        add(new SafeWalk());
-        add(new Scaffold());
-        add(new Slippy());
-        add(new Sneak());
-        add(new Speed());
-        add(new Spider());
-        add(new Sprint());
-        add(new Step());
-        add(new TridentBoost());
-        add(new Velocity());
-    }
-
-    private void initRender() {
-        add(new BetterTab());
-        add(new BetterTooltips());
-        add(new BlockESP());
-        add(new BlockSelection());
-        add(new Blur());
-        add(new BossStack());
-        add(new Breadcrumbs());
-        add(new BreakIndicators());
-        add(new CameraTweaks());
-        add(new Chams());
-        add(new CityESP());
-        add(new EntityOwner());
-        add(new ESP());
-        add(new Freecam());
-        add(new FreeLook());
-        add(new Fullbright());
-        add(new HandView());
-        add(new HoleESP());
-        add(new ItemPhysics());
-        add(new ItemHighlight());
-        add(new LightOverlay());
-        add(new LogoutSpots());
-        add(new Marker());
-        add(new Nametags());
-        add(new NoRender());
-        add(new PopChams());
-        add(new StorageESP());
-        add(new TimeChanger());
-        add(new Tracers());
-        add(new Trail());
-        add(new Trajectories());
-        add(new TunnelESP());
-        add(new VoidESP());
-        add(new WallHack());
-        add(new WaypointsModule());
-        add(new Xray());
-        add(new Zoom());
-    }
-
-    private void initWorld() {
-        add(new AirPlace());
-        add(new Ambience());
-        add(new AutoBreed());
-        add(new AutoBrewer());
-        add(new AutoMount());
-        add(new AutoNametag());
-        add(new AutoShearer());
-        add(new AutoSign());
-        add(new AutoSmelter());
-        add(new BuildHeight());
-        add(new Collisions());
-        add(new EChestFarmer());
-        add(new EndermanLook());
-        add(new Flamethrower());
-        add(new HighwayBuilder());
-        add(new LiquidFiller());
-        add(new MountBypass());
-        add(new NoGhostBlocks());
-        add(new Nuker());
-        add(new PacketMine());
-        add(new StashFinder());
-        add(new SpawnProofer());
-        add(new Timer());
-        add(new VeinMiner());
-
-        if (BaritoneUtils.IS_AVAILABLE) {
-            add(new Excavator());
-            add(new InfinityMiner());
-        }
-    }
-
-    private void initMisc() {
-        add(new AntiPacketKick());
-        add(new AutoLog());
-        add(new AutoReconnect());
-        add(new AutoRespawn());
-        add(new BetterBeacons());
-        add(new BetterChat());
-        add(new BookBot());
-        add(new DiscordPresence());
-        add(new InventoryTweaks());
-        add(new MessageAura());
-        add(new NameProtect());
-        add(new Notebot());
-        add(new Notifier());
-        add(new PacketCanceller());
-        add(new ServerSpoof());
-        add(new SoundBlocker());
-        add(new Spam());
-        add(new Swarm());
     }
 }
