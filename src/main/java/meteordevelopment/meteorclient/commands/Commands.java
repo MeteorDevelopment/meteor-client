@@ -27,48 +27,16 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class Commands {
     public static final CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
     public static final List<Command> COMMANDS = new ArrayList<>();
+    private static final Set<String> SCAN_PACKAGES = new HashSet<>();
+    private static final Map<String, Supplier<Boolean>> CONDITIONAL_COMMANDS = new HashMap<>();
+
+    static {
+        registerCommandPackage("meteordevelopment.meteorclient.commands.commands");
+    }
 
     @PostInit(dependencies = PathManagers.class)
     public static void init() {
-        add(new VClipCommand());
-        add(new HClipCommand());
-        add(new DismountCommand());
-        add(new DisconnectCommand());
-        add(new DamageCommand());
-        add(new DropCommand());
-        add(new EnchantCommand());
-        add(new FakePlayerCommand());
-        add(new FriendsCommand());
-        add(new CommandsCommand());
-        add(new InventoryCommand());
-        add(new NbtCommand());
-        add(new NotebotCommand());
-        add(new PeekCommand());
-        add(new EnderChestCommand());
-        add(new ProfilesCommand());
-        add(new ReloadCommand());
-        add(new ResetCommand());
-        add(new SayCommand());
-        add(new ServerCommand());
-        add(new SwarmCommand());
-        add(new ToggleCommand());
-        add(new SettingCommand());
-        add(new SpectateCommand());
-        add(new GamemodeCommand());
-        add(new SaveMapCommand());
-        add(new MacroCommand());
-        add(new ModulesCommand());
-        add(new BindsCommand());
-        add(new GiveCommand());
-        add(new NameHistoryCommand());
-        add(new BindCommand());
-        add(new FovCommand());
-        add(new RotationCommand());
-        add(new WaypointCommand());
-        add(new InputCommand());
-        add(new WaspCommand());
-        add(new LocateCommand());
-
+        loadCommands();
         COMMANDS.sort(Comparator.comparing(Command::getName));
     }
 
