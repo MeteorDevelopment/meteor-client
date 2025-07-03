@@ -111,8 +111,6 @@ public class Modules extends System<Modules> {
 
     public void loadModules() {
         try {
-            long startTime = java.lang.System.currentTimeMillis();
-
             ConfigurationBuilder config = new ConfigurationBuilder()
                 .forPackages(SCAN_PACKAGES.toArray(new String[0]))
                 .setScanners(Scanners.SubTypes)
@@ -125,12 +123,6 @@ public class Modules extends System<Modules> {
             moduleClasses = moduleClasses.stream()
                 .filter(moduleClass -> SCAN_PACKAGES.stream().anyMatch(pkg -> moduleClass.getName().startsWith(pkg)))
                 .collect(Collectors.toSet());
-
-            Map<String, List<Class<? extends Module>>> modulesByPackage = new HashMap<>();
-            for (Class<? extends Module> moduleClass : moduleClasses) {
-                String packageName = moduleClass.getPackage().getName();
-                modulesByPackage.computeIfAbsent(packageName, k -> new ArrayList<>()).add(moduleClass);
-            }
 
             int totalCount = 0;
             int skippedCount = 0;
@@ -157,15 +149,7 @@ public class Modules extends System<Modules> {
                 }
             }
 
-            long endTime = java.lang.System.currentTimeMillis();
-
-            for (Map.Entry<String, List<Class<? extends Module>>> entry : modulesByPackage.entrySet()) {
-                String packageName = entry.getKey();
-                int count = entry.getValue().size();
-                MeteorClient.LOG.info("Found {} modules in {}", count, packageName);
-            }
-
-            MeteorClient.LOG.info("Loaded {} modules ({} skipped) in {}ms", totalCount, skippedCount, endTime - startTime);
+            MeteorClient.LOG.info("Loaded {} modules ({} skipped)", totalCount, skippedCount);
         } catch (Exception e) {
             MeteorClient.LOG.error("Failed to load modules", e);
         }

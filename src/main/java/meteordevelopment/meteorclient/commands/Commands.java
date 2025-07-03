@@ -19,7 +19,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -93,7 +92,6 @@ public class Commands {
 
     public static void loadCommands() {
         try {
-            long startTime = java.lang.System.currentTimeMillis();
             int totalCount = 0;
             int skippedCount = 0;
 
@@ -109,12 +107,6 @@ public class Commands {
             commandClasses = commandClasses.stream()
                 .filter(commandClass -> SCAN_PACKAGES.stream().anyMatch(pkg -> commandClass.getName().startsWith(pkg)))
                 .collect(Collectors.toSet());
-
-            Map<String, List<Class<? extends Command>>> commandsByPackage = new HashMap<>();
-            for (Class<? extends Command> commandClass : commandClasses) {
-                String packageName = commandClass.getPackage().getName();
-                commandsByPackage.computeIfAbsent(packageName, k -> new ArrayList<>()).add(commandClass);
-            }
 
             for (Class<? extends Command> commandClass : commandClasses) {
                 String className = commandClass.getName();
@@ -139,15 +131,7 @@ public class Commands {
                 }
             }
 
-            long endTime = java.lang.System.currentTimeMillis();
-
-            for (Entry<String, List<Class<? extends Command>>> entry : commandsByPackage.entrySet()) {
-                String packageName = entry.getKey();
-                int count = entry.getValue().size();
-                MeteorClient.LOG.info("Found {} commands in {}", count, packageName);
-            }
-
-            MeteorClient.LOG.info("Loaded {} commands ({} skipped) in {}ms", totalCount, skippedCount, endTime - startTime);
+            MeteorClient.LOG.info("Loaded {} commands ({} skipped)", totalCount, skippedCount);
         } catch (Exception e) {
             MeteorClient.LOG.error("Failed to load commands", e);
         }
