@@ -26,13 +26,10 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
 public class GhostHand extends Module {
-    private static final Logger log = LoggerFactory.getLogger(GhostHand.class);
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<ActiveWhen> activeWhen = sgGeneral.add(new EnumSetting.Builder<ActiveWhen>()
@@ -81,27 +78,29 @@ public class GhostHand extends Module {
         // why tf is this always false
         if (mc.world.getBlockState(BlockPos.ofFloored(mc.player.raycast(mc.player.getBlockInteractionRange(), mc.getRenderTickCounter().getTickProgress(true), false).getPos())).hasBlockEntity()) return;
 
-        info("1");
+//        info("1");
+//        info(String.valueOf(mc.player.getPitch()));
 
+        float tickDelta = mc.getRenderTickCounter().getTickProgress(true);
         Vec3d direction = null;
 
         if (Modules.get().isActive(Freecam.class)) {
             direction = new Vec3d(0, 0, 0.1)
-                    .rotateX(-(float) Math.toRadians(Modules.get().get(Freecam.class).getPitch(mc.getRenderTickCounter().getTickProgress(true))))
-                    .rotateY(-(float) Math.toRadians(Modules.get().get(Freecam.class).getYaw(mc.getRenderTickCounter().getTickProgress(true))));
+                    .rotateX(-(float) Math.toRadians(Modules.get().get(Freecam.class).getPitch(tickDelta)))
+                    .rotateY(-(float) Math.toRadians(Modules.get().get(Freecam.class).getYaw(tickDelta)));
         } else {
             direction = new Vec3d(0, 0, 0.1)
                     .rotateX(-(float) Math.toRadians(mc.player.getPitch()))
                     .rotateY(-(float) Math.toRadians(mc.player.getYaw()));
         }
 
-        info(String.valueOf(direction));
+//        info("2");
+//        info(String.valueOf(direction));
 
         posList.clear();
 
         for (int i = 1; i < mc.player.getBlockInteractionRange() * 10; i++) {
             BlockPos pos = null;
-            float tickDelta = mc.getRenderTickCounter().getTickProgress(true);
             if (Modules.get().isActive(Freecam.class)) {
                 pos = BlockPos.ofFloored(new Vec3d(
                         Modules.get().get(Freecam.class).getX(tickDelta),
@@ -112,8 +111,8 @@ public class GhostHand extends Module {
                  pos = BlockPos.ofFloored(mc.player.getCameraPosVec(tickDelta).add(direction.multiply(i)));
             }
 
-            info(String.valueOf(Modules.get().isActive(Freecam.class)));
-            info(String.valueOf(pos));
+//            info(String.valueOf(Modules.get().isActive(Freecam.class)));
+//            info(String.valueOf(pos));
 
             if (posList.contains(pos)) continue;
             posList.add(pos);
