@@ -27,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShearsItem;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.world.GameMode;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -146,6 +147,7 @@ public class AutoTool extends Module {
     @EventHandler(priority = EventPriority.HIGH)
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         if (Modules.get().isActive(InfinityMiner.class)) return;
+        if (mc.player.getGameMode() != GameMode.SURVIVAL) return;
 
         // Get blockState
         BlockState blockState = mc.world.getBlockState(event.blockPos);
