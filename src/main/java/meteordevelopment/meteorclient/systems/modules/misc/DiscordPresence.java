@@ -107,6 +107,7 @@ public class DiscordPresence extends Module {
     private SmallImage currentSmallImage;
     private int ticks;
     private boolean forceUpdate, lastWasInMainMenu;
+    private boolean hasLoggedError = false;
 
     private final List<Script> line1Scripts = new ArrayList<>();
     private int line1Ticks, line1I;
@@ -146,31 +147,42 @@ public class DiscordPresence extends Module {
 
     @Override
     public void onActivate() {
-        DiscordIPC.start(835240968533049424L, null);
+        try {
+            DiscordIPC.start(835240968533049424L, null);
 
-        rpc.setStart(System.currentTimeMillis() / 1000L);
+            rpc.setStart(System.currentTimeMillis() / 1000L);
 
-        String largeText = "%s %s".formatted(MeteorClient.NAME, MeteorClient.VERSION);
-        if (!MeteorClient.BUILD_NUMBER.isEmpty()) largeText += " Build: " + MeteorClient.BUILD_NUMBER;
-        rpc.setLargeImage("meteor_client", largeText);
+            String largeText = "%s %s".formatted(MeteorClient.NAME, MeteorClient.VERSION);
+            if (!MeteorClient.BUILD_NUMBER.isEmpty()) largeText += " Build: " + MeteorClient.BUILD_NUMBER;
+            rpc.setLargeImage("meteor_client", largeText);
 
-        currentSmallImage = SmallImage.Snail;
+            currentSmallImage = SmallImage.Snail;
 
-        recompileLine1();
-        recompileLine2();
+            recompileLine1();
+            recompileLine2();
 
-        ticks = 0;
-        line1Ticks = 0;
-        line2Ticks = 0;
-        lastWasInMainMenu = false;
+            ticks = 0;
+            line1Ticks = 0;
+            line2Ticks = 0;
+            lastWasInMainMenu = false;
+            hasLoggedError = false;
 
-        line1I = 0;
-        line2I = 0;
+            line1I = 0;
+            line2I = 0;
+        } catch (Exception e) {
+            error("Failed to start Discord Rich Presence: " + e.getMessage());
+            error("Make sure Discord is running and try again.");
+            toggle();
+        }
     }
 
     @Override
     public void onDeactivate() {
-        DiscordIPC.stop();
+        try {
+            DiscordIPC.stop();
+        } catch (Exception e) {
+            // Ignore errors when stopping
+        }
     }
 
     private void recompile(List<String> messages, List<Script> scripts) {
@@ -277,7 +289,18 @@ public class DiscordPresence extends Module {
         }
 
         // Update
-        if (update) DiscordIPC.setActivity(rpc);
+        if (update) {
+            try {
+                DiscordIPC.setActivity(rpc);
+            } catch (Exception e) {
+                if (!hasLoggedError) {
+                    error("Failed to update Discord Rich Presence: " + e.getMessage());
+                    error("Make sure Discord is running. Module will be disabled.");
+                    hasLoggedError = true;
+                }
+                toggle();
+            }
+        }
         forceUpdate = false;
         lastWasInMainMenu = !Utils.canUpdate();
     }
