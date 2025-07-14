@@ -21,7 +21,7 @@ public class AddCrackedAccountScreen extends AddAccountScreen {
         WTable t = add(theme.table()).widget();
 
         // Name
-        t.add(theme.label("Name: "));
+        t.add(theme.label("alex stop hacking in singleplayer"));
         WTextBox name = t.add(theme.textBox("", "seasnail8169", (text, c) ->
             // Username can't contain spaces
             c != ' '
