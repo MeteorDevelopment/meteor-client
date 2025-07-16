@@ -10,6 +10,7 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.HighJump;
 import meteordevelopment.meteorclient.systems.modules.movement.Sprint;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
@@ -114,6 +115,13 @@ public abstract class LivingEntityMixin extends Entity {
         if (Modules.get().get(NoStatusEffects.class).shouldBlock(effect.value())) return false;
 
         return original;
+    }
+
+    @ModifyConstant(method = "jump", constant = @Constant(floatValue = 1.0E-5F))
+    private float modifyJumpConstant(float original) {
+        if ((Object) this != mc.player) return original;
+        if (!Modules.get().isActive(HighJump.class)) return original;
+        return -1;
     }
 
     @ModifyExpressionValue(method = "jump", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getYaw()F"))
