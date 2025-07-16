@@ -7,10 +7,8 @@ const otherModTerms = [
     "lunar",
     "optifabric",
     "optifine",
-    "origins",
     "pojav",
-    "tlauncher",
-    "wurst"
+    "tlauncher"
 ];
 
 const anticheatTerms = [
