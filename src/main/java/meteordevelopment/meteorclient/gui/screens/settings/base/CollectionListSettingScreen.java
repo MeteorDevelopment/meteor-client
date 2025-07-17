@@ -49,15 +49,15 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
             filterText = filter.get().trim();
 
             table.clear();
-            initWidgets(registry);
+            initTables();
         };
 
         table = add(theme.table()).expandX().widget();
 
-        initWidgets(registry);
+        initTables();
     }
 
-    private void initWidgets(Iterable<T> registry) {
+    private void initTables() {
         // Left (all)
         WTable left = abc(pairs -> registry.forEach(t -> {
             if (skipValue(t) || collection.contains(t)) return;
@@ -66,16 +66,16 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
             int diff = Utils.searchLevenshteinDefault(getValueName(t), filterText, false);
             if (words > 0 || diff <= getValueName(t).length() / 2) pairs.add(new Pair<>(t, -diff));
         }), true, t -> {
-            addValue(registry, t);
+            addValue(t);
 
             T v = getAdditionalValue(t);
-            if (v != null) addValue(registry, v);
+            if (v != null) addValue(v);
         });
 
         if (!left.cells.isEmpty()) table.add(theme.verticalSeparator()).expandWidgetY();
 
         // Right (selected)
-        abc(pairs -> {
+        WTable right = abc(pairs -> {
             for (T value : collection) {
                 if (skipValue(value)) continue;
 
@@ -84,29 +84,13 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
                 if (words > 0 || diff <= getValueName(value).length() / 2) pairs.add(new Pair<>(value, -diff));
             }
         }, false, t -> {
-            removeValue(registry, t);
+            removeValue(t);
 
             T v = getAdditionalValue(t);
-            if (v != null) removeValue(registry, v);
+            if (v != null) removeValue(v);
         });
-    }
 
-    private void addValue(Iterable<T> registry, T value) {
-        if (!collection.contains(value)) {
-            collection.add(value);
-
-            setting.onChanged();
-            table.clear();
-            initWidgets(registry);
-        }
-    }
-
-    private void removeValue(Iterable<T> registry, T value) {
-        if (collection.remove(value)) {
-            setting.onChanged();
-            table.clear();
-            initWidgets(registry);
-        }
+        postWidgets(left, right);
     }
 
     private WTable abc(Consumer<List<Pair<T, Integer>>> addValues, boolean isLeft, Consumer<T> buttonAction) {
@@ -135,6 +119,26 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
 
         return table;
     }
+
+    protected void addValue(T value) {
+        if (!collection.contains(value)) {
+            collection.add(value);
+
+            setting.onChanged();
+            table.clear();
+            initWidgets();
+        }
+    }
+
+    protected void removeValue(T value) {
+        if (collection.remove(value)) {
+            setting.onChanged();
+            table.clear();
+            initWidgets();
+        }
+    }
+
+    protected void postWidgets(WTable left, WTable right) {}
 
     protected boolean includeValue(T value) {
         return true;

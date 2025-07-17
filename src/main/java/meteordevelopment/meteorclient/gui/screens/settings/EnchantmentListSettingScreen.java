@@ -26,6 +26,7 @@ public class EnchantmentListSettingScreen extends DynamicRegistryListSettingScre
         return theme.label(getValueName(value));
     }
 
+    // todo add internal names to search filters
     @Override
     protected String getValueName(RegistryKey<Enchantment> value) {
         return Names.get(value);
