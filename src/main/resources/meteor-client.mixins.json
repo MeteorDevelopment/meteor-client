@@ -78,7 +78,6 @@
     "EndCrystalEntityRendererMixin",
     "EntityAccessor",
     "EntityBucketItemAccessor",
-    "EntityEffectParticleEffectAccessor",
     "EntityMixin",
     "EntityRenderDispatcherMixin",
     "EntityRendererMixin",
