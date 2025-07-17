@@ -8,10 +8,7 @@ package meteordevelopment.meteorclient.utils.entity;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongBidirectionalIterator;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
-import meteordevelopment.meteorclient.mixin.EntityTrackingSectionAccessor;
-import meteordevelopment.meteorclient.mixin.SectionedEntityCacheAccessor;
-import meteordevelopment.meteorclient.mixin.SimpleEntityLookupAccessor;
-import meteordevelopment.meteorclient.mixin.WorldAccessor;
+import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.block.Block;
@@ -124,7 +121,7 @@ public class EntityUtils {
         double bestDistanceSquared = 6 * 6;
         Direction bestDirection = null;
 
-        for (Direction direction : Direction.HORIZONTAL) {
+        for (Direction direction : DirectionAccessor.getHorizontal()) {
             testPos.set(player.getBlockPos().offset(direction));
 
             Block block = mc.world.getBlockState(testPos).getBlock();
