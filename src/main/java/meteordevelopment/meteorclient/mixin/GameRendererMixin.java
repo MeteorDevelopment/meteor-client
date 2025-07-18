@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.render.Zoom;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
@@ -129,6 +130,10 @@ public abstract class GameRendererMixin {
         if (Modules.get().get(NoMiningTrace.class).canWork(original instanceof EntityHitResult ehr ? ehr.getEntity() : null) && hitResult.getType() == HitResult.Type.BLOCK) {
             return hitResult;
         }
+        else if (original instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) {
+            return hitResult;
+        }
+
         return original;
     }
 
