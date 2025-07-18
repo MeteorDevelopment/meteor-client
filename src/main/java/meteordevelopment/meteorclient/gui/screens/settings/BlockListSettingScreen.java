@@ -29,6 +29,10 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
 
     @Override
     protected boolean includeValue(Block value) {
+        if (Registries.BLOCK.getId(value).getPath().endsWith("_wall_banner")) {
+            return false;
+        }
+
         Predicate<Block> filter = ((BlockListSetting) setting).filter;
 
         if (filter == null) return value != Blocks.AIR;
@@ -43,11 +47,6 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
     @Override
     protected String getValueName(Block value) {
         return Names.get(value);
-    }
-
-    @Override
-    protected boolean skipValue(Block value) {
-        return Registries.BLOCK.getId(value).getPath().endsWith("_wall_banner");
     }
 
     @Override

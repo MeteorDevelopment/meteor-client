@@ -53,7 +53,7 @@ public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
 
     private void initTable() {
         registry.forEach(t -> { // todo sorting
-            if (skipValue(t) || !includeValue(t)) return; // todo redundancy
+            if (!includeValue(t)) return;
 
             String name = getValueName(t);
             int words = Utils.searchInWords(name, filterText);
@@ -92,8 +92,4 @@ public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
     protected abstract WWidget getDataWidget(K value, @Nullable V data);
 
     protected abstract String getValueName(K value);
-
-    protected boolean skipValue(K value) {
-        return false;
-    }
 }

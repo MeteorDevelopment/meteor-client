@@ -60,7 +60,7 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
     private void initTables() {
         // Left (all)
         WTable left = abc(pairs -> registry.forEach(t -> {
-            if (skipValue(t) || collection.contains(t)) return;
+            if ((!includeValue(t)) || collection.contains(t)) return;
 
             int words = Utils.searchInWords(getValueName(t), filterText);
             int diff = Utils.searchLevenshteinDefault(getValueName(t), filterText, false);
@@ -77,7 +77,7 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
         // Right (selected)
         WTable right = abc(pairs -> {
             for (T value : collection) {
-                if (skipValue(value)) continue;
+                if (!includeValue(value)) continue;
 
                 int words = Utils.searchInWords(getValueName(value), filterText);
                 int diff = Utils.searchLevenshteinDefault(getValueName(value), filterText, false);
@@ -99,8 +99,6 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
         WTable table = cell.widget();
 
         Consumer<T> forEach = t -> {
-            if (!includeValue(t)) return;
-
             table.add(getValueWidget(t));
 
             WPressable button = table.add(isLeft ? theme.plus() : theme.minus()).expandCellX().right().widget();
@@ -147,10 +145,6 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
     protected abstract WWidget getValueWidget(T value);
 
     protected abstract String getValueName(T value);
-
-    protected boolean skipValue(T value) {
-        return false;
-    }
 
     protected T getAdditionalValue(T value) {
         return null;

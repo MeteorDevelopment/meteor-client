@@ -22,6 +22,11 @@ public class ParticleTypeListSettingScreen extends CollectionListSettingScreen<P
     }
 
     @Override
+    protected boolean includeValue(ParticleType<?> value) {
+        return value instanceof ParticleEffect;
+    }
+
+    @Override
     protected WWidget getValueWidget(ParticleType<?> value) {
         return theme.label(getValueName(value));
     }
@@ -29,10 +34,5 @@ public class ParticleTypeListSettingScreen extends CollectionListSettingScreen<P
     @Override
     protected String getValueName(ParticleType<?> value) {
         return Names.get(value);
-    }
-
-    @Override
-    protected boolean skipValue(ParticleType<?> value) {
-        return !(value instanceof ParticleEffect);
     }
 }
