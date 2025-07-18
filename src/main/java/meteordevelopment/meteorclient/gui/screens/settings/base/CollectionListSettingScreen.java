@@ -23,10 +23,8 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
     protected final Collection<T> collection;
     private final Iterable<T> registry;
 
-    private WTextBox filter;
-    private String filterText = "";
-
     private WTable table;
+    private String filterText = "";
 
     public CollectionListSettingScreen(GuiTheme theme, String title, Setting<?> setting, Collection<T> collection, Iterable<T> registry) {
         super(theme, title);
@@ -39,21 +37,21 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
     @Override
     public void initWidgets() {
         // Filter
-        filter = add(theme.textBox("")).minWidth(400).expandX().widget();
+        WTextBox filter = add(theme.textBox("")).minWidth(400).expandX().widget();
         filter.setFocused(true);
         filter.action = () -> {
             filterText = filter.get().trim();
 
             table.clear();
-            initTables();
+            initTable();
         };
 
         table = add(theme.table()).expandX().widget();
 
-        initTables();
+        initTable();
     }
 
-    private void initTables() {
+    private void initTable() {
         // Left (all)
         WTable left = abc(registry, true, t -> {
             addValue(t);
