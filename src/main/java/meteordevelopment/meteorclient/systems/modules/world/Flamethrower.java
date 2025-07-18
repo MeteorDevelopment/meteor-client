@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -104,14 +105,16 @@ public class Flamethrower extends Module {
         ticks++;
         for (Entity entity : mc.world.getEntities()) {
             if (!entities.get().contains(entity.getType()) || !PlayerUtils.isWithin(entity, distance.get())) continue;
-            if (entity.isFireImmune()) continue;
             if (entity == mc.player) continue;
-            if (!targetBabies.get() && entity instanceof LivingEntity && ((LivingEntity)entity).isBaby()) continue;
+            if (!entity.isAlive() || entity.inPowderSnow || entity.isTouchingWaterOrRain() || entity.isFireImmune()) continue;
 
-            FindItemResult findFlintAndSteel = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.FLINT_AND_STEEL && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
-            if (!InvUtils.swap(findFlintAndSteel.slot(), true)) return;
+            if (!targetBabies.get() && entity instanceof LivingEntity livingEntity && livingEntity.isBaby()) continue;
 
-            this.hand = findFlintAndSteel.getHand();
+            FindItemResult item = InvUtils.findInHotbar(itemStack -> (itemStack.isOf(Items.FLINT_AND_STEEL) || itemStack.isOf(Items.FIRE_CHARGE)) &&
+                (!itemStack.isDamageable() || !antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
+            if (!InvUtils.swap(item.slot(), true)) return;
+
+            this.hand = item.getHand();
             this.entity = entity;
 
             if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity.getBlockPos()), Rotations.getPitch(entity.getBlockPos()), -100, this::interact);
@@ -127,12 +130,11 @@ public class Flamethrower extends Module {
         if (block == Blocks.WATER || bottom == Blocks.WATER || bottom == Blocks.DIRT_PATH) return;
         if (block == Blocks.GRASS_BLOCK)  mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
 
-        if (putOutFire.get() && entity instanceof LivingEntity animal && animal.getHealth() < 1) {
+        if (putOutFire.get() && entity instanceof LivingEntity animal && animal.getHealth() < 2) {
             mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
-            mc.interactionManager.attackBlock(entity.getBlockPos().west(), Direction.DOWN);
-            mc.interactionManager.attackBlock(entity.getBlockPos().east(), Direction.DOWN);
-            mc.interactionManager.attackBlock(entity.getBlockPos().north(), Direction.DOWN);
-            mc.interactionManager.attackBlock(entity.getBlockPos().south(), Direction.DOWN);
+            for (HorizontalDirection direction : HorizontalDirection.values()) {
+                mc.interactionManager.attackBlock(entity.getBlockPos().add(direction.offsetX, 0, direction.offsetZ), Direction.DOWN);
+            }
         } else {
             if (ticks >= tickInterval.get() && !entity.isOnFire()) {
                 mc.interactionManager.interactBlock(mc.player, hand, new BlockHitResult(
