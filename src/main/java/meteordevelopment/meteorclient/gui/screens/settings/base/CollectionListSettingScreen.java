@@ -85,7 +85,7 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
             ? value -> this.includeValue(value) && !collection.contains(value)
             : this::includeValue;
 
-        Iterable<T> sorted = SortingHelper.sort(iterable, predicate, this::getValueName, filterText);
+        Iterable<T> sorted = SortingHelper.sort(iterable, predicate, this::getValueNames, filterText);
 
         sorted.forEach(t -> {
             table.add(getValueWidget(t));
@@ -127,7 +127,7 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
 
     protected abstract WWidget getValueWidget(T value);
 
-    protected abstract String getValueName(T value);
+    protected abstract String[] getValueNames(T value);
 
     protected T getAdditionalValue(T value) {
         return null;

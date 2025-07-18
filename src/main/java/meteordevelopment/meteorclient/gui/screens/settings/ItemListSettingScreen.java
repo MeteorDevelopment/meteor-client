@@ -35,7 +35,10 @@ public class ItemListSettingScreen extends CollectionListSettingScreen<Item> {
     }
 
     @Override
-    protected String getValueName(Item value) {
-        return Names.get(value);
+    protected String[] getValueNames(Item value) {
+        return new String[]{
+            Names.get(value),
+            Registries.ITEM.getId(value).toString()
+        };
     }
 }

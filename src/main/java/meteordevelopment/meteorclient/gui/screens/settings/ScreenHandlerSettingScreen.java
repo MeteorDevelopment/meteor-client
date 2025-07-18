@@ -21,11 +21,17 @@ public class ScreenHandlerSettingScreen extends CollectionListSettingScreen<Scre
 
     @Override
     protected WWidget getValueWidget(ScreenHandlerType<?> value) {
-        return theme.label(getValueName(value));
+        return theme.label(getName(value));
     }
 
     @Override
-    protected String getValueName(ScreenHandlerType<?> type) {
+    protected String[] getValueNames(ScreenHandlerType<?> type) {
+        return new String[]{
+            getName(type)
+        };
+    }
+
+    private static String getName(ScreenHandlerType<?> type) {
         return Registries.SCREEN_HANDLER.getId(type).toString();
     }
 }

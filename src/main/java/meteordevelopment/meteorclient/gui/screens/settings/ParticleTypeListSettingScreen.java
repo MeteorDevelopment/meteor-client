@@ -28,11 +28,14 @@ public class ParticleTypeListSettingScreen extends CollectionListSettingScreen<P
 
     @Override
     protected WWidget getValueWidget(ParticleType<?> value) {
-        return theme.label(getValueName(value));
+        return theme.label(Names.get(value));
     }
 
     @Override
-    protected String getValueName(ParticleType<?> value) {
-        return Names.get(value);
+    protected String[] getValueNames(ParticleType<?> value) {
+        return new String[]{
+            Names.get(value),
+            Registries.PARTICLE_TYPE.getId(value).toString()
+        };
     }
 }

@@ -53,7 +53,7 @@ public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
 
     private void initTable() {
         Comparator<K> prioritizeChanged = Comparator.comparing(key -> map.get(key) instanceof IChangeable changeable && changeable.isChanged());
-        Iterable<K> sorted = SortingHelper.sortWithPriority(registry, this::includeValue, this::getValueName, filterText, prioritizeChanged);
+        Iterable<K> sorted = SortingHelper.sortWithPriority(registry, this::includeValue, this::getValueNames, filterText, prioritizeChanged);
 
         sorted.forEach(t -> {
             @Nullable V data = map.get(t);
@@ -87,5 +87,5 @@ public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
 
     protected abstract WWidget getDataWidget(K value, @Nullable V data);
 
-    protected abstract String getValueName(K value);
+    protected abstract String[] getValueNames(K value);
 }

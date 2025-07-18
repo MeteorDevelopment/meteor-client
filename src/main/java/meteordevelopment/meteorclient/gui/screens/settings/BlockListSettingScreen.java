@@ -41,12 +41,15 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
 
     @Override
     protected WWidget getValueWidget(Block value) {
-        return theme.itemWithLabel(value.asItem().getDefaultStack(), getValueName(value));
+        return theme.itemWithLabel(value.asItem().getDefaultStack(), Names.get(value));
     }
 
     @Override
-    protected String getValueName(Block value) {
-        return Names.get(value);
+    protected String[] getValueNames(Block value) {
+        return new String[]{
+            Names.get(value),
+            Registries.BLOCK.getId(value).toString()
+        };
     }
 
     @Override

@@ -24,15 +24,15 @@ public final class SortingHelper {
 
     private SortingHelper() {}
 
-    public static <T> Iterable<T> sort(Iterable<T> registry, Predicate<T> filter, Function<T, String> nameFunction, String filterText) {
+    public static <T> Iterable<T> sort(Iterable<T> registry, Predicate<T> filter, Function<T, String[]> nameFunction, String filterText) {
         return sortInternal(registry, filter, nameFunction, filterText, null);
     }
 
-    public static <T> Iterable<T> sortWithPriority(Iterable<T> registry, Predicate<T> filter, Function<T, String> nameFunction, String filterText, Comparator<T> comparator) {
+    public static <T> Iterable<T> sortWithPriority(Iterable<T> registry, Predicate<T> filter, Function<T, String[]> nameFunction, String filterText, Comparator<T> comparator) {
         return sortInternal(registry, filter, nameFunction, filterText, comparator);
     }
 
-    private static <T> Iterable<T> sortInternal(Iterable<T> registry, Predicate<T> filter, Function<T, String> nameFunction, String filterText, @Nullable Comparator<T> comparator) {
+    private static <T> Iterable<T> sortInternal(Iterable<T> registry, Predicate<T> filter, Function<T, String[]> nameFunction, String filterText, @Nullable Comparator<T> comparator) {
         if (filterText.isBlank()) {
             if (comparator == null) {
                 return filtering(registry, filter);
@@ -57,11 +57,20 @@ public final class SortingHelper {
                     continue;
                 }
 
-                String name = nameFunction.apply(value);
-                int words = Utils.searchInWords(name, filterText);
-                int distance = Utils.searchLevenshteinDefault(name, filterText, false);
-                if (words > 0 || distance <= name.length() / 2) {
-                    list.add(new Entry<>(value, distance));
+                String[] names = nameFunction.apply(value);
+                int bestWords = 0;
+                int bestDistance = Integer.MAX_VALUE;
+                float relevancy = 0;
+                for (String name : names) {
+                    int words = Utils.searchInWords(name, filterText);
+                    int distance = Utils.searchLevenshteinDefault(name, filterText, false);
+                    bestWords = Math.max(bestWords, words);
+                    bestDistance = Math.min(bestDistance, distance);
+                    relevancy = Math.max(relevancy, distance / (name.length() / 2f));
+                }
+
+                if (bestWords > 0 || relevancy >= 0.5f) {
+                    list.add(new Entry<>(value, bestDistance));
                 }
             }
 

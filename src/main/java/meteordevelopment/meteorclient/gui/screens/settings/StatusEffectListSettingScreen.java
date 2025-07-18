@@ -27,12 +27,15 @@ public class StatusEffectListSettingScreen extends CollectionListSettingScreen<S
 
     @Override
     protected WWidget getValueWidget(StatusEffect value) {
-        return theme.itemWithLabel(getPotionStack(value), getValueName(value));
+        return theme.itemWithLabel(getPotionStack(value), Names.get(value));
     }
 
     @Override
-    protected String getValueName(StatusEffect value) {
-        return Names.get(value);
+    protected String[] getValueNames(StatusEffect value) {
+        return new String[]{
+            Names.get(value),
+            Registries.STATUS_EFFECT.getId(value).toString()
+        };
     }
 
     private ItemStack getPotionStack(StatusEffect effect) {

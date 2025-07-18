@@ -49,7 +49,10 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
     }
 
     @Override
-    protected String getValueName(Block block) {
-        return Names.get(block);
+    protected String[] getValueNames(Block block) {
+        return new String[]{
+            Names.get(block),
+            Registries.BLOCK.getId(block).toString()
+        };
     }
 }

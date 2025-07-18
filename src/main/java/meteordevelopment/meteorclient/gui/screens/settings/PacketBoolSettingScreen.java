@@ -31,11 +31,14 @@ public class PacketBoolSettingScreen extends CollectionListSettingScreen<Class<?
 
     @Override
     protected WWidget getValueWidget(Class<? extends Packet<?>> value) {
-        return theme.label(getValueName(value));
+        return theme.label(PacketUtils.getName(value));
     }
 
     @Override
-    protected String getValueName(Class<? extends Packet<?>> value) {
-        return PacketUtils.getName(value);
+    protected String[] getValueNames(Class<? extends Packet<?>> value) {
+        return new String[]{
+            PacketUtils.getName(value),
+            value.getSimpleName()
+        };
     }
 }

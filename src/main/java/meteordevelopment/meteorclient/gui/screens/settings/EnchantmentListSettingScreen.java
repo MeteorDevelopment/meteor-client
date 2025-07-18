@@ -23,12 +23,14 @@ public class EnchantmentListSettingScreen extends DynamicRegistryListSettingScre
 
     @Override
     protected WWidget getValueWidget(RegistryKey<Enchantment> value) {
-        return theme.label(getValueName(value));
+        return theme.label(Names.get(value));
     }
 
-    // todo add internal names to search filters
     @Override
-    protected String getValueName(RegistryKey<Enchantment> value) {
-        return Names.get(value);
+    protected String[] getValueNames(RegistryKey<Enchantment> value) {
+        return new String[]{
+            Names.get(value),
+            value.getValue().toString()
+        };
     }
 }
