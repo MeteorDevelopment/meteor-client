@@ -102,7 +102,6 @@
     "HeadFeatureRendererMixin",
     "HeldItemRendererMixin",
     "HorseScreenHandlerAccessor",
-    "IdentifierAccessor",
     "InGameHudMixin",
     "InGameOverlayRendererMixin",
     "ItemEntityRendererMixin",
