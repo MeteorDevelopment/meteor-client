@@ -126,7 +126,7 @@ public final class SortingHelper {
             @NotNull
             @Override
             public Iterator<T> iterator() {
-                throw new UnsupportedOperationException("Iterator not supported by this Iterable.");
+                throw new UnsupportedOperationException("iterator() not supported by this Iterable, use forEach() instead.");
             }
 
             @Override
