@@ -52,7 +52,7 @@ public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
     }
 
     private void initTable() {
-        Comparator<K> prioritizeChanged = Comparator.comparing(key -> map.get(key) instanceof IChangeable changeable && changeable.isChanged());
+        Comparator<K> prioritizeChanged = Comparator.comparing(key -> !(map.get(key) instanceof IChangeable changeable && changeable.isChanged()));
         Iterable<K> sorted = SortingHelper.sortWithPriority(registry, this::includeValue, this::getValueNames, filterText, prioritizeChanged);
 
         sorted.forEach(t -> {

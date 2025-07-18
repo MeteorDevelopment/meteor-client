@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.utils.misc.ICopyable;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,6 +30,11 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
         super(theme, "Configure Blocks", setting, setting.get(), Registries.BLOCK);
 
         this.setting = setting;
+    }
+
+    @Override
+    protected boolean includeValue(Block value) {
+        return value != Blocks.AIR;
     }
 
     @Override
