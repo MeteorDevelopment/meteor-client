@@ -60,13 +60,13 @@ public final class SortingHelper {
                 String[] names = nameFunction.apply(value);
                 int bestWords = 0;
                 int bestDistance = Integer.MAX_VALUE;
-                float relevancy = 0;
+                float relevancy = 0f;
                 for (String name : names) {
                     int words = Utils.searchInWords(name, filterText);
                     int distance = Utils.searchLevenshteinDefault(name, filterText, false);
                     bestWords = Math.max(bestWords, words);
                     bestDistance = Math.min(bestDistance, distance);
-                    relevancy = Math.max(relevancy, distance / (name.length() / 2f));
+                    relevancy = Math.max(relevancy, 1f - (float) distance / name.length());
                 }
 
                 if (bestWords > 0 || relevancy >= 0.5f) {
