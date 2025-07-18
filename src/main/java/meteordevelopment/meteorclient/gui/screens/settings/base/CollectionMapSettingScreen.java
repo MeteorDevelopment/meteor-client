@@ -12,10 +12,10 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.IChangeable;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.Map;
 
 public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
@@ -52,14 +52,10 @@ public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
     }
 
     private void initTable() {
-        registry.forEach(t -> { // todo sorting
-            if (!includeValue(t)) return;
+        Comparator<K> prioritizeChanged = Comparator.comparing(key -> map.get(key) instanceof IChangeable changeable && changeable.isChanged());
+        Iterable<K> sorted = SortingHelper.sortWithPriority(registry, this::includeValue, this::getValueName, filterText, prioritizeChanged);
 
-            String name = getValueName(t);
-            int words = Utils.searchInWords(name, filterText);
-            int diff = Utils.searchLevenshteinDefault(name, filterText, false);
-            if (words <= 0 && diff > name.length() / 2) return;
-
+        sorted.forEach(t -> {
             @Nullable V data = map.get(t);
             boolean isChanged = data instanceof IChangeable changeable && changeable.isChanged();
 
