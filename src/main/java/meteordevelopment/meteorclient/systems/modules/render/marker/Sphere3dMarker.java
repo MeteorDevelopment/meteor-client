@@ -10,23 +10,22 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.Future;
 
-public class Sphere2dMarker extends AbstractSphereMarker {
-    public static final String type = "Sphere-2D";
+public class Sphere3dMarker extends AbstractSphereMarker {
+    public static final String type = "Sphere-3D";
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
-    private final SettingGroup sgKeybinding = settings.createGroup("Keybinding");
 
     private final Setting<BlockPos> center = sgGeneral.add(new BlockPosSetting.Builder()
         .name("center")
@@ -40,18 +39,8 @@ public class Sphere2dMarker extends AbstractSphereMarker {
         .description("Radius of the sphere")
         .defaultValue(20)
         .min(1)
-        .noSlider()
+        .sliderRange(1, 64)
         .onChanged(r -> dirty = true)
-        .build()
-    );
-
-    private final Setting<Integer> layer = sgGeneral.add(new IntSetting.Builder()
-        .name("layer")
-        .description("Which layer to render")
-        .defaultValue(0)
-        .min(0)
-        .noSlider()
-        .onChanged(l -> dirty = true)
         .build()
     );
 
@@ -77,7 +66,7 @@ public class Sphere2dMarker extends AbstractSphereMarker {
         .description("Rendering range")
         .defaultValue(10)
         .min(1)
-        .sliderRange(1, 20)
+        .sliderRange(1, 128)
         .visible(limitRenderRange::get)
         .build()
     );
@@ -103,33 +92,11 @@ public class Sphere2dMarker extends AbstractSphereMarker {
         .build()
     );
 
-    // Keybinding
-
-    @SuppressWarnings("unused")
-    private final Setting<Keybind> nextLayerKey = sgKeybinding.add(new KeybindSetting.Builder()
-        .name("next-layer-keybind")
-        .description("Keybind to increment layer")
-        .action(() -> {
-            if (isVisible() && layer.get() < radius.get() * 2) layer.set(layer.get() + 1);
-        })
-        .build()
-    );
-
-    @SuppressWarnings("unused")
-    private final Setting<Keybind> prevLayerKey = sgKeybinding.add(new KeybindSetting.Builder()
-        .name("prev-layer-keybind")
-        .description("Keybind to increment layer")
-        .action(() -> {
-            if (isVisible()) layer.set(layer.get() - 1);
-        })
-        .build()
-    );
-
     private volatile List<RenderBlock> blocks = List.of();
     private volatile @Nullable Future<?> task = null;
     private boolean dirty = true;
 
-    public Sphere2dMarker() {
+    public Sphere3dMarker() {
         super(type);
     }
 
@@ -159,50 +126,79 @@ public class Sphere2dMarker extends AbstractSphereMarker {
 
         Runnable action = () -> {
             blocks = switch (mode.get()) {
-                case Full -> filledCircle(center.get(), radius.get(), layer.get());
-                case Hollow -> hollowCircle(center.get(), radius.get(), layer.get());
+                case Full -> filledSphere(center.get(), radius.get());
+                case Hollow -> hollowSphere(center.get(), radius.get());
             };
             task = null;
         };
 
-        if (radius.get() <= 50) action.run();
+        if (radius.get() <= 30) action.run();
         else {
             task = MeteorExecutor.executeFuture(action);
         }
     }
 
-    private static List<RenderBlock> hollowCircle(BlockPos center, int r, int layer) {
-        int dY = -r + layer;
+    private static List<RenderBlock> hollowSphere(BlockPos center, int r) {
+        /*
+        Since we're effectively copy and pasting the computed voxels, but rotated to fill in the top and bottom faces,
+        we skip computing those in the original pass by only going from -45 degrees to 45 degrees
+         */
+        double sin45 = 1 / Math.sqrt(2);
+        int height = MathHelper.ceil(r * sin45);
+        int d = height * 2;
 
-        ObjectOpenHashSet<RenderBlock> renderBlocks = new ObjectOpenHashSet<>();
+        ObjectOpenHashSet<RenderBlock> computedBlocks = new ObjectOpenHashSet<>();
 
-        computeCircle(renderBlocks, center, dY, r);
-        cullInnerFaces(renderBlocks);
+        for (int slice = 0; slice <= d; slice++) {
+            int dY = -height + slice;
 
-        return new ObjectArrayList<>(renderBlocks);
+            computeCircle(computedBlocks, center, dY, r);
+        }
+
+        ObjectOpenHashSet<RenderBlock> newBlocks = new ObjectOpenHashSet<>(computedBlocks);
+
+        int cX = center.getX();
+        int cY = center.getY();
+
+        // Rotate the computed blocks along a horizontal axis to fill in the top and bottom faces
+        for (RenderBlock block : computedBlocks) {
+            // x/y rotation
+            newBlocks.add(new RenderBlock(cX + cY - block.y, cY - cX + block.x, block.z));
+        }
+
+        cullInnerFaces(newBlocks);
+
+        return new ObjectArrayList<>(newBlocks);
     }
 
-    private static List<RenderBlock> filledCircle(BlockPos center, int r, int layer) {
+    private static List<RenderBlock> filledSphere(BlockPos center, int r) {
         ObjectOpenHashSet<RenderBlock> renderBlocks = new ObjectOpenHashSet<>();
 
         int rSq = r * r;
-        int dY = -r + layer;
-        int dYSq = dY * dY;
 
         for (int dX = 0; dX <= r; dX++) {
             int dXSq = dX * dX;
-            for (int dZ = 0; dZ <= r; dZ++) {
-                int dZSq = dZ * dZ;
-                if (dXSq + dYSq + dZSq <= rSq) {
-                    renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY() + dY, center.getZ() + dZ));
-                    renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY() + dY, center.getZ() + dZ));
-                    renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY() + dY, center.getZ() - dZ));
-                    renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY() + dY, center.getZ() - dZ));
+            for (int dY = 0; dY <= r; dY++) {
+                int dYSq = dY * dY;
+                for (int dZ = 0; dZ <= r; dZ++) {
+                    int dZSq = dZ * dZ;
+                    if (dXSq + dYSq + dZSq <= rSq) {
+                        renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY() + dY, center.getZ() + dZ));
+                        renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY() + dY, center.getZ() + dZ));
+                        renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY() - dY, center.getZ() + dZ));
+                        renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY() - dY, center.getZ() + dZ));
+                        renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY() + dY, center.getZ() - dZ));
+                        renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY() + dY, center.getZ() - dZ));
+                        renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY() - dY, center.getZ() - dZ));
+                        renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY() - dY, center.getZ() - dZ));
+                    }
                 }
             }
         }
 
         cullInnerFaces(renderBlocks);
+
+        renderBlocks.removeIf(block -> block.excludeDir == 0b111111);
 
         return new ObjectArrayList<>(renderBlocks);
     }
@@ -217,6 +213,12 @@ public class Sphere2dMarker extends AbstractSphereMarker {
             if (east != null) {
                 block.excludeDir |= Dir.EAST;
                 east.excludeDir |= Dir.WEST;
+            }
+
+            @Nullable RenderBlock top = renderBlocks.get(new RenderBlock(x, y + 1, z));
+            if (top != null) {
+                block.excludeDir |= Dir.UP;
+                top.excludeDir |= Dir.DOWN;
             }
 
             @Nullable RenderBlock south = renderBlocks.get(new RenderBlock(x, y, z + 1));
