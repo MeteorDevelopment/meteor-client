@@ -284,6 +284,7 @@ public class Nuker extends Module {
     );
 
     private final List<BlockPos> blocks = new ArrayList<>();
+    private final List<BlockPos> interacted = new ArrayList<>();
 
     private boolean firstBlock;
     private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
@@ -305,6 +306,7 @@ public class Nuker extends Module {
         firstBlock = true;
         timer = 0;
         noBlockTimer = 0;
+        interacted.clear();
     }
 
     @EventHandler
@@ -430,6 +432,8 @@ public class Nuker extends Module {
             if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(blockState.getBlock())) return;
             if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(blockState.getBlock())) return;
 
+            if (interact.get() && interacted.contains(blockPos)) return;
+
             // Add block
             blocks.add(blockPos.toImmutable());
         });
@@ -444,6 +448,7 @@ public class Nuker extends Module {
 
             // Check if some block was found
             if (blocks.isEmpty()) {
+                interacted.clear();
                 // If no block was found for long enough then set firstBlock flag to true to not wait before breaking another again
                 if (noBlockTimer++ >= delay.get()) firstBlock = true;
                 return;
@@ -491,6 +496,7 @@ public class Nuker extends Module {
         if (interact.get()) {
             // Interact mode
             BlockUtils.interact(new BlockHitResult(blockPos.toCenterPos(), BlockUtils.getDirection(blockPos), blockPos, true), Hand.MAIN_HAND, swing.get());
+            interacted.add(blockPos);
         } else if (packetMine.get()) {
             // Packet mine mode
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos)));
