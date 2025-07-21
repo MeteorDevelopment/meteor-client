@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.events.entity.player.BlockBreakingCooldownEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -41,6 +42,7 @@ import net.minecraft.world.RaycastContext;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 public class Nuker extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -284,7 +286,7 @@ public class Nuker extends Module {
     );
 
     private final List<BlockPos> blocks = new ArrayList<>();
-    private final List<BlockPos> interacted = new ArrayList<>();
+    private final Set<BlockPos> interacted = new ObjectOpenHashSet<>();
 
     private boolean firstBlock;
     private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
