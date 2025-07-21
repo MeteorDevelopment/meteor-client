@@ -191,6 +191,13 @@ public class HighwayBuilder extends Module {
         .build()
     );
 
+    private final Setting<Boolean> autoEnableNoGhostBlocks = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-enable-no-ghost-blocks")
+        .description("Enable No Ghost Blocks when activated.")
+        .defaultValue(false)
+        .build()
+    );
+
     // Digging
 
     private final Setting<Boolean> doubleMine = sgDigging.add(new BoolSetting.Builder()
@@ -458,6 +465,9 @@ public class HighwayBuilder extends Module {
     public boolean drawingBow;
     public DoubleMineBlock normalMining, packetMining;
 
+    private boolean ghostBlocksEnabled = false;
+    private NoGhostBlocks noGhostBlocks;
+
     private final MBlockPos posRender2 = new MBlockPos();
     private final MBlockPos posRender3 = new MBlockPos();
 
@@ -499,6 +509,13 @@ public class HighwayBuilder extends Module {
         if (placementsPerTick.get() > 1 && rotation.get().place) warning("With rotations enabled, you can place at most 1 block per tick.");
 
         if (Modules.get().get(InstantRebreak.class).isActive()) warning("It's recommended to disable the Instant Rebreak module and instead use the 'instantly-rebreak-echests' setting to avoid errors.");
+        
+        noGhostBlocks = Modules.get().get(NoGhostBlocks.class);
+        
+        if (autoEnableNoGhostBlocks.get()) {
+            ghostBlocksEnabled = noGhostBlocks.isActive();
+            if (!noGhostBlocks.isActive()) noGhostBlocks.toggle();
+        }
     }
 
     @Override
@@ -508,6 +525,8 @@ public class HighwayBuilder extends Module {
         mc.player.input = prevInput;
         mc.player.setYaw(dir.yaw);
         mc.options.useKey.setPressed(false);
+
+        if (autoEnableNoGhostBlocks.get() && (ghostBlocksEnabled != noGhostBlocks.isActive())) noGhostBlocks.toggle();
 
         if (displayInfo) {
             info("Distance: (highlight)%.0f", PlayerUtils.distanceTo(start));
@@ -561,6 +580,11 @@ public class HighwayBuilder extends Module {
         if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1.5f) {
             input.stop();
             return;
+        }
+
+        if (autoEnableNoGhostBlocks.get() && !noGhostBlocks.isActive()) {
+            noGhostBlocks.toggle();
+            info("Auto activate no ghost blocks is currently enabled in the highway builder, if you want to disable no ghost blocks then uncheck that setting first.");
         }
 
         count = 0;
