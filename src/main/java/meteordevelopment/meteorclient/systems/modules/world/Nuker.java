@@ -7,36 +7,36 @@ package meteordevelopment.meteorclient.systems.modules.world;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.events.entity.player.BlockBreakingCooldownEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.Names;
-import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
-import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Block;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
@@ -52,80 +52,80 @@ public class Nuker extends Module {
     // General
 
     private final Setting<Shape> shape = sgGeneral.add(new EnumSetting.Builder<Shape>()
-            .name("shape")
-            .description("The shape of nuking algorithm.")
-            .defaultValue(Shape.Sphere)
-            .build()
+        .name("shape")
+        .description("The shape of nuking algorithm.")
+        .defaultValue(Shape.Sphere)
+        .build()
     );
 
     private final Setting<Nuker.Mode> mode = sgGeneral.add(new EnumSetting.Builder<Nuker.Mode>()
-            .name("mode")
-            .description("The way the blocks are broken.")
-            .defaultValue(Nuker.Mode.Flatten)
-            .build()
+        .name("mode")
+        .description("The way the blocks are broken.")
+        .defaultValue(Nuker.Mode.Flatten)
+        .build()
     );
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("The break range.")
-            .defaultValue(4)
-            .min(0)
-            .visible(() -> shape.get() != Shape.Cube)
-            .build()
+        .name("range")
+        .description("The break range.")
+        .defaultValue(4)
+        .min(0)
+        .visible(() -> shape.get() != Shape.Cube)
+        .build()
     );
 
     private final Setting<Integer> range_up = sgGeneral.add(new IntSetting.Builder()
-            .name("up")
-            .description("The break range.")
-            .defaultValue(1)
-            .min(0)
-            .visible(() -> shape.get() == Shape.Cube)
-            .build()
+        .name("up")
+        .description("The break range.")
+        .defaultValue(1)
+        .min(0)
+        .visible(() -> shape.get() == Shape.Cube)
+        .build()
     );
 
     private final Setting<Integer> range_down = sgGeneral.add(new IntSetting.Builder()
-            .name("down")
-            .description("The break range.")
-            .defaultValue(1)
-            .min(0)
-            .visible(() -> shape.get() == Shape.Cube)
-            .build()
+        .name("down")
+        .description("The break range.")
+        .defaultValue(1)
+        .min(0)
+        .visible(() -> shape.get() == Shape.Cube)
+        .build()
     );
 
     private final Setting<Integer> range_left = sgGeneral.add(new IntSetting.Builder()
-            .name("left")
-            .description("The break range.")
-            .defaultValue(1)
-            .min(0)
-            .visible(() -> shape.get() == Shape.Cube)
-            .build()
+        .name("left")
+        .description("The break range.")
+        .defaultValue(1)
+        .min(0)
+        .visible(() -> shape.get() == Shape.Cube)
+        .build()
     );
 
     private final Setting<Integer> range_right = sgGeneral.add(new IntSetting.Builder()
-            .name("right")
-            .description("The break range.")
-            .defaultValue(1)
-            .min(0)
-            .visible(() -> shape.get() == Shape.Cube)
-            .build()
+        .name("right")
+        .description("The break range.")
+        .defaultValue(1)
+        .min(0)
+        .visible(() -> shape.get() == Shape.Cube)
+        .build()
     );
 
     private final Setting<Integer> range_forward = sgGeneral.add(new IntSetting.Builder()
-            .name("forward")
-            .description("The break range.")
-            .defaultValue(1)
-            .min(0)
-            .visible(() -> shape.get() == Shape.Cube)
-            .build()
+        .name("forward")
+        .description("The break range.")
+        .defaultValue(1)
+        .min(0)
+        .visible(() -> shape.get() == Shape.Cube)
+        .build()
     );
 
     private final Setting<Integer> range_back = sgGeneral.add(new IntSetting.Builder()
-            .name("back")
-            .description("The break range.")
-            .defaultValue(1)
-            .min(0)
-            .visible(() -> shape.get() == Shape.Cube)
-            .build()
+        .name("back")
+        .description("The break range.")
+        .defaultValue(1)
+        .min(0)
+        .visible(() -> shape.get() == Shape.Cube)
+        .build()
     );
 
     private final Setting<Double> wallsRange = sgGeneral.add(new DoubleSetting.Builder()
@@ -138,151 +138,151 @@ public class Nuker extends Module {
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("Delay in ticks between breaking blocks.")
-            .defaultValue(0)
-            .build()
+        .name("delay")
+        .description("Delay in ticks between breaking blocks.")
+        .defaultValue(0)
+        .build()
     );
 
     private final Setting<Integer> maxBlocksPerTick = sgGeneral.add(new IntSetting.Builder()
-            .name("max-blocks-per-tick")
-            .description("Maximum blocks to try to break per tick. Useful when insta mining.")
-            .defaultValue(1)
-            .min(1)
-            .build()
+        .name("max-blocks-per-tick")
+        .description("Maximum blocks to try to break per tick. Useful when insta mining.")
+        .defaultValue(1)
+        .min(1)
+        .build()
     );
 
     private final Setting<Nuker.SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<Nuker.SortMode>()
-            .name("sort-mode")
-            .description("The blocks you want to mine first.")
-            .defaultValue(Nuker.SortMode.Closest)
-            .build()
+        .name("sort-mode")
+        .description("The blocks you want to mine first.")
+        .defaultValue(Nuker.SortMode.Closest)
+        .build()
     );
 
     private final Setting<Boolean> packetMine = sgGeneral.add(new BoolSetting.Builder()
-            .name("packet-mine")
-            .description("Attempt to instamine everything at once.")
-            .defaultValue(false)
-            .build()
+        .name("packet-mine")
+        .description("Attempt to instamine everything at once.")
+        .defaultValue(false)
+        .build()
     );
 
-    private final Setting<Boolean> optimalTool = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-optimal-tools")
-            .description("Only mines when using the best tool for the block.")
-            .defaultValue(false)
-            .build()
+    private final Setting<Boolean> suitableTools = sgGeneral.add(new BoolSetting.Builder()
+        .name("only-suitable-tools")
+        .description("Only mines when using an appropriate for the block.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> interact = sgGeneral.add(new BoolSetting.Builder()
-            .name("interact")
-            .description("Interacts with the block instead of mining.")
-            .defaultValue(false)
-            .build()
+        .name("interact")
+        .description("Interacts with the block instead of mining.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Rotates server-side to the block being mined.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Rotates server-side to the block being mined.")
+        .defaultValue(true)
+        .build()
     );
 
     // Whitelist and blacklist
 
     private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
-            .name("list-mode")
-            .description("Selection mode.")
-            .defaultValue(ListMode.Blacklist)
-            .build()
+        .name("list-mode")
+        .description("Selection mode.")
+        .defaultValue(ListMode.Blacklist)
+        .build()
     );
 
     private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
-            .name("blacklist")
-            .description("The blocks you don't want to mine.")
-            .visible(() -> listMode.get() == ListMode.Blacklist)
-            .build()
+        .name("blacklist")
+        .description("The blocks you don't want to mine.")
+        .visible(() -> listMode.get() == ListMode.Blacklist)
+        .build()
     );
 
     private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
-            .name("whitelist")
-            .description("The blocks you want to mine.")
-            .visible(() -> listMode.get() == ListMode.Whitelist)
-            .build()
+        .name("whitelist")
+        .description("The blocks you want to mine.")
+        .visible(() -> listMode.get() == ListMode.Whitelist)
+        .build()
     );
 
     private final Setting<Keybind> selectBlockBind = sgWhitelist.add(new KeybindSetting.Builder()
-        .name("select-block-bind")
-        .description("Adds targeted block to list when this button is pressed.")
-        .defaultValue(Keybind.none())
-        .build()
+    .name("select-block-bind")
+    .description("Adds targeted block to list when this button is pressed.")
+    .defaultValue(Keybind.none())
+    .build()
     );
 
     // Rendering
 
     private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
-            .name("swing")
-            .description("Whether to swing hand client-side.")
-            .defaultValue(true)
-            .build()
+        .name("swing")
+        .description("Whether to swing hand client-side.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
-            .name("bounding-box")
-            .description("Enable rendering bounding box for Cube and Uniform Cube.")
-            .defaultValue(true)
-            .build()
+        .name("bounding-box")
+        .description("Enable rendering bounding box for Cube and Uniform Cube.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<ShapeMode> shapeModeBox = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("nuke-box-mode")
-            .description("How the shape for the bounding box is rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("nuke-box-mode")
+        .description("How the shape for the bounding box is rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
 
     private final Setting<SettingColor> sideColorBox = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The side color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 100))
-            .build()
+        .name("side-color")
+        .description("The side color of the bounding box.")
+        .defaultValue(new SettingColor(16,106,144, 100))
+        .build()
     );
 
     private final Setting<SettingColor> lineColorBox = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The line color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 255))
-            .build()
+        .name("line-color")
+        .description("The line color of the bounding box.")
+        .defaultValue(new SettingColor(16,106,144, 255))
+        .build()
     );
 
     private final Setting<Boolean> enableRenderBreaking = sgRender.add(new BoolSetting.Builder()
-            .name("broken-blocks")
-            .description("Enable rendering bounding box for Cube and Uniform Cube.")
-            .defaultValue(true)
-            .build()
+        .name("broken-blocks")
+        .description("Enable rendering bounding box for Cube and Uniform Cube.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<ShapeMode> shapeModeBreak = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("nuke-block-mode")
-            .description("How the shapes for broken blocks are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .visible(enableRenderBreaking::get)
-            .build()
+        .name("nuke-block-mode")
+        .description("How the shapes for broken blocks are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .visible(enableRenderBreaking::get)
+        .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The side color of the target block rendering.")
-            .defaultValue(new SettingColor(255, 0, 0, 80))
-            .visible(enableRenderBreaking::get)
-            .build()
+        .name("side-color")
+        .description("The side color of the target block rendering.")
+        .defaultValue(new SettingColor(255, 0, 0, 80))
+        .visible(enableRenderBreaking::get)
+        .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The line color of the target block rendering.")
-            .defaultValue(new SettingColor(255, 0, 0, 255))
-            .visible(enableRenderBreaking::get)
-            .build()
+        .name("line-color")
+        .description("The line color of the target block rendering.")
+        .defaultValue(new SettingColor(255, 0, 0, 255))
+        .visible(enableRenderBreaking::get)
+        .build()
     );
 
     private final List<BlockPos> blocks = new ArrayList<>();
@@ -422,7 +422,7 @@ public class Nuker extends Module {
             if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0) return;
 
             // Use only optimal tools
-            if (optimalTool.get() && !interact.get() && !mc.player.getMainHandStack().isSuitableFor(blockState)) return;
+            if (suitableTools.get() && !interact.get() && !mc.player.getMainHandStack().isSuitableFor(blockState)) return;
 
             // Block must be breakable
             if (!BlockUtils.canBreak(blockPos, blockState) && !interact.get()) return;
