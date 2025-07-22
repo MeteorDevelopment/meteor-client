@@ -211,10 +211,10 @@ public class Nuker extends Module {
     );
 
     private final Setting<Keybind> selectBlockBind = sgWhitelist.add(new KeybindSetting.Builder()
-    .name("select-block-bind")
-    .description("Adds targeted block to list when this button is pressed.")
-    .defaultValue(Keybind.none())
-    .build()
+        .name("select-block-bind")
+        .description("Adds targeted block to list when this button is pressed.")
+        .defaultValue(Keybind.none())
+        .build()
     );
 
     // Rendering
