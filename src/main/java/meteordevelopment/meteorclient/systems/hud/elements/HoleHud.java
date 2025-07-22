@@ -116,7 +116,7 @@ public class HoleHud extends HudElement {
 
         if (dir == Direction.DOWN) return;
 
-        ((WorldRendererAccessor) mc.worldRenderer).getBlockBreakingInfos().values().forEach(info -> {
+        ((WorldRendererAccessor) mc.worldRenderer).meteor$getBlockBreakingInfos().values().forEach(info -> {
             if (info.getPos().equals(mc.player.getBlockPos().offset(dir))) {
                 renderBreaking(renderer, x, y, info.getStage() / 9f);
             }

@@ -14,6 +14,6 @@ import java.util.Set;
 
 @Mixin(BlockEntityType.class)
 public interface BlockEntityTypeAccessor {
-    @Accessor
-    Set<Block> getBlocks();
+    @Accessor("blocks")
+    Set<Block> meteor$getBlocks();
 }

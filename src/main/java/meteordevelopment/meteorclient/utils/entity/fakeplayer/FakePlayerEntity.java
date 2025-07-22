@@ -67,7 +67,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
         PlayerListEntry entry = super.getPlayerListEntry();
 
         if (entry == null) {
-            ((AbstractClientPlayerEntityAccessor) this).setPlayerListEntry(mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid()));
+            ((AbstractClientPlayerEntityAccessor) this).meteor$setPlayerListEntry(mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid()));
         }
 
         return entry;

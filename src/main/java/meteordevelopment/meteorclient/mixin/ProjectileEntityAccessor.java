@@ -13,6 +13,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ProjectileEntity.class)
 public interface ProjectileEntityAccessor {
-    @Accessor
-    LazyEntityReference<Entity> getOwner();
+    @Accessor("owner")
+    LazyEntityReference<Entity> meteor$getOwner();
 }

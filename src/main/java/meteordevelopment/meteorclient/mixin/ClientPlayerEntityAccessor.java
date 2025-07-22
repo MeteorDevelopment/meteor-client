@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(ClientPlayerEntity.class)
 public interface ClientPlayerEntityAccessor {
     @Accessor("mountJumpStrength")
-    void setMountJumpStrength(float strength);
+    void meteor$setMountJumpStrength(float strength);
 
     @Accessor("ticksSinceLastPositionPacketSent")
-    void setTicksSinceLastPositionPacketSent(int ticks);
+    void meteor$setTicksSinceLastPositionPacketSent(int ticks);
 
     @Invoker("canSprint")
     boolean invokeCanSprint();

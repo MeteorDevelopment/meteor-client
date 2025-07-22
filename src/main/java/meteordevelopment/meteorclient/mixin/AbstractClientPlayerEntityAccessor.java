@@ -13,5 +13,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AbstractClientPlayerEntity.class)
 public interface AbstractClientPlayerEntityAccessor {
     @Accessor("playerListEntry")
-    void setPlayerListEntry(PlayerListEntry entry);
+    void meteor$setPlayerListEntry(PlayerListEntry entry);
 }

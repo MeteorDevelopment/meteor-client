@@ -71,7 +71,7 @@ public class SlotUtils {
     }
 
     private static int creativeInventory(int i) {
-        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || CreativeInventoryScreenAccessor.getSelectedTab() != Registries.ITEM_GROUP.get(ItemGroupsAccessor.getInventory()))
+        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || CreativeInventoryScreenAccessor.meteor$getSelectedTab() != Registries.ITEM_GROUP.get(ItemGroupsAccessor.meteor$getInventory()))
             return -1;
         return survivalInventory(i);
     }
@@ -137,7 +137,7 @@ public class SlotUtils {
     }
 
     private static int horse(ScreenHandler handler, int i) {
-        AbstractHorseEntity entity = ((HorseScreenHandlerAccessor) handler).getEntity();
+        AbstractHorseEntity entity = ((HorseScreenHandlerAccessor) handler).meteor$getEntity();
 
         if (entity instanceof LlamaEntity llamaEntity) {
             int strength = llamaEntity.getStrength();

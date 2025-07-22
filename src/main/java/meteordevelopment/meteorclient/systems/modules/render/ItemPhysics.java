@@ -58,12 +58,12 @@ public class ItemPhysics extends Module {
 
         random.setSeed(event.renderState.seed);
 
-        for (int i = 0; i < ((ItemRenderStateAccessor) event.renderState.itemRenderState).getLayerCount(); i++) {
-            ItemRenderState.LayerRenderState layer = ((ItemRenderStateAccessor) event.renderState.itemRenderState).getLayers()[i];
+        for (int i = 0; i < ((ItemRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayerCount(); i++) {
+            ItemRenderState.LayerRenderState layer = ((ItemRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayers()[i];
             ModelInfo info = getInfo(layer.getQuads());
 
             matrices.push();
-            applyTransformation(matrices, ((LayerRenderStateAccessor) layer).getTransform());
+            applyTransformation(matrices, ((LayerRenderStateAccessor) layer).meteor$getTransform());
             matrices.translate(0, info.offsetY, 0);
             offsetInWater(matrices, event.itemEntity);
 

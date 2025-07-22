@@ -363,7 +363,7 @@ public class HoleFiller extends Module {
     }
 
     private boolean isSurrounded(PlayerEntity target) {
-        for (Direction dir : DirectionAccessor.getHorizontal()) {
+        for (Direction dir : DirectionAccessor.meteor$getHorizontal()) {
             BlockPos blockPos = target.getBlockPos().offset(dir);
             Block block = mc.world.getBlockState(blockPos).getBlock();
             if (block.getBlastResistance() < 600) return false;

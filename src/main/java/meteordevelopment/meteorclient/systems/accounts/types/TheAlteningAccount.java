@@ -26,7 +26,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TheAlteningAccount extends Account<TheAlteningAccount> implements TokenAccount {
     private static final Environment ENVIRONMENT = new Environment("http://sessionserver.thealtening.com", "http://authserver.thealtening.com", "The Altening");
-    private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), ENVIRONMENT);
+    private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).meteor$getProxy(), ENVIRONMENT);
     private String token;
     private @Nullable WaybackAuthLib auth;
 

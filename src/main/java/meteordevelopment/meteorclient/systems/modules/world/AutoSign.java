@@ -38,7 +38,7 @@ public class AutoSign extends Module {
     private void onOpenScreen(OpenScreenEvent event) {
         if (!(event.screen instanceof AbstractSignEditScreen) || text == null) return;
 
-        SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
+        SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).meteor$getSign();
 
         mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), true, text[0], text[1], text[2], text[3]));
 

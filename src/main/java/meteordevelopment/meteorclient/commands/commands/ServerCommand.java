@@ -206,8 +206,8 @@ public class ServerCommand extends Command {
             // This gets the root node of the command tree. From there, all of its children have to be of type
             // LiteralCommandNode, so we don't need to worry about checking or casting and can just grab the name
             packet.getCommandTree(
-                CommandRegistryAccess.of(handler.getCombinedDynamicRegistries(), handler.getEnabledFeatures()),
-                ClientPlayNetworkHandlerAccessor.getCommandNodeFactory()
+                CommandRegistryAccess.of(handler.meteor$getCombinedDynamicRegistries(), handler.meteor$getEnabledFeatures()),
+                ClientPlayNetworkHandlerAccessor.meteor$getCommandNodeFactory()
             ).getChildren().forEach(node -> {
                 String[] split = node.getName().split(":");
                 if (split.length > 1) {

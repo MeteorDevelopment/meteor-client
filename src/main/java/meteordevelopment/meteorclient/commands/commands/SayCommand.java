@@ -39,8 +39,8 @@ public class SayCommand extends Command {
                     Instant instant = Instant.now();
                     long l = NetworkEncryptionUtils.SecureRandomUtil.nextLong();
                     ClientPlayNetworkHandler handler = mc.getNetworkHandler();
-                    LastSeenMessagesCollector.LastSeenMessages lastSeenMessages = ((ClientPlayNetworkHandlerAccessor) handler).getLastSeenMessagesCollector().collect();
-                    MessageSignatureData messageSignatureData = ((ClientPlayNetworkHandlerAccessor) handler).getMessagePacker().pack(new MessageBody(message, instant, l, lastSeenMessages.lastSeen()));
+                    LastSeenMessagesCollector.LastSeenMessages lastSeenMessages = ((ClientPlayNetworkHandlerAccessor) handler).meteor$getLastSeenMessagesCollector().collect();
+                    MessageSignatureData messageSignatureData = ((ClientPlayNetworkHandlerAccessor) handler).meteor$getMessagePacker().pack(new MessageBody(message, instant, l, lastSeenMessages.lastSeen()));
                     handler.sendPacket(new ChatMessageC2SPacket(message, instant, l, messageSignatureData, lastSeenMessages.update()));
                 }
             }

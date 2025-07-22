@@ -117,7 +117,7 @@ public class AutoFish extends Module {
         if (mc.player.fishHook.state != FishingBobberEntity.State.BOBBING) return;
 
         if (!wasHooked) {
-            if (((FishingBobberEntityAccessor) mc.player.fishHook).hasCaughtFish()) {
+            if (((FishingBobberEntityAccessor) mc.player.fishHook).meteor$hasCaughtFish()) {
                 catchDelayLeft = catchDelay.get();
                 wasHooked = true;
             }

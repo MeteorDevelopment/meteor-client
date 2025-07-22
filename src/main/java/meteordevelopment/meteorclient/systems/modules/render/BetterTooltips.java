@@ -25,7 +25,10 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Bucketable;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.*;
@@ -296,7 +299,7 @@ public class BetterTooltips extends Module {
 
         // Fish peek
         else if (event.itemStack.getItem() instanceof EntityBucketItem bucketItem && previewEntities()) {
-            EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).getEntityType();
+            EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).meteor$getEntityType();
             LivingEntity entity = (LivingEntity) type.create(mc.world, SpawnReason.NATURAL);
 
             if (entity != null) {
@@ -306,7 +309,7 @@ public class BetterTooltips extends Module {
                 }
 
                 ((Bucketable) entity).copyDataFromNbt(nbtComponent.copyNbt());
-                ((EntityAccessor) entity).setInWater(true);
+                ((EntityAccessor) entity).meteor$setInWater(true);
                 event.tooltipData = new EntityTooltipComponent(entity);
             }
         }

@@ -121,7 +121,7 @@ public class EntityUtils {
         double bestDistanceSquared = 6 * 6;
         Direction bestDirection = null;
 
-        for (Direction direction : DirectionAccessor.getHorizontal()) {
+        for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
             testPos.set(player.getBlockPos().offset(direction));
 
             Block block = mc.world.getBlockState(testPos).getBlock();
@@ -175,9 +175,9 @@ public class EntityUtils {
 
         // Fast implementation using SimpleEntityLookup that returns on the first intersecting entity
         if (entityLookup instanceof SimpleEntityLookup<Entity> simpleEntityLookup) {
-            SectionedEntityCache<Entity> cache = ((SimpleEntityLookupAccessor) simpleEntityLookup).getCache();
-            LongSortedSet trackedPositions = ((SectionedEntityCacheAccessor) cache).getTrackedPositions();
-            Long2ObjectMap<EntityTrackingSection<Entity>> trackingSections = ((SectionedEntityCacheAccessor) cache).getTrackingSections();
+            SectionedEntityCache<Entity> cache = ((SimpleEntityLookupAccessor) simpleEntityLookup).meteor$getCache();
+            LongSortedSet trackedPositions = ((SectionedEntityCacheAccessor) cache).meteor$getTrackedPositions();
+            Long2ObjectMap<EntityTrackingSection<Entity>> trackingSections = ((SectionedEntityCacheAccessor) cache).meteor$getTrackingSections();
 
             int i = ChunkSectionPos.getSectionCoord(box.minX - 2);
             int j = ChunkSectionPos.getSectionCoord(box.minY - 2);
@@ -200,7 +200,7 @@ public class EntityUtils {
                         EntityTrackingSection<Entity> entityTrackingSection = trackingSections.get(r);
 
                         if (entityTrackingSection != null && entityTrackingSection.getStatus().shouldTrack()) {
-                            for (Entity entity : ((EntityTrackingSectionAccessor) entityTrackingSection).<Entity>getCollection()) {
+                            for (Entity entity : ((EntityTrackingSectionAccessor) entityTrackingSection).<Entity>meteor$getCollection()) {
                                 if (entity.getBoundingBox().intersects(box) && predicate.test(entity)) return true;
                             }
                         }

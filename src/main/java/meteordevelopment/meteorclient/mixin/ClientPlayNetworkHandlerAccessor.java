@@ -18,22 +18,22 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ClientPlayNetworkHandler.class)
 public interface ClientPlayNetworkHandlerAccessor {
     @Accessor("chunkLoadDistance")
-    int getChunkLoadDistance();
+    int meteor$getChunkLoadDistance();
 
     @Accessor("messagePacker")
-    MessageChain.Packer getMessagePacker();
+    MessageChain.Packer meteor$getMessagePacker();
 
     @Accessor("lastSeenMessagesCollector")
-    LastSeenMessagesCollector getLastSeenMessagesCollector();
+    LastSeenMessagesCollector meteor$getLastSeenMessagesCollector();
 
     @Accessor("combinedDynamicRegistries")
-    DynamicRegistryManager.Immutable getCombinedDynamicRegistries();
+    DynamicRegistryManager.Immutable meteor$getCombinedDynamicRegistries();
 
     @Accessor("enabledFeatures")
-    FeatureSet getEnabledFeatures();
+    FeatureSet meteor$getEnabledFeatures();
 
     @Accessor("COMMAND_NODE_FACTORY")
-    static CommandTreeS2CPacket.NodeFactory<ClientCommandSource> getCommandNodeFactory() {
+    static CommandTreeS2CPacket.NodeFactory<ClientCommandSource> meteor$getCommandNodeFactory() {
         return null;
     }
 }

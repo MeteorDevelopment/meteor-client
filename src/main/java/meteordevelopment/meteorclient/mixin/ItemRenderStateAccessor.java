@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ItemRenderState.class)
 public interface ItemRenderStateAccessor {
     @Accessor("layerCount")
-    int getLayerCount();
+    int meteor$getLayerCount();
 
     @Accessor("layers")
-    ItemRenderState.LayerRenderState[] getLayers();
+    ItemRenderState.LayerRenderState[] meteor$getLayers();
 }

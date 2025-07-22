@@ -18,11 +18,11 @@ public interface LivingEntityAccessor {
     void swimUpwards(TagKey<Fluid> fluid);
 
     @Accessor("jumping")
-    boolean isJumping();
+    boolean meteor$isJumping();
 
     @Accessor("jumpingCooldown")
-    int getJumpCooldown();
+    int meteor$getJumpCooldown();
 
     @Accessor("jumpingCooldown")
-    void setJumpCooldown(int cooldown);
+    void meteor$setJumpCooldown(int cooldown);
 }

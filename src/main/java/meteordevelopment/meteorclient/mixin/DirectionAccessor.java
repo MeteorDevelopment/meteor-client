@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Direction.class)
 public interface DirectionAccessor {
     @Accessor("HORIZONTAL")
-    static Direction[] getHorizontal() {
+    static Direction[] meteor$getHorizontal() {
         throw new AssertionError();
     }
 }

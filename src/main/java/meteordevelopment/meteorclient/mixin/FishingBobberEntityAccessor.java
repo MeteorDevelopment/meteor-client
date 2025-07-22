@@ -12,5 +12,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(FishingBobberEntity.class)
 public interface FishingBobberEntityAccessor {
     @Accessor("caughtFish")
-    boolean hasCaughtFish();
+    boolean meteor$hasCaughtFish();
 }

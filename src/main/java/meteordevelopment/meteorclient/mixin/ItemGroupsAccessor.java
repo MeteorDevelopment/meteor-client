@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ItemGroups.class)
 public interface ItemGroupsAccessor {
     @Accessor("INVENTORY")
-    static RegistryKey<ItemGroup> getInventory() {
+    static RegistryKey<ItemGroup> meteor$getInventory() {
         throw new AssertionError();
     }
 }

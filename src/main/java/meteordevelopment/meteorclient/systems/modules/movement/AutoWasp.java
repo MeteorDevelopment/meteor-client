@@ -171,9 +171,9 @@ public class AutoWasp extends Module {
             double d = target.getBoundingBox().getLengthX() / 2; // x length = z length for players
 
             //get the block pos of the block underneath the corner of the targets bounding box
-            for (Direction dir : DirectionAccessor.getHorizontal()) {
+            for (Direction dir : DirectionAccessor.meteor$getHorizontal()) {
                 BlockPos pos = BlockPos.ofFloored(targetPos.offset(dir, d).offset(dir.rotateYClockwise(), d)).down();
-                if (((AbstractBlockAccessor) mc.world.getBlockState(pos).getBlock()).isCollidable() && Math.abs(targetPos.getY() - (pos.getY() + 1)) <= 0.25) {
+                if (((AbstractBlockAccessor) mc.world.getBlockState(pos).getBlock()).meteor$isCollidable() && Math.abs(targetPos.getY() - (pos.getY() + 1)) <= 0.25) {
                     targetPos = new Vec3d(targetPos.x, pos.getY() + 1.25, targetPos.z);
                     break;
                 }
