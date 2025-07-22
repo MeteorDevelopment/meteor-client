@@ -11,6 +11,8 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ActionResult;
@@ -41,7 +43,15 @@ public class ClickTP extends Module {
         if (mc.player.isUsingItem()) return;
 
         if (mc.options.useKey.isPressed()) {
-            HitResult hitResult = mc.player.raycast(maxDistance.get(), 1f / 20f, false);
+            HitResult hitResult;
+
+            if (Modules.get().get(Freecam.class).isActive()) {
+                hitResult = mc.crosshairTarget;
+            }
+            else {
+                hitResult = mc.player.raycast(maxDistance.get(), 1f / 20f, false);
+            }
+
 
             if (hitResult.getType() == HitResult.Type.ENTITY && mc.player.interact(((EntityHitResult) hitResult).getEntity(), Hand.MAIN_HAND) != ActionResult.PASS) return;
 
