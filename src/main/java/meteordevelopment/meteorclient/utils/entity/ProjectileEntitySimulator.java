@@ -60,9 +60,9 @@ public class ProjectileEntitySimulator {
                 if (projectilesComponent == null) return false;
 
                 if (projectilesComponent.contains(Items.FIREWORK_ROCKET)) {
-                    set(user, 0, CrossbowItemAccessor.getSpeed(projectilesComponent), simulated, 0, 0.6, accurate, tickDelta, EntityType.FIREWORK_ROCKET);
+                    set(user, 0, CrossbowItemAccessor.meteor$getSpeed(projectilesComponent), simulated, 0, 0.6, accurate, tickDelta, EntityType.FIREWORK_ROCKET);
                 }
-                else set(user, 0, CrossbowItemAccessor.getSpeed(projectilesComponent), simulated, 0.05, 0.6, accurate, tickDelta, EntityType.ARROW);
+                else set(user, 0, CrossbowItemAccessor.meteor$getSpeed(projectilesComponent), simulated, 0.05, 0.6, accurate, tickDelta, EntityType.ARROW);
             }
             case WindChargeItem ignored -> {
                 set(user, 0, 1.5, simulated, 0, 1.0, accurate, tickDelta, EntityType.WIND_CHARGE);
@@ -137,7 +137,7 @@ public class ProjectileEntitySimulator {
 
     public boolean set(Entity entity, boolean accurate) {
         // skip entities in ground
-        if (entity instanceof ProjectileInGroundAccessor ppe && ppe.invokeIsInGround()) return false;
+        if (entity instanceof ProjectileInGroundAccessor ppe && ppe.meteor$invokeIsInGround()) return false;
 
         if (entity instanceof ArrowEntity) {
             set(entity, 0.05, 0.6, accurate);

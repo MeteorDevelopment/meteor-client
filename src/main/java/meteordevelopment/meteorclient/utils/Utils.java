@@ -215,7 +215,7 @@ public class Utils {
         float height = mc.getWindow().getFramebufferHeight();
 
         RenderSystem.setProjectionMatrix(matrix.set(width, height), ProjectionType.ORTHOGRAPHIC);
-        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).callGetMatrix(width, height));
+        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).meteor$callGetMatrix(width, height));
 
         rendering3D = false;
     }
@@ -225,7 +225,7 @@ public class Utils {
         float height = (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor());
 
         RenderSystem.setProjectionMatrix(matrix.set(width, height), ProjectionType.PERSPECTIVE);
-        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).callGetMatrix(width, height));
+        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).meteor$callGetMatrix(width, height));
 
         rendering3D = true;
     }
@@ -551,7 +551,7 @@ public class Utils {
         }
 
         mc.options.attackKey.setPressed(true);
-        ((MinecraftClientAccessor) mc).leftClick();
+        ((MinecraftClientAccessor) mc).meteor$leftClick();
         mc.options.attackKey.setPressed(false);
     }
 

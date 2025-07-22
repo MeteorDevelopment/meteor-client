@@ -31,5 +31,5 @@ public interface KeyBindingAccessor {
     void meteor$setTimesPressed(int timesPressed);
 
     @Invoker("reset")
-    void invokeReset();
+    void meteor$invokeReset();
 }

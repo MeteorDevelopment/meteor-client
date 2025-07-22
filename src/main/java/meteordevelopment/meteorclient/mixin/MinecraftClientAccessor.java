@@ -48,7 +48,7 @@ public interface MinecraftClientAccessor {
     void meteor$setAttackCooldown(int attackCooldown);
 
     @Invoker("doAttack")
-    boolean leftClick();
+    boolean meteor$leftClick();
 
     @Mutable
     @Accessor("profileKeys")

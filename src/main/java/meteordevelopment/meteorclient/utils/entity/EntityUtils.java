@@ -171,7 +171,7 @@ public class EntityUtils {
     }
 
     public static boolean intersectsWithEntity(Box box, Predicate<Entity> predicate) {
-        EntityLookup<Entity> entityLookup = ((WorldAccessor) mc.world).getEntityLookup();
+        EntityLookup<Entity> entityLookup = ((WorldAccessor) mc.world).meteor$getEntityLookup();
 
         // Fast implementation using SimpleEntityLookup that returns on the first intersecting entity
         if (entityLookup instanceof SimpleEntityLookup<Entity> simpleEntityLookup) {

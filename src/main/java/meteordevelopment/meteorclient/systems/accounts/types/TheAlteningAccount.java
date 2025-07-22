@@ -59,7 +59,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
     @Override
     public boolean login() {
         if (auth == null) return false;
-        applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE.getServicesKeySet(), SERVICE.getProxy(), ENVIRONMENT));
+        applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.meteor$createYggdrasilMinecraftSessionService(SERVICE.getServicesKeySet(), SERVICE.getProxy(), ENVIRONMENT));
 
         try {
             setSession(new Session(auth.getCurrentProfile().getName(), auth.getCurrentProfile().getId(), auth.getAccessToken(), Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));

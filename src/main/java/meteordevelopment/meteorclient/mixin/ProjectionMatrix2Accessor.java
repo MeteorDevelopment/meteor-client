@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ProjectionMatrix2.class)
 public interface ProjectionMatrix2Accessor {
-    @Invoker
-    Matrix4f callGetMatrix(float width, float height);
+    @Invoker("getMatrix")
+    Matrix4f meteor$callGetMatrix(float width, float height);
 }

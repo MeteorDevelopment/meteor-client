@@ -186,12 +186,12 @@ public class Jesus extends Module {
             double swimHeight = mc.player.getSwimHeight();
 
             if (mc.player.isTouchingWater() && fluidHeight > swimHeight) {
-                ((LivingEntityAccessor) mc.player).swimUpwards(FluidTags.WATER);
+                ((LivingEntityAccessor) mc.player).meteor$swimUpwards(FluidTags.WATER);
             } else if (mc.player.isOnGround() && fluidHeight <= swimHeight && ((LivingEntityAccessor) mc.player).meteor$getJumpCooldown() == 0) {
                 mc.player.jump();
                 ((LivingEntityAccessor) mc.player).meteor$setJumpCooldown(10);
             } else {
-                ((LivingEntityAccessor) mc.player).swimUpwards(FluidTags.LAVA);
+                ((LivingEntityAccessor) mc.player).meteor$swimUpwards(FluidTags.LAVA);
             }
         }
 
