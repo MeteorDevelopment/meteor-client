@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.DirectionAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -329,7 +330,7 @@ public class AutoCity extends Module {
 
         // Otherwise, break their surround blocks
         List<BlockPos> blocks = new ArrayList<>();
-        for (Direction direction : Direction.HORIZONTAL) {
+        for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
             BlockPos neighborPos = targetPos.offset(direction);
             if (canMineBlock(neighborPos) && !isRiskyBreak(neighborPos)) {
                 blocks.add(neighborPos);
@@ -366,7 +367,7 @@ public class AutoCity extends Module {
         if (block.getBlastResistance() >= 600) return myBlockPos.equals(blockPos);
 
         // Otherwise, make certain we arent breaking our own surround blocks
-        for (Direction direction : Direction.HORIZONTAL) {
+        for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
             BlockPos neighborPos = myBlockPos.offset(direction);
             if (neighborPos.equals(blockPos)) return true;
         }
