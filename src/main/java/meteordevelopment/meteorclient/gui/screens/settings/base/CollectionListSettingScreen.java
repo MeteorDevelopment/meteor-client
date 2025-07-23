@@ -105,7 +105,7 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
 
             setting.onChanged();
             table.clear();
-            initWidgets();
+            initTable();
         }
     }
 
@@ -113,7 +113,7 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
         if (collection.remove(value)) {
             setting.onChanged();
             table.clear();
-            initWidgets();
+            initTable();
         }
     }
 

@@ -75,7 +75,7 @@ public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
         if (map.remove(value) != null) {
             setting.onChanged();
             table.clear();
-            initWidgets();
+            initTable();
         }
     }
 
