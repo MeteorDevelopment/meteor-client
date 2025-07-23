@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
+import meteordevelopment.meteorclient.mixin.DirectionAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -33,8 +34,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.RaycastContext;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket.Mode;
 
 public class BedAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -365,7 +364,7 @@ public class BedAura extends Module {
 
         Direction rotateDirection = Direction.fromHorizontalDegrees(Rotations.getYaw(footPos.toCenterPos()));
 
-        for (Direction placeDirection : Direction.HORIZONTAL) {
+        for (Direction placeDirection : DirectionAccessor.meteor$getHorizontal()) {
             BlockPos headPos = footPos.offset(placeDirection);
             if (!mc.world.getBlockState(headPos).isReplaceable()) continue;
 
@@ -447,11 +446,6 @@ public class BedAura extends Module {
     }
 
     private void doInteract() {
-        // Stop sneaking so interactions with the bed are successful
-        if (mc.player.isSneaking()) {
-            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, Mode.RELEASE_SHIFT_KEY));
-        }
-
         BlockUtils.interact(new BlockHitResult(bestBreakPos.toCenterPos(), BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), Hand.MAIN_HAND, swing.get());
         breakDelayLeft = 0;
     }
