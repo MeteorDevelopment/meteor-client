@@ -79,7 +79,7 @@ public class MeteorStarscript {
 
         // General
         ss.set("mc_version", SharedConstants.getGameVersion().name());
-        ss.set("fps", () -> Value.number(MinecraftClientAccessor.getFps()));
+        ss.set("fps", () -> Value.number(MinecraftClientAccessor.meteor$getFps()));
         ss.set("ping", MeteorStarscript::ping);
         ss.set("time", () -> Value.string(LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));
         ss.set("cps", () -> Value.number(CPSUtils.getCpsAverage()));
@@ -143,7 +143,7 @@ public class MeteorStarscript {
                 .set("z", () -> Value.number(mc.player != null ? Utils.getPlayerSpeed().z : 0))
             )
 
-            .set("breaking_progress", () -> Value.number(mc.interactionManager != null ? ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getBreakingProgress() : 0))
+            .set("breaking_progress", () -> Value.number(mc.interactionManager != null ? ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).meteor$getBreakingProgress() : 0))
             .set("biome", MeteorStarscript::biome)
 
             .set("dimension", () -> Value.string(PlayerUtils.getDimension().name()))

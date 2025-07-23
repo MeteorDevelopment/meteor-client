@@ -111,7 +111,7 @@ public class Sprint extends Module {
         }
 
         boolean strictSprint = !(mc.player.isTouchingWater() && !mc.player.isSubmergedInWater())
-            && ((ClientPlayerEntityAccessor) mc.player).invokeCanSprint()
+            && ((ClientPlayerEntityAccessor) mc.player).meteor$invokeCanSprint()
             && (!mc.player.horizontalCollision || mc.player.collidedSoftly);
 
         return isActive() && (mode.get() == Mode.Rage || strictSprint);

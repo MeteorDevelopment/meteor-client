@@ -305,7 +305,7 @@ public class InventoryTweaks extends Module {
             else InvUtils.click().slot(empty.slot());
         }
 
-        Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
+        Slot focusedSlot = ((HandledScreenAccessor) screen).meteor$getFocusedSlot();
         if (focusedSlot == null) return false;
 
         sorter = new InventorySorter(screen, focusedSlot);

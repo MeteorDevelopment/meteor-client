@@ -22,7 +22,7 @@ public interface KeyBindingAccessor {
     static Map<String, KeyBinding> getKeysById() { return null; }
 
     @Accessor("boundKey")
-    InputUtil.Key getKey();
+    InputUtil.Key meteor$getKey();
 
     @Accessor("timesPressed")
     int meteor$getTimesPressed();
@@ -31,5 +31,5 @@ public interface KeyBindingAccessor {
     void meteor$setTimesPressed(int timesPressed);
 
     @Invoker("reset")
-    void invokeReset();
+    void meteor$invokeReset();
 }

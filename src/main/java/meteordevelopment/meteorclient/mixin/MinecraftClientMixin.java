@@ -170,7 +170,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
             if (guimove.sneak.get() && kb == options.sneakKey) continue;
             if (guimove.sprint.get() && kb == options.sprintKey) continue;
             if (guimove.jump.get() && kb == options.jumpKey) continue;
-            ((KeyBindingAccessor) kb).invokeReset();
+            ((KeyBindingAccessor) kb).meteor$invokeReset();
         }
     }
 

@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.AbstractBlockAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -444,8 +445,8 @@ public class ElytraFly extends Module {
             BlockState under2State = mc.world.getBlockState(mc.player.getBlockPos().down().down());
             Block under2 = under2State.getBlock();
 
-            final boolean underCollidable = under.collidable || !underState.getFluidState().isEmpty();
-            final boolean under2Collidable = under2.collidable || !under2State.getFluidState().isEmpty();
+            final boolean underCollidable = ((AbstractBlockAccessor) under).meteor$isCollidable() || !underState.getFluidState().isEmpty();
+            final boolean under2Collidable = ((AbstractBlockAccessor) under2).meteor$isCollidable() || !under2State.getFluidState().isEmpty();
 
             if (!underCollidable && under2Collidable) {
                 ((IVec3d)event.movement).meteor$set(event.movement.x, -0.1f, event.movement.z);

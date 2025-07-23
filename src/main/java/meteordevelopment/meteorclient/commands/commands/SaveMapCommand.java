@@ -72,7 +72,7 @@ public class SaveMapCommand extends Command {
         if (path == null) throw OOPS.create();
 
         MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.gameRenderer.getClient().getMapTextureManager();
-        MapTextureManager.MapTexture texture = textureManager.invokeGetMapTexture(map.get(DataComponentTypes.MAP_ID), state);
+        MapTextureManager.MapTexture texture = textureManager.meteor$invokeGetMapTexture(map.get(DataComponentTypes.MAP_ID), state);
         if (texture.texture.getImage() == null) throw OOPS.create();
 
         try {

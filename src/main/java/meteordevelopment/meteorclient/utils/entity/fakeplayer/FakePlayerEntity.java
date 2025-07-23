@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.entity.fakeplayer;
 
 import com.mojang.authlib.GameProfile;
+import meteordevelopment.meteorclient.mixin.AbstractClientPlayerEntityAccessor;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
@@ -63,10 +64,12 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     @Nullable
     @Override
     protected PlayerListEntry getPlayerListEntry() {
-        if (playerListEntry == null) {
-            playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        PlayerListEntry entry = super.getPlayerListEntry();
+
+        if (entry == null) {
+            ((AbstractClientPlayerEntityAccessor) this).meteor$setPlayerListEntry(mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid()));
         }
 
-        return playerListEntry;
+        return entry;
     }
 }

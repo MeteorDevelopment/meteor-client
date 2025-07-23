@@ -313,7 +313,7 @@ public class BetterTooltips extends Module {
 
         // Fish peek
         else if (event.itemStack.getItem() instanceof EntityBucketItem bucketItem && previewEntities()) {
-            EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).getEntityType();
+            EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).meteor$getEntityType();
             LivingEntity entity = (LivingEntity) type.create(mc.world, SpawnReason.NATURAL);
 
             if (entity != null) {
@@ -323,7 +323,7 @@ public class BetterTooltips extends Module {
                 }
 
                 ((Bucketable) entity).copyDataFromNbt(nbtComponent.copyNbt());
-                ((EntityAccessor) entity).setInWater(true);
+                ((EntityAccessor) entity).meteor$setInWater(true);
                 event.tooltipData = new EntityTooltipComponent(entity);
             }
         }
