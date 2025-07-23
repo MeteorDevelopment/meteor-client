@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.DirectionAccessor;
 import meteordevelopment.meteorclient.mixin.WorldRendererAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -255,7 +256,7 @@ public class Surround extends Module {
         // Below
         if (renderBelow.get()) draw(playerPos.down(), event, 0);
 
-        for (Direction direction : Direction.HORIZONTAL) {
+        for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
             BlockPos renderPos = playerPos.offset(direction);
 
             // Regular surround positions
@@ -331,7 +332,7 @@ public class Surround extends Module {
         BlockPos playerPos = mc.player.getBlockPos();
 
         // Looping through feet blocks
-        for (Direction direction : Direction.HORIZONTAL) {
+        for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
             BlockPos placePos = playerPos.offset(direction);
 
             // Place support blocks if air place is disabled
@@ -345,7 +346,7 @@ public class Surround extends Module {
 
         // Looping through head blocks
         if (doubleHeight.get() && safe == 4) {
-            for (Direction direction : Direction.HORIZONTAL) {
+            for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
                 BlockPos placePos = playerPos.offset(direction).up();
                 if (place(placePos, block) && ++placedCount >= blocksPerTick.get()) break;
                 safe++;
@@ -372,7 +373,7 @@ public class Surround extends Module {
 
         // Check if the block is being mined
         boolean beingMined = false;
-        for (BlockBreakingInfo value : ((WorldRendererAccessor) mc.worldRenderer).getBlockBreakingInfos().values()) {
+        for (BlockBreakingInfo value : ((WorldRendererAccessor) mc.worldRenderer).meteor$getBlockBreakingInfos().values()) {
             if (value.getPos().equals(placePos)) {
                 beingMined = true;
                 break;
