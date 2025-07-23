@@ -32,8 +32,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket.Mode;
 
 public class AnchorAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -378,23 +376,19 @@ public class AnchorAura extends Module {
 
         Vec3d center = bestBreakPos.toCenterPos();
         int charges = blockState.get(Properties.CHARGES);
-        boolean sneaked = false;
 
         // Charge the anchor
         if (charges == 0 && chargeDelayLeft++ >= chargeDelay.get()) {
             InvUtils.swap(glowStone.slot(), swapBack.get());
-            stopSneaking();
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true));
+            BlockUtils.interact(new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), Hand.MAIN_HAND, swing.get());
             chargeDelayLeft = 0;
             charges++;
-            sneaked = true;
         }
 
         // Explode the anchor when charged
         if (charges > 0 && breakDelayLeft++ >= breakDelay.get()) {
             InvUtils.swap(anchor.slot(), swapBack.get());
-            if (!sneaked) stopSneaking();
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true));
+            BlockUtils.interact(new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), Hand.MAIN_HAND, swing.get());
             breakDelayLeft = 0;
 
             // Instantly break the anchor on client, stops invalid block placements
@@ -402,12 +396,6 @@ public class AnchorAura extends Module {
         }
 
         if (swapBack.get()) InvUtils.swapBack();
-    }
-
-    private void stopSneaking() {
-        if (mc.player.isSneaking()) { 
-            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, Mode.RELEASE_SHIFT_KEY));
-        }
     }
 
     private boolean isOutOfRange(BlockPos blockPos, double baseRange, double wallsRange) {
