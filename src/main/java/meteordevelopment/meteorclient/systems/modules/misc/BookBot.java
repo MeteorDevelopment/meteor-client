@@ -252,7 +252,7 @@ public class BookBot extends Module {
     private void writeBook(PrimitiveIterator.OfInt chars) {
         ArrayList<String> pages = new ArrayList<>();
         ArrayList<RawFilteredPair<Text>> filteredPages = new ArrayList<>();
-        TextHandler.WidthRetriever widthRetriever = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).getWidthRetriever();
+        TextHandler.WidthRetriever widthRetriever = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).meteor$getWidthRetriever();
 
         int maxPages = mode.get() == Mode.File ? 100 : this.pages.get();
 

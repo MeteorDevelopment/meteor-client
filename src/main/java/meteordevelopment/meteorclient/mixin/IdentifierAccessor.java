@@ -13,6 +13,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Identifier.class)
 public interface IdentifierAccessor {
     @Mutable
-    @Accessor
-    void setPath(String path);
+    @Accessor("path")
+    void meteor$setPath(String path);
 }

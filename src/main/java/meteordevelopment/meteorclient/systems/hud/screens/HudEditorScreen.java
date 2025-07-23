@@ -276,12 +276,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) {
-            renderBackground(context, mouseX, mouseY, delta);
-            context.draw();
-        }
-
-        double s = mc.getWindow().getScaleFactor();
+        int s = mc.getWindow().getScaleFactor();
 
         mouseX *= s;
         mouseY *= s;
@@ -332,7 +327,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         double h3 = h / 3.0;
 
         int prevA = SPLIT_LINES_COLOR.a;
-        SPLIT_LINES_COLOR.a *= splitLinesAnimation;
+        SPLIT_LINES_COLOR.a *= (int) splitLinesAnimation;
 
         renderSplitLine(renderer, w3, 0, w3, h);
         renderSplitLine(renderer, w3 * 2, 0, w3 * 2, h);

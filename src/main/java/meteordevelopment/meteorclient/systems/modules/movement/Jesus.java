@@ -186,12 +186,12 @@ public class Jesus extends Module {
             double swimHeight = mc.player.getSwimHeight();
 
             if (mc.player.isTouchingWater() && fluidHeight > swimHeight) {
-                ((LivingEntityAccessor) mc.player).swimUpwards(FluidTags.WATER);
-            } else if (mc.player.isOnGround() && fluidHeight <= swimHeight && ((LivingEntityAccessor) mc.player).getJumpCooldown() == 0) {
+                ((LivingEntityAccessor) mc.player).meteor$swimUpwards(FluidTags.WATER);
+            } else if (mc.player.isOnGround() && fluidHeight <= swimHeight && ((LivingEntityAccessor) mc.player).meteor$getJumpCooldown() == 0) {
                 mc.player.jump();
-                ((LivingEntityAccessor) mc.player).setJumpCooldown(10);
+                ((LivingEntityAccessor) mc.player).meteor$setJumpCooldown(10);
             } else {
-                ((LivingEntityAccessor) mc.player).swimUpwards(FluidTags.LAVA);
+                ((LivingEntityAccessor) mc.player).meteor$swimUpwards(FluidTags.LAVA);
             }
         }
 
@@ -229,7 +229,7 @@ public class Jesus extends Module {
 
     @EventHandler
     private void onCanWalkOnFluid(CanWalkOnFluidEvent event) {
-        if (mc.player != null && mc.player.isInSwimmingPose()) return;
+        if (mc.player != null && mc.player.isSwimming()) return;
         if ((event.fluidState.getFluid() == Fluids.WATER || event.fluidState.getFluid() == Fluids.FLOWING_WATER) && waterShouldBeSolid()) {
             event.walkOnFluid = true;
         }

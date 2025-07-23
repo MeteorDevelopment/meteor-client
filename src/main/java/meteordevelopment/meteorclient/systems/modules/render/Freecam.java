@@ -61,6 +61,13 @@ public class Freecam extends Module {
         .build()
     );
 
+    private final Setting<Boolean> staySneaking = sgGeneral.add(new BoolSetting.Builder()
+        .name("stay-sneaking")
+        .description("If you are sneaking when you enter freecam, whether your player should remain sneaking.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> toggleOnDamage = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-on-damage")
         .description("Disables freecam when you take damage.")
@@ -122,7 +129,7 @@ public class Freecam extends Module {
     private double fovScale;
     private boolean bobView;
 
-    private boolean forward, backward, right, left, up, down;
+    private boolean forward, backward, right, left, up, down, isSneaking;
 
     public Freecam() {
         super(Categories.Render, "freecam", "Allows the camera to move away from the player.");
@@ -153,12 +160,14 @@ public class Freecam extends Module {
         lastYaw = yaw;
         lastPitch = pitch;
 
-        forward = mc.options.forwardKey.isPressed();
-        backward = mc.options.backKey.isPressed();
-        right = mc.options.rightKey.isPressed();
-        left = mc.options.leftKey.isPressed();
-        up = mc.options.jumpKey.isPressed();
-        down = mc.options.sneakKey.isPressed();
+        isSneaking = mc.options.sneakKey.isPressed();
+
+        forward = Input.isPressed(mc.options.forwardKey);
+        backward = Input.isPressed(mc.options.backKey);
+        right = Input.isPressed(mc.options.rightKey);
+        left = Input.isPressed(mc.options.leftKey);
+        up = Input.isPressed(mc.options.jumpKey);
+        down = Input.isPressed(mc.options.sneakKey);
 
         unpress();
         if (reloadChunks.get()) mc.worldRenderer.reload();
@@ -173,10 +182,11 @@ public class Freecam extends Module {
         mc.options.setPerspective(perspective);
 
         if (staticView.get()) {
-
             mc.options.getFovEffectScale().setValue(fovScale);
             mc.options.getBobView().setValue(bobView);
         }
+
+        isSneaking = false;
     }
 
     @EventHandler
@@ -226,7 +236,7 @@ public class Freecam extends Module {
         }
 
         double s = 0.5;
-        if (mc.options.sprintKey.isPressed()) s = 1;
+        if (Input.isPressed(mc.options.sprintKey)) s = 1;
 
         boolean a = false;
         if (this.forward) {
@@ -269,7 +279,7 @@ public class Freecam extends Module {
         pos.set(pos.x + velX, pos.y + velY, pos.z + velZ);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onKey(KeyEvent event) {
         if (Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
         if (checkGuiMove()) return;
@@ -307,7 +317,7 @@ public class Freecam extends Module {
         if (cancel) event.cancel();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     private void onMouseButton(MouseButtonEvent event) {
         if (checkGuiMove()) return;
 
@@ -402,6 +412,10 @@ public class Freecam extends Module {
 
     public boolean renderHands() {
         return !isActive() || renderHands.get();
+    }
+
+    public boolean staySneaking() {
+        return isActive() && !mc.player.getAbilities().flying && staySneaking.get() && isSneaking;
     }
 
     public double getX(float tickDelta) {

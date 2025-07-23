@@ -21,7 +21,6 @@ import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -172,6 +171,7 @@ public class HoleESP extends Module {
         for (Hole hole : holes) holePool.free(hole);
         holes.clear();
 
+        // Probe for holes
         BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
             if (!validHole(blockPos)) return;
 
@@ -181,19 +181,21 @@ public class HoleESP extends Module {
             for (Direction direction : Direction.values()) {
                 if (direction == Direction.UP) continue;
                 BlockPos offsetPos = blockPos.offset(direction);
-                BlockState state = mc.world.getBlockState(offsetPos);
+                Block block = mc.world.getBlockState(offsetPos).getBlock();
+                boolean breakable = block.getHardness() >= 0;
 
-                if (state.getBlock() == Blocks.BEDROCK) bedrock++;
-                else if (state.getBlock() == Blocks.OBSIDIAN) obsidian++;
+                if (((AbstractBlockAccessor) block).meteor$isCollidable() && !breakable) bedrock++;
+                else if (block.getBlastResistance() >= 600 && breakable) obsidian++;
                 else if (direction == Direction.DOWN) return;
                 else if (doubles.get() && air == null && validHole(offsetPos)) {
                     for (Direction dir : Direction.values()) {
                         if (dir == direction.getOpposite() || dir == Direction.UP) continue;
 
-                        BlockState blockState1 = mc.world.getBlockState(offsetPos.offset(dir));
+                        block = mc.world.getBlockState(offsetPos.offset(dir)).getBlock();
+                        breakable = block.getHardness() >= 0;
 
-                        if (blockState1.getBlock() == Blocks.BEDROCK) bedrock++;
-                        else if (blockState1.getBlock() == Blocks.OBSIDIAN) obsidian++;
+                        if (((AbstractBlockAccessor) block).meteor$isCollidable() && !breakable) bedrock++;
+                        else if (block.getBlastResistance() >= 600 && breakable) obsidian++;
                         else return;
                     }
 
@@ -217,10 +219,10 @@ public class HoleESP extends Module {
         Block block = chunk.getBlockState(pos).getBlock();
         if (!webs.get() && block == Blocks.COBWEB) return false;
 
-        if (((AbstractBlockAccessor) block).isCollidable()) return false;
+        if (((AbstractBlockAccessor) block).meteor$isCollidable()) return false;
 
         for (int i = 0; i < holeHeight.get(); i++) {
-            if (((AbstractBlockAccessor) chunk.getBlockState(pos.up(i)).getBlock()).isCollidable()) return false;
+            if (((AbstractBlockAccessor) chunk.getBlockState(pos.up(i)).getBlock()).meteor$isCollidable()) return false;
         }
 
         return true;

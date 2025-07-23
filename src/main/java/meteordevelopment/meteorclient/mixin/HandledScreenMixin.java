@@ -104,7 +104,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
+        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
             ItemStack itemStack = focusedSlot.getStack();
             if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
                 cir.setReturnValue(Utils.openContainer(focusedSlot.getStack(), ITEMS, false));

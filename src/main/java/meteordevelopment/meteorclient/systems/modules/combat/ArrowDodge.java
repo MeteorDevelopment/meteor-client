@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.ProjectileEntityAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -21,7 +20,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class ArrowDodge extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -113,13 +115,14 @@ public class ArrowDodge extends Module {
         points.clear();
 
         for (Entity e : mc.world.getEntities()) {
-            if (!(e instanceof ProjectileEntity)) continue;
-            if (!allProjectiles.get() && !(e instanceof ArrowEntity)) continue;
+            if (!(e instanceof ProjectileEntity projectile)) continue;
+            if (!allProjectiles.get() && !(projectile instanceof ArrowEntity)) continue;
             if (ignoreOwn.get()) {
-                UUID owner = ((ProjectileEntityAccessor) e).getOwnerUuid();
-                if (owner != null && owner.equals(mc.player.getUuid())) continue;
+                Entity owner = projectile.getOwner();
+                if (owner != null && owner.getUuid().equals(mc.player.getUuid())) continue;
             }
-            if (!simulator.set(e, accurate.get())) continue;
+
+            if (!simulator.set(projectile, accurate.get())) continue;
             for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
                 points.add(vec3s.get().set(simulator.pos));
                 if (simulator.tick() != null) break;
@@ -129,7 +132,7 @@ public class ArrowDodge extends Module {
         if (isValid(Vec3d.ZERO, false)) return; // no need to move
 
         double speed = moveSpeed.get();
-        for (int i = 0; i < 500; i++) { // its not a while loop so it doesn't freeze if something is wrong
+        for (int i = 0; i < 500; i++) { // it's not a while loop so it doesn't freeze if something is wrong
             boolean didMove = false;
             Collections.shuffle(possibleMoveDirections); //Make the direction unpredictable
             for (Vec3d direction : possibleMoveDirections) {

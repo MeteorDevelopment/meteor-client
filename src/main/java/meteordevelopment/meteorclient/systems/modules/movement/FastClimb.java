@@ -82,6 +82,6 @@ public class FastClimb extends Module {
     }
 
     private boolean climbing() {
-        return (mc.player.horizontalCollision || ((LivingEntityAccessor) mc.player).isJumping()) && (mc.player.isClimbing() || mc.player.getBlockStateAtPos().isOf(Blocks.POWDER_SNOW) && PowderSnowBlock.canWalkOnPowderSnow(mc.player));
+        return (mc.player.horizontalCollision || ((LivingEntityAccessor) mc.player).meteor$isJumping()) && (mc.player.isClimbing() || mc.player.getBlockStateAtPos().isOf(Blocks.POWDER_SNOW) && PowderSnowBlock.canWalkOnPowderSnow(mc.player));
     }
 }

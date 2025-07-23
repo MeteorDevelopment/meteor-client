@@ -51,10 +51,12 @@ public class LightOverlay extends Module {
         .build()
     );
 
-    private final Setting<Boolean> newMobSpawnLightLevel = sgGeneral.add(new BoolSetting.Builder()
-        .name("new-mob-spawn-light-level")
-        .description("Use the new (1.18+) mob spawn behavior")
-        .defaultValue(true)
+    private final Setting<Integer> lightLevel = sgGeneral.add(new IntSetting.Builder()
+        .name("light-level")
+        .description("Which light levels to render. Old spawning light: 7.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(15)
         .build()
     );
 
@@ -86,9 +88,8 @@ public class LightOverlay extends Module {
         for (Cross cross : crosses) crossPool.free(cross);
         crosses.clear();
 
-        int spawnLightLevel = newMobSpawnLightLevel.get() ? 0 : 7;
         BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
-            switch (BlockUtils.isValidMobSpawn(blockPos, blockState, spawnLightLevel)) {
+            switch (BlockUtils.isValidMobSpawn(blockPos, blockState, lightLevel.get())) {
                 case Potential -> crosses.add(crossPool.get().set(blockPos, true));
                 case Always -> crosses.add((crossPool.get().set(blockPos, false)));
             }

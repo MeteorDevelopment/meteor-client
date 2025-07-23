@@ -27,61 +27,61 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(MinecraftClient.class)
 public interface MinecraftClientAccessor {
     @Accessor("currentFps")
-    static int getFps() {
+    static int meteor$getFps() {
         return 0;
     }
 
     @Mutable
     @Accessor("session")
-    void setSession(Session session);
+    void meteor$setSession(Session session);
 
     @Accessor("networkProxy")
-    Proxy getProxy();
+    Proxy meteor$getProxy();
 
     @Accessor("resourceReloadLogger")
-    ResourceReloadLogger getResourceReloadLogger();
+    ResourceReloadLogger meteor$getResourceReloadLogger();
 
     @Accessor("attackCooldown")
-    int getAttackCooldown();
+    int meteor$getAttackCooldown();
 
     @Accessor("attackCooldown")
-    void setAttackCooldown(int attackCooldown);
+    void meteor$setAttackCooldown(int attackCooldown);
 
     @Invoker("doAttack")
-    boolean leftClick();
+    boolean meteor$leftClick();
 
     @Mutable
     @Accessor("profileKeys")
-    void setProfileKeys(ProfileKeys keys);
+    void meteor$setProfileKeys(ProfileKeys keys);
 
     @Accessor("authenticationService")
-    YggdrasilAuthenticationService getAuthenticationService();
+    YggdrasilAuthenticationService meteor$getAuthenticationService();
 
     @Mutable
-    @Accessor
-    void setUserApiService(UserApiService apiService);
+    @Accessor("userApiService")
+    void meteor$setUserApiService(UserApiService apiService);
 
     @Mutable
     @Accessor("sessionService")
-    void setSessionService(MinecraftSessionService sessionService);
+    void meteor$setSessionService(MinecraftSessionService sessionService);
 
     @Mutable
     @Accessor("authenticationService")
-    void setAuthenticationService(YggdrasilAuthenticationService authenticationService);
+    void meteor$setAuthenticationService(YggdrasilAuthenticationService authenticationService);
 
     @Mutable
     @Accessor("skinProvider")
-    void setSkinProvider(PlayerSkinProvider skinProvider);
+    void meteor$setSkinProvider(PlayerSkinProvider skinProvider);
 
     @Mutable
     @Accessor("socialInteractionsManager")
-    void setSocialInteractionsManager(SocialInteractionsManager socialInteractionsManager);
+    void meteor$setSocialInteractionsManager(SocialInteractionsManager socialInteractionsManager);
 
     @Mutable
     @Accessor("abuseReportContext")
-    void setAbuseReportContext(AbuseReportContext abuseReportContext);
+    void meteor$setAbuseReportContext(AbuseReportContext abuseReportContext);
 
     @Mutable
     @Accessor("gameProfileFuture")
-    void setGameProfileFuture(CompletableFuture<ProfileResult> future);
+    void meteor$setGameProfileFuture(CompletableFuture<ProfileResult> future);
 }

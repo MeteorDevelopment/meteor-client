@@ -54,7 +54,7 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
         String path = Registries.BLOCK.getId(value).getPath();
         if (!path.endsWith("_banner")) return null;
 
-        ((IdentifierAccessor) (Object) ID).setPath(path.substring(0, path.length() - 6) + "wall_banner");
+        ((IdentifierAccessor) (Object) ID).meteor$setPath(path.substring(0, path.length() - 6) + "wall_banner");
         return Registries.BLOCK.get(ID);
     }
 }

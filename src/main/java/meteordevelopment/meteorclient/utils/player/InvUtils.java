@@ -58,7 +58,7 @@ public class InvUtils {
     public static boolean testInHotbar(Predicate<ItemStack> predicate) {
         if (testInHands(predicate)) return true;
 
-        for (int i = SlotUtils.HOTBAR_START; i < SlotUtils.HOTBAR_END; i++) {
+        for (int i = SlotUtils.HOTBAR_START; i <= SlotUtils.HOTBAR_END; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
             if (predicate.test(stack)) return true;
         }

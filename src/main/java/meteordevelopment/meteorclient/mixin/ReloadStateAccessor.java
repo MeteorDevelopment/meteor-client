@@ -12,5 +12,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ResourceReloadLogger.ReloadState.class)
 public interface ReloadStateAccessor {
     @Accessor("finished")
-    boolean isFinished();
+    boolean meteor$isFinished();
 }
