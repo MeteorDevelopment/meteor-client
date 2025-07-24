@@ -107,6 +107,7 @@
     "IdentifierAccessor",
     "InGameHudMixin",
     "InGameOverlayRendererMixin",
+    "InventoryScreenMixin",
     "ItemEntityRendererMixin",
     "ItemGroupsAccessor",
     "ItemGroupsMixin",
