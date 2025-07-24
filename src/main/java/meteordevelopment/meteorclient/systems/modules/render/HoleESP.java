@@ -21,7 +21,6 @@ import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -185,7 +184,7 @@ public class HoleESP extends Module {
                 Block block = mc.world.getBlockState(offsetPos).getBlock();
                 boolean breakable = block.getHardness() >= 0;
 
-                if (((AbstractBlockAccessor) block).isCollidable() && !breakable) bedrock++;
+                if (((AbstractBlockAccessor) block).meteor$isCollidable() && !breakable) bedrock++;
                 else if (block.getBlastResistance() >= 600 && breakable) obsidian++;
                 else if (direction == Direction.DOWN) return;
                 else if (doubles.get() && air == null && validHole(offsetPos)) {
@@ -195,7 +194,7 @@ public class HoleESP extends Module {
                         block = mc.world.getBlockState(offsetPos.offset(dir)).getBlock();
                         breakable = block.getHardness() >= 0;
 
-                        if (((AbstractBlockAccessor) block).isCollidable() && !breakable) bedrock++;
+                        if (((AbstractBlockAccessor) block).meteor$isCollidable() && !breakable) bedrock++;
                         else if (block.getBlastResistance() >= 600 && breakable) obsidian++;
                         else return;
                     }
@@ -220,10 +219,10 @@ public class HoleESP extends Module {
         Block block = chunk.getBlockState(pos).getBlock();
         if (!webs.get() && block == Blocks.COBWEB) return false;
 
-        if (((AbstractBlockAccessor) block).isCollidable()) return false;
+        if (((AbstractBlockAccessor) block).meteor$isCollidable()) return false;
 
         for (int i = 0; i < holeHeight.get(); i++) {
-            if (((AbstractBlockAccessor) chunk.getBlockState(pos.up(i)).getBlock()).isCollidable()) return false;
+            if (((AbstractBlockAccessor) chunk.getBlockState(pos.up(i)).getBlock()).meteor$isCollidable()) return false;
         }
 
         return true;

@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 public class Font {
-    public Texture texture;
+    public final Texture texture;
     private final int height;
     private final float scale;
     private final float ascent;

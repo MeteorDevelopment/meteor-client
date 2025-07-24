@@ -147,6 +147,6 @@ public class Anchor extends Module {
 
     private boolean isAir(int x, int y, int z) {
         blockPos.set(x, y, z);
-        return !((AbstractBlockAccessor)mc.world.getBlockState(blockPos).getBlock()).isCollidable();
+        return !((AbstractBlockAccessor)mc.world.getBlockState(blockPos).getBlock()).meteor$isCollidable();
     }
 }

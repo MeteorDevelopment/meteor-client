@@ -10,7 +10,7 @@ import com.mojang.blaze3d.systems.RenderPass;
 import meteordevelopment.meteorclient.mixininterface.IGpuDevice;
 import meteordevelopment.meteorclient.mixininterface.IRenderPipeline;
 import net.minecraft.client.gl.GlBackend;
-import net.minecraft.client.gl.GlResourceManager;
+import net.minecraft.client.gl.GlCommandEncoder;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,14 +21,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static org.lwjgl.opengl.GL11C.*;
 
-@Mixin(GlResourceManager.class)
-public abstract class GlResourceManagerMixin {
+@Mixin(GlCommandEncoder.class)
+public abstract class GlCommandEncoderMixin {
     @Shadow
     @Final
     private GlBackend backend;
 
     @SuppressWarnings("deprecation")
-    @Inject(method = "createRenderPass(Lcom/mojang/blaze3d/textures/GpuTexture;Ljava/util/OptionalInt;Lcom/mojang/blaze3d/textures/GpuTexture;Ljava/util/OptionalDouble;)Lcom/mojang/blaze3d/systems/RenderPass;", at = @At("RETURN"))
+    @Inject(method = "createRenderPass(Ljava/util/function/Supplier;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalInt;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalDouble;)Lcom/mojang/blaze3d/systems/RenderPass;", at = @At("RETURN"))
     private void createRenderPass$iGpuDevice(CallbackInfoReturnable<RenderPass> info) {
         ((IGpuDevice) backend).meteor$onCreateRenderPass(info.getReturnValue());
     }

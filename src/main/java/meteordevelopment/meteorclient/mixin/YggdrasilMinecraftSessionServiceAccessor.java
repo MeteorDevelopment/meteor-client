@@ -16,7 +16,7 @@ import java.net.Proxy;
 @Mixin(YggdrasilMinecraftSessionService.class)
 public interface YggdrasilMinecraftSessionServiceAccessor {
     @Invoker("<init>")
-    static YggdrasilMinecraftSessionService createYggdrasilMinecraftSessionService(final ServicesKeySet servicesKeySet, final Proxy proxy, final Environment env) {
+    static YggdrasilMinecraftSessionService meteor$createYggdrasilMinecraftSessionService(final ServicesKeySet servicesKeySet, final Proxy proxy, final Environment env) {
         throw new UnsupportedOperationException();
     }
 }

@@ -10,12 +10,8 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Zoom;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
-import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
-import org.joml.Vector3d;
-import org.joml.Vector4f;
+import org.joml.*;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -36,7 +32,7 @@ public class NametagUtils {
 
     public static void onRender(Matrix4f modelView) {
         model.set(modelView);
-        NametagUtils.projection.set(RenderSystem.getProjectionMatrix());
+        NametagUtils.projection.set(RenderUtils.projection);
 
         Utils.set(camera, mc.gameRenderer.getCamera().getPos());
         cameraNegated.set(camera);
@@ -92,10 +88,11 @@ public class NametagUtils {
     public static void begin(Vector3d pos, DrawContext drawContext) {
         begin(pos);
 
-        MatrixStack matrices = drawContext.getMatrices();
-        matrices.push();
-        matrices.translate((float) pos.x, (float) pos.y, 0);
-        matrices.scale((float) scale, (float) scale, 1);
+        Matrix3x2fStack matrices = drawContext.getMatrices();
+        matrices.pushMatrix();
+        matrices.scale(1.0f / mc.getWindow().getScaleFactor());
+        matrices.translate((float) pos.x, (float) pos.y);
+        matrices.scale((float) scale, (float) scale);
     }
 
     private static void begin(Matrix4fStack matrices, Vector3d pos) {
@@ -110,7 +107,7 @@ public class NametagUtils {
 
     public static void end(DrawContext drawContext) {
         end();
-        drawContext.getMatrices().pop();
+        drawContext.getMatrices().popMatrix();
     }
 
     private static double getScale(Vector3d pos) {

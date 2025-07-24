@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.ApplyTransformationEvent;
 import meteordevelopment.meteorclient.events.render.RenderItemEntityEvent;
+import meteordevelopment.meteorclient.mixin.ItemRenderStateAccessor;
 import meteordevelopment.meteorclient.mixin.LayerRenderStateAccessor;
 import meteordevelopment.meteorclient.mixininterface.IBakedQuad;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -21,7 +22,6 @@ import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.json.Transformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.random.Random;
 import org.joml.Vector3f;
@@ -29,16 +29,15 @@ import org.joml.Vector3f;
 import java.util.List;
 
 public class ItemPhysics extends Module {
-    private static final Direction[] FACES = { null, Direction.UP, Direction.DOWN, Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
     private static final float PIXEL_SIZE = 1f / 16f;
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> randomRotation = sgGeneral.add(new BoolSetting.Builder()
-            .name("random-rotation")
-            .description("Adds a random rotation to every item.")
-            .defaultValue(true)
-            .build()
+        .name("random-rotation")
+        .description("Adds a random rotation to every item.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Random random = Random.createLocal();
@@ -59,12 +58,12 @@ public class ItemPhysics extends Module {
 
         random.setSeed(event.renderState.seed);
 
-        for (int i = 0; i < event.renderState.itemRenderState.layerCount; i++) {
-            ItemRenderState.LayerRenderState layer = event.renderState.itemRenderState.layers[i];
+        for (int i = 0; i < ((ItemRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayerCount(); i++) {
+            ItemRenderState.LayerRenderState layer = ((ItemRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayers()[i];
             ModelInfo info = getInfo(layer.getQuads());
 
             matrices.push();
-            applyTransformation(matrices, ((LayerRenderStateAccessor) layer).getTransform());
+            applyTransformation(matrices, ((LayerRenderStateAccessor) layer).meteor$getTransform());
             matrices.translate(0, info.offsetY, 0);
             offsetInWater(matrices, event.itemEntity);
 

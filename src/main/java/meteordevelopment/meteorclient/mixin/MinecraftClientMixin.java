@@ -20,7 +20,6 @@ import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
-import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
@@ -32,7 +31,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CPSUtils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
-import meteordevelopment.starscript.Script;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gl.Framebuffer;
@@ -50,6 +48,7 @@ import net.minecraft.resource.ReloadableResourceManagerImpl;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profilers;
 import org.jetbrains.annotations.Nullable;
+import org.meteordev.starscript.Script;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -98,11 +97,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
         firstFrame = true;
-    }
-
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/ReloadableResourceManagerImpl;reload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/resource/ResourceReload;", shift = At.Shift.BEFORE))
-    private void init$beforeReload(CallbackInfo info) {
-        resourceManager.registerReloader(new MeteorRenderPipelines.Reloader());
     }
 
     @Inject(at = @At("HEAD"), method = "tick")
@@ -176,7 +170,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
             if (guimove.sneak.get() && kb == options.sneakKey) continue;
             if (guimove.sprint.get() && kb == options.sprintKey) continue;
             if (guimove.jump.get() && kb == options.jumpKey) continue;
-            ((KeyBindingAccessor) kb).invokeReset();
+            ((KeyBindingAccessor) kb).meteor$invokeReset();
         }
     }
 

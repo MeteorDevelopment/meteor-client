@@ -23,7 +23,7 @@ public class BuildHeight extends Module {
         if (!(event.packet instanceof PlayerInteractBlockC2SPacket p)) return;
         if (mc.world == null) return;
         if (p.getBlockHitResult().getPos().y >= mc.world.getHeight() && p.getBlockHitResult().getSide() == Direction.UP) {
-            ((BlockHitResultAccessor) p.getBlockHitResult()).setSide(Direction.DOWN);
+            ((BlockHitResultAccessor) p.getBlockHitResult()).meteor$setSide(Direction.DOWN);
         }
     }
 }
