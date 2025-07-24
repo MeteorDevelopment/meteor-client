@@ -99,21 +99,23 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
         return table;
     }
 
+    protected void invalidateTable() {
+        table.clear();
+        initTable();
+    }
+
     protected void addValue(T value) {
         if (!collection.contains(value)) {
             collection.add(value);
-
             setting.onChanged();
-            table.clear();
-            initTable();
+            invalidateTable();
         }
     }
 
     protected void removeValue(T value) {
         if (collection.remove(value)) {
             setting.onChanged();
-            table.clear();
-            initTable();
+            invalidateTable();
         }
     }
 

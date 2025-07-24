@@ -71,11 +71,15 @@ public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
         });
     }
 
+    protected void invalidateTable() {
+        table.clear();
+        initTable();
+    }
+
     protected void removeValue(K value) {
         if (map.remove(value) != null) {
             setting.onChanged();
-            table.clear();
-            initTable();
+            invalidateTable();
         }
     }
 

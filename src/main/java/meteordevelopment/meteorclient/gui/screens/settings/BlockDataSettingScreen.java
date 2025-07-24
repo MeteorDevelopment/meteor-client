@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.registry.Registries;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +26,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & IChangeable & IBlockData<T>> extends CollectionMapSettingScreen<Block, T> {
     private final BlockDataSetting<T> setting;
+    private boolean invalidate;
 
     public BlockDataSettingScreen(GuiTheme theme, BlockDataSetting<T> setting) {
         super(theme, "Configure Blocks", setting, setting.get(), Registries.BLOCK);
@@ -50,8 +52,17 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
             if (data == null) data = setting.defaultData.get().copy();
 
             mc.setScreen(data.createScreen(theme, block, setting));
+            invalidate = true;
         };
         return edit;
+    }
+
+    @Override
+    protected void onRenderBefore(DrawContext drawContext, float delta) {
+        if (invalidate) {
+            this.invalidateTable();
+            invalidate = false;
+        }
     }
 
     @Override
