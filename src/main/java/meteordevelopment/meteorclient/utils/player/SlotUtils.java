@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
 import meteordevelopment.meteorclient.mixin.HorseScreenHandlerAccessor;
+import meteordevelopment.meteorclient.mixin.ItemGroupsAccessor;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.entity.mob.SkeletonHorseEntity;
 import net.minecraft.entity.mob.ZombieHorseEntity;
@@ -14,7 +15,6 @@ import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.HorseEntity;
 import net.minecraft.entity.passive.LlamaEntity;
-import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.*;
 
@@ -71,7 +71,7 @@ public class SlotUtils {
     }
 
     private static int creativeInventory(int i) {
-        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || CreativeInventoryScreenAccessor.getSelectedTab() != Registries.ITEM_GROUP.get(ItemGroups.INVENTORY))
+        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || CreativeInventoryScreenAccessor.meteor$getSelectedTab() != Registries.ITEM_GROUP.get(ItemGroupsAccessor.meteor$getInventory()))
             return -1;
         return survivalInventory(i);
     }
@@ -137,7 +137,7 @@ public class SlotUtils {
     }
 
     private static int horse(ScreenHandler handler, int i) {
-        AbstractHorseEntity entity = ((HorseScreenHandlerAccessor) handler).getEntity();
+        AbstractHorseEntity entity = ((HorseScreenHandlerAccessor) handler).meteor$getEntity();
 
         if (entity instanceof LlamaEntity llamaEntity) {
             int strength = llamaEntity.getStrength();

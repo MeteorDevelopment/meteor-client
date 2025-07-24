@@ -32,6 +32,6 @@ public class EntityControl extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (maxJump.get()) ((ClientPlayerEntityAccessor) mc.player).setMountJumpStrength(1);
+        if (maxJump.get()) ((ClientPlayerEntityAccessor) mc.player).meteor$setMountJumpStrength(1);
     }
 }

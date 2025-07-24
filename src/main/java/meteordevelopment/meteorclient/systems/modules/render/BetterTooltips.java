@@ -25,7 +25,10 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Bucketable;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.*;
@@ -163,6 +166,14 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    private final Setting<SortSize> sizeType = sgOther.add(new EnumSetting.Builder<SortSize>()
+        .name("byte-size-format")
+        .description("The format by which to display the item's byte size.")
+        .defaultValue(SortSize.Dynamic)
+        .visible(byteSize::get)
+        .build()
+    );
+
     private final Setting<Boolean> statusEffects = sgOther.add(new BoolSetting.Builder()
         .name("status-effects")
         .description("Adds list of status effects to tooltips of food items.")
@@ -233,19 +244,25 @@ public class BetterTooltips extends Module {
                         success.value().write(ByteCountDataOutput.INSTANCE);
 
                         int byteCount = ByteCountDataOutput.INSTANCE.getCount();
-                        String count;
+                        String count = switch (sizeType.get()) {
+                            case Bytes -> String.format("%d bytes", byteCount);
+                            case Kilobytes -> String.format("%.2f kB", byteCount / 1024f);
+                            case Megabytes -> String.format("%.4f MB", byteCount / 1048576f);
+                            case Dynamic -> {
+                                if (byteCount >= 1048576) yield String.format("%.2f MB", byteCount / 1048576f);
+                                else if (byteCount >= 1024) yield String.format("%.2f kB", byteCount / 1024f);
+                                else yield String.format("%d bytes", byteCount);
+                            }
+                        };
 
                         ByteCountDataOutput.INSTANCE.reset();
 
-                        if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
-                        else count = String.format("%d bytes", byteCount);
-
-                        event.appendEnd(Text.literal(count).formatted(Formatting.GRAY));
+                        event.appendEnd(Text.literal(count).formatted(Formatting.DARK_GRAY));
                     } catch (Exception e) {
                         event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
                     }
                 }
-                case DataResult.Error<NbtElement> error ->
+                case DataResult.Error<NbtElement> ignored ->
                     event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
                 default ->
                     throw new MatchException(null, null);
@@ -296,7 +313,7 @@ public class BetterTooltips extends Module {
 
         // Fish peek
         else if (event.itemStack.getItem() instanceof EntityBucketItem bucketItem && previewEntities()) {
-            EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).getEntityType();
+            EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).meteor$getEntityType();
             LivingEntity entity = (LivingEntity) type.create(mc.world, SpawnReason.NATURAL);
 
             if (entity != null) {
@@ -306,7 +323,7 @@ public class BetterTooltips extends Module {
                 }
 
                 ((Bucketable) entity).copyDataFromNbt(nbtComponent.copyNbt());
-                ((EntityAccessor) entity).setInWater(true);
+                ((EntityAccessor) entity).meteor$setInWater(true);
                 event.tooltipData = new EntityTooltipComponent(entity);
             }
         }
@@ -440,5 +457,12 @@ public class BetterTooltips extends Module {
     public enum DisplayWhen {
         Keybind,
         Always
+    }
+
+    public enum SortSize {
+        Bytes,
+        Kilobytes,
+        Megabytes,
+        Dynamic,
     }
 }

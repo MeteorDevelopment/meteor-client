@@ -327,7 +327,7 @@ public class BetterChat extends Module {
         Text returnText = null;
         int messageIndex = -1;
 
-        List<ChatHudLine> messages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages();
+        List<ChatHudLine> messages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).meteor$getMessages();
         if (messages.isEmpty()) return null;
 
         for (int i = 0; i < Math.min(antiSpamDepth.get(), messages.size()); i++) {
@@ -358,7 +358,7 @@ public class BetterChat extends Module {
         }
 
         if (returnText != null) {
-            List<ChatHudLine.Visible> visible = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages();
+            List<ChatHudLine.Visible> visible = ((ChatHudAccessor) mc.inGameHud.getChatHud()).meteor$getVisibleMessages();
 
             int start = -1;
             for (int i = 0; i < messageIndex; i++) {

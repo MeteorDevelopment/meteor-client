@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.AbstractBlockAccessor;
+import meteordevelopment.meteorclient.mixin.DirectionAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -28,11 +28,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
@@ -364,7 +363,7 @@ public class HoleFiller extends Module {
     }
 
     private boolean isSurrounded(PlayerEntity target) {
-        for (Direction dir : Direction.HORIZONTAL) {
+        for (Direction dir : DirectionAccessor.meteor$getHorizontal()) {
             BlockPos blockPos = target.getBlockPos().offset(dir);
             Block block = mc.world.getBlockState(blockPos).getBlock();
             if (block.getBlastResistance() < 600) return false;

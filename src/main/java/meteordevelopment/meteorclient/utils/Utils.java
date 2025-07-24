@@ -199,7 +199,7 @@ public class Utils {
     }
 
     public static int getRenderDistance() {
-        return Math.max(mc.options.getViewDistance().getValue(), ((ClientPlayNetworkHandlerAccessor) mc.getNetworkHandler()).getChunkLoadDistance());
+        return Math.max(mc.options.getViewDistance().getValue(), ((ClientPlayNetworkHandlerAccessor) mc.getNetworkHandler()).meteor$getChunkLoadDistance());
     }
 
     public static int getWindowWidth() {
@@ -215,7 +215,7 @@ public class Utils {
         float height = mc.getWindow().getFramebufferHeight();
 
         RenderSystem.setProjectionMatrix(matrix.set(width, height), ProjectionType.ORTHOGRAPHIC);
-        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).callGetMatrix(width, height));
+        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).meteor$callGetMatrix(width, height));
 
         rendering3D = false;
     }
@@ -225,7 +225,7 @@ public class Utils {
         float height = (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor());
 
         RenderSystem.setProjectionMatrix(matrix.set(width, height), ProjectionType.PERSPECTIVE);
-        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).callGetMatrix(width, height));
+        RenderUtils.projection.set(((ProjectionMatrix2Accessor) matrix).meteor$callGetMatrix(width, height));
 
         rendering3D = true;
     }
@@ -260,7 +260,7 @@ public class Utils {
 
         if (components.contains(DataComponentTypes.CONTAINER)) {
             ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) components.get(DataComponentTypes.CONTAINER));
-            DefaultedList<ItemStack> stacks = container.getStacks();
+            DefaultedList<ItemStack> stacks = container.meteor$getStacks();
 
             for (int i = 0; i < stacks.size(); i++) {
                 if (i >= 0 && i < items.length) items[i] = stacks.get(i);
@@ -311,7 +311,7 @@ public class Utils {
     @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static boolean hasItems(ItemStack itemStack) {
         ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) itemStack.get(DataComponentTypes.CONTAINER));
-        if (container != null && !container.getStacks().isEmpty()) return true;
+        if (container != null && !container.meteor$getStacks().isEmpty()) return true;
 
         NbtCompound compoundTag = itemStack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).getNbt();
         return compoundTag != null && compoundTag.contains("Items");
@@ -407,7 +407,7 @@ public class Utils {
             if (mc.world == null) return "";
             if (mc.getServer() == null) return "FAILED_BECAUSE_LEFT_WORLD";
 
-            File folder = ((MinecraftServerAccessor) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey()).toFile();
+            File folder = ((MinecraftServerAccessor) mc.getServer()).meteor$getSession().getWorldDirectory(mc.world.getRegistryKey()).toFile();
             if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
                 folder = folder.getParentFile();
             }
@@ -545,13 +545,13 @@ public class Utils {
         // check if a screen is open
         // see net.minecraft.client.Mouse.lockCursor
         // see net.minecraft.client.MinecraftClient.tick
-        int attackCooldown = ((MinecraftClientAccessor) mc).getAttackCooldown();
+        int attackCooldown = ((MinecraftClientAccessor) mc).meteor$getAttackCooldown();
         if (attackCooldown == 10000) {
-            ((MinecraftClientAccessor) mc).setAttackCooldown(0);
+            ((MinecraftClientAccessor) mc).meteor$setAttackCooldown(0);
         }
 
         mc.options.attackKey.setPressed(true);
-        ((MinecraftClientAccessor) mc).leftClick();
+        ((MinecraftClientAccessor) mc).meteor$leftClick();
         mc.options.attackKey.setPressed(false);
     }
 
@@ -591,8 +591,8 @@ public class Utils {
     }
 
     public static boolean isLoading() {
-        ResourceReloadLogger.ReloadState state = ((ResourceReloadLoggerAccessor) ((MinecraftClientAccessor) mc).getResourceReloadLogger()).getReloadState();
-        return state == null || !((ReloadStateAccessor) state).isFinished();
+        ResourceReloadLogger.ReloadState state = ((ResourceReloadLoggerAccessor) ((MinecraftClientAccessor) mc).meteor$getResourceReloadLogger()).meteor$getReloadState();
+        return state == null || !((ReloadStateAccessor) state).meteor$isFinished();
     }
 
     public static int parsePort(String full) {
@@ -654,6 +654,6 @@ public class Utils {
 
     public static boolean ipFilter(String text, char character) {
         if (text.contains(":") && character == ':') return false;
-        return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.' || character == '-';
+        return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.' || character == '-' || character == ':';
     }
 }

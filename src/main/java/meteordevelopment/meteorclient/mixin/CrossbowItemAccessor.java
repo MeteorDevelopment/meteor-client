@@ -13,5 +13,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(CrossbowItem.class)
 public interface CrossbowItemAccessor {
     @Invoker("getSpeed")
-    static float getSpeed(ChargedProjectilesComponent itemStack) { return 0; }
+    static float meteor$getSpeed(ChargedProjectilesComponent itemStack) { return 0; }
 }
