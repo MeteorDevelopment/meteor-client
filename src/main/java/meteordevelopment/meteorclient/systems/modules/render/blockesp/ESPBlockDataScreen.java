@@ -49,7 +49,7 @@ public class ESPBlockDataScreen extends WindowScreen {
             .name("line-color")
             .description("Color of lines.")
             .defaultValue(new SettingColor(0, 255, 200))
-            .onModuleActivated(settingColorSetting -> settingColorSetting.set(blockData.lineColor))
+            .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.lineColor))
             .onChanged(settingColor -> {
                 if (!blockData.lineColor.equals(settingColor)) {
                     blockData.lineColor.set(settingColor);
@@ -63,7 +63,7 @@ public class ESPBlockDataScreen extends WindowScreen {
             .name("side-color")
             .description("Color of sides.")
             .defaultValue(new SettingColor(0, 255, 200, 25))
-            .onModuleActivated(settingColorSetting -> settingColorSetting.set(blockData.sideColor))
+            .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.sideColor))
             .onChanged(settingColor -> {
                 if (!blockData.sideColor.equals(settingColor)) {
                     blockData.sideColor.set(settingColor);
@@ -91,7 +91,7 @@ public class ESPBlockDataScreen extends WindowScreen {
             .name("tracer-color")
             .description("Color of tracer line.")
             .defaultValue(new SettingColor(0, 255, 200, 125))
-            .onModuleActivated(settingColorSetting -> settingColorSetting.set(blockData.tracerColor))
+            .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.tracerColor))
             .onChanged(settingColor -> {
                 if (!blockData.tracerColor.equals(settingColor)) {
                     blockData.tracerColor.set(settingColor);
