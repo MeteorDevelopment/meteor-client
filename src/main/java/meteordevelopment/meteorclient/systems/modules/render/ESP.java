@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
@@ -21,6 +22,7 @@ import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,6 +33,7 @@ import org.joml.Vector3d;
 import java.util.Set;
 
 public class ESP extends Module {
+    private static ESP esp;
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
@@ -297,22 +300,35 @@ public class ESP extends Module {
 
     // Utils
 
-    public boolean shouldSkip(Entity entity) {
-        if (!entities.get().contains(entity.getType())) return true;
-        if (entity == mc.player && ignoreSelf.get()) return true;
-        if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
+    public static ESP get() {
+        if (esp == null) {
+            esp = Modules.get().get(ESP.class);
+        }
+
+        return esp;
+    }
+
+    public static boolean shouldSkip(Entity entity) {
+        ESP esp = get();
+
+        if (!esp.entities.get().contains(entity.getType())) return true;
+        if (entity == MinecraftClient.getInstance().player && esp.ignoreSelf.get()) return true;
+        if (entity == MinecraftClient.getInstance().cameraEntity
+            && MinecraftClient.getInstance().options.getPerspective().isFirstPerson()) return true;
         return !EntityUtils.isInRenderDistance(entity);
     }
 
-    public Color getColor(Entity entity) {
-        if (!isActive()) return null;
-        if (!entities.get().contains(entity.getType())) return null;
+    public static Color getColor(Entity entity) {
+        ESP esp = get();
 
-        double alpha = getFadeAlpha(entity);
+        if (!esp.isActive()) return null;
+        if (!esp.entities.get().contains(entity.getType())) return null;
+
+        double alpha = esp.getFadeAlpha(entity);
         if (alpha == 0) return null;
 
-        Color color = getEntityTypeColor(entity);
-        return baseColor.set(color.r, color.g, color.b, (int) (color.a * alpha));
+        Color color = esp.getEntityTypeColor(entity);
+        return esp.baseColor.set(color.r, color.g, color.b, (int) (color.a * alpha));
     }
 
     private double getFadeAlpha(Entity entity) {
@@ -347,12 +363,14 @@ public class ESP extends Module {
         return Integer.toString(count);
     }
 
-    public boolean isShader() {
-        return isActive() && mode.get() == Mode.Shader;
+    public static boolean isShader() {
+        ESP esp = get();
+        return esp.isActive() && esp.mode.get() == Mode.Shader;
     }
 
-    public boolean isGlow() {
-        return isActive() && mode.get() == Mode.Glow;
+    public static boolean isGlow() {
+        ESP esp = get();
+        return esp.isActive() && esp.mode.get() == Mode.Glow;
     }
 
     public enum Mode {
