@@ -305,6 +305,7 @@ public class ESP extends Module {
     }
 
     public Color getColor(Entity entity) {
+        if (!isActive()) return null;
         if (!entities.get().contains(entity.getType())) return null;
 
         double alpha = getFadeAlpha(entity);
