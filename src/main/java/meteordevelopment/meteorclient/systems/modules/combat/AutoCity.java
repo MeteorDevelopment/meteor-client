@@ -24,21 +24,21 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
-import net.minecraft.block.Block;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
 
 public class AutoCity extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -175,7 +175,7 @@ public class AutoCity extends Module {
 
     private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
         .name("swing")
-        .description("Whether to swing hand client-side.")
+        .description("Whether to swing your hand client-side.")
         .defaultValue(false)
         .build()
     );
@@ -274,7 +274,7 @@ public class AutoCity extends Module {
         if (packetMine.get()) {
             boolean start = progress == 0 && !mining;
 
-            // Packets are only sent twice- at the beginning and end of the mining process
+            // Packets are only sent twice - at the beginning and end of the mining process
             if ((start || progress >= 1) && hasPickaxe) {
                 if (rotate.get()) Rotations.rotate(Rotations.getYaw(breakPos), Rotations.getPitch(breakPos), () -> packetMineBlock(tool, start));
                 else packetMineBlock(tool, start);
@@ -366,7 +366,7 @@ public class AutoCity extends Module {
         Block block = mc.world.getBlockState(myBlockPos).getBlock();
         if (block.getBlastResistance() >= 600) return myBlockPos.equals(blockPos);
 
-        // Otherwise, make certain we arent breaking our own surround blocks
+        // Otherwise, make certain we aren't breaking our own surround blocks
         for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
             BlockPos neighborPos = myBlockPos.offset(direction);
             if (neighborPos.equals(blockPos)) return true;
@@ -403,9 +403,7 @@ public class AutoCity extends Module {
         if (pauseOnUse.get() && mc.player.isUsingItem()) return true;
 
         CrystalAura CA = Modules.get().get(CrystalAura.class);
-        if (pauseOnCA.get() && CA.isActive() && CA.kaTimer > 0) return true;
-
-        return false;
+        return pauseOnCA.get() && CA.isActive() && CA.kaTimer > 0;
     }
 
     @EventHandler
