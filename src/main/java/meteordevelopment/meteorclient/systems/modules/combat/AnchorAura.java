@@ -16,16 +16,19 @@ import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
-import meteordevelopment.meteorclient.utils.player.*;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.state.property.Properties;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -204,7 +207,7 @@ public class AnchorAura extends Module {
 
     private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
         .name("swing")
-        .description("Whether to swing hand client-side.")
+        .description("Whether to swing your hand client-side.")
         .defaultValue(true)
         .build()
     );
@@ -241,10 +244,10 @@ public class AnchorAura extends Module {
     );
 
     private double bestPlaceDamage;
-    private BlockPos.Mutable bestPlacePos = new BlockPos.Mutable();
+    private final BlockPos.Mutable bestPlacePos = new BlockPos.Mutable();
 
     private double bestBreakDamage;
-    private BlockPos.Mutable bestBreakPos = new BlockPos.Mutable();
+    private final BlockPos.Mutable bestBreakPos = new BlockPos.Mutable();
 
     private BlockPos renderBlockPos;
     private int placeDelayLeft, chargeDelayLeft, breakDelayLeft;
@@ -364,7 +367,7 @@ public class AnchorAura extends Module {
         renderBlockPos = bestBreakPos;
 
         if (rotate.get()) {
-            Rotations.rotate(Rotations.getYaw(bestBreakPos), Rotations.getPitch(bestBreakPos), 40, () -> { doInteract(anchor, glowStone); });
+            Rotations.rotate(Rotations.getYaw(bestBreakPos), Rotations.getPitch(bestBreakPos), 40, () -> doInteract(anchor, glowStone));
         } else {
             doInteract(anchor, glowStone);
         }
@@ -414,6 +417,7 @@ public class AnchorAura extends Module {
         for (Direction direction : Direction.values()) {
             if (!mc.world.getBlockState(blockPos.offset(direction)).isReplaceable()) return false;
         }
+
         return true;
     }
 
@@ -423,9 +427,7 @@ public class AnchorAura extends Module {
         if (pauseOnMine.get() && mc.interactionManager.isBreakingBlock()) return true;
 
         CrystalAura CA = Modules.get().get(CrystalAura.class);
-        if (pauseOnCA.get() && CA.isActive() && CA.kaTimer > 0) return true;
-
-        return false;
+        return pauseOnCA.get() && CA.isActive() && CA.kaTimer > 0;
     }
 
     @EventHandler
