@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.DirectionAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -18,21 +18,24 @@ import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
-import meteordevelopment.meteorclient.utils.player.*;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.BedBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.BedPart;
-import net.minecraft.item.BedItem;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BedItem;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.RaycastContext;
 
 public class BedAura extends Module {
@@ -88,8 +91,8 @@ public class BedAura extends Module {
     private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
         .name("place-delay")
         .description("The delay between placing beds in ticks.")
-        .defaultValue(5)
-        .range(0, 10)
+        .defaultValue(10)
+        .range(0, 20)
         .visible(place::get)
         .build()
     );
@@ -265,11 +268,11 @@ public class BedAura extends Module {
     );
 
     private double bestPlaceDamage;
-    private BlockPos.Mutable bestPlacePos = new BlockPos.Mutable();
+    private final BlockPos.Mutable bestPlacePos = new BlockPos.Mutable();
     private Direction bestPlaceDirection;
 
     private double bestBreakDamage;
-    private BlockPos.Mutable bestBreakPos = new BlockPos.Mutable();
+    private final BlockPos.Mutable bestBreakPos = new BlockPos.Mutable();
 
     private BlockPos renderBlockPos;
     private Direction renderDirection;
@@ -439,7 +442,7 @@ public class BedAura extends Module {
 
         // Break bed!
         if (rotate.get()) {
-            Rotations.rotate(Rotations.getYaw(bestBreakPos), Rotations.getPitch(bestBreakPos), () -> { doInteract(); });
+            Rotations.rotate(Rotations.getYaw(bestBreakPos), Rotations.getPitch(bestBreakPos), this::doInteract);
         } else {
             doInteract();
         }
@@ -475,9 +478,7 @@ public class BedAura extends Module {
         if (pauseOnMine.get() && mc.interactionManager.isBreakingBlock()) return true;
 
         CrystalAura CA = Modules.get().get(CrystalAura.class);
-        if (pauseOnCA.get() && CA.isActive() && CA.kaTimer > 0) return true;
-
-        return false;
+        return pauseOnCA.get() && CA.isActive() && CA.kaTimer > 0;
     }
 
     @EventHandler
@@ -489,6 +490,7 @@ public class BedAura extends Module {
                 mc.world.setBlockState(otherPos, event.newState.with(BedBlock.PART, BedPart.HEAD), 0);
             }
         }
+
         // Spoof bed breaking for instantaneous bed sync
         if (spoofBreak.get() && event.oldState.getBlock() instanceof BedBlock && event.newState.isReplaceable()) {
             BlockPos otherPos = event.pos.offset(BedBlock.getOppositePartDirection(event.oldState));
