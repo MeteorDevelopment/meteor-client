@@ -24,7 +24,7 @@ public class SlotUtils {
     public static final int HOTBAR_START = 0;
     public static final int HOTBAR_END = 8;
 
-    public static final int OFFHAND = 45;
+    public static final int OFFHAND = 40;
 
     public static final int MAIN_START = 9;
     public static final int MAIN_END = 35;
