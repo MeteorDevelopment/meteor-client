@@ -67,6 +67,7 @@ public class SlotUtils {
     private static int survivalInventory(int i) {
         if (isHotbar(i)) return 36 + i;
         if (isArmor(i)) return 5 + (i - 36);
+        if (i == OFFHAND) return 45;
         return i;
     }
 
