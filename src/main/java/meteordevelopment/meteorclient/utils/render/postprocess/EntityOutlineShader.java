@@ -2,31 +2,27 @@ package meteordevelopment.meteorclient.utils.render.postprocess;
 
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
-import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import net.minecraft.entity.Entity;
 
 public class EntityOutlineShader extends EntityShader {
-    private static ESP esp;
-
     public EntityOutlineShader() {
         init(MeteorRenderPipelines.POST_OUTLINE);
     }
 
     @Override
     protected boolean shouldDraw() {
-        if (esp == null) esp = Modules.get().get(ESP.class);
-        return esp.isShader();
+        return ESP.isShader();
     }
 
     @Override
     public boolean shouldDraw(Entity entity) {
-        if (!shouldDraw()) return false;
-        return !esp.shouldSkip(entity);
+        return !ESP.shouldSkip(entity);
     }
 
     @Override
     protected void setupPass(MeshRenderer renderer) {
+        ESP esp = ESP.get();
         renderer.uniform("OutlineData", OutlineUniforms.write(
             esp.outlineWidth.get(),
             esp.fillOpacity.get().floatValue(),
