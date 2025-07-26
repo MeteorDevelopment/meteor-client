@@ -193,7 +193,7 @@ public class AutoEat extends Module {
     }
 
     private void stopEating() {
-        changeSlot(prevSlot);
+        if (prevSlot != SlotUtils.OFFHAND) changeSlot(prevSlot);
         setPressed(false);
 
         eating = false;
