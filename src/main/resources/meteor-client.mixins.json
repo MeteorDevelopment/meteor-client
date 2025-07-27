@@ -106,6 +106,7 @@
     "HorseScreenHandlerAccessor",
     "InGameHudMixin",
     "InGameOverlayRendererMixin",
+    "InventoryScreenMixin",
     "ItemEntityRendererMixin",
     "ItemGroupsAccessor",
     "ItemGroupsMixin",
