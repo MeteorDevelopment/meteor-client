@@ -21,6 +21,7 @@ public abstract class WWidget implements BaseWidget {
     public String tooltip;
 
     public boolean mouseOver;
+    protected boolean instantTooltips;
     protected double mouseOverTimer;
 
     public void init() {}
@@ -73,7 +74,7 @@ public abstract class WWidget implements BaseWidget {
 
         if (isOver(mouseX, mouseY)) {
             mouseOverTimer += delta;
-            if (mouseOverTimer >= 1 && tooltip != null) renderer.tooltip(tooltip);
+            if ((instantTooltips || mouseOverTimer >= 1) && tooltip != null) renderer.tooltip(tooltip);
         }
         else {
             mouseOverTimer = 0;

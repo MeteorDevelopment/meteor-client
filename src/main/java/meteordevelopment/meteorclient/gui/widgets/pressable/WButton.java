@@ -16,6 +16,8 @@ public abstract class WButton extends WPressable {
     public WButton(String text, GuiTexture texture) {
         this.text = text;
         this.texture = texture;
+
+        if (text == null) instantTooltips = true;
     }
 
     @Override

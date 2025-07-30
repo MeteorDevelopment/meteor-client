@@ -243,6 +243,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
         WButton reset = list.add(theme.button(GuiRenderer.RESET)).expandCellX().right().widget();
         reset.action = keybind::resetBind;
+        reset.tooltip = "Reset";
     }
 
     private void blockW(WTable table, BlockSetting setting) {
@@ -484,6 +485,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
             setting.reset();
             if (action != null) action.run();
         };
+        reset.tooltip = "Reset";
     }
 
     private static class WSelectedCountLabel extends WMeteorLabel {

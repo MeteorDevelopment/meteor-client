@@ -69,6 +69,7 @@ public class HudTab extends Tab {
 
             WButton resetSettings = bottom.add(theme.button(GuiRenderer.RESET)).widget();
             resetSettings.action = hud.settings::reset;
+            resetSettings.tooltip = "Reset";
         }
 
         @Override

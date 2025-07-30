@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.IChangeable;
 import org.jetbrains.annotations.Nullable;
@@ -63,9 +64,9 @@ public abstract class CollectionMapSettingScreen<K, V> extends WindowScreen {
             table.add(theme.label(isChanged ? "*" : " "));
             table.add(getDataWidget(t, data));
 
-            table.add(theme.button(GuiRenderer.RESET)).widget().action = () -> {
-                removeValue(t);
-            };
+            WButton reset = table.add(theme.button(GuiRenderer.RESET)).widget();
+            reset.action = () -> removeValue(t);
+            reset.tooltip = "Reset";
 
             table.row();
         });
