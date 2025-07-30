@@ -9,9 +9,9 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import net.minecraft.class_11566;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.item.property.numeric.CompassState;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,14 +21,14 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(CompassState.class)
 public abstract class CompassStateMixin {
-    @ModifyExpressionValue(method = "getBodyYaw", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getBodyYaw()F"))
+    @ModifyExpressionValue(method = "getBodyYaw", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_11566;getBodyYaw()F"))
     private static float callLivingEntityGetYaw(float original) {
         if (Modules.get().isActive(Freecam.class)) return mc.gameRenderer.getCamera().getYaw();
         return original;
     }
 
-    @ModifyReturnValue(method = "getAngleTo(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/BlockPos;)D", at = @At("RETURN"))
-    private static double modifyGetAngleTo(double original, Entity entity, BlockPos pos) {
+    @ModifyReturnValue(method = "getAngleTo(Lnet/minecraft/class_11566;Lnet/minecraft/util/math/BlockPos;)D", at = @At("RETURN"))
+    private static double modifyGetAngleTo(double original, class_11566 arg, BlockPos pos) {
         if (Modules.get().isActive(Freecam.class)) {
             Vec3d vec3d = Vec3d.ofCenter(pos);
             Camera camera = mc.gameRenderer.getCamera();

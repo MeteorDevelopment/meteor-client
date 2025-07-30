@@ -77,7 +77,8 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${properties["loader_version"] as String}")
 
     modInclude(fabricApi.module("fabric-api-base", properties["fapi_version"] as String))
-    modInclude(fabricApi.module("fabric-resource-loader-v0", properties["fapi_version"] as String))
+    // todo re-include when it doesnt crash
+    //modInclude(fabricApi.module("fabric-resource-loader-v0", properties["fapi_version"] as String))
 
     // Compat fixes
     modCompileOnly(fabricApi.module("fabric-renderer-indigo", properties["fapi_version"] as String))

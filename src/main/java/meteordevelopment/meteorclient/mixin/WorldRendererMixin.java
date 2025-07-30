@@ -112,7 +112,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
             meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
             PostProcessShaders.rendering = true;
 
-            shader.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
+            shader.vertexConsumerProvider.setColor(color.getPacked());
             renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, shader.vertexConsumerProvider);
 
             PostProcessShaders.rendering = false;
@@ -132,7 +132,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
             Color color = getESP().getColor(entity.get());
 
             if (color == null) original.call(instance, red, green, blue, alpha);
-            else instance.setColor(color.r, color.g, color.b, color.a);
+            else instance.setColor(color.getPacked());
         }
     }
 

@@ -23,6 +23,7 @@
     "BiomeColorsMixin",
     "BlockCollisionSpliteratorMixin",
     "BlockColorsMixin",
+    "BlockEntityRenderDispatcherAccessor",
     "BlockEntityRenderDispatcherMixin",
     "BlockHitResultAccessor",
     "BlockItemMixin",

@@ -114,7 +114,8 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    // todo rename bl when appropriate
+    public boolean mouseClicked(double mouseX, double mouseY, int button, boolean bl) {
         if (locked) return false;
 
         double s = mc.getWindow().getScaleFactor();
