@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -130,6 +131,8 @@ public class NoFall extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (!Utils.canUpdate()) return;
+
         if (timer > 20) {
             placedWater = false;
             timer = 0;
