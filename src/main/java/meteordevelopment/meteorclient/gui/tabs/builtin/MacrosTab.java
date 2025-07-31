@@ -64,7 +64,7 @@ public class MacrosTab extends Tab {
 
                 Keybind keybind = macro.keybind.get();
                 Color keybindColor = keybind.isSet() ? Color.GREEN : Color.LIGHT_GRAY;
-                table.add(theme.label("(")).expandCellX().right();
+                table.add(theme.label(" (")).expandCellX().right();
                 table.add(theme.label(keybind.toString()).color(keybindColor)).center();
                 table.add(theme.label(")")).right();
 
