@@ -17,7 +17,9 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.macros.Macro;
 import meteordevelopment.meteorclient.systems.macros.Macros;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -58,9 +60,15 @@ public class MacrosTab extends Tab {
             if (Macros.get().isEmpty()) return;
 
             for (Macro macro : Macros.get()) {
-                table.add(theme.label(macro.name.get() + " (" + macro.keybind.get() + ")"));
+                table.add(theme.label(macro.name.get()));
 
-                WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
+                Keybind keybind = macro.keybind.get();
+                Color keybindColor = keybind.isSet() ? Color.GREEN : Color.LIGHT_GRAY;
+                table.add(theme.label("(")).expandCellX().right();
+                table.add(theme.label(keybind.toString()).color(keybindColor)).center();
+                table.add(theme.label(")")).right();
+
+                WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
                 edit.action = () -> mc.setScreen(new EditMacroScreen(theme, macro, this::reload));
 
                 WMinus remove = table.add(theme.minus()).widget();
