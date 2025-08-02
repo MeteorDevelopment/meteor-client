@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.gui.screens.settings;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import net.minecraft.registry.Registries;
@@ -20,11 +21,17 @@ public class ScreenHandlerSettingScreen extends CollectionListSettingScreen<Scre
 
     @Override
     protected WWidget getValueWidget(ScreenHandlerType<?> value) {
-        return theme.label(getValueName(value));
+        return theme.label(getName(value));
     }
 
     @Override
-    protected String getValueName(ScreenHandlerType<?> type) {
+    protected String[] getValueNames(ScreenHandlerType<?> type) {
+        return new String[]{
+            getName(type)
+        };
+    }
+
+    private static String getName(ScreenHandlerType<?> type) {
         return Registries.SCREEN_HANDLER.getId(type).toString();
     }
 }

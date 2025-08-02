@@ -151,15 +151,20 @@ public abstract class ChatHudMixin implements IChatHud {
         return getBetterChat().modifyChatWidth(width);
     }
 
-    @ModifyReceiver(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/OrderedText;III)I"))
-    private DrawContext onRender_beforeDrawTextWithShadow(DrawContext context, TextRenderer textRenderer, OrderedText text, int x, int y, int color, @Local ChatHudLine.Visible line) {
-        getBetterChat().drawPlayerHead(context, line, y, color);
+    @ModifyReceiver(method = "method_71991", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/OrderedText;III)V"))
+    private DrawContext onRender_beforeDrawTextWithShadow(DrawContext context, TextRenderer textRenderer, OrderedText text, int x, int y, int color, @Local(argsOnly = true) ChatHudLine.Visible line) {
+        getBetterChat().beforeDrawMessage(context, line, y, color);
         return context;
+    }
+
+    @Inject(method = "method_71991", at = @At("TAIL"))
+    private void onRender_afterDrawTextWithShadow(int i, DrawContext context, float f, int j, int k, int l, ChatHudLine.Visible visible, int m, float g, CallbackInfo info) {
+        getBetterChat().afterDrawMessage(context);
     }
 
     // No Message Signature Indicator
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;indicator()Lnet/minecraft/client/gui/hud/MessageIndicator;"))
+    @ModifyExpressionValue(method = "method_71992", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;indicator()Lnet/minecraft/client/gui/hud/MessageIndicator;"))
     private MessageIndicator onRender_modifyIndicator(MessageIndicator indicator) {
         return Modules.get().get(NoRender.class).noMessageSignatureIndicator() ? null : indicator;
     }

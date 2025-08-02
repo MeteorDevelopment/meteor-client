@@ -12,19 +12,17 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.pathing.NopPathManager;
 import meteordevelopment.meteorclient.pathing.PathManagers;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.option.KeyBinding;
 
 public class AutoWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -105,10 +103,10 @@ public class AutoWalk extends Module {
             }
 
             switch (direction.get()) {
-                case Forwards -> setPressed(mc.options.forwardKey, true);
-                case Backwards -> setPressed(mc.options.backKey, true);
-                case Left -> setPressed(mc.options.leftKey, true);
-                case Right -> setPressed(mc.options.rightKey, true);
+                case Forwards -> mc.options.forwardKey.setPressed(true);
+                case Backwards -> mc.options.backKey.setPressed(true);
+                case Left -> mc.options.leftKey.setPressed(true);
+                case Right -> mc.options.rightKey.setPressed(true);
             }
         } else {
             if (PathManagers.get() instanceof NopPathManager) {
@@ -150,15 +148,10 @@ public class AutoWalk extends Module {
     }
 
     private void unpress() {
-        setPressed(mc.options.forwardKey, false);
-        setPressed(mc.options.backKey, false);
-        setPressed(mc.options.leftKey, false);
-        setPressed(mc.options.rightKey, false);
-    }
-
-    private void setPressed(KeyBinding key, boolean pressed) {
-        key.setPressed(pressed);
-        Input.setKeyState(key, pressed);
+        mc.options.forwardKey.setPressed(false);
+        mc.options.backKey.setPressed(false);
+        mc.options.leftKey.setPressed(false);
+        mc.options.rightKey.setPressed(false);
     }
 
     private boolean isMovementKey(int key) {

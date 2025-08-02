@@ -12,5 +12,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ClientChunkManager.class)
 public interface ClientChunkManagerAccessor {
     @Accessor("chunks")
-    ClientChunkManager.ClientChunkMap getChunks();
+    ClientChunkManager.ClientChunkMap meteor$getChunks();
 }

@@ -188,7 +188,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
     private void stringW(WTable table, StringSetting setting) {
         CharFilter filter = setting.filter == null ? (text, c) -> true : setting.filter;
-        Cell<WTextBox> cell = table.add(theme.textBox(setting.get(), filter, setting.renderer));
+        Cell<WTextBox> cell = table.add(theme.textBox(setting.get(), setting.placeholder, filter, setting.renderer));
         if (setting.wide) cell.minWidth(Utils.getWindowWidth() - Utils.getWindowWidth() / 4.0);
 
         WTextBox textBox = cell.expandX().widget();
@@ -337,7 +337,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
     private void blockDataW(WTable table, BlockDataSetting<?> setting) {
         WButton button = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
-        button.action = () -> mc.setScreen(new BlockDataSettingScreen(theme, setting));
+        button.action = () -> mc.setScreen(new BlockDataSettingScreen<>(theme, setting));
 
         reset(table, setting, null);
     }
