@@ -5,12 +5,17 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
+import com.terraformersmc.modmenu.util.mod.Mod;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -19,6 +24,10 @@ import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.BlockStateRaycastContext;
+import net.minecraft.world.RaycastContext;
 
 public class AirPlace extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -82,7 +91,7 @@ public class AirPlace extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         double r = customRange.get() ? range.get() : mc.player.getBlockInteractionRange();
-        hitResult = mc.getCameraEntity().raycast(r, 0, false);
+        hitResult = Freecam.withPos(() -> mc.getCameraEntity().raycast(r, 0, false));
 
         if (!(hitResult instanceof BlockHitResult blockHitResult) || !(mc.player.getMainHandStack().getItem() instanceof BlockItem) && !(mc.player.getMainHandStack().getItem() instanceof SpawnEggItem)) return;
 
