@@ -192,13 +192,14 @@ public abstract class GameRendererMixin {
                 cameraE.setPitch(camera.getPitch());
             } else {
                 ((IVec3d) cameraE.getPos()).meteor$set(freecam.getX(1), freecam.getY(1) - cameraE.getEyeHeight(cameraE.getPose()), freecam.getZ(1));
-                cameraE.lastX = freecam.getX(0);
-                cameraE.lastY = freecam.getY(0) - cameraE.getEyeHeight(cameraE.getPose());
-                cameraE.lastZ = freecam.getZ(0);
+                cameraE.lastX = freecam.getX(1);
+                cameraE.lastY = freecam.getY(1) - cameraE.getEyeHeight(cameraE.getPose());
+                cameraE.lastZ = freecam.getZ(1);
                 cameraE.setYaw(freecam.yaw);
                 cameraE.setPitch(freecam.pitch);
-                cameraE.lastYaw = freecam.lastYaw;
-                cameraE.lastPitch = freecam.lastPitch;
+                cameraE.lastYaw = freecam.yaw;
+                cameraE.lastPitch = freecam.pitch;
+                tickDelta = 1;
             }
 
             freecamSet = true;
