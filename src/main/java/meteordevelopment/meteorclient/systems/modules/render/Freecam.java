@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
@@ -14,6 +15,7 @@ import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -21,6 +23,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.misc.Producer;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -33,11 +36,14 @@ import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.concurrent.Callable;
 
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -564,6 +570,94 @@ public class Freecam extends Module {
         if (relativePos.get()) z += mc.cameraEntity.getZ();
         return z;
     }
+    public Vec3d getPos(float tickDelta) {
+        return new Vec3d(getX(tickDelta), getY(tickDelta), getZ(tickDelta));
+    }
+    public Vec3d getPos() {
+        return new Vec3d(getX(1), getY(1), getZ(1));
+    }
+
+    static public <R> R withPos(Producer<R> c) {
+        Freecam f = Modules.get().get(Freecam.class);
+
+        Entity cameraE = MeteorClient.mc.getCameraEntity();
+
+        if (!f.shouldChangeCrosshairTarget()) return c.create();
+
+        double x = cameraE.getX();
+        double y = cameraE.getY();
+        double z = cameraE.getZ();
+        double lastX = cameraE.lastX;
+        double lastY = cameraE.lastY;
+        double lastZ = cameraE.lastZ;
+        float yaw = cameraE.getYaw();
+        float pitch = cameraE.getPitch();
+        float lastYaw = cameraE.lastYaw;
+        float lastPitch = cameraE.lastPitch;
+
+        cameraE.lastX = f.getX(1);
+        cameraE.lastY = f.getY(1) - cameraE.getEyeHeight(cameraE.getPose());
+        cameraE.lastZ = f.getZ(1);
+        cameraE.setYaw(yaw);
+        cameraE.setPitch(pitch);
+        cameraE.lastYaw = yaw;
+        cameraE.lastPitch = pitch;
+
+        R r = c.create();
+
+        ((IVec3d) cameraE.getPos()).meteor$set(x, y, z);
+        cameraE.lastX = lastX;
+        cameraE.lastY = lastY;
+        cameraE.lastZ = lastZ;
+        cameraE.setYaw(yaw);
+        cameraE.setPitch(pitch);
+        cameraE.lastYaw = lastYaw;
+        cameraE.lastPitch = lastPitch;
+
+        return r;
+    }
+
+    static public void withPos(Runnable c) {
+        Freecam f = Modules.get().get(Freecam.class);
+
+        Entity cameraE = MeteorClient.mc.getCameraEntity();
+
+        if (!f.shouldChangeCrosshairTarget()) {
+            c.run();
+            return;
+        }
+
+        double x = cameraE.getX();
+        double y = cameraE.getY();
+        double z = cameraE.getZ();
+        double lastX = cameraE.lastX;
+        double lastY = cameraE.lastY;
+        double lastZ = cameraE.lastZ;
+        float yaw = cameraE.getYaw();
+        float pitch = cameraE.getPitch();
+        float lastYaw = cameraE.lastYaw;
+        float lastPitch = cameraE.lastPitch;
+
+        cameraE.lastX = f.getX(1);
+        cameraE.lastY = f.getY(1) - cameraE.getEyeHeight(cameraE.getPose());
+        cameraE.lastZ = f.getZ(1);
+        cameraE.setYaw(yaw);
+        cameraE.setPitch(pitch);
+        cameraE.lastYaw = yaw;
+        cameraE.lastPitch = pitch;
+
+        c.run();
+
+        ((IVec3d) cameraE.getPos()).meteor$set(x, y, z);
+        cameraE.lastX = lastX;
+        cameraE.lastY = lastY;
+        cameraE.lastZ = lastZ;
+        cameraE.setYaw(yaw);
+        cameraE.setPitch(pitch);
+        cameraE.lastYaw = lastYaw;
+        cameraE.lastPitch = lastPitch;
+    }
+
 
     public double getYaw(float tickDelta) {
         if (override || !mc.isWindowFocused()) return yaw;
