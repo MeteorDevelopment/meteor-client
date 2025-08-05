@@ -65,7 +65,7 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
         matrices2.scale((float) scale, (float) scale, 0);
         matrices2.translate(8, 8, 0);
         mc.getMapRenderer().update(new MapIdComponent(mapId), mapState, mapRenderState);
-        mc.getMapRenderer().draw(mapRenderState, matrices2, mc.gameRenderer.method_72910(), false, 0xF000F0);
+        mc.getMapRenderer().draw(mapRenderState, matrices2, mc.gameRenderer.getEntityRenderCommandQueue(), false, 0xF000F0);
         matrices2.pop();
     }
 }

@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.class_11701;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
+import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
+import net.minecraft.client.texture.SpriteHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(BlockEntityRenderDispatcher.class)
-public interface BlockEntityRenderDispatcherAccessor {
-    @Accessor("field_61783")
-    class_11701 getField_61783();
+@Mixin(BlockEntityRenderManager.class)
+public interface BlockEntityRenderManagerAccessor {
+    @Accessor("spriteHolder")
+    SpriteHolder getSpriteHolder();
 }

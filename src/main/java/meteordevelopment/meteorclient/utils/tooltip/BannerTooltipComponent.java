@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import meteordevelopment.meteorclient.mixin.BlockEntityRenderDispatcherAccessor;
+import meteordevelopment.meteorclient.mixin.BlockEntityRenderManagerAccessor;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -81,7 +81,7 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
         VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
 
         BannerBlockEntityRenderer.renderCanvas(
-            ((BlockEntityRenderDispatcherAccessor) mc.getBlockEntityRenderDispatcher()).getField_61783(),
+            ((BlockEntityRenderManagerAccessor) mc.getBlockEntityRenderDispatcher()).getSpriteHolder(),
             matrices,
             immediate,
             15728880,
