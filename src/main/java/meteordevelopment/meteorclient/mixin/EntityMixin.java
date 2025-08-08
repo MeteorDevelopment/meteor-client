@@ -144,7 +144,7 @@ public abstract class EntityMixin {
     @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)
     private void onGetTeamColorValue(CallbackInfoReturnable<Integer> info) {
         if (PostProcessShaders.rendering) {
-            Color color = Modules.get().get(ESP.class).getColor((Entity) (Object) this);
+            Color color = ESP.getColor((Entity) (Object) this);
             if (color != null) info.setReturnValue(color.getPacked());
         }
     }
@@ -161,8 +161,7 @@ public abstract class EntityMixin {
     @ModifyReturnValue(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("RETURN"))
     private boolean isInvisibleToCanceller(boolean original) {
         if (!Utils.canUpdate()) return original;
-        ESP esp = Modules.get().get(ESP.class);
-        if (Modules.get().get(NoRender.class).noInvisibility() || esp.isActive() && !esp.shouldSkip((Entity) (Object) this)) return false;
+        if (Modules.get().get(NoRender.class).noInvisibility() || ESP.get().isActive() && !ESP.shouldSkip((Entity) (Object) this)) return false;
         return original;
     }
 

@@ -268,11 +268,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @ModifyReturnValue(method = "hasOutline", at = @At("RETURN"))
     private boolean hasOutlineModifyIsOutline(boolean original, Entity entity) {
-        ESP esp = Modules.get().get(ESP.class);
-        if (esp == null) return original;
-        if (!esp.isGlow() || esp.shouldSkip(entity)) return original;
+        if (ESP.get() == null) return original;
+        if (!ESP.isGlow() || ESP.shouldSkip(entity)) return original;
 
-        return esp.getColor(entity) != null || original;
+        return ESP.getColor(entity) != null || original;
     }
 
     // Interface
