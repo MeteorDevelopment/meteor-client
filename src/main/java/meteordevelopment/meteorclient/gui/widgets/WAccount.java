@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.screens.accounts.AccountInfoScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedMinus;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
@@ -73,7 +73,7 @@ public abstract class WAccount extends WHorizontalList {
         };
 
         // Remove
-        WMinus remove = add(theme.minus()).widget();
+        WConfirmedMinus remove = add(theme.confirmedMinus()).widget();
         remove.action = () -> {
             Accounts.get().remove(account);
             if (refreshScreenAction != null) refreshScreenAction.run();
