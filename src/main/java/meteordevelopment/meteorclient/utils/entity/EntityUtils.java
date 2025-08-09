@@ -11,9 +11,7 @@ import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
@@ -27,7 +25,6 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.entity.EntityLookup;
 import net.minecraft.world.entity.EntityTrackingSection;
@@ -40,8 +37,6 @@ import java.util.function.Predicate;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EntityUtils {
-    private static final BlockPos.Mutable testPos = new BlockPos.Mutable();
-
     private EntityUtils() {
     }
 
@@ -113,30 +108,6 @@ public class EntityUtils {
         double d = (mc.options.getViewDistance().getValue() + 1) * 16;
 
         return x < d && z < d;
-    }
-
-    public static BlockPos getCityBlock(PlayerEntity player) {
-        if (player == null) return null;
-
-        double bestDistanceSquared = 6 * 6;
-        Direction bestDirection = null;
-
-        for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
-            testPos.set(player.getBlockPos().offset(direction));
-
-            Block block = mc.world.getBlockState(testPos).getBlock();
-            if (block != Blocks.OBSIDIAN && block != Blocks.NETHERITE_BLOCK && block != Blocks.CRYING_OBSIDIAN
-                && block != Blocks.RESPAWN_ANCHOR && block != Blocks.ANCIENT_DEBRIS) continue;
-
-            double testDistanceSquared = PlayerUtils.squaredDistanceTo(testPos);
-            if (testDistanceSquared < bestDistanceSquared) {
-                bestDistanceSquared = testDistanceSquared;
-                bestDirection = direction;
-            }
-        }
-
-        if (bestDirection == null) return null;
-        return player.getBlockPos().offset(bestDirection);
     }
 
     public static String getName(Entity entity) {
