@@ -18,26 +18,6 @@ public abstract class WConfirmedButton extends WButton {
     }
 
     @Override
-    protected void onCalculateSize() {
-        double pad = pad();
-
-        String text = getText();
-
-        if (text != null) {
-            textWidth = theme.textWidth(text);
-
-            width = pad + textWidth + pad;
-            height = pad + theme.textHeight() + pad;
-        }
-        else {
-            double s = theme.textHeight();
-
-            width = pad + s + pad;
-            height = pad + s + pad;
-        }
-    }
-
-    @Override
     public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
         boolean pressed = super.onMouseClicked(mouseX, mouseY, button, used);
         if (!pressed) {
@@ -55,6 +35,7 @@ public abstract class WConfirmedButton extends WButton {
         return pressed = false;
     }
 
+    @Override
     public String getText() {
         return pressedOnce ? confirmText : text;
     }

@@ -22,6 +22,8 @@ public abstract class WButton extends WPressable {
     protected void onCalculateSize() {
         double pad = pad();
 
+        String text = getText();
+
         if (text != null) {
             textWidth = theme.textWidth(text);
 
