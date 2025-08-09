@@ -38,12 +38,6 @@ public abstract class WConfirmedButton extends WButton {
     }
 
     @Override
-    protected void onPressed(int button) {
-        pressedOnce = false;
-        super.onPressed(button);
-    }
-
-    @Override
     public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
         boolean pressed = super.onMouseClicked(mouseX, mouseY, button, used);
         if (!pressed) {
@@ -55,10 +49,8 @@ public abstract class WConfirmedButton extends WButton {
 
     @Override
     public boolean onMouseReleased(double mouseX, double mouseY, int button) {
-        if (pressed) {
-            if (pressedOnce) super.onMouseReleased(mouseX, mouseY, button);
-            else pressedOnce = true;
-        } else pressedOnce = false;
+        if (pressed && pressedOnce) super.onMouseReleased(mouseX, mouseY, button);
+        pressedOnce = pressed;
         invalidate();
         return pressed = false;
     }

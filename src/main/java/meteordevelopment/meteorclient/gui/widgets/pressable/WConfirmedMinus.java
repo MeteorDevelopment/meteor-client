@@ -9,12 +9,6 @@ public class WConfirmedMinus extends WMinus {
     protected boolean pressedOnce = false;
 
     @Override
-    protected void onPressed(int button) {
-        pressedOnce = false;
-        super.onPressed(button);
-    }
-
-    @Override
     public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
         boolean pressed = super.onMouseClicked(mouseX, mouseY, button, used);
         if (!pressed) {
@@ -25,10 +19,8 @@ public class WConfirmedMinus extends WMinus {
 
     @Override
     public boolean onMouseReleased(double mouseX, double mouseY, int button) {
-        if (pressed) {
-            if (pressedOnce) super.onMouseReleased(mouseX, mouseY, button);
-            else pressedOnce = true;
-        } else pressedOnce = false;
+        if (pressed && pressedOnce) super.onMouseReleased(mouseX, mouseY, button);
+        pressedOnce = pressed;
         return pressed = false;
     }
 }
