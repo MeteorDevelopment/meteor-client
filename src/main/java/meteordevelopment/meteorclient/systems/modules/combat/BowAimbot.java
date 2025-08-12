@@ -97,7 +97,7 @@ public class BowAimbot extends Module {
         if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
 
         target = TargetUtils.get(entity -> {
-            if (entity == mc.player || entity == mc.cameraEntity) return false;
+            if (entity == mc.player || entity == mc.getCameraEntity()) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!entities.get().contains(entity.getType())) return false;

@@ -56,7 +56,9 @@ public class FakeClientPlayer {
                         null,
                         null,
                         null,
-                        null)
+                        null,
+                        null,
+                        false)
                     ),
                     new ClientWorld.Properties(Difficulty.NORMAL, false, false),
                     world.getRegistryKey(),

@@ -150,7 +150,7 @@ public class MeteorClient implements ClientModInitializer {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.currentScreen == null && mc.getOverlay() == null && KeyBinds.OPEN_COMMANDS.wasPressed()) {
-            mc.setScreen(new ChatScreen(Config.get().prefix.get()));
+            mc.setScreen(new ChatScreen(Config.get().prefix.get(), true));
         }
     }
 

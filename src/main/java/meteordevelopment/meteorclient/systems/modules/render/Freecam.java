@@ -209,7 +209,7 @@ public class Freecam extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.cameraEntity.isInsideWall()) mc.getCameraEntity().noClip = true;
+        if (mc.getCameraEntity().isInsideWall()) mc.getCameraEntity().noClip = true;
         if (!perspective.isFirstPerson()) mc.options.setPerspective(Perspective.FIRST_PERSON);
 
         Vec3d forward = Vec3d.fromPolar(0, yaw);
