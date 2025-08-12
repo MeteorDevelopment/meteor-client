@@ -27,12 +27,15 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
+import meteordevelopment.meteorclient.utils.network.NetworkHandler;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
@@ -59,6 +62,7 @@ public class MeteorClient implements ClientModInitializer {
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
     public static final Logger LOG;
+    public static boolean AllowMidAirGhostBlocks = false;
 
     static {
         MOD_META = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
@@ -110,6 +114,15 @@ public class MeteorClient implements ClientModInitializer {
             } catch (AbstractMethodError e) {
                 throw new RuntimeException("Addon \"%s\" is too old and cannot be ran.".formatted(addon.name), e);
             }
+        });
+
+        // Register NetworkHandler
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            AllowMidAirGhostBlocks = false;
+        });
+        NetworkHandler.registerS2CPackets();
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            NetworkHandler.sendAllowMidAirBlocks(handler.player, true);
         });
 
         // Register init classes

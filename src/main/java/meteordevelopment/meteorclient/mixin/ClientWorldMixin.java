@@ -9,14 +9,23 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.EntityAddedEvent;
 import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.player.GhostBlock;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -33,6 +42,8 @@ public abstract class ClientWorldMixin {
     @Unique private final DimensionEffects customSky = new Ambience.Custom();
 
     @Shadow @Nullable public abstract Entity getEntityById(int id);
+    @Shadow @Final private MinecraftClient client;
+    @Shadow public abstract boolean setBlockState(BlockPos pos, BlockState state, int flags, int maxUpdateDepth);
 
     @Inject(method = "addEntity", at = @At("TAIL"))
     private void onAddEntity(Entity entity, CallbackInfo info) {
@@ -67,6 +78,34 @@ public abstract class ClientWorldMixin {
             cir.setReturnValue(ambience.skyColor().getPacked());
         }
     }
+
+    /**
+     * @author NDev007
+     */
+    @Inject(at = @At("HEAD"), method = "tick")
+    public void onTick(CallbackInfo ci) {
+        GhostBlock ghostBlock = Modules.get().get(GhostBlock.class);
+        if (ghostBlock.isActive()) {
+            if (ghostBlock.ghostPlace.get().isPressed()) {
+                var player = client.player;
+                var world = player.getWorld();
+                var pos = player.getBlockPos();
+
+                boolean placeAllowed = player.isCreative()
+                    || world.getBlockState(pos.down(1)).isAir()
+                    || world.getBlockState(pos.down(2)).isAir()
+                    || world.getBlockState(pos.down(3)).isAir();
+
+                if (placeAllowed) {
+                    BlockPos targetPos = pos.down(1);
+                    Block block = ghostBlock.block.get();
+                    var newState = block.getDefaultState();
+                    this.setBlockState(targetPos, newState, 0, 0);
+                }
+            }
+        }
+    }
+
 
     /**
      * @author Walaryne
