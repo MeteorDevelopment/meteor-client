@@ -52,7 +52,7 @@ public class DiscordPresence extends Module {
 
     private final Setting<List<String>> line1Strings = sgLine1.add(new StringListSetting.Builder()
         .name("line-1-messages")
-        .description("Messages used for the first line.")
+        .description("Сообщения, используемые для первой строки.")
         .defaultValue("{player}", "{server}")
         .onChanged(strings -> recompileLine1())
         .renderer(StarscriptTextBoxRenderer.class)
@@ -61,7 +61,7 @@ public class DiscordPresence extends Module {
 
     private final Setting<Integer> line1UpdateDelay = sgLine1.add(new IntSetting.Builder()
         .name("line-1-update-delay")
-        .description("How fast to update the first line in ticks.")
+        .description("Как быстро обновляется первая строка в тиках.")
         .defaultValue(200)
         .min(10)
         .sliderRange(10, 200)
@@ -70,7 +70,7 @@ public class DiscordPresence extends Module {
 
     private final Setting<SelectMode> line1SelectMode = sgLine1.add(new EnumSetting.Builder<SelectMode>()
         .name("line-1-select-mode")
-        .description("How to select messages for the first line.")
+        .description("Как выбрать сообщения для первой строки.")
         .defaultValue(SelectMode.Sequential)
         .build()
     );
@@ -79,8 +79,8 @@ public class DiscordPresence extends Module {
 
     private final Setting<List<String>> line2Strings = sgLine2.add(new StringListSetting.Builder()
         .name("line-2-messages")
-        .description("Messages used for the second line.")
-        .defaultValue("Meteor on Crack!", "{round(server.tps, 1)} TPS", "Playing on {server.difficulty} difficulty.", "{server.player_count} Players online")
+        .description("Сообщения, используемые для второй строки.")
+        .defaultValue("Meteor Client fork!", "{round(server.tps, 1)} TPS", "Играет на {server.difficulty} сложности.", "{server.player_count} Игроков онлайн")
         .onChanged(strings -> recompileLine2())
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
@@ -88,7 +88,7 @@ public class DiscordPresence extends Module {
 
     private final Setting<Integer> line2UpdateDelay = sgLine2.add(new IntSetting.Builder()
         .name("line-2-update-delay")
-        .description("How fast to update the second line in ticks.")
+        .description("Как быстро обновлять вторую строку в тиках.")
         .defaultValue(60)
         .min(10)
         .sliderRange(10, 200)
@@ -97,7 +97,7 @@ public class DiscordPresence extends Module {
 
     private final Setting<SelectMode> line2SelectMode = sgLine2.add(new EnumSetting.Builder<SelectMode>()
         .name("line-2-select-mode")
-        .description("How to select messages for the second line.")
+        .description("Как выбрать сообщения для второй линии.")
         .defaultValue(SelectMode.Sequential)
         .build()
     );
@@ -116,12 +116,12 @@ public class DiscordPresence extends Module {
     public static final List<Pair<String, String>> customStates = new ArrayList<>();
 
     static {
-        registerCustomState("com.terraformersmc.modmenu.gui", "Browsing mods");
-        registerCustomState("me.jellysquid.mods.sodium.client", "Changing options");
+        registerCustomState("com.terraformersmc.modmenu.gui", "Просмотривает моды");
+        registerCustomState("me.jellysquid.mods.sodium.client", "Изменяет настройки");
     }
 
     public DiscordPresence() {
-        super(Categories.Misc, "discord-presence", "Displays Meteor as your presence on Discord.");
+        super(Categories.Misc, "discord-presence", "Отображает Meteor как RPC в Discord.");
 
         runInMainMenu = true;
     }
@@ -244,18 +244,18 @@ public class DiscordPresence extends Module {
             if (!lastWasInMainMenu) {
                 rpc.setDetails(MeteorClient.NAME + " " + (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD));
 
-                if (mc.currentScreen instanceof TitleScreen) rpc.setState("Looking at title screen");
-                else if (mc.currentScreen instanceof SelectWorldScreen) rpc.setState("Selecting world");
-                else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen) rpc.setState("Creating world");
-                else if (mc.currentScreen instanceof EditWorldScreen) rpc.setState("Editing world");
-                else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.setState("Loading world");
-                else if (mc.currentScreen instanceof MultiplayerScreen) rpc.setState("Selecting server");
-                else if (mc.currentScreen instanceof AddServerScreen) rpc.setState("Adding server");
-                else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectConnectScreen) rpc.setState("Connecting to server");
-                else if (mc.currentScreen instanceof WidgetScreen) rpc.setState("Browsing Meteor's GUI");
-                else if (mc.currentScreen instanceof OptionsScreen || mc.currentScreen instanceof SkinOptionsScreen || mc.currentScreen instanceof SoundOptionsScreen || mc.currentScreen instanceof VideoOptionsScreen || mc.currentScreen instanceof ControlsOptionsScreen || mc.currentScreen instanceof LanguageOptionsScreen || mc.currentScreen instanceof ChatOptionsScreen || mc.currentScreen instanceof PackScreen || mc.currentScreen instanceof AccessibilityOptionsScreen) rpc.setState("Changing options");
-                else if (mc.currentScreen instanceof CreditsScreen) rpc.setState("Reading credits");
-                else if (mc.currentScreen instanceof RealmsScreen) rpc.setState("Browsing Realms");
+                if (mc.currentScreen instanceof TitleScreen) rpc.setState("Просматривает главный экран");
+                else if (mc.currentScreen instanceof SelectWorldScreen) rpc.setState("Выбирает мир");
+                else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen) rpc.setState("Создает мир");
+                else if (mc.currentScreen instanceof EditWorldScreen) rpc.setState("Редактирует мир");
+                else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.setState("Загружает мир");
+                else if (mc.currentScreen instanceof MultiplayerScreen) rpc.setState("Выбирает сервер");
+                else if (mc.currentScreen instanceof AddServerScreen) rpc.setState("Добавляет сервер");
+                else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectConnectScreen) rpc.setState("Подключается к серверу");
+                else if (mc.currentScreen instanceof WidgetScreen) rpc.setState("Просмотривает GUI Meteor");
+                else if (mc.currentScreen instanceof OptionsScreen || mc.currentScreen instanceof SkinOptionsScreen || mc.currentScreen instanceof SoundOptionsScreen || mc.currentScreen instanceof VideoOptionsScreen || mc.currentScreen instanceof ControlsOptionsScreen || mc.currentScreen instanceof LanguageOptionsScreen || mc.currentScreen instanceof ChatOptionsScreen || mc.currentScreen instanceof PackScreen || mc.currentScreen instanceof AccessibilityOptionsScreen) rpc.setState("Изменяет настройки");
+                else if (mc.currentScreen instanceof CreditsScreen) rpc.setState("Читает благодарности");
+                else if (mc.currentScreen instanceof RealmsScreen) rpc.setState("Смотрит Realms");
                 else {
                     boolean setState = false;
                     if (mc.currentScreen != null) {
@@ -268,7 +268,7 @@ public class DiscordPresence extends Module {
                             }
                         }
                     }
-                    if (!setState) rpc.setState("In main menu");
+                    if (!setState) rpc.setState("В главном меню");
                 }
 
                 update = true;
@@ -288,7 +288,7 @@ public class DiscordPresence extends Module {
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
-        WButton help = theme.button("Open documentation.");
+        WButton help = theme.button("Открыть документацию");
         help.action = () -> Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Starscript");
 
         return help;
