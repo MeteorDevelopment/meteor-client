@@ -9,10 +9,10 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.EndCrystalEntityRenderer;
 import net.minecraft.client.render.entity.command.EntityRenderCommandQueue;
+import net.minecraft.client.render.entity.command.ModelCommandRenderer;
 import net.minecraft.client.render.entity.state.EndCrystalEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
@@ -61,19 +61,19 @@ public abstract class EndCrystalEntityRendererMixin {
 
     // Chams - Color
 
-    @WrapWithCondition(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;pushModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;III)V"))
-    private boolean render$color(EntityRenderCommandQueue instance, Model model, Object state, MatrixStack matrices, RenderLayer renderLayer, int light, int overlay, int outlineColor) {
+    @WrapWithCondition(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;method_73489(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/render/entity/command/ModelCommandRenderer$class_11792;)V"))
+    private boolean render$color(EntityRenderCommandQueue instance, Model model, Object state, MatrixStack matrices, RenderLayer renderLayer, int light, int uv, int outlineColor, ModelCommandRenderer.class_11792 class11792) {
         if (chams.isActive() && chams.crystals.get()) {
-            instance.pushModel(model,
+            instance.method_73490(model,
                 state,
                 matrices,
                 END_CRYSTAL,
-                ((EndCrystalEntityRenderState) state).light,
-                OverlayTexture.DEFAULT_UV,
+                light,
+                uv,
                 chams.crystalsColor.get().getPacked(),
                 null,
-                ((EndCrystalEntityRenderState) state).outlineColor,
-                0);
+                outlineColor,
+                null);
             return false;
         }
 

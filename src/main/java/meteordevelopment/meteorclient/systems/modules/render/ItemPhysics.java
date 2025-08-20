@@ -105,7 +105,7 @@ public class ItemPhysics extends Module {
                 translate(matrices, info, x, 0, z);
             }
 
-            event.renderState.itemRenderState.render(matrices, event.vertexConsumerProvider, event.light, OverlayTexture.DEFAULT_UV);
+            event.renderState.itemRenderState.render(matrices, event.renderCommandQueue, event.light, OverlayTexture.DEFAULT_UV, event.renderState.outlineColor);
 
             matrices.pop();
 

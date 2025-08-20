@@ -14,10 +14,10 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.render.entity.command.EntityRenderCommandQueue;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
@@ -57,7 +57,7 @@ public abstract class PlayerEntityRendererMixin {
     // Chams - Hand Texture
 
     @ModifyExpressionValue(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/RenderLayer;getEntityTranslucent(Lnet/minecraft/util/Identifier;)Lnet/minecraft/client/render/RenderLayer;"))
-    private RenderLayer renderArm$texture(RenderLayer original, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, Identifier skinTexture, ModelPart arm, boolean sleeveVisible) {
+    private RenderLayer renderArm$texture(RenderLayer original, MatrixStack matrixStack, EntityRenderCommandQueue entityRenderCommandQueue, int light, Identifier skinTexture, ModelPart modelPart, boolean sleeveVisible) {
         if (chams.isActive() && chams.hand.get()) {
             Identifier texture = chams.handTexture.get() ? skinTexture : Chams.BLANK;
             return RenderLayer.getEntityTranslucent(texture);
@@ -68,10 +68,10 @@ public abstract class PlayerEntityRendererMixin {
 
     // Chams - Hand Color
 
-    @WrapWithCondition(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V"))
-    private boolean renderArm$color(ModelPart instance, MatrixStack matrices, VertexConsumer vertices, int light, int overlay) {
+    @WrapWithCondition(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;method_73491(Lnet/minecraft/client/model/ModelPart;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IILnet/minecraft/client/texture/Sprite;)V"))
+    private boolean renderArm$color(EntityRenderCommandQueue instance, ModelPart modelPart, MatrixStack matrixStack, RenderLayer renderLayer, int light, int uv, Sprite sprite) {
         if (chams.isActive() && chams.hand.get()) {
-            instance.render(matrices, vertices, light, overlay, chams.handColor.get().getPacked());
+            instance.method_73492(modelPart, matrixStack, renderLayer, light, uv, null, chams.handColor.get().getPacked());
             return false;
         }
 

@@ -41,7 +41,7 @@ public abstract class SimpleBlockRenderer {
 
         if (renderer != null && blockEntity.hasWorld() && blockEntity.getType().supports(blockEntity.getCachedState())) {
             Vec3d camera = mc.gameRenderer.getCamera().getPos();
-            renderer.render(blockEntity, tickDelta, MATRICES, vertexConsumerProvider, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, camera);
+            renderer.render(blockEntity, tickDelta, MATRICES, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, camera, null, mc.gameRenderer.getEntityRenderDispatcher().getQueue());
         }
 
         vertexConsumerProvider.setOffset(0, 0, 0);

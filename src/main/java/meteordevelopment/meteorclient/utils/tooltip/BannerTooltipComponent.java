@@ -12,8 +12,9 @@ import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
+import net.minecraft.client.render.entity.command.BatchingEntityRenderCommandQueue;
+import net.minecraft.client.render.entity.command.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.model.ModelBaker;
 import net.minecraft.client.util.math.MatrixStack;
@@ -78,12 +79,13 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
         float s = Math.min(width, height);
         matrices.scale(s * 0.75f, s * 0.75f, 1);
 
-        VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
+        EntityRenderDispatcher entityRenderDispatcher = mc.gameRenderer.getEntityRenderDispatcher();
+        BatchingEntityRenderCommandQueue batchingEntityRenderCommandQueue = entityRenderDispatcher.getQueue();
 
         BannerBlockEntityRenderer.renderCanvas(
             ((BlockEntityRenderManagerAccessor) mc.getBlockEntityRenderDispatcher()).getSpriteHolder(),
             matrices,
-            immediate,
+            batchingEntityRenderCommandQueue,
             15728880,
             OverlayTexture.DEFAULT_UV,
             bannerField,
@@ -92,8 +94,6 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
             color,
             patterns
         );
-
-        immediate.draw();
 
         matrices.pop();
     }
