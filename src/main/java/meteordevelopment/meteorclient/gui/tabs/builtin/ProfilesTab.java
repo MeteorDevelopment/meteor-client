@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedMinus;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -67,7 +66,7 @@ public class ProfilesTab extends Tab {
             for (Profile profile : Profiles.get()) {
                 table.add(theme.label(profile.name.get())).expandCellX();
 
-                WConfirmedButton save = theme.confirmedButton("Save", "Confirm");;
+                WConfirmedButton save = theme.confirmedButton("Save", "Confirm");
                 save.action = profile::save;
                 table.add(save).right();
 

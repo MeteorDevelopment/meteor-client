@@ -122,6 +122,12 @@ public class ProxiesImportScreen extends WindowScreen {
             add(theme.label("Invalid File!"));
         }
         add(theme.horizontalSeparator()).expandX();
+        WButton refresh = add(theme.button("Check proxies")).expandX().widget();
+        refresh.action = () -> {
+            Proxies.get().checkProxies(false);
+            close();
+        };
+
         WButton btnBack = add(theme.button("Back")).expandX().widget();
         btnBack.action = this::close;
     }

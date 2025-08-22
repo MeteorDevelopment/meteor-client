@@ -39,4 +39,9 @@ public abstract class WConfirmedButton extends WButton {
     public String getText() {
         return pressedOnce ? confirmText : text;
     }
+
+    public void set(String text, String confirmText) {
+        super.set(text);
+        this.confirmText = confirmText;
+    }
 }
