@@ -12,11 +12,13 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.IconChanger;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +70,14 @@ public class Config extends System<Config> {
         .name("title-screen-splashes")
         .description("Show Meteor splash texts on title screen")
         .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<WindowIcons> customWindowIcon = sgVisual.add(new EnumSetting.Builder<WindowIcons>()
+        .name("custom-window-icon")
+        .description("The icon to use for the window.")
+        .defaultValue(WindowIcons.Default)
+        .onChanged(IconChanger::setIcon)
         .build()
     );
 
@@ -198,5 +208,29 @@ public class Config extends System<Config> {
         List<String> list = new ArrayList<>();
         for (NbtElement item : tag.getListOrEmpty(key)) list.add(item.asString().orElse(""));
         return list;
+    }
+
+    public enum WindowIcons {
+        Meteor(
+            MeteorClient.identifier("textures/icons/windowicon/meteor_16.png"),
+            MeteorClient.identifier("textures/icons/windowicon/meteor_32.png")
+        ),
+        Christmas(
+            MeteorClient.identifier("textures/icons/windowicon/christmas_16.png"),
+            MeteorClient.identifier("textures/icons/windowicon/christmas_32.png")
+        ),
+        Halloween(
+            MeteorClient.identifier("textures/icons/windowicon/halloween_16.png"),
+            MeteorClient.identifier("textures/icons/windowicon/halloween_32.png")
+        ),
+        Default(null, null);
+
+        public final Identifier icon16;
+        public final Identifier icon32;
+
+        WindowIcons(Identifier icon16, Identifier icon32) {
+            this.icon16 = icon16;
+            this.icon32 = icon32;
+        }
     }
 }
