@@ -28,6 +28,8 @@ public class IconChanger {
     public static void setIcon(WindowIcons icon) {
         if (icon == WindowIcons.Default) {
             resetToDefault();
+        } else if (icon.icon16 == null || icon.icon32 == null) {
+            MeteorClient.LOG.warn("Icon paths cannot be null for custom icons");
         } else {
             setCustomIcon(icon);
         }
@@ -45,11 +47,6 @@ public class IconChanger {
     }
 
     private static void setCustomIcon(WindowIcons windowIcons) {
-        if (windowIcons.icon16 == null || windowIcons.icon32 == null) {
-            MeteorClient.LOG.warn("Icon paths cannot be null for custom icons");
-            return;
-        }
-
         try (MemoryStack stack = MemoryStack.stackPush()) {
             GLFWImage.Buffer icons = GLFWImage.malloc(2, stack);
 
@@ -67,14 +64,13 @@ public class IconChanger {
             .getResource(iconPath)
             .orElseThrow(() -> new IOException("Icon not found: " + iconPath));
 
-        NativeImage image = NativeImage.read(resource.getInputStream());
-        ByteBuffer pixelBuffer = imageToByteBuffer(image);
+        try (NativeImage image = NativeImage.read(resource.getInputStream())) {
+            ByteBuffer pixelBuffer = imageToByteBuffer(image);
 
-        GLFWImage glfwImage = GLFWImage.malloc(stack);
-        glfwImage.set(image.getWidth(), image.getHeight(), pixelBuffer);
-        icons.put(index, glfwImage);
-
-        image.close();
+            GLFWImage glfwImage = GLFWImage.malloc(stack);
+            glfwImage.set(image.getWidth(), image.getHeight(), pixelBuffer);
+            icons.put(index, glfwImage);
+        }
     }
 
     private static ByteBuffer imageToByteBuffer(NativeImage image) {
