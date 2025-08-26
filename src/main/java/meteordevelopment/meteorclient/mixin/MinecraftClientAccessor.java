@@ -70,6 +70,6 @@ public interface MinecraftClientAccessor {
     void meteor$setGameProfileFuture(CompletableFuture<ProfileResult> future);
 
     @Mutable
-    @Accessor("field_62106")
+    @Accessor("apiServices")
     void meteor$setApiServices(ApiServices apiServices);
 }

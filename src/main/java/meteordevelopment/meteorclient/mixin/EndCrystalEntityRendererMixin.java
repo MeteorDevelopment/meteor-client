@@ -10,9 +10,9 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EndCrystalEntityRenderer;
-import net.minecraft.client.render.entity.command.EntityRenderCommandQueue;
-import net.minecraft.client.render.entity.command.ModelCommandRenderer;
 import net.minecraft.client.render.entity.state.EndCrystalEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
@@ -44,15 +44,15 @@ public abstract class EndCrystalEntityRendererMixin {
     @Final
     private static Identifier TEXTURE;
 
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;)V", at = @At("HEAD"))
-    private void render$renderLayer(EndCrystalEntityRenderState endCrystalEntityRenderState, MatrixStack matrixStack, EntityRenderCommandQueue entityRenderCommandQueue, CallbackInfo ci) {
+    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;)V", at = @At("HEAD"))
+    private void render$renderLayer(EndCrystalEntityRenderState endCrystalEntityRenderState, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CallbackInfo ci) {
         END_CRYSTAL = RenderLayer.getEntityTranslucent((chams.isActive() && chams.crystals.get() && !chams.crystalsTexture.get()) ? Chams.BLANK : TEXTURE);
     }
 
     // Chams - Scale
 
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;scale(FFF)V"))
-    private void render$scale(EndCrystalEntityRenderState endCrystalEntityRenderState, MatrixStack matrixStack, EntityRenderCommandQueue entityRenderCommandQueue, CallbackInfo ci) {
+    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;scale(FFF)V"))
+    private void render$scale(EndCrystalEntityRenderState endCrystalEntityRenderState, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CallbackInfo ci) {
         if (!chams.isActive() || !chams.crystals.get()) return;
 
         float v = chams.crystalsScale.get().floatValue();
@@ -61,12 +61,12 @@ public abstract class EndCrystalEntityRendererMixin {
 
     // Chams - Color
 
-    @WrapWithCondition(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;method_73489(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/render/entity/command/ModelCommandRenderer$class_11792;)V"))
-    private boolean render$color(EntityRenderCommandQueue instance, Model model, Object state, MatrixStack matrices, RenderLayer renderLayer, int light, int uv, int outlineColor, ModelCommandRenderer.class_11792 class11792) {
+    @WrapWithCondition(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;)V"))
+    private boolean render$color(OrderedRenderCommandQueue instance, Model model, Object state, MatrixStack matrixStack, RenderLayer renderLayer, int light, int uv, int outlineColor, ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlayCommand) {
         if (chams.isActive() && chams.crystals.get()) {
-            instance.method_73490(model,
+            instance.submitModel(model,
                 state,
-                matrices,
+                matrixStack,
                 END_CRYSTAL,
                 light,
                 uv,

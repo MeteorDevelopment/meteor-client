@@ -369,12 +369,12 @@ public class Notifier extends Module {
                     Formatting.GRAY + "["
                         + Formatting.GREEN + "+"
                         + Formatting.GRAY + "] "
-                        + entry.profile().getName()
+                        + entry.profile().name()
                 ));
             } else {
                 messageQueue.addLast(Text.literal(
                     Formatting.WHITE
-                        + entry.profile().getName()
+                        + entry.profile().name()
                         + Formatting.GRAY + " joined."
                 ));
             }
@@ -393,12 +393,12 @@ public class Notifier extends Module {
                     Formatting.GRAY + "["
                         + Formatting.RED + "-"
                         + Formatting.GRAY + "] "
-                        + toRemove.getProfile().getName()
+                        + toRemove.getProfile().name()
                 ));
             } else {
                 messageQueue.addLast(Text.literal(
                     Formatting.WHITE
-                        + toRemove.getProfile().getName()
+                        + toRemove.getProfile().name()
                         + Formatting.GRAY + " left."
                 ));
             }

@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.EnchantingTableBlockEntityRenderer;
-import net.minecraft.client.render.entity.command.EntityRenderCommandQueue;
-import net.minecraft.client.render.entity.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,8 +20,8 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(EnchantingTableBlockEntityRenderer.class)
 public abstract class EnchantingTableBlockEntityRendererMixin {
-    @WrapWithCondition(method = "render(Lnet/minecraft/block/entity/EnchantingTableBlockEntity;FLnet/minecraft/client/util/math/MatrixStack;IILnet/minecraft/util/math/Vec3d;Lnet/minecraft/client/render/entity/command/ModelCommandRenderer$class_11792;Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/command/EntityRenderCommandQueue;method_73490(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/texture/Sprite;ILnet/minecraft/client/render/entity/command/ModelCommandRenderer$class_11792;)V"))
-    private boolean onRenderBookModelRenderProxy(EntityRenderCommandQueue instance, Model model, Object o, MatrixStack matrixStack, RenderLayer renderLayer, int i, int j, int k, Sprite sprite, int l, ModelCommandRenderer.class_11792 class11792) {
+    @WrapWithCondition(method = "render(Lnet/minecraft/block/entity/EnchantingTableBlockEntity;FLnet/minecraft/client/util/math/MatrixStack;IILnet/minecraft/util/math/Vec3d;Lnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/texture/Sprite;ILnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;)V"))
+    private boolean onRenderBookModelRenderProxy(OrderedRenderCommandQueue instance, Model model, Object o, MatrixStack matrixStack, RenderLayer renderLayer, int i, int j, int k, Sprite sprite, int l, ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlayCommand) {
         return !Modules.get().get(NoRender.class).noEnchTableBook();
     }
 }

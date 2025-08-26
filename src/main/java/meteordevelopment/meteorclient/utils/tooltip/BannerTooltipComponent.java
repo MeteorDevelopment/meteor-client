@@ -13,8 +13,8 @@ import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
-import net.minecraft.client.render.entity.command.BatchingEntityRenderCommandQueue;
-import net.minecraft.client.render.entity.command.EntityRenderDispatcher;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.command.RenderDispatcher;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.model.ModelBaker;
 import net.minecraft.client.util.math.MatrixStack;
@@ -79,20 +79,21 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
         float s = Math.min(width, height);
         matrices.scale(s * 0.75f, s * 0.75f, 1);
 
-        EntityRenderDispatcher entityRenderDispatcher = mc.gameRenderer.getEntityRenderDispatcher();
-        BatchingEntityRenderCommandQueue batchingEntityRenderCommandQueue = entityRenderDispatcher.getQueue();
+        RenderDispatcher entityRenderDispatcher = mc.gameRenderer.getEntityRenderDispatcher();
+        OrderedRenderCommandQueue renderCommandQueue = entityRenderDispatcher.getQueue();
 
         BannerBlockEntityRenderer.renderCanvas(
             ((BlockEntityRenderManagerAccessor) mc.getBlockEntityRenderDispatcher()).getSpriteHolder(),
             matrices,
-            batchingEntityRenderCommandQueue,
+            renderCommandQueue,
             15728880,
             OverlayTexture.DEFAULT_UV,
             bannerField,
             ModelBaker.BANNER_BASE,
             true,
             color,
-            patterns
+            patterns,
+            null
         );
 
         matrices.pop();

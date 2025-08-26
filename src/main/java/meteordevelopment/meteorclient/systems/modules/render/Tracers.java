@@ -284,7 +284,7 @@ public class Tracers extends Module {
             Color color = getEntityColor(entity);
 
             if (blinkOffscreen.get())
-                color.a *= getAlpha();
+                color.a *= (int) getAlpha();
 
             Vec2f screenCenter = new Vec2f(mc.getWindow().getFramebufferWidth() / 2.f, mc.getWindow().getFramebufferHeight() / 2.f);
 
@@ -365,7 +365,7 @@ public class Tracers extends Module {
         double speed = blinkOffscreenSpeed.get() / 4.0;
         double duration = Math.abs(Duration.between(Instant.now(), initTimer).toMillis()) * speed;
 
-        return (float)Math.abs((duration % 1000) - 500) / 500.f;
+        return (float) Math.abs((duration % 1000) - 500) / 500.f;
     }
 
     @Override

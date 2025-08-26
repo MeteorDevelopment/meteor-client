@@ -16,9 +16,9 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
 import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.command.BatchingEntityRenderCommandQueue;
-import net.minecraft.client.render.entity.command.EntityRenderCommandQueue;
 import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
@@ -31,7 +31,7 @@ public class WireframeEntityRenderer {
     private static final MatrixStack matrices = new MatrixStack();
 
     private static Renderer3D renderer;
-    private static final EntityRenderCommandQueue entityRenderCommandQueue = new BatchingEntityRenderCommandQueue();
+    private static final OrderedRenderCommandQueue entityRenderCommandQueue = new OrderedRenderCommandQueueImpl();
 
     private static Color sideColor;
     private static Color lineColor;

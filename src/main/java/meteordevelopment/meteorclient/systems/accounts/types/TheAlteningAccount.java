@@ -40,8 +40,8 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
         try {
             auth.logIn();
 
-            cache.username = auth.getCurrentProfile().getName();
-            cache.uuid = auth.getCurrentProfile().getId().toString();
+            cache.username = auth.getCurrentProfile().name();
+            cache.uuid = auth.getCurrentProfile().id().toString();
             cache.loadHead();
 
             return true;
@@ -60,7 +60,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
         applyLoginEnvironment(SERVICE);
 
         try {
-            setSession(new Session(auth.getCurrentProfile().getName(), auth.getCurrentProfile().getId(), auth.getAccessToken(), Optional.empty(), Optional.empty()));
+            setSession(new Session(auth.getCurrentProfile().name(), auth.getCurrentProfile().id (), auth.getAccessToken(), Optional.empty(), Optional.empty()));
             return true;
         } catch (Exception e) {
             MeteorClient.LOG.error("Failed to login with TheAltening.");

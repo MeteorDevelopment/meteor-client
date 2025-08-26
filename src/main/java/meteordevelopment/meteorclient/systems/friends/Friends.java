@@ -69,7 +69,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     public Friend get(PlayerListEntry player) {
-        return get(player.getProfile().getName());
+        return get(player.getProfile().name());
     }
 
     public boolean isFriend(PlayerEntity player) {

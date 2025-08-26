@@ -19,6 +19,7 @@ import net.minecraft.client.session.Session;
 import net.minecraft.client.session.report.AbuseReportContext;
 import net.minecraft.client.session.report.ReporterEnvironment;
 import net.minecraft.client.texture.PlayerSkinProvider;
+import net.minecraft.client.texture.PlayerSkinTextureDownloader;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.encryption.SignatureVerifier;
 import net.minecraft.util.ApiServices;
@@ -83,7 +84,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         PlayerSkinProvider.FileCache skinCache = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).meteor$getSkinCache();
         Path skinCachePath = ((FileCacheAccessor) skinCache).meteor$getDirectory();
         mca.meteor$setApiServices(ApiServices.create(authService, mc.runDirectory));
-        mca.meteor$setSkinProvider(new PlayerSkinProvider(skinCachePath, mc.method_73361(), mc));
+        mca.meteor$setSkinProvider(new PlayerSkinProvider(skinCachePath, mc.method_73361(), new PlayerSkinTextureDownloader(mc.getNetworkProxy(), mc.getTextureManager(), mc), mc));
     }
 
     @Override
