@@ -86,6 +86,18 @@ public class DropCommand extends Command {
         ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
         if (stack == null || stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
 
+        int total = 0;
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            ItemStack invStack = player.getInventory().getStack(i);
+            if (!invStack.isEmpty() && stack.getItem() == invStack.getItem()) {
+                total += invStack.getCount();
+            }
+        }
+        if (total < amount) {
+            error("Not enough items to drop! Have: " + total);
+            return;
+        }
+
         for (int i = 0; i < player.getInventory().size() && amount > 0; i++) {
             ItemStack invStack = player.getInventory().getStack(i);
             if (invStack.isEmpty() || stack.getItem() != invStack.getItem()) continue;
