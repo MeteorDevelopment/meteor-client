@@ -144,7 +144,7 @@ public class StorageESP extends Module {
 
     private final Setting<SettingColor> other = sgGeneral.add(new ColorSetting.Builder()
         .name("other")
-        .description("The color of furnaces, dispenders, droppers and hoppers.")
+        .description("The color of furnaces, dispensers, droppers and hoppers.")
         .defaultValue(new SettingColor(140, 140, 140, 255))
         .build()
     );
@@ -247,10 +247,6 @@ public class StorageESP extends Module {
     private void onRender(Render3DEvent event) {
         count = 0;
 
-        if (mode.get() == Mode.Shader) {
-            mesh.begin();
-        }
-
         for (BlockEntity blockEntity : Utils.blockEntities()) {
             // Check if the block has been interacted with (opened)
             boolean interacted = interactedBlocks.contains(blockEntity.getPos());
@@ -267,6 +263,11 @@ public class StorageESP extends Module {
             }
 
             if (render) {
+                // Only start a mesh when there's something to render
+                if (count == 0 && mode.get() == Mode.Shader) {
+                    mesh.begin();
+                }
+
                 double dist = PlayerUtils.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
                 double a = 1;
                 if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
@@ -296,7 +297,7 @@ public class StorageESP extends Module {
             }
         }
 
-        if (mode.get() == Mode.Shader) {
+        if (mode.get() == Mode.Shader && count > 0) {
             PostProcessShaders.STORAGE_OUTLINE.endRender(() -> MeshRenderer.begin()
                 .attachments(mc.getFramebuffer())
                 .clearColor(Color.CLEAR)
