@@ -105,6 +105,8 @@ public class WaypointsModule extends Module {
             Vector3d pos = new Vector3d(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
             double dist = PlayerUtils.distanceToCamera(pos.x, pos.y, pos.z);
 
+            waypoint.hideWhenNear((int) Math.floor(dist));
+
             // Continue if this waypoint should not be rendered
             if (dist > waypoint.maxVisible.get()) continue;
             if (!NametagUtils.to2D(pos, waypoint.scale.get() - 0.2)) continue;
@@ -171,6 +173,10 @@ public class WaypointsModule extends Module {
                 .pos(BlockPos.ofFloored(deathPos).up(2))
                 .dimension(PlayerUtils.getDimension())
                 .build();
+
+            // Configure death waypoints to auto hide when the player is within 4 blocks
+            waypoint.hideWhenNear.set(true);
+            waypoint.hideWhenNearDistance.set(4);
 
             Waypoints.get().add(waypoint);
         }

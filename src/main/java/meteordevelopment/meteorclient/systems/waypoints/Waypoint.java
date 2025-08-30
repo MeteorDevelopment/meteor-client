@@ -94,6 +94,21 @@ public class Waypoint implements ISerializable<Waypoint> {
         .build()
     );
 
+    public Setting<Boolean> hideWhenNear = sgPosition.add(new BoolSetting.Builder()
+        .name("hide-when-near")
+        .description("Whether to set the waypoint to hidden when the player is near enough.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public Setting<Integer> hideWhenNearDistance = sgPosition.add(new IntSetting.Builder()
+        .name("hide-when-near-distance")
+        .description("Hides the waypoint if the player is closer than this distance, and hide when near is enabled.")
+        .defaultValue(8)
+        .sliderRange(0, 32)
+        .build()
+    );
+
     public final UUID uuid;
 
     private Waypoint() {
@@ -135,6 +150,13 @@ public class Waypoint implements ISerializable<Waypoint> {
             case Nether -> new BlockPos(pos.getX() * 8, pos.getY(), pos.getZ() * 8);
             default -> null;
         };
+    }
+
+    public void hideWhenNear(int distance) {
+        if (!hideWhenNear.get()) { return; }
+        if (distance > hideWhenNearDistance.get()) { return; }
+
+        visible.set(false);
     }
 
     private void validateIcon() {
