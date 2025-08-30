@@ -44,15 +44,7 @@ public class MacroCommand extends Command {
 
                     return SINGLE_SUCCESS;
                 })
-            )
-            .then(argument("macro", MacroArgumentType.create())
-                .executes(context -> {
-                    Macro macro = MacroArgumentType.get(context);
-                    scheduleQueue.add(new ScheduledMacro(1, macro));
-
-                    return SINGLE_SUCCESS;
-                })
-                .then(literal("clear")
+                .then(argument("macro", MacroArgumentType.create())
                     .executes(context -> {
                         Macro macro = MacroArgumentType.get(context);
 
@@ -66,6 +58,14 @@ public class MacroCommand extends Command {
                         return SINGLE_SUCCESS;
                     })
                 )
+            )
+            .then(argument("macro", MacroArgumentType.create())
+                .executes(context -> {
+                    Macro macro = MacroArgumentType.get(context);
+                    scheduleQueue.add(new ScheduledMacro(1, macro));
+
+                    return SINGLE_SUCCESS;
+                })
                 .then(argument("delay", TimeArgumentType.time(1))
                     .executes(context -> {
                         Macro macro = MacroArgumentType.get(context);
@@ -85,7 +85,7 @@ public class MacroCommand extends Command {
 
     public boolean isScheduled(Macro macro) {
         return scheduleQueue.stream().anyMatch(element -> element.macro == macro) ||
-            scheduledMacros.stream().noneMatch(element -> element.macro == macro);
+            scheduledMacros.stream().anyMatch(element -> element.macro == macro);
     }
 
     public void clear(Macro macro) {
