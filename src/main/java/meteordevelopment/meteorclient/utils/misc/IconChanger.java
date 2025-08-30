@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.utils.misc;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.systems.config.Config.WindowIcons;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.Icons;
@@ -23,6 +22,30 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class IconChanger {
     private IconChanger() {
+    }
+
+    public enum WindowIcons {
+        Meteor(
+            MeteorClient.identifier("textures/icons/windowicon/meteor_16.png"),
+            MeteorClient.identifier("textures/icons/windowicon/meteor_32.png")
+        ),
+        Christmas(
+            MeteorClient.identifier("textures/icons/windowicon/christmas_16.png"),
+            MeteorClient.identifier("textures/icons/windowicon/christmas_32.png")
+        ),
+        Halloween(
+            MeteorClient.identifier("textures/icons/windowicon/halloween_16.png"),
+            MeteorClient.identifier("textures/icons/windowicon/halloween_32.png")
+        ),
+        Default(null, null);
+
+        public final Identifier icon16;
+        public final Identifier icon32;
+
+        WindowIcons(Identifier icon16, Identifier icon32) {
+            this.icon16 = icon16;
+            this.icon32 = icon32;
+        }
     }
 
     public static void setIcon(WindowIcons icon) {
