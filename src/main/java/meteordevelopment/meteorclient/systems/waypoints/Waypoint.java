@@ -152,7 +152,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         };
     }
 
-    public void hideWhenNear(int distance) {
+    public void hideWhenNearCheck(int distance) {
         if (!hideWhenNear.get()) { return; }
         if (distance > hideWhenNearDistance.get()) { return; }
 

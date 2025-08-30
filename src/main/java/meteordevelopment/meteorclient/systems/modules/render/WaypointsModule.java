@@ -105,7 +105,7 @@ public class WaypointsModule extends Module {
             Vector3d pos = new Vector3d(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
             double dist = PlayerUtils.distanceToCamera(pos.x, pos.y, pos.z);
 
-            waypoint.hideWhenNear((int) Math.floor(dist));
+            waypoint.hideWhenNearCheck((int) Math.floor(dist));
 
             // Continue if this waypoint should not be rendered
             if (dist > waypoint.maxVisible.get()) continue;
