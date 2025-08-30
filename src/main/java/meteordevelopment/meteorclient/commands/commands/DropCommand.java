@@ -19,7 +19,6 @@ import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
 public class DropCommand extends Command {
@@ -85,18 +84,6 @@ public class DropCommand extends Command {
     private void dropItem(ClientPlayerEntity player, CommandContext<CommandSource> context, int amount) throws CommandSyntaxException {
         ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
         if (stack == null || stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
-
-        int total = 0;
-        for (int i = 0; i < player.getInventory().size(); i++) {
-            ItemStack invStack = player.getInventory().getStack(i);
-            if (!invStack.isEmpty() && stack.getItem() == invStack.getItem()) {
-                total += invStack.getCount();
-            }
-        }
-        if (total < amount) {
-            error("Not enough items to drop! Have: " + total);
-            return;
-        }
 
         for (int i = 0; i < player.getInventory().size() && amount > 0; i++) {
             ItemStack invStack = player.getInventory().getStack(i);
