@@ -327,7 +327,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         double h3 = h / 3.0;
 
         int prevA = SPLIT_LINES_COLOR.a;
-        SPLIT_LINES_COLOR.a *= (int) splitLinesAnimation;
+        SPLIT_LINES_COLOR.a *= splitLinesAnimation;
 
         renderSplitLine(renderer, w3, 0, w3, h);
         renderSplitLine(renderer, w3 * 2, 0, w3 * 2, h);
