@@ -62,11 +62,11 @@ public class MacroCommand extends Command {
             .then(argument("macro", MacroArgumentType.create())
                 .executes(context -> {
                     Macro macro = MacroArgumentType.get(context);
-                    scheduleQueue.add(new ScheduledMacro(1, macro));
+                    scheduleQueue.add(new ScheduledMacro(0, macro));
 
                     return SINGLE_SUCCESS;
                 })
-                .then(argument("delay", TimeArgumentType.time(1))
+                .then(argument("delay", TimeArgumentType.time())
                     .executes(context -> {
                         Macro macro = MacroArgumentType.get(context);
                         scheduleQueue.add(new ScheduledMacro(IntegerArgumentType.getInteger(context, "delay"), macro));
@@ -94,19 +94,21 @@ public class MacroCommand extends Command {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
+    private void onTick(TickEvent.Post event) {
         if (!scheduleQueue.isEmpty()) {
             scheduledMacros.addAll(scheduleQueue);
             scheduleQueue.clear();
         }
 
         if (!scheduledMacros.isEmpty()) {
-            tickMacros();
+            runMacros();
         }
+
+        scheduledMacros.forEach(ScheduledMacro::tick);
     }
 
-    private void tickMacros() {
-        scheduledMacros.removeIf(ScheduledMacro::tick);
+    private void runMacros() {
+        scheduledMacros.removeIf(ScheduledMacro::run);
     }
 }
 
@@ -120,15 +122,18 @@ class ScheduledMacro {
         macro = scheduledMacro;
     }
 
-    public boolean tick() {
+    public void tick() {
        delay--;
-       if (delay > 0) { return false; }
-
-       run();
-       return true;
     }
 
-    private void run() {
+    public boolean run() {
+        if (delay > 0) { return false; }
+
+        runMacro();
+        return true;
+    }
+
+    private void runMacro() {
         if (MeteorClient.mc.player == null) { return; }
 
         macro.onAction();
