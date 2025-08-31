@@ -404,7 +404,7 @@ public class KillAura extends Module {
         if (ignorePassive.get()) {
             if (entity instanceof EndermanEntity enderman && !enderman.isAngry()) return false;
             if (entity instanceof PiglinEntity piglin && !piglin.isAttacking()) return false;
-            if (entity instanceof ZombifiedPiglinEntity zombified_piglin && !zombified_piglin.isAttacking()) return false;
+            if (entity instanceof ZombifiedPiglinEntity zombifiedPiglin && !zombifiedPiglin.isAttacking()) return false;
             if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
         }
         if (entity instanceof PlayerEntity player) {
