@@ -49,9 +49,9 @@ public class MacroCommand extends Command {
                         Macro macro = MacroArgumentType.get(context);
 
                         if (!isScheduled(macro)) {
-                            error("This module is not currently scheduled.");
+                            error("This macro is not currently scheduled.");
                             return SINGLE_SUCCESS;
-                        };
+                        }
 
                         clear(macro);
                         info("Cleared scheduled macro.");
@@ -116,8 +116,7 @@ class ScheduledMacro {
     public int delay;
     public Macro macro;
 
-
-    public ScheduledMacro (int tickDelay, Macro scheduledMacro) {
+    public ScheduledMacro(int tickDelay, Macro scheduledMacro) {
         delay = tickDelay;
         macro = scheduledMacro;
     }
@@ -127,14 +126,14 @@ class ScheduledMacro {
     }
 
     public boolean run() {
-        if (delay > 0) { return false; }
+        if (delay > 0) return false;
 
         runMacro();
         return true;
     }
 
     private void runMacro() {
-        if (MeteorClient.mc.player == null) { return; }
+        if (MeteorClient.mc.player == null) return;
 
         macro.onAction();
     }
