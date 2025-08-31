@@ -128,7 +128,7 @@ public class WaypointsModule extends Module {
             if (distToCenter <= textRenderDist) {
                 // Setup text rendering
                 int preTextA = TEXT.a;
-                TEXT.a *= (int) a;
+                TEXT.a *= a;
                 text.begin();
 
                 // Render name
