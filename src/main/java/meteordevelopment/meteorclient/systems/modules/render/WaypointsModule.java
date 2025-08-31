@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.entity.player.PlayerDeathEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -105,7 +107,11 @@ public class WaypointsModule extends Module {
             Vector3d pos = new Vector3d(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
             double dist = PlayerUtils.distanceToCamera(pos.x, pos.y, pos.z);
 
-            waypoint.hideWhenNearCheck((int) Math.floor(dist));
+            // Only perform hide when near check if player is alive
+            // Otherwise, death waypoints immediately get hidden
+            if (mc.player != null && !mc.player.isDead()) {
+                waypoint.hideWhenNearCheck((int) Math.floor(dist));
+            }
 
             // Continue if this waypoint should not be rendered
             if (dist > waypoint.maxVisible.get()) continue;
@@ -150,10 +156,10 @@ public class WaypointsModule extends Module {
     }
 
     @EventHandler
-    private void onOpenScreen(OpenScreenEvent event) {
-        if (!(event.screen instanceof DeathScreen)) return;
+    private void onPlayerDeath(PlayerDeathEvent event) {
+        if (mc.player == null) return;
 
-        if (!event.isCancelled()) addDeath(mc.player.getPos());
+        addDeath(mc.player.getPos());
     }
 
     public void addDeath(Vec3d deathPos) {
