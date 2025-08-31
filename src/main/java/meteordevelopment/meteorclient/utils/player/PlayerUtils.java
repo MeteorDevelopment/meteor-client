@@ -104,6 +104,27 @@ public class PlayerUtils {
         return horizontalVelocity;
     }
 
+    public static double getVerticalVelocity(double bps) {
+        Vec3d forward = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
+        double velY = 0;
+
+        boolean a = false;
+        if (mc.player.input.playerInput.forward()) {
+            velY += forward.y / 20 * bps;
+            a = true;
+        }
+        if (mc.player.input.playerInput.backward()) {
+            velY -= forward.y / 20 * bps;
+            a = true;
+        }
+
+        if (a && (mc.player.input.playerInput.left() || mc.player.input.playerInput.right())) {
+            velY *= diagonal;
+        }
+
+        return velY;
+    }
+
     public static void centerPlayer() {
         double x = MathHelper.floor(mc.player.getX()) + 0.5;
         double z = MathHelper.floor(mc.player.getZ()) + 0.5;
