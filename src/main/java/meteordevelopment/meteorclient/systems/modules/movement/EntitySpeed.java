@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.math.Vec3d;
 
 public class EntitySpeed extends Module {
@@ -23,7 +24,7 @@ public class EntitySpeed extends Module {
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
-        .description("Horizontal speed in blocks per second.")
+        .description("Movement speed in blocks per second.")
         .defaultValue(10)
         .min(0)
         .sliderMax(50)
@@ -57,8 +58,23 @@ public class EntitySpeed extends Module {
         if (onlyOnGround.get() && !entity.isOnGround()) return;
         if (!inWater.get() && entity.isTouchingWater()) return;
 
-        // Set horizontal velocity
+        // Set velocity
         Vec3d vel = PlayerUtils.getHorizontalVelocity(speed.get());
+
+        // Calculate vertical velocity based on pitch
+        Vec3d forward = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
+        double velY = 0;
+        if (mc.player.input.playerInput.forward()) velY += forward.y / 20 * speed.get();
+        if (mc.player.input.playerInput.backward()) velY -= forward.y / 20 * speed.get();
+
+        boolean horizontal = mc.player.input.playerInput.forward() || mc.player.input.playerInput.backward();
+        boolean sideways = mc.player.input.playerInput.left() || mc.player.input.playerInput.right();
+        if (horizontal && sideways) velY *= 1 / Math.sqrt(2);
+
         ((IVec3d) event.movement).meteor$setXZ(vel.x, vel.z);
+
+        if (Registries.ENTITY_TYPE.getId(entity.getType()).getPath().equals("happy_ghast")) {
+            ((IVec3d) event.movement).meteor$setY(velY);
+        }
     }
 }
