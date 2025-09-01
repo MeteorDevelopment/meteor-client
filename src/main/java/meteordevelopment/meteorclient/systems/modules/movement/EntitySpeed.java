@@ -25,8 +25,17 @@ public class EntitySpeed extends Module {
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
-        .description("Movement speed in blocks per second.")
+        .description("Horizontal speed in blocks per second.")
         .defaultValue(10)
+        .min(0)
+        .sliderMax(50)
+        .build()
+    );
+
+    private final Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
+        .name("vertical-speed")
+        .description("Vertical speed in blocks per second for happy ghast.")
+        .defaultValue(5)
         .min(0)
         .sliderMax(50)
         .build()
@@ -56,7 +65,7 @@ public class EntitySpeed extends Module {
 
         // Check for onlyOnGround and inWater
         LivingEntity entity = event.entity;
-        if (onlyOnGround.get() && !entity.isOnGround()) return;
+        if (onlyOnGround.get() && !entity.isOnGround() && !(entity instanceof HappyGhastEntity)) return;    // Bypass onlyOnGround for happy ghast
         if (!inWater.get() && entity.isTouchingWater()) return;
 
         // Set horizontal velocity
@@ -65,8 +74,8 @@ public class EntitySpeed extends Module {
 
         if (entity instanceof HappyGhastEntity) {
             double velY = 0;
-            if (mc.options.jumpKey.isPressed()) velY += speed.get();
-            if (Input.isPressed(mc.options.sprintKey)) velY -= speed.get();
+            if (mc.options.jumpKey.isPressed()) velY += verticalSpeed.get();
+            if (Input.isPressed(mc.options.sprintKey)) velY -= verticalSpeed.get();
 
             ((IVec3d) event.movement).meteor$setY(velY / 20);
         }
