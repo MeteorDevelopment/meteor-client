@@ -43,7 +43,7 @@ public class EntitySpeed extends Module {
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-ground")
-        .description("Use speed only when standing on a block.")
+        .description("Use speed only when standing on a block. (excludes happy ghast)")
         .defaultValue(false)
         .build()
     );
