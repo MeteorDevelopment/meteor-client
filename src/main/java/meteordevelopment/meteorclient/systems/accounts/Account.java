@@ -75,7 +75,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         mca.meteor$setSocialInteractionsManager(new SocialInteractionsManager(mc, apiService));
         mca.meteor$setProfileKeys(ProfileKeys.create(apiService, session, mc.runDirectory.toPath()));
         mca.meteor$setAbuseReportContext(AbuseReportContext.create(ReporterEnvironment.ofIntegratedServer(), apiService));
-        mca.meteor$setGameProfileFuture(CompletableFuture.supplyAsync(() -> mc.method_73361().sessionService().fetchProfile(mc.getSession().getUuidOrNull(), true), Util.getIoWorkerExecutor()));
+        mca.meteor$setGameProfileFuture(CompletableFuture.supplyAsync(() -> mc.getApiServices().sessionService().fetchProfile(mc.getSession().getUuidOrNull(), true), Util.getIoWorkerExecutor()));
     }
 
     public static void applyLoginEnvironment(YggdrasilAuthenticationService authService) {
@@ -84,7 +84,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         PlayerSkinProvider.FileCache skinCache = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).meteor$getSkinCache();
         Path skinCachePath = ((FileCacheAccessor) skinCache).meteor$getDirectory();
         mca.meteor$setApiServices(ApiServices.create(authService, mc.runDirectory));
-        mca.meteor$setSkinProvider(new PlayerSkinProvider(skinCachePath, mc.method_73361(), new PlayerSkinTextureDownloader(mc.getNetworkProxy(), mc.getTextureManager(), mc), mc));
+        mca.meteor$setSkinProvider(new PlayerSkinProvider(skinCachePath, mc.getApiServices(), new PlayerSkinTextureDownloader(mc.getNetworkProxy(), mc.getTextureManager(), mc), mc));
     }
 
     @Override

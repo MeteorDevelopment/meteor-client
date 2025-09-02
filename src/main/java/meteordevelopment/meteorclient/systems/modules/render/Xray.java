@@ -87,7 +87,7 @@ public class Xray extends Module {
 
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
-        if (isBlocked(event.blockEntity.getCachedState().getBlock(), event.blockEntity.getPos())) event.cancel();
+        if (isBlocked(event.blockEntityState.field_62674.getBlock(), event.blockEntityState.field_62673)) event.cancel();
     }
 
     @EventHandler

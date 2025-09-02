@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.render.ItemHighlight;
 import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.class_11909;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
@@ -92,19 +93,19 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     // Inventory Tweaks
     @Inject(method = "mouseDragged", at = @At("TAIL"))
-    private void onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> info) {
-        if (button != GLFW_MOUSE_BUTTON_LEFT || doubleClicking || !Modules.get().get(InventoryTweaks.class).mouseDragItemMove()) return;
+    private void onMouseDragged(class_11909 arg, double d, double e, CallbackInfoReturnable<Boolean> cir) {
+        if (arg.method_74245() != GLFW_MOUSE_BUTTON_LEFT || doubleClicking || !Modules.get().get(InventoryTweaks.class).mouseDragItemMove()) return;
 
-        Slot slot = getSlotAt(mouseX, mouseY);
-        if (slot != null && slot.hasStack() && hasShiftDown()) onMouseClick(slot, slot.id, button, SlotActionType.QUICK_MOVE);
+        Slot slot = getSlotAt(arg.x(), arg.y());
+        if (slot != null && slot.hasStack() && mc.method_74187()) onMouseClick(slot, slot.id, arg.method_74245(), SlotActionType.QUICK_MOVE);
     }
 
     // Middle click open
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void mouseClicked(double mouseX, double mouseY, int button, boolean bl, CallbackInfoReturnable<Boolean> cir) {
+    private void mouseClicked(class_11909 arg, boolean bl, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
+        if (arg.method_74245() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
             ItemStack itemStack = focusedSlot.getStack();
             if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
                 cir.setReturnValue(Utils.openContainer(focusedSlot.getStack(), ITEMS, false));

@@ -23,6 +23,8 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
+import net.minecraft.class_11908;
+import net.minecraft.class_11909;
 
 public class AutoWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -128,12 +130,12 @@ public class AutoWalk extends Module {
 
     @EventHandler
     private void onKey(KeyEvent event) {
-        if (isMovementKey(event.key) && event.action == KeyAction.Press) onMovement();
+        if (isMovementKey(event.arg) && event.action == KeyAction.Press) onMovement();
     }
 
      @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (isMovementButton(event.button) && event.action == KeyAction.Press) onMovement();
+        if (isMovementButton(event.arg) && event.action == KeyAction.Press) onMovement();
     }
 
     @EventHandler
@@ -154,16 +156,16 @@ public class AutoWalk extends Module {
         mc.options.rightKey.setPressed(false);
     }
 
-    private boolean isMovementKey(int key) {
-        return mc.options.forwardKey.matchesKey(key, 0)
-            || mc.options.backKey.matchesKey(key, 0)
-            || mc.options.leftKey.matchesKey(key, 0)
-            || mc.options.rightKey.matchesKey(key, 0)
-            || mc.options.sneakKey.matchesKey(key, 0)
-            || mc.options.jumpKey.matchesKey(key, 0);
+    private boolean isMovementKey(class_11908 key) {
+        return mc.options.forwardKey.matchesKey(key)
+            || mc.options.backKey.matchesKey(key)
+            || mc.options.leftKey.matchesKey(key)
+            || mc.options.rightKey.matchesKey(key)
+            || mc.options.sneakKey.matchesKey(key)
+            || mc.options.jumpKey.matchesKey(key);
     }
 
-    private boolean isMovementButton(int button) {
+    private boolean isMovementButton(class_11909 button) {
         return mc.options.forwardKey.matchesMouse(button)
             || mc.options.backKey.matchesMouse(button)
             || mc.options.leftKey.matchesMouse(button)

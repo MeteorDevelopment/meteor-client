@@ -127,7 +127,7 @@ public class GUIMove extends Module {
 
     @EventHandler
     private void onKey(KeyEvent event) {
-        onInput(event.key, event.action, false);
+        //onInput(event.arg, event.action, false);
     }
 
     @EventHandler
@@ -173,8 +173,8 @@ public class GUIMove extends Module {
     }
 
     private void pass(KeyBinding bind, int key, KeyAction action, boolean mouse) {
-        if (!mouse && !bind.matchesKey(key, 0)) return;
-        if (mouse && !bind.matchesMouse(key)) return;
+        //if (!mouse && !bind.matchesKey(key)) return;
+        //if (mouse && !bind.matchesMouse(key)) return;
         if (action == KeyAction.Press) bind.setPressed(true);
         if (action == KeyAction.Release) bind.setPressed(false);
     }

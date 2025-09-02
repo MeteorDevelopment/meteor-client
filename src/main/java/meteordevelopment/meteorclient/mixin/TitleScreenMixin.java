@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.player.TitleScreenCredits;
+import net.minecraft.class_11909;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
@@ -30,9 +31,9 @@ public abstract class TitleScreenMixin extends Screen {
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void onMouseClicked(double mouseX, double mouseY, int button, boolean bl, CallbackInfoReturnable<Boolean> info) {
-        if (Config.get().titleScreenCredits.get() && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
-            if (TitleScreenCredits.onClicked(mouseX, mouseY)) info.setReturnValue(true);
+    private void onMouseClicked(class_11909 arg, boolean bl, CallbackInfoReturnable<Boolean> cir) {
+        if (Config.get().titleScreenCredits.get() && arg.method_74245() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (TitleScreenCredits.onClicked(arg.x(), arg.y())) cir.setReturnValue(true);
         }
     }
 }

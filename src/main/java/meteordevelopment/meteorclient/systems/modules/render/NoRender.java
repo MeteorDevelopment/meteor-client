@@ -576,7 +576,7 @@ public class NoRender extends Module {
 
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
-        if (blockEntities.get().contains(event.blockEntity.getCachedState().getBlock())) event.cancel();
+        if (blockEntities.get().contains(event.blockEntityState.field_62674.getBlock())) event.cancel();
     }
 
     // Entity

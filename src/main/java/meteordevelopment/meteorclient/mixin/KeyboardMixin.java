@@ -13,6 +13,8 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import net.minecraft.class_11905;
+import net.minecraft.class_11908;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
@@ -28,31 +30,32 @@ public abstract class KeyboardMixin {
     @Shadow @Final private MinecraftClient client;
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
-    public void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo info) {
-        if (key != GLFW.GLFW_KEY_UNKNOWN) {
+    public void onKey(long window, int action, class_11908 arg, CallbackInfo ci) { // todo verify this is correct when they update the mappings
+        int modifiers = arg.modifiers();
+        if (arg.key() != GLFW.GLFW_KEY_UNKNOWN) {
             // on Linux/X11 the modifier is not active when the key is pressed and still active when the key is released
             // https://github.com/glfw/glfw/issues/1630
             if (action == GLFW.GLFW_PRESS) {
-                modifiers |= Input.getModifier(key);
+                modifiers |= Input.getModifier(arg.key());
             } else if (action == GLFW.GLFW_RELEASE) {
-                modifiers &= ~Input.getModifier(key);
+                modifiers &= ~Input.getModifier(arg.key());
             }
 
             if (client.currentScreen instanceof WidgetScreen && action == GLFW.GLFW_REPEAT) {
-                ((WidgetScreen) client.currentScreen).keyRepeated(key, modifiers);
+                ((WidgetScreen) client.currentScreen).keyRepeated(arg.key(), modifiers);
             }
 
             if (GuiKeyEvents.canUseKeys) {
-                Input.setKeyState(key, action != GLFW.GLFW_RELEASE);
-                if (MeteorClient.EVENT_BUS.post(KeyEvent.get(key, modifiers, KeyAction.get(action))).isCancelled()) info.cancel();
+                Input.setKeyState(arg.key(), action != GLFW.GLFW_RELEASE);
+                if (MeteorClient.EVENT_BUS.post(KeyEvent.get(arg, arg.key(), modifiers, KeyAction.get(action))).isCancelled()) ci.cancel();
             }
         }
     }
 
     @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
-    private void onChar(long window, int i, int j, CallbackInfo info) {
+    private void onChar(long window, class_11905 arg, CallbackInfo ci) {
         if (Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
-            if (MeteorClient.EVENT_BUS.post(CharTypedEvent.get((char) i)).isCancelled()) info.cancel();
+            if (MeteorClient.EVENT_BUS.post(CharTypedEvent.get((char) arg.codepoint())).isCancelled()) ci.cancel();
         }
     }
 }

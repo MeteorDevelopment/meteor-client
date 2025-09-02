@@ -9,7 +9,10 @@ import meteordevelopment.meteorclient.mixininterface.IBakedQuad;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.*;
+import net.minecraft.class_11954;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.BlockModelPart;
@@ -37,11 +40,12 @@ public abstract class SimpleBlockRenderer {
         vertexConsumerProvider.setOffset(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ());
         SimpleBlockRenderer.render(blockEntity.getPos(), blockEntity.getCachedState(), vertexConsumerProvider);
 
-        BlockEntityRenderer<BlockEntity> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
+        BlockEntityRenderer<BlockEntity, class_11954> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
 
         if (renderer != null && blockEntity.hasWorld() && blockEntity.getType().supports(blockEntity.getCachedState())) {
-            Vec3d camera = mc.gameRenderer.getCamera().getPos();
-            renderer.render(blockEntity, tickDelta, MATRICES, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, camera, null, mc.gameRenderer.getEntityRenderDispatcher().getQueue());
+            class_11954 c = new class_11954();
+            class_11954.method_74399(blockEntity, c, null);
+            renderer.render(c, MATRICES, mc.gameRenderer.getEntityRenderDispatcher().getQueue());
         }
 
         vertexConsumerProvider.setOffset(0, 0, 0);

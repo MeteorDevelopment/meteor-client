@@ -156,14 +156,14 @@ public class MeteorClient implements ClientModInitializer {
 
     @EventHandler
     private void onKey(KeyEvent event) {
-        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesKey(event.key, 0)) {
+        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesKey(event.arg)) {
             toggleGui();
         }
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesMouse(event.button)) {
+        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesMouse(event.arg)) {
             toggleGui();
         }
     }

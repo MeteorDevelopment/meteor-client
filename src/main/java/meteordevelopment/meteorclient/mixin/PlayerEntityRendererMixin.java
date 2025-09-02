@@ -11,11 +11,15 @@ import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import net.minecraft.class_11890;
+import net.minecraft.class_11901;
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
@@ -29,11 +33,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(PlayerEntityRenderer.class)
-public abstract class PlayerEntityRendererMixin {
+public abstract class PlayerEntityRendererMixin<AvatarlikeEntity extends class_11890 & class_11901>
+    extends LivingEntityRenderer<AvatarlikeEntity, PlayerEntityRenderState, PlayerEntityModel> {
     // Chams
 
     @Unique
     private Chams chams;
+
+    public PlayerEntityRendererMixin(EntityRendererFactory.Context ctx, PlayerEntityModel model, float shadowRadius) {
+        super(ctx, model, shadowRadius);
+    }
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init$chams(CallbackInfo info) {
@@ -42,8 +51,8 @@ public abstract class PlayerEntityRendererMixin {
 
     // Chams - Player scale
 
-    @Inject(method = "updateRenderState(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;F)V", at = @At("RETURN"))
-    private void updateRenderState$scale(AbstractClientPlayerEntity player, PlayerEntityRenderState state, float f, CallbackInfo info) {
+    @Inject(method = "updateRenderState(Lnet/minecraft/class_11890;Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;F)V", at = @At("RETURN"))
+    private void updateRenderState$scale(AvatarlikeEntity player, PlayerEntityRenderState state, float f, CallbackInfo ci) {
         if (!chams.isActive() || !chams.players.get()) return;
         if (chams.ignoreSelf.get() && player == mc.player) return;
 
@@ -80,8 +89,8 @@ public abstract class PlayerEntityRendererMixin {
 
     // Rotations
 
-    @Inject(method = "updateRenderState(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;F)V", at = @At("RETURN"))
-    private void updateRenderState$rotations(AbstractClientPlayerEntity player, PlayerEntityRenderState state, float f, CallbackInfo info) {
+    @Inject(method = "updateRenderState(Lnet/minecraft/class_11890;Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;F)V", at = @At("RETURN"))
+    private void updateRenderState$rotations(AvatarlikeEntity player, PlayerEntityRenderState state, float f, CallbackInfo info) {
         if (Rotations.rotating && player == mc.player) {
             state.bodyYaw = Rotations.serverYaw;
             state.pitch = Rotations.serverPitch;
