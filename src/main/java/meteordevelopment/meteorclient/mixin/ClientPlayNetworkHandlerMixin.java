@@ -167,11 +167,10 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
         }
     }
 
-    // When health reaches 0, send the PlayerDeathEvent
-    @Inject(method = "onHealthUpdate", at = @At("TAIL"))
-    private void onClientDeath(HealthUpdateS2CPacket packet, CallbackInfo ci) {
+    // When receiving the death message packet, send the PlayerDeathEvent
+    @Inject(method = "onDeathMessage", at = @At("HEAD"))
+    private void onClientDeath(DeathMessageS2CPacket packet, CallbackInfo ci) {
         if (client.player == null) return;
-        if (packet.getHealth() > 0) return;
 
         MeteorClient.EVENT_BUS.post(PlayerDeathEvent.get());
     }

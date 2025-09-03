@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.events.entity.player;
 
-import net.minecraft.entity.damage.DamageSource;
-
 public class PlayerDeathEvent {
     private static final PlayerDeathEvent INSTANCE = new PlayerDeathEvent();
 
