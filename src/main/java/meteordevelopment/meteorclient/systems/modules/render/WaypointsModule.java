@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
+import meteordevelopment.meteorclient.events.entity.player.PlayerDeathEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
@@ -29,7 +29,6 @@ import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -96,7 +95,9 @@ public class WaypointsModule extends Module {
         Vector3d center = new Vector3d(mc.getWindow().getFramebufferWidth() / 2.0, mc.getWindow().getFramebufferHeight() / 2.0, 0);
         int textRenderDist = textRenderDistance.get();
 
-        for (Waypoint waypoint : Waypoints.get()) {
+        for (Iterator<Waypoint> it = Waypoints.get().iterator(); it.hasNext();) {
+            Waypoint waypoint = it.next();
+
             // Continue if this waypoint should not be rendered
             if (!waypoint.visible.get() || !Waypoints.checkDimension(waypoint)) continue;
 
@@ -104,6 +105,22 @@ public class WaypointsModule extends Module {
             BlockPos blockPos = waypoint.getPos();
             Vector3d pos = new Vector3d(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
             double dist = PlayerUtils.distanceToCamera(pos.x, pos.y, pos.z);
+
+            // Only perform hide when near check if player is alive
+            // Otherwise, death waypoints immediately get hidden
+            boolean playerAlive = (mc.player != null && !mc.player.isDead());
+            boolean waypointIsNear = waypoint.actionWhenNearCheck((int) Math.floor(dist));
+            if (playerAlive && waypointIsNear) {
+                switch (waypoint.actionWhenNear.get()) {
+                    case Disabled: break;
+                    case Hide:
+                        waypoint.visible.set(false);
+                        break;
+                    case Delete:
+                        it.remove();
+                        break;
+                }
+            }
 
             // Continue if this waypoint should not be rendered
             if (dist > waypoint.maxVisible.get()) continue;
@@ -148,10 +165,10 @@ public class WaypointsModule extends Module {
     }
 
     @EventHandler
-    private void onOpenScreen(OpenScreenEvent event) {
-        if (!(event.screen instanceof DeathScreen)) return;
+    private void onPlayerDeath(PlayerDeathEvent event) {
+        if (mc.player == null) return;
 
-        if (!event.isCancelled()) addDeath(mc.player.getPos());
+        addDeath(mc.player.getPos());
     }
 
     public void addDeath(Vec3d deathPos) {
@@ -171,6 +188,10 @@ public class WaypointsModule extends Module {
                 .pos(BlockPos.ofFloored(deathPos).up(2))
                 .dimension(PlayerUtils.getDimension())
                 .build();
+
+            // Configure death waypoints to auto delete when the player is within 4 blocks
+            waypoint.actionWhenNear.set(Waypoint.NearAction.Delete);
+            waypoint.actionWhenNearDistance.set(4);
 
             Waypoints.get().add(waypoint);
         }
