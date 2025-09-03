@@ -113,15 +113,21 @@ public class Waypoint implements ISerializable<Waypoint> {
     );
 
     public final UUID uuid;
+    public final long createdAt;
+
+    // 1 second cooldown for waypoint actions
+    final int waypointActionCooldown = 1000;
 
     private Waypoint() {
         uuid = UUID.randomUUID();
+        createdAt = System.currentTimeMillis();
     }
 
     public Waypoint(NbtElement tag) {
         NbtCompound nbt = (NbtCompound) tag;
 
         uuid = nbt.get("uuid", Uuids.INT_STREAM_CODEC).orElse(UUID.randomUUID());
+        createdAt = System.currentTimeMillis();
 
         fromTag(nbt);
     }
@@ -155,6 +161,9 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     public boolean actionWhenNearCheck(int distance) {
+        // Add cooldown to near check, to account for death event inaccuracies
+        if ((System.currentTimeMillis() - createdAt) < waypointActionCooldown) return false;
+
         return actionWhenNearDistance.get() >= distance;
     }
 
