@@ -5,9 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.PlayerDeathEvent;
-import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
@@ -31,7 +29,6 @@ import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -98,7 +95,9 @@ public class WaypointsModule extends Module {
         Vector3d center = new Vector3d(mc.getWindow().getFramebufferWidth() / 2.0, mc.getWindow().getFramebufferHeight() / 2.0, 0);
         int textRenderDist = textRenderDistance.get();
 
-        for (Waypoint waypoint : Waypoints.get()) {
+        for (Iterator<Waypoint> it = Waypoints.get().iterator(); it.hasNext();) {
+            Waypoint waypoint = it.next();
+
             // Continue if this waypoint should not be rendered
             if (!waypoint.visible.get() || !Waypoints.checkDimension(waypoint)) continue;
 
@@ -109,8 +108,18 @@ public class WaypointsModule extends Module {
 
             // Only perform hide when near check if player is alive
             // Otherwise, death waypoints immediately get hidden
-            if (mc.player != null && !mc.player.isDead()) {
-                waypoint.hideWhenNearCheck((int) Math.floor(dist));
+            boolean playerAlive = (mc.player != null && !mc.player.isDead());
+            boolean waypointIsNear = waypoint.actionWhenNearCheck((int) Math.floor(dist));
+            if (playerAlive && waypointIsNear) {
+                switch (waypoint.actionWhenNear.get()) {
+                    case Disabled: break;
+                    case Hide:
+                        waypoint.visible.set(false);
+                        break;
+                    case Delete:
+                        it.remove();
+                        break;
+                }
             }
 
             // Continue if this waypoint should not be rendered
@@ -180,9 +189,9 @@ public class WaypointsModule extends Module {
                 .dimension(PlayerUtils.getDimension())
                 .build();
 
-            // Configure death waypoints to auto hide when the player is within 4 blocks
-            waypoint.hideWhenNear.set(true);
-            waypoint.hideWhenNearDistance.set(4);
+            // Configure death waypoints to auto delete when the player is within 4 blocks
+            waypoint.actionWhenNear.set(Waypoint.NearAction.Delete);
+            waypoint.actionWhenNearDistance.set(4);
 
             Waypoints.get().add(waypoint);
         }
