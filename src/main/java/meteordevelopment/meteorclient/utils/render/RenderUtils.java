@@ -13,17 +13,13 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Vector3f;
+import org.joml.Matrix3x2fStack;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,6 +29,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RenderUtils {
     public static Vec3d center;
+    public static final Matrix4f projection = new Matrix4f();
 
     private static final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private static final List<RenderBlock> renderBlocks = new ArrayList<>();
@@ -46,56 +43,40 @@ public class RenderUtils {
     }
 
     // Items
-    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride) {
-        MatrixStack matrices = drawContext.getMatrices();
-        matrices.push();
-        matrices.scale(scale, scale, 1f);
-        matrices.translate(0, 0, 401); // Thanks Mojang
+    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride, boolean disableGuiScale) {
+        Matrix3x2fStack matrices = drawContext.getMatrices();
+        matrices.pushMatrix();
+
+        if (disableGuiScale) {
+            matrices.scale(1.0f / mc.getWindow().getScaleFactor());
+        }
+
+        matrices.scale(scale, scale);
 
         int scaledX = (int) (x / scale);
         int scaledY = (int) (y / scale);
 
         drawContext.drawItem(itemStack, scaledX, scaledY);
-        if (overlay) drawContext.drawItemInSlot(mc.textRenderer, itemStack, scaledX, scaledY, countOverride);
+        if (overlay) drawContext.drawStackOverlay(mc.textRenderer, itemStack, scaledX, scaledY, countOverride);
 
-        matrices.pop();
+        matrices.popMatrix();
     }
 
     public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        drawItem(drawContext, itemStack, x, y, scale, overlay, null);
+        drawItem(drawContext, itemStack, x, y, scale, overlay, null, true);
     }
 
-    public static void updateScreenCenter() {
-        MinecraftClient mc = MinecraftClient.getInstance();
+    public static void updateScreenCenter(Matrix4f projection, Matrix4f view) {
+        RenderUtils.projection.set(projection);
 
-        Vector3f pos = new Vector3f(0, 0, 1);
+        Matrix4f invProjection = new Matrix4f(projection).invert();
+        Matrix4f invView = new Matrix4f(view).invert();
 
-        if (mc.options.getBobView().getValue()) {
-            MatrixStack bobViewMatrices = new MatrixStack();
+        Vector4f center4 = new Vector4f(0, 0, 0, 1).mul(invProjection).mul(invView);
+        center4.div(center4.w);
 
-            bobView(bobViewMatrices);
-            pos.mulPosition(bobViewMatrices.peek().getPositionMatrix().invert());
-        }
-
-        center = new Vec3d(pos.x, -pos.y, pos.z)
-            .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
-            .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
-            .add(mc.gameRenderer.getCamera().getPos());
-    }
-
-    private static void bobView(MatrixStack matrices) {
-        Entity cameraEntity = MinecraftClient.getInstance().getCameraEntity();
-
-        if (cameraEntity instanceof PlayerEntity playerEntity) {
-            float f = mc.getRenderTickCounter().getTickDelta(true);
-            float g = playerEntity.horizontalSpeed - playerEntity.prevHorizontalSpeed;
-            float h = -(playerEntity.horizontalSpeed + g * f);
-            float i = MathHelper.lerp(f, playerEntity.prevStrideDistance, playerEntity.strideDistance);
-
-            matrices.translate(-(MathHelper.sin(h * 3.1415927f) * i * 0.5), Math.abs(MathHelper.cos(h * 3.1415927f) * i), 0);
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(h * 3.1415927f) * i * 3));
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(Math.abs(MathHelper.cos(h * 3.1415927f - 0.2f) * i) * 5));
-        }
+        Vec3d camera = mc.gameRenderer.getCamera().getPos();
+        center = new Vec3d(camera.x + center4.x, camera.y + center4.y, camera.z + center4.z);
     }
 
     public static void renderTickingBlock(BlockPos blockPos, Color sideColor, Color lineColor, ShapeMode shapeMode, int excludeDir, int duration, boolean fade, boolean shrink) {

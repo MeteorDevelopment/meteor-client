@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.mixininterface;
 
 public interface ISlot {
-    int getId();
+    int meteor$getId();
 
-    int getIndex();
+    int meteor$getIndex();
 }

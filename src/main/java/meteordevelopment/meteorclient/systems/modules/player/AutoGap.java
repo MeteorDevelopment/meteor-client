@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AutoGap extends Module {
+    @SuppressWarnings("unchecked")
     private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -88,9 +89,9 @@ public class AutoGap extends Module {
         .build()
     );
 
-    private final Setting<Boolean> potionsResistance = sgPotions.add(new BoolSetting.Builder()
+    private final Setting<Boolean> potionsAbsorption = sgPotions.add(new BoolSetting.Builder()
         .name("potions-absorption")
-        .description("If it should eat when Resistance runs out. Requires E-Gaps.")
+        .description("If it should eat when Absorption runs out. Requires E-Gaps.")
         .defaultValue(false)
         .visible(allowEgap::get)
         .build()
@@ -178,7 +179,7 @@ public class AutoGap extends Module {
     }
 
     private void startEating() {
-        prevSlot = mc.player.getInventory().selectedSlot;
+        prevSlot = mc.player.getInventory().getSelectedSlot();
         eat();
 
         // Pause auras
@@ -263,7 +264,7 @@ public class AutoGap extends Module {
         }
 
         // Absorption
-        if (potionsResistance.get() && !effects.containsKey(StatusEffects.RESISTANCE)) {
+        if (potionsAbsorption.get() && !effects.containsKey(StatusEffects.ABSORPTION)) {
             requiresEGap = true;
             return true;
         }

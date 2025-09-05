@@ -44,7 +44,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public abstract boolean fetchInfo();
 
     public boolean login() {
-        YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy());
+        YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).meteor$getProxy());
         applyLoginEnvironment(authenticationService, authenticationService.createMinecraftSessionService());
 
         return true;
@@ -65,24 +65,24 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
 
     public static void setSession(Session session) {
         MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
-        mca.setSession(session);
+        mca.meteor$setSession(session);
         UserApiService apiService;
-        apiService = mca.getAuthenticationService().createUserApiService(session.getAccessToken());
-        mca.setUserApiService(apiService);
-        mca.setSocialInteractionsManager(new SocialInteractionsManager(mc, apiService));
-        mca.setProfileKeys(ProfileKeys.create(apiService, session, mc.runDirectory.toPath()));
-        mca.setAbuseReportContext(AbuseReportContext.create(ReporterEnvironment.ofIntegratedServer(), apiService));
-        mca.setGameProfileFuture(CompletableFuture.supplyAsync(() -> mc.getSessionService().fetchProfile(mc.getSession().getUuidOrNull(), true), Util.getIoWorkerExecutor()));
+        apiService = mca.meteor$getAuthenticationService().createUserApiService(session.getAccessToken());
+        mca.meteor$setUserApiService(apiService);
+        mca.meteor$setSocialInteractionsManager(new SocialInteractionsManager(mc, apiService));
+        mca.meteor$setProfileKeys(ProfileKeys.create(apiService, session, mc.runDirectory.toPath()));
+        mca.meteor$setAbuseReportContext(AbuseReportContext.create(ReporterEnvironment.ofIntegratedServer(), apiService));
+        mca.meteor$setGameProfileFuture(CompletableFuture.supplyAsync(() -> mc.getSessionService().fetchProfile(mc.getSession().getUuidOrNull(), true), Util.getIoWorkerExecutor()));
     }
 
     public static void applyLoginEnvironment(YggdrasilAuthenticationService authService, MinecraftSessionService sessService) {
         MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
-        mca.setAuthenticationService(authService);
+        mca.meteor$setAuthenticationService(authService);
         SignatureVerifier.create(authService.getServicesKeySet(), ServicesKeyType.PROFILE_KEY);
-        mca.setSessionService(sessService);
-        PlayerSkinProvider.FileCache skinCache = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCache();
-        Path skinCachePath = ((FileCacheAccessor) skinCache).getDirectory();
-        mca.setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), skinCachePath, sessService, mc));
+        mca.meteor$setSessionService(sessService);
+        PlayerSkinProvider.FileCache skinCache = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).meteor$getSkinCache();
+        Path skinCachePath = ((FileCacheAccessor) skinCache).meteor$getDirectory();
+        mca.meteor$setSkinProvider(new PlayerSkinProvider(skinCachePath, sessService, mc));
     }
 
     @Override
@@ -96,12 +96,13 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         return tag;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T fromTag(NbtCompound tag) {
-        if (!tag.contains("name") || !tag.contains("cache")) throw new NbtException();
+        if (tag.getString("name").isEmpty() || tag.getCompound("cache").isEmpty()) throw new NbtException();
 
-        name = tag.getString("name");
-        cache.fromTag(tag.getCompound("cache"));
+        name = tag.getString("name").get();
+        cache.fromTag(tag.getCompound("cache").get());
 
         return (T) this;
     }

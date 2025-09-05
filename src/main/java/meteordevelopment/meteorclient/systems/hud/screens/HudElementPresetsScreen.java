@@ -14,12 +14,14 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.DrawContext;
+import org.jetbrains.annotations.Nullable;
 
 public class HudElementPresetsScreen extends WindowScreen {
     private final HudElementInfo<?> info;
     private final int x, y;
 
     private final WTextBox searchBar;
+    @Nullable
     private HudElementInfo<?>.Preset firstPreset;
 
     public HudElementPresetsScreen(GuiTheme theme, HudElementInfo<?> info, int x, int y) {
@@ -36,6 +38,7 @@ public class HudElementPresetsScreen extends WindowScreen {
         };
 
         enterAction = () -> {
+            if (firstPreset == null) return;
             Hud.get().add(firstPreset, x, y);
             close();
         };

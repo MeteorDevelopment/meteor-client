@@ -13,10 +13,11 @@ import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 @SuppressWarnings("unused")
 public class Color implements ICopyable<Color>, ISerializable<Color> {
-
+    public static final Color CLEAR = new Color(0, 0, 0, 0);
     public static final Color WHITE = new Color(java.awt.Color.WHITE);
     public static final Color LIGHT_GRAY = new Color(java.awt.Color.LIGHT_GRAY);
     public static final Color GRAY = new Color(java.awt.Color.GRAY);
@@ -310,6 +311,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         return new Vector3f(r / 255.0f, g / 255.0f, b / 255.0f);
     }
 
+    public Vector4f getVec4f() {
+        return new Vector4f(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+    }
+
     public int getPacked() {
         return fromRGBA(r, g, b, a);
     }
@@ -328,10 +333,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
 
     @Override
     public Color fromTag(NbtCompound tag) {
-        r = tag.getInt("r");
-        g = tag.getInt("g");
-        b = tag.getInt("b");
-        a = tag.getInt("a");
+        r = tag.getInt("r", 0);
+        g = tag.getInt("g", 0);
+        b = tag.getInt("b", 0);
+        a = tag.getInt("a", 0);
 
         validate();
         return this;

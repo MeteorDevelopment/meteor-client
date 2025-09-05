@@ -8,24 +8,22 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.HighJump;
 import meteordevelopment.meteorclient.systems.modules.movement.Sprint;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Bounce;
+import meteordevelopment.meteorclient.systems.modules.player.NoStatusEffects;
 import meteordevelopment.meteorclient.systems.modules.player.OffhandCrash;
-import meteordevelopment.meteorclient.systems.modules.player.PotionSpoof;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
@@ -46,12 +44,6 @@ public abstract class LivingEntityMixin extends Entity {
         super(type, world);
     }
 
-    @Inject(method = "damage", at = @At("HEAD"))
-    private void onDamageHead(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate() && getWorld().isClient)
-            MeteorClient.EVENT_BUS.post(DamageEvent.get((LivingEntity) (Object) this, source));
-    }
-
     @ModifyReturnValue(method = "canWalkOnFluid", at = @At("RETURN"))
     private boolean onCanWalkOnFluid(boolean original, FluidState fluidState) {
         if ((Object) this != mc.player) return original;
@@ -68,30 +60,37 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "onEquipStack", at = @At("HEAD"), cancellable = true)
     private void onEquipStack(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo info) {
-        if ((Object) this == mc.player && Modules.get().get(OffhandCrash.class).isAntiCrash()) {
+        if ((Object) this != mc.player) return;
+
+        if (Modules.get().get(OffhandCrash.class).isAntiCrash()) {
             info.cancel();
         }
     }
 
     @ModifyArg(method = "swingHand(Lnet/minecraft/util/Hand;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;swingHand(Lnet/minecraft/util/Hand;Z)V"))
     private Hand setHand(Hand hand) {
+        if ((Object) this != mc.player) return hand;
+
         HandView handView = Modules.get().get(HandView.class);
-        if ((Object) this == mc.player && handView.isActive()) {
+        if (handView.isActive()) {
             if (handView.swingMode.get() == HandView.SwingMode.None) return hand;
             return handView.swingMode.get() == HandView.SwingMode.Offhand ? Hand.OFF_HAND : Hand.MAIN_HAND;
         }
         return hand;
     }
 
-    @ModifyConstant(method = "getHandSwingDuration", constant = @Constant(intValue = 6))
-    private int getHandSwingDuration(int constant) {
-        if ((Object) this != mc.player) return constant;
-        return Modules.get().get(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : constant;
+    @ModifyExpressionValue(method = "getHandSwingDuration", at = @At(value = "CONSTANT", args = "intValue=6"))
+    private int getHandSwingDuration(int original) {
+        if ((Object) this != mc.player) return original;
+
+        return Modules.get().get(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : original;
     }
 
-    @ModifyReturnValue(method = "isFallFlying", at = @At("RETURN"))
-    private boolean isFallFlyingHook(boolean original) {
-        if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {
+    @ModifyReturnValue(method = "isGliding", at = @At("RETURN"))
+    private boolean isGlidingHook(boolean original) {
+        if ((Object) this != mc.player) return original;
+
+        if (Modules.get().get(ElytraFly.class).canPacketEfly()) {
             return true;
         }
 
@@ -101,7 +100,7 @@ public abstract class LivingEntityMixin extends Entity {
     @Unique
     private boolean previousElytra = false;
 
-    @Inject(method = "isFallFlying", at = @At("TAIL"), cancellable = true)
+    @Inject(method = "isGliding", at = @At("TAIL"), cancellable = true)
     public void recastOnLand(CallbackInfoReturnable<Boolean> cir) {
         boolean elytra = cir.getReturnValue();
         ElytraFly elytraFly = Modules.get().get(ElytraFly.class);
@@ -113,7 +112,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyReturnValue(method = "hasStatusEffect", at = @At("RETURN"))
     private boolean hasStatusEffect(boolean original, RegistryEntry<StatusEffect> effect) {
-        if (Modules.get().get(PotionSpoof.class).shouldBlock(effect.value())) return false;
+        if (Modules.get().get(NoStatusEffects.class).shouldBlock(effect.value())) return false;
 
         return original;
     }
@@ -121,17 +120,31 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyExpressionValue(method = "jump", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getYaw()F"))
     private float modifyGetYaw(float original) {
         if ((Object) this != mc.player) return original;
+        if (!Modules.get().get(Sprint.class).rageSprint()) return original;
 
-        Sprint s = Modules.get().get(Sprint.class);
-        if (!s.rageSprint() || !s.jumpFix.get()) return original;
-
-        float forward = Math.signum(mc.player.input.movementForward);
-        float strafe = 90 * Math.signum(mc.player.input.movementSideways);
+        float forward = Math.signum(mc.player.forwardSpeed);
+        float strafe = 90 * Math.signum(mc.player.sidewaysSpeed);
         if (forward != 0) strafe *= (forward * 0.5f);
 
         original -= strafe;
         if (forward < 0) original -= 180;
 
         return original;
+    }
+
+    @ModifyConstant(method = "jump", constant = @Constant(floatValue = 1.0E-5F))
+    private float modifyJumpConstant(float original) {
+        if ((Object) this != mc.player) return original;
+        if (!Modules.get().isActive(HighJump.class)) return original;
+        return -1;
+    }
+
+    @ModifyExpressionValue(method = "jump", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isSprinting()Z"))
+    private boolean modifyIsSprinting(boolean original) {
+        if ((Object) this != mc.player) return original;
+        if (!Modules.get().get(Sprint.class).rageSprint()) return original;
+
+        // only add the extra velocity if you're actually moving, otherwise you'll jump in place and move forward
+        return original && (Math.abs(mc.player.forwardSpeed) > 1.0E-5F || Math.abs(mc.player.sidewaysSpeed) > 1.0E-5F);
     }
 }

@@ -67,7 +67,7 @@ public class InventorySorter {
         List<MySlot> slots = new ArrayList<>();
 
         for (Slot slot : screen.getScreenHandler().slots) {
-            if (getInvPart(slot) == originInvPart) slots.add(new MySlot(((ISlot) slot).getId(), slot.getStack()));
+            if (getInvPart(slot) == originInvPart) slots.add(new MySlot(((ISlot) slot).meteor$getId(), slot.getStack()));
         }
 
         slots.sort(Comparator.comparingInt(value -> value.id));
@@ -167,15 +167,18 @@ public class InventorySorter {
         else if (!bestI.isEmpty() && slotI.isEmpty()) return false;
 
         int c = Registries.ITEM.getId(bestI.getItem()).compareTo(Registries.ITEM.getId(slotI.getItem()));
-        if (c == 0) return slotI.getCount() > bestI.getCount();
+        if (c == 0) {
+            if (slotI.getCount() != bestI.getCount()) return slotI.getCount() > bestI.getCount();
+            if (slotI.getDamage() != bestI.getDamage()) return slotI.getDamage() > bestI.getDamage();
+        }
 
         return c > 0;
     }
 
     private InvPart getInvPart(Slot slot) {
-        int i = ((ISlot) slot).getIndex();
+        int i = ((ISlot) slot).meteor$getIndex();
 
-        if (slot.inventory instanceof PlayerInventory && (!(screen instanceof CreativeInventoryScreen) || ((ISlot) slot).getId() > 8)) {
+        if (slot.inventory instanceof PlayerInventory && (!(screen instanceof CreativeInventoryScreen) || ((ISlot) slot).meteor$getId() > 8)) {
             if (SlotUtils.isHotbar(i)) return InvPart.Hotbar;
             else if (SlotUtils.isMain(i)) return InvPart.Player;
         }
@@ -208,7 +211,7 @@ public class InventorySorter {
 
         public List<MySlot> get(ItemStack itemStack) {
             for (Pair<ItemStack, List<MySlot>> entry : map) {
-                if (ItemStack.areItemsEqual(itemStack, entry.getLeft())) {
+                if (ItemStack.areItemsAndComponentsEqual(itemStack, entry.getLeft())) {
                     return entry.getRight();
                 }
             }

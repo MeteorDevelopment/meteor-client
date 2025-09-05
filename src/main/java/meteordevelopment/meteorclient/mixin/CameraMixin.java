@@ -47,7 +47,10 @@ public abstract class CameraMixin implements ICamera {
 
     @ModifyVariable(method = "clipToSpace", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private float modifyClipToSpace(float d) {
-        return (Modules.get().get(Freecam.class).isActive() ? 0 : (float) Modules.get().get(CameraTweaks.class).getDistance());
+        if (Modules.get().get(Freecam.class).isActive()) return 0;
+
+        CameraTweaks cameraTweaks = Modules.get().get(CameraTweaks.class);
+        return cameraTweaks.isActive() ? (float) cameraTweaks.distance : d;
     }
 
     @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
@@ -100,7 +103,7 @@ public abstract class CameraMixin implements ICamera {
     }
 
     @Override
-    public void setRot(double yaw, double pitch) {
+    public void meteor$setRot(double yaw, double pitch) {
         setRotation((float) yaw, (float) MathHelper.clamp(pitch, -90, 90));
     }
 }

@@ -5,20 +5,35 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import com.mojang.blaze3d.buffers.Std140Builder;
+import com.mojang.blaze3d.buffers.Std140SizeCalculator;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.textures.TextureFormat;
 import it.unimi.dsi.fastutil.ints.IntDoubleImmutablePair;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.game.WindowResizedEvent;
+import meteordevelopment.meteorclient.events.game.ResolutionChangedEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
-import meteordevelopment.meteorclient.renderer.*;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.mixininterface.IGpuTexture;
+import meteordevelopment.meteorclient.renderer.FullScreenRenderer;
+import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.listeners.ConsumerListener;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.DynamicUniformStorage;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+
+import java.nio.ByteBuffer;
 
 public class Blur extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -97,8 +112,8 @@ public class Blur extends Module {
         .build()
     );
 
-    private Shader shaderDown, shaderUp, shaderPassthrough;
-    private final Framebuffer[] fbos = new Framebuffer[6];
+    private final GpuTextureView[] fbos = new GpuTextureView[6];
+    private boolean initialized;
 
     private boolean enabled;
     private long fadeEndAt;
@@ -107,18 +122,27 @@ public class Blur extends Module {
         super(Categories.Render, "blur", "Blurs background when in GUI screens.");
 
         // The listeners need to run even when the module is not enabled
-        MeteorClient.EVENT_BUS.subscribe(new ConsumerListener<>(WindowResizedEvent.class, event -> {
+        MeteorClient.EVENT_BUS.subscribe(new ConsumerListener<>(ResolutionChangedEvent.class, event -> {
             // Resize all fbos
             for (int i = 0; i < fbos.length; i++) {
                 if (fbos[i] != null) {
-                    fbos[i].resize();
-                } else {
-                    fbos[i] = new Framebuffer(1 / Math.pow(2, i));
+                    fbos[i].close();
                 }
+
+                fbos[i] = createFbo(i);
             }
         }));
 
         MeteorClient.EVENT_BUS.subscribe(new ConsumerListener<>(RenderAfterWorldEvent.class, event -> onRenderAfterWorld()));
+    }
+
+    private GpuTextureView createFbo(int i) {
+        double scale = 1 / Math.pow(2, i);
+
+        int width = (int) (mc.getWindow().getFramebufferWidth() * scale);
+        int height = (int) (mc.getWindow().getFramebufferHeight() * scale);
+
+        return RenderSystem.getDevice().createTextureView(RenderSystem.getDevice().createTexture("Blur - " + i, 15,  TextureFormat.RGBA8, width, height, 1, 1));
     }
 
     private void onRenderAfterWorld() {
@@ -145,15 +169,14 @@ public class Blur extends Module {
         if (!enabled) return;
 
         // Initialize shader and framebuffer if running for the first time
-        if (shaderDown == null) {
-            shaderDown = new Shader("blur.vert", "blur_down.frag");
-            shaderUp = new Shader("blur.vert", "blur_up.frag");
-            shaderPassthrough = new Shader("passthrough.vert", "passthrough.frag");
+        if (!initialized) {
             for (int i = 0; i < fbos.length; i++) {
                 if (fbos[i] == null) {
-                    fbos[i] = new Framebuffer(1 / Math.pow(2, i));
+                    fbos[i] = createFbo(i);
                 }
             }
+
+            initialized = true;
         }
 
         // Update progress
@@ -171,48 +194,46 @@ public class Blur extends Module {
         int iterations = strength.leftInt();
         double offset = strength.rightDouble();
 
-        // Render the blur
-        PostProcessRenderer.beginRender();
-
         // Initial downsample
-        renderToFbo(fbos[0], MinecraftClient.getInstance().getFramebuffer().getColorAttachment(), shaderDown, offset);
+        renderToFbo(fbos[0], mc.getFramebuffer().getColorAttachmentView(), MeteorRenderPipelines.BLUR_DOWN, offset);
 
         // Downsample
         for (int i = 0; i < iterations; i++) {
-            renderToFbo(fbos[i + 1], fbos[i].texture, shaderDown, offset);
+            renderToFbo(fbos[i + 1], fbos[i], MeteorRenderPipelines.BLUR_DOWN, offset);
         }
 
         // Upsample
         for (int i = iterations; i >= 1; i--) {
-            renderToFbo(fbos[i - 1], fbos[i].texture, shaderUp, offset);
+            renderToFbo(fbos[i - 1], fbos[i], MeteorRenderPipelines.BLUR_UP, offset);
         }
 
         // Render output
-        MinecraftClient.getInstance().getFramebuffer().beginWrite(true);
-        shaderPassthrough.bind();
-        GL.bindTexture(fbos[0].texture);
-        shaderPassthrough.set("uTexture", 0);
-        PostProcessRenderer.render();
-
-        PostProcessRenderer.endRender();
+        MeshRenderer.begin()
+            .attachments(mc.getFramebuffer())
+            .pipeline(MeteorRenderPipelines.BLUR_PASSTHROUGH)
+            .mesh(FullScreenRenderer.mesh)
+            .sampler("u_Texture", fbos[0])
+            .end();
     }
 
-    /**
-     * Renders one iteration of the blur.
-     *
-     * @param targetFbo The framebuffer to render to.
-     * @param sourceText The texture to use.
-     * @param shader The shader to use.
-     */
-    private void renderToFbo(Framebuffer targetFbo, int sourceText, Shader shader, double offset) {
-        targetFbo.bind();
-        targetFbo.setViewport();
-        shader.bind();
-        GL.bindTexture(sourceText);
-        shader.set("uTexture", 0);
-        shader.set("uHalfTexelSize", .5 / targetFbo.width, .5 / targetFbo.height);
-        shader.set("uOffset", offset);
-        PostProcessRenderer.render();
+    private void renderToFbo(GpuTextureView targetFbo, GpuTextureView sourceTexture, RenderPipeline pipeline, double offset) {
+        AddressMode prevAddressModeU = ((IGpuTexture) sourceTexture.texture()).meteor$getAddressModeU();
+        AddressMode prevAddressModeV = ((IGpuTexture) sourceTexture.texture()).meteor$getAddressModeV();
+
+        sourceTexture.texture().setAddressMode(AddressMode.CLAMP_TO_EDGE);
+
+        MeshRenderer.begin()
+            .attachments(targetFbo, null)
+            .pipeline(pipeline)
+            .mesh(FullScreenRenderer.mesh)
+            .uniform("BlurData", UNIFORM_STORAGE.write(new UniformData(
+                0.5f / targetFbo.getWidth(0), 0.5f / targetFbo.getHeight(0),
+                (float) offset
+            )))
+            .sampler("u_Texture", sourceTexture)
+            .end();
+
+        sourceTexture.texture().setAddressMode(prevAddressModeU, prevAddressModeV);
     }
 
     private boolean shouldRender() {
@@ -225,5 +246,27 @@ public class Blur extends Module {
         if (screen != null) return other.get();
 
         return false;
+    }
+
+    // Uniforms
+
+    private static final int UNIFORM_SIZE = new Std140SizeCalculator()
+        .putVec2()
+        .putFloat()
+        .get();
+
+    private static final DynamicUniformStorage<UniformData> UNIFORM_STORAGE = new DynamicUniformStorage<>("Meteor - Blur UBO", UNIFORM_SIZE, 16);
+
+    public static void flipFrame() {
+        UNIFORM_STORAGE.clear();
+    }
+
+    private record UniformData(float halfTexelSizeX, float halfTexelSizeY, float offset) implements DynamicUniformStorage.Uploadable {
+        @Override
+        public void write(ByteBuffer buffer) {
+            Std140Builder.intoBuffer(buffer)
+                .putVec2(halfTexelSizeX, halfTexelSizeY)
+                .putFloat(offset);
+        }
     }
 }

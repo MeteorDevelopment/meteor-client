@@ -13,11 +13,11 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.other.Snapper;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
@@ -164,6 +164,21 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
                     for (HudElement element : selection) element.remove();
                     selection.clear();
                 }
+            } else if (!selection.isEmpty()) {
+                int pixels = (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL) || Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT_CONTROL)) ? 10 : 1;
+                int dx = 0, dy = 0;
+
+                switch (keyCode) {
+                    case GLFW.GLFW_KEY_UP -> dy = -pixels;
+                    case GLFW.GLFW_KEY_DOWN -> dy = pixels;
+                    case GLFW.GLFW_KEY_RIGHT -> dx = pixels;
+                    case GLFW.GLFW_KEY_LEFT -> dx = -pixels;
+                }
+
+                // manually move selection to bypass snapping
+                for (HudElement element : selection) {
+                    element.move(dx, dy);
+                }
             }
         }
 
@@ -261,9 +276,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) renderBackground(context, mouseX, mouseY, delta);
-
-        double s = mc.getWindow().getScaleFactor();
+        int s = mc.getWindow().getScaleFactor();
 
         mouseX *= s;
         mouseY *= s;
@@ -276,7 +289,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         Renderer2D.COLOR.begin();
         onRender(mouseX, mouseY);
-        Renderer2D.COLOR.render(new MatrixStack());
+        Renderer2D.COLOR.render();
 
         Utils.scaledProjection();
         runAfterRenderTasks();
@@ -324,7 +337,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         SPLIT_LINES_COLOR.a = prevA;
 
-        renderer.render(new MatrixStack());
+        renderer.render();
     }
 
     private void renderSplitLine(Renderer2D renderer, double x, double y, double destX, double destY) {
@@ -409,14 +422,14 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         @Override
         public void move(int deltaX, int deltaY) {
-            int prevX = x;
-            int prevY = y;
+            int lastX = x;
+            int lastY = y;
 
             int border = Hud.get().border.get();
             x = MathHelper.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
             y = MathHelper.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
 
-            for (HudElement element : selection) element.move(x - prevX, y - prevY);
+            for (HudElement element : selection) element.move(x - lastX, y - lastY);
         }
     }
 }

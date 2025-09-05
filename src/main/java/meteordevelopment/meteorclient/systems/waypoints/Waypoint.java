@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.waypoints;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
@@ -16,10 +15,12 @@ import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Waypoint implements ISerializable<Waypoint> {
     public final Settings settings = new Settings();
@@ -93,9 +94,19 @@ public class Waypoint implements ISerializable<Waypoint> {
         .build()
     );
 
-    private Waypoint() {}
+    public final UUID uuid;
+
+    private Waypoint() {
+        uuid = UUID.randomUUID();
+    }
+
     public Waypoint(NbtElement tag) {
-        fromTag((NbtCompound) tag);
+        NbtCompound nbt = (NbtCompound) tag;
+
+        if (nbt.contains("uuid")) uuid = nbt.get("uuid", Uuids.INT_STREAM_CODEC).get();
+        else uuid = UUID.randomUUID();
+
+        fromTag(nbt);
     }
 
     public void renderIcon(double x, double y, double a, double size) {
@@ -105,10 +116,9 @@ public class Waypoint implements ISerializable<Waypoint> {
         int preA = color.get().a;
         color.get().a *= a;
 
-        GL.bindTexture(texture.getGlId());
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, size, size, color.get());
-        Renderer2D.TEXTURE.render(null);
+        Renderer2D.TEXTURE.render(texture.getGlTextureView());
 
         color.get().a = preA;
     }
@@ -177,6 +187,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
 
+        tag.put("uuid", Uuids.INT_STREAM_CODEC, uuid);
         tag.put("settings", settings.toTag());
 
         return tag;
@@ -185,7 +196,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     @Override
     public Waypoint fromTag(NbtCompound tag) {
         if (tag.contains("settings")) {
-            settings.fromTag(tag.getCompound("settings"));
+            settings.fromTag(tag.getCompoundOrEmpty("settings"));
         }
 
         return this;
@@ -196,6 +207,16 @@ public class Waypoint implements ISerializable<Waypoint> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Waypoint waypoint = (Waypoint) o;
-        return Objects.equals(waypoint.name.get(), this.name.get());
+        return Objects.equals(uuid, waypoint.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(uuid);
+    }
+
+    @Override
+    public String toString() {
+        return name.get();
     }
 }

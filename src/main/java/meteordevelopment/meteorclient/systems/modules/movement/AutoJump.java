@@ -58,7 +58,7 @@ public class AutoJump extends Module {
         if (!mc.player.isOnGround() || mc.player.isSneaking() || !jump()) return;
 
         if (mode.get() == Mode.Jump) mc.player.jump();
-        else ((IVec3d) mc.player.getVelocity()).setY(velocityHeight.get());
+        else ((IVec3d) mc.player.getVelocity()).meteor$setY(velocityHeight.get());
     }
 
     public enum JumpWhen {

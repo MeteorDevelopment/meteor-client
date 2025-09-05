@@ -548,6 +548,8 @@ public class Notebot extends Module {
             BlockPos blockPos = entry.getValue();
 
             BlockState blockState = mc.world.getBlockState(blockPos);
+            if (blockState.getBlock() != Blocks.NOTE_BLOCK) continue;
+
             int currentLevel = blockState.get(NoteBlock.NOTE);
 
             if (targetLevel != currentLevel) {
@@ -751,7 +753,7 @@ public class Notebot extends Module {
                     error("Loading song '" + FilenameUtils.getBaseName(file.getName()) + "' was cancelled.");
                 } else {
                     error("An error occurred while loading song '" + FilenameUtils.getBaseName(file.getName()) + "'. See the logs for more details");
-                    MeteorClient.LOG.error("An error occurred while loading song '" + FilenameUtils.getBaseName(file.getName()) + "'", ex);
+                    MeteorClient.LOG.error("An error occurred while loading song '{}'", FilenameUtils.getBaseName(file.getName()), ex);
                     onSongEnd();
                 }
             }

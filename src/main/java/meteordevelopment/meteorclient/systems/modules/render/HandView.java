@@ -39,10 +39,10 @@ public class HandView extends Module {
         .build()
     );
 
-    public final Setting<Boolean> showSwapping = sgGeneral.add(new BoolSetting.Builder()
-        .name("show-swapping")
-        .description("Whether or not to show the item swapping animation")
-        .defaultValue(true)
+    public final Setting<Boolean> skipSwapping = sgGeneral.add(new BoolSetting.Builder()
+        .name("skip-swapping-animation")
+        .description("Whether or not to skip the item swapping animation")
+        .defaultValue(false)
         .build()
     );
 
@@ -223,8 +223,8 @@ public class HandView extends Module {
         return isActive() && oldAnimations.get();
     }
 
-    public boolean showSwapping() {
-        return isActive() && showSwapping.get();
+    public boolean skipSwapping() {
+        return isActive() && skipSwapping.get();
     }
 
     public boolean disableFoodAnimation() {

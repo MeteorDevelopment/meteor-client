@@ -58,9 +58,9 @@ public class StringListSetting extends Setting<List<String>>{
     public List<String> load(NbtCompound tag) {
         get().clear();
 
-        NbtList valueTag = tag.getList("value", 8);
+        NbtList valueTag = tag.getListOrEmpty("value");
         for (NbtElement tagI : valueTag) {
-            get().add(tagI.asString());
+            get().add(tagI.asString().orElse(""));
         }
 
         return get();
@@ -115,6 +115,7 @@ public class StringListSetting extends Setting<List<String>>{
 
             fillTable(theme, table, setting);
         };
+        reset.tooltip = "Reset";
     }
 
     public static class Builder extends SettingBuilder<Builder, List<String>, StringListSetting> {

@@ -21,9 +21,10 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.EntityType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.vehicle.AbstractBoatEntity;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -32,6 +33,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.GameMode;
@@ -184,12 +186,12 @@ public class Jesus extends Module {
             double swimHeight = mc.player.getSwimHeight();
 
             if (mc.player.isTouchingWater() && fluidHeight > swimHeight) {
-                ((LivingEntityAccessor) mc.player).swimUpwards(FluidTags.WATER);
-            } else if (mc.player.isOnGround() && fluidHeight <= swimHeight && ((LivingEntityAccessor) mc.player).getJumpCooldown() == 0) {
+                ((LivingEntityAccessor) mc.player).meteor$swimUpwards(FluidTags.WATER);
+            } else if (mc.player.isOnGround() && fluidHeight <= swimHeight && ((LivingEntityAccessor) mc.player).meteor$getJumpCooldown() == 0) {
                 mc.player.jump();
-                ((LivingEntityAccessor) mc.player).setJumpCooldown(10);
+                ((LivingEntityAccessor) mc.player).meteor$setJumpCooldown(10);
             } else {
-                ((LivingEntityAccessor) mc.player).swimUpwards(FluidTags.LAVA);
+                ((LivingEntityAccessor) mc.player).meteor$swimUpwards(FluidTags.LAVA);
             }
         }
 
@@ -199,13 +201,13 @@ public class Jesus extends Module {
 
         // Move up in bubble columns
         if (bubbleColumn) {
-            if (mc.options.jumpKey.isPressed() && mc.player.getVelocity().getY() < 0.11) ((IVec3d) mc.player.getVelocity()).setY(0.11);
+            if (mc.options.jumpKey.isPressed() && mc.player.getVelocity().getY() < 0.11) ((IVec3d) mc.player.getVelocity()).meteor$setY(0.11);
             return;
         }
 
         // Move up
         if (mc.player.isTouchingWater() || mc.player.isInLava()) {
-            ((IVec3d) mc.player.getVelocity()).setY(0.11);
+            ((IVec3d) mc.player.getVelocity()).meteor$setY(0.11);
             tickTimer = 0;
             return;
         }
@@ -218,16 +220,16 @@ public class Jesus extends Module {
 
 
         // Simulate jumping out of water
-        if (tickTimer == 0) ((IVec3d) mc.player.getVelocity()).setY(0.30);
+        if (tickTimer == 0) ((IVec3d) mc.player.getVelocity()).meteor$setY(0.30);
         else if (tickTimer == 1 && (blockBelowState == Blocks.WATER.getDefaultState() || blockBelowState == Blocks.LAVA.getDefaultState() || waterLogger))
-            ((IVec3d) mc.player.getVelocity()).setY(0);
+            ((IVec3d) mc.player.getVelocity()).meteor$setY(0);
 
         tickTimer++;
     }
 
     @EventHandler
     private void onCanWalkOnFluid(CanWalkOnFluidEvent event) {
-        if (mc.player != null && mc.player.isInSwimmingPose()) return;
+        if (mc.player != null && mc.player.isSwimming()) return;
         if ((event.fluidState.getFluid() == Fluids.WATER || event.fluidState.getFluid() == Fluids.FLOWING_WATER) && waterShouldBeSolid()) {
             event.walkOnFluid = true;
         }
@@ -260,7 +262,7 @@ public class Jesus extends Module {
         if (mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.fallDistance > 3f || !isOverLiquid()) return;
 
         // If not actually moving, cancel packet
-        if (mc.player.input.movementForward == 0 && mc.player.input.movementSideways == 0) {
+        if (mc.player.input.getMovementInput().equals(Vec2f.ZERO)) {
             event.cancel();
             return;
         }
@@ -280,10 +282,10 @@ public class Jesus extends Module {
         // Create new packet
         Packet<?> newPacket;
         if (packet instanceof PlayerMoveC2SPacket.PositionAndOnGround) {
-            newPacket = new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true);
+            newPacket = new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true, mc.player.horizontalCollision);
         }
         else {
-            newPacket = new PlayerMoveC2SPacket.Full(x, y, z, packet.getYaw(0), packet.getPitch(0), true);
+            newPacket = new PlayerMoveC2SPacket.Full(x, y, z, packet.getYaw(0), packet.getPitch(0), true, mc.player.horizontalCollision);
         }
 
         // Send new packet
@@ -293,14 +295,12 @@ public class Jesus extends Module {
     private boolean waterShouldBeSolid() {
         if (EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR || mc.player.getAbilities().flying) return false;
 
-
         if (mc.player.getVehicle() != null) {
-            EntityType<?> vehicle = mc.player.getVehicle().getType();
-            if (vehicle == EntityType.BOAT || vehicle == EntityType.CHEST_BOAT) return false;
+            Entity vehicle = mc.player.getVehicle();
+            if (vehicle instanceof AbstractBoatEntity) return false;
         }
 
         if (Modules.get().get(Flight.class).isActive()) return false;
-
 
         if (dipIfBurning.get() && mc.player.isOnFire()) return false;
 
@@ -323,8 +323,7 @@ public class Jesus extends Module {
 
     private boolean lavaIsSafe() {
         if (!dipIfFireResistant.get()) return false;
-        return mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) && (mc.player.getStatusEffect(StatusEffects.FIRE_RESISTANCE).getDuration() > (15 * 20 * mc.player.getAttributeValue(EntityAttributes.GENERIC_BURNING_TIME)));
-        // todo verify
+        return mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) && (mc.player.getStatusEffect(StatusEffects.FIRE_RESISTANCE).getDuration() > (15 * 20 * mc.player.getAttributeValue(EntityAttributes.BURNING_TIME)));
     }
 
     private boolean isOverLiquid() {

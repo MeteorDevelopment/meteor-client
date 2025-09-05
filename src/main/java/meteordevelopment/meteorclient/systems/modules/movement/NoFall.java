@@ -18,19 +18,20 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.item.MaceItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -74,17 +75,16 @@ public class NoFall extends Module {
         .build()
     );
 
-    private final Setting<Boolean> autoDimension = sgGeneral.add(new BoolSetting.Builder()
-        .name("auto-dimension")
-        .description("Use powder snow bucket in nether.")
-        .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Place)
-        .build()
-    );
-
     private final Setting<Boolean> antiBounce = sgGeneral.add(new BoolSetting.Builder()
         .name("anti-bounce")
         .description("Disables bouncing on slime-block and bed upon landing.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> pauseOnMace = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-on-mace")
+        .description("Pauses NoFall when using a mace.")
         .defaultValue(true)
         .build()
     );
@@ -113,51 +113,55 @@ public class NoFall extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
+        if (pauseOnMace.get() && mc.player.getMainHandStack().getItem() instanceof MaceItem) return;
         if (mc.player.getAbilities().creativeMode
             || !(event.packet instanceof PlayerMoveC2SPacket)
             || mode.get() != Mode.Packet
-            || ((IPlayerMoveC2SPacket) event.packet).getTag() == 1337) return;
+            || ((IPlayerMoveC2SPacket) event.packet).meteor$getTag() == 1337) return;
 
 
         if (!Modules.get().isActive(Flight.class)) {
-            if (mc.player.isFallFlying()) return;
+            if (mc.player.isGliding()) return;
             if (mc.player.getVelocity().y > -0.5) return;
-            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
+            ((PlayerMoveC2SPacketAccessor) event.packet).meteor$setOnGround(true);
         } else {
-            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
+            ((PlayerMoveC2SPacketAccessor) event.packet).meteor$setOnGround(true);
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (!Utils.canUpdate()) return;
+
         if (timer > 20) {
             placedWater = false;
             timer = 0;
         }
 
         if (mc.player.getAbilities().creativeMode) return;
+        if (pauseOnMace.get() && mc.player.getMainHandStack().getItem() instanceof MaceItem) return;
 
         // Airplace mode
         if (mode.get() == Mode.AirPlace) {
             // Test if fall damage setting is valid
-            if (!airPlaceMode.get().test(mc.player.fallDistance)) return;
+            if (!airPlaceMode.get().test((float) mc.player.fallDistance)) return;
 
             // Center and place block
             if (anchor.get()) PlayerUtils.centerPlayer();
 
             Rotations.rotate(mc.player.getYaw(), 90, Integer.MAX_VALUE, () -> {
                 double preY = mc.player.getVelocity().y;
-                ((IVec3d) mc.player.getVelocity()).setY(0);
+                ((IVec3d) mc.player.getVelocity()).meteor$setY(0);
 
                 BlockUtils.place(mc.player.getBlockPos().down(), InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem), false, 0, true);
 
-                ((IVec3d) mc.player.getVelocity()).setY(preY);
+                ((IVec3d) mc.player.getVelocity()).meteor$setY(preY);
             });
         }
 
         // Bucket mode
         else if (mode.get() == Mode.Place) {
-            PlacedItem placedItem1 = autoDimension.get() && PlayerUtils.getDimension() == Dimension.Nether ? PlacedItem.PowderSnow : placedItem.get();
+            PlacedItem placedItem1 = mc.world.getDimension().ultrawarm() && placedItem.get() == PlacedItem.Bucket ? PlacedItem.PowderSnow : placedItem.get();
             if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
                 Item item = placedItem1.item;
 
@@ -187,6 +191,8 @@ public class NoFall extends Module {
                 timer++;
                 if (mc.player.getBlockStateAtPos().getBlock() == placedItem1.block) {
                     useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos, true);
+                } else if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == Blocks.POWDER_SNOW && mc.player.fallDistance==0 && placedItem1.block==Blocks.POWDER_SNOW){ //check if the powder snow block is still there and the player is on the ground
+                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos.down(), true);
                 }
             }
         }

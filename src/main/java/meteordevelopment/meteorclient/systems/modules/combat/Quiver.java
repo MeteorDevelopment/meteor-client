@@ -124,14 +124,14 @@ public class Quiver extends Module {
 
         if (!bow.isMainHand()) {
             if (wasHotbar) InvUtils.swap(bow.slot(), true);
-            else InvUtils.move().from(mc.player.getInventory().selectedSlot).to(prevSlot);
+            else InvUtils.move().from(mc.player.getInventory().getSelectedSlot()).to(prevSlot);
         } else wasMainhand = true;
 
         arrowSlots.clear();
         List<StatusEffect> usedEffects = new ArrayList<>();
 
         for (int i = mc.player.getInventory().size(); i > 0; i--) {
-            if (i == mc.player.getInventory().selectedSlot) continue;
+            if (i == mc.player.getInventory().getSelectedSlot()) continue;
 
             ItemStack item = mc.player.getInventory().getStack(i);
 
@@ -156,7 +156,7 @@ public class Quiver extends Module {
     public void onDeactivate() {
         if (!wasMainhand) {
             if (wasHotbar) InvUtils.swapBack();
-            else InvUtils.move().from(mc.player.getInventory().selectedSlot).to(prevSlot);
+            else InvUtils.move().from(mc.player.getInventory().getSelectedSlot()).to(prevSlot);
         }
     }
 
@@ -184,7 +184,7 @@ public class Quiver extends Module {
                 int targetSlot = arrowSlots.getFirst();
                 arrowSlots.removeFirst();
 
-                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround()));
+                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround(), mc.player.horizontalCollision));
                 mc.options.useKey.setPressed(false);
                 mc.interactionManager.stopUsingItem(mc.player);
                 if (targetSlot != 9) InvUtils.move().from(9).to(targetSlot);
@@ -231,11 +231,11 @@ public class Quiver extends Module {
     private boolean headIsOpen() {
         testPos.set(mc.player.getBlockPos().add(0, 1, 0));
         BlockState pos1 = mc.world.getBlockState(testPos);
-        if (((AbstractBlockAccessor) pos1.getBlock()).isCollidable())  return false;
+        if (((AbstractBlockAccessor) pos1.getBlock()).meteor$isCollidable())  return false;
 
         testPos.add(0, 1, 0);
         BlockState pos2 = mc.world.getBlockState(testPos);
-        return !((AbstractBlockAccessor) pos2.getBlock()).isCollidable();
+        return !((AbstractBlockAccessor) pos2.getBlock()).meteor$isCollidable();
     }
 
     private boolean hasEffect(StatusEffect effect) {

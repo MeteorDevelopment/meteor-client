@@ -18,6 +18,8 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.UUID;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 public class Friend implements ISerializable<Friend>, Comparable<Friend> {
     public volatile String name;
     private volatile @Nullable UUID id;
@@ -51,7 +53,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
         if (res == null || res.name == null || res.id == null) return;
         name = res.name;
         id = UndashedUuid.fromStringLenient(res.id);
-        headTexture = PlayerHeadUtils.fetchHead(id);
+        mc.execute(() -> headTexture = PlayerHeadUtils.fetchHead(id));
         updating = false;
     }
 

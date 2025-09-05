@@ -49,6 +49,7 @@ public class ChatUtils {
     /**
      * Registers a custom prefix to be used when calling from a class in the specified package. When null is returned from the supplier the default Meteor prefix is used.
      */
+    @SuppressWarnings("unused")
     public static void registerCustomPrefix(String packageName, Supplier<Text> supplier) {
         for (Pair<String, Supplier<Text>> pair : customPrefixes) {
             if (pair.getLeft().equals(packageName)) {
@@ -63,6 +64,7 @@ public class ChatUtils {
     /**
      * The package name must match exactly to the one provided through {@link #registerCustomPrefix(String, Supplier)}.
      */
+    @SuppressWarnings("unused")
     public static void unregisterCustomPrefix(String packageName) {
         customPrefixes.removeIf(pair -> pair.getLeft().equals(packageName));
     }
@@ -74,10 +76,17 @@ public class ChatUtils {
     // Player
 
     /**
-     * Sends the message as if the user typed it into chat.
+     * Sends the message as if the user typed it into chat and adds it to the chat history.
      */
     public static void sendPlayerMsg(String message) {
-        mc.inGameHud.getChatHud().addToMessageHistory(message);
+        sendPlayerMsg(message, true);
+    }
+
+    /**
+     * Sends the message as if the user typed it into chat.
+     */
+    public static void sendPlayerMsg(String message, boolean addToHistory) {
+        if (addToHistory) mc.inGameHud.getChatHud().addToMessageHistory(message);
 
         if (message.startsWith("/")) mc.player.networkHandler.sendChatCommand(message.substring(1));
         else mc.player.networkHandler.sendChatMessage(message);
@@ -257,12 +266,10 @@ public class ChatUtils {
 
         if (BaritoneUtils.IS_AVAILABLE) {
             Style style = coordsText.getStyle().withFormatting(Formatting.BOLD)
-                .withHoverEvent(new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
+                .withHoverEvent(new HoverEvent.ShowText(
                     Text.literal("Set as Baritone goal")
                 ))
                 .withClickEvent(new MeteorClickEvent(
-                    ClickEvent.Action.RUN_COMMAND,
                     String.format("%sgoto %d %d %d", BaritoneUtils.getPrefix(), (int) pos.x, (int) pos.y, (int) pos.z)
                 ));
 

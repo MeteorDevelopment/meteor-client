@@ -44,6 +44,13 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
         return settings.get(index);
     }
 
+    public boolean wasChanged() {
+        for (Setting<?> setting : settings) {
+            if (setting.wasChanged()) return true;
+        }
+        return false;
+    }
+
     @Override
     public @NotNull Iterator<Setting<?>> iterator() {
         return settings.iterator();
@@ -57,21 +64,23 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
         tag.putBoolean("sectionExpanded", sectionExpanded);
 
         NbtList settingsTag = new NbtList();
-        for (Setting<?> setting : this) if (setting.wasChanged()) settingsTag.add(setting.toTag());
-        tag.put("settings", settingsTag);
+        for (Setting<?> setting : this) {
+            if (setting.wasChanged()) settingsTag.add(setting.toTag());
+        }
+        if (!settingsTag.isEmpty()) tag.put("settings", settingsTag);
 
         return tag;
     }
 
     @Override
     public SettingGroup fromTag(NbtCompound tag) {
-        sectionExpanded = tag.getBoolean("sectionExpanded");
+        sectionExpanded = tag.getBoolean("sectionExpanded", false);
 
-        NbtList settingsTag = tag.getList("settings", 10);
+        NbtList settingsTag = tag.getListOrEmpty("settings");
         for (NbtElement t : settingsTag) {
             NbtCompound settingTag = (NbtCompound) t;
 
-            Setting<?> setting = get(settingTag.getString("name"));
+            Setting<?> setting = get(settingTag.getString("name", ""));
             if (setting != null) setting.fromTag(settingTag);
         }
 

@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedMinus;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.macros.Macro;
 import meteordevelopment.meteorclient.systems.macros.Macros;
@@ -63,7 +63,7 @@ public class MacrosTab extends Tab {
                 WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
                 edit.action = () -> mc.setScreen(new EditMacroScreen(theme, macro, this::reload));
 
-                WMinus remove = table.add(theme.minus()).widget();
+                WConfirmedMinus remove = table.add(theme.confirmedMinus()).widget();
                 remove.action = () -> {
                     Macros.get().remove(macro);
                     reload();
