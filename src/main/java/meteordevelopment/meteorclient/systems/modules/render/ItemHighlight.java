@@ -20,7 +20,7 @@ import java.util.List;
 public class ItemHighlight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
+    public final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
         .name("items")
         .description("Items to highlight.")
         .build()
