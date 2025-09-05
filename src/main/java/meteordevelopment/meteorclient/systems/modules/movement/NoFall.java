@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -122,14 +123,16 @@ public class NoFall extends Module {
         if (!Modules.get().isActive(Flight.class)) {
             if (mc.player.isGliding()) return;
             if (mc.player.getVelocity().y > -0.5) return;
-            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
+            ((PlayerMoveC2SPacketAccessor) event.packet).meteor$setOnGround(true);
         } else {
-            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
+            ((PlayerMoveC2SPacketAccessor) event.packet).meteor$setOnGround(true);
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (!Utils.canUpdate()) return;
+
         if (timer > 20) {
             placedWater = false;
             timer = 0;

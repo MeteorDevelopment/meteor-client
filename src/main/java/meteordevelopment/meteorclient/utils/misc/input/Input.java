@@ -31,7 +31,7 @@ public class Input {
     }
 
     public static int getKey(KeyBinding bind) {
-        return ((KeyBindingAccessor) bind).getKey().getCode();
+        return ((KeyBindingAccessor) bind).meteor$getKey().getCode();
     }
 
     public static void setKeyState(KeyBinding bind, boolean pressed) {

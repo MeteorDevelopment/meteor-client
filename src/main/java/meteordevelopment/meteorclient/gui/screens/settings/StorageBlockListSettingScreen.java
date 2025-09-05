@@ -7,12 +7,14 @@ package meteordevelopment.meteorclient.gui.screens.settings;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.StorageBlockListSetting;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 
 import java.util.List;
 import java.util.Map;
@@ -47,13 +49,16 @@ public class StorageBlockListSettingScreen extends CollectionListSettingScreen<B
 
     @Override
     protected WWidget getValueWidget(BlockEntityType<?> value) {
-        Item item = BLOCK_ENTITY_TYPE_INFO_MAP.getOrDefault(value, UNKNOWN).item();
-        return theme.itemWithLabel(item.getDefaultStack(), getValueName(value));
+        BlockEntityTypeInfo info = BLOCK_ENTITY_TYPE_INFO_MAP.getOrDefault(value, UNKNOWN);
+        return theme.itemWithLabel(info.item().getDefaultStack(), info.name());
     }
 
     @Override
-    protected String getValueName(BlockEntityType<?> value) {
-        return BLOCK_ENTITY_TYPE_INFO_MAP.getOrDefault(value, UNKNOWN).name();
+    protected String[] getValueNames(BlockEntityType<?> value) {
+        return new String[]{
+            BLOCK_ENTITY_TYPE_INFO_MAP.getOrDefault(value, UNKNOWN).name(),
+            Registries.BLOCK_ENTITY_TYPE.getId(value).toString()
+        };
     }
 
     private record BlockEntityTypeInfo(Item item, String name) {}

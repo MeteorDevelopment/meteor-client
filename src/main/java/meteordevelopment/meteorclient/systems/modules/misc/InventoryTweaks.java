@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
+import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
+import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
@@ -23,13 +25,17 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
+import net.minecraft.block.DecoratedPotBlock;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.Hand;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -38,6 +44,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class InventoryTweaks extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSorting = settings.createGroup("Sorting");
+    private final SettingGroup sgAntiDrop = settings.createGroup("Anti Drop");
     private final SettingGroup sgAutoDrop = settings.createGroup("Auto Drop");
     private final SettingGroup sgStealDump = settings.createGroup("Steal and Dump");
     private final SettingGroup sgAutoSteal = settings.createGroup("Auto Steal");
@@ -51,12 +58,6 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> antiDropItems = sgGeneral.add(new ItemListSetting.Builder()
-        .name("anti-drop-items")
-        .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
-        .build()
-    );
-
     private final Setting<Boolean> xCarry = sgGeneral.add(new BoolSetting.Builder()
         .name("xcarry")
         .description("Allows you to store four extra item stacks in your crafting grid.")
@@ -66,13 +67,6 @@ public class InventoryTweaks extends Module {
             mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
             invOpened = false;
         })
-        .build()
-    );
-
-    private final Setting<Boolean> armorStorage = sgGeneral.add(new BoolSetting.Builder()
-        .name("armor-storage")
-        .description("Allows you to put normal items in your armor slots.")
-        .defaultValue(true)
         .build()
     );
 
@@ -107,6 +101,27 @@ public class InventoryTweaks extends Module {
         .description("Disables the inventory sorter when in creative mode.")
         .defaultValue(true)
         .visible(sortingEnabled::get)
+        .build()
+    );
+
+    // Anti drop
+
+    private final Setting<List<Item>> antiDropItems = sgAntiDrop.add(new ItemListSetting.Builder()
+        .name("anti-drop-items")
+        .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
+        .build()
+    );
+
+    private final Setting<Boolean> antiItemFrame = sgAntiDrop.add(new BoolSetting.Builder()
+        .name("item-frames")
+        .description("Prevent anti-drop items from being placed in item frames or pots")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Keybind> antiDropOverrideBind = sgAntiDrop.add(new KeybindSetting.Builder()
+        .name("override-bind")
+        .description("Hold this bind to temporarily bypass anti-drop")
         .build()
     );
 
@@ -290,7 +305,7 @@ public class InventoryTweaks extends Module {
             else InvUtils.click().slot(empty.slot());
         }
 
-        Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
+        Slot focusedSlot = ((HandledScreenAccessor) screen).meteor$getFocusedSlot();
         if (focusedSlot == null) return false;
 
         sorter = new InventorySorter(screen, focusedSlot);
@@ -324,9 +339,32 @@ public class InventoryTweaks extends Module {
         }
     }
 
+    // Anti Drop
+
     @EventHandler
     private void onDropItems(DropItemsEvent event) {
+        if (antiDropOverrideBind.get().isPressed()) return;
         if (antiDropItems.get().contains(event.itemStack.getItem())) event.cancel();
+    }
+
+    @EventHandler
+    private void onInteractEntity(InteractEntityEvent event) {
+        if (!antiItemFrame.get() || antiDropOverrideBind.get().isPressed()) return;
+        if (!(event.entity instanceof ItemFrameEntity)) return;
+
+        Item item = mc.player.getStackInHand(event.hand).getItem();
+        if (antiDropItems.get().contains(item)) event.cancel();
+    }
+
+    @EventHandler
+    private void onInteractBlock(InteractBlockEvent event) {
+        if (!antiItemFrame.get() || antiDropOverrideBind.get().isPressed()) return;
+        if (event.hand != Hand.MAIN_HAND) return;
+        Block block = mc.world.getBlockState(event.result.getBlockPos()).getBlock();
+        if (!(block instanceof DecoratedPotBlock)) return;
+
+        Item item = mc.player.getStackInHand(event.hand).getItem();
+        if (antiDropItems.get().contains(item)) event.cancel();
     }
 
     // XCarry
@@ -412,10 +450,6 @@ public class InventoryTweaks extends Module {
 
     public boolean mouseDragItemMove() {
         return isActive() && mouseDragItemMove.get();
-    }
-
-    public boolean armorStorage() {
-        return isActive() && armorStorage.get();
     }
 
     public boolean canSteal(ScreenHandler handler) {

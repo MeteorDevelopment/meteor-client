@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.AbstractBlockAccessor;
+import meteordevelopment.meteorclient.mixin.DirectionAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -169,9 +171,9 @@ public class AutoWasp extends Module {
             double d = target.getBoundingBox().getLengthX() / 2; // x length = z length for players
 
             //get the block pos of the block underneath the corner of the targets bounding box
-            for (Direction dir : Direction.HORIZONTAL) {
+            for (Direction dir : DirectionAccessor.meteor$getHorizontal()) {
                 BlockPos pos = BlockPos.ofFloored(targetPos.offset(dir, d).offset(dir.rotateYClockwise(), d)).down();
-                if (mc.world.getBlockState(pos).getBlock().collidable && Math.abs(targetPos.getY() - (pos.getY() + 1)) <= 0.25) {
+                if (((AbstractBlockAccessor) mc.world.getBlockState(pos).getBlock()).meteor$isCollidable() && Math.abs(targetPos.getY() - (pos.getY() + 1)) <= 0.25) {
                     targetPos = new Vec3d(targetPos.x, pos.getY() + 1.25, targetPos.z);
                     break;
                 }

@@ -56,7 +56,7 @@ public class OffhandCrash extends Module {
     private void onTick(TickEvent.Post event) {
         if (!doCrash.get()) return;
 
-        Channel channel = ((ClientConnectionAccessor) mc.player.networkHandler.getConnection()).getChannel();
+        Channel channel = ((ClientConnectionAccessor) mc.player.networkHandler.getConnection()).meteor$getChannel();
         for (int i = 0; i < speed.get(); ++i) channel.write(PACKET);
         channel.flush();
     }

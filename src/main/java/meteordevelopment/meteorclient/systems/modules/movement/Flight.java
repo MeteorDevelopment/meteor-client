@@ -131,7 +131,7 @@ public class Flight extends Module {
 
             if (antiKickMode.get() == AntiKickMode.Packet) {
                 // Resend movement packets
-                ((ClientPlayerEntityAccessor) mc.player).setTicksSinceLastPositionPacketSent(20);
+                ((ClientPlayerEntityAccessor) mc.player).meteor$setTicksSinceLastPositionPacketSent(20);
             }
         } else if (delayLeft <= 0) {
             boolean shouldReturn = false;
@@ -143,7 +143,7 @@ public class Flight extends Module {
                 }
             } else if (antiKickMode.get() == AntiKickMode.Packet && offLeft == offTime.get()) {
                 // Resend movement packets
-                ((ClientPlayerEntityAccessor) mc.player).setTicksSinceLastPositionPacketSent(20);
+                ((ClientPlayerEntityAccessor) mc.player).meteor$setTicksSinceLastPositionPacketSent(20);
             }
 
             offLeft--;
@@ -183,7 +183,7 @@ public class Flight extends Module {
             shouldFlyDown(currentY, this.lastPacketY) && isEntityOnAir(mc.player)) {
             // actual check is for >= -0.03125D, but we have to do a bit more than that
             // due to the fact that it's a bigger or *equal* to, and not just a bigger than
-            ((PlayerMoveC2SPacketAccessor) packet).setY(lastPacketY - 0.03130D);
+            ((PlayerMoveC2SPacketAccessor) packet).meteor$setY(lastPacketY - 0.03130D);
         } else {
             lastPacketY = currentY;
         }

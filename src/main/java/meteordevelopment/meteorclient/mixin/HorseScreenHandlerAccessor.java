@@ -13,5 +13,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(HorseScreenHandler.class)
 public interface HorseScreenHandlerAccessor {
     @Accessor("entity")
-    AbstractHorseEntity getEntity();
+    AbstractHorseEntity meteor$getEntity();
 }

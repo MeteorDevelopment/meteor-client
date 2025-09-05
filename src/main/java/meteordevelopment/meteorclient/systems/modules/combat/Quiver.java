@@ -231,11 +231,11 @@ public class Quiver extends Module {
     private boolean headIsOpen() {
         testPos.set(mc.player.getBlockPos().add(0, 1, 0));
         BlockState pos1 = mc.world.getBlockState(testPos);
-        if (((AbstractBlockAccessor) pos1.getBlock()).isCollidable())  return false;
+        if (((AbstractBlockAccessor) pos1.getBlock()).meteor$isCollidable())  return false;
 
         testPos.add(0, 1, 0);
         BlockState pos2 = mc.world.getBlockState(testPos);
-        return !((AbstractBlockAccessor) pos2.getBlock()).isCollidable();
+        return !((AbstractBlockAccessor) pos2.getBlock()).meteor$isCollidable();
     }
 
     private boolean hasEffect(StatusEffect effect) {

@@ -6,8 +6,10 @@
 package meteordevelopment.meteorclient.gui.screens.settings;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvent;
 
@@ -20,11 +22,14 @@ public class SoundEventListSettingScreen extends CollectionListSettingScreen<Sou
 
     @Override
     protected WWidget getValueWidget(SoundEvent value) {
-        return theme.label(getValueName(value));
+        return theme.label(value.id().getPath());
     }
 
     @Override
-    protected String getValueName(SoundEvent value) {
-        return value.id().getPath();
+    protected String[] getValueNames(SoundEvent value) {
+        return new String[]{
+            value.id().toString(),
+            I18n.translate("subtitles." + value.id().getPath())
+        };
     }
 }

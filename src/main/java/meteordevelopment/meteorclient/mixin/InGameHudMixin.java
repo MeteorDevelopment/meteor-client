@@ -33,7 +33,7 @@ public abstract class InGameHudMixin {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        context.draw();
+        context.createNewRootLayer();
 
         Profilers.get().push(MeteorClient.MOD_ID + "_render_2d");
 
@@ -41,7 +41,7 @@ public abstract class InGameHudMixin {
 
         MeteorClient.EVENT_BUS.post(Render2DEvent.get(context, context.getScaledWindowWidth(), context.getScaledWindowWidth(), tickCounter.getTickProgress(true)));
 
-        context.draw();
+        context.createNewRootLayer();
         Utils.scaledProjection();
 
         Profilers.get().pop();

@@ -12,5 +12,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(PersistentProjectileEntity.class)
 public interface ProjectileInGroundAccessor {
     @Invoker("isInGround")
-    boolean invokeIsInGround();
+    boolean meteor$invokeIsInGround();
 }

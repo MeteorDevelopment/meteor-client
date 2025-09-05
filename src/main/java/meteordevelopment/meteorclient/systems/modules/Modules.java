@@ -394,6 +394,7 @@ public class Modules extends System<Modules> {
         add(new AutoArmor());
         add(new AutoCity());
         add(new AutoEXP());
+        add(new AutoLog());
         add(new AutoTotem());
         add(new AutoTrap());
         add(new AutoWeapon());
@@ -416,6 +417,8 @@ public class Modules extends System<Modules> {
     }
 
     private void initPlayer() {
+        add(new AirPlace());
+        add(new AntiAFK());
         add(new AntiHunger());
         add(new AutoEat());
         add(new AutoClicker());
@@ -423,6 +426,7 @@ public class Modules extends System<Modules> {
         add(new AutoGap());
         add(new AutoMend());
         add(new AutoReplenish());
+        add(new AutoRespawn());
         add(new AutoTool());
         add(new BreakDelay());
         add(new ChestSwap());
@@ -434,6 +438,7 @@ public class Modules extends System<Modules> {
         add(new LiquidInteract());
         add(new MiddleClickExtra());
         add(new Multitask());
+        add(new NameProtect());
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
@@ -449,7 +454,6 @@ public class Modules extends System<Modules> {
     private void initMovement() {
         add(new AirJump());
         add(new Anchor());
-        add(new AntiAFK());
         add(new AntiVoid());
         add(new AutoJump());
         add(new AutoWalk());
@@ -524,7 +528,6 @@ public class Modules extends System<Modules> {
     }
 
     private void initWorld() {
-        add(new AirPlace());
         add(new Ambience());
         add(new AutoBreed());
         add(new AutoBrewer());
@@ -557,16 +560,13 @@ public class Modules extends System<Modules> {
 
     private void initMisc() {
         add(new AntiPacketKick());
-        add(new AutoLog());
         add(new AutoReconnect());
-        add(new AutoRespawn());
         add(new BetterBeacons());
         add(new BetterChat());
         add(new BookBot());
         add(new DiscordPresence());
         add(new InventoryTweaks());
         add(new MessageAura());
-        add(new NameProtect());
         add(new Notebot());
         add(new Notifier());
         add(new PacketCanceller());

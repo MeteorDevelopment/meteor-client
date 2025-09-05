@@ -14,5 +14,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(MapTextureManager.class)
 public interface MapTextureManagerAccessor {
     @Invoker("getMapTexture")
-    MapTextureManager.MapTexture invokeGetMapTexture(MapIdComponent id, MapState state);
+    MapTextureManager.MapTexture meteor$invokeGetMapTexture(MapIdComponent id, MapState state);
 }

@@ -13,5 +13,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ClientConnection.class)
 public interface ClientConnectionAccessor {
     @Accessor("channel")
-    Channel getChannel();
+    Channel meteor$getChannel();
 }

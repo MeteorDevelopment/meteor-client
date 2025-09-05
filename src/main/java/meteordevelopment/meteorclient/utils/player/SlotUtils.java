@@ -7,34 +7,50 @@ package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
 import meteordevelopment.meteorclient.mixin.HorseScreenHandlerAccessor;
+import meteordevelopment.meteorclient.mixin.ItemGroupsAccessor;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.mob.SkeletonHorseEntity;
 import net.minecraft.entity.mob.ZombieHorseEntity;
-import net.minecraft.entity.passive.AbstractDonkeyEntity;
-import net.minecraft.entity.passive.AbstractHorseEntity;
-import net.minecraft.entity.passive.HorseEntity;
-import net.minecraft.entity.passive.LlamaEntity;
-import net.minecraft.item.ItemGroups;
+import net.minecraft.entity.passive.*;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.*;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class SlotUtils {
+    /**
+     * These constants refer to the slot index of relevant player slots. They are used when dealing directly with the
+     * player inventory - e.g. {@code mc.player.getInventory().getSelectedSlot()} returns the slot index of your
+     * selected slot (i.e. main hand).
+     *
+     * @see net.minecraft.entity.player.PlayerInventory
+     * @see Slot#index
+     */
     public static final int HOTBAR_START = 0;
     public static final int HOTBAR_END = 8;
-
-    public static final int OFFHAND = 45;
-
     public static final int MAIN_START = 9;
     public static final int MAIN_END = 35;
-
     public static final int ARMOR_START = 36;
     public static final int ARMOR_END = 39;
+    public static final int OFFHAND = 40;
 
     private SlotUtils() {
     }
 
+    /**
+     * Slot ids are used when inventory interactions have to be communicated to the server - you'll only find references
+     * to slot ids when dealing with screen handlers or slot/inventory packets. All the methods in this class are used
+     * to translate slot indices to the ids for each handled screen.
+     *
+     * @see <a href="https://minecraft.wiki/w/Java_Edition_protocol/Inventory">the minecraft.wiki page</a> for every slot id
+     * @see ClientPlayerInteractionManager#clickSlot(int, int, int, SlotActionType, PlayerEntity)
+     * @see ScreenHandler#internalOnSlotClick(int, int, SlotActionType, PlayerEntity)
+     * @see Slot#id
+     */
     public static int indexToId(int i) {
         if (mc.player == null) return -1;
         ScreenHandler handler = mc.player.currentScreenHandler;
@@ -60,6 +76,8 @@ public class SlotUtils {
         if (handler instanceof LecternScreenHandler) return lectern();
         if (handler instanceof LoomScreenHandler) return loom(i);
         if (handler instanceof StonecutterScreenHandler) return stonecutter(i);
+        if (handler instanceof CrafterScreenHandler) return crafter(i);
+        if (handler instanceof SmithingScreenHandler) return smithingTable(i);
 
         return -1;
     }
@@ -67,11 +85,12 @@ public class SlotUtils {
     private static int survivalInventory(int i) {
         if (isHotbar(i)) return 36 + i;
         if (isArmor(i)) return 5 + (i - 36);
+        if (i == OFFHAND) return 45;
         return i;
     }
 
     private static int creativeInventory(int i) {
-        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || CreativeInventoryScreenAccessor.getSelectedTab() != Registries.ITEM_GROUP.get(ItemGroups.INVENTORY))
+        if (CreativeInventoryScreenAccessor.meteor$getSelectedTab() != Registries.ITEM_GROUP.get(ItemGroupsAccessor.meteor$getInventory()))
             return -1;
         return survivalInventory(i);
     }
@@ -137,13 +156,14 @@ public class SlotUtils {
     }
 
     private static int horse(ScreenHandler handler, int i) {
-        AbstractHorseEntity entity = ((HorseScreenHandlerAccessor) handler).getEntity();
+        AbstractHorseEntity entity = ((HorseScreenHandlerAccessor) handler).meteor$getEntity();
 
         if (entity instanceof LlamaEntity llamaEntity) {
             int strength = llamaEntity.getStrength();
             if (isHotbar(i)) return (2 + 3 * strength) + 28 + i;
             if (isMain(i)) return (2 + 3 * strength) + 1 + (i - 9);
-        } else if (entity instanceof HorseEntity || entity instanceof SkeletonHorseEntity || entity instanceof ZombieHorseEntity) {
+        } else if (entity instanceof HorseEntity || entity instanceof SkeletonHorseEntity
+            || entity instanceof ZombieHorseEntity || entity instanceof CamelEntity) {
             if (isHotbar(i)) return 29 + i;
             if (isMain(i)) return 2 + (i - 9);
         } else if (entity instanceof AbstractDonkeyEntity abstractDonkeyEntity) {
@@ -183,17 +203,29 @@ public class SlotUtils {
         return -1;
     }
 
+    private static int crafter(int i) {
+        if (isHotbar(i)) return 36 + i;
+        if (isMain(i)) return i;
+        return -1;
+    }
+
+    private static int smithingTable(int i) {
+        if (isHotbar(i)) return 31 + i;
+        if (isMain(i)) return 4 + (i - 9);
+        return -1;
+    }
+
     // Utils
 
-    public static boolean isHotbar(int i) {
-        return i >= HOTBAR_START && i <= HOTBAR_END;
+    public static boolean isHotbar(int slotIndex) {
+        return slotIndex >= HOTBAR_START && slotIndex <= HOTBAR_END;
     }
 
-    public static boolean isMain(int i) {
-        return i >= MAIN_START && i <= MAIN_END;
+    public static boolean isMain(int slotIndex) {
+        return slotIndex >= MAIN_START && slotIndex <= MAIN_END;
     }
 
-    public static boolean isArmor(int i) {
-        return i >= ARMOR_START && i <= ARMOR_END;
+    public static boolean isArmor(int slotIndex) {
+        return slotIndex >= ARMOR_START && slotIndex <= ARMOR_END;
     }
 }

@@ -12,8 +12,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(StatusEffectInstance.class)
 public interface StatusEffectInstanceAccessor {
     @Accessor("duration")
-    void setDuration(int duration);
-
-    @Accessor("amplifier")
-    void setAmplifier(int amplifier);
+    void meteor$setDuration(int duration);
 }

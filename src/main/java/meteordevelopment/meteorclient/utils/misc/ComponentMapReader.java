@@ -154,7 +154,7 @@ public class ComponentMapReader {
 
         private <T> void readComponentValue(StringReader reader, ComponentMap.Builder builder, ComponentType<T> type) throws CommandSyntaxException {
             int i = reader.getCursor();
-            NbtElement nbtElement = SNBT_READER.read(reader);
+            NbtElement nbtElement = SNBT_READER.readAsArgument(reader);
             DataResult<T> dataResult = type.getCodecOrThrow().parse(this.nbtOps, nbtElement);
             builder.add(type, dataResult.getOrThrow(error -> {
                 reader.setCursor(i);

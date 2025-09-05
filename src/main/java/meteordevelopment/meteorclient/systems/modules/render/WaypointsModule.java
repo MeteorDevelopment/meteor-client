@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedMinus;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
@@ -128,7 +128,7 @@ public class WaypointsModule extends Module {
             if (distToCenter <= textRenderDist) {
                 // Setup text rendering
                 int preTextA = TEXT.a;
-                TEXT.a *= (int) a;
+                TEXT.a *= a;
                 text.begin();
 
                 // Render name
@@ -233,7 +233,7 @@ public class WaypointsModule extends Module {
                 };
             }
 
-            WMinus remove = table.add(theme.minus()).widget();
+            WConfirmedMinus remove = table.add(theme.confirmedMinus()).widget();
             remove.action = () -> {
                 Waypoints.get().remove(waypoint);
                 initTable(theme, table);

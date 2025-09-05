@@ -15,5 +15,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface BlockHitResultAccessor {
     @Mutable
     @Accessor("side")
-    void setSide(Direction direction);
+    void meteor$setSide(Direction direction);
 }

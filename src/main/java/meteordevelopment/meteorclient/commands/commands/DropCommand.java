@@ -44,8 +44,8 @@ public class DropCommand extends Command {
 
         // Main Inv
         builder.then(literal("inventory").executes(context -> drop(player -> {
-            for (int i = 9; i < player.getInventory().getMainStacks().size(); i++) {
-                InvUtils.drop().slotMain(i - 9);
+            for (int i = 0; i < 27; i++) {
+                InvUtils.drop().slotMain(i);
             }
         })));
 
@@ -54,7 +54,7 @@ public class DropCommand extends Command {
             for (int i = 0; i < player.getInventory().size(); i++) {
                 InvUtils.drop().slot(i);
             }
-            InvUtils.drop().slotOffhand();
+            if (!mc.player.getOffHandStack().isEmpty()) InvUtils.drop().slotOffhand();
         })));
 
         // Armor

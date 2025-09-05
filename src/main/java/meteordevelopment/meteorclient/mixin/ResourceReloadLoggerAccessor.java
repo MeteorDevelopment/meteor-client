@@ -12,5 +12,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ResourceReloadLogger.class)
 public interface ResourceReloadLoggerAccessor {
     @Accessor("reloadState")
-    ResourceReloadLogger.ReloadState getReloadState();
+    ResourceReloadLogger.ReloadState meteor$getReloadState();
 }

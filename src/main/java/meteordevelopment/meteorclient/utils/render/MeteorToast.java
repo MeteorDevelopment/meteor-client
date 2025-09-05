@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.utils.render;
 
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.toast.Toast;
@@ -26,28 +26,68 @@ import org.jetbrains.annotations.Nullable;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class MeteorToast implements Toast {
-    public static final int TITLE_COLOR = Color.fromRGBA(145, 61, 226, 255);
-    public static final int TEXT_COLOR = Color.fromRGBA(220, 220, 220, 255);
+    private static final int TITLE_COLOR = Color.fromRGBA(145, 61, 226, 255);
+    private static final int TEXT_COLOR = Color.fromRGBA(220, 220, 220, 255);
     private static final Identifier TEXTURE = Identifier.of("toast/advancement");
+    private static final long DEFAULT_DURATION = 6000;
+    private static final SoundInstance DEFAULT_SOUND = PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_CHIME.value(), 1.2f, 1);
 
-    private ItemStack icon;
-    private Text title, text;
-    private boolean justUpdated = true, playedSound;
-    private long start, duration;
-    private Toast.Visibility visibility = Visibility.HIDE;
+    // Toast fields
+    private final @NotNull Text title;
+    private final @Nullable Text text;
+    private final @Nullable ItemStack icon;
+    private final @Nullable SoundInstance customSound;
+    private final long duration;
 
-    public MeteorToast(@Nullable Item item, @NotNull String title, @Nullable String text, long duration) {
-        this.icon = item != null ? item.getDefaultStack() : null;
-        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TITLE_COLOR)));
-        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TEXT_COLOR))) : null;
-        this.duration = duration;
+    // State variables
+    private boolean playedSound;
+    private long start = -1;
+    private Visibility visibility = Visibility.HIDE;
+
+    private MeteorToast(Builder builder) {
+        this.title = builder.title;
+        this.text = builder.text;
+        this.icon = builder.icon;
+        this.customSound = builder.customSound;
+        this.duration = builder.duration;
     }
 
-    public MeteorToast(@Nullable Item item, @NotNull String title, @Nullable String text) {
-        this.icon = item != null ? item.getDefaultStack() : null;
-        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TITLE_COLOR)));
-        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TEXT_COLOR))) : null;
-        this.duration = 6000;
+    public static class Builder {
+        private final @NotNull Text title;
+        private @Nullable Text text;
+        private @Nullable ItemStack icon;
+        private @Nullable SoundInstance customSound = DEFAULT_SOUND;
+        private long duration = DEFAULT_DURATION;
+
+        public Builder(@NotNull String title) {
+            this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TITLE_COLOR)));
+        }
+
+        public Builder text(@Nullable String text) {
+            this.text = text != null && !text.trim().isEmpty() ?
+                Text.literal(text).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TEXT_COLOR))) :
+                null;
+            return this;
+        }
+
+        public Builder icon(@Nullable Item item) {
+            this.icon = item != null ? item.getDefaultStack() : null;
+            return this;
+        }
+
+        public Builder sound(@Nullable SoundInstance sound) {
+            this.customSound = sound;
+            return this;
+        }
+
+        public Builder duration(long duration) {
+            this.duration = Math.max(0, duration);
+            return this;
+        }
+
+        public MeteorToast build() {
+            return new MeteorToast(this);
+        }
     }
 
     @Override
@@ -57,58 +97,30 @@ public class MeteorToast implements Toast {
 
     @Override
     public void update(ToastManager manager, long time) {
-        if (justUpdated) {
-            start = time;
-            justUpdated = false;
-        }
+        if (start == -1) start = time;
 
-        visibility = time - start >= duration ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
+        visibility = time - start >= duration ? Visibility.HIDE : Visibility.SHOW;
 
         if (!playedSound) {
-            mc.getSoundManager().play(getSound());
+            mc.getSoundManager().play(customSound);
             playedSound = true;
         }
     }
 
     @Override
     public void draw(DrawContext context, TextRenderer textRenderer, long startTime) {
-        context.drawGuiTexture(RenderLayer::getGuiTextured, TEXTURE, 0, 0, getWidth(), getHeight());
+        context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, getWidth(), getHeight());
 
-        int x = icon != null ? 28 : 12;
+        int textX = icon != null ? 28 : 12;
         int titleY = 12;
 
         if (text != null) {
-            context.drawText(mc.textRenderer, title, x, 18, TITLE_COLOR, false);
+            context.drawText(textRenderer, text, textX, 18, TEXT_COLOR, false);
             titleY = 7;
         }
 
-        context.drawText(mc.textRenderer, title, x, titleY, TITLE_COLOR, false);
+        context.drawText(textRenderer, title, textX, titleY, TITLE_COLOR, false);
 
         if (icon != null) context.drawItem(icon, 8, 8);
-    }
-
-    public void setIcon(@Nullable Item item) {
-        this.icon = item != null ? item.getDefaultStack() : null;
-        justUpdated = true;
-    }
-
-    public void setTitle(@NotNull String title) {
-        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TITLE_COLOR)));
-        justUpdated = true;
-    }
-
-    public void setText(@Nullable String text) {
-        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TEXT_COLOR))) : null;
-        justUpdated = true;
-    }
-
-    public void setDuration(long duration) {
-        this.duration = duration;
-        justUpdated = true;
-    }
-
-    // Addons: @Override this method in a subclass if you want a different sound
-    public SoundInstance getSound() {
-        return PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_CHIME.value(), 1.2f, 1);
     }
 }

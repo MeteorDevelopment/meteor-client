@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(Identifier.class)
-public interface IdentifierAccessor {
-    @Mutable
-    @Accessor
-    void setPath(String path);
+@Mixin(Direction.class)
+public interface DirectionAccessor {
+    @Accessor("HORIZONTAL")
+    static Direction[] meteor$getHorizontal() {
+        throw new AssertionError();
+    }
 }

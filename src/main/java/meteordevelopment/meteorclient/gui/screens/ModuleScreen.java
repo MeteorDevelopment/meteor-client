@@ -84,6 +84,7 @@ public class ModuleScreen extends WindowScreen {
 
         WButton reset = bind.add(theme.button(GuiRenderer.RESET)).expandCellX().right().widget();
         reset.action = keybind::resetBind;
+        reset.tooltip = "Reset";
 
         // Toggle on bind release
         WHorizontalList tobr = section.add(theme.horizontalList()).widget();

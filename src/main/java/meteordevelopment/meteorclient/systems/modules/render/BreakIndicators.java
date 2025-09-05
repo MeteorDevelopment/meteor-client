@@ -94,10 +94,10 @@ public class BreakIndicators extends Module {
     }
 
     private void renderNormal(Render3DEvent event) {
-        Map<Integer, BlockBreakingInfo> blocks = ((WorldRendererAccessor) mc.worldRenderer).getBlockBreakingInfos();
+        Map<Integer, BlockBreakingInfo> blocks = ((WorldRendererAccessor) mc.worldRenderer).meteor$getBlockBreakingInfos();
 
-        float ownBreakingStage = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getBreakingProgress();
-        BlockPos ownBreakingPos = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getCurrentBreakingBlockPos();
+        float ownBreakingStage = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).meteor$getBreakingProgress();
+        BlockPos ownBreakingPos = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).meteor$getCurrentBreakingBlockPos();
 
         if (ownBreakingPos != null && ownBreakingStage > 0) {
             BlockState state = mc.world.getBlockState(ownBreakingPos);

@@ -197,7 +197,7 @@ public class Ambience extends Module {
 
     public static class Custom extends DimensionEffects {
         public Custom() {
-            super(Float.NaN, true, DimensionEffects.SkyType.END, true, false);
+            super(SkyType.END, true, false);
         }
 
         @Override

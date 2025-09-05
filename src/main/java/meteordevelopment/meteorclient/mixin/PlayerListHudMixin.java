@@ -75,7 +75,8 @@ public abstract class PlayerListHudMixin {
             TextRenderer textRenderer = mc.textRenderer;
 
             int latency = MathHelper.clamp(entry.getLatency(), 0, 9999);
-            int color = latency < 150 ? 0x00E970 : latency < 300 ? 0xE7D020 : 0xD74238;
+            int color = latency < 150 ? 0xFF00E970 :
+                        latency < 300 ? 0xFFE7D020 : 0xFFD74238;
             String text = latency + "ms";
             context.drawTextWithShadow(textRenderer, text, x + width - textRenderer.getWidth(text), y, color);
             ci.cancel();

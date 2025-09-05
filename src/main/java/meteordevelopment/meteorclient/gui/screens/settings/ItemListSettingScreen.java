@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.gui.screens.settings;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.ItemListSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
@@ -34,7 +35,10 @@ public class ItemListSettingScreen extends CollectionListSettingScreen<Item> {
     }
 
     @Override
-    protected String getValueName(Item value) {
-        return Names.get(value);
+    protected String[] getValueNames(Item value) {
+        return new String[]{
+            Names.get(value),
+            Registries.ITEM.getId(value).toString()
+        };
     }
 }

@@ -88,7 +88,7 @@ public class Fullbright extends Module {
         if (mc.player == null || !mode.get().equals(Mode.Potion)) return;
         if (mc.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffects.NIGHT_VISION.value()))) {
             StatusEffectInstance instance = mc.player.getStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffects.NIGHT_VISION.value()));
-            if (instance != null && instance.getDuration() < 420) ((StatusEffectInstanceAccessor) instance).setDuration(420);
+            if (instance != null && instance.getDuration() < 420) ((StatusEffectInstanceAccessor) instance).meteor$setDuration(420);
         } else {
             mc.player.addStatusEffect(new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(StatusEffects.NIGHT_VISION.value()), 420, 0));
         }

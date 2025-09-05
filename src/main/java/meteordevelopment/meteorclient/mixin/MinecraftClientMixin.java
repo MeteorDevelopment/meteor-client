@@ -8,6 +8,8 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
@@ -18,9 +20,9 @@ import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
-import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.player.Multitask;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
@@ -29,7 +31,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CPSUtils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
-import meteordevelopment.starscript.Script;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gl.Framebuffer;
@@ -37,6 +38,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -46,6 +48,7 @@ import net.minecraft.resource.ReloadableResourceManagerImpl;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profilers;
 import org.jetbrains.annotations.Nullable;
+import org.meteordev.starscript.Script;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -96,11 +99,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         firstFrame = true;
     }
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/ReloadableResourceManagerImpl;reload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/resource/ResourceReload;", shift = At.Shift.BEFORE))
-    private void init$beforeReload(CallbackInfo info) {
-        resourceManager.registerReloader(new MeteorRenderPipelines.Reloader());
-    }
-
     @Inject(at = @At("HEAD"), method = "tick")
     private void onPreTick(CallbackInfo info) {
         OnlinePlayers.update();
@@ -147,6 +145,33 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         MeteorClient.EVENT_BUS.post(event);
 
         if (event.isCancelled()) info.cancel();
+    }
+
+    @WrapOperation(method = "setScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/KeyBinding;unpressAll()V"))
+    private void onSetScreenKeyBindingUnpressAll(Operation<Void> op) {
+        Modules modules = Modules.get();
+        if (modules == null) {
+            op.call();
+            return;
+        }
+
+        GUIMove guimove = modules.get(GUIMove.class);
+        if (guimove == null || !guimove.isActive() || guimove.skip()) {
+            op.call();
+            return;
+        }
+
+        GameOptions options = MeteorClient.mc.options;
+        for (KeyBinding kb : KeyBindingAccessor.getKeysById().values()) {
+            if (kb == options.forwardKey) continue;
+            if (kb == options.leftKey) continue;
+            if (kb == options.rightKey) continue;
+            if (kb == options.backKey) continue;
+            if (guimove.sneak.get() && kb == options.sneakKey) continue;
+            if (guimove.sprint.get() && kb == options.sprintKey) continue;
+            if (guimove.jump.get() && kb == options.jumpKey) continue;
+            ((KeyBindingAccessor) kb).meteor$invokeReset();
+        }
     }
 
     @Inject(method = "doItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isItemEnabled(Lnet/minecraft/resource/featuretoggle/FeatureSet;)Z"))

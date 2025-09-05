@@ -195,7 +195,7 @@ public abstract class EntityMixin {
     private EntityPose modifyGetPose(EntityPose original) {
         if ((Object) this != mc.player) return original;
 
-        if (original == EntityPose.CROUCHING && !mc.player.isSneaking()) return EntityPose.STANDING;
+        if (original == EntityPose.CROUCHING && !mc.player.isSneaking() && ((PlayerEntityAccessor) mc.player).meteor$canChangeIntoPose(EntityPose.STANDING)) return EntityPose.STANDING;
         return original;
     }
 

@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ItemRenderState.LayerRenderState.class)
 public interface LayerRenderStateAccessor {
-    @Accessor
-    Transformation getTransform();
+    @Accessor("transform")
+    Transformation meteor$getTransform();
 }

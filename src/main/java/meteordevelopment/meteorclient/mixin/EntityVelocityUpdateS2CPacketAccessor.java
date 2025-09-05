@@ -14,14 +14,14 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface EntityVelocityUpdateS2CPacketAccessor {
     @Mutable
     @Accessor("velocityX")
-    void setX(int velocityX);
+    void meteor$setX(int velocityX);
 
     @Mutable
     @Accessor("velocityY")
-    void setY(int velocityY);
+    void meteor$setY(int velocityY);
 
     @Mutable
     @Accessor("velocityZ")
-    void setZ(int velocityZ);
+    void meteor$setZ(int velocityZ);
 }
 

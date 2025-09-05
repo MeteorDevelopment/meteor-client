@@ -362,7 +362,7 @@ public class Surround extends Module {
 
         // Check if the block is being mined
         boolean beingMined = false;
-        for (BlockBreakingInfo value : ((WorldRendererAccessor) mc.worldRenderer).getBlockBreakingInfos().values()) {
+        for (BlockBreakingInfo value : ((WorldRendererAccessor) mc.worldRenderer).meteor$getBlockBreakingInfos().values()) {
             if (value.getPos().equals(placePos)) {
                 beingMined = true;
                 break;

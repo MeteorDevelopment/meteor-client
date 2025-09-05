@@ -1,0 +1,14 @@
+{
+  "name": "moderator",
+  "version": "1.0.0",
+  "author": "MachieCodes",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "banned_terms": "node banned_terms.js"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0"
+  }
+}

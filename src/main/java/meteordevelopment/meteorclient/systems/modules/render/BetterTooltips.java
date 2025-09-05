@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
@@ -21,18 +22,19 @@ import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.entity.BeehiveBlockEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.Bucketable;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.*;
 import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.RawFilteredPair;
@@ -164,17 +166,17 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    private final Setting<Boolean> statusEffects = sgOther.add(new BoolSetting.Builder()
-        .name("status-effects")
-        .description("Adds list of status effects to tooltips of food items.")
-        .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+    private final Setting<SortSize> sizeType = sgOther.add(new EnumSetting.Builder<SortSize>()
+        .name("byte-size-format")
+        .description("The format by which to display the item's byte size.")
+        .defaultValue(SortSize.Dynamic)
+        .visible(byteSize::get)
         .build()
     );
 
-    private final Setting<Boolean> beehive = sgOther.add(new BoolSetting.Builder()
-        .name("beehive")
-        .description("Displays information about a beehive or bee nest.")
+    private final Setting<Boolean> statusEffects = sgOther.add(new BoolSetting.Builder()
+        .name("status-effects")
+        .description("Adds list of status effects to tooltips of food items.")
         .defaultValue(true)
         .onChanged(value -> updateTooltips = true)
         .build()
@@ -234,38 +236,36 @@ public class BetterTooltips extends Module {
             }
         }
 
-        //Beehive
-        if (beehive.get()) {
-            if (event.itemStack().getItem() == Items.BEEHIVE || event.itemStack().getItem() == Items.BEE_NEST) {
-                BlockStateComponent blockStateComponent = event.itemStack().get(DataComponentTypes.BLOCK_STATE);
-                if (blockStateComponent != null) {
-                    String level = blockStateComponent.properties().get("honey_level");
-                    event.appendStart(Text.literal(String.format("%sHoney level: %s%s%s.", Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
-                }
-
-                List<BeehiveBlockEntity.BeeData> bees = event.itemStack().getOrDefault(DataComponentTypes.BEES, BeesComponent.DEFAULT).bees();
-                if (bees != null) {
-                    event.appendStart(Text.literal(String.format("%sBees: %s%d%s.", Formatting.GRAY, Formatting.YELLOW, bees.size(), Formatting.GRAY)));
-                }
-            }
-        }
-
         // Item size tooltip
         if (byteSize.get()) {
-            try {
-                event.itemStack().toNbt(mc.player.getRegistryManager()).write(ByteCountDataOutput.INSTANCE);
+            switch (ItemStack.CODEC.encodeStart(mc.player.getRegistryManager().getOps(NbtOps.INSTANCE), event.itemStack())) {
+                case DataResult.Success<NbtElement> success -> {
+                    try {
+                        success.value().write(ByteCountDataOutput.INSTANCE);
 
-                int byteCount = ByteCountDataOutput.INSTANCE.getCount();
-                String count;
+                        int byteCount = ByteCountDataOutput.INSTANCE.getCount();
+                        String count = switch (sizeType.get()) {
+                            case Bytes -> String.format("%d bytes", byteCount);
+                            case Kilobytes -> String.format("%.2f kB", byteCount / 1024f);
+                            case Megabytes -> String.format("%.4f MB", byteCount / 1048576f);
+                            case Dynamic -> {
+                                if (byteCount >= 1048576) yield String.format("%.2f MB", byteCount / 1048576f);
+                                else if (byteCount >= 1024) yield String.format("%.2f kB", byteCount / 1024f);
+                                else yield String.format("%d bytes", byteCount);
+                            }
+                        };
 
-                ByteCountDataOutput.INSTANCE.reset();
+                        ByteCountDataOutput.INSTANCE.reset();
 
-                if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
-                else count = String.format("%d bytes", byteCount);
-
-                event.appendEnd(Text.literal(count).formatted(Formatting.GRAY));
-            } catch (Exception e) {
-                event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
+                        event.appendEnd(Text.literal(count).formatted(Formatting.DARK_GRAY));
+                    } catch (Exception e) {
+                        event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
+                    }
+                }
+                case DataResult.Error<NbtElement> ignored ->
+                    event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
+                default ->
+                    throw new MatchException(null, null);
             }
         }
 
@@ -313,16 +313,17 @@ public class BetterTooltips extends Module {
 
         // Fish peek
         else if (event.itemStack.getItem() instanceof EntityBucketItem bucketItem && previewEntities()) {
-            EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).getEntityType();
-            Entity entity = type.create(mc.world, SpawnReason.NATURAL);
+            EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).meteor$getEntityType();
+            LivingEntity entity = (LivingEntity) type.create(mc.world, SpawnReason.NATURAL);
+
             if (entity != null) {
-                NbtComponent nbtComponent = event.itemStack.getOrDefault(DataComponentTypes.BUCKET_ENTITY_DATA, NbtComponent.DEFAULT);
-                if (nbtComponent.isEmpty()) {
+                NbtComponent nbtComponent = event.itemStack.getOrDefault(DataComponentTypes.BUCKET_ENTITY_DATA, null);
+                if (nbtComponent == null) {
                     return;
                 }
 
                 ((Bucketable) entity).copyDataFromNbt(nbtComponent.copyNbt());
-                ((EntityAccessor) entity).setInWater(true);
+                ((EntityAccessor) entity).meteor$setInWater(true);
                 event.tooltipData = new EntityTooltipComponent(entity);
             }
         }
@@ -456,5 +457,12 @@ public class BetterTooltips extends Module {
     public enum DisplayWhen {
         Keybind,
         Always
+    }
+
+    public enum SortSize {
+        Bytes,
+        Kilobytes,
+        Megabytes,
+        Dynamic,
     }
 }

@@ -9,6 +9,10 @@ import net.minecraft.util.Hand;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
+/**
+ * @param slot  The slot index
+ * @param count The number of items in the slot
+ */
 public record FindItemResult(int slot, int count) {
     public boolean found() {
         return slot != -1;

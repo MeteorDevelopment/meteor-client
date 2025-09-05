@@ -32,13 +32,13 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public abstract class BookEditScreenMixin extends Screen {
     @Shadow @Final private List<String> pages;
     @Shadow private int currentPage;
-    @Shadow private boolean dirty;
+
+    @Shadow
+    protected abstract void updatePage();
 
     public BookEditScreenMixin(Text title) {
         super(title);
     }
-
-    @Shadow protected abstract void updateButtons();
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
@@ -99,8 +99,7 @@ public abstract class BookEditScreenMixin extends Screen {
 
                         currentPage = tag.getInt("currentPage", 0);
 
-                        dirty = true;
-                        updateButtons();
+                        updatePage();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

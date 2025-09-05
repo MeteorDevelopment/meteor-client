@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.FishingBobberEntityAccessor;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -116,7 +117,7 @@ public class AutoFish extends Module {
         if (mc.player.fishHook.state != FishingBobberEntity.State.BOBBING) return;
 
         if (!wasHooked) {
-            if (mc.player.fishHook.caughtFish) {
+            if (((FishingBobberEntityAccessor) mc.player.fishHook).meteor$hasCaughtFish()) {
                 catchDelayLeft = catchDelay.get();
                 wasHooked = true;
             }

@@ -59,7 +59,7 @@ public class AntiHunger extends Module {
         }
 
         if (event.packet instanceof PlayerMoveC2SPacket packet && onGround.get() && mc.player.isOnGround() && mc.player.fallDistance <= 0.0 && !mc.interactionManager.isBreakingBlock()) {
-            ((PlayerMoveC2SPacketAccessor) packet).setOnGround(false);
+            ((PlayerMoveC2SPacketAccessor) packet).meteor$setOnGround(false);
         }
     }
 
