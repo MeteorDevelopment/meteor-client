@@ -28,7 +28,9 @@ public class Waypoint implements ISerializable<Waypoint> {
     private final SettingGroup sgVisual = settings.createGroup("Visual");
     private final SettingGroup sgPosition = settings.createGroup("Position");
 
-    public enum NearAction {Disabled, Hide, Delete};
+    public enum NearAction {
+        Disabled, Hide, Delete
+    }
 
     public Setting<String> name = sgVisual.add(new StringSetting.Builder()
         .name("name")
@@ -70,7 +72,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     public Setting<Double> scale = sgVisual.add(new DoubleSetting.Builder()
         .name("scale")
         .description("The scale of the waypoint.")
-        .defaultValue(1)
+        .defaultValue(1.5)
         .build()
     );
 

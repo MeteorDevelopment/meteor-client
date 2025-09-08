@@ -112,13 +112,8 @@ public class WaypointsModule extends Module {
             boolean waypointIsNear = waypoint.actionWhenNearCheck((int) Math.floor(dist));
             if (playerAlive && waypointIsNear) {
                 switch (waypoint.actionWhenNear.get()) {
-                    case Disabled: break;
-                    case Hide:
-                        waypoint.visible.set(false);
-                        break;
-                    case Delete:
-                        it.remove();
-                        break;
+                    case Hide -> waypoint.visible.set(false);
+                    case Delete -> it.remove();
                 }
             }
 

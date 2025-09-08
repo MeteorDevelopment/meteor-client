@@ -170,7 +170,7 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
     // When receiving the death message packet, send the PlayerDeathEvent
     @Inject(method = "onDeathMessage", at = @At("HEAD"))
     private void onClientDeath(DeathMessageS2CPacket packet, CallbackInfo ci) {
-        if (client.player == null) return;
+        if (client.player == null || world.getEntityById(packet.playerId()) != client.player) return;
 
         MeteorClient.EVENT_BUS.post(PlayerDeathEvent.get());
     }
