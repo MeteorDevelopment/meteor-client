@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.events.entity.EntityDestroyEvent;
 import meteordevelopment.meteorclient.events.entity.player.PickItemsEvent;
-import meteordevelopment.meteorclient.events.entity.player.PlayerDeathEvent;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
@@ -165,13 +164,5 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
             client.inGameHud.getChatHud().addToMessageHistory(message);
             ci.cancel();
         }
-    }
-
-    // When receiving the death message packet, send the PlayerDeathEvent
-    @Inject(method = "onDeathMessage", at = @At("HEAD"))
-    private void onClientDeath(DeathMessageS2CPacket packet, CallbackInfo ci) {
-        if (client.player == null || world.getEntityById(packet.playerId()) != client.player) return;
-
-        MeteorClient.EVENT_BUS.post(PlayerDeathEvent.get());
     }
 }

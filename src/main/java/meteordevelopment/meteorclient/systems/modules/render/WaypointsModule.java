@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import meteordevelopment.meteorclient.events.entity.player.PlayerDeathEvent;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
@@ -29,6 +29,7 @@ import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -160,10 +161,10 @@ public class WaypointsModule extends Module {
     }
 
     @EventHandler
-    private void onPlayerDeath(PlayerDeathEvent event) {
-        if (mc.player == null) return;
+    private void onOpenScreen(OpenScreenEvent event) {
+        if (!(event.screen instanceof DeathScreen)) return;
 
-        addDeath(mc.player.getPos());
+        if (!event.isCancelled()) addDeath(mc.player.getPos());
     }
 
     public void addDeath(Vec3d deathPos) {
