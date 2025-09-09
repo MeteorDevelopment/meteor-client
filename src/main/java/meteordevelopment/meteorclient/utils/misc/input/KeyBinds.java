@@ -5,21 +5,16 @@
 
 package meteordevelopment.meteorclient.utils.misc.input;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyBinds {
-    /*
-     todo
-        mojang changed how keybindings work, they used to take a String for the category but now take one of an enum
-        hopefully fabric adds a helper method to sort this out because the alternative will be doing it ourselves
-        with ASM or Unsafe, which will be a pain
-     */
-    private static final String CATEGORY = "Meteor Client";
+    private static final KeyBinding.Category CATEGORY = KeyBinding.Category.method_74698(MeteorClient.identifier("meteor-client"));
 
-    public static KeyBinding OPEN_GUI = new KeyBinding("key.meteor-client.open-gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, KeyBinding.class_11900.INTERFACE);
-    public static KeyBinding OPEN_COMMANDS = new KeyBinding("key.meteor-client.open-commands", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_PERIOD, KeyBinding.class_11900.INTERFACE);
+    public static KeyBinding OPEN_GUI = new KeyBinding("key.meteor-client.open-gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, CATEGORY);
+    public static KeyBinding OPEN_COMMANDS = new KeyBinding("key.meteor-client.open-commands", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_PERIOD, CATEGORY);
 
     private KeyBinds() {
     }

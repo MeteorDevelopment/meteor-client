@@ -13,10 +13,10 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
-import net.minecraft.class_11905;
-import net.minecraft.class_11908;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,7 +30,7 @@ public abstract class KeyboardMixin {
     @Shadow @Final private MinecraftClient client;
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
-    public void onKey(long window, int action, class_11908 arg, CallbackInfo ci) { // todo verify this is correct when they update the mappings
+    public void onKey(long window, int action, KeyInput arg, CallbackInfo ci) { // todo verify this is correct when they update the mappings
         int modifiers = arg.modifiers();
         if (arg.key() != GLFW.GLFW_KEY_UNKNOWN) {
             // on Linux/X11 the modifier is not active when the key is pressed and still active when the key is released
@@ -53,7 +53,7 @@ public abstract class KeyboardMixin {
     }
 
     @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
-    private void onChar(long window, class_11905 arg, CallbackInfo ci) {
+    private void onChar(long window, CharInput arg, CallbackInfo ci) {
         if (Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
             if (MeteorClient.EVENT_BUS.post(CharTypedEvent.get((char) arg.codepoint())).isCancelled()) ci.cancel();
         }

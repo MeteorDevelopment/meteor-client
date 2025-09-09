@@ -31,9 +31,6 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
         bodyYaw = player.bodyYaw;
         lastBodyYaw = bodyYaw;
 
-        Byte playerModel = player.getDataTracker().get(PlayerEntity.field_62514);
-        dataTracker.set(PlayerEntity.field_62514, playerModel);
-
         getAttributes().setFrom(player.getAttributes());
         setPose(player.getPose());
 

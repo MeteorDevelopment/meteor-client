@@ -17,12 +17,12 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CursorStyle;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
-import net.minecraft.class_11905;
-import net.minecraft.class_11908;
-import net.minecraft.class_11909;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.util.MacWindowUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
@@ -119,7 +119,7 @@ public abstract class WidgetScreen extends Screen {
 
     @Override
     // todo rename bl when appropriate
-    public boolean mouseClicked(class_11909 arg, boolean bl) {
+    public boolean mouseClicked(Click arg, boolean bl) {
         if (locked) return false;
 
         double mouseX = arg.x();
@@ -129,11 +129,11 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
-        return root.mouseClicked(mouseX, mouseY, arg.method_74245(), bl);
+        return root.mouseClicked(mouseX, mouseY, arg.button(), bl);
     }
 
     @Override
-    public boolean mouseReleased(class_11909 arg) {
+    public boolean mouseReleased(Click arg) {
         if (locked) return false;
 
         double mouseX = arg.x();
@@ -143,7 +143,7 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
-        return root.mouseReleased(mouseX, mouseY, arg.method_74245());
+        return root.mouseReleased(mouseX, mouseY, arg.button());
     }
 
     @Override
@@ -170,7 +170,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean keyReleased(class_11908 arg) {
+    public boolean keyReleased(KeyInput arg) {
         if (locked) return false;
 
         if ((arg.modifiers() == GLFW_MOD_CONTROL || arg.modifiers() == GLFW_MOD_SUPER) && arg.key() == GLFW_KEY_9) {
@@ -187,7 +187,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(class_11908 arg) {
+    public boolean keyPressed(KeyInput arg) {
         if (locked) return false;
 
         boolean shouldReturn = root.keyPressed(arg.key(), arg.modifiers()) || super.keyPressed(arg);
@@ -238,7 +238,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean charTyped(class_11905 arg) {
+    public boolean charTyped(CharInput arg) {
         if (locked) return false;
 
         return root.charTyped(((char) arg.codepoint()));

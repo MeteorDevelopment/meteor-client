@@ -13,6 +13,7 @@ import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
+import net.minecraft.client.render.block.entity.model.BannerFlagBlockModel;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.command.RenderDispatcher;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
@@ -30,18 +31,21 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
     private final DyeColor color;
     private final BannerPatternsComponent patterns;
     private final ModelPart bannerField;
+    private final BannerFlagBlockModel bannerFlag;
 
     // should only be used when the ItemStack is a banner
     public BannerTooltipComponent(ItemStack banner) {
         this.color = ((BannerItem) banner.getItem()).getColor();
         this.patterns = banner.getOrDefault(DataComponentTypes.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT);
         this.bannerField = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG).getChild("flag");
+        this.bannerFlag = new BannerFlagBlockModel(bannerField);
     }
 
     public BannerTooltipComponent(DyeColor color, BannerPatternsComponent patterns) {
         this.color = color;
         this.patterns = patterns;
         this.bannerField = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG).getChild("flag");
+        this.bannerFlag = new BannerFlagBlockModel(bannerField);
     }
 
     @Override
@@ -88,7 +92,8 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
             renderCommandQueue,
             15728880,
             OverlayTexture.DEFAULT_UV,
-            bannerField,
+            bannerFlag,
+            null,
             ModelBaker.BANNER_BASE,
             true,
             color,

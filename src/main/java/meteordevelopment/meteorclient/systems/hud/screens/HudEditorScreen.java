@@ -16,10 +16,10 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.other.Snapper;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.class_11908;
-import net.minecraft.class_11909;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
@@ -67,7 +67,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     public void initWidgets() {}
 
     @Override
-    public boolean mouseClicked(class_11909 arg, boolean bl) {
+    public boolean mouseClicked(Click arg, boolean bl) {
         double s = mc.getWindow().getScaleFactor();
 
         double mouseX = arg.x();
@@ -76,7 +76,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         mouseX *= s;
         mouseY *= s;
 
-        if (arg.method_74245() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             pressed = true;
             selectionSnapBox = null;
 
@@ -117,7 +117,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public boolean mouseReleased(class_11909 arg) {
+    public boolean mouseReleased(Click arg) {
         double s = mc.getWindow().getScaleFactor();
 
         double mouseX = arg.x();
@@ -126,7 +126,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         mouseX *= s;
         mouseY *= s;
 
-        if (arg.method_74245() == GLFW.GLFW_MOUSE_BUTTON_LEFT) pressed = false;
+        if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) pressed = false;
 
         if (addedHoveredToSelectionWhenClickedElement != null) {
             selection.remove(addedHoveredToSelectionWhenClickedElement);
@@ -134,14 +134,14 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         }
 
         if (moved) {
-            if (arg.method_74245() == GLFW.GLFW_MOUSE_BUTTON_LEFT && !dragging) fillSelection((int) mouseX, (int)mouseY);
+            if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT && !dragging) fillSelection((int) mouseX, (int)mouseY);
         }
         else {
-            if (arg.method_74245() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                 HudElement hovered = getHovered((int) mouseX, (int) mouseY);
                 if (hovered != null) hovered.toggle();
             }
-            else if (arg.method_74245() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            else if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                 HudElement hovered = getHovered((int) mouseX, (int) mouseY);
 
                 if (hovered != null) mc.setScreen(new HudElementScreen(theme, hovered));
@@ -149,7 +149,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
             }
         }
 
-        if (arg.method_74245() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             snapper.unsnap();
             moved = dragging = false;
         }
@@ -158,7 +158,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public boolean keyPressed(class_11908 arg) {
+    public boolean keyPressed(KeyInput arg) {
         if (!pressed) {
             if (arg.key() == GLFW.GLFW_KEY_ENTER || arg.key() == GLFW.GLFW_KEY_KP_ENTER) {
                 HudElement hovered = getHovered(lastMouseX, lastMouseY);

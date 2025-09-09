@@ -95,7 +95,7 @@ public abstract class ClientWorldMixin {
         if (Modules.get().get(NoRender.class).noBlockBreakParticles()) info.cancel();
     }
 
-    @Inject(method = "method_74254", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "spawnBlockBreakingParticle", at = @At("HEAD"), cancellable = true)
     private void onAddBlockBreakingParticles(BlockPos blockPos, Direction direction, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noBlockBreakParticles()) info.cancel();
     }

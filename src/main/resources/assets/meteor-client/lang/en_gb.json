@@ -1,4 +1,5 @@
 {
   "key.meteor-client.open-gui": "Open GUI",
-  "key.meteor-client.open-commands": "Open Commands"
+  "key.meteor-client.open-commands": "Open Commands",
+  "key.category.meteor-client.meteor-client": "Meteor Client"
 }

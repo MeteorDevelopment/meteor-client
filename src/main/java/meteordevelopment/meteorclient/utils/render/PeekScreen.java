@@ -9,12 +9,12 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.class_11908;
-import net.minecraft.class_11909;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
@@ -38,10 +38,10 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean mouseClicked(class_11909 arg, boolean bl) {
+    public boolean mouseClicked(Click arg, boolean bl) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (arg.method_74245() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
+        if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
             ItemStack itemStack = focusedSlot.getStack();
             if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
                 return Utils.openContainer(focusedSlot.getStack(), contents, false);
@@ -56,12 +56,12 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean mouseReleased(class_11909 arg) {
+    public boolean mouseReleased(Click arg) {
         return false;
     }
 
     @Override
-    public boolean keyPressed(class_11908 arg) {
+    public boolean keyPressed(KeyInput arg) {
         if (arg.key() == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(arg)) {
             close();
             return true;
@@ -70,7 +70,7 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean keyReleased(class_11908 arg) {
+    public boolean keyReleased(KeyInput arg) {
         if (arg.key() == GLFW.GLFW_KEY_ESCAPE) {
             close();
             return true;

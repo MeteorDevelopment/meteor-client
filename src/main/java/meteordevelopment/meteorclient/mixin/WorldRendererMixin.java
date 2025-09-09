@@ -50,7 +50,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
         if (Modules.get().isActive(BlockSelection.class)) ci.cancel();
     }
 
-    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;setupTerrain(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;ZZ)V"), index = 3)
+    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;method_74752(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;Z)V"), index = 2)
     private boolean renderSetupTerrainModifyArg(boolean spectator) {
         return Modules.get().isActive(Freecam.class) || spectator;
     }
@@ -81,6 +81,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
                               Camera camera,
                               Matrix4f positionMatrix,
                               Matrix4f projectionMatrix,
+                              Matrix4f matrix4f2,
                               GpuBufferSlice fog,
                               Vector4f fogColor,
                               boolean shouldRenderSky,

@@ -7,11 +7,11 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import net.minecraft.class_11949;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
 import net.minecraft.client.render.block.entity.model.BannerBlockModel;
 import net.minecraft.client.render.block.entity.model.BannerFlagBlockModel;
+import net.minecraft.client.render.block.entity.state.BannerBlockEntityRenderState;
 import net.minecraft.client.render.command.ModelCommandRenderer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.model.ModelBaker;
@@ -30,8 +30,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BannerBlockEntityRenderer.class)
 public abstract class BannerBlockEntityRendererMixin {
-    @Inject(method = "render(Lnet/minecraft/class_11949;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;)V", at = @At("HEAD"), cancellable = true)
-    private void injectRender1(class_11949 arg, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CallbackInfo ci) {
+    @Inject(method = "render(Lnet/minecraft/client/render/block/entity/state/BannerBlockEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;)V", at = @At("HEAD"), cancellable = true)
+    private void injectRender1(BannerBlockEntityRenderState arg, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).getBannerRenderMode() == NoRender.BannerRenderMode.None) ci.cancel();
     }
 
