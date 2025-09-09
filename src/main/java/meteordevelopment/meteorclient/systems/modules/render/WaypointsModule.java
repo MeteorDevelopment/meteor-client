@@ -96,7 +96,9 @@ public class WaypointsModule extends Module {
         Vector3d center = new Vector3d(mc.getWindow().getFramebufferWidth() / 2.0, mc.getWindow().getFramebufferHeight() / 2.0, 0);
         int textRenderDist = textRenderDistance.get();
 
-        for (Waypoint waypoint : Waypoints.get()) {
+        for (Iterator<Waypoint> it = Waypoints.get().iterator(); it.hasNext();) {
+            Waypoint waypoint = it.next();
+
             // Continue if this waypoint should not be rendered
             if (!waypoint.visible.get() || !Waypoints.checkDimension(waypoint)) continue;
 
@@ -104,6 +106,17 @@ public class WaypointsModule extends Module {
             BlockPos blockPos = waypoint.getPos();
             Vector3d pos = new Vector3d(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
             double dist = PlayerUtils.distanceToCamera(pos.x, pos.y, pos.z);
+
+            // Only perform hide when near check if player is alive
+            // Otherwise, death waypoints immediately get hidden
+            boolean playerAlive = (mc.player != null && !mc.player.isDead());
+            boolean waypointIsNear = waypoint.actionWhenNearCheck((int) Math.floor(dist));
+            if (playerAlive && waypointIsNear) {
+                switch (waypoint.actionWhenNear.get()) {
+                    case Hide -> waypoint.visible.set(false);
+                    case Delete -> it.remove();
+                }
+            }
 
             // Continue if this waypoint should not be rendered
             if (dist > waypoint.maxVisible.get()) continue;
@@ -171,6 +184,10 @@ public class WaypointsModule extends Module {
                 .pos(BlockPos.ofFloored(deathPos).up(2))
                 .dimension(PlayerUtils.getDimension())
                 .build();
+
+            // Configure death waypoints to auto delete when the player is within 4 blocks
+            waypoint.actionWhenNear.set(Waypoint.NearAction.Delete);
+            waypoint.actionWhenNearDistance.set(4);
 
             Waypoints.get().add(waypoint);
         }
