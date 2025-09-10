@@ -62,7 +62,7 @@ public class AutoEat extends Module {
 
     private final Setting<Boolean> pauseModules = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-modules")
-        .description("Pauses all Auras, Nuker, InfinityMiner and AutoFish when eating.")
+        .description("Pauses Auras, Nuker, InfinityMiner and AutoFish when eating.")
         .defaultValue(true)
         .build()
     );
