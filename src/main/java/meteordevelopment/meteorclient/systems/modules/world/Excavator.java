@@ -11,6 +11,7 @@ import baritone.api.utils.BetterBlockPos;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -19,6 +20,7 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import org.lwjgl.glfw.GLFW;
 
@@ -46,6 +48,13 @@ public class Excavator extends Module {
     private final Setting<Boolean> keepActive = sgGeneral.add(new BoolSetting.Builder()
         .name("keep-active")
         .description("Keep the module active after finishing the excavation.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> disableLowDura = sgGeneral.add(new BoolSetting.Builder()
+        .name("disable-low-dura")
+        .description("Disable the module when your main hand tool has < 100 durability to prevent it from breaking.")
         .defaultValue(false)
         .build()
     );
@@ -90,6 +99,23 @@ public class Excavator extends Module {
         baritone.getSelectionManager().removeSelection(baritone.getSelectionManager().getLastSelection());
         if (baritone.getBuilderProcess().isActive()) baritone.getCommandManager().execute("stop");
         status = Status.SEL_START;
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (!disableLowDura.get()) return;
+        if (isToolLowDurability()) {
+            info("Tool durability is below 100, stopping Excavator to prevent breaking.");
+            toggle();
+        }
+    }
+
+    private boolean isToolLowDurability() {
+        ItemStack mainHandStack = mc.player.getMainHandStack();
+        if (mainHandStack.isEmpty() || !mainHandStack.isDamageable()) {
+            return false;
+        }
+        return mainHandStack.getMaxDamage() - mainHandStack.getDamage() < 100;
     }
 
     @EventHandler
