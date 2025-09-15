@@ -355,14 +355,18 @@ public class Nametags extends Module {
             EntityType<?> type = entity.getType();
 
             if (NametagUtils.to2D(pos, scale.get())) {
-                if (type == EntityType.PLAYER) renderNametagPlayer(event, (PlayerEntity) entity, shadow);
-                else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getStack(), shadow);
-                else if (type == EntityType.ITEM_FRAME || type == EntityType.GLOW_ITEM_FRAME)
-                    renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack(), shadow);
-                else if (type == EntityType.TNT) renderTntNametag(ticksToTime(((TntEntity) entity).getFuse()), shadow);
+                if (type == EntityType.PLAYER)
+                    renderNametagPlayer(event, (PlayerEntity) entity, shadow);
+                else if (type == EntityType.ITEM)
+                    renderNametagItem(((ItemEntity) entity).getStack(), shadow);
+                else if (entity instanceof ItemFrameEntity frame)
+                    renderNametagItem(frame.getHeldItemStack(), shadow);
+                else if (type == EntityType.TNT)
+                    renderTntNametag(ticksToTime(((TntEntity) entity).getFuse()), shadow);
                 else if (type == EntityType.TNT_MINECART && ((TntMinecartEntity) entity).isPrimed())
                     renderTntNametag(ticksToTime(((TntMinecartEntity) entity).getFuseTicks()), shadow);
-                else if (entity instanceof LivingEntity) renderGenericLivingNametag((LivingEntity) entity, shadow);
+                else if (entity instanceof LivingEntity)
+                    renderGenericLivingNametag((LivingEntity) entity, shadow);
                 else renderGenericNametag(entity, shadow);
             }
         }
