@@ -35,7 +35,9 @@ import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
     @SuppressWarnings("unchecked")
-    private static final Class<? extends Module>[] MODULELIST = new Class[]{KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class, Nuker.class, InfinityMiner.class, AutoFish.class};
+    private static final Class<? extends Module>[] MODULELIST = new Class[] {
+        KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class, Nuker.class, InfinityMiner.class, AutoFish.class
+    };
 
     // Settings groups
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -167,7 +169,6 @@ public class AutoEat extends Module {
         prevSlot = mc.player.getInventory().getSelectedSlot();
         eat();
 
-        // Pause auras
         wasAura.clear();
         if (pauseModules.get()) {
             for (Class<? extends Module> klass : MODULELIST) {
@@ -181,9 +182,11 @@ public class AutoEat extends Module {
         }
 
         // Pause baritone
-        if (pauseBaritone.get() && PathManagers.get().isPathing() && !wasBaritone) {
-            wasBaritone = true;
-            PathManagers.get().pause();
+        if (pauseBaritone.get()) {
+            if (PathManagers.get().isPathing()) {
+                wasBaritone = true;
+                PathManagers.get().pause();
+            }
         }
     }
 
@@ -214,8 +217,8 @@ public class AutoEat extends Module {
 
         // Resume baritone
         if (pauseBaritone.get() && wasBaritone) {
-            wasBaritone = false;
             PathManagers.get().resume();
+            wasBaritone = false;
         }
     }
 
@@ -237,8 +240,8 @@ public class AutoEat extends Module {
         FoodComponent food = mc.player.getInventory().getStack(slot).get(DataComponentTypes.FOOD);
         if (food == null) return false;
 
-        return thresholdMode.get().test(healthLow, hungerLow)
-            && (mc.player.getHungerManager().isNotFull() ||  food.canAlwaysEat());
+        return thresholdMode.get().test(healthLow, hungerLow) &&
+            (mc.player.getHungerManager().isNotFull() || food.canAlwaysEat());
     }
 
     private int findSlot() {
@@ -274,9 +277,9 @@ public class AutoEat extends Module {
 
     public enum ThresholdMode {
         Health((health, hunger) -> health),
-        Hunger((health, hunger) -> hunger),
-        Any((health, hunger) -> health || hunger),
-        Both((health, hunger) -> health && hunger);
+            Hunger((health, hunger) -> hunger),
+            Any((health, hunger) -> health || hunger),
+            Both((health, hunger) -> health && hunger);
 
         private final BiPredicate<Boolean, Boolean> predicate;
 
