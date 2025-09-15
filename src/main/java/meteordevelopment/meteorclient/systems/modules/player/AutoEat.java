@@ -16,6 +16,9 @@ import meteordevelopment.meteorclient.systems.modules.combat.AnchorAura;
 import meteordevelopment.meteorclient.systems.modules.combat.BedAura;
 import meteordevelopment.meteorclient.systems.modules.combat.CrystalAura;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
+import meteordevelopment.meteorclient.systems.modules.world.Nuker;
+import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
+import meteordevelopment.meteorclient.systems.modules.player.AutoFish;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
@@ -32,7 +35,7 @@ import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
     @SuppressWarnings("unchecked")
-    private static final Class<? extends Module>[] AURAS = new Class[]{ KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
+    private static final Class<? extends Module>[] MODULELIST = new Class[]{KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class, Nuker.class, InfinityMiner.class, AutoFish.class};
 
     // Settings groups
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -57,9 +60,9 @@ public class AutoEat extends Module {
         .build()
     );
 
-    private final Setting<Boolean> pauseAuras = sgGeneral.add(new BoolSetting.Builder()
-        .name("pause-auras")
-        .description("Pauses all auras when eating.")
+    private final Setting<Boolean> pauseModules = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-modules")
+        .description("Pauses Auras, Nuker, InfinityMiner and AutoFish when eating.")
         .defaultValue(true)
         .build()
     );
@@ -166,8 +169,8 @@ public class AutoEat extends Module {
 
         // Pause auras
         wasAura.clear();
-        if (pauseAuras.get()) {
-            for (Class<? extends Module> klass : AURAS) {
+        if (pauseModules.get()) {
+            for (Class<? extends Module> klass : MODULELIST) {
                 Module module = Modules.get().get(klass);
 
                 if (module.isActive()) {
@@ -199,8 +202,8 @@ public class AutoEat extends Module {
         eating = false;
 
         // Resume auras
-        if (pauseAuras.get()) {
-            for (Class<? extends Module> klass : AURAS) {
+        if (pauseModules.get()) {
+            for (Class<? extends Module> klass : MODULELIST) {
                 Module module = Modules.get().get(klass);
 
                 if (wasAura.contains(klass) && !module.isActive()) {
