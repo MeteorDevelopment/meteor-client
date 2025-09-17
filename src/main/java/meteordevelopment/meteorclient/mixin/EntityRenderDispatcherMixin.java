@@ -80,9 +80,4 @@ public abstract class EntityRenderDispatcherMixin {
     private void onGetSquaredDistanceToCameraEntity(Entity entity, CallbackInfoReturnable<Double> info) {
         if (camera == null) info.setReturnValue(0.0);
     }
-
-    @Inject(method = "getSquaredDistanceToCamera(DDD)D", at = @At("HEAD"), cancellable = true)
-    private void onGetSquaredDistanceToCameraXYZ(double x, double y, double z, CallbackInfoReturnable<Double> info) {
-        if (camera == null) info.setReturnValue(0.0);
-    }
 }

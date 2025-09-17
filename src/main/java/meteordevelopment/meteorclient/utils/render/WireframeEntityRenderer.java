@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.mixininterface.IMultiPhaseParameters;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.class_12075;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexConsumer;
@@ -67,7 +68,7 @@ public class WireframeEntityRenderer {
 
         matrices.push();
         matrices.scale((float) scale, (float) scale, (float) scale);
-        renderer.render(state, matrices, entityRenderCommandQueue);
+        renderer.render(state, matrices, entityRenderCommandQueue, new class_12075());
         // todo this just adds the entities to a list, we need to actually render them somewhere by calling
         //  net.minecraft.class_11688.method_73012
         matrices.pop();

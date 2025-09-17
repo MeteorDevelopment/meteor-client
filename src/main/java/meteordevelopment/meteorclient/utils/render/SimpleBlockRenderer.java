@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.mixininterface.IBakedQuad;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.class_12075;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -45,7 +46,7 @@ public abstract class SimpleBlockRenderer {
         if (renderer != null && blockEntity.hasWorld() && blockEntity.getType().supports(blockEntity.getCachedState())) {
             BlockEntityRenderState c = new BlockEntityRenderState();
             BlockEntityRenderState.updateBlockEntityRenderState(blockEntity, c, null);
-            renderer.render(c, MATRICES, mc.gameRenderer.getEntityRenderDispatcher().getQueue());
+            renderer.render(c, MATRICES, mc.gameRenderer.getEntityRenderDispatcher().getQueue(), new class_12075());
         }
 
         vertexConsumerProvider.setOffset(0, 0, 0);

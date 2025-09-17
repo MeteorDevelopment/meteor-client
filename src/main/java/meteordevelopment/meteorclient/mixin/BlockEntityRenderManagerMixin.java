@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
+import net.minecraft.class_12075;
 import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
 import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
@@ -19,8 +20,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BlockEntityRenderManager.class)
 public abstract class BlockEntityRenderManagerMixin {
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private <S extends BlockEntityRenderState> void onRenderEntity(S blockEntity, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CallbackInfo ci) {
-        RenderBlockEntityEvent event = MeteorClient.EVENT_BUS.post(RenderBlockEntityEvent.get(blockEntity));
+    private <S extends BlockEntityRenderState> void onRenderEntity(S renderState, MatrixStack matrices, OrderedRenderCommandQueue queue, class_12075 arg, CallbackInfo ci) {
+        RenderBlockEntityEvent event = MeteorClient.EVENT_BUS.post(RenderBlockEntityEvent.get(renderState));
         if (event.isCancelled()) ci.cancel();
     }
 }

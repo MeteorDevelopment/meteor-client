@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import net.minecraft.class_12075;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.command.ModelCommandRenderer;
@@ -64,7 +65,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
     // Chams - player color
 
-    @WrapWithCondition(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/texture/Sprite;ILnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;)V"))
+    @WrapWithCondition(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/class_12075;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/texture/Sprite;ILnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;)V"))
     private boolean render$render(OrderedRenderCommandQueue instance, Model model, Object state, MatrixStack matrixStack, RenderLayer renderLayer, int light, int overlay, int mixColor, Sprite sprite, int outlineColor, ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlayCommand) {
         if (!chams.isActive() || !chams.players.get() || !(((IEntityRenderState) state).meteor$getEntity() instanceof PlayerEntity player)) return true;
         if (chams.ignoreSelf.get() && player == mc.player) return true;
@@ -90,8 +91,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
     // Chams - Through walls
 
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;)V", at = @At("HEAD"), cancellable = true)
-    private void render$Head(S state, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CallbackInfo ci) {
+    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/class_12075;)V", at = @At("HEAD"), cancellable = true)
+    private void render$Head(S state, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, class_12075 arg, CallbackInfo ci) {
         Entity entity = ((IEntityRenderState) state).meteor$getEntity();
         if (!(entity instanceof LivingEntity livingEntity)) return;
 
@@ -103,8 +104,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         }
     }
 
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;)V", at = @At("TAIL"))
-    private void render$Tail(S state, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CallbackInfo ci) {
+    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/class_12075;)V", at = @At("TAIL"))
+    private void render$Tail(S state, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, class_12075 arg, CallbackInfo ci) {
         Entity entity = ((IEntityRenderState) state).meteor$getEntity();
         if (!(entity instanceof LivingEntity livingEntity)) return;
 

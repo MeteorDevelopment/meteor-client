@@ -15,17 +15,15 @@ import meteordevelopment.meteorclient.systems.modules.render.BlockSelection;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
-import net.minecraft.block.BlockState;
+import net.minecraft.class_12074;
+import net.minecraft.class_12077;
+import net.minecraft.class_12078;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.Handle;
 import net.minecraft.client.util.ObjectAllocator;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.border.WorldBorder;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Final;
@@ -46,7 +44,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     }
 
     @Inject(method = "drawBlockOutline", at = @At("HEAD"), cancellable = true)
-    private void onDrawHighlightedBlockOutline(MatrixStack matrices, VertexConsumer vertexConsumer, Entity entity, double cameraX, double cameraY, double cameraZ, BlockPos pos, BlockState state, int i, CallbackInfo ci) {
+    private void onDrawHighlightedBlockOutline(MatrixStack matrixStack, VertexConsumer vertexConsumer, double d, double e, double f, class_12074 arg, int i, CallbackInfo ci) {
         if (Modules.get().isActive(BlockSelection.class)) ci.cancel();
     }
 
@@ -57,13 +55,13 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
 
     // No Render
 
-    @WrapWithCondition(method = "method_62216", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WeatherRendering;renderPrecipitation(Lnet/minecraft/world/World;Lnet/minecraft/client/render/VertexConsumerProvider;IFLnet/minecraft/util/math/Vec3d;)V"))
-    private boolean shouldRenderPrecipitation(WeatherRendering instance, World world, VertexConsumerProvider vertexConsumers, int ticks, float tickProgress, Vec3d pos) {
+    @WrapWithCondition(method = "method_62216", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WeatherRendering;renderPrecipitation(Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/class_12077;)V"))
+    private boolean shouldRenderPrecipitation(WeatherRendering instance, VertexConsumerProvider vertexConsumers, Vec3d pos, class_12077 arg) {
         return !Modules.get().get(NoRender.class).noWeather();
     }
 
-    @WrapWithCondition(method = "method_62216", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldBorderRendering;render(Lnet/minecraft/world/border/WorldBorder;Lnet/minecraft/util/math/Vec3d;DD)V"))
-    private boolean shouldRenderWorldBorder(WorldBorderRendering instance, WorldBorder border, Vec3d cameraPos, double viewDistanceBlocks, double farPlaneDistance) {
+    @WrapWithCondition(method = "method_62216", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldBorderRendering;render(Lnet/minecraft/class_12078;Lnet/minecraft/util/math/Vec3d;DD)V"))
+    private boolean shouldRenderWorldBorder(WorldBorderRendering instance, class_12078 arg, Vec3d cameraPos, double viewDistanceBlocks, double farPlaneDistance) {
         return !Modules.get().get(NoRender.class).noWorldBorder();
     }
 
