@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
+import net.minecraft.item.MaceItem;
 import net.minecraft.registry.tag.ItemTags;
 
 import java.util.Set;
@@ -49,6 +49,54 @@ public class Hitboxes extends Module {
         .build()
     );
 
+    private final Setting<Boolean> sword = sgGeneral.add(new BoolSetting.Builder()
+        .name("sword")
+        .description("Enable when holding a sword.")
+        .defaultValue(true)
+        .visible(onlyOnWeapon::get)
+        .build()
+    );
+
+    private final Setting<Boolean> axe = sgGeneral.add(new BoolSetting.Builder()
+        .name("axe")
+        .description("Enable when holding an axe.")
+        .defaultValue(true)
+        .visible(onlyOnWeapon::get)
+        .build()
+    );
+
+    private final Setting<Boolean> pickaxe = sgGeneral.add(new BoolSetting.Builder()
+        .name("pickaxe")
+        .description("Enable when holding a pickaxe.")
+        .defaultValue(true)
+        .visible(onlyOnWeapon::get)
+        .build()
+    );
+
+    private final Setting<Boolean> shovel = sgGeneral.add(new BoolSetting.Builder()
+        .name("shovel")
+        .description("Enable when holding a shovel.")
+        .defaultValue(true)
+        .visible(onlyOnWeapon::get)
+        .build()
+    );
+
+    private final Setting<Boolean> hoe = sgGeneral.add(new BoolSetting.Builder()
+        .name("hoe")
+        .description("Enable when holding a hoe.")
+        .defaultValue(true)
+        .visible(onlyOnWeapon::get)
+        .build()
+    );
+
+    private final Setting<Boolean> mace = sgGeneral.add(new BoolSetting.Builder()
+        .name("mace")
+        .description("Enable when holding a mace.")
+        .defaultValue(true)
+        .visible(onlyOnWeapon::get)
+        .build()
+    );
+
     public Hitboxes() {
         super(Categories.Combat, "hitboxes", "Expands an entity's hitboxes.");
     }
@@ -61,6 +109,14 @@ public class Hitboxes extends Module {
 
     private boolean testWeapon() {
         if (!onlyOnWeapon.get()) return true;
-        return InvUtils.testInHands(itemStack -> itemStack.isIn(ItemTags.SWORDS) || itemStack.getItem() instanceof AxeItem);
+        return InvUtils.testInHands(itemStack -> {
+            if (sword.get() && itemStack.isIn(ItemTags.SWORDS)) return true;
+            if (axe.get() && itemStack.isIn(ItemTags.AXES)) return true;
+            if (pickaxe.get() && itemStack.isIn(ItemTags.PICKAXES)) return true;
+            if (shovel.get() && itemStack.isIn(ItemTags.SHOVELS)) return true;
+            if (hoe.get() && itemStack.isIn(ItemTags.HOES)) return true;
+            if (mace.get() && itemStack.getItem() instanceof MaceItem) return true;
+            return false;
+        });
     }
 }
