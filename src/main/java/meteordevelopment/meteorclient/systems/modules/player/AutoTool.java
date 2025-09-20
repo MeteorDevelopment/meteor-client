@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -51,6 +52,13 @@ public class AutoTool extends Module {
         .build()
     );
 
+    private final Setting<Boolean> silkTouchForGlass = sgGeneral.add(new BoolSetting.Builder()
+        .name("silk-touch-for-glass")
+        .description("Prefer to mine glass with silk touch")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> fortuneForOresCrops = sgGeneral.add(new BoolSetting.Builder()
         .name("fortune-for-ores-and-crops")
         .description("Mines Ores and crops only with the Fortune enchantment.")
@@ -58,27 +66,17 @@ public class AutoTool extends Module {
         .build()
     );
 
-    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-break")
-        .description("Stops you from breaking your tool.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Integer> breakDurability = sgGeneral.add(new IntSetting.Builder()
-        .name("anti-break-percentage")
-        .description("The durability percentage to stop using a tool.")
-        .defaultValue(10)
-        .range(1, 100)
-        .sliderRange(1, 100)
-        .visible(antiBreak::get)
-        .build()
-    );
-
     private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
         .name("switch-back")
         .description("Switches your hand to whatever was selected when releasing your attack key.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> switchAway = sgGeneral.add(new BoolSetting.Builder()
+        .name("switch-away")
+        .description("Switch to hand when no correct tool is found")
+        .defaultValue(true)
         .build()
     );
 
@@ -164,7 +162,7 @@ public class AutoTool extends Module {
             if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
             if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(itemStack.getItem())) continue;
 
-            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
+            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), ToolSaver::canUse);
             if (score < 0) continue;
 
             if (score > bestScore) {
@@ -173,28 +171,28 @@ public class AutoTool extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        if (bestSlot == -1 && ToolSaver.isTool(mc.player.getMainHandStack()) && switchAway.get()) {
+            for (int i = 0; i < 9; i++) {
+                if (!ToolSaver.isTool(mc.player.getInventory().getStack(i))) {
+                    bestSlot = i;
+                    bestScore = 0;
+                    break;
+                }
+            }
+        }
+
+        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack -> ToolSaver.canUse(itemStack) || ToolSaver.canUse(currentStack) || !isTool(currentStack))))) {
             ticks = switchDelay.get();
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
             else shouldSwitch = true;
         }
 
-        // Anti break
-        currentStack = mc.player.getMainHandStack();
-
-        if (shouldStopUsing(currentStack) && isTool(currentStack)) {
-            mc.options.attackKey.setPressed(false);
-            event.cancel();
-        }
-    }
-
-    private boolean shouldStopUsing(ItemStack itemStack) {
-        return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
+
         if (!itemStack.isSuitableFor(state) &&
             !(itemStack.isIn(ItemTags.SWORDS) && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock)) &&
             !(itemStack.getItem() instanceof ShearsItem && state.getBlock() instanceof LeavesBlock || state.isIn(BlockTags.WOOL)))
