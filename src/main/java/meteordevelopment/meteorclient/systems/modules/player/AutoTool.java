@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -155,7 +154,6 @@ public class AutoTool extends Module {
         if (invSwapReturn.get() && !mc.options.attackKey.isPressed() && wasPressed && toolWasIn != -1) {
             InvUtils.quickSwap().fromId(invSwapSlot.get()).to(toolWasIn);
             toolWasIn = -1;
-            wasPressed = false;
             return;
         }
 

@@ -5,21 +5,27 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
-import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
+import meteordevelopment.meteorclient.events.entity.player.*;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.PumpkinBlock;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.entity.passive.SnowGolemEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 
 import java.util.List;
+import java.util.Objects;
 
 public class ToolSaver extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -84,6 +90,82 @@ public class ToolSaver extends Module {
             mc.options.attackKey.setPressed(false);
             event.cancel();
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onInteractBlock(InteractBlockEvent event) {
+        ItemStack s = mc.player.getStackInHand(event.hand);
+        BlockState bs = mc.world.getBlockState(event.result.getBlockPos());
+
+        switch (toolType(s)) {
+        case AXE:
+            if (!bs.isIn(BlockTags.LOGS) && !isWaxedCopperBlock(bs.getBlock())) return;
+            break;
+        case SHEAR:
+            if (!(bs.getBlock() instanceof PumpkinBlock)) return;
+            break;
+        case FLINT_AND_STEEL:
+            break;
+        default:
+            return;
+        }
+
+        if (!_canUse(s)) {
+            mc.options.useKey.setPressed(false);
+            event.cancel();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onInteractEntity(InteractEntityEvent event) {
+        ItemStack s = mc.player.getStackInHand(event.hand);
+
+        if (toolType(s) != ToolType.SHEAR) return;
+        if (!(event.entity instanceof SheepEntity || event.entity instanceof SnowGolemEntity)) return;
+
+        if (!_canUse(s)) {
+            mc.options.useKey.setPressed(false);
+            event.cancel();
+        }
+    }
+
+    private static boolean isWaxedCopperBlock(Block b) {
+        // there is no block tag or other apparent way to find waxed blocks...
+        return b == Blocks.WAXED_WEATHERED_CHISELED_COPPER
+            || b == Blocks.WAXED_EXPOSED_CHISELED_COPPER
+            || b == Blocks.WAXED_CHISELED_COPPER
+            || b == Blocks.WAXED_COPPER_BLOCK
+            || b == Blocks.WAXED_WEATHERED_COPPER
+            || b == Blocks.WAXED_EXPOSED_COPPER
+            || b == Blocks.WAXED_OXIDIZED_COPPER
+            || b == Blocks.WAXED_OXIDIZED_CUT_COPPER
+            || b == Blocks.WAXED_WEATHERED_CUT_COPPER
+            || b == Blocks.WAXED_EXPOSED_CUT_COPPER
+            || b == Blocks.WAXED_CUT_COPPER
+            || b == Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS
+            || b == Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS
+            || b == Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS
+            || b == Blocks.WAXED_CUT_COPPER_STAIRS
+            || b == Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB
+            || b == Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB
+            || b == Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB
+            || b == Blocks.WAXED_CUT_COPPER_SLAB
+            || b == Blocks.WAXED_COPPER_DOOR
+            || b == Blocks.WAXED_EXPOSED_COPPER_DOOR
+            || b == Blocks.WAXED_OXIDIZED_COPPER_DOOR
+            || b == Blocks.WAXED_WEATHERED_COPPER_DOOR
+            || b == Blocks.WAXED_COPPER_TRAPDOOR
+            || b == Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR
+            || b == Blocks.WAXED_OXIDIZED_COPPER_TRAPDOOR
+            || b == Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR
+            || b == Blocks.WAXED_COPPER_GRATE
+            || b == Blocks.WAXED_EXPOSED_COPPER_GRATE
+            || b == Blocks.WAXED_WEATHERED_COPPER_GRATE
+            || b == Blocks.WAXED_OXIDIZED_COPPER_GRATE
+            || b == Blocks.WAXED_COPPER_BULB
+            || b == Blocks.WAXED_EXPOSED_COPPER_BULB
+            || b == Blocks.WAXED_WEATHERED_COPPER_BULB
+            || b == Blocks.WAXED_OXIDIZED_COPPER_BULB;
     }
 
 
@@ -160,8 +242,7 @@ public class ToolSaver extends Module {
     }
 
     private boolean _canUse(ItemStack tool) {
-        ToolSaver ts = Modules.get().get(ToolSaver.class);
-        return !ts.isActive() || ts.isIgnored(tool) ||  !ts.isBroken(tool) || ts.canBreak(tool);
+        return !isActive() || isIgnored(tool) || !isBroken(tool) || canBreak(tool);
     }
 
     public static boolean canUse(ItemStack tool) {
