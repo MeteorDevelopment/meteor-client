@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
@@ -80,6 +81,31 @@ public class AutoTool extends Module {
         .build()
     );
 
+    private final Setting<Boolean> invSwap = sgGeneral.add(new BoolSetting.Builder()
+        .name("swap-from-inventory")
+        .description("Search tools in the entire inventory")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> invSwapSlot = sgGeneral.add(new IntSetting.Builder()
+        .name("swap-slot")
+        .description("Slot to swap tools from inventory into")
+        .defaultValue(8)
+        .range(0, 8)
+        .noSlider()
+        .visible(invSwap::get)
+        .build()
+    );
+
+    private final Setting<Boolean> invSwapReturn = sgGeneral.add(new BoolSetting.Builder()
+        .name("return-swapped-tool-back")
+        .description("Swap the tool back into the inventory")
+        .defaultValue(false)
+        .visible(invSwap::get)
+        .build()
+    );
+
     private final Setting<Integer> switchDelay = sgGeneral.add((new IntSetting.Builder()
         .name("switch-delay")
         .description("Delay in ticks before switching tools.")
@@ -116,6 +142,7 @@ public class AutoTool extends Module {
     private boolean shouldSwitch;
     private int ticks;
     private int bestSlot;
+    private int toolWasIn;
 
     public AutoTool() {
         super(Categories.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
@@ -124,6 +151,13 @@ public class AutoTool extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (Modules.get().isActive(InfinityMiner.class)) return;
+
+        if (invSwapReturn.get() && !mc.options.attackKey.isPressed() && wasPressed && toolWasIn != -1) {
+            InvUtils.quickSwap().fromId(invSwapSlot.get()).to(toolWasIn);
+            toolWasIn = -1;
+            wasPressed = false;
+            return;
+        }
 
         if (switchBack.get() && !mc.options.attackKey.isPressed() && wasPressed && InvUtils.previousSlot != -1) {
             InvUtils.swapBack();
@@ -156,7 +190,9 @@ public class AutoTool extends Module {
         double bestScore = -1;
         bestSlot = -1;
 
-        for (int i = 0; i < 9; i++) {
+        int max = invSwap.get() ? SlotUtils.MAIN_END : 9;
+
+        for (int i = 0; i < max; i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
 
             if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
@@ -183,11 +219,25 @@ public class AutoTool extends Module {
             }
         }
 
+        int returnToolTo = toolWasIn;
+
+        if (bestSlot > 8) {
+            toolWasIn = bestSlot;
+            bestSlot = invSwapSlot.get();
+        }
+
         if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack -> ToolSaver.canUse(itemStack) || ToolSaver.canUse(currentStack) || !isTool(currentStack))))) {
             ticks = switchDelay.get();
 
+            if (invSwapReturn.get() && returnToolTo > 8) InvUtils.quickSwap().fromId(invSwapSlot.get()).to(returnToolTo);
+
             if (ticks == 0) InvUtils.swap(bestSlot, true);
             else shouldSwitch = true;
+
+            if (toolWasIn > 8) {
+                if (bestSlot == invSwapSlot.get()) InvUtils.quickSwap().fromId(invSwapSlot.get()).to(toolWasIn);
+                else toolWasIn = -1;
+            }
         }
 
     }
