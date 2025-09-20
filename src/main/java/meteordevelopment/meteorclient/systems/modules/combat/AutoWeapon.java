@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.player.ToolSaver;
 import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -34,13 +35,6 @@ public class AutoWeapon extends Module {
         .build()
     );
 
-    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-break")
-        .description("Prevents you from breaking your weapon.")
-        .defaultValue(false)
-        .build()
-    );
-
     public AutoWeapon() {
         super(Categories.Combat, "auto-weapon", "Finds the best weapon to use in your hotbar.");
     }
@@ -62,14 +56,14 @@ public class AutoWeapon extends Module {
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.isIn(ItemTags.SWORDS)
-                && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
+                && ToolSaver.canUse(stack)) {
                 currentDamageS = DamageUtils.getAttackDamage(mc.player, target, stack);
                 if (currentDamageS > damageS) {
                     damageS = currentDamageS;
                     slotS = i;
                 }
             } else if (stack.getItem() instanceof AxeItem
-                && (!antiBreak.get() || (stack.getMaxDamage() - stack.getDamage()) > 10)) {
+                && ToolSaver.canUse(stack)) {
                 currentDamageA = DamageUtils.getAttackDamage(mc.player, target, stack);
                 if (currentDamageA > damageA) {
                     damageA = currentDamageA;

@@ -100,6 +100,7 @@ public class ToolSaver extends Module {
         if (is.isIn(ItemTags.SWORDS)) return ToolType.SWORD;
         if (is.getItem() instanceof ShearsItem) return ToolType.SHEAR;
         if (is.getItem() instanceof MaceItem) return ToolType.MACE;
+        if (is.getItem() instanceof FlintAndSteelItem) return ToolType.FLINT_AND_STEEL;
         return ToolType.NONE;
     }
 
@@ -181,5 +182,6 @@ public class ToolSaver extends Module {
         SWORD,
         MACE,
         SHEAR,
+        FLINT_AND_STEEL,
     }
 }
