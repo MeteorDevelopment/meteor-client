@@ -137,19 +137,19 @@ public class AutoReplenish extends Module {
 
         // If there are still items left in the stack, but it just crossed the threshold
         if (stack.isStackable() && !stack.isEmpty() && stack.getCount() <= minCount.get()) {
-            fromSlot = findItem(stack, slot, minCount.get() - stack.getCount() + 1);
+            fromSlot = findItem(stack, slot, minCount.get() - stack.getCount() + 1, true);
         }
 
         // If the stack just went from above the threshold to empty in a single tick
         // this can happen if the threshold is set low enough while using modules that
         // place many blocks per tick, like surround or holefiller
         if (prevStack.isStackable() && stack.isEmpty() && !prevStack.isEmpty()) {
-            fromSlot = findItem(prevStack, slot, minCount.get() - stack.getCount() + 1);
+            fromSlot = findItem(prevStack, slot, minCount.get() - stack.getCount() + 1, false);
         }
 
         // Unstackable items
         if (unstackable.get() && !prevStack.isStackable() && stack.isEmpty() && !prevStack.isEmpty()) {
-            fromSlot = findItem(prevStack, slot, 1);
+            fromSlot = findItem(prevStack, slot, 1, false);
         }
 
         // eliminate occasional loops when moving items from hotbar to itself
@@ -159,7 +159,7 @@ public class AutoReplenish extends Module {
         InvUtils.move().from(fromSlot).to(slot);
     }
 
-    private int findItem(ItemStack lookForStack, int excludedSlot, int goodEnoughCount) {
+    private int findItem(ItemStack lookForStack, int excludedSlot, int goodEnoughCount, boolean mustCombine) {
         int slot = -1;
         int count = 0;
 
@@ -169,7 +169,8 @@ public class AutoReplenish extends Module {
             ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.getItem() != lookForStack.getItem()) continue;
 
-            if (sameEnchants.get() && !stack.getComponents().equals(lookForStack.getComponents())) continue;
+            if (mustCombine && !ItemStack.areItemsAndComponentsEqual(lookForStack, stack)) continue;
+            if (sameEnchants.get() && !stack.getEnchantments().equals(lookForStack.getEnchantments())) continue;
 
             if (stack.getCount() > count) {
                 slot = i;
