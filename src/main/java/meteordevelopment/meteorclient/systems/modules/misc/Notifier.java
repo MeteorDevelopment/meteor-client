@@ -216,7 +216,7 @@ public class Notifier extends Module {
             } else {
                 MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
                 text.append(Text.literal(" has spawned at ").formatted(Formatting.GRAY));
-                text.append(formatCoords(event.entity.getPos()));
+                text.append(formatCoords(event.entity.getEntityPos()));
                 text.append(Text.literal(".").formatted(Formatting.GRAY));
                 info(text);
             }
@@ -240,7 +240,7 @@ public class Notifier extends Module {
             } else {
                 MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
                 text.append(Text.literal(" has despawned at ").formatted(Formatting.GRAY));
-                text.append(formatCoords(event.entity.getPos()));
+                text.append(formatCoords(event.entity.getEntityPos()));
                 text.append(Text.literal(".").formatted(Formatting.GRAY));
                 info(text);
             }
@@ -252,7 +252,7 @@ public class Notifier extends Module {
             if (pearlStartPosMap.containsKey(i)) {
                 EnderPearlEntity pearl = (EnderPearlEntity) e;
                 if (pearl.getOwner() != null && pearl.getOwner() instanceof PlayerEntity p) {
-                    double d = pearlStartPosMap.get(i).distanceTo(e.getPos());
+                    double d = pearlStartPosMap.get(i).distanceTo(e.getEntityPos());
                     if ((!Friends.get().isFriend(p) || !pearlIgnoreFriends.get()) && (!p.equals(mc.player) || !pearlIgnoreOwn.get())) {
                         info("(highlight)%s's(default) pearl landed at %d, %d, %d (highlight)(%.1fm away, travelled %.1fm)(default).", pearl.getOwner().getName().getString(), pearl.getBlockPos().getX(), pearl.getBlockPos().getY(), pearl.getBlockPos().getZ(), pearl.distanceTo(mc.player), d);
                     }

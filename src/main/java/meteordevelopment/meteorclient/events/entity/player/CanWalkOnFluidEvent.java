@@ -15,7 +15,7 @@ import net.minecraft.fluid.FluidState;
  * Getting the pose calls {@link meteordevelopment.meteorclient.mixin.EntityMixin#modifyGetPose(net.minecraft.entity.EntityPose)},
  * which calls {@link PlayerEntity#canChangeIntoPose(net.minecraft.entity.EntityPose)}, which
  * calculates whether there is enough space to fit your bounding box if you change into that pose. This method ends up
- * calling {@link LivingEntity#canWalkOnFluid(net.minecraft.fluid.FluidState)}, causing this event to fire
+ * calling {@link LivingEntity#canWalkOnFluid(FluidState)}, causing this event to fire
  * again and leading to a stack overflow crash. Introduced in
  * <a href="https://github.com/MeteorDevelopment/meteor-client/pull/5449">this pull request</a>
  */

@@ -58,10 +58,10 @@ public class Nuker extends Module {
         .build()
     );
 
-    private final Setting<Nuker.Mode> mode = sgGeneral.add(new EnumSetting.Builder<Nuker.Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("The way the blocks are broken.")
-        .defaultValue(Nuker.Mode.Flatten)
+        .defaultValue(Mode.Flatten)
         .build()
     );
 
@@ -152,10 +152,10 @@ public class Nuker extends Module {
         .build()
     );
 
-    private final Setting<Nuker.SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<Nuker.SortMode>()
+    private final Setting<SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<SortMode>()
         .name("sort-mode")
         .description("The blocks you want to mine first.")
-        .defaultValue(Nuker.SortMode.Closest)
+        .defaultValue(SortMode.Closest)
         .build()
     );
 

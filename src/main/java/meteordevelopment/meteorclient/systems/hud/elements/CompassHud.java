@@ -24,7 +24,7 @@ public class CompassHud extends HudElement {
 
     // General
 
-    private final Setting<CompassHud.Mode> mode = sgGeneral.add(new EnumSetting.Builder<CompassHud.Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("type")
         .description("Which type of direction information to show.")
         .defaultValue(Mode.Axis)

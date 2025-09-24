@@ -140,7 +140,7 @@ public class PopChams extends Module {
 
             // Y Modifier
             lastRenderY = getY();
-            ((IVec3d) getPos()).meteor$setY(getY() + yModifier.get() * event.frameTime);
+            ((IVec3d) getEntityPos()).meteor$setY(getY() + yModifier.get() * event.frameTime);
 
             // Scale Modifier
             scale += scaleModifier.get() * event.frameTime;

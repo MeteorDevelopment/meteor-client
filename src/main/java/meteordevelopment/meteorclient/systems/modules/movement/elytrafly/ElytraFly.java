@@ -431,8 +431,8 @@ public class ElytraFly extends Module {
         }
 
         if (noCrash.get() && mc.player.isGliding() && flightMode.get() != ElytraFlightModes.Bounce) {
-            Vec3d lookAheadPos = mc.player.getPos().add(mc.player.getVelocity().normalize().multiply(crashLookAhead.get()));
-            RaycastContext raycastContext = new RaycastContext(mc.player.getPos(), new Vec3d(lookAheadPos.getX(), mc.player.getY(), lookAheadPos.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+            Vec3d lookAheadPos = mc.player.getEntityPos().add(mc.player.getVelocity().normalize().multiply(crashLookAhead.get()));
+            RaycastContext raycastContext = new RaycastContext(mc.player.getEntityPos(), new Vec3d(lookAheadPos.getX(), mc.player.getY(), lookAheadPos.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
             BlockHitResult hitResult = mc.world.raycast(raycastContext);
             if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
                 ((IVec3d) event.movement).meteor$set(0, currentMode.velY, 0);
@@ -459,7 +459,7 @@ public class ElytraFly extends Module {
 
                 mc.player.setPitch(MathHelper.clamp(mc.player.getPitch(0), -50.f, 20.f));
 
-                if (mc.player.getPos().y <= mc.player.getBlockPos().down().getY() + 1.34f) {
+                if (mc.player.getEntityPos().y <= mc.player.getBlockPos().down().getY() + 1.34f) {
                     ((IVec3d)event.movement).meteor$set(event.movement.x, 0, event.movement.z);
                     mc.player.setSneaking(false);
                 }

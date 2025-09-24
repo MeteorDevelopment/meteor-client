@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import meteordevelopment.meteorclient.mixin.BlockEntityRenderManagerAccessor;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -30,22 +29,21 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class BannerTooltipComponent implements MeteorTooltipData, TooltipComponent {
     private final DyeColor color;
     private final BannerPatternsComponent patterns;
-    private final ModelPart bannerField;
     private final BannerFlagBlockModel bannerFlag;
 
-    // should only be used when the ItemStack is a banner
+    /** Should only be used when the ItemStack is a banner */
     public BannerTooltipComponent(ItemStack banner) {
         this.color = ((BannerItem) banner.getItem()).getColor();
         this.patterns = banner.getOrDefault(DataComponentTypes.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT);
-        this.bannerField = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG).getChild("flag");
-        this.bannerFlag = new BannerFlagBlockModel(bannerField);
+        ModelPart modelPart = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG);
+        this.bannerFlag = new BannerFlagBlockModel(modelPart);
     }
 
     public BannerTooltipComponent(DyeColor color, BannerPatternsComponent patterns) {
         this.color = color;
         this.patterns = patterns;
-        this.bannerField = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG).getChild("flag");
-        this.bannerFlag = new BannerFlagBlockModel(bannerField);
+        ModelPart modelPart = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG);
+        this.bannerFlag = new BannerFlagBlockModel(modelPart);
     }
 
     @Override
@@ -67,8 +65,8 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
         mc.gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ITEMS_FLAT);
 
-        bannerField.pitch = 0f;
-        bannerField.originY = -32f;
+        //bannerField.pitch = 0f;
+        //bannerField.originY = -32f;
 
         // the width and height provided to this method seem to be the dimensions of the entire tooltip,
         // not just this component
@@ -83,24 +81,27 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
         float s = Math.min(width, height);
         matrices.scale(s * 0.75f, s * 0.75f, 1);
 
-        RenderDispatcher entityRenderDispatcher = mc.gameRenderer.getEntityRenderDispatcher();
-        OrderedRenderCommandQueue renderCommandQueue = entityRenderDispatcher.getQueue();
+        RenderDispatcher renderDispatcher = mc.gameRenderer.getEntityRenderDispatcher();
+        OrderedRenderCommandQueue renderCommandQueue = renderDispatcher.getQueue();
 
         BannerBlockEntityRenderer.renderCanvas(
-            ((BlockEntityRenderManagerAccessor) mc.getBlockEntityRenderDispatcher()).getSpriteHolder(),
+            mc.getAtlasManager(),
             matrices,
             renderCommandQueue,
             15728880,
             OverlayTexture.DEFAULT_UV,
             bannerFlag,
-            null,
+            0f,
             ModelBaker.BANNER_BASE,
             true,
             color,
             patterns,
-            null
+            false,
+            null,
+            0
         );
 
+        renderDispatcher.render();
         matrices.pop();
     }
 }

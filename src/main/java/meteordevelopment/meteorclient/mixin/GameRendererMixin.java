@@ -191,7 +191,7 @@ public abstract class GameRendererMixin {
                 cameraE.setYaw(camera.getYaw());
                 cameraE.setPitch(camera.getPitch());
             } else {
-                ((IVec3d) cameraE.getPos()).meteor$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
+                ((IVec3d) cameraE.getEntityPos()).meteor$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
                 cameraE.lastX = freecam.prevPos.x;
                 cameraE.lastY = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
                 cameraE.lastZ = freecam.prevPos.z;
@@ -205,7 +205,7 @@ public abstract class GameRendererMixin {
             updateCrosshairTarget(tickDelta);
             freecamSet = false;
 
-            ((IVec3d) cameraE.getPos()).meteor$set(x, y, z);
+            ((IVec3d) cameraE.getEntityPos()).meteor$set(x, y, z);
             cameraE.lastX = lastX;
             cameraE.lastY = lastY;
             cameraE.lastZ = lastZ;

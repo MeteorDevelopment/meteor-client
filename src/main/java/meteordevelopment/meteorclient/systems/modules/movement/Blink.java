@@ -73,7 +73,7 @@ public class Blink extends Module {
             model.spawn();
         }
 
-        Utils.set(start, mc.player.getPos());
+        Utils.set(start, mc.player.getEntityPos());
     }
 
     @Override
