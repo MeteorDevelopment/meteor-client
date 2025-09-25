@@ -207,6 +207,12 @@ public class InvUtils {
         return ACTION;
     }
 
+    public static Action dropOne() {
+        ACTION.type = SlotActionType.THROW;
+        ACTION.data = 0;
+        return ACTION;
+    }
+
     public static void dropHand() {
         if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, ScreenHandler.EMPTY_SPACE_SLOT_INDEX, 0, SlotActionType.PICKUP, mc.player);
     }
