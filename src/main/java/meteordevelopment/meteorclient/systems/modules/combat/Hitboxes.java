@@ -110,7 +110,7 @@ public class Hitboxes extends Module {
 
     private boolean testWeapon() {
         if (!onlyOnWeapon.get()) return true;
-        return InvUtils.testInHands(itemStack -> {
+        return InvUtils.testInMainHand(itemStack -> {
             if (sword.get() && itemStack.isIn(ItemTags.SWORDS)) return true;
             if (axe.get() && itemStack.isIn(ItemTags.AXES)) return true;
             if (pickaxe.get() && itemStack.isIn(ItemTags.PICKAXES)) return true;
