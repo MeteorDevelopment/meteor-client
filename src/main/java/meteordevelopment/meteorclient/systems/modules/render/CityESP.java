@@ -14,7 +14,8 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.entity.EntityUtils;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.combat.AutoCity;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -48,7 +49,7 @@ public class CityESP extends Module {
         .build()
     );
 
-    private BlockPos target;
+    private BlockPos cityPos;
 
     public CityESP() {
         super(Categories.Render, "city-esp", "Displays blocks that can be broken in order to city another player.");
@@ -56,19 +57,20 @@ public class CityESP extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        PlayerEntity targetEntity = TargetUtils.getPlayerTarget(mc.player.getBlockInteractionRange() + 2, SortPriority.LowestDistance);
+        cityPos = null;
 
-        if (TargetUtils.isBadTarget(targetEntity, mc.player.getBlockInteractionRange() + 2)) {
-            target = null;
-        } else {
-            target = EntityUtils.getCityBlock(targetEntity);
+        PlayerEntity target = TargetUtils.getPlayerTarget(mc.player.getBlockInteractionRange() + 2, SortPriority.LowestDistance);
+        if (TargetUtils.isBadTarget(target, mc.player.getBlockInteractionRange() + 2)) return;
+
+        AutoCity autoCity = Modules.get().get(AutoCity.class);
+        if (autoCity.breakPos == null) {
+            cityPos = autoCity.getBlockToMine(target);
         }
     }
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (target == null) return;
-
-        event.renderer.box(target, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (cityPos == null) return;
+        event.renderer.box(cityPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }
