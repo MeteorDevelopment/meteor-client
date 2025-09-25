@@ -8,6 +8,9 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.mixininterface.IChatHud;
@@ -23,16 +26,17 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.gui.hud.MessageIndicator;
+import net.minecraft.client.util.ChatMessages;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.OrderedText;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
@@ -79,16 +83,14 @@ public abstract class ChatHudMixin implements IChatHud {
         ((IChatHudLine) (Object) messages.getFirst()).meteor$setId(nextId);
     }
 
-    @SuppressWarnings("DataFlowIssue")
     @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
-    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Local(ordinal = 1) int j) {
+    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Share("index") LocalIntRef indexRef) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
-        if (handler == null) return line;
-
         IChatHudLineVisible meteorLine = (IChatHudLineVisible) (Object) line;
+        if (meteorLine == null) return line;
 
         meteorLine.meteor$setSender(handler.meteor$getSender());
-        meteorLine.meteor$setStartOfEntry(j == 0);
+        meteorLine.meteor$setStartOfEntry(indexRef.get() == 0);
 
         return line;
     }
@@ -169,12 +171,30 @@ public abstract class ChatHudMixin implements IChatHud {
         return Modules.get().get(NoRender.class).noMessageSignatureIndicator() ? null : indicator;
     }
 
+    // Get the variable `j` for later usage at onAddMessage_modifyChatHudLineVisible
+
+    @ModifyArg(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;"))
+    private int addVisibleMessage_captureIndex(int index, @Share("index") LocalIntRef indexRef) {
+        indexRef.set(index);
+        return index;
+    }
+
+    // Get list for later usage at anti-spam
+
+    @Redirect(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/ChatMessages;breakRenderedChatMessageLines(Lnet/minecraft/text/StringVisitable;ILnet/minecraft/client/font/TextRenderer;)Ljava/util/List;"))
+    private List<OrderedText> addVisibleMessage_captureList(StringVisitable message, int width, TextRenderer textRenderer, @Share("listRef") LocalRef<List<OrderedText>> listRef) {
+        List<OrderedText> list = ChatMessages.breakRenderedChatMessageLines(message, width, textRenderer);
+        listRef.set(list);
+        return list;
+    }
+
     // Anti spam
 
     @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;isChatFocused()Z"))
-    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, @Local List<OrderedText> list) {
+    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, @Share("listRef") LocalRef<List<OrderedText>> listRef) {
         if (Modules.get() == null) return; // baritone calls addMessage before we initialise
 
+        List<OrderedText> list = listRef.get();
         getBetterChat().lines.addFirst(list.size());
     }
 
