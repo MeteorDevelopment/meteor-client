@@ -151,6 +151,8 @@ public class AutoReplenish extends Module {
         if (unstackable.get() && !prevStack.isStackable() && stack.isEmpty() && !prevStack.isEmpty()) {
             fromSlot = findItem(prevStack, slot, 1, false);
         }
+        
+        if (slot == 9) slot = SlotUtils.OFFHAND;
 
         // eliminate occasional loops when moving items from hotbar to itself
         if (fromSlot == mc.player.getInventory().getSelectedSlot() || fromSlot == SlotUtils.OFFHAND) return;
