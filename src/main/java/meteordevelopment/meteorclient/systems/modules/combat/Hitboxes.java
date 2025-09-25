@@ -20,6 +20,7 @@ import java.util.Set;
 
 public class Hitboxes extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgWeapon = settings.createGroup("Weapon Options");
 
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
@@ -42,14 +43,14 @@ public class Hitboxes extends Module {
         .build()
     );
 
-    private final Setting<Boolean> onlyOnWeapon = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyOnWeapon = sgWeapon.add(new BoolSetting.Builder()
         .name("only-on-weapon")
         .description("Only modifies hitbox when holding a weapon in hand.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> sword = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> sword = sgWeapon.add(new BoolSetting.Builder()
         .name("sword")
         .description("Enable when holding a sword.")
         .defaultValue(true)
@@ -57,7 +58,7 @@ public class Hitboxes extends Module {
         .build()
     );
 
-    private final Setting<Boolean> axe = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> axe = sgWeapon.add(new BoolSetting.Builder()
         .name("axe")
         .description("Enable when holding an axe.")
         .defaultValue(true)
@@ -65,7 +66,7 @@ public class Hitboxes extends Module {
         .build()
     );
 
-    private final Setting<Boolean> pickaxe = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> pickaxe = sgWeapon.add(new BoolSetting.Builder()
         .name("pickaxe")
         .description("Enable when holding a pickaxe.")
         .defaultValue(true)
@@ -73,7 +74,7 @@ public class Hitboxes extends Module {
         .build()
     );
 
-    private final Setting<Boolean> shovel = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> shovel = sgWeapon.add(new BoolSetting.Builder()
         .name("shovel")
         .description("Enable when holding a shovel.")
         .defaultValue(true)
@@ -81,7 +82,7 @@ public class Hitboxes extends Module {
         .build()
     );
 
-    private final Setting<Boolean> hoe = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> hoe = sgWeapon.add(new BoolSetting.Builder()
         .name("hoe")
         .description("Enable when holding a hoe.")
         .defaultValue(true)
@@ -89,7 +90,7 @@ public class Hitboxes extends Module {
         .build()
     );
 
-    private final Setting<Boolean> mace = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> mace = sgWeapon.add(new BoolSetting.Builder()
         .name("mace")
         .description("Enable when holding a mace.")
         .defaultValue(true)
