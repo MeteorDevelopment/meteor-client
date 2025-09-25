@@ -325,37 +325,38 @@ public class Surround extends Module {
         // Centering player
         if (center.get() == Center.Always) PlayerUtils.centerPlayer();
 
-        // Check surround blocks in order and place the first missing one if present
-        int safe = 0;
         int placedCount = 0;
+        boolean complete = true;
 
         BlockPos playerPos = mc.player.getBlockPos();
 
-        // Looping through feet blocks
+        // Placing feet blocks
         for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
             BlockPos placePos = playerPos.offset(direction);
 
             // Place support blocks if air place is disabled
             if (!airPlace.get() && isAirPlace(placePos) && mc.world.getBlockState(placePos).isReplaceable()){
                 if (place(placePos.down(), block) && ++placedCount >= blocksPerTick.get()) break;
+
+                if (mc.world.getBlockState(placePos.down()).isReplaceable()) complete = false;
             }
 
             if (place(placePos, block) && ++placedCount >= blocksPerTick.get()) break;
-            safe++;
+
+            if (mc.world.getBlockState(placePos).isReplaceable()) complete = false;
         }
 
-        // Looping through head blocks
-        if (doubleHeight.get() && safe == 4) {
+        // Placing head blocks
+        if (doubleHeight.get() && complete) {
             for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
                 BlockPos placePos = playerPos.offset(direction).up();
                 if (place(placePos, block) && ++placedCount >= blocksPerTick.get()) break;
-                safe++;
+
+                if (mc.world.getBlockState(placePos).isReplaceable()) complete = false;
             }
         }
 
         timer = 0;
-
-        boolean complete = safe == (doubleHeight.get() ? 8 : 4);
 
         // Disable if all the surround blocks are placed
         if (complete && toggleOnComplete.get()) {
