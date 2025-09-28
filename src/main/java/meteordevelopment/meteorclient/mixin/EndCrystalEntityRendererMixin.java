@@ -63,9 +63,10 @@ public abstract class EndCrystalEntityRendererMixin {
     // Chams - Color
 
     @WrapWithCondition(method = "render(Lnet/minecraft/client/render/entity/state/EndCrystalEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;)V"))
-    private boolean render$color(OrderedRenderCommandQueue instance, Model model, Object state, MatrixStack matrixStack, RenderLayer renderLayer, int light, int uv, int outlineColor, ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlayCommand) {
+    private <S> boolean render$color(OrderedRenderCommandQueue instance, Model<? super S> model, S state, MatrixStack matrixStack, RenderLayer renderLayer, int light, int uv, int outlineColor, ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlayCommand) {
         if (chams.isActive() && chams.crystals.get()) {
-            instance.submitModel(model,
+            instance.submitModel(
+                model,
                 state,
                 matrixStack,
                 END_CRYSTAL,
@@ -74,7 +75,8 @@ public abstract class EndCrystalEntityRendererMixin {
                 chams.crystalsColor.get().getPacked(),
                 null,
                 outlineColor,
-                null);
+                null
+            );
             return false;
         }
 
