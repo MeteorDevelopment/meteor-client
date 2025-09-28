@@ -2831,7 +2831,7 @@ public class HighwayBuilder extends Module {
             // when it isn't supposed to due to latency
             boolean timeout = progress() > 2 && (b.mc.player.age - (packet ? packetStartTime : normalStartTime) > 60);
 
-            return  distance || timeout;
+            return distance || timeout;
         }
 
         public double progress() {
