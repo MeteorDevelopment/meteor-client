@@ -27,10 +27,7 @@ public class Renderer3D {
     }
 
     public void begin() {
-        lines.begin();
-        triangles.begin();
-    }
-
+       
     public void render(MatrixStack matrices) {
         MeshRenderer.begin()
             .attachments(MinecraftClient.getInstance().getFramebuffer())
