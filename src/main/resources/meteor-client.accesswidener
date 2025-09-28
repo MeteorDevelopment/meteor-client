@@ -21,5 +21,7 @@ accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder withSnip
 accessible   field   net/minecraft/client/render/RenderPhase ITEM_ENTITY_TARGET Lnet/minecraft/client/render/RenderPhase$Target;
 
 # Auto Fish
-accessible class net/minecraft/entity/projectile/FishingBobberEntity$State
-accessible field net/minecraft/entity/projectile/FishingBobberEntity state Lnet/minecraft/entity/projectile/FishingBobberEntity$State;
+accessible   class   net/minecraft/entity/projectile/FishingBobberEntity$State
+accessible   field   net/minecraft/entity/projectile/FishingBobberEntity state Lnet/minecraft/entity/projectile/FishingBobberEntity$State;
+
+accessible   method   net/minecraft/client/network/ClientPlayerInteractionManager sendSequencedPacket (Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V
