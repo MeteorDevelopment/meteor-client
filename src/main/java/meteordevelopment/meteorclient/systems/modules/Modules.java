@@ -390,6 +390,7 @@ public class Modules extends System<Modules> {
         add(new AntiAnvil());
         add(new AntiBed());
         add(new ArrowDodge());
+        add(new AttributeSwap());
         add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
@@ -402,7 +403,6 @@ public class Modules extends System<Modules> {
         add(new BedAura());
         add(new BowAimbot());
         add(new BowSpam());
-        add(new AttributeSwap());
         add(new Burrow());
         add(new Criticals());
         add(new CrystalAura());
