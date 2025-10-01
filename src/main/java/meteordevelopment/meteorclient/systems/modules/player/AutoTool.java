@@ -46,14 +46,14 @@ public class AutoTool extends Module {
     );
 
     private final Setting<Boolean> silkTouchEnabled = sgSilk.add(new BoolSetting.Builder()
-        .name("silk Touch Whitelist")
+        .name("silk-touch-whitelist")
         .description("Require Silk Touch for selected blocks.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<List<Block>> silkTouchBlocks = sgSilk.add(new BlockListSetting.Builder()
-        .name("Whitelist Blocks")
+        .name("whitelist-blocks")
         .description("Blocks that should be mined with Silk Touch.")
         .defaultValue(Blocks.ENDER_CHEST, Blocks.GLOWSTONE, Blocks.SEA_LANTERN, Blocks.GLASS, Blocks.TURTLE_EGG, Blocks.ICE, Blocks.BLUE_ICE, Blocks.PACKED_ICE)
         .visible(silkTouchEnabled::get)
