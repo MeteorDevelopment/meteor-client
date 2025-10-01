@@ -122,6 +122,10 @@ public class CustomTextRenderer implements TextRenderer {
     public void end() {
         if (!building) throw new RuntimeException("CustomTextRenderer.end() called without calling begin()");
 
+        for (Font f : fonts) {
+            f.updateTextureIfNeeded();
+        }
+
         if (!scaleOnly) {
             mesh.end();
 

@@ -47,6 +47,30 @@ public class Texture extends AbstractTexture {
         image.close();
     }
 
+    public void uploadRegion(ByteBuffer buffer, int srcX, int srcY, int width, int height) {
+        if (width * height > (getWidth() * getHeight()) / 4) {
+            upload(buffer);
+            return;
+        }
+
+        var image = getImage();
+
+        // cp only dirty region
+        int texWidth = getWidth();
+        long srcAddr = MemoryUtil.memAddress(buffer);
+        long dstAddr = image.imageId();
+
+        for (int y = 0; y < height; y++) {
+            long srcOffset = srcAddr + ((srcY + y) * texWidth + srcX);
+            long dstOffset = dstAddr + ((srcY + y) * texWidth + srcX);
+            MemoryUtil.memCopy(srcOffset, dstOffset, width);
+        }
+
+        RenderSystem.getDevice().createCommandEncoder().writeToTexture(glTexture, image);
+
+        image.close();
+    }
+
     private @NotNull NativeImage getImage() {
         NativeImage.Format imageFormat = switch (glTexture.getFormat()) {
             case RGBA8 -> NativeImage.Format.RGBA;
