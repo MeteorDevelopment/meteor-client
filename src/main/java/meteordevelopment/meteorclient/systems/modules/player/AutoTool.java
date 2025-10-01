@@ -231,6 +231,10 @@ public class AutoTool extends Module {
         // for ender chest, only pickaxes are valid tool (silk touch axes will drop ec but extremely slow, so we pass it)
         if (state.getBlock() == Blocks.ENDER_CHEST && !itemStack.isIn(ItemTags.PICKAXES)) return -1;
         boolean bypassSuitability = isSilkTarget && allowSilkBypass(state);
+        
+        // When fortuneForOresCrops is enabled, allow crops to bypass suitability so fortune tools can be considered for crops
+        if (!bypassSuitability && fortuneOre && (state.getBlock() instanceof CropBlock || state.getBlock() instanceof NetherWartBlock)) bypassSuitability = true;
+
         if (!itemStack.isSuitableFor(state) &&
             !bypassSuitability &&
             !(itemStack.isIn(ItemTags.SWORDS) && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock)) &&
@@ -259,6 +263,9 @@ public class AutoTool extends Module {
 
         if (itemStack.isIn(ItemTags.SWORDS) && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
             score += 9000 + (itemStack.get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
+
+        // Prefer hoes slightly for crops when fortune is enabled and the block is a crop.
+        if (fortuneOre && (state.getBlock() instanceof CropBlock || state.getBlock() instanceof NetherWartBlock) && itemStack.isIn(ItemTags.HOES)) score += 10;
 
         return score;
     }
