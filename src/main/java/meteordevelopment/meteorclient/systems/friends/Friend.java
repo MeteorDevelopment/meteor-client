@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.friends;
 
 import com.mojang.util.UndashedUuid;
-import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
@@ -53,8 +52,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
 
         APIResponse res = null;
 
-        // Prefer UUID-based lookup when configured and UUID is known
-        if (Config.get().useUUIDsForLookup.get() && id != null) {
+        if (id != null) {
             res = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + UndashedUuid.toString(id)).sendJson(APIResponse.class);
         }
 

@@ -159,13 +159,6 @@ public class Config extends System<Config> {
         .build()
     );
 
-    public final Setting<Boolean> useUUIDsForLookup = sgMisc.add(new BoolSetting.Builder()
-        .name("use-uuids-to-lookup")
-        .description("Uses UUIDs to lookup for friends when available.")
-        .defaultValue(true)
-        .build()
-    );
-
     public List<String> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {
