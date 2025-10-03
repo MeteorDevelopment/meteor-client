@@ -14,6 +14,8 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
+import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
+import net.minecraft.client.render.command.RenderDispatcher;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.BlockModelPart;
 import net.minecraft.client.render.model.BlockStateModel;
@@ -34,6 +36,20 @@ public abstract class SimpleBlockRenderer {
     private static final Direction[] DIRECTIONS = Direction.values();
     private static final Random RANDOM = Random.create();
 
+    private static final OrderedRenderCommandQueueImpl renderCommandQueue = new OrderedRenderCommandQueueImpl();
+
+    private static final RenderDispatcher renderDispatcher = new RenderDispatcher(
+        renderCommandQueue,
+        mc.getBlockRenderManager(),
+        new WrapperImmediateVertexConsumerProvider(),
+        mc.getAtlasManager(),
+        NoopOutlineVertexConsumerProvider.INSTANCE,
+        NoopImmediateVertexConsumerProvider.INSTANCE,
+        mc.textRenderer
+    );
+
+    private static VertexConsumerProvider provider;
+
     private SimpleBlockRenderer() {}
 
     public static void renderWithBlockEntity(BlockEntity blockEntity, float tickDelta, IVertexConsumerProvider vertexConsumerProvider) {
@@ -43,9 +59,16 @@ public abstract class SimpleBlockRenderer {
         BlockEntityRenderer<BlockEntity, BlockEntityRenderState> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
 
         if (renderer != null && blockEntity.hasWorld() && blockEntity.getType().supports(blockEntity.getCachedState())) {
+            SimpleBlockRenderer.provider = vertexConsumerProvider;
+
             BlockEntityRenderState state = renderer.createRenderState();
             renderer.updateRenderState(blockEntity, state, tickDelta, mc.gameRenderer.getCamera().getPos(), null);
-            renderer.render(state, MATRICES, mc.gameRenderer.getEntityRenderDispatcher().getQueue(), mc.gameRenderer.getEntityRenderStates().cameraRenderState);
+            renderer.render(state, MATRICES, renderCommandQueue, mc.gameRenderer.getEntityRenderStates().cameraRenderState);
+
+            renderDispatcher.render();
+            renderCommandQueue.onNextFrame();
+
+            SimpleBlockRenderer.provider = null;
         }
 
         vertexConsumerProvider.setOffset(0, 0, 0);
@@ -88,6 +111,25 @@ public abstract class SimpleBlockRenderer {
 
                 consumer.vertex(offsetX + x, offsetY + y, offsetZ + z);
             }
+        }
+    }
+
+    private static class WrapperImmediateVertexConsumerProvider extends VertexConsumerProvider.Immediate {
+        private WrapperImmediateVertexConsumerProvider() {
+            super(null, null);
+        }
+
+        @Override
+        public VertexConsumer getBuffer(RenderLayer layer) {
+            return provider.getBuffer(layer);
+        }
+
+        @Override
+        public void draw() {
+        }
+
+        @Override
+        public void draw(RenderLayer layer) {
         }
     }
 }
