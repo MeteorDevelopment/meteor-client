@@ -69,7 +69,6 @@
     "CreativeInventoryScreenAccessor",
     "CreativeSlotMixin",
     "CrossbowItemAccessor",
-    "DefaultSkinHelperMixin",
     "DirectionAccessor",
     "DisconnectedScreenMixin",
     "DrawContextMixin",

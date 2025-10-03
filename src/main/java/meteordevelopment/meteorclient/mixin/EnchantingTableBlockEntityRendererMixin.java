@@ -20,8 +20,8 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(EnchantingTableBlockEntityRenderer.class)
 public abstract class EnchantingTableBlockEntityRendererMixin {
-    @WrapWithCondition(method = "render(Lnet/minecraft/block/entity/EnchantingTableBlockEntity;FLnet/minecraft/client/util/math/MatrixStack;IILnet/minecraft/util/math/Vec3d;Lnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/texture/Sprite;ILnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;)V"))
-    private boolean onRenderBookModelRenderProxy(OrderedRenderCommandQueue instance, Model model, Object o, MatrixStack matrixStack, RenderLayer renderLayer, int i, int j, int k, Sprite sprite, int l, ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlayCommand) {
+    @WrapWithCondition(method = "render(Lnet/minecraft/client/render/block/entity/state/EnchantingTableBlockEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/texture/Sprite;ILnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;)V"))
+    private <S> boolean onRenderBookModelRenderProxy(OrderedRenderCommandQueue instance, Model<? super S> model, S state, MatrixStack matrixStack, RenderLayer renderLayer, int i, int j, int k, Sprite sprite, int l, ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlayCommand) {
         return !Modules.get().get(NoRender.class).noEnchTableBook();
     }
 }
