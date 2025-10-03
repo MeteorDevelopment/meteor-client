@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderTickCounter;
@@ -95,6 +96,7 @@ public abstract class InGameHudMixin {
     @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
     private void onRenderCrosshair(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noCrosshair()) ci.cancel();
+        if (MinecraftClient.getInstance().currentScreen != null) ci.cancel();
     }
 
     @Inject(method = "renderTitleAndSubtitle", at = @At("HEAD"), cancellable = true)
