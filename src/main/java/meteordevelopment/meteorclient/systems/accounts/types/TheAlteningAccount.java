@@ -60,7 +60,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
         applyLoginEnvironment(SERVICE);
 
         try {
-            setSession(new Session(auth.getCurrentProfile().name(), auth.getCurrentProfile().id (), auth.getAccessToken(), Optional.empty(), Optional.empty()));
+            setSession(new Session(auth.getCurrentProfile().name(), auth.getCurrentProfile().id(), auth.getAccessToken(), Optional.empty(), Optional.empty()));
             return true;
         } catch (Exception e) {
             MeteorClient.LOG.error("Failed to login with TheAltening.");

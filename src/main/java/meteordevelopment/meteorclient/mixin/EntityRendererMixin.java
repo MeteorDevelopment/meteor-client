@@ -18,8 +18,10 @@ import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShader
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.world.LightType;
@@ -71,6 +73,21 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 
             if (color == null) return;
             state.outlineColor = color.getPacked();
+        }
+    }
+
+    @Inject(method = "updateShadow(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/entity/state/EntityRenderState;)V", at = @At("HEAD"), cancellable = true)
+    private void updateShadow(Entity entity, EntityRenderState renderState, CallbackInfo ci) {
+        if (PostProcessShaders.rendering) {
+            ci.cancel();
+            return;
+        }
+
+        if (Modules.get().get(NoRender.class).noDeadEntities() &&
+            entity instanceof LivingEntity &&
+            renderState instanceof LivingEntityRenderState livingEntityRenderState &&
+            livingEntityRenderState.deathTime > 0) {
+            ci.cancel();
         }
     }
 

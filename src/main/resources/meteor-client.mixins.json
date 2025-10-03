@@ -79,7 +79,7 @@
     "EntityAccessor",
     "EntityBucketItemAccessor",
     "EntityMixin",
-    "EntityRenderDispatcherMixin",
+    "EntityRenderManagerMixin",
     "EntityRendererMixin",
     "EntityRenderStateMixin",
     "EntityTrackingSectionAccessor",
