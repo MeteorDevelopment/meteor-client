@@ -80,7 +80,6 @@ public class FriendsTab extends Tab {
                 MeteorExecutor.execute(() -> {
                     if (friend.headTextureNeedsUpdate()) {
                         friend.updateInfo();
-                        reload();
                     }
                 })
             );
