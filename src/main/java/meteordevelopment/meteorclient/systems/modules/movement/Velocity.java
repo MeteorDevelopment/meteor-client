@@ -152,9 +152,9 @@ public class Velocity extends Module {
     private void onPacketReceive(PacketEvent.Receive event) {
         if (knockback.get() && event.packet instanceof EntityVelocityUpdateS2CPacket packet
             && packet.getEntityId() == mc.player.getId()) {
-            double velX = (packet.method_73085().getX() - mc.player.getVelocity().x) * knockbackHorizontal.get();
-            double velY = (packet.method_73085().getY() - mc.player.getVelocity().y) * knockbackVertical.get();
-            double velZ = (packet.method_73085().getZ() - mc.player.getVelocity().z) * knockbackHorizontal.get();
+            double velX = (packet.getVelocity().getX() - mc.player.getVelocity().x) * knockbackHorizontal.get();
+            double velY = (packet.getVelocity().getY() - mc.player.getVelocity().y) * knockbackVertical.get();
+            double velZ = (packet.getVelocity().getZ() - mc.player.getVelocity().z) * knockbackHorizontal.get();
             ((EntityVelocityUpdateS2CPacketAccessor) packet).meteor$setVelocity(
                 new Vec3d(velX * 8000 + mc.player.getVelocity().x * 8000, velY * 8000 + mc.player.getVelocity().y * 8000, velZ * 8000 + mc.player.getVelocity().z * 8000)
             );

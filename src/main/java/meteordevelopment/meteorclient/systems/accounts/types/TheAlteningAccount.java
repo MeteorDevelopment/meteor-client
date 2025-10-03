@@ -23,7 +23,7 @@ import java.util.Optional;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TheAlteningAccount extends Account<TheAlteningAccount> implements TokenAccount {
-    private static final Environment ENVIRONMENT = new Environment("http://sessionserver.thealtening.com", "http://authserver.thealtening.com", "The Altening");
+    private static final Environment ENVIRONMENT = new Environment("http://sessionserver.thealtening.com", "http://authserver.thealtening.com", "https://api.mojang.com", "The Altening");
     private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(mc.getNetworkProxy(), ENVIRONMENT);
     private String token;
     private @Nullable WaybackAuthLib auth;
