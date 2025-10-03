@@ -70,6 +70,7 @@ import org.joml.Vector3d;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
@@ -2092,10 +2093,10 @@ public class HighwayBuilder extends Module {
             int bestSlot = -1;
 
             for (int i = 0; i < b.mc.player.getInventory().getMainStacks().size(); i++) {
-                double score = AutoTool.getScore(b.mc.player.getInventory().getStack(i), blockState, false, false, AutoTool.EnchantPreference.None, itemStack -> {
+                double score = AutoTool.getScore(b.mc.player.getInventory().getStack(i), blockState, false, AutoTool.EnchantPreference.None, itemStack -> {
                     if (noSilkTouch && Utils.hasEnchantment(itemStack, Enchantments.SILK_TOUCH)) return false;
                     return !b.dontBreakTools.get() || itemStack.getMaxDamage() - itemStack.getDamage() > (itemStack.getMaxDamage() * (b.breakDurability.get() / 100));
-                });
+                }, false, Collections.<Block>emptyList());
 
                 if (score > bestScore) {
                     bestScore = score;
