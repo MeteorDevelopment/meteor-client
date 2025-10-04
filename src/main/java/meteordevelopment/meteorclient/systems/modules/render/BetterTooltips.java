@@ -156,6 +156,14 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    private final Setting<Boolean> bundles = sgPreviews.add(new BoolSetting.Builder()
+        .name("bundles")
+        .description("Shows a preview of bundle contents when hovering over it in an inventory.")
+        .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
+        .build()
+    );
+
     private final Setting<Boolean> foodInfo = sgPreviews.add(new BoolSetting.Builder()
         .name("food-info")
         .description("Shows hunger and saturation values for food items.")
@@ -248,11 +256,12 @@ public class BetterTooltips extends Module {
         if (foodInfo.get()) {
             FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
             if (food != null) {
-                // Those emojis really look like in-game hunger bar  
+                // Those emojis really look like in-game hunger bar
                 event.appendStart(Text.literal(String.format("🍖 %d (💛 %.1f)", food.nutrition(), food.saturation()))
                     .formatted(Formatting.GRAY));
             }
         }
+
 
         // Item size tooltip
         if (byteSize.get()) {
@@ -346,6 +355,21 @@ public class BetterTooltips extends Module {
                 event.tooltipData = new EntityTooltipComponent(entity);
             }
         }
+
+        // Bundle preview
+        else if (event.itemStack.getItem() instanceof BundleItem && previewBundles()) {
+            if (event.itemStack.contains(DataComponentTypes.BUNDLE_CONTENTS)) {
+                BundleContentsComponent bundleContents = event.itemStack.get(DataComponentTypes.BUNDLE_CONTENTS);
+                if (bundleContents != null && !bundleContents.isEmpty()) {
+                    ItemStack[] bundleItems = new ItemStack[bundleContents.size()];
+                    int index = 0;
+                    for (ItemStack stack : bundleContents.iterate()) {
+                        bundleItems[index++] = stack;
+                    }
+                    event.tooltipData = new BundleTooltipComponent(bundleItems, bundleContents, new Color(139, 69, 19, 255));
+                }
+            }
+        }
     }
 
     public void applyCompactShulkerTooltip(List<ItemStack> stacks, Consumer<Text> textConsumer) {
@@ -377,6 +401,7 @@ public class BetterTooltips extends Module {
                 || (event.itemStack().getItem() == Items.WRITABLE_BOOK && books.get())
                 || (event.itemStack().getItem() == Items.WRITTEN_BOOK && books.get())
                 || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get())
+                || (event.itemStack().getItem() instanceof BundleItem && bundles.get())
                 || (event.itemStack().getItem() instanceof BannerItem && banners.get())
                 || (event.itemStack().contains(DataComponentTypes.PROVIDES_BANNER_PATTERNS) && banners.get())
                 || (event.itemStack().getItem() == Items.SHIELD && banners.get())
@@ -458,6 +483,10 @@ public class BetterTooltips extends Module {
 
     private boolean previewEntities() {
         return isPressed() && entitiesInBuckets.get();
+    }
+
+    private boolean previewBundles() {
+        return isPressed() && bundles.get();
     }
 
     private boolean isPressed() {
