@@ -156,6 +156,14 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    private final Setting<Boolean> foodInfo = sgPreviews.add(new BoolSetting.Builder()
+        .name("food-info")
+        .description("Shows hunger and saturation values for food items.")
+        .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
+        .build()
+    );
+
     // Extras
 
     public final Setting<Boolean> byteSize = sgOther.add(new BoolSetting.Builder()
@@ -233,6 +241,16 @@ public class BetterTooltips extends Module {
                         .flatMap(apply -> apply.effects().stream())
                         .forEach(effect -> event.appendStart(getStatusText(effect)));
                 }
+            }
+        }
+
+        // Food info
+        if (foodInfo.get()) {
+            FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
+            if (food != null) {
+                // Those emojis really look like in-game hunger bar  
+                event.appendStart(Text.literal(String.format("🍖 %d (💛 %.1f)", food.nutrition(), food.saturation()))
+                    .formatted(Formatting.GRAY));
             }
         }
 
