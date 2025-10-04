@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL;
 
 public class BetterTooltips extends Module {
     public static final Color ECHEST_COLOR = new Color(0, 50, 50);
@@ -80,7 +80,7 @@ public class BetterTooltips extends Module {
     private final Setting<Keybind> openInventoryKey = sgGeneral.add(new KeybindSetting.Builder()
         .name("open-inventory")
         .description("Key to open full container inventory screen.")
-        .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_SHIFT))
+        .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_CONTROL))
         .build()
     );
 
