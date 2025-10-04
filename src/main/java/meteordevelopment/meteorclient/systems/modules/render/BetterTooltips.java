@@ -263,15 +263,11 @@ public class BetterTooltips extends Module {
         }
 
         // Food info
-        if (foodInfo.get()) {
+        if (foodInfo.get() && event.itemStack().contains(DataComponentTypes.FOOD)) {
             FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
-            if (food != null) {
-                // Those emojis really look like in-game hunger bar
-                event.appendStart(Text.literal(String.format("🍖 %d (💛 %.1f)", food.nutrition(), food.saturation()))
-                    .formatted(Formatting.GRAY));
-            }
+            // Those emojis really look like in-game hunger bar
+            event.appendStart(Text.literal(String.format("🍖 %d hunger (💛 %.1f saturation)", food.nutrition(), food.saturation())).formatted(Formatting.GRAY));
         }
-
 
         // Item size tooltip
         if (byteSize.get()) {
