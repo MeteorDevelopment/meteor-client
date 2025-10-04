@@ -453,7 +453,7 @@ public class BetterTooltips extends Module {
 
         if (showFullPreviewText) {
             if (spacer && !showPreviewText) event.appendEnd(Text.literal(""));
-            event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + viewContentKey.get() + Formatting.RESET + " to open preview"));
+            event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + viewContentKey.get() + Formatting.RESET + " to view contents"));
         }
     }
 
