@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupedList;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -52,10 +53,10 @@ public class VeinMiner extends Module {
 
     // General
 
-    private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Which blocks to select.")
-        .defaultValue(Blocks.STONE, Blocks.DIRT, Blocks.GRASS_BLOCK)
+        .defaultGroups(BlockListSetting.TERRAIN)
         .build()
     );
 

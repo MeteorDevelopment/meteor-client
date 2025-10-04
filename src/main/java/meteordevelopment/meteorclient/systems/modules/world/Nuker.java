@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupedList;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -196,14 +197,14 @@ public class Nuker extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("blacklist")
         .description("The blocks you don't want to mine.")
         .visible(() -> listMode.get() == ListMode.Blacklist)
         .build()
     );
 
-    private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("The blocks you want to mine.")
         .visible(() -> listMode.get() == ListMode.Whitelist)
@@ -532,12 +533,16 @@ public class Nuker extends Module {
         BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
         Block targetBlock = mc.world.getBlockState(pos).getBlock();
 
-        List<Block> list = listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get();
+        GroupedList<Block, GroupedListSetting<Block>.Group> list = listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get();
         String modeName = listMode.get().name();
 
         if (list.contains(targetBlock)) {
             list.remove(targetBlock);
-            info("Removed " + Names.get(targetBlock) + " from " + modeName);
+            if (list.contains(targetBlock)) {
+                info("Removed " + Names.get(targetBlock) + " from " + modeName + ", but it is also included by a group");
+            } else {
+                info("Removed " + Names.get(targetBlock) + " from " + modeName);
+            }
         } else {
             list.add(targetBlock);
             info("Added " + Names.get(targetBlock) + " to " + modeName);

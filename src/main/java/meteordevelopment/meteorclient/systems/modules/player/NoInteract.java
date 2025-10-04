@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupedList;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -24,7 +25,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.List;
 import java.util.Set;
 
 public class NoInteract extends Module {
@@ -33,7 +33,7 @@ public class NoInteract extends Module {
 
     // Blocks
 
-    private final Setting<List<Block>> blockMine = sgBlocks.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blockMine = sgBlocks.add(new BlockListSetting.Builder()
         .name("block-mine")
         .description("Cancels block mining.")
         .build()
@@ -46,7 +46,7 @@ public class NoInteract extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blockInteract = sgBlocks.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blockInteract = sgBlocks.add(new BlockListSetting.Builder()
         .name("block-interact")
         .description("Cancels block interaction.")
         .build()

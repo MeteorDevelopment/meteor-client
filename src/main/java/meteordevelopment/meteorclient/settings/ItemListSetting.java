@@ -5,7 +5,11 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.ListGroupTracker;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -13,46 +17,51 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class ItemListSetting extends Setting<List<Item>> {
-    public final Predicate<Item> filter;
+public class ItemListSetting extends GroupedListSetting<Item> {
+
+    private final static Map<String, Group> GROUPS = new HashMap<>();
+    private final static ListGroupTracker tracker = new ListGroupTracker();
+
     private final boolean bypassFilterWhenSavingAndLoading;
 
-    public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
+    public ItemListSetting(String name, String description, GroupedList<Item, GroupedListSetting<Item>.Group> defaultValue, Consumer<GroupedList<Item, GroupedListSetting<Item>.Group>> onChanged, Consumer<Setting<GroupedList<Item, GroupedListSetting<Item>.Group>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+
+        if (GROUPS.isEmpty()) initGroups();
 
         this.filter = filter;
         this.bypassFilterWhenSavingAndLoading = bypassFilterWhenSavingAndLoading;
     }
 
     @Override
-    protected List<Item> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<Item> items = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                Item item = parseId(Registries.ITEM, value);
-                if (item != null && (filter == null || filter.test(item))) items.add(item);
-            }
-        } catch (Exception ignored) {}
-
-        return items;
+    public Item parseItem(String str) {
+        Item item = parseId(Registries.ITEM, str);
+        if (item != null && (filter == null || filter.test(item))) return item;
+        return null;
     }
 
     @Override
-    public void resetImpl() {
-        value = new ArrayList<>(defaultValue);
+    public NbtElement itemToNbt(Item item) {
+        return NbtString.of(Registries.ITEM.getId(item).toString());
     }
 
     @Override
-    protected boolean isValueValid(List<Item> value) {
-        return true;
+    public Item itemFromNbt(NbtElement e) {
+        return Registries.ITEM.get(Identifier.of(e.asString().orElse("")));
+    }
+
+    @Override
+    public Map<String, GroupedListSetting<Item>.Group> groups() {
+        return GROUPS;
+    }
+
+    @Override
+    protected ListGroupTracker tracker() {
+        return tracker;
     }
 
     @Override
@@ -60,41 +69,40 @@ public class ItemListSetting extends Setting<List<Item>> {
         return Registries.ITEM.getIds();
     }
 
-    @Override
-    public NbtCompound save(NbtCompound tag) {
-        NbtList valueTag = new NbtList();
-        for (Item item : get()) {
-            if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) valueTag.add(NbtString.of(Registries.ITEM.getId(item).toString()));
-        }
-        tag.put("value", valueTag);
-
-        return tag;
-    }
-
-    @Override
-    public List<Item> load(NbtCompound tag) {
-        get().clear();
-
-        NbtList valueTag = tag.getListOrEmpty("value");
-        for (NbtElement tagI : valueTag) {
-            Item item = Registries.ITEM.get(Identifier.of(tagI.asString().orElse("")));
-
-            if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) get().add(item);
-        }
-
-        return get();
-    }
-
-    public static class Builder extends SettingBuilder<Builder, List<Item>, ItemListSetting> {
-        private Predicate<Item> filter;
-        private boolean bypassFilterWhenSavingAndLoading;
+   public static class Builder extends SettingBuilder<Builder, GroupedList<Item, Group>, ItemListSetting> {
+        private Predicate<Item> filter = null;
+        private boolean bypass = false;
 
         public Builder() {
-            super(new ArrayList<>(0));
+            super(new GroupedList<>());
+        }
+
+        public Builder defaultValue(Collection<Item> defaults) {
+            if (defaultValue == null)
+                return defaultValue(defaults != null ? new GroupedList<>(defaults) : new GroupedList<>());
+            defaultValue.addAll(defaults);
+            return this;
         }
 
         public Builder defaultValue(Item... defaults) {
-            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
+            if (defaultValue == null)
+                return defaultValue(defaults != null ? new GroupedList<>(Arrays.asList(defaults)) : new GroupedList<>());
+            defaultValue.addAll(Arrays.asList(defaults));
+            return this;
+        }
+
+         @SafeVarargs
+         public final Builder defaultGroups(Group... defaults) {
+            List<Group> groups = null;
+
+            if (defaults != null)
+                groups = Arrays.stream(defaults).filter(g -> g.trackerIs(tracker)).toList();
+
+            if (defaultValue == null)
+                return defaultValue(groups != null ? new GroupedList<>(null, groups) : new GroupedList<>());
+
+            if (groups != null) defaultValue.addAllGroups(groups);
+            return this;
         }
 
         public Builder filter(Predicate<Item> filter) {
@@ -102,14 +110,24 @@ public class ItemListSetting extends Setting<List<Item>> {
             return this;
         }
 
-        public Builder bypassFilterWhenSavingAndLoading() {
-            this.bypassFilterWhenSavingAndLoading = true;
-            return this;
-        }
-
         @Override
         public ItemListSetting build() {
-            return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter, bypassFilterWhenSavingAndLoading);
+            return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter, bypass);
         }
+    }
+    public static Group TEST;
+
+    private void initGroups() {
+
+        MeteorClient.LOG.info("initGroups@ creating TEST");
+
+        TEST = builtin("TEST", Items.DIAMOND_AXE)
+            .items(Items.DIAMOND_AXE, Items.DRAGON_EGG).get();
+
+        MeteorClient.LOG.info("initGroups@ created TEST with {} items", TEST.get().size());
+
+        TEST.add(Items.RED_BUNDLE);
+
+        MeteorClient.LOG.info("initGroups@ added item to TEST, now {} items", TEST.get().size());
     }
 }

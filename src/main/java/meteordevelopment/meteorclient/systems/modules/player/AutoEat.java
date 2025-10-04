@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTarge
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupedList;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -39,7 +40,7 @@ public class AutoEat extends Module {
     private final SettingGroup sgThreshold = settings.createGroup("Threshold");
 
     // General
-    public final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+    public final Setting<GroupedList<Item, GroupedListSetting<Item>.Group>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
         .name("blacklist")
         .description("Which items to not eat.")
         .defaultValue(

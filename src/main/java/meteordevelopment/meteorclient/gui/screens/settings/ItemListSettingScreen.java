@@ -7,7 +7,9 @@ package meteordevelopment.meteorclient.gui.screens.settings;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSettingScreen;
+import meteordevelopment.meteorclient.gui.screens.settings.base.GroupedListSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.settings.GroupedListSetting;
 import meteordevelopment.meteorclient.settings.ItemListSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.item.Item;
@@ -16,22 +18,21 @@ import net.minecraft.registry.Registries;
 
 import java.util.function.Predicate;
 
-public class ItemListSettingScreen extends CollectionListSettingScreen<Item> {
+public class ItemListSettingScreen extends GroupedListSettingScreen<Item, ItemListSetting> {
     public ItemListSettingScreen(GuiTheme theme, ItemListSetting setting) {
-        super(theme, "Select Items", setting, setting.get(), Registries.ITEM);
+        super(theme, "Select Items", setting, Registries.ITEM);
     }
 
     @Override
     protected boolean includeValue(Item value) {
-        Predicate<Item> filter = ((ItemListSetting) setting).filter;
+        Predicate<Item> filter = setting.filter;
         if (filter != null && !filter.test(value)) return false;
 
         return value != Items.AIR;
     }
 
     @Override
-    protected WWidget getValueWidget(Item value) {
-        return theme.itemWithLabel(value.getDefaultStack());
+    protected WWidget getValueWidget(Item value) { return theme.itemWithLabel(value.getDefaultStack(), Names.get(value)).color(includeValue(value) ? theme.textColor() : theme.textSecondaryColor());
     }
 
     @Override

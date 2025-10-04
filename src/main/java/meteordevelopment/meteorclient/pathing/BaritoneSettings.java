@@ -180,31 +180,31 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         .build()
                     );
                 }
-                else if (value instanceof List) {
-                    Type listType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                    Type type = ((ParameterizedType) listType).getActualTypeArguments()[0];
-
-                    if (type == Block.class) {
-                        sgBlockLists.add(new BlockListSetting.Builder()
-                            .name(setting.getName())
-                            .description(getDescription(setting.getName()))
-                            .defaultValue((List<Block>) setting.defaultValue)
-                            .onChanged(blockList -> setting.value = blockList)
-                            .onModuleActivated(blockListSetting -> blockListSetting.set((List<Block>) setting.value))
-                            .build()
-                        );
-                    }
-                    else if (type == Item.class) {
-                        sgItemLists.add(new ItemListSetting.Builder()
-                            .name(setting.getName())
-                            .description(getDescription(setting.getName()))
-                            .defaultValue((List<Item>) setting.defaultValue)
-                            .onChanged(itemList -> setting.value = itemList)
-                            .onModuleActivated(itemListSetting -> itemListSetting.set((List<Item>) setting.value))
-                            .build()
-                        );
-                    }
-                }
+//                else if (value instanceof List) {
+//                    Type listType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+//                    Type type = ((ParameterizedType) listType).getActualTypeArguments()[0];
+//
+//                    if (type == Block.class) {
+//                        sgBlockLists.add(new BlockListSetting.Builder()
+//                            .name(setting.getName())
+//                            .description(getDescription(setting.getName()))
+//                            .defaultValue((List<Block>) setting.defaultValue)
+//                            .onChanged(blockList -> setting.value = blockList)
+//                            .onModuleActivated(blockListSetting -> blockListSetting.set((List<Block>) setting.value))
+//                            .build()
+//                        );
+//                    }
+//                    else if (type == Item.class) {
+//                        sgItemLists.add(new ItemListSetting.Builder()
+//                            .name(setting.getName())
+//                            .description(getDescription(setting.getName()))
+//                            .defaultValue((List<Item>) setting.defaultValue)
+//                            .onChanged(itemList -> setting.value = itemList)
+//                            .onModuleActivated(itemListSetting -> itemListSetting.set((List<Item>) setting.value))
+//                            .build()
+//                        );
+//                    }
+//                }
             }
         }
         catch (IllegalAccessException e) {

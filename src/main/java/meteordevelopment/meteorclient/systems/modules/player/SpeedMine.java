@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupedList;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -17,8 +18,6 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.List;
 
 import static net.minecraft.entity.effect.StatusEffects.HASTE;
 
@@ -32,7 +31,7 @@ public class SpeedMine extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Selected blocks.")
         .filter(block -> block.getHardness() > 0)

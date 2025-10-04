@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupedList;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -38,7 +39,7 @@ public class Trajectories extends Module {
 
     // General
 
-    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupedList<Item, GroupedListSetting<Item>.Group>> items = sgGeneral.add(new ItemListSetting.Builder()
         .name("items")
         .description("Items to display trajectories for.")
         .defaultValue(getDefaultItems())

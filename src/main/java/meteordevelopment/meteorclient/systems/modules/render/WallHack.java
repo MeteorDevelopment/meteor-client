@@ -10,13 +10,12 @@ import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupedList;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.block.Block;
-
-import java.util.List;
 
 public class WallHack extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -35,10 +34,9 @@ public class WallHack extends Module {
         .build()
     );
 
-    public final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("What blocks should be targeted for Wall Hack.")
-        .defaultValue()
         .onChanged(onChanged -> {
             if (isActive()) mc.worldRenderer.reload();
         })

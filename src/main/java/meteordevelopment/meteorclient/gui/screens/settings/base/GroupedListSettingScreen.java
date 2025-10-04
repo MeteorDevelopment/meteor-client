@@ -1,0 +1,267 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.gui.screens.settings.base;
+
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.WindowScreen;
+import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.screens.EditSystemScreen;
+import meteordevelopment.meteorclient.gui.utils.Cell;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
+import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
+import meteordevelopment.meteorclient.settings.BlockListSetting;
+import meteordevelopment.meteorclient.settings.GroupedListSetting;
+import meteordevelopment.meteorclient.settings.Settings;
+import meteordevelopment.meteorclient.utils.render.color.Color;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+public abstract class GroupedListSettingScreen<T, S extends GroupedListSetting<T>> extends WindowScreen {
+    protected final S setting;
+    private final Iterable<T> registry;
+
+    private WTable table;
+    private String filterText = "";
+
+    private GroupedListSetting<T>.Group expanded;
+
+    public GroupedListSettingScreen(GuiTheme theme, String title, S setting, Iterable<T> registry) {
+        super(theme, title);
+
+        this.registry = registry;
+        this.setting = setting;
+
+        MeteorClient.LOG.info("GroupedListSettingScreen@ BlockListSetting.ORES contains {} items", BlockListSetting.ORES.get().size());
+    }
+
+    @Override
+    public void initWidgets() {
+        // Filter
+        WTextBox filter = add(theme.textBox("")).minWidth(400).expandX().widget();
+        filter.setFocused(true);
+        filter.action = () -> {
+            filterText = filter.get().trim();
+
+            table.clear();
+            initTable();
+        };
+
+        table = add(theme.table()).expandX().widget();
+
+        initTable();
+    }
+
+    private void initTable() {
+
+        List<ItemUnion> list = new ArrayList<>(setting.groups().values().stream().map(s -> {
+            MeteorClient.LOG.info("GroupedListSettingScreen@initTable {} contains {} items", s.name, s.get().size());
+            return new ItemUnion(s);
+        }).toList());
+
+        registry.forEach((t) -> list.add(new ItemUnion(t)));
+
+        // Left (all)
+        WTable left = abc(list, true, t -> {
+            addValue(t);
+
+            if (t.t != null) {
+                T v = getAdditionalValue(t.t);
+                if (v != null) addValue(t);
+            }
+        });
+
+        if (!left.cells.isEmpty()) table.add(theme.verticalSeparator()).expandWidgetY();
+
+        list.clear();
+        list.addAll(setting.get().getIncludedGroups().stream().map(ItemUnion::new).toList());
+
+        setting.get().getDirectlyIncludedItems().forEach((t) -> list.add(new ItemUnion(t)));
+
+        // Right (selected)
+        WTable right = abc(list, false, t -> {
+            removeValue(t);
+
+            if (t.t != null) {
+                T v = getAdditionalValue(t.t);
+                if (v != null) removeValue(t);
+            }
+        });
+
+        postWidgets(left, right);
+    }
+
+    private WWidget groupLabel(GroupedListSetting<T>.Group s) {
+        if (s.showIcon.get()) return theme.itemWithLabel(s.icon.get().asItem().getDefaultStack(), "@"+s.name.get()).color(Color.ORANGE);
+        else return theme.label(" @"+s.name.get()).color(Color.ORANGE);
+    }
+
+    private WTable abc(Iterable<ItemUnion> iterable, boolean isLeft, Consumer<ItemUnion> buttonAction) {
+        // Create
+        Cell<WTable> cell = this.table.add(theme.table()).top();
+        WTable table = cell.widget();
+
+
+        // Sort
+        Predicate<ItemUnion> predicate = isLeft
+            ? v -> Boolean.TRUE.equals(v.map(
+                t -> this.includeValue(t) && !setting.get().getDirectlyIncludedItems().contains(t),
+            s -> !setting.get().getIncludedGroups().contains(s)))
+            : v -> Boolean.TRUE.equals(v.map(this::includeValue, s -> true));
+
+        Iterable<ItemUnion> sorted = SortingHelper.sort(iterable, predicate, v -> v.map(this::getValueNames, s -> new String[]{"@"+s.name.get()}), filterText);
+
+        sorted.forEach(v -> {
+            table.add(v.map(this::getValueWidget, s -> {
+
+                WVerticalList vlist = theme.verticalList();
+                WTable hlist = vlist.add(theme.table()).widget();
+
+                boolean e = expanded == s;
+
+                WButton expand = hlist.add(theme.button(e ? GuiRenderer.TRIANGLE : GuiRenderer.CIRCLE)).widget();
+                expand.action = () -> {
+                    expanded = e ? null : s;
+                    reload();
+                };
+
+                hlist.add(groupLabel(s));
+
+                WTable subtable = vlist.add(theme.table()).widget();
+
+                if (e) {
+                    for (GroupedListSetting<T>.Group inc : s.getGroups()) {
+                        subtable.add(theme.label("   -> "));
+                        subtable.add(groupLabel(inc));
+                        subtable.row();
+                    }
+
+                    Iterable<T> subitems = SortingHelper.sortWithPriority(s.get(), (t)->true, this::getValueNames, "", (T a, T b) -> includeValue(a) == includeValue(b) ? 0 : includeValue(a) ? -1 : 1);
+
+                    subitems.forEach(t -> {
+                        subtable.add(theme.label("   -> "));
+                        subtable.add(getValueWidget(t));
+                        subtable.row();
+                    });
+                }
+
+                return vlist;
+            }));
+
+            if (v.s != null) {
+                WButton edit = table.add(theme.button(GuiRenderer.EDIT)).right().top().widget();
+                edit.action = () -> MeteorClient.mc.setScreen(new EditListGroupScreen(theme, v.s, () -> {
+                    invalidateTable();
+                    reload();
+                }));
+            }
+
+            WPressable button = table.add(isLeft ? theme.plus() : theme.minus()).expandCellX().right().top().widget();
+            button.action = () -> buttonAction.accept(v);
+
+            table.row();
+        });
+
+        if (!table.cells.isEmpty()) cell.expandX();
+
+        return table;
+    }
+
+    protected void invalidateTable() {
+        table.clear();
+        initTable();
+    }
+
+    protected void addValue(ItemUnion value) {
+        if (value.t != null) {
+            setting.get().add(value.t);
+            setting.onChanged();
+            invalidateTable();
+        } else if (value.s != null) {
+            setting.get().add(value.s);
+            setting.onChanged();
+            invalidateTable();
+        }
+    }
+
+    protected void removeValue(ItemUnion value) {
+       if (value.t != null) {
+            setting.get().remove(value.t);
+            setting.onChanged();
+            invalidateTable();
+        } else if (value.s != null) {
+            setting.get().remove(value.s);
+            setting.onChanged();
+            invalidateTable();
+        }
+    }
+
+    protected void postWidgets(WTable left, WTable right) {}
+
+    protected boolean includeValue(T value) {
+        return true;
+    }
+
+    protected abstract WWidget getValueWidget(T value);
+
+    protected abstract String[] getValueNames(T value);
+
+    protected T getAdditionalValue(T value) {
+        return null;
+    }
+
+    protected class ItemUnion {
+        private final T t;
+        private final GroupedListSetting<T>.Group s;
+
+        public ItemUnion(T t) {
+            this.s = null;
+            this.t = t;
+        }
+
+        public ItemUnion(GroupedListSetting<T>.Group s) {
+            this.s = s;
+            this.t = null;
+        }
+
+        public <R> R map(Function<T, R> a, Function<GroupedListSetting<T>.Group, R> b) {
+            if (t != null) return a.apply(t);
+            else if (s != null) return b.apply(s);
+            return null;
+        }
+    }
+
+    public class EditListGroupScreen extends EditSystemScreen<GroupedListSetting<T>.Group> {
+        public EditListGroupScreen(GuiTheme theme, GroupedListSetting<T>.Group value, Runnable reload) {
+            super(theme, value, reload);
+        }
+
+        @Override
+        public GroupedListSetting<T>.Group create() {
+            return null;
+        }
+
+        @Override
+        public boolean save() {
+            value.builtin = false;
+            return true;
+        }
+
+        @Override
+        public Settings getSettings() {
+            return value.settings;
+        }
+    }
+}

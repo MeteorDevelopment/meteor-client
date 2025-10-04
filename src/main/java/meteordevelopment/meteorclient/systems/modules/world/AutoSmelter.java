@@ -6,10 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.ItemListSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupedList;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -20,26 +18,24 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipePropertySet;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 
-import java.util.List;
-
 public class AutoSmelter extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<Item>> fuelItems = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupedList<Item, GroupedListSetting<Item>.Group>> fuelItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("fuel-items")
         .description("Items to use as fuel")
         .defaultValue(Items.COAL, Items.CHARCOAL)
         .filter(this::fuelItemFilter)
-        .bypassFilterWhenSavingAndLoading()
+        //.bypassFilterWhenSavingAndLoading()
         .build()
     );
 
-    private final Setting<List<Item>> smeltableItems = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupedList<Item, GroupedListSetting<Item>.Group>> smeltableItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("smeltable-items")
         .description("Items to smelt")
         .defaultValue(Items.IRON_ORE, Items.GOLD_ORE, Items.COPPER_ORE, Items.RAW_IRON, Items.RAW_COPPER, Items.RAW_GOLD)
         .filter(this::smeltableItemFilter)
-        .bypassFilterWhenSavingAndLoading()
+        //.bypassFilterWhenSavingAndLoading()
         .build()
     );
 
