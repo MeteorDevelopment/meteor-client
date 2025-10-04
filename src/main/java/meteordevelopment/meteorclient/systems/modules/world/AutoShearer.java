@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.player.ToolSaver;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -30,13 +31,6 @@ public class AutoShearer extends Module {
         .description("The maximum distance the sheep have to be to be sheared.")
         .min(0.0)
         .defaultValue(5.0)
-        .build()
-    );
-
-    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-break")
-        .description("Prevents shears from being broken.")
-        .defaultValue(false)
         .build()
     );
 
@@ -66,7 +60,7 @@ public class AutoShearer extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || !PlayerUtils.isWithin(entity, distance.get())) continue;
 
-            FindItemResult findShear = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.SHEARS && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
+            FindItemResult findShear = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.SHEARS && ToolSaver.canUse(itemStack));
             if (!InvUtils.swap(findShear.slot(), true)) return;
 
             this.hand = findShear.getHand();
