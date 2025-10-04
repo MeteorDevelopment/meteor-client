@@ -23,8 +23,10 @@ import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.DataComponentTypes;
 
+import net.minecraft.client.gui.screen.ingame.BookScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.Bucketable;
@@ -77,10 +79,19 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    private final Setting<Keybind> openInventoryKey = sgGeneral.add(new KeybindSetting.Builder()
-        .name("open-inventory")
-        .description("Key to open full container inventory screen.")
+    private final Setting<Boolean> viewContent = sgGeneral.add(new BoolSetting.Builder()
+        .name("view-content")
+        .description("Enable view content functionality.")
+        .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
+        .build()
+    );
+
+    private final Setting<Keybind> viewContentKey = sgGeneral.add(new KeybindSetting.Builder()
+        .name("view-content-key")
+        .description("Key to view contents (containers, books, etc.).")
         .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_CONTROL))
+        .visible(() -> viewContent.get())
         .build()
     );
 
@@ -302,8 +313,16 @@ public class BetterTooltips extends Module {
             }
         }
 
-        if (openInventoryKey.get().isPressed() && (Utils.hasItems(event.itemStack()) || event.itemStack().getItem() instanceof BundleItem)) {
-            mc.setScreen(new ContainerInventoryScreen(event.itemStack()));
+        if (viewContent.get() && viewContentKey.get().isPressed()) {
+            if (Utils.hasItems(event.itemStack()) || event.itemStack().getItem() instanceof BundleItem) {
+                if (mc.currentScreen instanceof HandledScreen)
+                    mc.currentScreen.close();
+                mc.setScreen(new ContainerInventoryScreen(event.itemStack()));
+            } else if (event.itemStack().getItem() == Items.WRITABLE_BOOK || event.itemStack().getItem() == Items.WRITTEN_BOOK) {
+                if (mc.currentScreen instanceof HandledScreen)
+                    mc.currentScreen.close();
+                mc.setScreen(new BookScreen(BookScreen.Contents.create(event.itemStack())));
+            }
         }
 
         // Hold to preview tooltip
@@ -334,7 +353,11 @@ public class BetterTooltips extends Module {
         // Book preview
         else if ((event.itemStack.getItem() == Items.WRITABLE_BOOK || event.itemStack.getItem() == Items.WRITTEN_BOOK) && previewBooks()) {
             Text page = getFirstPage(event.itemStack);
-            if (page != null) event.tooltipData = new BookTooltipComponent(page);
+            if (page != null) {
+                int pageCount = getBookPageCount(event.itemStack);
+                Text pageWithCount = page.copy().append(Text.literal(String.format(" (%d pages)", pageCount)).formatted(Formatting.GRAY));
+                event.tooltipData = new BookTooltipComponent(pageWithCount);
+            }
         }
 
         // Banner preview
@@ -417,8 +440,9 @@ public class BetterTooltips extends Module {
                 || (event.itemStack().getItem() == Items.SHIELD && banners.get())
         );
 
-        boolean showInventoryText = !openInventoryKey.get().isPressed() && (
+        boolean showFullPreviewText = viewContent.get() && !viewContentKey.get().isPressed() && (
             Utils.hasItems(event.itemStack()) || event.itemStack().getItem() instanceof BundleItem
+                || event.itemStack().getItem() == Items.WRITABLE_BOOK || event.itemStack().getItem() == Items.WRITTEN_BOOK
         );
 
         if (showPreviewText) {
@@ -427,9 +451,9 @@ public class BetterTooltips extends Module {
             event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
         }
 
-        if (showInventoryText) {
+        if (showFullPreviewText) {
             if (spacer && !showPreviewText) event.appendEnd(Text.literal(""));
-            event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + openInventoryKey.get() + Formatting.RESET + " to open inventory"));
+            event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + viewContentKey.get() + Formatting.RESET + " to open preview"));
         }
     }
 
@@ -461,6 +485,16 @@ public class BetterTooltips extends Module {
 
         return null;
     }
+
+    private int getBookPageCount(ItemStack bookItem) {
+        if (bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT) != null) {
+            return bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT).pages().size();
+        } else if (bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null) {
+            return bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).pages().size();
+        }
+        return 0;
+    }
+
 
     private BannerTooltipComponent createBannerFromBannerPatternItem(ItemStack item) {
         // I can't imagine getting the banner pattern from a banner pattern item would fail without some serious messing around
