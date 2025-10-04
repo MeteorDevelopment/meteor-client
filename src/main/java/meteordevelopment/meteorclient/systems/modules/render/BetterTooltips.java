@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
 import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
+import meteordevelopment.meteorclient.gui.screens.ContainerInventoryScreen;
 import meteordevelopment.meteorclient.mixin.EntityAccessor;
 import meteordevelopment.meteorclient.mixin.EntityBucketItemAccessor;
 import meteordevelopment.meteorclient.settings.*;
@@ -23,6 +24,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
+
 import net.minecraft.component.type.*;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.Bucketable;
@@ -47,6 +49,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 
 public class BetterTooltips extends Module {
     public static final Color ECHEST_COLOR = new Color(0, 50, 50);
@@ -71,6 +74,13 @@ public class BetterTooltips extends Module {
         .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
         .visible(() -> displayWhen.get() == DisplayWhen.Keybind)
         .onChanged(value -> updateTooltips = true)
+        .build()
+    );
+
+    private final Setting<Keybind> openInventoryKey = sgGeneral.add(new KeybindSetting.Builder()
+        .name("open-inventory")
+        .description("Key to open full container inventory screen.")
+        .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_SHIFT))
         .build()
     );
 
@@ -296,6 +306,10 @@ public class BetterTooltips extends Module {
             }
         }
 
+        if (openInventoryKey.get().isPressed() && (Utils.hasItems(event.itemStack()) || event.itemStack().getItem() instanceof BundleItem)) {
+            mc.setScreen(new ContainerInventoryScreen(event.itemStack()));
+        }
+
         // Hold to preview tooltip
         appendPreviewTooltipText(event, true);
     }
@@ -394,7 +408,7 @@ public class BetterTooltips extends Module {
     }
 
     private void appendPreviewTooltipText(ItemStackTooltipEvent event, boolean spacer) {
-        if (!isPressed() && (
+        boolean showPreviewText = !isPressed() && (
             shulkers.get() && Utils.hasItems(event.itemStack())
                 || (event.itemStack().getItem() == Items.ENDER_CHEST && echest.get())
                 || (event.itemStack().getItem() == Items.FILLED_MAP && maps.get())
@@ -405,10 +419,21 @@ public class BetterTooltips extends Module {
                 || (event.itemStack().getItem() instanceof BannerItem && banners.get())
                 || (event.itemStack().contains(DataComponentTypes.PROVIDES_BANNER_PATTERNS) && banners.get())
                 || (event.itemStack().getItem() == Items.SHIELD && banners.get())
-        )) {
+        );
+
+        boolean showInventoryText = !openInventoryKey.get().isPressed() && (
+            Utils.hasItems(event.itemStack()) || event.itemStack().getItem() instanceof BundleItem
+        );
+
+        if (showPreviewText) {
             // we don't want to add the spacer if the tooltip is hidden
             if (spacer) event.appendEnd(Text.literal(""));
             event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
+        }
+
+        if (showInventoryText) {
+            if (spacer && !showPreviewText) event.appendEnd(Text.literal(""));
+            event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + openInventoryKey.get() + Formatting.RESET + " to open inventory"));
         }
     }
 
