@@ -342,7 +342,7 @@ public class Nametags extends Module {
     }
 
     @EventHandler
-    private void onRender2D(Render2DEvent event) {
+    protected void onRender2D(Render2DEvent event) {
         int count = getRenderCount();
         boolean shadow = Config.get().customFont.get();
 
