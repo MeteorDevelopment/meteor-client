@@ -102,7 +102,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     // Middle click open
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void mouseClicked(Click arg, boolean bl, CallbackInfoReturnable<Boolean> cir) {
+    private void mouseClicked(Click arg, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty() && tooltips.middleClickOpen()) {

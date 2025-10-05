@@ -67,7 +67,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     public void initWidgets() {}
 
     @Override
-    public boolean mouseClicked(Click arg, boolean bl) {
+    public boolean mouseClicked(Click arg, boolean doubled) {
         double s = mc.getWindow().getScaleFactor();
 
         double mouseX = arg.x();

@@ -28,7 +28,7 @@ public abstract class MapRendererMixin {
     }
 
     @Inject(method = "draw", at = @At("HEAD"), cancellable = true)
-    private void onDraw(MapRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, boolean bl, int light, CallbackInfo ci) {
+    private void onDraw(MapRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, boolean skipRenderingDecorations, int light, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noMapContents()) ci.cancel();
     }
 }

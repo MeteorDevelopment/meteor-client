@@ -24,7 +24,7 @@ public abstract class CapeFeatureRendererMixin {
     private AssetInfo.TextureAsset modifyCapeTexture(AssetInfo.TextureAsset original, MatrixStack matrices, OrderedRenderCommandQueue entityRenderCommandQueue, int i, PlayerEntityRenderState state, float f, float g) {
         if (((IEntityRenderState) state).meteor$getEntity() instanceof PlayerEntity player) {
             Identifier id = Capes.get(player);
-            return id == null ? original : new AssetInfo.TextureAssetInfo(id);
+            return id == null ? original : new AssetInfo.TextureAssetInfo(id, id);
         }
 
         return original;

@@ -30,7 +30,7 @@ public abstract class KeyboardMixin {
     @Shadow @Final private MinecraftClient client;
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
-    public void onKey(long window, int action, KeyInput arg, CallbackInfo ci) { // todo verify this is correct when they update the mappings
+    public void onKey(long window, int action, KeyInput arg, CallbackInfo ci) {
         int modifiers = arg.modifiers();
         if (arg.key() != GLFW.GLFW_KEY_UNKNOWN) {
             // on Linux/X11 the modifier is not active when the key is pressed and still active when the key is released

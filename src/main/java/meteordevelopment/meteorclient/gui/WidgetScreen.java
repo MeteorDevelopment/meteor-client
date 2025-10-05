@@ -118,8 +118,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    // todo rename bl when appropriate
-    public boolean mouseClicked(Click arg, boolean bl) {
+    public boolean mouseClicked(Click arg, boolean doubled) {
         if (locked) return false;
 
         double mouseX = arg.x();
@@ -129,7 +128,7 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
-        return root.mouseClicked(mouseX, mouseY, arg.button(), bl);
+        return root.mouseClicked(mouseX, mouseY, arg.button(), doubled);
     }
 
     @Override

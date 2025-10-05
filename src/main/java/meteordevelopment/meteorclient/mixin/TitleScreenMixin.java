@@ -31,7 +31,7 @@ public abstract class TitleScreenMixin extends Screen {
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void onMouseClicked(Click arg, boolean bl, CallbackInfoReturnable<Boolean> cir) {
+    private void onMouseClicked(Click arg, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
         if (Config.get().titleScreenCredits.get() && arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             if (TitleScreenCredits.onClicked(arg.x(), arg.y())) cir.setReturnValue(true);
         }
