@@ -92,6 +92,7 @@ public abstract class PlayerEntityRendererMixin<AvatarlikeEntity extends PlayerL
     @Inject(method = "updateRenderState(Lnet/minecraft/entity/PlayerLikeEntity;Lnet/minecraft/client/render/entity/state/PlayerEntityRenderState;F)V", at = @At("RETURN"))
     private void updateRenderState$rotations(AvatarlikeEntity player, PlayerEntityRenderState state, float f, CallbackInfo info) {
         if (Rotations.rotating && player == mc.player) {
+            state.relativeHeadYaw = 0;
             state.bodyYaw = Rotations.serverYaw;
             state.pitch = Rotations.serverPitch;
         }
