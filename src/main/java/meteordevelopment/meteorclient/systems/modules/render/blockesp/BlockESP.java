@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
@@ -30,8 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 
 public class BlockESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -80,7 +80,7 @@ public class BlockESP extends Module {
 
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
-    private final ExecutorService workerThread = Executors.newSingleThreadExecutor();
+    private final Executor workerThread = Util.getMainWorkerExecutor().named("BlockESP");
 
     private DimensionType lastDimension;
 
@@ -159,7 +159,7 @@ public class BlockESP extends Module {
     }
 
     private void searchChunk(Chunk chunk) {
-        workerThread.submit(() -> {
+        workerThread.execute(() -> {
             if (!isActive()) return;
             ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
 
@@ -192,36 +192,36 @@ public class BlockESP extends Module {
         boolean added = blocks.get().contains(event.newState.getBlock()) && !blocks.get().contains(event.oldState.getBlock());
         boolean removed = !added && !blocks.get().contains(event.newState.getBlock()) && blocks.get().contains(event.oldState.getBlock());
 
-        if (added || removed) {
-            workerThread.submit(() -> {
-                synchronized (chunks) {
-                    ESPChunk chunk = chunks.get(key);
+        if (!added && !removed) return;
 
-                    if (chunk == null) {
-                        chunk = new ESPChunk(chunkX, chunkZ);
-                        if (chunk.shouldBeDeleted()) return;
+        workerThread.execute(() -> {
+            synchronized (chunks) {
+                ESPChunk chunk = chunks.get(key);
 
-                        chunks.put(key, chunk);
-                    }
+                if (chunk == null) {
+                    chunk = new ESPChunk(chunkX, chunkZ);
+                    if (chunk.shouldBeDeleted()) return;
 
-                    blockPos.set(bx, by, bz);
+                    chunks.put(key, chunk);
+                }
 
-                    if (added) chunk.add(blockPos);
-                    else chunk.remove(blockPos);
+                blockPos.set(bx, by, bz);
 
-                    // Update neighbour blocks
-                    for (int x = -1; x < 2; x++) {
-                        for (int z = -1; z < 2; z++) {
-                            for (int y = -1; y < 2; y++) {
-                                if (x == 0 && y == 0 && z == 0) continue;
+                if (added) chunk.add(blockPos);
+                else chunk.remove(blockPos);
 
-                                updateBlock(bx + x, by + y, bz + z);
-                            }
+                // Update neighbour blocks
+                for (int x = -1; x < 2; x++) {
+                    for (int z = -1; z < 2; z++) {
+                        for (int y = -1; y < 2; y++) {
+                            if (x == 0 && y == 0 && z == 0) continue;
+
+                            updateBlock(bx + x, by + y, bz + z);
                         }
                     }
                 }
-            });
-        }
+            }
+        });
     }
 
     @EventHandler
@@ -239,7 +239,7 @@ public class BlockESP extends Module {
                 ESPChunk chunk = it.next();
 
                 if (chunk.shouldBeDeleted()) {
-                    workerThread.submit(() -> {
+                    workerThread.execute(() -> {
                         for (ESPBlock block : chunk.blocks.values()) {
                             block.group.remove(block, false);
                             block.loaded = false;

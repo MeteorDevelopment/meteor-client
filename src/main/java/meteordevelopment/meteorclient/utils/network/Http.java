@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.utils.network;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import meteordevelopment.meteorclient.utils.other.JsonDateDeserializer;
+import net.minecraft.util.Util;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -29,7 +30,9 @@ public class Http {
     public static final int FORBIDDEN = 403;
     public static final int NOT_FOUND = 404;
 
-    private static final HttpClient CLIENT = HttpClient.newHttpClient();
+    private static final HttpClient CLIENT = HttpClient.newBuilder()
+        .executor(Util.getDownloadWorkerExecutor())
+        .build();
 
     private static final Gson GSON = new GsonBuilder()
         .registerTypeAdapter(Date.class, new JsonDateDeserializer())
