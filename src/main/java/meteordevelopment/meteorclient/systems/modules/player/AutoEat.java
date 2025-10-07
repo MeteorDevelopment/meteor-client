@@ -40,7 +40,7 @@ public class AutoEat extends Module {
     private final SettingGroup sgThreshold = settings.createGroup("Threshold");
 
     // General
-    public final Setting<GroupedList<Item, GroupedListSetting<Item>.Group>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+    public final Setting<GroupedList<Item, GroupedListSetting.Groups<Item>.Group>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
         .name("blacklist")
         .description("Which items to not eat.")
         .defaultValue(

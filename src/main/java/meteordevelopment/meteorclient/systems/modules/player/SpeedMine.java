@@ -31,7 +31,7 @@ public class SpeedMine extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Selected blocks.")
         .filter(block -> block.getHardness() > 0)

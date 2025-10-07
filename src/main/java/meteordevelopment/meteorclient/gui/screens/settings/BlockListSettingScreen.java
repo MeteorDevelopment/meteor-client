@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 
 public class BlockListSettingScreen extends GroupedListSettingScreen<Block, BlockListSetting> {
     public BlockListSettingScreen(GuiTheme theme, BlockListSetting setting) {
-        super(theme, "Select Blocks", setting, Registries.BLOCK);
+        super(theme, "Select Blocks", setting, BlockListSetting.GROUPS, Registries.BLOCK);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class BlockListSettingScreen extends GroupedListSettingScreen<Block, Bloc
             return false;
         }
 
-        Predicate<Block> filter = setting.filter;
+        Predicate<Block> filter = setting.getFilter();
 
         if (filter == null) return value != Blocks.AIR;
         return filter.test(value);

@@ -254,7 +254,7 @@ public class HighwayBuilder extends Module {
 
     // Paving
 
-    public final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blocksToPlace = sgPaving.add(new BlockListSetting.Builder()
+    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blocksToPlace = sgPaving.add(new BlockListSetting.Builder()
         .name("blocks-to-place")
         .description("Blocks it is allowed to place.")
         .defaultValue(Blocks.OBSIDIAN)
@@ -288,7 +288,7 @@ public class HighwayBuilder extends Module {
 
     // Inventory
 
-    private final Setting<GroupedList<Item, GroupedListSetting<Item>.Group>> trashItems = sgInventory.add(new ItemListSetting.Builder()
+    private final Setting<GroupedList<Item, GroupedListSetting.Groups<Item>.Group>> trashItems = sgInventory.add(new ItemListSetting.Builder()
         .name("trash-items")
         .description("Items that are considered trash and can be thrown out.")
         .defaultValue(

@@ -73,7 +73,7 @@ public class SpawnProofer extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Block to use for spawn proofing.")
         .defaultValue(Blocks.TORCH, Blocks.STONE_BUTTON, Blocks.STONE_SLAB)

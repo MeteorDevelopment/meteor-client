@@ -39,7 +39,7 @@ public class Trajectories extends Module {
 
     // General
 
-    private final Setting<GroupedList<Item, GroupedListSetting<Item>.Group>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupedList<Item, GroupedListSetting.Groups<Item>.Group>> items = sgGeneral.add(new ItemListSetting.Builder()
         .name("items")
         .description("Items to display trajectories for.")
         .defaultValue(getDefaultItems())

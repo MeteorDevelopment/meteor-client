@@ -7,12 +7,12 @@ package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.settings.groups.GroupedList;
-import meteordevelopment.meteorclient.settings.groups.ListGroupTracker;
+import meteordevelopment.meteorclient.systems.modules.player.AutoEat;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ConsumableComponents;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
@@ -23,17 +23,13 @@ import java.util.function.Predicate;
 
 public class ItemListSetting extends GroupedListSetting<Item> {
 
-    private final static Map<String, Group> GROUPS = new HashMap<>();
-    private final static ListGroupTracker tracker = new ListGroupTracker();
+    public static final Groups<Item> GROUPS = new Groups<>();
 
     private final boolean bypassFilterWhenSavingAndLoading;
 
-    public ItemListSetting(String name, String description, GroupedList<Item, GroupedListSetting<Item>.Group> defaultValue, Consumer<GroupedList<Item, GroupedListSetting<Item>.Group>> onChanged, Consumer<Setting<GroupedList<Item, GroupedListSetting<Item>.Group>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
-        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+    public ItemListSetting(String name, String description, GroupedList<Item, Groups<Item>.Group> defaultValue, Consumer<GroupedList<Item, Groups<Item>.Group>> onChanged, Consumer<Setting<GroupedList<Item, Groups<Item>.Group>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
+        super(name, description, defaultValue, filter, onChanged, onModuleActivated, visible);
 
-        if (GROUPS.isEmpty()) initGroups();
-
-        this.filter = filter;
         this.bypassFilterWhenSavingAndLoading = bypassFilterWhenSavingAndLoading;
     }
 
@@ -55,13 +51,8 @@ public class ItemListSetting extends GroupedListSetting<Item> {
     }
 
     @Override
-    public Map<String, GroupedListSetting<Item>.Group> groups() {
+    protected Groups<Item> groups() {
         return GROUPS;
-    }
-
-    @Override
-    protected ListGroupTracker tracker() {
-        return tracker;
     }
 
     @Override
@@ -69,7 +60,7 @@ public class ItemListSetting extends GroupedListSetting<Item> {
         return Registries.ITEM.getIds();
     }
 
-   public static class Builder extends SettingBuilder<Builder, GroupedList<Item, Group>, ItemListSetting> {
+   public static class Builder extends SettingBuilder<Builder, GroupedList<Item, Groups<Item>.Group>, ItemListSetting> {
         private Predicate<Item> filter = null;
         private boolean bypass = false;
 
@@ -92,11 +83,11 @@ public class ItemListSetting extends GroupedListSetting<Item> {
         }
 
          @SafeVarargs
-         public final Builder defaultGroups(Group... defaults) {
-            List<Group> groups = null;
+         public final Builder defaultGroups(Groups<Item>.Group... defaults) {
+            List<Groups<Item>.Group> groups = null;
 
             if (defaults != null)
-                groups = Arrays.stream(defaults).filter(g -> g.trackerIs(tracker)).toList();
+                groups = Arrays.stream(defaults).filter(g -> g.trackerIs(GROUPS)).toList();
 
             if (defaultValue == null)
                 return defaultValue(groups != null ? new GroupedList<>(null, groups) : new GroupedList<>());
@@ -115,19 +106,60 @@ public class ItemListSetting extends GroupedListSetting<Item> {
             return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter, bypass);
         }
     }
-    public static Group TEST;
 
-    private void initGroups() {
+    // these are just for UI testing, they are not necessarily good ones to have
+    public static Groups<Item>.Group FOOD, AXES, PICKAXES, SWORDS, HOES, TOOLS, TOOLS_STRICT, HELMETS, CHESTPLATES, LEGGINGS, BOOTS, ARMOR;
+    static {
 
-        MeteorClient.LOG.info("initGroups@ creating TEST");
+        FOOD = GROUPS.builtin("food-all", Items.APPLE)
+            .items(Registries.ITEM.stream().filter(i -> i.getComponents().get(DataComponentTypes.FOOD) != null).toList())
+            .get();
 
-        TEST = builtin("TEST", Items.DIAMOND_AXE)
-            .items(Items.DIAMOND_AXE, Items.DRAGON_EGG).get();
+        TOOLS_STRICT = GROUPS.builtin("tools-all", Items.GOLDEN_AXE)
+            .items(Registries.ITEM.stream().filter(i -> i.getComponents().get(DataComponentTypes.TOOL) != null).toList())
+            .get();
 
-        MeteorClient.LOG.info("initGroups@ created TEST with {} items", TEST.get().size());
+        PICKAXES = GROUPS.builtin("picks", Items.IRON_PICKAXE)
+            .items(Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.GOLDEN_HOE, Items.DIAMOND_HOE, Items.NETHERITE_HOE)
+            .get();
 
-        TEST.add(Items.RED_BUNDLE);
+        AXES = GROUPS.builtin("axes", Items.IRON_AXE)
+            .items(Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.GOLDEN_HOE, Items.DIAMOND_HOE, Items.NETHERITE_HOE)
+            .get();
 
-        MeteorClient.LOG.info("initGroups@ added item to TEST, now {} items", TEST.get().size());
+        SWORDS = GROUPS.builtin("swords", Items.IRON_SWORD)
+            .items(Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.GOLDEN_HOE, Items.DIAMOND_HOE, Items.NETHERITE_HOE)
+            .get();
+
+        HOES = GROUPS.builtin("hoes", Items.IRON_HOE)
+            .items(Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.GOLDEN_HOE, Items.DIAMOND_HOE, Items.NETHERITE_HOE)
+            .get();
+
+        TOOLS = GROUPS.builtin("tools", Items.DIAMOND_AXE)
+            .items(Items.SHEARS, Items.FLINT_AND_STEEL)
+            .include(PICKAXES, AXES, HOES)
+            .get();
+
+        HELMETS = GROUPS.builtin("hoes", Items.IRON_HELMET)
+            .items(Items.TURTLE_HELMET, Items.CHAINMAIL_HELMET, Items.IRON_HELMET, Items.GOLDEN_HELMET, Items.DIAMOND_HELMET, Items.NETHERITE_HELMET)
+            .get();
+
+        CHESTPLATES = GROUPS.builtin("chestplates", Items.IRON_CHESTPLATE)
+            .items(Items.CHAINMAIL_CHESTPLATE, Items.IRON_CHESTPLATE, Items.GOLDEN_CHESTPLATE, Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE)
+            .get();
+
+        LEGGINGS = GROUPS.builtin("leggings", Items.IRON_LEGGINGS)
+            .items(Items.CHAINMAIL_LEGGINGS, Items.IRON_LEGGINGS, Items.GOLDEN_LEGGINGS, Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS)
+            .get();
+
+        BOOTS = GROUPS.builtin("boots", Items.IRON_BOOTS)
+            .items(Items.CHAINMAIL_BOOTS, Items.IRON_BOOTS, Items.GOLDEN_BOOTS, Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS)
+            .get();
+
+        ARMOR = GROUPS.builtin("armor", Items.DIAMOND_CHESTPLATE)
+            .include(HELMETS, CHESTPLATES, LEGGINGS, BOOTS)
+            .get();
+
+
     }
 }

@@ -4,7 +4,7 @@ public class ListGroupTracker {
 
     long a = 0;
 
-    public long get() { return a; }
+    public long getVersion() { return a; }
 
     public void invalidate() { a++; }
 

@@ -20,12 +20,12 @@ import java.util.function.Predicate;
 
 public class ItemListSettingScreen extends GroupedListSettingScreen<Item, ItemListSetting> {
     public ItemListSettingScreen(GuiTheme theme, ItemListSetting setting) {
-        super(theme, "Select Items", setting, Registries.ITEM);
+        super(theme, "Select Items", setting, ItemListSetting.GROUPS, Registries.ITEM);
     }
 
     @Override
     protected boolean includeValue(Item value) {
-        Predicate<Item> filter = setting.filter;
+        Predicate<Item> filter = setting.getFilter();
         if (filter != null && !filter.test(value)) return false;
 
         return value != Items.AIR;

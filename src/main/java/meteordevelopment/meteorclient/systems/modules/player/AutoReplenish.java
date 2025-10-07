@@ -70,7 +70,7 @@ public class AutoReplenish extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Item, GroupedListSetting<Item>.Group>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupedList<Item, GroupedListSetting.Groups<Item>.Group>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("excluded-items")
         .description("Items that won't be replenished.")
         .build()

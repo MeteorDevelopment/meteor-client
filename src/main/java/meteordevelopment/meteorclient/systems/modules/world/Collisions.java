@@ -22,7 +22,7 @@ import net.minecraft.util.shape.VoxelShapes;
 public class Collisions extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("What blocks should be added collision box.")
         .filter(this::blockFilter)

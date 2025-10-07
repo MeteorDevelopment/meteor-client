@@ -10,11 +10,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class GroupedList<T, G extends ListGroup<T, G>> implements Iterable<T> {
     private List<T> cached;
     private List<G> include;
     private List<T> direct;
+
+    private Predicate<T> filter;
 
     public ListGroupTracker tracker = null;
     long version;
@@ -22,7 +25,7 @@ public class GroupedList<T, G extends ListGroup<T, G>> implements Iterable<T> {
     private boolean isValid() {
         if (cached == null) return false;
         if (tracker == null) return false;
-        return version == tracker.get();
+        return version == tracker.getVersion();
     }
 
     public GroupedList() {
@@ -81,36 +84,40 @@ public class GroupedList<T, G extends ListGroup<T, G>> implements Iterable<T> {
         cached = null;
     }
 
+    public void setFilter(Predicate<T> filter) {
+        this.filter = filter;
+        cached = null;
+    }
+
+    public boolean testFilter(T t) {
+        return filter.test(t);
+    }
+
     @Unmodifiable
     public List<T> get() {
 
         if (isValid()) return cached;
 
-        if (tracker != null) version = tracker.get();
+        if (tracker != null) version = tracker.getVersion();
         else if (cached != null && !cached.isEmpty()) MeteorClient.LOG.warn("Rebuild of GroupedList with tracker == null");
 
         MeteorClient.LOG.info("Rebuild {} direct, {} groups.", direct.size(), include.size());
 
-        List<ListGroup<T, G>> indirect = new ArrayList<>(include);
         Set<T> set = new HashSet<>(direct);
-        List<ListGroup<T, G>> groups = new ArrayList<>();
+        List<ListGroup<T, G>> seen = new ArrayList<>();
+        List<ListGroup<T, G>> next = new ArrayList<>();
 
-        for (int i = 0; i < indirect.size(); i++) {
-            ListGroup<T, G> g = indirect.get(i);
-
-            if (groups.contains(g)) continue;
-            groups.add(g);
-
-            List<T> items = g.get();
-
-            if (items != null) set.addAll(items);
-
-            if (g.getGroups() != null) indirect.addAll(g.getGroups());
+        for (ListGroup<T, G> g : include) {
+            g.internalGetAll(set, seen, next);
         }
+
 
         if (cached != null) cached.clear();
         else cached = new ArrayList<>();
-        cached.addAll(set);
+
+        for (T t : set) {
+            if (filter == null || filter.test(t)) cached.add(t);
+        }
 
         return cached;
     }
@@ -119,14 +126,14 @@ public class GroupedList<T, G extends ListGroup<T, G>> implements Iterable<T> {
         cached = null;
         if (other.isValid()) {
             cached = new ArrayList<>(other.cached);
-            version = tracker.get();
+            version = tracker.getVersion();
         }
         include = new ArrayList<>(other.include);
         direct = new ArrayList<>(other.direct);
     }
 
     public void clear() {
-        cached.clear();
+        if (cached != null) cached.clear();
         include.clear();
         direct.clear();
     }

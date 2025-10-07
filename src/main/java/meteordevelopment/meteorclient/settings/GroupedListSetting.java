@@ -5,12 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.settings.groups.GroupedList;
 import meteordevelopment.meteorclient.settings.groups.ListGroup;
 import meteordevelopment.meteorclient.settings.groups.ListGroupTracker;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -19,16 +17,19 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, GroupedListSetting<T>.Group>> {
+public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, GroupedListSetting.Groups<T>.Group>> {
 
-    public GroupedListSetting(String name, String description, GroupedList<T, Group> defaultValue, Consumer<GroupedList<T, Group>> onChanged, Consumer<Setting<GroupedList<T, Group>>> onModuleActivated, IVisible visible) {
+    protected Predicate<T> filter;
+
+    public GroupedListSetting(String name, String description, GroupedList<T, Groups<T>.Group> defaultValue, Predicate<T> filter, Consumer<GroupedList<T, Groups<T>.Group>> onChanged, Consumer<Setting<GroupedList<T, Groups<T>.Group>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+        this.filter = filter;
     }
 
     abstract public T parseItem(String str);
@@ -36,25 +37,23 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
     abstract public NbtElement itemToNbt(T t);
     abstract public T itemFromNbt(NbtElement e);
 
-    abstract public Map<String, Group> groups();
-    abstract protected ListGroupTracker tracker();
-
-    public Predicate<T> filter = null;
-
-    protected Group getGroup(String name) {
-        return groups().get(name.toUpperCase());
-    }
+    abstract protected Groups<T> groups();
 
     @Override
-    public GroupedList<T, Group> get() {
+    public GroupedList<T, Groups<T>.Group> get() {
         return value;
     }
 
+    public Predicate<T> getFilter() {
+        return filter;
+    }
+
     @Override
-    public boolean set(GroupedList<T, Group> o) {
+    public boolean set(GroupedList<T, Groups<T>.Group> o) {
         if (value == null) {
             value = new GroupedList<>();
-            value.tracker = tracker();
+            value.tracker = groups();
+            value.setFilter(filter);
         }
         value.set(o);
         onChanged();
@@ -67,20 +66,20 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
     }
 
     @Override
-    protected GroupedList<T, Group> parseImpl(String str) {
+    protected GroupedList<T, Groups<T>.Group> parseImpl(String str) {
 
-        GroupedList<T, Group> list = new GroupedList<>();
-        list.tracker = tracker();
+        GroupedList<T, Groups<T>.Group> list = new GroupedList<>();
+        list.tracker = groups();
 
         String[] values = str.split(",");
 
         try {
             for (String value : values) {
                 value = value.trim();
-                Group group = null;
+                Groups<T>.Group group = null;
 
                 if (value.startsWith("@")) {
-                    group = getGroup(value.substring(1));
+                    group = groups().get(value.substring(1));
                 }
 
                 if (group != null) {
@@ -98,7 +97,7 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
     }
 
     @Override
-    protected boolean isValueValid(GroupedList<T, Group> value) {
+    protected boolean isValueValid(GroupedList<T, Groups<T>.Group> value) {
         return true;
     }
 
@@ -106,7 +105,9 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
     final protected NbtCompound save(NbtCompound tag) {
         NbtList groupsTag = new NbtList();
 
-        for (Group g : groups().values()) if (!g.builtin) groupsTag.add(g.toTag());
+        // this does duplicate the contents of all groups into the config of every setting, however this is
+        // necessary for copy/paste to be able to share the complete config
+        for (Groups<T>.Group g : groups().GROUPS.values()) if (!g.builtin) groupsTag.add(g.toTag(this::itemToNbt));
         tag.put("groups", groupsTag);
 
         NbtList direct = new NbtList();
@@ -123,185 +124,202 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
     }
 
     @Override
-    final protected GroupedList<T, Group> load(NbtCompound tag) {
-        return null;
+    final protected GroupedList<T, Groups<T>.Group> load(NbtCompound tag) {
+        tag.getListOrEmpty("groups").forEach(el -> el.asCompound().ifPresent(t -> groups().fromTag(t, this::itemFromNbt)));
+
+        value.clear();
+
+        value.addAll(tag.getListOrEmpty("direct").stream().map(this::itemFromNbt).filter(Objects::nonNull).toList());
+        value.addAllGroups(tag.getListOrEmpty("include").stream().map(NbtElement::asString).filter(Optional::isPresent).map(o -> groups().get(o.get())).toList());
+
+        return value;
     }
 
-    final public class GroupBuilder {
+    static final public class Groups<T> extends ListGroupTracker {
 
-        private Group g;
+        Map<String, Group> GROUPS = new HashMap<>();
 
-        public GroupBuilder(String name) {
-            g = new Group(name);
+        public Groups<T>.Group get(String name) {
+            return GROUPS.get(name.toUpperCase());
         }
 
-        public GroupBuilder(String name, Item icon) {
-            g = new Group(name);
-            g.icon.set(icon);
-            g.showIcon.set(true);
+        public Collection<Group> getAll() {
+            return GROUPS.values();
         }
 
-        private GroupBuilder builtin() {
-            g.builtin = true;
-            return this;
-        }
+        public class GroupBuilder {
 
-        @SafeVarargs
-        public final GroupBuilder items(T... of) {
-            g.addAll(Arrays.asList(of));
-            return this;
-        }
+            private Group g;
 
-        @SafeVarargs
-        public final GroupBuilder include(Group... of) {
-            g.addAllGroups(Arrays.asList(of));
-            return this;
-        }
-
-        public GroupBuilder items(Collection<T> of) {
-            g.addAll(of);
-            return this;
-        }
-
-        public GroupBuilder include(Collection<Group> of) {
-            g.addAllGroups(of);
-            return this;
-        }
-
-        public Group get() {
-            groups().put(g.internalName.toUpperCase(), g);
-            Group w = g;
-            g = null;
-            return w;
-        }
-    }
-
-    protected GroupBuilder builtin(String name) {
-        return new GroupBuilder(name).builtin();
-    }
-
-    protected GroupBuilder builtin(String name, Item icon) {
-        return new GroupBuilder(name, icon).builtin();
-    }
-
-    public GroupBuilder newGroup(String name) {
-        return new GroupBuilder(name);
-    }
-
-    public GroupBuilder newGroup(String name, Item icon) {
-        return new GroupBuilder(name, icon);
-    }
-
-
-    public class Group extends ListGroup<T, Group> implements ISerializable<Group> {
-        public boolean builtin;
-
-        public Settings settings = new Settings();
-        public SettingGroup sg = settings.getDefaultGroup();
-
-        private String internalName;
-
-        public Setting<String> name = sg.add(new StringSetting.Builder()
-            .name("name")
-            .description("the name of the group")
-            .onChanged(this::changeName)
-            .filter(Utils::nameFilter)
-            .build()
-        );
-
-        public Setting<Boolean> showIcon = sg.add(new BoolSetting.Builder()
-            .name("show-icon")
-            .description("don't show an icon")
-            .defaultValue(false)
-            .build()
-        );
-
-        public Setting<Item> icon = sg.add(new ItemSetting.Builder()
-            .name("icon")
-            .description("item to use as icon in list")
-            .defaultValue(Items.NETHER_STAR)
-            .visible(showIcon::get)
-            .build()
-        );
-
-        public boolean checkName(String v) {
-            Group other = groups().get(v.toUpperCase());
-            return other == this || other == null;
-        }
-
-        private void changeName(String v) {
-            if (v.equals(internalName)) return;
-
-            Group other = groups().get(v.toUpperCase());
-            if (other == this) {
-                internalName = v;
-                return;
+            public GroupBuilder(String name) {
+                g = new Group(name);
             }
-            if (other != null) {
-                name.set(internalName);
+
+            public GroupBuilder(String name, Item icon) {
+                g = new Group(name);
+                g.icon.set(icon);
+                g.showIcon.set(true);
             }
-            else {
-                groups().remove(internalName.toUpperCase());
-                groups().put(v.toUpperCase(), this);
+
+            private GroupBuilder builtin() {
+                g.builtin = true;
+                return this;
+            }
+
+            @SafeVarargs
+            public final GroupBuilder items(T... of) {
+                g.addAll(Arrays.asList(of));
+                return this;
+            }
+
+            @SafeVarargs
+            public final GroupBuilder include(Group... of) {
+                g.addAllGroups(Arrays.asList(of));
+                return this;
+            }
+
+            public GroupBuilder items(Collection<T> of) {
+                g.addAll(of);
+                return this;
+            }
+
+            public GroupBuilder include(Collection<Group> of) {
+                g.addAllGroups(of);
+                return this;
+            }
+
+            public Group get() {
+                GROUPS.put(g.internalName.toUpperCase(), g);
+                Group w = g;
+                g = null;
+                return w;
             }
         }
 
-
-        private Group(String name)
-        {
-            super(tracker());
-
-            MeteorClient.LOG.info("GroupedListSetting<T>.Group@ \"{}\" in {}", internalName, tracker().hashCode());
-
-            internalName = name;
-            this.name.set(name);
+        protected GroupBuilder builtin(String name) {
+            return new GroupBuilder(name).builtin();
         }
 
-        @Override
-        @Unmodifiable
-        public List<T> get() {
-            MeteorClient.LOG.info("GroupedListSetting<T>.get@ \"{}\" ({} before filter)", internalName, direct.size());
-            if (filter == null) return direct;
-            return direct.stream().filter(filter).toList();
+        protected GroupBuilder builtin(String name, Item icon) {
+            return new GroupBuilder(name, icon).builtin();
         }
 
-        @Override
-        public NbtCompound toTag() {
-            NbtCompound tag = new NbtCompound();
-            tag.putString("name", internalName);
-            tag.put("icon", Identifier.CODEC, Registries.ITEM.getId(icon.get()));
-
-            NbtList d = new NbtList();
-            direct.forEach((t) -> d.add(itemToNbt(t)));
-
-            NbtList i = new NbtList();
-            include.forEach((g) -> i.add(NbtString.of(g.internalName)));
-
-            tag.put("direct", d);
-            tag.put("include", i);
-            return tag;
+        public GroupBuilder builder(String name) {
+            return new GroupBuilder(name);
         }
 
-        @Override
-        public Group fromTag(NbtCompound tag) {
-            String name = tag.getString("name", null);
-            if (name == null) return null;
+        public GroupBuilder builder(String name, Item icon) {
+            return new GroupBuilder(name, icon);
+        }
 
-            Group g = groups().get(name.toUpperCase());
-            if (g == null) g = this;
+        public Group fromTag(NbtCompound tag, Function<NbtElement, T> itemFromNbt) {
+            return new Group(tag, itemFromNbt);
+        }
 
-            g.internalName = name;
-            g.name.set(name);
-            g.icon.set(tag.get("item", Identifier.CODEC).map(Registries.ITEM::get).orElse(null));
+        public class Group extends ListGroup<T, Group> {
+            public boolean builtin;
 
-            g.direct = tag.getListOrEmpty("direct").stream().map(GroupedListSetting.this::itemFromNbt).toList();
-            g.include = tag.getListOrEmpty("include").stream().map(NbtElement::asString)
-                .filter(Optional::isPresent).map(Optional::get).map(String::toUpperCase).map((s) -> {
-                    if (groups().containsKey(s)) return groups().get(s);
-                    return groups().put(s, newGroup(s).get());
-                }).toList();
+            public Settings settings = new Settings();
+            public SettingGroup sg = settings.getDefaultGroup();
 
-            return g;
+            private String internalName;
+
+            public Setting<String> name = sg.add(new StringSetting.Builder()
+                .name("name")
+                .description("the name of the group")
+                .onChanged(this::changeName)
+                .filter(Utils::nameFilter)
+                .build()
+            );
+
+            public Setting<Boolean> showIcon = sg.add(new BoolSetting.Builder()
+                .name("show-icon")
+                .description("don't show an icon")
+                .defaultValue(false)
+                .build()
+            );
+
+            public Setting<Item> icon = sg.add(new ItemSetting.Builder()
+                .name("icon")
+                .description("item to use as icon in list")
+                .defaultValue(Items.NETHER_STAR)
+                .visible(showIcon::get)
+                .build()
+            );
+
+            public boolean checkName(String v) {
+                Group other = GROUPS.get(v.toUpperCase());
+                return other == this || other == null;
+            }
+
+            private void changeName(String v) {
+                if (v.equals(internalName)) return;
+
+                Group other = GROUPS.get(v.toUpperCase());
+                if (other == this) {
+                    internalName = v;
+                    return;
+                }
+                if (other != null) {
+                    name.set(internalName);
+                }
+                else {
+                    GROUPS.remove(internalName.toUpperCase());
+                    GROUPS.put(v.toUpperCase(), this);
+                }
+            }
+
+
+            private Group(String name)
+            {
+                super(Groups.this);
+
+                internalName = name;
+                this.name.set(name);
+            }
+
+            private Group(NbtCompound tag, Function<NbtElement, T> itemFromNbt)
+            {
+                super(Groups.this);
+                fromTag(tag, itemFromNbt);
+            }
+
+            public NbtCompound toTag(Function<T, NbtElement> itemToNbt) {
+                NbtCompound tag = new NbtCompound();
+                tag.putString("name", internalName);
+                tag.put("icon", Identifier.CODEC, Registries.ITEM.getId(icon.get()));
+
+                NbtList d = new NbtList();
+                direct.forEach((t) -> d.add(itemToNbt.apply(t)));
+
+                NbtList i = new NbtList();
+                include.forEach((g) -> i.add(NbtString.of(g.internalName)));
+
+                tag.put("direct", d);
+                tag.put("include", i);
+                return tag;
+            }
+
+            public Group fromTag(NbtCompound tag, Function<NbtElement, T> itemFromNbt) {
+                String name = tag.getString("name", null);
+                if (name == null) return null;
+
+                this.name.set(name);
+                this.icon.set(tag.get("item", Identifier.CODEC).map(Registries.ITEM::get).orElse(null));
+
+                this.direct = tag.getListOrEmpty("direct").stream().map(itemFromNbt).toList();
+                this.include = tag.getListOrEmpty("include").stream().map(NbtElement::asString)
+                    .filter(Optional::isPresent).map(Optional::get).map(String::toUpperCase).map((s) -> {
+                        if (GROUPS.containsKey(s)) return GROUPS.get(s);
+                        return GROUPS.put(s, builder(s).get());
+                    }).toList();
+
+                if (internalName == null) this.name.set(String.format("group%d", hashCode()));
+
+                return this;
+            }
         }
     }
+
+
 }

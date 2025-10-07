@@ -323,7 +323,7 @@ public class NoRender extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
         .name("block-entities")
         .description("Block entities (chest, shulker block, etc.) to not render.")
         .filter(block -> block instanceof BlockEntityProvider && !(block instanceof AbstractBannerBlock))

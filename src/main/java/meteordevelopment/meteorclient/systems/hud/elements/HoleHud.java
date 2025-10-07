@@ -30,7 +30,7 @@ public class HoleHud extends HudElement {
 
     // General
 
-    public final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> safe = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> safe = sgGeneral.add(new BlockListSetting.Builder()
         .name("safe-blocks")
         .description("Which blocks to consider safe.")
         .defaultValue(Blocks.OBSIDIAN, Blocks.BEDROCK, Blocks.CRYING_OBSIDIAN, Blocks.NETHERITE_BLOCK)

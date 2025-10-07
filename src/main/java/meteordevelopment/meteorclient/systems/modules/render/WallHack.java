@@ -34,7 +34,7 @@ public class WallHack extends Module {
         .build()
     );
 
-    public final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("What blocks should be targeted for Wall Hack.")
         .onChanged(onChanged -> {

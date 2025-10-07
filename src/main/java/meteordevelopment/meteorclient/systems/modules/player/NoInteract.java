@@ -33,7 +33,7 @@ public class NoInteract extends Module {
 
     // Blocks
 
-    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blockMine = sgBlocks.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blockMine = sgBlocks.add(new BlockListSetting.Builder()
         .name("block-mine")
         .description("Cancels block mining.")
         .build()
@@ -46,7 +46,7 @@ public class NoInteract extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> blockInteract = sgBlocks.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blockInteract = sgBlocks.add(new BlockListSetting.Builder()
         .name("block-interact")
         .description("Cancels block interaction.")
         .build()

@@ -53,7 +53,7 @@ public class VeinMiner extends Module {
 
     // General
 
-    private final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Which blocks to select.")
         .defaultGroups(BlockListSetting.TERRAIN)

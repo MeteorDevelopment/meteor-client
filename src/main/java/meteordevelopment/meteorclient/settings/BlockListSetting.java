@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.settings.groups.GroupedList;
-import meteordevelopment.meteorclient.settings.groups.ListGroupTracker;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -22,14 +21,8 @@ import java.util.function.Predicate;
 
 public class BlockListSetting extends GroupedListSetting<Block> {
 
-    private final static Map<String, Group> GROUPS = new HashMap<>();
-
-    public BlockListSetting(String name, String description, GroupedList<Block, Group> defaultValue, Consumer<GroupedList<Block, Group>> onChanged, Consumer<Setting<GroupedList<Block, Group>>> onModuleActivated, Predicate<Block> filter, IVisible visible) {
-        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-
-        if (GROUPS.isEmpty()) initGroups();
-
-        this.filter = filter;
+    public BlockListSetting(String name, String description, GroupedList<Block, Groups<Block>.Group> defaultValue, Consumer<GroupedList<Block, Groups<Block>.Group>> onChanged, Consumer<Setting<GroupedList<Block, Groups<Block>.Group>>> onModuleActivated, Predicate<Block> filter, IVisible visible) {
+        super(name, description, defaultValue, filter, onChanged, onModuleActivated, visible);
     }
 
     @Override
@@ -51,16 +44,11 @@ public class BlockListSetting extends GroupedListSetting<Block> {
         return null;
     }
 
+    public static final Groups<Block> GROUPS = new Groups<>();
+
     @Override
-    public Map<String, GroupedListSetting<Block>.Group> groups() {
+    protected Groups<Block> groups() {
         return GROUPS;
-    }
-
-    private final static ListGroupTracker tracker = new ListGroupTracker();
-
-    @Override
-    protected ListGroupTracker tracker() {
-        return tracker;
     }
 
     @Override
@@ -68,7 +56,7 @@ public class BlockListSetting extends GroupedListSetting<Block> {
         return Registries.BLOCK.getIds();
     }
 
-    public static class Builder extends SettingBuilder<Builder, GroupedList<Block, Group>, BlockListSetting> {
+    public static class Builder extends SettingBuilder<Builder, GroupedList<Block, Groups<Block>.Group>, BlockListSetting> {
         private Predicate<Block> filter;
 
         public Builder() {
@@ -90,11 +78,11 @@ public class BlockListSetting extends GroupedListSetting<Block> {
         }
 
          @SafeVarargs
-         public final Builder defaultGroups(Group... defaults) {
-            List<Group> groups = null;
+         public final Builder defaultGroups(Groups<Block>.Group... defaults) {
+            List<Groups<Block>.Group> groups = null;
 
             if (defaults != null)
-                groups = Arrays.stream(defaults).filter(g -> g.trackerIs(tracker)).toList();
+                groups = Arrays.stream(defaults).filter(g -> g.trackerIs(GROUPS)).toList();
 
             if (defaultValue == null)
                 return defaultValue(groups != null ? new GroupedList<>(null, groups) : new GroupedList<>());
@@ -114,28 +102,28 @@ public class BlockListSetting extends GroupedListSetting<Block> {
         }
     }
 
-    public static Group ORES, DIRTS, SANDS, STONES, STONES_ALL, TERRAIN, TERRAIN_ALL;
+    public static Groups<Block>.Group ORES, DIRTS, SANDS, STONES, STONES_ALL, TERRAIN, TERRAIN_ALL;
 
-    private void initGroups() {
-        ORES = builtin("Ores", Items.DIAMOND_ORE)
+    static {
+        ORES = GROUPS.builtin("ores", Items.DIAMOND_ORE)
             .items(Xray.ORES).get();
-        DIRTS = builtin("Dirt", Items.DIRT)
+        DIRTS = GROUPS.builtin("dirt", Items.DIRT)
             .items(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.DIRT_PATH, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.CLAY)
             .get();
-        SANDS = builtin("Sand", Items.SAND)
+        SANDS = GROUPS.builtin("sand", Items.SAND)
             .items(Blocks.SAND, Blocks.RED_SAND, Blocks.GRAVEL)
             .get();
-        STONES = builtin("Stone", Items.STONE)
+        STONES = GROUPS.builtin("stone", Items.STONE)
             .items(Blocks.STONE, Blocks.DEEPSLATE, Blocks.NETHERRACK, Blocks.SANDSTONE, Blocks.TUFF, Blocks.BASALT)
             .get();
-        STONES_ALL = builtin("Stone-all", Items.DIORITE)
+        STONES_ALL = GROUPS.builtin("stone-all", Items.DIORITE)
             .items(Blocks.ANDESITE, Blocks.DIORITE, Blocks.GRANITE, Blocks.BLACKSTONE, Blocks.CALCITE)
             .include(STONES)
             .get();
-        TERRAIN = builtin("Terrain", Items.GRASS_BLOCK)
+        TERRAIN = GROUPS.builtin("terrain", Items.GRASS_BLOCK)
             .include(STONES, DIRTS, SANDS)
             .get();
-        TERRAIN_ALL = builtin("Terrain-all", Items.GRASS_BLOCK)
+        TERRAIN_ALL = GROUPS.builtin("terrain-all", Items.GRASS_BLOCK)
             .include(STONES_ALL, DIRTS, SANDS)
             .get();
     }

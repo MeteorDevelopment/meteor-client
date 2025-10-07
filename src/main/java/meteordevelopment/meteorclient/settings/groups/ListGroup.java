@@ -9,9 +9,8 @@ import meteordevelopment.meteorclient.MeteorClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 
 public abstract class ListGroup<T, G extends ListGroup<T, G>> {
     protected List<T> direct = new ArrayList<>();
@@ -22,13 +21,42 @@ public abstract class ListGroup<T, G extends ListGroup<T, G>> {
     public boolean trackerIs(ListGroupTracker o) { return tracker == o; };
 
     @Unmodifiable
-    public List<T> get() {
+    public List<T> getImmediate() {
         return direct;
     }
 
-    @Unmodifiable
-    final public List<T> getAll() {
-        return direct;
+    public List<T> getAll() {
+        Set<T> set = new HashSet<>();
+        List<ListGroup<T, G>> seen = new ArrayList<>();
+        List<ListGroup<T, G>> next = new ArrayList<>();
+        internalGetAll(set, seen, next);
+        return new ArrayList<>(set);
+    }
+
+    public void internalGetAll(Collection<T> to, Collection<ListGroup<T, G>> seen, List<ListGroup<T, G>> next) {
+        next.clear();
+        next.add(this);
+        for (int i = 0; i < next.size(); i++) {
+            ListGroup<T, G> g = next.get(i);
+            if (seen.contains(g)) continue;
+            to.addAll(g.direct);
+            next.addAll(g.include);
+            seen.add(g);
+        }
+    }
+
+    public boolean anyMatch(Predicate<T> predicate) {
+        List<ListGroup<T, G>> seen = new ArrayList<>();
+        List<ListGroup<T, G>> next = new ArrayList<>();
+        next.add(this);
+        for (int i = 0; i < next.size(); i++) {
+            ListGroup<T, G> g = next.get(i);
+            if (seen.contains(g)) continue;
+            if (g.direct.stream().anyMatch(predicate)) return true;
+            next.addAll(g.include);
+            seen.add(g);
+        }
+        return false;
     }
 
     @Unmodifiable

@@ -30,14 +30,14 @@ public class Slippy extends Module {
         .build()
     );
 
-    public final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> ignoredBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> ignoredBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("ignored-blocks")
         .description("Decide which blocks not to slip on")
         .visible(() -> listMode.get() == ListMode.Blacklist)
         .build()
     );
 
-    public final Setting<GroupedList<Block, GroupedListSetting<Block>.Group>> allowedBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> allowedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("allowed-blocks")
         .description("Decide which blocks to slip on")
         .visible(() -> listMode.get() == ListMode.Whitelist)
