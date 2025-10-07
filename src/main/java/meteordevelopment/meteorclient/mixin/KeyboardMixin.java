@@ -30,24 +30,24 @@ public abstract class KeyboardMixin {
     @Shadow @Final private MinecraftClient client;
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
-    public void onKey(long window, int action, KeyInput arg, CallbackInfo ci) {
-        int modifiers = arg.modifiers();
-        if (arg.key() != GLFW.GLFW_KEY_UNKNOWN) {
+    public void onKey(long window, int action, KeyInput keyEvent, CallbackInfo ci) {
+        int modifiers = keyEvent.modifiers();
+        if (keyEvent.key() != GLFW.GLFW_KEY_UNKNOWN) {
             // on Linux/X11 the modifier is not active when the key is pressed and still active when the key is released
             // https://github.com/glfw/glfw/issues/1630
             if (action == GLFW.GLFW_PRESS) {
-                modifiers |= Input.getModifier(arg.key());
+                modifiers |= Input.getModifier(keyEvent.key());
             } else if (action == GLFW.GLFW_RELEASE) {
-                modifiers &= ~Input.getModifier(arg.key());
+                modifiers &= ~Input.getModifier(keyEvent.key());
             }
 
             if (client.currentScreen instanceof WidgetScreen && action == GLFW.GLFW_REPEAT) {
-                ((WidgetScreen) client.currentScreen).keyRepeated(arg.key(), modifiers);
+                ((WidgetScreen) client.currentScreen).keyRepeated(keyEvent.key(), modifiers);
             }
 
             if (GuiKeyEvents.canUseKeys) {
-                Input.setKeyState(arg.key(), action != GLFW.GLFW_RELEASE);
-                if (MeteorClient.EVENT_BUS.post(KeyEvent.get(arg, arg.key(), modifiers, KeyAction.get(action))).isCancelled()) ci.cancel();
+                Input.setKeyState(keyEvent.key(), action != GLFW.GLFW_RELEASE);
+                if (MeteorClient.EVENT_BUS.post(KeyEvent.get(keyEvent, KeyAction.get(action))).isCancelled()) ci.cancel();
             }
         }
     }

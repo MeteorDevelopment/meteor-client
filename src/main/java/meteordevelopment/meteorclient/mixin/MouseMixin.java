@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -37,10 +37,11 @@ public abstract class MouseMixin {
     private MinecraftClient client;
 
     @Inject(method = "onMouseButton", at = @At("HEAD"), cancellable = true)
-    private void onMouseButton(long window, MouseInput arg, int action, CallbackInfo ci) {
-        Input.setButtonState(arg.button(), action != GLFW_RELEASE);
+    private void onMouseButton(long window, MouseInput mouseInput, int action, CallbackInfo ci) {
+        Input.setButtonState(mouseInput.button(), action != GLFW_RELEASE);
 
-        if (MeteorClient.EVENT_BUS.post(MouseButtonEvent.get(new Click(getScaledX(client.getWindow()), getScaledY(client.getWindow()), arg), arg.button(), KeyAction.get(action))).isCancelled()) ci.cancel();
+        Click click = new Click(getScaledX(client.getWindow()), getScaledY(client.getWindow()), mouseInput);
+        if (MeteorClient.EVENT_BUS.post(MouseClickEvent.get(mouseInput, click, KeyAction.get(action))).isCancelled()) ci.cancel();
     }
 
     @Inject(method = "onMouseScroll", at = @At("HEAD"), cancellable = true)

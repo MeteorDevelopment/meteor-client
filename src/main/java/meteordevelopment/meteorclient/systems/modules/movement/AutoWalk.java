@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.pathing.NopPathManager;
@@ -130,12 +130,12 @@ public class AutoWalk extends Module {
 
     @EventHandler
     private void onKey(KeyEvent event) {
-        if (isMovementKey(event.arg) && event.action == KeyAction.Press) onMovement();
+        if (isMovementKey(event.input) && event.action == KeyAction.Press) onMovement();
     }
 
      @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
-        if (isMovementButton(event.arg) && event.action == KeyAction.Press) onMovement();
+    private void onMouseClick(MouseClickEvent event) {
+        if (isMovementButton(event.click) && event.action == KeyAction.Press) onMovement();
     }
 
     @EventHandler
