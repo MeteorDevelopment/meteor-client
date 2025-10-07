@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -254,7 +254,7 @@ public class HighwayBuilder extends Module {
 
     // Paving
 
-    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blocksToPlace = sgPaving.add(new BlockListSetting.Builder()
+    public final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> blocksToPlace = sgPaving.add(new BlockListSetting.Builder()
         .name("blocks-to-place")
         .description("Blocks it is allowed to place.")
         .defaultValue(Blocks.OBSIDIAN)
@@ -288,7 +288,7 @@ public class HighwayBuilder extends Module {
 
     // Inventory
 
-    private final Setting<GroupedList<Item, GroupedListSetting.Groups<Item>.Group>> trashItems = sgInventory.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> trashItems = sgInventory.add(new ItemListSetting.Builder()
         .name("trash-items")
         .description("Items that are considered trash and can be thrown out.")
         .defaultValue(

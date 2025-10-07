@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.settings.BlockListSetting;
-import meteordevelopment.meteorclient.settings.GroupedListSetting;
+import meteordevelopment.meteorclient.settings.GroupedSetSetting;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
@@ -28,17 +28,17 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class GroupedListSettingScreen<T, S extends GroupedListSetting<T>> extends WindowScreen {
+public abstract class GroupedListSettingScreen<T, S extends GroupedSetSetting<T>> extends WindowScreen {
     protected final S setting;
     private final Iterable<T> registry;
-    private final GroupedListSetting.Groups<T> groups;
+    private final GroupedSetSetting.Groups<T> groups;
 
     private WTable table;
     private String filterText = "";
 
-    private GroupedListSetting.Groups<T>.Group expanded;
+    private GroupedSetSetting.Groups<T>.Group expanded;
 
-    public GroupedListSettingScreen(GuiTheme theme, String title, S setting, GroupedListSetting.Groups<T> groups, Iterable<T> registry) {
+    public GroupedListSettingScreen(GuiTheme theme, String title, S setting, GroupedSetSetting.Groups<T> groups, Iterable<T> registry) {
         super(theme, title);
 
         this.registry = registry;
@@ -84,9 +84,9 @@ public abstract class GroupedListSettingScreen<T, S extends GroupedListSetting<T
         if (!left.cells.isEmpty()) table.add(theme.verticalSeparator()).expandWidgetY();
 
         list.clear();
-        list.addAll(setting.get().getIncludedGroups().stream().map(ItemUnion::new).toList());
+        list.addAll(setting.get().getGroups().stream().map(ItemUnion::new).toList());
 
-        setting.get().getDirectlyIncludedItems().forEach((t) -> list.add(new ItemUnion(t)));
+        setting.get().getImmediate().forEach((t) -> list.add(new ItemUnion(t)));
 
         // Right (selected)
         WTable right = abc(list, false, t -> {
@@ -101,7 +101,7 @@ public abstract class GroupedListSettingScreen<T, S extends GroupedListSetting<T
         postWidgets(left, right);
     }
 
-    private WWidget groupLabel(GroupedListSetting.Groups<T>.Group s) {
+    private WWidget groupLabel(GroupedSetSetting.Groups<T>.Group s) {
         Color color = entireGroupExcluded(s) ? new Color(200, 100, 10) : Color.ORANGE;
         if (s.showIcon.get()) return theme.itemWithLabel(s.icon.get().asItem().getDefaultStack(), "@"+s.name.get()).color(color);
         else return theme.label(" @"+s.name.get()).color(color);
@@ -116,8 +116,8 @@ public abstract class GroupedListSettingScreen<T, S extends GroupedListSetting<T
         // Sort
         Predicate<ItemUnion> predicate = isLeft
             ? v -> Boolean.TRUE.equals(v.map(
-                t -> this.includeValue(t) && !setting.get().getDirectlyIncludedItems().contains(t),
-            s -> !entireGroupExcluded(s) && !setting.get().getIncludedGroups().contains(s)))
+                t -> this.includeValue(t) && !setting.get().getImmediate().contains(t),
+            s -> !entireGroupExcluded(s) && !setting.get().getGroups().contains(s)))
             : v -> true;
 
         Iterable<ItemUnion> sorted = SortingHelper.sort(iterable, predicate, v -> v.map(this::getValueNames, s -> new String[]{"@"+s.name.get()}), filterText);
@@ -141,7 +141,7 @@ public abstract class GroupedListSettingScreen<T, S extends GroupedListSetting<T
                 WTable subtable = vlist.add(theme.table()).widget();
 
                 if (e) {
-                    for (GroupedListSetting.Groups<T>.Group inc : s.getGroups()) {
+                    for (GroupedSetSetting.Groups<T>.Group inc : s.getGroups()) {
                         subtable.add(theme.label("   -> "));
                         subtable.add(groupLabel(inc));
                         subtable.row();
@@ -178,7 +178,7 @@ public abstract class GroupedListSettingScreen<T, S extends GroupedListSetting<T
         return table;
     }
 
-    private boolean entireGroupExcluded(GroupedListSetting.Groups<T>.Group s) {
+    private boolean entireGroupExcluded(GroupedSetSetting.Groups<T>.Group s) {
         return !s.anyMatch(this::includeValue);
     }
 
@@ -227,32 +227,32 @@ public abstract class GroupedListSettingScreen<T, S extends GroupedListSetting<T
 
     protected class ItemUnion {
         private final T t;
-        private final GroupedListSetting.Groups<T>.Group s;
+        private final GroupedSetSetting.Groups<T>.Group s;
 
         public ItemUnion(T t) {
             this.s = null;
             this.t = t;
         }
 
-        public ItemUnion(GroupedListSetting.Groups<T>.Group s) {
+        public ItemUnion(GroupedSetSetting.Groups<T>.Group s) {
             this.s = s;
             this.t = null;
         }
 
-        public <R> R map(Function<T, R> a, Function<GroupedListSetting.Groups<T>.Group, R> b) {
+        public <R> R map(Function<T, R> a, Function<GroupedSetSetting.Groups<T>.Group, R> b) {
             if (t != null) return a.apply(t);
             else if (s != null) return b.apply(s);
             return null;
         }
     }
 
-    public class EditListGroupScreen extends EditSystemScreen<GroupedListSetting.Groups<T>.Group> {
-        public EditListGroupScreen(GuiTheme theme, GroupedListSetting.Groups<T>.Group value, Runnable reload) {
+    public class EditListGroupScreen extends EditSystemScreen<GroupedSetSetting.Groups<T>.Group> {
+        public EditListGroupScreen(GuiTheme theme, GroupedSetSetting.Groups<T>.Group value, Runnable reload) {
             super(theme, value, reload);
         }
 
         @Override
-        public GroupedListSetting.Groups<T>.Group create() {
+        public GroupedSetSetting.Groups<T>.Group create() {
             return null;
         }
 

@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -22,7 +22,7 @@ import net.minecraft.util.shape.VoxelShapes;
 public class Collisions extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("What blocks should be added collision box.")
         .filter(this::blockFilter)

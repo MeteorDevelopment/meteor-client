@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -19,9 +19,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class BlockListSetting extends GroupedListSetting<Block> {
+public class BlockListSetting extends GroupedSetSetting<Block> {
 
-    public BlockListSetting(String name, String description, GroupedList<Block, Groups<Block>.Group> defaultValue, Consumer<GroupedList<Block, Groups<Block>.Group>> onChanged, Consumer<Setting<GroupedList<Block, Groups<Block>.Group>>> onModuleActivated, Predicate<Block> filter, IVisible visible) {
+    public BlockListSetting(String name, String description, GroupSet<Block, Groups<Block>.Group> defaultValue, Consumer<GroupSet<Block, Groups<Block>.Group>> onChanged, Consumer<Setting<GroupSet<Block, Groups<Block>.Group>>> onModuleActivated, Predicate<Block> filter, IVisible visible) {
         super(name, description, defaultValue, filter, onChanged, onModuleActivated, visible);
     }
 
@@ -56,23 +56,23 @@ public class BlockListSetting extends GroupedListSetting<Block> {
         return Registries.BLOCK.getIds();
     }
 
-    public static class Builder extends SettingBuilder<Builder, GroupedList<Block, Groups<Block>.Group>, BlockListSetting> {
+    public static class Builder extends SettingBuilder<Builder, GroupSet<Block, Groups<Block>.Group>, BlockListSetting> {
         private Predicate<Block> filter;
 
         public Builder() {
-            super(new GroupedList<>());
+            super(new GroupSet<>());
         }
 
         public Builder defaultValue(Collection<Block> defaults) {
             if (defaultValue == null)
-                return defaultValue(defaults != null ? new GroupedList<>(defaults) : new GroupedList<>());
+                return defaultValue(defaults != null ? new GroupSet<>(defaults) : new GroupSet<>());
             defaultValue.addAll(defaults);
             return this;
         }
 
         public Builder defaultValue(Block... defaults) {
             if (defaultValue == null)
-                return defaultValue(defaults != null ? new GroupedList<>(Arrays.asList(defaults)) : new GroupedList<>());
+                return defaultValue(defaults != null ? new GroupSet<>(Arrays.asList(defaults)) : new GroupSet<>());
             defaultValue.addAll(Arrays.asList(defaults));
             return this;
         }
@@ -82,10 +82,10 @@ public class BlockListSetting extends GroupedListSetting<Block> {
             List<Groups<Block>.Group> groups = null;
 
             if (defaults != null)
-                groups = Arrays.stream(defaults).filter(g -> g.trackerIs(GROUPS)).toList();
+                groups = Arrays.stream(defaults).filter(g -> g.isOf(GROUPS)).toList();
 
             if (defaultValue == null)
-                return defaultValue(groups != null ? new GroupedList<>(null, groups) : new GroupedList<>());
+                return defaultValue(groups != null ? new GroupSet<>(null, groups) : new GroupSet<>());
 
             if (groups != null) defaultValue.addAllGroups(groups);
             return this;

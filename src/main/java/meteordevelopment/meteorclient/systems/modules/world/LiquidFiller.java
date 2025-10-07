@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -106,7 +106,7 @@ public class LiquidFiller extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
+    private final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("The allowed blocks that it will use to fill up the liquid.")
         .defaultValue(Blocks.COBBLESTONE, Blocks.COBBLED_DEEPSLATE)
@@ -115,7 +115,7 @@ public class LiquidFiller extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
+    private final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("blacklist")
         .description("The denied blocks that it not will use to fill up the liquid.")
         .visible(() -> listMode.get() == ListMode.Blacklist)

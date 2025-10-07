@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
-import meteordevelopment.meteorclient.settings.groups.ListGroup;
-import meteordevelopment.meteorclient.settings.groups.ListGroupTracker;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
+import meteordevelopment.meteorclient.settings.groups.SetGroup;
+import meteordevelopment.meteorclient.settings.groups.SetGroupEnumeration;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -22,12 +22,13 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, GroupedListSetting.Groups<T>.Group>> {
+public abstract class GroupedSetSetting<T> extends Setting<GroupSet<T, GroupedSetSetting.Groups<T>.Group>> {
 
     protected Predicate<T> filter;
 
-    public GroupedListSetting(String name, String description, GroupedList<T, Groups<T>.Group> defaultValue, Predicate<T> filter, Consumer<GroupedList<T, Groups<T>.Group>> onChanged, Consumer<Setting<GroupedList<T, Groups<T>.Group>>> onModuleActivated, IVisible visible) {
+    public GroupedSetSetting(String name, String description, GroupSet<T, Groups<T>.Group> defaultValue, Predicate<T> filter, Consumer<GroupSet<T, Groups<T>.Group>> onChanged, Consumer<Setting<GroupSet<T, Groups<T>.Group>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
         this.filter = filter;
     }
@@ -40,7 +41,7 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
     abstract protected Groups<T> groups();
 
     @Override
-    public GroupedList<T, Groups<T>.Group> get() {
+    public GroupSet<T, Groups<T>.Group> get() {
         return value;
     }
 
@@ -49,11 +50,11 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
     }
 
     @Override
-    public boolean set(GroupedList<T, Groups<T>.Group> o) {
+    public boolean set(GroupSet<T, Groups<T>.Group> o) {
         if (value == null) {
-            value = new GroupedList<>();
-            value.tracker = groups();
-            value.setFilter(filter);
+            value = new GroupSet<>();
+            value.enumeration = groups();
+            value.setIncludeCondition(filter);
         }
         value.set(o);
         onChanged();
@@ -66,10 +67,9 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
     }
 
     @Override
-    protected GroupedList<T, Groups<T>.Group> parseImpl(String str) {
-
-        GroupedList<T, Groups<T>.Group> list = new GroupedList<>();
-        list.tracker = groups();
+    protected GroupSet<T, Groups<T>.Group> parseImpl(String str) {
+        GroupSet<T, Groups<T>.Group> list = new GroupSet<>();
+        list.enumeration = groups();
 
         String[] values = str.split(",");
 
@@ -97,7 +97,7 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
     }
 
     @Override
-    protected boolean isValueValid(GroupedList<T, Groups<T>.Group> value) {
+    protected boolean isValueValid(GroupSet<T, Groups<T>.Group> value) {
         return true;
     }
 
@@ -111,12 +111,12 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
         tag.put("groups", groupsTag);
 
         NbtList direct = new NbtList();
-        value.getDirectlyIncludedItems().stream().map(this::itemToNbt).forEach(direct::add);
+        value.getImmediate().stream().map(this::itemToNbt).forEach(direct::add);
 
         tag.put("direct", direct);
 
         NbtList include = new NbtList();
-        value.getIncludedGroups().stream().map((g) -> NbtString.of(g.internalName)).forEach(direct::add);
+        value.getGroups().stream().map((g) -> NbtString.of(g.internalName)).forEach(direct::add);
 
         tag.put("include", include);
 
@@ -124,7 +124,7 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
     }
 
     @Override
-    final protected GroupedList<T, Groups<T>.Group> load(NbtCompound tag) {
+    final protected GroupSet<T, Groups<T>.Group> load(NbtCompound tag) {
         tag.getListOrEmpty("groups").forEach(el -> el.asCompound().ifPresent(t -> groups().fromTag(t, this::itemFromNbt)));
 
         value.clear();
@@ -135,7 +135,7 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
         return value;
     }
 
-    static final public class Groups<T> extends ListGroupTracker {
+    static final public class Groups<T> extends SetGroupEnumeration {
 
         Map<String, Group> GROUPS = new HashMap<>();
 
@@ -216,7 +216,7 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
             return new Group(tag, itemFromNbt);
         }
 
-        public class Group extends ListGroup<T, Group> {
+        public class Group extends SetGroup<T, Group> {
             public boolean builtin;
 
             public Settings settings = new Settings();
@@ -247,13 +247,11 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
                 .build()
             );
 
-            public boolean checkName(String v) {
-                Group other = GROUPS.get(v.toUpperCase());
-                return other == this || other == null;
-            }
-
             private void changeName(String v) {
                 if (v.equals(internalName)) return;
+
+                // this should never happen
+                if (internalName == null) internalName = "_group" + hashCode();
 
                 Group other = GROUPS.get(v.toUpperCase());
                 if (other == this) {
@@ -262,13 +260,11 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
                 }
                 if (other != null) {
                     name.set(internalName);
-                }
-                else {
+                } else {
                     GROUPS.remove(internalName.toUpperCase());
                     GROUPS.put(v.toUpperCase(), this);
                 }
             }
-
 
             private Group(String name)
             {
@@ -290,7 +286,7 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
                 tag.put("icon", Identifier.CODEC, Registries.ITEM.getId(icon.get()));
 
                 NbtList d = new NbtList();
-                direct.forEach((t) -> d.add(itemToNbt.apply(t)));
+                immediate.forEach((t) -> d.add(itemToNbt.apply(t)));
 
                 NbtList i = new NbtList();
                 include.forEach((g) -> i.add(NbtString.of(g.internalName)));
@@ -307,7 +303,7 @@ public abstract class GroupedListSetting<T> extends Setting<GroupedList<T, Group
                 this.name.set(name);
                 this.icon.set(tag.get("item", Identifier.CODEC).map(Registries.ITEM::get).orElse(null));
 
-                this.direct = tag.getListOrEmpty("direct").stream().map(itemFromNbt).toList();
+                this.immediate = tag.getListOrEmpty("direct").stream().map(itemFromNbt).collect(Collectors.toSet());
                 this.include = tag.getListOrEmpty("include").stream().map(NbtElement::asString)
                     .filter(Optional::isPresent).map(Optional::get).map(String::toUpperCase).map((s) -> {
                         if (GROUPS.containsKey(s)) return GROUPS.get(s);

@@ -1,6 +1,6 @@
 package meteordevelopment.meteorclient.settings.groups;
 
-public class ListGroupTracker {
+public class SetGroupEnumeration {
 
     long a = 0;
 

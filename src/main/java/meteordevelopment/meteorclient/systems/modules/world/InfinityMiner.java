@@ -13,7 +13,7 @@ import baritone.api.process.ICustomGoalProcess;
 import baritone.api.process.IMineProcess;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -40,7 +40,7 @@ public class InfinityMiner extends Module {
 
     // General
 
-    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> targetBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> targetBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("target-blocks")
         .description("The target blocks to mine.")
         .defaultValue(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE)
@@ -48,14 +48,14 @@ public class InfinityMiner extends Module {
         .build()
     );
 
-    public final Setting<GroupedList<Item, GroupedListSetting.Groups<Item>.Group>> targetItems = sgGeneral.add(new ItemListSetting.Builder()
+    public final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> targetItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("target-items")
         .description("The target items to collect.")
         .defaultValue(Items.DIAMOND)
         .build()
     );
 
-    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> repairBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> repairBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("repair-blocks")
         .description("The repair blocks to mine.")
         .defaultValue(Blocks.COAL_ORE, Blocks.REDSTONE_ORE, Blocks.NETHER_QUARTZ_ORE)

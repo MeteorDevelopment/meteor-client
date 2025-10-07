@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.item.BlockItem;
@@ -28,7 +28,7 @@ public class FastUse extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Item, GroupedListSetting.Groups<Item>.Group>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> items = sgGeneral.add(new ItemListSetting.Builder()
         .name("items")
         .description("Which items should fast place work on in \"Some\" mode.")
         .visible(() -> mode.get() == Mode.Some)

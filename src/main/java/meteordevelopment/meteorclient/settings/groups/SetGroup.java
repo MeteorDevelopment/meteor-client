@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.settings.groups;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.MeteorClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -12,47 +13,47 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.*;
 import java.util.function.Predicate;
 
-public abstract class ListGroup<T, G extends ListGroup<T, G>> {
-    protected List<T> direct = new ArrayList<>();
+public abstract class SetGroup<T, G extends SetGroup<T, G>> {
+    protected Set<T> immediate = new ReferenceOpenHashSet<>();
     protected List<G> include = new ArrayList<>();
 
-    final protected ListGroupTracker tracker;
+    final protected SetGroupEnumeration enumeration;
 
-    public boolean trackerIs(ListGroupTracker o) { return tracker == o; };
+    public boolean isOf(SetGroupEnumeration of) { return enumeration == of; };
 
     @Unmodifiable
-    public List<T> getImmediate() {
-        return direct;
+    public Set<T> getImmediate() {
+        return immediate;
     }
 
-    public List<T> getAll() {
-        Set<T> set = new HashSet<>();
-        List<ListGroup<T, G>> seen = new ArrayList<>();
-        List<ListGroup<T, G>> next = new ArrayList<>();
+    public Set<T> getAll() {
+        Set<T> set = new ReferenceOpenHashSet<>();
+        List<SetGroup<T, G>> seen = new ArrayList<>();
+        List<SetGroup<T, G>> next = new ArrayList<>();
         internalGetAll(set, seen, next);
-        return new ArrayList<>(set);
+        return set;
     }
 
-    public void internalGetAll(Collection<T> to, Collection<ListGroup<T, G>> seen, List<ListGroup<T, G>> next) {
+    public void internalGetAll(Collection<T> to, Collection<SetGroup<T, G>> seen, List<SetGroup<T, G>> next) {
         next.clear();
         next.add(this);
         for (int i = 0; i < next.size(); i++) {
-            ListGroup<T, G> g = next.get(i);
+            SetGroup<T, G> g = next.get(i);
             if (seen.contains(g)) continue;
-            to.addAll(g.direct);
+            to.addAll(g.immediate);
             next.addAll(g.include);
             seen.add(g);
         }
     }
 
     public boolean anyMatch(Predicate<T> predicate) {
-        List<ListGroup<T, G>> seen = new ArrayList<>();
-        List<ListGroup<T, G>> next = new ArrayList<>();
+        List<SetGroup<T, G>> seen = new ArrayList<>();
+        List<SetGroup<T, G>> next = new ArrayList<>();
         next.add(this);
         for (int i = 0; i < next.size(); i++) {
-            ListGroup<T, G> g = next.get(i);
+            SetGroup<T, G> g = next.get(i);
             if (seen.contains(g)) continue;
-            if (g.direct.stream().anyMatch(predicate)) return true;
+            if (g.immediate.stream().anyMatch(predicate)) return true;
             next.addAll(g.include);
             seen.add(g);
         }
@@ -65,20 +66,20 @@ public abstract class ListGroup<T, G extends ListGroup<T, G>> {
     }
 
     public boolean add(T t) {
-        if (!direct.contains(t)) {
-            MeteorClient.LOG.info("ListGroup.add@ had {}", direct.size());
-            direct.add(t);
-            tracker.invalidate();
+        if (!immediate.contains(t)) {
+            MeteorClient.LOG.info("SetGroup.add@ had {}", immediate.size());
+            immediate.add(t);
+            enumeration.invalidate();
             return true;
         }
-        MeteorClient.LOG.info("ListGroup.add@ duplicate item");
+        MeteorClient.LOG.info("SetGroup.add@ duplicate item");
         return false;
     }
 
     public boolean add(G g) {
         if (!include.contains(g)) {
             include.add(g);
-            tracker.invalidate();
+            enumeration.invalidate();
             return true;
         }
         return false;
@@ -86,15 +87,15 @@ public abstract class ListGroup<T, G extends ListGroup<T, G>> {
 
     public boolean remove(G g) {
         if (include.remove(g)) {
-            tracker.invalidate();
+            enumeration.invalidate();
             return true;
         }
         return false;
     }
 
     public boolean remove(T t) {
-        if (direct.remove(t)) {
-            tracker.invalidate();
+        if (immediate.remove(t)) {
+            enumeration.invalidate();
             return true;
         }
         return false;
@@ -103,14 +104,14 @@ public abstract class ListGroup<T, G extends ListGroup<T, G>> {
     public boolean addAll(@NotNull Collection<? extends T> collection) {
         boolean modified = false;
         for (T t : collection) {
-            MeteorClient.LOG.info("ListGroup.addAll@ had {}", direct.size());
-            if (!direct.contains(t)) {
-                direct.add(t);
+            MeteorClient.LOG.info("SetGroup.addAll@ had {}", immediate.size());
+            if (!immediate.contains(t)) {
+                immediate.add(t);
                 modified = true;
             }
-            MeteorClient.LOG.info("ListGroup.addAll@ has {}", direct.size());
+            MeteorClient.LOG.info("SetGroup.addAll@ has {}", immediate.size());
         }
-        if (modified) tracker.invalidate();
+        if (modified) enumeration.invalidate();
         return modified;
     }
 
@@ -122,21 +123,21 @@ public abstract class ListGroup<T, G extends ListGroup<T, G>> {
                 modified = true;
             }
         }
-        if (modified) tracker.invalidate();;
+        if (modified) enumeration.invalidate();;
         return modified;
     }
 
     public boolean removeAll(@NotNull Collection<T> collection) {
-        tracker.invalidate();
-        return direct.removeAll(collection);
+        enumeration.invalidate();
+        return immediate.removeAll(collection);
     }
 
     public boolean removeAllGroups(@NotNull Collection<G> collection) {
-        tracker.invalidate();
+        enumeration.invalidate();
         return include.removeAll(collection);
     }
 
-    public ListGroup(ListGroupTracker t) { tracker = t; }
+    public SetGroup(SetGroupEnumeration t) { enumeration = t; }
 
     @Override
     public boolean equals(Object obj) {

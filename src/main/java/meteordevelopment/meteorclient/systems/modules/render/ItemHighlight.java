@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -16,7 +16,7 @@ import net.minecraft.item.ItemStack;
 public class ItemHighlight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<GroupedList<Item, GroupedListSetting.Groups<Item>.Group>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> items = sgGeneral.add(new ItemListSetting.Builder()
         .name("items")
         .description("Items to highlight.")
         .build()

@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.hud.elements;
 
 import meteordevelopment.meteorclient.mixin.WorldRendererAccessor;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
@@ -30,7 +30,7 @@ public class HoleHud extends HudElement {
 
     // General
 
-    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> safe = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> safe = sgGeneral.add(new BlockListSetting.Builder()
         .name("safe-blocks")
         .description("Which blocks to consider safe.")
         .defaultValue(Blocks.OBSIDIAN, Blocks.BEDROCK, Blocks.CRYING_OBSIDIAN, Blocks.NETHERITE_BLOCK)

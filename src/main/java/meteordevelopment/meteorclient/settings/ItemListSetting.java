@@ -5,11 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
-import meteordevelopment.meteorclient.systems.modules.player.AutoEat;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ConsumableComponents;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
@@ -21,13 +18,13 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class ItemListSetting extends GroupedListSetting<Item> {
+public class ItemListSetting extends GroupedSetSetting<Item> {
 
     public static final Groups<Item> GROUPS = new Groups<>();
 
     private final boolean bypassFilterWhenSavingAndLoading;
 
-    public ItemListSetting(String name, String description, GroupedList<Item, Groups<Item>.Group> defaultValue, Consumer<GroupedList<Item, Groups<Item>.Group>> onChanged, Consumer<Setting<GroupedList<Item, Groups<Item>.Group>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
+    public ItemListSetting(String name, String description, GroupSet<Item, Groups<Item>.Group> defaultValue, Consumer<GroupSet<Item, Groups<Item>.Group>> onChanged, Consumer<Setting<GroupSet<Item, Groups<Item>.Group>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
         super(name, description, defaultValue, filter, onChanged, onModuleActivated, visible);
 
         this.bypassFilterWhenSavingAndLoading = bypassFilterWhenSavingAndLoading;
@@ -60,24 +57,24 @@ public class ItemListSetting extends GroupedListSetting<Item> {
         return Registries.ITEM.getIds();
     }
 
-   public static class Builder extends SettingBuilder<Builder, GroupedList<Item, Groups<Item>.Group>, ItemListSetting> {
+   public static class Builder extends SettingBuilder<Builder, GroupSet<Item, Groups<Item>.Group>, ItemListSetting> {
         private Predicate<Item> filter = null;
         private boolean bypass = false;
 
         public Builder() {
-            super(new GroupedList<>());
+            super(new GroupSet<>());
         }
 
         public Builder defaultValue(Collection<Item> defaults) {
             if (defaultValue == null)
-                return defaultValue(defaults != null ? new GroupedList<>(defaults) : new GroupedList<>());
+                return defaultValue(defaults != null ? new GroupSet<>(defaults) : new GroupSet<>());
             defaultValue.addAll(defaults);
             return this;
         }
 
         public Builder defaultValue(Item... defaults) {
             if (defaultValue == null)
-                return defaultValue(defaults != null ? new GroupedList<>(Arrays.asList(defaults)) : new GroupedList<>());
+                return defaultValue(defaults != null ? new GroupSet<>(Arrays.asList(defaults)) : new GroupSet<>());
             defaultValue.addAll(Arrays.asList(defaults));
             return this;
         }
@@ -87,10 +84,10 @@ public class ItemListSetting extends GroupedListSetting<Item> {
             List<Groups<Item>.Group> groups = null;
 
             if (defaults != null)
-                groups = Arrays.stream(defaults).filter(g -> g.trackerIs(GROUPS)).toList();
+                groups = Arrays.stream(defaults).filter(g -> g.isOf(GROUPS)).toList();
 
             if (defaultValue == null)
-                return defaultValue(groups != null ? new GroupedList<>(null, groups) : new GroupedList<>());
+                return defaultValue(groups != null ? new GroupSet<>(null, groups) : new GroupSet<>());
 
             if (groups != null) defaultValue.addAllGroups(groups);
             return this;

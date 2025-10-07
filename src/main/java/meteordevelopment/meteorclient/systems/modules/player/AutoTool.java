@@ -9,7 +9,7 @@ package meteordevelopment.meteorclient.systems.modules.player;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -98,7 +98,7 @@ public class AutoTool extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Item, GroupedListSetting.Groups<Item>.Group>> whitelist = sgWhitelist.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> whitelist = sgWhitelist.add(new ItemListSetting.Builder()
         .name("whitelist")
         .description("The tools you want to use.")
         .visible(() -> listMode.get() == ListMode.Whitelist)
@@ -106,7 +106,7 @@ public class AutoTool extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Item, GroupedListSetting.Groups<Item>.Group>> blacklist = sgWhitelist.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> blacklist = sgWhitelist.add(new ItemListSetting.Builder()
         .name("blacklist")
         .description("The tools you don't want to use.")
         .visible(() -> listMode.get() == ListMode.Blacklist)

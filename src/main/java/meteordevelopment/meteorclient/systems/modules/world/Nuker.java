@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -197,14 +197,14 @@ public class Nuker extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
+    private final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("blacklist")
         .description("The blocks you don't want to mine.")
         .visible(() -> listMode.get() == ListMode.Blacklist)
         .build()
     );
 
-    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
+    private final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("The blocks you want to mine.")
         .visible(() -> listMode.get() == ListMode.Whitelist)
@@ -533,7 +533,7 @@ public class Nuker extends Module {
         BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
         Block targetBlock = mc.world.getBlockState(pos).getBlock();
 
-        GroupedList<Block, GroupedListSetting.Groups<Block>.Group> list = listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get();
+        GroupSet<Block, GroupedSetSetting.Groups<Block>.Group> list = listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get();
         String modeName = listMode.get().name();
 
         if (list.contains(targetBlock)) {

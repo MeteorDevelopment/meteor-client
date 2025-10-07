@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ParticleEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -323,7 +323,7 @@ public class NoRender extends Module {
         .build()
     );
 
-    private final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
+    private final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
         .name("block-entities")
         .description("Block entities (chest, shulker block, etc.) to not render.")
         .filter(block -> block instanceof BlockEntityProvider && !(block instanceof AbstractBannerBlock))

@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.settings.groups.GroupedList;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.block.Block;
@@ -30,14 +30,14 @@ public class Slippy extends Module {
         .build()
     );
 
-    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> ignoredBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> ignoredBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("ignored-blocks")
         .description("Decide which blocks not to slip on")
         .visible(() -> listMode.get() == ListMode.Blacklist)
         .build()
     );
 
-    public final Setting<GroupedList<Block, GroupedListSetting.Groups<Block>.Group>> allowedBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> allowedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("allowed-blocks")
         .description("Decide which blocks to slip on")
         .visible(() -> listMode.get() == ListMode.Whitelist)
