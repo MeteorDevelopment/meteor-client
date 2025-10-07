@@ -23,7 +23,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 @Mixin(CobwebBlock.class)
 public abstract class CobwebBlockMixin {
     @Inject(method = "onEntityCollision", at = @At("HEAD"), cancellable = true)
-    private void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, CallbackInfo info) {
-        if (entity == mc.player && Modules.get().get(NoSlow.class).cobweb()) info.cancel();
+    private void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, boolean bl, CallbackInfo ci) {
+        if (entity == mc.player && Modules.get().get(NoSlow.class).cobweb()) ci.cancel();
     }
 }
