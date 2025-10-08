@@ -107,7 +107,7 @@ public class InventoryTweaks extends Module {
 
     // Anti drop
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> antiDropItems = sgAntiDrop.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> antiDropItems = sgAntiDrop.add(new ItemSetSetting.Builder()
         .name("anti-drop-items")
         .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
         .build()
@@ -128,7 +128,7 @@ public class InventoryTweaks extends Module {
 
     // Auto Drop
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> autoDropItems = sgAutoDrop.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> autoDropItems = sgAutoDrop.add(new ItemSetSetting.Builder()
         .name("auto-drop-items")
         .description("Items to drop.")
         .build()
@@ -193,7 +193,7 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> dumpItems = sgStealDump.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> dumpItems = sgStealDump.add(new ItemSetSetting.Builder()
         .name("dump-items")
         .description("Items to dump.")
         .build()
@@ -206,7 +206,7 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> stealItems = sgStealDump.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> stealItems = sgStealDump.add(new ItemSetSetting.Builder()
         .name("steal-items")
         .description("Items to steal.")
         .build()

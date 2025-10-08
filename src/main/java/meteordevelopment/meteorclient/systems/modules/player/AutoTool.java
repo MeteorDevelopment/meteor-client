@@ -98,7 +98,7 @@ public class AutoTool extends Module {
         .build()
     );
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> whitelist = sgWhitelist.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> whitelist = sgWhitelist.add(new ItemSetSetting.Builder()
         .name("whitelist")
         .description("The tools you want to use.")
         .visible(() -> listMode.get() == ListMode.Whitelist)
@@ -106,7 +106,7 @@ public class AutoTool extends Module {
         .build()
     );
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> blacklist = sgWhitelist.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> blacklist = sgWhitelist.add(new ItemSetSetting.Builder()
         .name("blacklist")
         .description("The tools you don't want to use.")
         .visible(() -> listMode.get() == ListMode.Blacklist)

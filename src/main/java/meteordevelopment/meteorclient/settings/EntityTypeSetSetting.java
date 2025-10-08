@@ -5,27 +5,21 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class EntityTypeSetSetting extends GroupedSetSetting<EntityType<?>> {
-
     public static Groups<EntityType<?>> GROUPS = new Groups<>();
 
     public EntityTypeSetSetting(String name, String description, GroupSet<EntityType<?>, Groups<EntityType<?>>.Group> defaultValue, Predicate<EntityType<?>> filter, Consumer<GroupSet<EntityType<?>, Groups<EntityType<?>>.Group>> onChanged, Consumer<Setting<GroupSet<EntityType<?>, Groups<EntityType<?>>.Group>>> onModuleActivated, IVisible visible) {

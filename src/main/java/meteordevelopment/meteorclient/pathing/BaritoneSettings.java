@@ -198,7 +198,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
 //                        );
 //                    }
 //                    else if (type == Item.class) {
-//                        sgItemLists.add(new ItemListSetting.Builder()
+//                        sgItemLists.add(new ItemSetSetting.Builder()
 //                            .name(setting.getName())
 //                            .description(getDescription(setting.getName()))
 //                            .defaultValue((List<Item>) setting.defaultValue)

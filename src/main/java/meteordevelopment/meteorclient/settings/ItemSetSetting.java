@@ -21,14 +21,14 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class ItemListSetting extends GroupedSetSetting<Item> {
+public class ItemSetSetting extends GroupedSetSetting<Item> {
 
     public static final Groups<Item> GROUPS = new Groups<>();
 
     // TODO: resolve this (used in AutoSmelter)
     private final boolean bypassFilterWhenSavingAndLoading;
 
-    public ItemListSetting(String name, String description, GroupSet<Item, Groups<Item>.Group> defaultValue, Consumer<GroupSet<Item, Groups<Item>.Group>> onChanged, Consumer<Setting<GroupSet<Item, Groups<Item>.Group>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
+    public ItemSetSetting(String name, String description, GroupSet<Item, Groups<Item>.Group> defaultValue, Consumer<GroupSet<Item, Groups<Item>.Group>> onChanged, Consumer<Setting<GroupSet<Item, Groups<Item>.Group>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
         super(name, description, defaultValue, filter, onChanged, onModuleActivated, visible);
 
         this.bypassFilterWhenSavingAndLoading = bypassFilterWhenSavingAndLoading;
@@ -61,7 +61,7 @@ public class ItemListSetting extends GroupedSetSetting<Item> {
         return Registries.ITEM;
     }
 
-    public static class Builder extends SettingBuilder<Builder, GroupSet<Item, Groups<Item>.Group>, ItemListSetting> {
+    public static class Builder extends SettingBuilder<Builder, GroupSet<Item, Groups<Item>.Group>, ItemSetSetting> {
         private Predicate<Item> filter = null;
         private boolean bypass = false;
 
@@ -103,8 +103,8 @@ public class ItemListSetting extends GroupedSetSetting<Item> {
         }
 
         @Override
-        public ItemListSetting build() {
-            return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter, bypass);
+        public ItemSetSetting build() {
+            return new ItemSetSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter, bypass);
         }
     }
 

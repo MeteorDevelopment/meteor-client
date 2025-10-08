@@ -288,7 +288,7 @@ public class HighwayBuilder extends Module {
 
     // Inventory
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> trashItems = sgInventory.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> trashItems = sgInventory.add(new ItemSetSetting.Builder()
         .name("trash-items")
         .description("Items that are considered trash and can be thrown out.")
         .defaultValue(

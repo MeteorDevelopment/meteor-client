@@ -28,7 +28,7 @@ public class FastUse extends Module {
         .build()
     );
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> items = sgGeneral.add(new ItemSetSetting.Builder()
         .name("items")
         .description("Which items should fast place work on in \"Some\" mode.")
         .visible(() -> mode.get() == Mode.Some)

@@ -21,7 +21,7 @@ import net.minecraft.item.ItemStack;
 public class AutoMend extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> blacklist = sgGeneral.add(new ItemSetSetting.Builder()
         .name("blacklist")
         .description("Item blacklist.")
         .filter(item -> item.getComponents().get(DataComponentTypes.DAMAGE) != null)

@@ -16,7 +16,7 @@ import net.minecraft.item.ItemStack;
 public class ItemHighlight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> items = sgGeneral.add(new ItemSetSetting.Builder()
         .name("items")
         .description("Items to highlight.")
         .build()

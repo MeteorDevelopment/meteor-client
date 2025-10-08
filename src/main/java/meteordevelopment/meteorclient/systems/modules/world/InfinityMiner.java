@@ -48,7 +48,7 @@ public class InfinityMiner extends Module {
         .build()
     );
 
-    public final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> targetItems = sgGeneral.add(new ItemListSetting.Builder()
+    public final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> targetItems = sgGeneral.add(new ItemSetSetting.Builder()
         .name("target-items")
         .description("The target items to collect.")
         .defaultValue(Items.DIAMOND)

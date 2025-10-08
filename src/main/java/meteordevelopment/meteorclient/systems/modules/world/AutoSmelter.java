@@ -21,7 +21,7 @@ import net.minecraft.screen.AbstractFurnaceScreenHandler;
 public class AutoSmelter extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> fuelItems = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> fuelItems = sgGeneral.add(new ItemSetSetting.Builder()
         .name("fuel-items")
         .description("Items to use as fuel")
         .defaultValue(Items.COAL, Items.CHARCOAL)
@@ -30,7 +30,7 @@ public class AutoSmelter extends Module {
         .build()
     );
 
-    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> smeltableItems = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> smeltableItems = sgGeneral.add(new ItemSetSetting.Builder()
         .name("smeltable-items")
         .description("Items to smelt")
         .defaultValue(Items.IRON_ORE, Items.GOLD_ORE, Items.COPPER_ORE, Items.RAW_IRON, Items.RAW_COPPER, Items.RAW_GOLD)
