@@ -108,8 +108,17 @@ dependencies {
 afterEvaluate {
     val jijConfig = configurations.findByName("jij") ?: return@afterEvaluate
 
+    // Dependencies to exclude from jar-in-jar
+    val excluded = setOf(
+        "org.slf4j",    // Logging provided by Minecraft
+        "jsr305"        // Compile time annotations only
+    )
+
+
     jijConfig.incoming.resolutionResult.allDependencies.forEach { dep ->
         val requested = dep.requested.displayName
+
+        if (excluded.any { requested.contains(it) }) return@forEach
 
         val compileOnlyDep = dependencies.create(requested) {
             isTransitive = false
