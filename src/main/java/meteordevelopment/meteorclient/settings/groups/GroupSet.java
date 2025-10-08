@@ -98,9 +98,8 @@ public class GroupSet<T, G extends SetGroup<T, G>> implements Iterable<T> {
         if (isValid()) return cached;
 
         if (enumeration != null) version = enumeration.getVersion();
-        else if (cached != null && !cached.isEmpty()) MeteorClient.LOG.warn("Rebuild of GroupSet with tracker == null");
-
-        MeteorClient.LOG.info("Rebuild {} direct, {} groups.", immediate.size(), include.size());
+        // debug statement
+        else if (cached != null && !cached.isEmpty()) MeteorClient.LOG.warn("Rebuild of temporary GroupSet");
 
         Set<T> set = new ReferenceOpenHashSet<>(immediate);
         List<SetGroup<T, G>> seen = new ArrayList<>();

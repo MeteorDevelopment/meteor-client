@@ -44,8 +44,6 @@ public abstract class GroupedListSettingScreen<T, S extends GroupedSetSetting<T>
         this.registry = registry;
         this.setting = setting;
         this.groups = groups;
-
-        MeteorClient.LOG.info("GroupedListSettingScreen@ BlockListSetting.ORES contains {} items", BlockListSetting.ORES.getImmediate().size());
     }
 
     @Override

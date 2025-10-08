@@ -67,12 +67,10 @@ public abstract class SetGroup<T, G extends SetGroup<T, G>> {
 
     public boolean add(T t) {
         if (!immediate.contains(t)) {
-            MeteorClient.LOG.info("SetGroup.add@ had {}", immediate.size());
             immediate.add(t);
             enumeration.invalidate();
             return true;
         }
-        MeteorClient.LOG.info("SetGroup.add@ duplicate item");
         return false;
     }
 
@@ -104,12 +102,10 @@ public abstract class SetGroup<T, G extends SetGroup<T, G>> {
     public boolean addAll(@NotNull Collection<? extends T> collection) {
         boolean modified = false;
         for (T t : collection) {
-            MeteorClient.LOG.info("SetGroup.addAll@ had {}", immediate.size());
             if (!immediate.contains(t)) {
                 immediate.add(t);
                 modified = true;
             }
-            MeteorClient.LOG.info("SetGroup.addAll@ has {}", immediate.size());
         }
         if (modified) enumeration.invalidate();
         return modified;
