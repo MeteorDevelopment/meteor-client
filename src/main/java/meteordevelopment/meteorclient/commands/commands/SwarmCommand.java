@@ -34,7 +34,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 

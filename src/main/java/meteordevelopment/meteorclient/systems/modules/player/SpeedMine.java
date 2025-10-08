@@ -18,7 +18,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.List;
 import java.util.Set;
 
 import static net.minecraft.entity.effect.StatusEffects.HASTE;

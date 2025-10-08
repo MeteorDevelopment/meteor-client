@@ -18,7 +18,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.List;
 import java.util.Set;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;

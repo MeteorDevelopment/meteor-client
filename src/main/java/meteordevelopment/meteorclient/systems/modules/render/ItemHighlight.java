@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-import java.util.List;
 import java.util.Set;
 
 public class ItemHighlight extends Module {

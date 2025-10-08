@@ -20,7 +20,6 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipePropertySet;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 
-import java.util.List;
 import java.util.Set;
 
 public class AutoSmelter extends Module {

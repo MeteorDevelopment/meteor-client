@@ -28,7 +28,6 @@ import net.minecraft.item.ShearsItem;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 

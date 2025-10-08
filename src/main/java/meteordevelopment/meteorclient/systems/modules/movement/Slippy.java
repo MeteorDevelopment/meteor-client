@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.block.Block;
 
-import java.util.List;
 import java.util.Set;
 
 public class Slippy extends Module {

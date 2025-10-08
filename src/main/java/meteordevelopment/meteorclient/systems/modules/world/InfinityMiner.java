@@ -31,7 +31,6 @@ import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 

@@ -16,7 +16,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.block.Block;
 
-import java.util.List;
 import java.util.Set;
 
 public class WallHack extends Module {

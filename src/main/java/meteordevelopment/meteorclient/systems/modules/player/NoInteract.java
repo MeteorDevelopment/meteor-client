@@ -24,7 +24,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.List;
 import java.util.Set;
 
 public class NoInteract extends Module {

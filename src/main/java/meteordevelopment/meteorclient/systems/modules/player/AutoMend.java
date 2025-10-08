@@ -20,7 +20,6 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-import java.util.List;
 import java.util.Set;
 
 public class AutoMend extends Module {

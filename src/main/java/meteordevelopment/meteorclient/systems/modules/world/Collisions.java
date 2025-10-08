@@ -21,7 +21,6 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.shape.VoxelShapes;
 
-import java.util.List;
 import java.util.Set;
 
 public class Collisions extends Module {
