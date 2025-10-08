@@ -29,7 +29,7 @@ import java.util.Set;
 public class AutoNametag extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Which entities to nametag.")
         .build()

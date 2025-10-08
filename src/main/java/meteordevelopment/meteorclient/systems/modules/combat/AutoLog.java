@@ -98,7 +98,7 @@ public class AutoLog extends Module {
 
     // Entities
 
-    private final Setting<Set<EntityType<?>>> entities = sgEntities.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgEntities.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Disconnects when a specified entity is present within a specified range.")
         .defaultValue(EntityType.END_CRYSTAL)

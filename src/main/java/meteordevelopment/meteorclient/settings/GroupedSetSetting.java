@@ -16,6 +16,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 import java.util.*;
@@ -28,6 +29,8 @@ public abstract class GroupedSetSetting<T> extends Setting<GroupSet<T, GroupedSe
 
     protected Predicate<T> filter;
 
+    private List<String> suggestions;
+
     public GroupedSetSetting(String name, String description, GroupSet<T, Groups<T>.Group> defaultValue, Predicate<T> filter, Consumer<GroupSet<T, Groups<T>.Group>> onChanged, Consumer<Setting<GroupSet<T, Groups<T>.Group>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
         this.filter = filter;
@@ -39,6 +42,16 @@ public abstract class GroupedSetSetting<T> extends Setting<GroupSet<T, GroupedSe
     abstract public T itemFromNbt(NbtElement e);
 
     abstract protected Groups<T> groups();
+    long version = -1;
+
+    protected void buildSuggestions(List<String> to)
+    {
+        Registry<T> registry = suggestRegistry();
+        for (Identifier id : registry.getIds()) {
+            if (filter == null || filter.test(registry.get(id))) to.add(id.toString());
+        }
+    }
+    protected Registry<T> suggestRegistry() { return null; }
 
     @Override
     public GroupSet<T, Groups<T>.Group> get() {
@@ -135,8 +148,29 @@ public abstract class GroupedSetSetting<T> extends Setting<GroupSet<T, GroupedSe
         return value;
     }
 
-    static final public class Groups<T> extends SetGroupEnumeration {
+    public void invalidateSuggestions() {
+       suggestions = null;
+    }
 
+    @Override
+    final public Iterable<Identifier> getIdentifierSuggestions() {
+        return null;
+    }
+
+    @Override
+    final public List<String> getSuggestions() {
+        if (suggestions == null || groups().getVersion() != version) {
+            version = groups().getVersion();
+
+            suggestions = new ArrayList<>(groups().GROUPS.size());
+            groups().GROUPS.forEach((_1, v)-> suggestions.add("@" + v.internalName));
+            buildSuggestions(suggestions);
+        }
+
+        return suggestions;
+    }
+
+    static final public class Groups<T> extends SetGroupEnumeration {
         Map<String, Group> GROUPS = new HashMap<>();
 
         public Groups<T>.Group get(String name) {
@@ -163,6 +197,12 @@ public abstract class GroupedSetSetting<T> extends Setting<GroupSet<T, GroupedSe
 
             private GroupBuilder builtin() {
                 g.builtin = true;
+                return this;
+            }
+
+            private GroupBuilder dynamic() {
+                g.builtin = true;
+                g.dynamic = true;
                 return this;
             }
 
@@ -204,6 +244,14 @@ public abstract class GroupedSetSetting<T> extends Setting<GroupSet<T, GroupedSe
             return new GroupBuilder(name, icon).builtin();
         }
 
+        protected GroupBuilder dynamic(String name) {
+            return new GroupBuilder(name).dynamic();
+        }
+
+        protected GroupBuilder dynamic(String name, Item icon) {
+            return new GroupBuilder(name, icon).builtin();
+        }
+
         public GroupBuilder builder(String name) {
             return new GroupBuilder(name);
         }
@@ -217,7 +265,8 @@ public abstract class GroupedSetSetting<T> extends Setting<GroupSet<T, GroupedSe
         }
 
         public class Group extends SetGroup<T, Group> {
-            public boolean builtin;
+            public boolean builtin; // will not be saved to config
+            public boolean dynamic; // cannot be modified through config
 
             public Settings settings = new Settings();
             public SettingGroup sg = settings.getDefaultGroup();

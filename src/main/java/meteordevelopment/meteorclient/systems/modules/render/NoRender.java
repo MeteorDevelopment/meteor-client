@@ -332,7 +332,7 @@ public class NoRender extends Module {
 
     // Entity
 
-    private final Setting<Set<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgEntity.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Disables rendering of selected entities.")
         .build()

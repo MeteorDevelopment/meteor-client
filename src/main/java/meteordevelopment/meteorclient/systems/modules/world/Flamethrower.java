@@ -73,7 +73,7 @@ public class Flamethrower extends Module {
         .build()
     );
 
-    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Entities to cook.")
         .defaultValue(

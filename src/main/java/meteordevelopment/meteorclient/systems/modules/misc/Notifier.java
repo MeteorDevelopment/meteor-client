@@ -112,7 +112,7 @@ public class Notifier extends Module {
         .build()
     );
 
-    private final Setting<Set<EntityType<?>>> entities = sgVisualRange.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgVisualRange.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Which entities to notify about.")
         .defaultValue(EntityType.PLAYER)

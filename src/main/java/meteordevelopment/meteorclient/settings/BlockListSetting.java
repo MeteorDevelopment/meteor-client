@@ -13,6 +13,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
@@ -54,8 +55,8 @@ public class BlockListSetting extends GroupedSetSetting<Block> {
     }
 
     @Override
-    public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.BLOCK.getIds();
+    protected Registry<Block> suggestRegistry() {
+        return Registries.BLOCK;
     }
 
     public static class Builder extends SettingBuilder<Builder, GroupSet<Block, Groups<Block>.Group>, BlockListSetting> {

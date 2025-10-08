@@ -12,6 +12,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
@@ -56,11 +57,11 @@ public class ItemListSetting extends GroupedSetSetting<Item> {
     }
 
     @Override
-    public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.ITEM.getIds();
+    protected Registry<Item> suggestRegistry() {
+        return Registries.ITEM;
     }
 
-   public static class Builder extends SettingBuilder<Builder, GroupSet<Item, Groups<Item>.Group>, ItemListSetting> {
+    public static class Builder extends SettingBuilder<Builder, GroupSet<Item, Groups<Item>.Group>, ItemListSetting> {
         private Predicate<Item> filter = null;
         private boolean bypass = false;
 

@@ -68,7 +68,7 @@ public class NoInteract extends Module {
 
     // Entities
 
-    private final Setting<Set<EntityType<?>>> entityHit = sgEntities.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entityHit = sgEntities.add(new EntityTypeSetSetting.Builder()
         .name("entity-hit")
         .description("Cancel entity hitting.")
         .onlyAttackable()
@@ -82,7 +82,7 @@ public class NoInteract extends Module {
         .build()
     );
 
-    private final Setting<Set<EntityType<?>>> entityInteract = sgEntities.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entityInteract = sgEntities.add(new EntityTypeSetSetting.Builder()
         .name("entity-interact")
         .description("Cancel entity interaction.")
         .onlyAttackable()

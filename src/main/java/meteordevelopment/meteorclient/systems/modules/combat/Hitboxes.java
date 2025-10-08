@@ -22,7 +22,7 @@ public class Hitboxes extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgWeapon = settings.createGroup("Weapon Options");
 
-    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Which entities to target.")
         .defaultValue(EntityType.PLAYER)

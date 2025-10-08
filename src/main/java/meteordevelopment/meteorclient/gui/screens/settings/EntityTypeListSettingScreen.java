@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
-import meteordevelopment.meteorclient.settings.EntityTypeListSetting;
+import meteordevelopment.meteorclient.settings.EntityTypeSetSetting;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.entity.EntityType;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class EntityTypeListSettingScreen extends WindowScreen {
-    private final EntityTypeListSetting setting;
+    private final EntityTypeSetSetting setting;
 
     private WVerticalList list;
     private final WTextBox filter;
@@ -38,7 +38,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
     private WTable animalsT, waterAnimalsT, monstersT, ambientT, miscT;
     int hasAnimal = 0, hasWaterAnimal = 0, hasMonster = 0, hasAmbient = 0, hasMisc = 0;
 
-    public EntityTypeListSettingScreen(GuiTheme theme, EntityTypeListSetting setting) {
+    public EntityTypeListSettingScreen(GuiTheme theme, EntityTypeSetSetting setting) {
         super(theme, "Select entities");
         this.setting = setting;
 

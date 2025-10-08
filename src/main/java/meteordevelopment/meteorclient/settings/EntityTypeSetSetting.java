@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.settings;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
@@ -17,121 +18,56 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class EntityTypeListSetting extends Setting<Set<EntityType<?>>> {
-    public final Predicate<EntityType<?>> filter;
-    private List<String> suggestions;
-    private final static List<String> groups = List.of("animal", "wateranimal", "monster", "ambient", "misc");
+public class EntityTypeSetSetting extends GroupedSetSetting<EntityType<?>> {
 
-    public EntityTypeListSetting(String name, String description, Set<EntityType<?>> defaultValue, Consumer<Set<EntityType<?>>> onChanged, Consumer<Setting<Set<EntityType<?>>>> onModuleActivated, IVisible visible, Predicate<EntityType<?>> filter) {
-        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+    public static Groups<EntityType<?>> GROUPS = new Groups<>();
 
-        this.filter = filter;
+    public EntityTypeSetSetting(String name, String description, GroupSet<EntityType<?>, Groups<EntityType<?>>.Group> defaultValue, Predicate<EntityType<?>> filter, Consumer<GroupSet<EntityType<?>, Groups<EntityType<?>>.Group>> onChanged, Consumer<Setting<GroupSet<EntityType<?>, Groups<EntityType<?>>.Group>>> onModuleActivated, IVisible visible) {
+        super(name, description, defaultValue, filter, onChanged, onModuleActivated, visible);
     }
 
     @Override
-    public void resetImpl() {
-        value = new ObjectOpenHashSet<>(defaultValue);
+    public EntityType<?> parseItem(String str) {
+        return parseId(Registries.ENTITY_TYPE, str);
     }
 
     @Override
-    protected Set<EntityType<?>> parseImpl(String str) {
-        String[] values = str.split(",");
-        Set<EntityType<?>> entities = new ObjectOpenHashSet<>(values.length);
-
-        try {
-            for (String value : values) {
-                EntityType<?> entity = parseId(Registries.ENTITY_TYPE, value);
-                if (entity != null) entities.add(entity);
-                else {
-                    String lowerValue = value.trim().toLowerCase();
-                    if (!groups.contains(lowerValue)) continue;
-
-                    for (EntityType<?> entityType : Registries.ENTITY_TYPE) {
-                        if (filter != null && !filter.test(entityType)) continue;
-
-                        switch (lowerValue) {
-                            case "animal" -> {
-                                if (entityType.getSpawnGroup() == SpawnGroup.CREATURE) entities.add(entityType);
-                            }
-                            case "wateranimal" -> {
-                                if (entityType.getSpawnGroup() == SpawnGroup.WATER_AMBIENT
-                                    || entityType.getSpawnGroup() == SpawnGroup.WATER_CREATURE
-                                    || entityType.getSpawnGroup() == SpawnGroup.UNDERGROUND_WATER_CREATURE
-                                    || entityType.getSpawnGroup() == SpawnGroup.AXOLOTLS) entities.add(entityType);
-                            }
-                            case "monster" -> {
-                                if (entityType.getSpawnGroup() == SpawnGroup.MONSTER) entities.add(entityType);
-                            }
-                            case "ambient" -> {
-                                if (entityType.getSpawnGroup() == SpawnGroup.AMBIENT) entities.add(entityType);
-                            }
-                            case "misc" -> {
-                                if (entityType.getSpawnGroup() == SpawnGroup.MISC) entities.add(entityType);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception ignored) {}
-
-        return entities;
+    public NbtElement itemToNbt(EntityType<?> entityType) {
+        return NbtString.of(Registries.ENTITY_TYPE.getId(entityType).toString());
     }
 
     @Override
-    protected boolean isValueValid(Set<EntityType<?>> value) {
-        return true;
+    public EntityType<?> itemFromNbt(NbtElement e) {
+        return Registries.ENTITY_TYPE.get(Identifier.of(e.asString().orElse("")));
     }
 
     @Override
-    public List<String> getSuggestions() {
-        if (suggestions == null) {
-            suggestions = new ArrayList<>(groups);
-            for (EntityType<?> entityType : Registries.ENTITY_TYPE) {
-                if (filter == null || filter.test(entityType)) suggestions.add(Registries.ENTITY_TYPE.getId(entityType).toString());
-            }
+    protected Groups<EntityType<?>> groups() {
+        return GROUPS;
+    }
+
+    @Override
+    public void buildSuggestions(List<String> to) {
+        for (EntityType<?> entityType : Registries.ENTITY_TYPE) {
+            if (filter == null || filter.test(entityType)) to.add(Registries.ENTITY_TYPE.getId(entityType).toString());
         }
-
-        return suggestions;
     }
 
-    @Override
-    public NbtCompound save(NbtCompound tag) {
-        NbtList valueTag = new NbtList();
-        for (EntityType<?> entityType : get()) {
-            valueTag.add(NbtString.of(Registries.ENTITY_TYPE.getId(entityType).toString()));
-        }
-        tag.put("value", valueTag);
-
-        return tag;
-    }
-
-    @Override
-    public Set<EntityType<?>> load(NbtCompound tag) {
-        get().clear();
-
-        NbtList valueTag = tag.getListOrEmpty("value");
-        for (NbtElement tagI : valueTag) {
-            EntityType<?> type = Registries.ENTITY_TYPE.get(Identifier.of(tagI.asString().orElse("")));
-            if (filter == null || filter.test(type)) get().add(type);
-        }
-
-        return get();
-    }
-
-    public static class Builder extends SettingBuilder<Builder, Set<EntityType<?>>, EntityTypeListSetting> {
+    public static class Builder extends SettingBuilder<Builder, GroupSet<EntityType<?>, Groups<EntityType<?>>.Group>, EntityTypeSetSetting> {
         private Predicate<EntityType<?>> filter;
 
         public Builder() {
-            super(new ObjectOpenHashSet<>(0));
+            super(new GroupSet<>());
         }
 
         public Builder defaultValue(EntityType<?>... defaults) {
-            return defaultValue(defaults != null ? new ObjectOpenHashSet<>(defaults) : new ObjectOpenHashSet<>(0));
+            return defaultValue(defaults != null ? new GroupSet<>(Arrays.asList(defaults)) : new GroupSet<>());
         }
 
         public Builder onlyAttackable() {
@@ -145,8 +81,29 @@ public class EntityTypeListSetting extends Setting<Set<EntityType<?>>> {
         }
 
         @Override
-        public EntityTypeListSetting build() {
-            return new EntityTypeListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter);
+        public EntityTypeSetSetting build() {
+            return new EntityTypeSetSetting(name, description, defaultValue, filter, onChanged, onModuleActivated, visible);
+        }
+    }
+
+    static Groups<EntityType<?>>.Group ANIMAL, WATER_ANIMAL, MONSTER, AMBIENT, MISC;
+
+    static {
+        ANIMAL = GROUPS.dynamic("animals").get();
+        WATER_ANIMAL = GROUPS.dynamic("water-animals").get();
+        MONSTER = GROUPS.dynamic("monsters").get();
+        AMBIENT = GROUPS.dynamic("ambient").get();
+        MISC = GROUPS.dynamic("misc").get();
+
+        for (EntityType<?> entityType : Registries.ENTITY_TYPE) {
+            if (entityType.getSpawnGroup() == SpawnGroup.CREATURE) ANIMAL.add(entityType);
+            if (entityType.getSpawnGroup() == SpawnGroup.MONSTER) MONSTER.add(entityType);
+            if (entityType.getSpawnGroup() == SpawnGroup.AMBIENT) AMBIENT.add(entityType);
+            if (entityType.getSpawnGroup() == SpawnGroup.MISC) MISC.add(entityType);
+            if (entityType.getSpawnGroup() == SpawnGroup.WATER_AMBIENT
+                || entityType.getSpawnGroup() == SpawnGroup.WATER_CREATURE
+                || entityType.getSpawnGroup() == SpawnGroup.UNDERGROUND_WATER_CREATURE
+                || entityType.getSpawnGroup() == SpawnGroup.AXOLOTLS) WATER_ANIMAL.add(entityType);
         }
     }
 }

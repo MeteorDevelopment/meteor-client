@@ -116,7 +116,7 @@ public class KillAura extends Module {
 
     // Targeting
 
-    private final Setting<Set<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgTargeting.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Entities to attack.")
         .onlyAttackable()
