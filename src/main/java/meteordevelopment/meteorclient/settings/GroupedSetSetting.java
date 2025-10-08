@@ -25,7 +25,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public abstract class GroupedSetSetting<T> extends Setting<GroupSet<T, GroupedSetSetting.Groups<T>.Group>> {
+public abstract class GroupedSetSetting<T> extends AbstractCollectionSetting<GroupSet<T, GroupedSetSetting.Groups<T>.Group>> {
 
     protected Predicate<T> filter;
 
