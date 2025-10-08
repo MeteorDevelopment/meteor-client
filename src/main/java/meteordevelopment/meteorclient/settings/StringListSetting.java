@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class StringListSetting extends Setting<List<String>>{
+public class StringListSetting extends AbstractCollectionSetting<List<String>>{
     public final Class<? extends WTextBox.Renderer> renderer;
     public final CharFilter filter;
 

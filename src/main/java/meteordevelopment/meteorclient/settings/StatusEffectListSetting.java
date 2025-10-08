@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
+public class StatusEffectListSetting extends AbstractCollectionSetting<List<StatusEffect>> {
     public StatusEffectListSetting(String name, String description, List<StatusEffect> defaultValue, Consumer<List<StatusEffect>> onChanged, Consumer<Setting<List<StatusEffect>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
