@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
@@ -25,8 +26,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-
-import java.util.Set;
 
 public class Flamethrower extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -73,7 +72,7 @@ public class Flamethrower extends Module {
         .build()
     );
 
-    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeSetSetting.Builder()
+    private final Setting<GroupSet<EntityType<?>, GroupedSetSetting.Groups<EntityType<?>>.Group>> entities = sgGeneral.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Entities to cook.")
         .defaultValue(

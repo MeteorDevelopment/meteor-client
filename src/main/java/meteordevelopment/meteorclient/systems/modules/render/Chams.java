@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -15,8 +16,6 @@ import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShader
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Identifier;
-
-import java.util.Set;
 
 public class Chams extends Module {
     private final SettingGroup sgThroughWalls = settings.createGroup("Through Walls");
@@ -26,7 +25,7 @@ public class Chams extends Module {
 
     // Through walls
 
-    public final Setting<Set<EntityType<?>>> entities = sgThroughWalls.add(new EntityTypeSetSetting.Builder()
+    public final Setting<GroupSet<EntityType<?>, GroupedSetSetting.Groups<EntityType<?>>.Group>> entities = sgThroughWalls.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Select entities to show through walls.")
         .onlyAttackable()

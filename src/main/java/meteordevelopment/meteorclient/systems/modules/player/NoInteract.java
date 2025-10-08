@@ -25,8 +25,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.Set;
-
 public class NoInteract extends Module {
     private final SettingGroup sgBlocks = settings.createGroup("Blocks");
     private final SettingGroup sgEntities = settings.createGroup("Entities");
@@ -68,7 +66,7 @@ public class NoInteract extends Module {
 
     // Entities
 
-    private final Setting<Set<EntityType<?>>> entityHit = sgEntities.add(new EntityTypeSetSetting.Builder()
+    private final Setting<GroupSet<EntityType<?>, GroupedSetSetting.Groups<EntityType<?>>.Group>> entityHit = sgEntities.add(new EntityTypeSetSetting.Builder()
         .name("entity-hit")
         .description("Cancel entity hitting.")
         .onlyAttackable()
@@ -82,7 +80,7 @@ public class NoInteract extends Module {
         .build()
     );
 
-    private final Setting<Set<EntityType<?>>> entityInteract = sgEntities.add(new EntityTypeSetSetting.Builder()
+    private final Setting<GroupSet<EntityType<?>, GroupedSetSetting.Groups<EntityType<?>>.Group>> entityInteract = sgEntities.add(new EntityTypeSetSetting.Builder()
         .name("entity-interact")
         .description("Cancel entity interaction.")
         .onlyAttackable()

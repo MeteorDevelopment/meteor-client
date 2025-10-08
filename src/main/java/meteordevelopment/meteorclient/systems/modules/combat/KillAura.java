@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -46,7 +47,6 @@ import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public class KillAura extends Module {
@@ -116,7 +116,7 @@ public class KillAura extends Module {
 
     // Targeting
 
-    private final Setting<Set<EntityType<?>>> entities = sgTargeting.add(new EntityTypeSetSetting.Builder()
+    private final Setting<GroupSet<EntityType<?>, GroupedSetSetting.Groups<EntityType<?>>.Group>> entities = sgTargeting.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Entities to attack.")
         .onlyAttackable()

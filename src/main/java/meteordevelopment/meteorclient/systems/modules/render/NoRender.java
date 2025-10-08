@@ -22,7 +22,6 @@ import net.minecraft.particle.ParticleType;
 import net.minecraft.particle.ParticleTypes;
 
 import java.util.List;
-import java.util.Set;
 
 public class NoRender extends Module {
     private final SettingGroup sgOverlay = settings.createGroup("Overlay");
@@ -332,7 +331,7 @@ public class NoRender extends Module {
 
     // Entity
 
-    private final Setting<Set<EntityType<?>>> entities = sgEntity.add(new EntityTypeSetSetting.Builder()
+    private final Setting<GroupSet<EntityType<?>, GroupedSetSetting.Groups<EntityType<?>>.Group>> entities = sgEntity.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Disables rendering of selected entities.")
         .build()

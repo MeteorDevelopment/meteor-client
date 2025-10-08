@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -31,7 +32,6 @@ import org.joml.Vector3d;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Set;
 
 public class Tracers extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -45,7 +45,7 @@ public class Tracers extends Module {
 
     // General
 
-    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeSetSetting.Builder()
+    private final Setting<GroupSet<EntityType<?>, GroupedSetSetting.Groups<EntityType<?>>.Group>> entities = sgGeneral.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Select specific entities.")
         .defaultValue(EntityType.PLAYER)

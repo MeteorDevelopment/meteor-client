@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -112,7 +113,7 @@ public class Notifier extends Module {
         .build()
     );
 
-    private final Setting<Set<EntityType<?>>> entities = sgVisualRange.add(new EntityTypeSetSetting.Builder()
+    private final Setting<GroupSet<EntityType<?>, GroupedSetSetting.Groups<EntityType<?>>.Group>> entities = sgVisualRange.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Which entities to notify about.")
         .defaultValue(EntityType.PLAYER)

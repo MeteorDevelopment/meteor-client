@@ -8,10 +8,8 @@ package meteordevelopment.meteorclient.systems.modules.world;
 //Created by squidoodly 16/07/2020
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.EntityTypeSetSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
@@ -24,8 +22,6 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.Hand;
-
-import java.util.Set;
 
 public class AutoMount extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -44,7 +40,7 @@ public class AutoMount extends Module {
         .build()
     );
 
-    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeSetSetting.Builder()
+    private final Setting<GroupSet<EntityType<?>, GroupedSetSetting.Groups<EntityType<?>>.Group>> entities = sgGeneral.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Rideable entities.")
         .filter(EntityUtils::isRideable)
