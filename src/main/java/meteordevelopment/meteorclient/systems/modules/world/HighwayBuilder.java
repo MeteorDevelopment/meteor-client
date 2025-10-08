@@ -68,10 +68,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector3d;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 @SuppressWarnings("ConstantConditions")
@@ -254,7 +251,7 @@ public class HighwayBuilder extends Module {
 
     // Paving
 
-    public final Setting<List<Block>> blocksToPlace = sgPaving.add(new BlockListSetting.Builder()
+    public final Setting<Set<Block>> blocksToPlace = sgPaving.add(new BlockListSetting.Builder()
         .name("blocks-to-place")
         .description("Blocks it is allowed to place.")
         .defaultValue(Blocks.OBSIDIAN)
@@ -288,7 +285,7 @@ public class HighwayBuilder extends Module {
 
     // Inventory
 
-    private final Setting<List<Item>> trashItems = sgInventory.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> trashItems = sgInventory.add(new ItemListSetting.Builder()
         .name("trash-items")
         .description("Items that are considered trash and can be thrown out.")
         .defaultValue(

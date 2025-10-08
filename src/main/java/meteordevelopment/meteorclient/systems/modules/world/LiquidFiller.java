@@ -28,6 +28,7 @@ import net.minecraft.world.RaycastContext;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 public class LiquidFiller extends Module {
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
@@ -105,7 +106,7 @@ public class LiquidFiller extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("The allowed blocks that it will use to fill up the liquid.")
         .defaultValue(
@@ -121,7 +122,7 @@ public class LiquidFiller extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("blacklist")
         .description("The denied blocks that it not will use to fill up the liquid.")
         .visible(() -> listMode.get() == ListMode.Blacklist)

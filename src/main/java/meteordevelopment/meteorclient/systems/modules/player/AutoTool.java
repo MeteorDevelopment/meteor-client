@@ -29,6 +29,7 @@ import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class AutoTool extends Module {
@@ -98,7 +99,7 @@ public class AutoTool extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> whitelist = sgWhitelist.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> whitelist = sgWhitelist.add(new ItemListSetting.Builder()
         .name("whitelist")
         .description("The tools you want to use.")
         .visible(() -> listMode.get() == ListMode.Whitelist)
@@ -106,7 +107,7 @@ public class AutoTool extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> blacklist = sgWhitelist.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> blacklist = sgWhitelist.add(new ItemListSetting.Builder()
         .name("blacklist")
         .description("The tools you don't want to use.")
         .visible(() -> listMode.get() == ListMode.Blacklist)

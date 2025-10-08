@@ -16,11 +16,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.List;
+import java.util.Set;
 
 public class ItemHighlight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
         .name("items")
         .description("Items to highlight.")
         .build()

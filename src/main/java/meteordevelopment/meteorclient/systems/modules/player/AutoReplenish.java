@@ -19,6 +19,7 @@ import net.minecraft.item.Items;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class AutoReplenish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -69,7 +70,7 @@ public class AutoReplenish extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("excluded-items")
         .description("Items that won't be replenished.")
         .build()

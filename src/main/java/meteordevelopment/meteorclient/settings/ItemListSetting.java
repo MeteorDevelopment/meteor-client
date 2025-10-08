@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.google.common.base.Predicates;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -13,55 +15,25 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class ItemListSetting extends Setting<List<Item>> {
-    public final Predicate<Item> filter;
+public class ItemListSetting extends AbstractRegistryListSetting<Set<Item>, Item> {
     private final boolean bypassFilterWhenSavingAndLoading;
 
-    public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
-        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-
-        this.filter = filter;
+    public ItemListSetting(String name, String description, Set<Item> defaultValue, Consumer<Set<Item>> onChanged, Consumer<Setting<Set<Item>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible, filter, Registries.ITEM);
         this.bypassFilterWhenSavingAndLoading = bypassFilterWhenSavingAndLoading;
     }
 
     @Override
-    protected List<Item> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<Item> items = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                Item item = parseId(Registries.ITEM, value);
-                if (item != null && (filter == null || filter.test(item))) items.add(item);
-            }
-        } catch (Exception ignored) {}
-
-        return items;
+    protected Set<Item> transferCollection(Collection<Item> from) {
+        return new ReferenceOpenHashSet<>(from);
     }
 
     @Override
-    public void resetImpl() {
-        value = new ArrayList<>(defaultValue);
-    }
-
-    @Override
-    protected boolean isValueValid(List<Item> value) {
-        return true;
-    }
-
-    @Override
-    public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.ITEM.getIds();
-    }
-
-    @Override
-    public NbtCompound save(NbtCompound tag) {
+    protected NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (Item item : get()) {
             if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) valueTag.add(NbtString.of(Registries.ITEM.getId(item).toString()));
@@ -72,7 +44,7 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    public List<Item> load(NbtCompound tag) {
+    public Set<Item> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getListOrEmpty("value");
@@ -85,16 +57,16 @@ public class ItemListSetting extends Setting<List<Item>> {
         return get();
     }
 
-    public static class Builder extends SettingBuilder<Builder, List<Item>, ItemListSetting> {
-        private Predicate<Item> filter;
+    public static class Builder extends SettingBuilder<Builder, Set<Item>, ItemListSetting> {
+        private Predicate<Item> filter = Predicates.alwaysTrue();
         private boolean bypassFilterWhenSavingAndLoading;
 
         public Builder() {
-            super(new ArrayList<>(0));
+            super(Collections.emptySet());
         }
 
         public Builder defaultValue(Item... defaults) {
-            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
+            return defaultValue(defaults != null ? ReferenceOpenHashSet.of(defaults) : new ReferenceOpenHashSet<>());
         }
 
         public Builder filter(Predicate<Item> filter) {

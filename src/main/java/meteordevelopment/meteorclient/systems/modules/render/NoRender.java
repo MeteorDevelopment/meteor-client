@@ -315,7 +315,7 @@ public class NoRender extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
         .name("block-entities")
         .description("Block entities (chest, shulker block, etc.) to not render.")
         .filter(block -> block instanceof BlockEntityProvider && !(block instanceof AbstractBannerBlock))

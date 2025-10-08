@@ -39,7 +39,7 @@ public class BlockESP extends Module {
 
     // General
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Blocks to search for.")
         .onChanged(blocks1 -> {

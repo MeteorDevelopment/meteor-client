@@ -24,6 +24,7 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class SelfTrap extends Module {
     public enum TopMode {
@@ -43,7 +44,7 @@ public class SelfTrap extends Module {
 
     // General
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("Which blocks to use.")
         .defaultValue(Blocks.OBSIDIAN, Blocks.NETHERITE_BLOCK)

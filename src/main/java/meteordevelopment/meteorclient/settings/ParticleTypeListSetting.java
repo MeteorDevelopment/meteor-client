@@ -5,78 +5,24 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.particle.ParticleEffect;
+import com.google.common.base.Predicates;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
+public class ParticleTypeListSetting extends AbstractRegistryListSetting<List<ParticleType<?>>, ParticleType<?>> {
     public ParticleTypeListSetting(String name, String description, List<ParticleType<?>> defaultValue, Consumer<List<ParticleType<?>>> onChanged, Consumer<Setting<List<ParticleType<?>>>> onModuleActivated, IVisible visible) {
-        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible, Predicates.alwaysTrue(), Registries.PARTICLE_TYPE);
     }
 
     @Override
-    public void resetImpl() {
-        value = new ArrayList<>(defaultValue);
-    }
-
-    @Override
-    protected List<ParticleType<?>> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<ParticleType<?>> particleTypes = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                ParticleType<?> particleType = parseId(Registries.PARTICLE_TYPE, value);
-                if (particleType instanceof ParticleEffect) particleTypes.add(particleType);
-            }
-        } catch (Exception ignored) {}
-
-        return particleTypes;
-    }
-
-    @Override
-    protected boolean isValueValid(List<ParticleType<?>> value) {
-        return true;
-    }
-
-    @Override
-    public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.PARTICLE_TYPE.getIds();
-    }
-
-    @Override
-    public NbtCompound save(NbtCompound tag) {
-        NbtList valueTag = new NbtList();
-        for (ParticleType<?> particleType : get()) {
-            Identifier id = Registries.PARTICLE_TYPE.getId(particleType);
-            if (id != null) valueTag.add(NbtString.of(id.toString()));
-        }
-        tag.put("value", valueTag);
-
-        return tag;
-    }
-
-    @Override
-    public List<ParticleType<?>> load(NbtCompound tag) {
-        get().clear();
-
-        NbtList valueTag = tag.getListOrEmpty("value");
-        for (NbtElement tagI : valueTag) {
-            ParticleType<?> particleType = Registries.PARTICLE_TYPE.get(Identifier.of(tagI.asString().orElse("")));
-            if (particleType != null) get().add(particleType);
-        }
-
-        return get();
+    protected List<ParticleType<?>> transferCollection(Collection<ParticleType<?>> from) {
+        return new ArrayList<>(from);
     }
 
     public static class Builder extends SettingBuilder<Builder, List<ParticleType<?>>, ParticleTypeListSetting> {

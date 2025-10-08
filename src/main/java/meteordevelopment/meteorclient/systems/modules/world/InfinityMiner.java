@@ -32,6 +32,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class InfinityMiner extends Module {
@@ -40,7 +41,7 @@ public class InfinityMiner extends Module {
 
     // General
 
-    public final Setting<List<Block>> targetBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<Set<Block>> targetBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("target-blocks")
         .description("The target blocks to mine.")
         .defaultValue(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE)
@@ -48,14 +49,14 @@ public class InfinityMiner extends Module {
         .build()
     );
 
-    public final Setting<List<Item>> targetItems = sgGeneral.add(new ItemListSetting.Builder()
+    public final Setting<Set<Item>> targetItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("target-items")
         .description("The target items to collect.")
         .defaultValue(Items.DIAMOND)
         .build()
     );
 
-    public final Setting<List<Block>> repairBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<Set<Block>> repairBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("repair-blocks")
         .description("The repair blocks to mine.")
         .defaultValue(Blocks.COAL_ORE, Blocks.REDSTONE_ORE, Blocks.NETHER_QUARTZ_ORE)

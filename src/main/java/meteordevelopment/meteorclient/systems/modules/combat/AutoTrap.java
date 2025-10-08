@@ -43,7 +43,7 @@ public class AutoTrap extends Module {
 
     // General
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("Which blocks to use.")
         .defaultValue(Blocks.OBSIDIAN, Blocks.CRYING_OBSIDIAN)

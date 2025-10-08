@@ -39,6 +39,7 @@ import net.minecraft.util.Hand;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class InventoryTweaks extends Module {
@@ -106,7 +107,7 @@ public class InventoryTweaks extends Module {
 
     // Anti drop
 
-    private final Setting<List<Item>> antiDropItems = sgAntiDrop.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> antiDropItems = sgAntiDrop.add(new ItemListSetting.Builder()
         .name("anti-drop-items")
         .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
         .build()
@@ -127,7 +128,7 @@ public class InventoryTweaks extends Module {
 
     // Auto Drop
 
-    private final Setting<List<Item>> autoDropItems = sgAutoDrop.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> autoDropItems = sgAutoDrop.add(new ItemListSetting.Builder()
         .name("auto-drop-items")
         .description("Items to drop.")
         .build()
@@ -192,7 +193,7 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> dumpItems = sgStealDump.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> dumpItems = sgStealDump.add(new ItemListSetting.Builder()
         .name("dump-items")
         .description("Items to dump.")
         .build()
@@ -205,7 +206,7 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> stealItems = sgStealDump.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> stealItems = sgStealDump.add(new ItemListSetting.Builder()
         .name("steal-items")
         .description("Items to steal.")
         .build()

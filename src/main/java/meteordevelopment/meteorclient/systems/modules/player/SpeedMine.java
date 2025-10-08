@@ -19,6 +19,7 @@ import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
+import java.util.Set;
 
 import static net.minecraft.entity.effect.StatusEffects.HASTE;
 
@@ -32,7 +33,7 @@ public class SpeedMine extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Selected blocks.")
         .filter(block -> block.getHardness() > 0)

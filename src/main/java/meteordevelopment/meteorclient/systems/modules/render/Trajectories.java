@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -31,6 +32,7 @@ import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Trajectories extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -38,11 +40,11 @@ public class Trajectories extends Module {
 
     // General
 
-    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
         .name("items")
         .description("Items to display trajectories for.")
-        .defaultValue(getDefaultItems())
-        .filter(this::itemFilter)
+        .defaultValue(Registries.ITEM.stream().filter(Trajectories::itemFilter).collect(ReferenceOpenHashSet.toSet()))
+        .filter(Trajectories::itemFilter)
         .build()
     );
 
@@ -141,20 +143,10 @@ public class Trajectories extends Module {
         super(Categories.Render, "trajectories", "Predicts the trajectory of throwable items.");
     }
 
-    private boolean itemFilter(Item item) {
+    private static boolean itemFilter(Item item) {
         return item instanceof RangedWeaponItem || item instanceof FishingRodItem || item instanceof TridentItem ||
             item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem ||
             item instanceof ExperienceBottleItem || item instanceof ThrowablePotionItem || item instanceof WindChargeItem;
-    }
-
-    private List<Item> getDefaultItems() {
-        List<Item> items = new ArrayList<>();
-
-        for (Item item : Registries.ITEM) {
-            if (itemFilter(item)) items.add(item);
-        }
-
-        return items;
     }
 
     private Path getEmptyPath() {

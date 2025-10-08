@@ -22,11 +22,12 @@ import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.List;
+import java.util.Set;
 
 public class Collisions extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<Set<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("What blocks should be added collision box.")
         .filter(this::blockFilter)

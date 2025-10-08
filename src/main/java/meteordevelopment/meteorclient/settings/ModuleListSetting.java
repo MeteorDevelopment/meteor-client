@@ -49,7 +49,7 @@ public class ModuleListSetting extends Setting<List<Module>> {
     }
 
     @Override
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         if (suggestions == null) {
             suggestions = new ArrayList<>(Modules.get().getAll().size());
             for (Module module : Modules.get().getAll()) suggestions.add(module.name);

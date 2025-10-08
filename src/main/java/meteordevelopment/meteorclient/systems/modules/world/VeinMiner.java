@@ -52,7 +52,7 @@ public class VeinMiner extends Module {
 
     // General
 
-    private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Which blocks to select.")
         .defaultValue(Blocks.STONE, Blocks.DIRT, Blocks.GRASS_BLOCK)

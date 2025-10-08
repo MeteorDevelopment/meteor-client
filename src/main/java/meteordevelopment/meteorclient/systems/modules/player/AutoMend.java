@@ -21,11 +21,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.List;
+import java.util.Set;
 
 public class AutoMend extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
         .name("blacklist")
         .description("Item blacklist.")
         .filter(item -> item.getComponents().get(DataComponentTypes.DAMAGE) != null)

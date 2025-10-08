@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.pathing;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.utils.SettingsUtil;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
@@ -88,24 +89,24 @@ public class BaritoneSettings implements IPathManager.ISettings {
 
                 Object value = setting.value;
 
-                if (value instanceof Boolean) {
-                    Setting<Boolean> wrapper = sgBool.add(new BoolSetting.Builder()
-                        .name(setting.getName())
-                        .description(getDescription(setting.getName()))
-                        .defaultValue((boolean) setting.defaultValue)
-                        .onChanged(aBoolean -> setting.value = aBoolean)
-                        .onModuleActivated(booleanSetting -> booleanSetting.set((Boolean) setting.value))
-                        .build()
-                    );
+                switch (value) {
+                    case Boolean b -> {
+                        Setting<Boolean> wrapper = sgBool.add(new BoolSetting.Builder()
+                            .name(setting.getName())
+                            .description(getDescription(setting.getName()))
+                            .defaultValue((boolean) setting.defaultValue)
+                            .onChanged(aBoolean -> setting.value = aBoolean)
+                            .onModuleActivated(booleanSetting -> booleanSetting.set((Boolean) setting.value))
+                            .build()
+                        );
 
-                    switch (wrapper.name) {
-                        case "assumeWalkOnWater" -> walkOnWater = wrapper;
-                        case "assumeWalkOnLava" -> walkOnLava = wrapper;
-                        case "assumeStep" -> step = wrapper;
+                        switch (wrapper.name) {
+                            case "assumeWalkOnWater" -> walkOnWater = wrapper;
+                            case "assumeWalkOnLava" -> walkOnLava = wrapper;
+                            case "assumeStep" -> step = wrapper;
+                        }
                     }
-                }
-                else if (value instanceof Double) {
-                    sgDouble.add(new DoubleSetting.Builder()
+                    case Double v -> sgDouble.add(new DoubleSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
                         .defaultValue((double) setting.defaultValue)
@@ -115,9 +116,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         .onModuleActivated(doubleSetting -> doubleSetting.set((Double) setting.value))
                         .build()
                     );
-                }
-                else if (value instanceof Float) {
-                    sgDouble.add(new DoubleSetting.Builder()
+                    case Float v -> sgDouble.add(new DoubleSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
                         .defaultValue(((Float) setting.defaultValue).doubleValue())
@@ -127,29 +126,27 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         .onModuleActivated(doubleSetting -> doubleSetting.set(((Float) setting.value).doubleValue()))
                         .build()
                     );
-                }
-                else if (value instanceof Integer) {
-                    Setting<Integer> wrapper = sgInt.add(new IntSetting.Builder()
-                        .name(setting.getName())
-                        .description(getDescription(setting.getName()))
-                        .defaultValue((int) setting.defaultValue)
-                        .onChanged(integer -> setting.value = integer)
-                        .onModuleActivated(integerSetting -> integerSetting.set((Integer) setting.value))
-                        .build()
-                    );
+                    case Integer i -> {
+                        Setting<Integer> wrapper = sgInt.add(new IntSetting.Builder()
+                            .name(setting.getName())
+                            .description(getDescription(setting.getName()))
+                            .defaultValue((int) setting.defaultValue)
+                            .onChanged(integer -> setting.value = integer)
+                            .onModuleActivated(integerSetting -> integerSetting.set((Integer) setting.value))
+                            .build()
+                        );
 
-                    if (wrapper.name.equals("maxFallHeightNoWater")) {
-                        noFall = new BoolSetting.Builder()
-                            .name(wrapper.name)
-                            .description(wrapper.description)
-                            .defaultValue(false)
-                            .onChanged(aBoolean -> wrapper.set(aBoolean ? 159159 : wrapper.getDefaultValue()))
-                            .onModuleActivated(booleanSetting -> booleanSetting.set(wrapper.get() >= 255))
-                            .build();
+                        if (wrapper.name.equals("maxFallHeightNoWater")) {
+                            noFall = new BoolSetting.Builder()
+                                .name(wrapper.name)
+                                .description(wrapper.description)
+                                .defaultValue(false)
+                                .onChanged(aBoolean -> wrapper.set(aBoolean ? 159159 : wrapper.getDefaultValue()))
+                                .onModuleActivated(booleanSetting -> booleanSetting.set(wrapper.get() >= 255))
+                                .build();
+                        }
                     }
-                }
-                else if (value instanceof Long) {
-                    sgInt.add(new IntSetting.Builder()
+                    case Long l -> sgInt.add(new IntSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
                         .defaultValue(((Long) setting.defaultValue).intValue())
@@ -157,9 +154,7 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         .onModuleActivated(integerSetting -> integerSetting.set(((Long) setting.value).intValue()))
                         .build()
                     );
-                }
-                else if (value instanceof String) {
-                    sgString.add(new StringSetting.Builder()
+                    case String s -> sgString.add(new StringSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
                         .defaultValue((String) setting.defaultValue)
@@ -167,42 +162,43 @@ public class BaritoneSettings implements IPathManager.ISettings {
                         .onModuleActivated(stringSetting -> stringSetting.set((String) setting.value))
                         .build()
                     );
-                }
-                else if (value instanceof Color) {
-                    Color c = (Color) setting.value;
+                    case Color color1 -> {
+                        Color c = (Color) setting.value;
 
-                    sgColor.add(new ColorSetting.Builder()
-                        .name(setting.getName())
-                        .description(getDescription(setting.getName()))
-                        .defaultValue(new SettingColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()))
-                        .onChanged(color -> setting.value = new Color(color.r, color.g, color.b, color.a))
-                        .onModuleActivated(colorSetting -> colorSetting.set(new SettingColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha())))
-                        .build()
-                    );
-                }
-                else if (value instanceof List) {
-                    Type listType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                    Type type = ((ParameterizedType) listType).getActualTypeArguments()[0];
-
-                    if (type == Block.class) {
-                        sgBlockLists.add(new BlockListSetting.Builder()
+                        sgColor.add(new ColorSetting.Builder()
                             .name(setting.getName())
                             .description(getDescription(setting.getName()))
-                            .defaultValue((List<Block>) setting.defaultValue)
-                            .onChanged(blockList -> setting.value = blockList)
-                            .onModuleActivated(blockListSetting -> blockListSetting.set((List<Block>) setting.value))
+                            .defaultValue(new SettingColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()))
+                            .onChanged(color -> setting.value = new Color(color.r, color.g, color.b, color.a))
+                            .onModuleActivated(colorSetting -> colorSetting.set(new SettingColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha())))
                             .build()
                         );
                     }
-                    else if (type == Item.class) {
-                        sgItemLists.add(new ItemListSetting.Builder()
-                            .name(setting.getName())
-                            .description(getDescription(setting.getName()))
-                            .defaultValue((List<Item>) setting.defaultValue)
-                            .onChanged(itemList -> setting.value = itemList)
-                            .onModuleActivated(itemListSetting -> itemListSetting.set((List<Item>) setting.value))
-                            .build()
-                        );
+                    case List list -> {
+                        Type listType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                        Type type = ((ParameterizedType) listType).getActualTypeArguments()[0];
+
+                        if (type == Block.class) {
+                            sgBlockLists.add(new BlockListSetting.Builder()
+                                .name(setting.getName())
+                                .description(getDescription(setting.getName()))
+                                .defaultValue(new ReferenceOpenHashSet<>((List<Block>) setting.defaultValue))
+                                .onChanged(blockList -> setting.value = blockList)
+                                .onModuleActivated(blockListSetting -> blockListSetting.set(new ReferenceOpenHashSet<>((List<Block>) setting.value)))
+                                .build()
+                            );
+                        } else if (type == Item.class) {
+                            sgItemLists.add(new ItemListSetting.Builder()
+                                .name(setting.getName())
+                                .description(getDescription(setting.getName()))
+                                .defaultValue(new ReferenceOpenHashSet<>((List<Item>) setting.defaultValue))
+                                .onChanged(itemList -> setting.value = itemList)
+                                .onModuleActivated(itemListSetting -> itemListSetting.set(new ReferenceOpenHashSet<>((List<Item>) setting.value)))
+                                .build()
+                            );
+                        }
+                    }
+                    case null, default -> {
                     }
                 }
             }

@@ -36,13 +36,14 @@ import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class HoleFiller extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSmart = settings.createGroup("Smart");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Which blocks can be used to fill holes.")
         .defaultValue(

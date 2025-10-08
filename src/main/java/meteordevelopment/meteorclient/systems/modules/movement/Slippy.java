@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.block.Block;
 
 import java.util.List;
+import java.util.Set;
 
 public class Slippy extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -31,14 +32,14 @@ public class Slippy extends Module {
         .build()
     );
 
-    public final Setting<List<Block>> ignoredBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<Set<Block>> ignoredBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("ignored-blocks")
         .description("Decide which blocks not to slip on")
         .visible(() -> listMode.get() == ListMode.Blacklist)
         .build()
     );
 
-    public final Setting<List<Block>> allowedBlocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<Set<Block>> allowedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("allowed-blocks")
         .description("Decide which blocks to slip on")
         .visible(() -> listMode.get() == ListMode.Whitelist)

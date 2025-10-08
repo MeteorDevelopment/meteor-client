@@ -5,33 +5,27 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import net.minecraft.nbt.NbtCompound;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class EnumSetting<T extends Enum<?>> extends Setting<T> {
-    private final T[] values;
-
-    private final List<String> suggestions;
+    private final Map<String, T> nameToValueMap = new Object2ObjectRBTreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     @SuppressWarnings("unchecked")
     public EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
-        values = (T[]) defaultValue.getDeclaringClass().getEnumConstants();
-        suggestions = new ArrayList<>(values.length);
-        for (T value : values) suggestions.add(value.toString());
+        for (Object t : defaultValue.getDeclaringClass().getEnumConstants()) {
+            nameToValueMap.put(t.toString(), (T) t);
+        }
     }
 
     @Override
     protected T parseImpl(String str) {
-        for (T possibleValue : values) {
-            if (str.equalsIgnoreCase(possibleValue.toString())) return possibleValue;
-        }
-
-        return null;
+        return nameToValueMap.get(str);
     }
 
     @Override
@@ -40,8 +34,8 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     }
 
     @Override
-    public List<String> getSuggestions() {
-        return suggestions;
+    public Iterable<String> getSuggestions() {
+        return nameToValueMap.keySet();
     }
 
     @Override

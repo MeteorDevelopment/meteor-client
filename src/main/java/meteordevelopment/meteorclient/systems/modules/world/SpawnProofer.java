@@ -25,6 +25,7 @@ import net.minecraft.world.RaycastContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Comparator;
+import java.util.Set;
 
 public class SpawnProofer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -72,7 +73,7 @@ public class SpawnProofer extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Block to use for spawn proofing.")
         .defaultValue(Blocks.TORCH, Blocks.STONE_BUTTON, Blocks.STONE_SLAB)

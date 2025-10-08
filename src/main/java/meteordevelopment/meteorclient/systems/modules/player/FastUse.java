@@ -13,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.List;
+import java.util.Set;
 
 public class FastUse extends Module {
     public enum Mode {
@@ -29,7 +30,7 @@ public class FastUse extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
         .name("items")
         .description("Which items should fast place work on in \"Some\" mode.")
         .visible(() -> mode.get() == Mode.Some)
