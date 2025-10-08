@@ -72,6 +72,7 @@
     "DefaultSkinHelperMixin",
     "DirectionAccessor",
     "DisconnectedScreenMixin",
+    "DownloaderMixin",
     "DrawContextMixin",
     "ElytraFeatureRendererMixin",
     "EnchantingTableBlockEntityRendererMixin",
