@@ -273,7 +273,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private void blockListW(WTable table, BlockListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new BlockListSettingScreen(theme, setting)));
+        selectW(table, setting, () -> mc.setScreen(new BlockSetSettingScreen(theme, setting)));
     }
 
     private void itemW(WTable table, ItemSetting setting) {
@@ -293,7 +293,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private void itemListW(WTable table, ItemListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new ItemListSettingScreen(theme, setting)));
+        selectW(table, setting, () -> mc.setScreen(new ItemSetSettingScreen(theme, setting)));
     }
 
     private void entityTypeListW(WTable table, EntityTypeListSetting setting) {

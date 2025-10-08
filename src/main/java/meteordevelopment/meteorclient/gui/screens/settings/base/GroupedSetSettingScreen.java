@@ -17,7 +17,6 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
-import meteordevelopment.meteorclient.settings.BlockListSetting;
 import meteordevelopment.meteorclient.settings.GroupedSetSetting;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -28,7 +27,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class GroupedListSettingScreen<T, S extends GroupedSetSetting<T>> extends WindowScreen {
+public abstract class GroupedSetSettingScreen<T, S extends GroupedSetSetting<T>> extends WindowScreen {
     protected final S setting;
     private final Iterable<T> registry;
     private final GroupedSetSetting.Groups<T> groups;
@@ -38,7 +37,7 @@ public abstract class GroupedListSettingScreen<T, S extends GroupedSetSetting<T>
 
     private GroupedSetSetting.Groups<T>.Group expanded;
 
-    public GroupedListSettingScreen(GuiTheme theme, String title, S setting, GroupedSetSetting.Groups<T> groups, Iterable<T> registry) {
+    public GroupedSetSettingScreen(GuiTheme theme, String title, S setting, GroupedSetSetting.Groups<T> groups, Iterable<T> registry) {
         super(theme, title);
 
         this.registry = registry;

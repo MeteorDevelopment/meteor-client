@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import javax.print.attribute.UnmodifiableSetException;
 import java.util.*;
 import java.util.function.Predicate;
 

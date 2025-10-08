@@ -6,11 +6,13 @@
 package meteordevelopment.meteorclient.settings.groups;
 
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import meteordevelopment.meteorclient.MeteorClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public abstract class SetGroup<T, G extends SetGroup<T, G>> {

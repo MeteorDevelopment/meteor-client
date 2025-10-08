@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.gui.screens.settings;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.screens.settings.base.GroupedListSettingScreen;
+import meteordevelopment.meteorclient.gui.screens.settings.base.GroupedSetSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.ItemListSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
@@ -16,8 +16,8 @@ import net.minecraft.registry.Registries;
 
 import java.util.function.Predicate;
 
-public class ItemListSettingScreen extends GroupedListSettingScreen<Item, ItemListSetting> {
-    public ItemListSettingScreen(GuiTheme theme, ItemListSetting setting) {
+public class ItemSetSettingScreen extends GroupedSetSettingScreen<Item, ItemListSetting> {
+    public ItemSetSettingScreen(GuiTheme theme, ItemListSetting setting) {
         super(theme, "Select Items", setting, ItemListSetting.GROUPS, Registries.ITEM);
     }
 

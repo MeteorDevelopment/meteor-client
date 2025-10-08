@@ -6,8 +6,7 @@
 package meteordevelopment.meteorclient.gui.screens.settings;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSettingScreen;
-import meteordevelopment.meteorclient.gui.screens.settings.base.GroupedListSettingScreen;
+import meteordevelopment.meteorclient.gui.screens.settings.base.GroupedSetSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.BlockListSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
@@ -18,8 +17,8 @@ import net.minecraft.util.Identifier;
 
 import java.util.function.Predicate;
 
-public class BlockListSettingScreen extends GroupedListSettingScreen<Block, BlockListSetting> {
-    public BlockListSettingScreen(GuiTheme theme, BlockListSetting setting) {
+public class BlockSetSettingScreen extends GroupedSetSettingScreen<Block, BlockListSetting> {
+    public BlockSetSettingScreen(GuiTheme theme, BlockListSetting setting) {
         super(theme, "Select Blocks", setting, BlockListSetting.GROUPS, Registries.BLOCK);
     }
 
