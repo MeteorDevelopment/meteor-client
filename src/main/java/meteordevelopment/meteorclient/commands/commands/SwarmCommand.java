@@ -213,6 +213,7 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker()) {
+                    // TODO: resolve
                     Modules.get().get(InfinityMiner.class).targetBlocks.set(new GroupSet<>(List.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock())));
                     runInfinityMiner();
                 }
@@ -229,6 +230,7 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker()) {
+                    // TODO: resolve
                     Modules.get().get(InfinityMiner.class).targetBlocks.set(new GroupSet<>(List.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock())));
                     Modules.get().get(InfinityMiner.class).repairBlocks.set(new GroupSet<>(List.of(context.getArgument("repair", BlockStateArgument.class).getBlockState().getBlock())));
                     runInfinityMiner();

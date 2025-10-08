@@ -24,6 +24,7 @@ public class ItemListSetting extends GroupedSetSetting<Item> {
 
     public static final Groups<Item> GROUPS = new Groups<>();
 
+    // TODO: resolve this (used in AutoSmelter)
     private final boolean bypassFilterWhenSavingAndLoading;
 
     public ItemListSetting(String name, String description, GroupSet<Item, Groups<Item>.Group> defaultValue, Consumer<GroupSet<Item, Groups<Item>.Group>> onChanged, Consumer<Setting<GroupSet<Item, Groups<Item>.Group>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
