@@ -85,7 +85,7 @@ public class LightOverlay extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (Cross cross : crosses) crossPool.free(cross);
+        crossPool.freeAll(crosses);
         crosses.clear();
 
         BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {

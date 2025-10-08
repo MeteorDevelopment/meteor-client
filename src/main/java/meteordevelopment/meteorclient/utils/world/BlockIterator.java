@@ -75,7 +75,7 @@ public class BlockIterator {
         hRadius = 0;
         vRadius = 0;
 
-        for (Callback callback : callbacks) callbackPool.free(callback);
+        callbackPool.freeAll(callbacks);
         callbacks.clear();
 
         for (Runnable callback : afterCallbacks) callback.run();

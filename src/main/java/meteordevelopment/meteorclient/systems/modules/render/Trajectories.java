@@ -230,7 +230,7 @@ public class Trajectories extends Module {
         public Vector3d lastPoint;
 
         public void clear() {
-            for (Vector3d point : points) vec3s.free(point);
+            vec3s.freeAll(points);
             points.clear();
 
             hitQuad = false;
