@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 public class BetterTooltips extends Module {
     public static final Color ECHEST_COLOR = new Color(0, 50, 50);
@@ -79,26 +79,18 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    private final Setting<Boolean> viewContent = sgGeneral.add(new BoolSetting.Builder()
-        .name("view-content")
-        .description("Enable view content functionality.")
-        .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
-        .build()
-    );
-
-    private final Setting<Keybind> viewContentKey = sgGeneral.add(new KeybindSetting.Builder()
-        .name("view-content-key")
-        .description("Key to view contents (containers, books, etc.).")
-        .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_CONTROL))
-        .visible(() -> viewContent.get())
-        .build()
-    );
-
     private final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
         .name("middle-click-open")
         .description("Opens a GUI window with the inventory of the storage block or book when you middle click the item.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Keybind> middleClickKey = sgGeneral.add(new KeybindSetting.Builder()
+        .name("middle-click-key")
+        .description("Key to open contents (containers, books, etc.) when pressed on items.")
+        .defaultValue(Keybind.fromButton(GLFW_MOUSE_BUTTON_MIDDLE))
+        .visible(() -> middleClickOpen.get())
         .build()
     );
 
@@ -313,17 +305,6 @@ public class BetterTooltips extends Module {
             }
         }
 
-        if (viewContent.get() && viewContentKey.get().isPressed()) {
-            if (Utils.hasItems(event.itemStack()) || event.itemStack().getItem() instanceof BundleItem) {
-                if (mc.currentScreen instanceof HandledScreen)
-                    mc.currentScreen.close();
-                mc.setScreen(new ContainerInventoryScreen(event.itemStack()));
-            } else if (event.itemStack().getItem() == Items.WRITABLE_BOOK || event.itemStack().getItem() == Items.WRITTEN_BOOK) {
-                if (mc.currentScreen instanceof HandledScreen)
-                    mc.currentScreen.close();
-                mc.setScreen(new BookScreen(BookScreen.Contents.create(event.itemStack())));
-            }
-        }
 
         // Hold to preview tooltip
         appendPreviewTooltipText(event, true);
@@ -440,20 +421,10 @@ public class BetterTooltips extends Module {
                 || (event.itemStack().getItem() == Items.SHIELD && banners.get())
         );
 
-        boolean showFullPreviewText = viewContent.get() && !viewContentKey.get().isPressed() && (
-            Utils.hasItems(event.itemStack()) || event.itemStack().getItem() instanceof BundleItem
-                || event.itemStack().getItem() == Items.WRITABLE_BOOK || event.itemStack().getItem() == Items.WRITTEN_BOOK
-        );
-
         if (showPreviewText) {
             // we don't want to add the spacer if the tooltip is hidden
             if (spacer) event.appendEnd(Text.literal(""));
             event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
-        }
-
-        if (showFullPreviewText) {
-            if (spacer && !showPreviewText) event.appendEnd(Text.literal(""));
-            event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + viewContentKey.get() + Formatting.RESET + " to view contents"));
         }
     }
 
@@ -510,6 +481,31 @@ public class BetterTooltips extends Module {
 
     public boolean middleClickOpen() {
         return (isActive() && middleClickOpen.get()) && (!pauseInCreative.get() || !mc.player.isInCreativeMode());
+    }
+
+    public Keybind middleClickKey() {
+        return middleClickKey.get();
+    }
+
+    public boolean openContent(ItemStack itemStack) {
+        if (!middleClickOpen() || itemStack.isEmpty()) return false;
+
+        if (itemStack.getItem() instanceof BundleItem) {
+            if (mc.currentScreen instanceof HandledScreen)
+                mc.currentScreen.close();
+            mc.setScreen(new ContainerInventoryScreen(itemStack));
+            return true;
+        } else if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
+            Utils.openContainer(itemStack, ITEMS, false);
+            return true;
+        } else if (itemStack.getItem() == Items.WRITABLE_BOOK || itemStack.getItem() == Items.WRITTEN_BOOK) {
+            if (mc.currentScreen instanceof HandledScreen)
+                mc.currentScreen.close();
+            mc.setScreen(new BookScreen(BookScreen.Contents.create(itemStack)));
+            return true;
+        }
+
+        return false;
     }
 
     public boolean previewShulkers() {

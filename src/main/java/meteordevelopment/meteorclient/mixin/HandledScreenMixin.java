@@ -9,22 +9,17 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.render.ItemHighlight;
-import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -33,7 +28,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 @Mixin(HandledScreen.class)
@@ -104,14 +98,20 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
-            ItemStack itemStack = focusedSlot.getStack();
-            if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
-                cir.setReturnValue(Utils.openContainer(focusedSlot.getStack(), ITEMS, false));
+        if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(false, button, 0) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
+            if (tooltips.openContent(focusedSlot.getStack())) {
+                cir.setReturnValue(true);
             }
-            else if (itemStack.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null || itemStack.get(DataComponentTypes.WRITABLE_BOOK_CONTENT) != null) {
-                close();
-                mc.setScreen(new BookScreen(BookScreen.Contents.create(itemStack)));
+        }
+    }
+
+    // Keyboard input for middle click open
+    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
+    private void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+        BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
+
+        if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(true, keyCode, modifiers) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
+            if (tooltips.openContent(focusedSlot.getStack())) {
                 cir.setReturnValue(true);
             }
         }
