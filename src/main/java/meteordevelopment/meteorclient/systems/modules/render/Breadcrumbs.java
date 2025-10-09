@@ -67,7 +67,7 @@ public class Breadcrumbs extends Module {
 
     @Override
     public void onDeactivate() {
-        for (Section section : sections) sectionPool.free(section);
+        sectionPool.freeAll(sections);
         sections.clear();
     }
 
@@ -76,7 +76,7 @@ public class Breadcrumbs extends Module {
         if (!mc.player.isLoaded()) return;
 
         if (lastDimension != mc.world.getDimension()) {
-            for (Section sec : sections) sectionPool.free(sec);
+            sectionPool.freeAll(sections);
             sections.clear();
         }
 
