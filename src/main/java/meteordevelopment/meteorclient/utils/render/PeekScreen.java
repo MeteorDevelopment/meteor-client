@@ -11,12 +11,9 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
@@ -39,13 +36,9 @@ public class PeekScreen extends ShulkerBoxScreen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
+        if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(false, button, 0) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             ItemStack itemStack = focusedSlot.getStack();
-            if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
-                return Utils.openContainer(focusedSlot.getStack(), contents, false);
-            } else if (itemStack.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null || itemStack.get(DataComponentTypes.WRITABLE_BOOK_CONTENT) != null) {
-                close();
-                mc.setScreen(new BookScreen(BookScreen.Contents.create(itemStack)));
+            if (tooltips.openContent(itemStack)) {
                 return true;
             }
         }
@@ -60,6 +53,15 @@ public class PeekScreen extends ShulkerBoxScreen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
+
+        if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(true, keyCode, modifiers) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+            ItemStack itemStack = focusedSlot.getStack();
+            if (tooltips.openContent(itemStack)) {
+                return true;
+            }
+        }
+
         if (keyCode == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(keyCode, scanCode)) {
             close();
             return true;

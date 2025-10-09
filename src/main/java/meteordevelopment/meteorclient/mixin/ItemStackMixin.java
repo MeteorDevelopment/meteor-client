@@ -10,9 +10,12 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
+import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.tooltip.TooltipData;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -32,6 +36,20 @@ public abstract class ItemStackMixin {
         if (Utils.canUpdate()) {
             ItemStackTooltipEvent event = MeteorClient.EVENT_BUS.post(new ItemStackTooltipEvent((ItemStack) (Object) this, original));
             return event.list();
+        }
+
+        return original;
+    }
+
+    @ModifyReturnValue(method = "getTooltipData", at = @At("RETURN"))
+    private Optional<TooltipData> onGetTooltipData(Optional<TooltipData> original) {
+        ItemStack stack = (ItemStack) (Object) this;
+
+        if (stack.getItem() instanceof net.minecraft.item.BundleItem) {
+            TooltipDataEvent event = MeteorClient.EVENT_BUS.post(TooltipDataEvent.get(stack));
+            if (event.tooltipData != null) {
+                return Optional.of(event.tooltipData);
+            }
         }
 
         return original;
