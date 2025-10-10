@@ -17,21 +17,22 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.dimension.DimensionType;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class BlockESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -80,9 +81,9 @@ public class BlockESP extends Module {
 
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
-    private final Executor workerThread = Util.getMainWorkerExecutor().named("BlockESP");
+    private final ExecutorService workerThread = Executors.newSingleThreadExecutor();
 
-    private DimensionType lastDimension;
+    private Dimension lastDimension;
 
     public BlockESP() {
         super(Categories.Render, "block-esp", "Renders specified blocks through walls.", "search");
@@ -101,7 +102,7 @@ public class BlockESP extends Module {
             searchChunk(chunk);
         }
 
-        lastDimension = mc.world.getDimension();
+        lastDimension = PlayerUtils.getDimension();
     }
 
     @Override
@@ -159,7 +160,7 @@ public class BlockESP extends Module {
     }
 
     private void searchChunk(Chunk chunk) {
-        workerThread.execute(() -> {
+        workerThread.submit(() -> {
             if (!isActive()) return;
             ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
 
@@ -192,43 +193,44 @@ public class BlockESP extends Module {
         boolean added = blocks.get().contains(event.newState.getBlock()) && !blocks.get().contains(event.oldState.getBlock());
         boolean removed = !added && !blocks.get().contains(event.newState.getBlock()) && blocks.get().contains(event.oldState.getBlock());
 
-        if (!added && !removed) return;
+        if (added || removed) {
+            workerThread.submit(() -> {
+                synchronized (chunks) {
+                    ESPChunk chunk = chunks.get(key);
 
-        workerThread.execute(() -> {
-            synchronized (chunks) {
-                ESPChunk chunk = chunks.get(key);
+                    if (chunk == null) {
+                        chunk = new ESPChunk(chunkX, chunkZ);
+                        if (chunk.shouldBeDeleted()) return;
 
-                if (chunk == null) {
-                    chunk = new ESPChunk(chunkX, chunkZ);
-                    if (chunk.shouldBeDeleted()) return;
+                        chunks.put(key, chunk);
+                    }
 
-                    chunks.put(key, chunk);
-                }
+                    blockPos.set(bx, by, bz);
 
-                blockPos.set(bx, by, bz);
+                    if (added) chunk.add(blockPos);
+                    else chunk.remove(blockPos);
 
-                if (added) chunk.add(blockPos);
-                else chunk.remove(blockPos);
+                    // Update neighbour blocks
+                    for (int x = -1; x < 2; x++) {
+                        for (int z = -1; z < 2; z++) {
+                            for (int y = -1; y < 2; y++) {
+                                if (x == 0 && y == 0 && z == 0) continue;
 
-                // Update neighbour blocks
-                for (int x = -1; x < 2; x++) {
-                    for (int z = -1; z < 2; z++) {
-                        for (int y = -1; y < 2; y++) {
-                            if (x == 0 && y == 0 && z == 0) continue;
-
-                            updateBlock(bx + x, by + y, bz + z);
+                                updateBlock(bx + x, by + y, bz + z);
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        DimensionType dimension = mc.world.getDimension();
+        Dimension dimension = PlayerUtils.getDimension();
 
         if (lastDimension != dimension) onActivate();
+
         lastDimension = dimension;
     }
 
