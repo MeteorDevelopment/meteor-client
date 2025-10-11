@@ -67,16 +67,16 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     public void initWidgets() {}
 
     @Override
-    public boolean mouseClicked(Click arg, boolean doubled) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         double s = mc.getWindow().getScaleFactor();
 
-        double mouseX = arg.x();
-        double mouseY = arg.y();
+        double mouseX = click.x();
+        double mouseY = click.y();
 
         mouseX *= s;
         mouseY *= s;
 
-        if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             pressed = true;
             selectionSnapBox = null;
 
@@ -117,16 +117,16 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public boolean mouseReleased(Click arg) {
+    public boolean mouseReleased(Click click) {
         double s = mc.getWindow().getScaleFactor();
 
-        double mouseX = arg.x();
-        double mouseY = arg.y();
+        double mouseX = click.x();
+        double mouseY = click.y();
 
         mouseX *= s;
         mouseY *= s;
 
-        if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) pressed = false;
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) pressed = false;
 
         if (addedHoveredToSelectionWhenClickedElement != null) {
             selection.remove(addedHoveredToSelectionWhenClickedElement);
@@ -134,14 +134,14 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         }
 
         if (moved) {
-            if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT && !dragging) fillSelection((int) mouseX, (int)mouseY);
+            if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT && !dragging) fillSelection((int) mouseX, (int)mouseY);
         }
         else {
-            if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                 HudElement hovered = getHovered((int) mouseX, (int) mouseY);
                 if (hovered != null) hovered.toggle();
             }
-            else if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            else if (click.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                 HudElement hovered = getHovered((int) mouseX, (int) mouseY);
 
                 if (hovered != null) mc.setScreen(new HudElementScreen(theme, hovered));
@@ -149,7 +149,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
             }
         }
 
-        if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             snapper.unsnap();
             moved = dragging = false;
         }
@@ -158,13 +158,13 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public boolean keyPressed(KeyInput arg) {
+    public boolean keyPressed(KeyInput input) {
         if (!pressed) {
-            if (arg.key() == GLFW.GLFW_KEY_ENTER || arg.key() == GLFW.GLFW_KEY_KP_ENTER) {
+            if (input.key() == GLFW.GLFW_KEY_ENTER || input.key() == GLFW.GLFW_KEY_KP_ENTER) {
                 HudElement hovered = getHovered(lastMouseX, lastMouseY);
                 if (hovered != null) hovered.toggle();
             }
-            else if (arg.key() == GLFW.GLFW_KEY_DELETE) {
+            else if (input.key() == GLFW.GLFW_KEY_DELETE) {
                 HudElement hovered = getHovered(lastMouseX, lastMouseY);
 
                 if (hovered != null) hovered.remove();
@@ -176,7 +176,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
                 int pixels = (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL) || Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT_CONTROL)) ? 10 : 1;
                 int dx = 0, dy = 0;
 
-                switch (arg.key()) {
+                switch (input.key()) {
                     case GLFW.GLFW_KEY_UP -> dy = -pixels;
                     case GLFW.GLFW_KEY_DOWN -> dy = pixels;
                     case GLFW.GLFW_KEY_RIGHT -> dx = pixels;
@@ -190,7 +190,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
             }
         }
 
-        return super.keyPressed(arg);
+        return super.keyPressed(input);
     }
 
     private void fillSelection(int mouseX, int mouseY) {

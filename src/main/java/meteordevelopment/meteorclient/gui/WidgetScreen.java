@@ -118,31 +118,31 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(Click arg, boolean doubled) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         if (locked) return false;
 
-        double mouseX = arg.x();
-        double mouseY = arg.y();
+        double mouseX = click.x();
+        double mouseY = click.y();
         double s = mc.getWindow().getScaleFactor();
 
         mouseX *= s;
         mouseY *= s;
 
-        return root.mouseClicked(mouseX, mouseY, arg.button(), doubled);
+        return root.mouseClicked(new Click(mouseX, mouseY, click.buttonInfo()), doubled);
     }
 
     @Override
-    public boolean mouseReleased(Click arg) {
+    public boolean mouseReleased(Click click) {
         if (locked) return false;
 
-        double mouseX = arg.x();
-        double mouseY = arg.y();
+        double mouseX = click.x();
+        double mouseY = click.y();
         double s = mc.getWindow().getScaleFactor();
 
         mouseX *= s;
         mouseY *= s;
 
-        return root.mouseReleased(mouseX, mouseY, arg.button());
+        return root.mouseReleased(new Click(mouseX, mouseY, click.buttonInfo()));
     }
 
     @Override
@@ -169,31 +169,31 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean keyReleased(KeyInput arg) {
+    public boolean keyReleased(KeyInput input) {
         if (locked) return false;
 
-        if ((arg.modifiers() == GLFW_MOD_CONTROL || arg.modifiers() == GLFW_MOD_SUPER) && arg.key() == GLFW_KEY_9) {
+        if ((input.modifiers() == GLFW_MOD_CONTROL || input.modifiers() == GLFW_MOD_SUPER) && input.key() == GLFW_KEY_9) {
             debug = !debug;
             return true;
         }
 
-        if ((arg.key() == GLFW_KEY_ENTER || arg.key() == GLFW_KEY_KP_ENTER) && enterAction != null) {
+        if ((input.key() == GLFW_KEY_ENTER || input.key() == GLFW_KEY_KP_ENTER) && enterAction != null) {
             enterAction.run();
             return true;
         }
 
-        return super.keyReleased(arg);
+        return super.keyReleased(input);
     }
 
     @Override
-    public boolean keyPressed(KeyInput arg) {
+    public boolean keyPressed(KeyInput input) {
         if (locked) return false;
 
-        boolean shouldReturn = root.keyPressed(arg.key(), arg.modifiers()) || super.keyPressed(arg);
+        boolean shouldReturn = root.keyPressed(input) || super.keyPressed(input);
         if (shouldReturn) return true;
 
         // Select next text box if TAB was pressed
-        if (arg.key() == GLFW_KEY_TAB) {
+        if (input.key() == GLFW_KEY_TAB) {
             AtomicReference<WTextBox> firstTextBox = new AtomicReference<>(null);
             AtomicBoolean done = new AtomicBoolean(false);
             AtomicBoolean foundFocused = new AtomicBoolean(false);
@@ -224,23 +224,23 @@ public abstract class WidgetScreen extends Screen {
             return true;
         }
 
-        boolean control = MacWindowUtil.IS_MAC ? arg.modifiers() == GLFW_MOD_SUPER : arg.modifiers() == GLFW_MOD_CONTROL;
+        boolean control = MacWindowUtil.IS_MAC ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
 
-        return (control && arg.key() == GLFW_KEY_C && toClipboard())
-            || (control && arg.key() == GLFW_KEY_V && fromClipboard());
+        return (control && input.key() == GLFW_KEY_C && toClipboard())
+            || (control && input.key() == GLFW_KEY_V && fromClipboard());
     }
 
-    public void keyRepeated(int key, int modifiers) {
+    public void keyRepeated(KeyInput input) {
         if (locked) return;
 
-        root.keyRepeated(key, modifiers);
+        root.keyRepeated(input);
     }
 
     @Override
-    public boolean charTyped(CharInput arg) {
+    public boolean charTyped(CharInput input) {
         if (locked) return false;
 
-        return root.charTyped(((char) arg.codepoint()));
+        return root.charTyped(input);
     }
 
     @Override

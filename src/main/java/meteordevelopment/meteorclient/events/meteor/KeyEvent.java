@@ -15,9 +15,9 @@ public class KeyEvent extends Cancellable {
     public KeyInput input;
     public KeyAction action;
 
-    public static KeyEvent get(KeyInput keyInput, KeyAction action) {
+    public static KeyEvent get(KeyInput input, KeyAction action) {
         INSTANCE.setCancelled(false);
-        INSTANCE.input = keyInput;
+        INSTANCE.input = input;
         INSTANCE.action = action;
         return INSTANCE;
     }

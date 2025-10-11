@@ -60,11 +60,11 @@ public abstract class ScreenMixin {
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void onKeyPressed(KeyInput arg, CallbackInfoReturnable<Boolean> cir) {
+    private void onKeyPressed(KeyInput input, CallbackInfoReturnable<Boolean> cir) {
         if ((Object) (this) instanceof ChatScreen) return;
         GUIMove guiMove = Modules.get().get(GUIMove.class);
         List<Integer> arrows = List.of(GLFW_KEY_RIGHT, GLFW_KEY_LEFT, GLFW_KEY_DOWN,  GLFW_KEY_UP);
-        if ((guiMove.disableArrows() && arrows.contains(arg.key())) || (guiMove.disableSpace() && arg.key() == GLFW_KEY_SPACE)) {
+        if ((guiMove.disableArrows() && arrows.contains(input.key())) || (guiMove.disableSpace() && input.key() == GLFW_KEY_SPACE)) {
             cir.setReturnValue(true);
         }
     }

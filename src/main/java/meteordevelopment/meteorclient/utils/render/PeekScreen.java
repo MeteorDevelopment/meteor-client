@@ -38,10 +38,10 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean mouseClicked(Click arg, boolean doubled) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
             ItemStack itemStack = focusedSlot.getStack();
             if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
                 return Utils.openContainer(focusedSlot.getStack(), contents, false);
@@ -56,13 +56,13 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean mouseReleased(Click arg) {
+    public boolean mouseReleased(Click click) {
         return false;
     }
 
     @Override
-    public boolean keyPressed(KeyInput arg) {
-        if (arg.key() == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(arg)) {
+    public boolean keyPressed(KeyInput input) {
+        if (input.key() == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(input)) {
             close();
             return true;
         }
@@ -70,8 +70,8 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean keyReleased(KeyInput arg) {
-        if (arg.key() == GLFW.GLFW_KEY_ESCAPE) {
+    public boolean keyReleased(KeyInput input) {
+        if (input.key() == GLFW.GLFW_KEY_ESCAPE) {
             close();
             return true;
         }

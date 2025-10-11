@@ -156,22 +156,22 @@ public class AutoWalk extends Module {
         mc.options.rightKey.setPressed(false);
     }
 
-    private boolean isMovementKey(KeyInput key) {
-        return mc.options.forwardKey.matchesKey(key)
-            || mc.options.backKey.matchesKey(key)
-            || mc.options.leftKey.matchesKey(key)
-            || mc.options.rightKey.matchesKey(key)
-            || mc.options.sneakKey.matchesKey(key)
-            || mc.options.jumpKey.matchesKey(key);
+    private boolean isMovementKey(KeyInput input) {
+        return mc.options.forwardKey.matchesKey(input)
+            || mc.options.backKey.matchesKey(input)
+            || mc.options.leftKey.matchesKey(input)
+            || mc.options.rightKey.matchesKey(input)
+            || mc.options.sneakKey.matchesKey(input)
+            || mc.options.jumpKey.matchesKey(input);
     }
 
-    private boolean isMovementButton(Click button) {
-        return mc.options.forwardKey.matchesMouse(button)
-            || mc.options.backKey.matchesMouse(button)
-            || mc.options.leftKey.matchesMouse(button)
-            || mc.options.rightKey.matchesMouse(button)
-            || mc.options.sneakKey.matchesMouse(button)
-            || mc.options.jumpKey.matchesMouse(button);
+    private boolean isMovementButton(Click click) {
+        return mc.options.forwardKey.matchesMouse(click)
+            || mc.options.backKey.matchesMouse(click)
+            || mc.options.leftKey.matchesMouse(click)
+            || mc.options.rightKey.matchesMouse(click)
+            || mc.options.sneakKey.matchesMouse(click)
+            || mc.options.jumpKey.matchesMouse(click);
     }
 
     private void createGoal() {

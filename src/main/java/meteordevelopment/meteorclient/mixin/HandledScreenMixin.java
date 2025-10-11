@@ -93,19 +93,19 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     // Inventory Tweaks
     @Inject(method = "mouseDragged", at = @At("TAIL"))
-    private void onMouseDragged(Click arg, double d, double e, CallbackInfoReturnable<Boolean> cir) {
-        if (arg.button() != GLFW_MOUSE_BUTTON_LEFT || doubleClicking || !Modules.get().get(InventoryTweaks.class).mouseDragItemMove()) return;
+    private void onMouseDragged(Click click, double offsetX, double offsetY, CallbackInfoReturnable<Boolean> cir) {
+        if (click.button() != GLFW_MOUSE_BUTTON_LEFT || doubleClicking || !Modules.get().get(InventoryTweaks.class).mouseDragItemMove()) return;
 
-        Slot slot = getSlotAt(arg.x(), arg.y());
-        if (slot != null && slot.hasStack() && mc.isShiftPressed()) onMouseClick(slot, slot.id, arg.button(), SlotActionType.QUICK_MOVE);
+        Slot slot = getSlotAt(click.x(), click.y());
+        if (slot != null && slot.hasStack() && mc.isShiftPressed()) onMouseClick(slot, slot.id, click.button(), SlotActionType.QUICK_MOVE);
     }
 
     // Middle click open
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void mouseClicked(Click arg, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
+    private void mouseClicked(Click click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (arg.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty() && tooltips.middleClickOpen()) {
             ItemStack itemStack = focusedSlot.getStack();
             if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
                 cir.setReturnValue(Utils.openContainer(focusedSlot.getStack(), ITEMS, false));
