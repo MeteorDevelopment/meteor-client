@@ -511,7 +511,7 @@ public abstract class WTextBox extends WWidget {
         if (filter.filter(text, input.codepoint())) {
             clearSelection();
 
-            text = text.substring(0, cursor) + input + text.substring(cursor);
+            text = text.substring(0, cursor) + input.asString() + text.substring(cursor);
 
             cursor++;
             resetSelection();
