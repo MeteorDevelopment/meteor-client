@@ -38,9 +38,7 @@ public class PeekScreen extends ShulkerBoxScreen {
 
         if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(false, button, 0) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             ItemStack itemStack = focusedSlot.getStack();
-            if (tooltips.openContent(itemStack)) {
-                return true;
-            }
+            return tooltips.openContent(itemStack, contents);
         }
 
         return false;
@@ -57,7 +55,7 @@ public class PeekScreen extends ShulkerBoxScreen {
 
         if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(true, keyCode, modifiers) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             ItemStack itemStack = focusedSlot.getStack();
-            if (tooltips.openContent(itemStack)) {
+            if (tooltips.openContent(itemStack, contents)) {
                 return true;
             }
         }
@@ -66,6 +64,7 @@ public class PeekScreen extends ShulkerBoxScreen {
             close();
             return true;
         }
+
         return false;
     }
 
@@ -84,6 +83,6 @@ public class PeekScreen extends ShulkerBoxScreen {
 
         int i = (width - backgroundWidth) / 2;
         int j = (height - backgroundHeight) / 2;
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, i, j, 0f, 0f, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight, 256, 256, ColorHelper.fromFloats(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f));
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, i, j, 0f, 0f, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight, 256, 256, ColorHelper.fromFloats(color.a / 255f, color.r / 255f, color.g / 255f, color.b / 255f));
     }
 }

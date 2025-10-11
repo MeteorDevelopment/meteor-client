@@ -6,9 +6,9 @@
 package meteordevelopment.meteorclient.gui.screens;
 
 import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.entity.player.PlayerInventory;
@@ -19,10 +19,10 @@ import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 /*
  * i couldn't figure out how to add proper outer borders for the GUI without adding custom textures. @TODO
@@ -31,7 +31,7 @@ public class ContainerInventoryScreen extends Screen {
     private static final Identifier SLOT_TEXTURE = Identifier.ofVanilla("container/slot");
     private static final int SLOT_SIZE = 18;
     private static final int SCREEN_WIDTH = 176;
-    
+
     private final List<ItemStack> containerItems;
     private final PlayerInventory playerInventory;
     private final int containerRows;
@@ -42,7 +42,7 @@ public class ContainerInventoryScreen extends Screen {
         super(containerItem.getName());
         this.playerInventory = mc.player.getInventory();
         this.tooltipContext = Item.TooltipContext.create(mc.world);
-        
+
         this.containerItems = new ArrayList<>();
         if (containerItem.getItem() instanceof BundleItem) {
             BundleContentsComponent bundleContents = containerItem.get(DataComponentTypes.BUNDLE_CONTENTS);
@@ -58,7 +58,7 @@ public class ContainerInventoryScreen extends Screen {
                 }
             }
         }
-        
+
         this.containerRows = Math.max(1, (containerItems.size() + 8) / 9);
     }
 
@@ -72,18 +72,18 @@ public class ContainerInventoryScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        
+
         int baseX = x + 8;
         int baseY = y + 18;
         int playerY = baseY + containerRows * SLOT_SIZE + 20;
-        
+
         for (int row = 0; row < containerRows + 4; row++) {
             for (int col = 0; col < 9; col++) {
                 int slotY = row < containerRows ? baseY + row * SLOT_SIZE : playerY + (row - containerRows) * SLOT_SIZE;
                 context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE, baseX + col * SLOT_SIZE, slotY, SLOT_SIZE, SLOT_SIZE);
             }
         }
-        
+
         for (int i = 0; i < containerItems.size(); i++) {
             ItemStack item = containerItems.get(i);
             if (!item.isEmpty()) {
@@ -93,7 +93,7 @@ public class ContainerInventoryScreen extends Screen {
                 context.drawStackOverlay(textRenderer, item, itemX, itemY);
             }
         }
-        
+
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 9; col++) {
                 int slotIndex = row < 3 ? 9 + row * 9 + col : col;
@@ -106,7 +106,7 @@ public class ContainerInventoryScreen extends Screen {
                 }
             }
         }
-        
+
         context.getMatrices().pushMatrix();
         context.getMatrices().translate((float)x, (float)y);
         if (textRenderer != null) {
@@ -114,10 +114,10 @@ public class ContainerInventoryScreen extends Screen {
             context.drawText(textRenderer, playerInventory.getDisplayName(), 8, 18 + containerRows * SLOT_SIZE + 10, -12566464, false);
         }
         context.getMatrices().popMatrix();
-        
+
         if (mouseX >= baseX && mouseX < baseX + 9 * SLOT_SIZE) {
             int col = (mouseX - baseX) / SLOT_SIZE;
-            
+
             if (mouseY >= baseY && mouseY < baseY + containerRows * SLOT_SIZE) {
                 int index = ((mouseY - baseY) / SLOT_SIZE) * 9 + col;
                 if (index < containerItems.size()) {
@@ -138,5 +138,4 @@ public class ContainerInventoryScreen extends Screen {
             }
         }
     }
-
 }

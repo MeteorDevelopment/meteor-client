@@ -99,7 +99,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(false, button, 0) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
-            if (tooltips.openContent(focusedSlot.getStack())) {
+            if (tooltips.openContent(focusedSlot.getStack(), ITEMS)) {
                 cir.setReturnValue(true);
             }
         }
@@ -111,7 +111,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(true, keyCode, modifiers) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
-            if (tooltips.openContent(focusedSlot.getStack())) {
+            if (tooltips.openContent(focusedSlot.getStack(), ITEMS)) {
                 cir.setReturnValue(true);
             }
         }

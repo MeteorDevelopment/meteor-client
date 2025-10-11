@@ -23,7 +23,6 @@ import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
-
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.component.DataComponentTypes;
@@ -90,7 +89,7 @@ public class BetterTooltips extends Module {
         .name("middle-click-key")
         .description("Key to open contents (containers, books, etc.) when pressed on items.")
         .defaultValue(Keybind.fromButton(GLFW_MOUSE_BUTTON_MIDDLE))
-        .visible(() -> middleClickOpen.get())
+        .visible(middleClickOpen::get)
         .build()
     );
 
@@ -269,7 +268,7 @@ public class BetterTooltips extends Module {
         if (foodInfo.get() && event.itemStack().contains(DataComponentTypes.FOOD)) {
             FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
             // Those emojis really look like in-game hunger bar
-            event.appendStart(Text.literal(String.format("🍖 %d hunger (💛 %.1f saturation)", food.nutrition(), food.saturation())).formatted(Formatting.GRAY));
+            event.appendStart(Text.literal(String.format("🍖 %d (💛 %.1f)", food.nutrition(), food.saturation())).formatted(Formatting.GRAY));
         }
 
         // Item size tooltip
@@ -304,7 +303,6 @@ public class BetterTooltips extends Module {
                     throw new MatchException(null, null);
             }
         }
-
 
         // Hold to preview tooltip
         appendPreviewTooltipText(event, true);
@@ -380,7 +378,7 @@ public class BetterTooltips extends Module {
                     for (ItemStack stack : bundleContents.iterate()) {
                         bundleItems[index++] = stack;
                     }
-                    event.tooltipData = new BundleTooltipComponent(bundleItems, bundleContents, new Color(139, 69, 19, 255));
+                    event.tooltipData = new BundleTooltipComponent(bundleItems, bundleContents);
                 }
             }
         }
@@ -487,20 +485,18 @@ public class BetterTooltips extends Module {
         return middleClickKey.get();
     }
 
-    public boolean openContent(ItemStack itemStack) {
+    public boolean openContent(ItemStack itemStack, ItemStack[] contents) {
         if (!middleClickOpen() || itemStack.isEmpty()) return false;
 
         if (itemStack.getItem() instanceof BundleItem) {
-            if (mc.currentScreen instanceof HandledScreen)
-                mc.currentScreen.close();
+            if (mc.currentScreen instanceof HandledScreen) mc.currentScreen.close();
             mc.setScreen(new ContainerInventoryScreen(itemStack));
             return true;
         } else if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
-            Utils.openContainer(itemStack, ITEMS, false);
+            Utils.openContainer(itemStack, contents, false);
             return true;
         } else if (itemStack.getItem() == Items.WRITABLE_BOOK || itemStack.getItem() == Items.WRITTEN_BOOK) {
-            if (mc.currentScreen instanceof HandledScreen)
-                mc.currentScreen.close();
+            if (mc.currentScreen instanceof HandledScreen) mc.currentScreen.close();
             mc.setScreen(new BookScreen(BookScreen.Contents.create(itemStack)));
             return true;
         }
@@ -536,7 +532,7 @@ public class BetterTooltips extends Module {
         return isPressed() && entitiesInBuckets.get();
     }
 
-    private boolean previewBundles() {
+    public boolean previewBundles() {
         return isPressed() && bundles.get();
     }
 

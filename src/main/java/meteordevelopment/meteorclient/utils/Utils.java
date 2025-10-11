@@ -283,7 +283,7 @@ public class Utils {
                 if (slot.get() >= 0 && slot.get() < items.length) {
                     switch (StackWithSlot.CODEC.parse(mc.player.getRegistryManager().getOps(NbtOps.INSTANCE), compound.get())) {
                         case DataResult.Success<StackWithSlot> success -> items[slot.get()] = success.value().stack();
-                        case DataResult.Error<StackWithSlot> error -> items[slot.get()] = ItemStack.EMPTY;
+                        case DataResult.Error<StackWithSlot> ignored -> items[slot.get()] = ItemStack.EMPTY;
                         default -> throw new MatchException(null, null);
                     }
                 }
