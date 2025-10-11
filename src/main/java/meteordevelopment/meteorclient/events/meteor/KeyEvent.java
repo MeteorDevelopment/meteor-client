@@ -21,4 +21,12 @@ public class KeyEvent extends Cancellable {
         INSTANCE.action = action;
         return INSTANCE;
     }
+
+    public int key() {
+        return INSTANCE.input.key();
+    }
+
+    public int modifiers() {
+        return INSTANCE.input.modifiers();
+    }
 }

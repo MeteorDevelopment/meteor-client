@@ -90,7 +90,7 @@ public class MiddleClickExtra extends Module {
 
     @EventHandler
     private void onMouseClick(MouseClickEvent event) {
-        if (event.action != KeyAction.Press || event.input.button() != GLFW_MOUSE_BUTTON_MIDDLE || mc.currentScreen != null) return;
+        if (event.action != KeyAction.Press || event.button() != GLFW_MOUSE_BUTTON_MIDDLE || mc.currentScreen != null) return;
 
         if (mode.get() == Mode.AddFriend) {
             if (mc.targetedEntity == null) return;

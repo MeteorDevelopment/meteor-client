@@ -32,13 +32,13 @@ public class KeybindSetting extends Setting<Keybind> {
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onKeyBinding(KeyEvent event) {
         if (widget == null) return;
-        if (event.action == KeyAction.Press && event.input.key() == GLFW.GLFW_KEY_ESCAPE && widget.onClear()) event.cancel();
-        else if (event.action == KeyAction.Release && widget.onAction(true, event.input.key(), event.input.modifiers())) event.cancel();
+        if (event.action == KeyAction.Press && event.key() == GLFW.GLFW_KEY_ESCAPE && widget.onClear()) event.cancel();
+        else if (event.action == KeyAction.Release && widget.onAction(true, event.key(), event.modifiers())) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onMouseClickBinding(MouseClickEvent event) {
-        if (event.action == KeyAction.Press && widget != null && widget.onAction(false, event.input.button(), 0)) event.cancel();
+        if (event.action == KeyAction.Press && widget != null && widget.onAction(false, event.button(), 0)) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGH)

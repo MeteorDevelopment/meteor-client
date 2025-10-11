@@ -112,12 +112,12 @@ public class GUIMove extends Module {
 
     @EventHandler
     private void onKey(KeyEvent event) {
-        onInput(event.input.key(), event.action);
+        onInput(event.key(), event.action);
     }
 
     @EventHandler
     private void onButton(MouseClickEvent event) {
-        onInput(event.input.button(), event.action);
+        onInput(event.button(), event.action);
     }
 
     private void onInput(int key, KeyAction action) {

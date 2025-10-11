@@ -62,7 +62,7 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
         if (event.action == KeyAction.Release) return;
 
         for (Macro macro : macros) {
-            if (macro.onAction(true, event.input.key(), event.input.modifiers())) return;
+            if (macro.onAction(true, event.key(), event.modifiers())) return;
         }
     }
 
@@ -71,7 +71,7 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
         if (event.action == KeyAction.Release) return;
 
         for (Macro macro : macros) {
-            if (macro.onAction(false, event.input.button(), 0)) return;
+            if (macro.onAction(false, event.button(), 0)) return;
         }
     }
 

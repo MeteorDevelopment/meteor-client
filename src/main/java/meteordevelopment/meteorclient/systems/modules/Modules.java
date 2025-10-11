@@ -213,12 +213,12 @@ public class Modules extends System<Modules> {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onKeyBinding(KeyEvent event) {
-        if (event.action == KeyAction.Release && onBinding(true, event.input.key(), event.input.modifiers())) event.cancel();
+        if (event.action == KeyAction.Release && onBinding(true, event.key(), event.modifiers())) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onButtonBinding(MouseClickEvent event) {
-        if (event.action == KeyAction.Release && onBinding(false, event.input.button(), 0)) event.cancel();
+        if (event.action == KeyAction.Release && onBinding(false, event.button(), 0)) event.cancel();
     }
 
     private boolean onBinding(boolean isKey, int value, int modifiers) {
@@ -250,13 +250,13 @@ public class Modules extends System<Modules> {
     @EventHandler(priority = EventPriority.HIGH)
     private void onKey(KeyEvent event) {
         if (event.action == KeyAction.Repeat) return;
-        onAction(true, event.input.key(), event.input.modifiers(), event.action == KeyAction.Press);
+        onAction(true, event.key(), event.modifiers(), event.action == KeyAction.Press);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onMouseClick(MouseClickEvent event) {
         if (event.action == KeyAction.Repeat) return;
-        onAction(false, event.input.button(), 0, event.action == KeyAction.Press);
+        onAction(false, event.button(), 0, event.action == KeyAction.Press);
     }
 
     private void onAction(boolean isKey, int value, int modifiers, boolean isPress) {

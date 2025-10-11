@@ -240,7 +240,7 @@ public class Offhand extends Module {
     @EventHandler
     private void onMouseClick(MouseClickEvent event) {
         // Detects if the User is right-clicking
-        isClicking = mc.currentScreen == null && !Modules.get().get(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.input.button() == GLFW_MOUSE_BUTTON_RIGHT;
+        isClicking = mc.currentScreen == null && !Modules.get().get(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button() == GLFW_MOUSE_BUTTON_RIGHT;
     }
 
     private boolean usableItem() {

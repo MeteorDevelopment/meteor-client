@@ -41,7 +41,7 @@ public abstract class MouseMixin {
         Input.setButtonState(mouseInput.button(), action != GLFW_RELEASE);
 
         Click click = new Click(getScaledX(client.getWindow()), getScaledY(client.getWindow()), mouseInput);
-        if (MeteorClient.EVENT_BUS.post(MouseClickEvent.get(mouseInput, click, KeyAction.get(action))).isCancelled()) ci.cancel();
+        if (MeteorClient.EVENT_BUS.post(MouseClickEvent.get(click, KeyAction.get(action))).isCancelled()) ci.cancel();
     }
 
     @Inject(method = "onMouseScroll", at = @At("HEAD"), cancellable = true)

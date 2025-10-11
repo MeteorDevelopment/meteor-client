@@ -284,14 +284,14 @@ public class Freecam extends Module {
         if (Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
         if (checkGuiMove()) return;
 
-        if (onInput(event.input.key(), event.action)) event.cancel();
+        if (onInput(event.key(), event.action)) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onMouseClick(MouseClickEvent event) {
         if (checkGuiMove()) return;
 
-        if (onInput(event.input.button(), event.action)) event.cancel();
+        if (onInput(event.button(), event.action)) event.cancel();
     }
 
     private boolean onInput(int key, KeyAction action) {
