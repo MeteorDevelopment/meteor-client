@@ -28,6 +28,7 @@ import net.minecraft.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
@@ -39,7 +40,7 @@ public class AutoEat extends Module {
     private final SettingGroup sgThreshold = settings.createGroup("Threshold");
 
     // General
-    public final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+    public final Setting<Set<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
         .name("blacklist")
         .description("Which items to not eat.")
         .defaultValue(

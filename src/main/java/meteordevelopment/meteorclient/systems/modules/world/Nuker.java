@@ -196,14 +196,14 @@ public class Nuker extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("blacklist")
         .description("The blocks you don't want to mine.")
         .visible(() -> listMode.get() == ListMode.Blacklist)
         .build()
     );
 
-    private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("The blocks you want to mine.")
         .visible(() -> listMode.get() == ListMode.Whitelist)
@@ -532,11 +532,10 @@ public class Nuker extends Module {
         BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
         Block targetBlock = mc.world.getBlockState(pos).getBlock();
 
-        List<Block> list = listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get();
+        Set<Block> list = listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get();
         String modeName = listMode.get().name();
 
-        if (list.contains(targetBlock)) {
-            list.remove(targetBlock);
+        if (list.remove(targetBlock)) {
             info("Removed " + Names.get(targetBlock) + " from " + modeName);
         } else {
             list.add(targetBlock);

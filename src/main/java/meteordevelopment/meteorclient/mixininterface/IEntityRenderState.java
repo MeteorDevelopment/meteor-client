@@ -6,10 +6,7 @@
 package meteordevelopment.meteorclient.mixininterface;
 
 import meteordevelopment.meteorclient.mixin.EntityRenderManagerMixin;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 
 public interface IEntityRenderState {

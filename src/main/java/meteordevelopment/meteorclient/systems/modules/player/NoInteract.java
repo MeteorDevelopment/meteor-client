@@ -24,7 +24,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.List;
 import java.util.Set;
 
 public class NoInteract extends Module {
@@ -33,7 +32,7 @@ public class NoInteract extends Module {
 
     // Blocks
 
-    private final Setting<List<Block>> blockMine = sgBlocks.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blockMine = sgBlocks.add(new BlockListSetting.Builder()
         .name("block-mine")
         .description("Cancels block mining.")
         .build()
@@ -46,7 +45,7 @@ public class NoInteract extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blockInteract = sgBlocks.add(new BlockListSetting.Builder()
+    private final Setting<Set<Block>> blockInteract = sgBlocks.add(new BlockListSetting.Builder()
         .name("block-interact")
         .description("Cancels block interaction.")
         .build()

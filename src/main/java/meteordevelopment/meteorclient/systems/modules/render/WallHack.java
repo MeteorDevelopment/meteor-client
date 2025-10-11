@@ -16,7 +16,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.block.Block;
 
-import java.util.List;
+import java.util.Set;
 
 public class WallHack extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -35,7 +35,7 @@ public class WallHack extends Module {
         .build()
     );
 
-    public final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<Set<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("What blocks should be targeted for Wall Hack.")
         .defaultValue()

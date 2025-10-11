@@ -43,7 +43,7 @@ public class ColorSetting extends Setting<SettingColor> {
     }
 
     @Override
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         return SUGGESTIONS;
     }
 

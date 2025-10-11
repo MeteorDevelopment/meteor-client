@@ -20,12 +20,12 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipePropertySet;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 
-import java.util.List;
+import java.util.Set;
 
 public class AutoSmelter extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<Item>> fuelItems = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> fuelItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("fuel-items")
         .description("Items to use as fuel")
         .defaultValue(Items.COAL, Items.CHARCOAL)
@@ -34,7 +34,7 @@ public class AutoSmelter extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> smeltableItems = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<Set<Item>> smeltableItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("smeltable-items")
         .description("Items to smelt")
         .defaultValue(Items.IRON_ORE, Items.GOLD_ORE, Items.COPPER_ORE, Items.RAW_IRON, Items.RAW_COPPER, Items.RAW_GOLD)

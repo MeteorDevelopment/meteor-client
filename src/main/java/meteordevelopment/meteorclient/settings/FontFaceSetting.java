@@ -39,7 +39,7 @@ public class FontFaceSetting extends Setting<FontFace> {
     }
 
     @Override
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         return List.of("JetBrainsMono-Regular", "Arial-Bold");
     }
 

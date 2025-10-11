@@ -14,14 +14,11 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
-    private static final List<String> NO_SUGGESTIONS = new ArrayList<>(0);
-
     public final String name, title, description;
     private final IVisible visible;
 
@@ -108,8 +105,8 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return null;
     }
 
-    public List<String> getSuggestions() {
-        return NO_SUGGESTIONS;
+    public Iterable<String> getSuggestions() {
+        return Collections.emptyList();
     }
 
     protected abstract NbtCompound save(NbtCompound tag);
@@ -158,7 +155,7 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
 
         Identifier id;
         if (name.contains(":")) id = Identifier.of(name);
-        else id = Identifier.of("minecraft", name);
+        else id = Identifier.ofVanilla(name);
         if (registry.containsId(id)) return registry.get(id);
 
         return null;

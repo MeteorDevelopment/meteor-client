@@ -55,7 +55,7 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     }
 
     @Override
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         if (suggestions == null) {
             suggestions = new ArrayList<>(PacketUtils.getC2SPackets().size() + PacketUtils.getS2CPackets().size());
 

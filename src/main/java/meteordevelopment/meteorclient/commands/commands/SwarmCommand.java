@@ -34,8 +34,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class SwarmCommand extends Command {
 
@@ -212,7 +212,7 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker()) {
-                    Modules.get().get(InfinityMiner.class).targetBlocks.set(List.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock()));
+                    Modules.get().get(InfinityMiner.class).targetBlocks.set(Set.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock()));
                     runInfinityMiner();
                 }
             }
@@ -228,8 +228,8 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker()) {
-                    Modules.get().get(InfinityMiner.class).targetBlocks.set(List.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock()));
-                    Modules.get().get(InfinityMiner.class).repairBlocks.set(List.of(context.getArgument("repair", BlockStateArgument.class).getBlockState().getBlock()));
+                    Modules.get().get(InfinityMiner.class).targetBlocks.set(Set.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock()));
+                    Modules.get().get(InfinityMiner.class).repairBlocks.set(Set.of(context.getArgument("repair", BlockStateArgument.class).getBlockState().getBlock()));
                     runInfinityMiner();
                 }
             }
