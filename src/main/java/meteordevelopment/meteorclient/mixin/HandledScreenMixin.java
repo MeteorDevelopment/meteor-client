@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
@@ -13,6 +14,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
@@ -122,5 +124,14 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void onDrawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
         int color = Modules.get().get(ItemHighlight.class).getColor(slot.getStack());
         if (color != -1) context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, color);
+    }
+
+    @ModifyReturnValue(method = "isItemTooltipSticky", at = @At("RETURN"))
+    private boolean isTooltipSticky(boolean original, ItemStack item) {
+        if (item.getTooltipData().orElse(null) instanceof TooltipComponent component) {
+            return component.isSticky();
+        }
+
+        return original;
     }
 }
