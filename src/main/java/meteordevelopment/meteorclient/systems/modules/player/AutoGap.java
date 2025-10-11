@@ -89,9 +89,9 @@ public class AutoGap extends Module {
         .build()
     );
 
-    private final Setting<Boolean> potionsResistance = sgPotions.add(new BoolSetting.Builder()
+    private final Setting<Boolean> potionsAbsorption = sgPotions.add(new BoolSetting.Builder()
         .name("potions-absorption")
-        .description("If it should eat when Resistance runs out. Requires E-Gaps.")
+        .description("If it should eat when Absorption runs out. Requires E-Gaps.")
         .defaultValue(false)
         .visible(allowEgap::get)
         .build()
@@ -264,7 +264,7 @@ public class AutoGap extends Module {
         }
 
         // Absorption
-        if (potionsResistance.get() && !effects.containsKey(StatusEffects.RESISTANCE)) {
+        if (potionsAbsorption.get() && !effects.containsKey(StatusEffects.ABSORPTION)) {
             requiresEGap = true;
             return true;
         }

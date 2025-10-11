@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.AutoTotem;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -129,6 +130,8 @@ public class AutoReplenish extends Module {
         ItemStack prevStack = items[slot];
         items[slot] = stack.copy();
 
+        if (slot == 9) slot = SlotUtils.OFFHAND;
+        
         if (excludedItems.get().contains(stack.getItem())) return;
         if (excludedItems.get().contains(prevStack.getItem())) return;
 
@@ -136,25 +139,29 @@ public class AutoReplenish extends Module {
 
         // If there are still items left in the stack, but it just crossed the threshold
         if (stack.isStackable() && !stack.isEmpty() && stack.getCount() <= minCount.get()) {
-            fromSlot = findItem(stack, slot, minCount.get() - stack.getCount() + 1);
+            fromSlot = findItem(stack, slot, minCount.get() - stack.getCount() + 1, true);
         }
 
         // If the stack just went from above the threshold to empty in a single tick
         // this can happen if the threshold is set low enough while using modules that
         // place many blocks per tick, like surround or holefiller
         if (prevStack.isStackable() && stack.isEmpty() && !prevStack.isEmpty()) {
-            fromSlot = findItem(prevStack, slot, minCount.get() - stack.getCount() + 1);
+            fromSlot = findItem(prevStack, slot, minCount.get() - stack.getCount() + 1, false);
         }
 
         // Unstackable items
         if (unstackable.get() && !prevStack.isStackable() && stack.isEmpty() && !prevStack.isEmpty()) {
-            fromSlot = findItem(prevStack, slot, 1);
+            fromSlot = findItem(prevStack, slot, 1, false);
         }
+
+        // eliminate occasional loops when moving items from hotbar to itself
+        if (fromSlot == mc.player.getInventory().getSelectedSlot() || fromSlot == SlotUtils.OFFHAND) return;
+        if (fromSlot < 9 && fromSlot < slot && slot != mc.player.getInventory().getSelectedSlot() && slot != SlotUtils.OFFHAND) return;
 
         InvUtils.move().from(fromSlot).to(slot);
     }
 
-    private int findItem(ItemStack lookForStack, int excludedSlot, int goodEnoughCount) {
+    private int findItem(ItemStack lookForStack, int excludedSlot, int goodEnoughCount, boolean mustCombine) {
         int slot = -1;
         int count = 0;
 
@@ -164,6 +171,7 @@ public class AutoReplenish extends Module {
             ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.getItem() != lookForStack.getItem()) continue;
 
+            if (mustCombine && !ItemStack.areItemsAndComponentsEqual(lookForStack, stack)) continue;
             if (sameEnchants.get() && !stack.getEnchantments().equals(lookForStack.getEnchantments())) continue;
 
             if (stack.getCount() > count) {

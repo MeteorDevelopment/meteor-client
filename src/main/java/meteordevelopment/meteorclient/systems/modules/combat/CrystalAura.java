@@ -1036,7 +1036,7 @@ public class CrystalAura extends Module {
         // Place
         if (supportBlock == null) {
             // Place crystal
-            mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result, 0));
+            mc.interactionManager.sendSequencedPacket(mc.world, (sequence) ->new PlayerInteractBlockC2SPacket(hand, result, sequence));
 
             if (swingMode.get().client()) mc.player.swingHand(hand);
             if (swingMode.get().packet()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));

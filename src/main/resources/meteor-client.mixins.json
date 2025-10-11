@@ -71,6 +71,7 @@
     "CrossbowItemAccessor",
     "DirectionAccessor",
     "DisconnectedScreenMixin",
+    "DownloaderMixin",
     "DrawContextMixin",
     "ElytraFeatureRendererMixin",
     "EnchantingTableBlockEntityRendererMixin",

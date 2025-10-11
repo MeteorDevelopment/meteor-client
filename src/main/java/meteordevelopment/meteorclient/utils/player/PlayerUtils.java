@@ -205,7 +205,7 @@ public class PlayerUtils {
             }
 
             // Check for beds if in nether
-            if (PlayerUtils.getDimension() != Dimension.Overworld) {
+            if (!mc.world.getDimension().bedWorks()) {
                 for (BlockEntity blockEntity : Utils.blockEntities()) {
                     BlockPos bp = blockEntity.getPos();
                     Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());

@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket;
@@ -73,7 +74,7 @@ public class BoatFly extends Module {
 
         // Vertical movement
         if (mc.options.jumpKey.isPressed()) velY += verticalSpeed.get() / 20;
-        if (mc.options.sprintKey.isPressed()) velY -= verticalSpeed.get() / 20;
+        if (Input.isPressed(mc.options.sprintKey)) velY -= verticalSpeed.get() / 20;
         else velY -= fallSpeed.get() / 20;
 
         // Apply velocity

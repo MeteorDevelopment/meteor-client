@@ -18,8 +18,12 @@ accessible   class   net/minecraft/client/resource/ResourceReloadLogger$ReloadSt
 
 accessible   class   com/mojang/blaze3d/opengl/GlStateManager$CapabilityTracker
 accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder <init> ()V
-accessible   method   com/mojang/blaze3d/pipeline/RenderPipeline$Builder withSnippet (Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;)V
+accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder withSnippet (Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;)V
+
+accessible   field   net/minecraft/client/render/RenderPhase ITEM_ENTITY_TARGET Lnet/minecraft/client/render/RenderPhase$Target;
 
 # Auto Fish
-accessible class net/minecraft/entity/projectile/FishingBobberEntity$State
-accessible field net/minecraft/entity/projectile/FishingBobberEntity state Lnet/minecraft/entity/projectile/FishingBobberEntity$State;
+accessible   class   net/minecraft/entity/projectile/FishingBobberEntity$State
+accessible   field   net/minecraft/entity/projectile/FishingBobberEntity state Lnet/minecraft/entity/projectile/FishingBobberEntity$State;
+
+accessible   method   net/minecraft/client/network/ClientPlayerInteractionManager sendSequencedPacket (Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V
