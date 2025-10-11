@@ -23,7 +23,7 @@ public abstract class PostProcessShader {
     protected RenderPipeline pipeline;
 
     public void init(RenderPipeline pipeline) {
-        vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());
+        vertexConsumerProvider = new OutlineVertexConsumerProvider();
         framebuffer = new SimpleFramebuffer(MeteorClient.NAME + " PostProcessShader", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), true);
         this.pipeline = pipeline;
     }

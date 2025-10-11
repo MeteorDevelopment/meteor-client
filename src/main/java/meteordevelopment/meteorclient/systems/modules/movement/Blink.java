@@ -66,14 +66,14 @@ public class Blink extends Module {
     @Override
     public void onActivate() {
         if (renderOriginal.get()) {
-            model = new FakePlayerEntity(mc.player, mc.player.getGameProfile().getName(), 20, true);
+            model = new FakePlayerEntity(mc.player, mc.player.getGameProfile().name(), 20, true);
             model.doNotPush = true;
             model.hideWhenInsideCamera = true;
             model.noHit = true;
             model.spawn();
         }
 
-        Utils.set(start, mc.player.getPos());
+        Utils.set(start, mc.player.getEntityPos());
     }
 
     @Override

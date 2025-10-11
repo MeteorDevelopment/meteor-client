@@ -162,7 +162,7 @@ public class AutoWasp extends Module {
 
         double xVel = 0, yVel = 0, zVel = 0;
 
-        Vec3d targetPos = target.getPos().add(offset.get().x, offset.get().y, offset.get().z);
+        Vec3d targetPos = target.getEntityPos().add(offset.get().x, offset.get().y, offset.get().z);
 
         if (predictMovement.get()) targetPos.add(PlayerEntity.adjustMovementForCollisions(target, target.getVelocity(),
             target.getBoundingBox(), mc.world, mc.world.getEntityCollisions(target, target.getBoundingBox().stretch(target.getVelocity()))));

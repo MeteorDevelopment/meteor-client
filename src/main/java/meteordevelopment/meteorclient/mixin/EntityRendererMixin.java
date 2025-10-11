@@ -8,26 +8,33 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.systems.modules.render.Nametags;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.world.LightType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin<T extends Entity, S extends EntityRenderState> {
+    @Unique private ESP esp;
 
     @Inject(method = "getDisplayName", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(T entity, CallbackInfoReturnable<Text> cir) {
@@ -57,5 +64,39 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
     @ModifyExpressionValue(method = "updateRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getLightLevel(Lnet/minecraft/world/LightType;Lnet/minecraft/util/math/BlockPos;)I"))
     private int onGetLightLevel(int original) {
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.BLOCK), original);
+    }
+
+    @Inject(method = "updateRenderState", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/entity/state/EntityRenderState;outlineColor:I", shift = At.Shift.AFTER))
+    private void onGetOutlineColor(T entity, S state, float tickProgress, CallbackInfo ci) {
+        if (getESP().isGlow() && !getESP().shouldSkip(entity)) {
+            Color color = getESP().getColor(entity);
+
+            if (color == null) return;
+            state.outlineColor = color.getPacked();
+        }
+    }
+
+    @Inject(method = "updateShadow(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/entity/state/EntityRenderState;)V", at = @At("HEAD"), cancellable = true)
+    private void updateShadow(Entity entity, EntityRenderState renderState, CallbackInfo ci) {
+        if (PostProcessShaders.rendering) {
+            ci.cancel();
+            return;
+        }
+
+        if (Modules.get().get(NoRender.class).noDeadEntities() &&
+            entity instanceof LivingEntity &&
+            renderState instanceof LivingEntityRenderState livingEntityRenderState &&
+            livingEntityRenderState.deathTime > 0) {
+            ci.cancel();
+        }
+    }
+
+    @Unique
+    private ESP getESP() {
+        if (esp == null) {
+            esp = Modules.get().get(ESP.class);
+        }
+
+        return esp;
     }
 }

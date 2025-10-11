@@ -99,7 +99,7 @@ public class EntityOwner extends Module {
 
     private String getOwnerName(LazyEntityReference<LivingEntity> owner) {
         // Check if the player is online
-        @Nullable LivingEntity ownerEntity = owner.resolve(mc.world, LivingEntity.class);
+        @Nullable LivingEntity ownerEntity = LazyEntityReference.resolve(owner, mc.world, LivingEntity.class);
         if (ownerEntity instanceof PlayerEntity playerEntity) return playerEntity.getName().getString();
 
         UUID uuid = owner.getUuid();
