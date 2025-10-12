@@ -234,6 +234,13 @@ public class BlockUtils {
      * Needs to be used in {@link TickEvent.Pre}
      */
     public static boolean breakBlock(BlockPos blockPos, boolean swing) {
+        return breakBlock(blockPos, swing ? SwingMode.Normal : SwingMode.SendPacket, BlockDirectionFrom.PlayerFacing);
+    }
+
+    /**
+     * Needs to be used in {@link TickEvent.Pre}
+     */
+    public static boolean breakBlock(BlockPos blockPos, SwingMode swing, BlockDirectionFrom directionMode) {
         if (!canBreak(blockPos, mc.world.getBlockState(blockPos))) return false;
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field, and we don't want it to change when it has been stored in a field somewhere
@@ -246,11 +253,15 @@ public class BlockUtils {
         }
 
         if (mc.interactionManager.isBreakingBlock())
-            mc.interactionManager.updateBlockBreakingProgress(pos, getDirection(blockPos));
-        else mc.interactionManager.attackBlock(pos, getDirection(blockPos));
+            mc.interactionManager.updateBlockBreakingProgress(pos, getDirection(blockPos, directionMode));
+        else mc.interactionManager.attackBlock(pos, getDirection(blockPos, directionMode));
 
-        if (swing) mc.player.swingHand(Hand.MAIN_HAND);
-        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        switch (swing) {
+            case None -> {
+            }
+            case SendPacket -> mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+            case Normal -> mc.player.swingHand(Hand.MAIN_HAND);
+        }
 
         breaking = true;
         breakingThisTick = true;
@@ -336,13 +347,58 @@ public class BlockUtils {
 
     // Finds the best block direction to get when interacting with the block.
     public static Direction getDirection(BlockPos pos) {
-        Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
+        return getDirection(pos, BlockDirectionFrom.PlayerFacing);
+    }
+
+    public static Direction getDirection(BlockPos pos, BlockDirectionFrom mode) {
+        return switch (mode) {
+            case PlayerFacing -> getDirectionFromPlayerFacing(pos);
+            case PlayerPosition -> getDirectionFromPlayerPosition(pos);
+        };
+    }
+
+    private static Direction getDirectionFromPlayerFacing(BlockPos pos) {
+         Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
         if ((double) pos.getY() > eyesPos.y) {
             if (mc.world.getBlockState(pos.add(0, -1, 0)).isReplaceable()) return Direction.DOWN;
             else return mc.player.getHorizontalFacing().getOpposite();
         }
         if (!mc.world.getBlockState(pos.add(0, 1, 0)).isReplaceable()) return mc.player.getHorizontalFacing().getOpposite();
         return Direction.UP;
+    }
+    
+    private static Direction getDirectionFromPlayerPosition(BlockPos pos) {
+        Vec3d eyePos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
+
+        Vec3d blockCenter = new Vec3d(
+                pos.getX() + 0.5,
+                pos.getY() + 0.5,
+                pos.getZ() + 0.5);
+
+        Vec3d direction = blockCenter.subtract(eyePos);
+
+        double absX = Math.abs(direction.x);
+        double absY = Math.abs(direction.y);
+        double absZ = Math.abs(direction.z);
+
+        if (absX >= absY && absX >= absZ) {
+            return direction.x > 0 ? Direction.WEST : Direction.EAST;
+        } else if (absY >= absX && absY >= absZ) {
+            return direction.y > 0 ? Direction.DOWN : Direction.UP;
+        } else {
+            return direction.z > 0 ? Direction.NORTH : Direction.SOUTH;
+        }
+    }
+
+    public enum BlockDirectionFrom {
+        PlayerFacing,
+        PlayerPosition,
+    }
+
+    public enum SwingMode {
+        None,
+        SendPacket,
+        Normal
     }
 
     public enum MobSpawn {
