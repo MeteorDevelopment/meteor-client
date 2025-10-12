@@ -74,6 +74,7 @@ public class PeekScreen extends ShulkerBoxScreen {
             close();
             return true;
         }
+
         return false;
     }
 
