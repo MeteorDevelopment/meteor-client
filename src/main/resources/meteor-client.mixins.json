@@ -37,6 +37,8 @@
     "BoxMixin",
     "BrewingStandScreenMixin",
     "BrightnessGetterMixin",
+    "BundleItemMixin",
+    "BundleTooltipSubmenuHandlerMixin",
     "CameraMixin",
     "CapabilityTrackerMixin",
     "CapeFeatureRendererMixin",

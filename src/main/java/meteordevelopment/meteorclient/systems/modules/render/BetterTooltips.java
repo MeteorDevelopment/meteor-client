@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
 import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
+import meteordevelopment.meteorclient.gui.screens.ContainerInventoryScreen;
 import meteordevelopment.meteorclient.mixin.EntityAccessor;
 import meteordevelopment.meteorclient.mixin.EntityBucketItemAccessor;
 import meteordevelopment.meteorclient.settings.*;
@@ -22,6 +23,8 @@ import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.screen.ingame.BookScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.*;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
@@ -47,6 +50,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 public class BetterTooltips extends Module {
     public static final Color ECHEST_COLOR = new Color(0, 50, 50);
@@ -74,10 +78,18 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    private final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
-        .name("middle-click-open")
-        .description("Opens a GUI window with the inventory of the storage block or book when you middle click the item.")
+    private final Setting<Boolean> openContents = sgGeneral.add(new BoolSetting.Builder()
+        .name("open-contents")
+        .description("Opens a GUI window with the inventory of the storage block or book when you click the item.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Keybind> openContentsKey = sgGeneral.add(new KeybindSetting.Builder()
+        .name("keybind")
+        .description("Key to open contents (containers, books, etc.) when pressed on items.")
+        .defaultValue(Keybind.fromButton(GLFW_MOUSE_BUTTON_MIDDLE))
+        .visible(openContents::get)
         .build()
     );
 
@@ -85,7 +97,7 @@ public class BetterTooltips extends Module {
         .name("pause-in-creative")
         .description("Pauses middle click open while the player is in creative mode.")
         .defaultValue(true)
-        .visible(middleClickOpen::get)
+        .visible(openContents::get)
         .build()
     );
 
@@ -156,6 +168,22 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    private final Setting<Boolean> bundles = sgPreviews.add(new BoolSetting.Builder()
+        .name("bundles")
+        .description("Shows a preview of bundle contents when hovering over it in an inventory.")
+        .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
+        .build()
+    );
+
+    private final Setting<Boolean> foodInfo = sgPreviews.add(new BoolSetting.Builder()
+        .name("food-info")
+        .description("Shows hunger and saturation values for food items.")
+        .defaultValue(true)
+        .onChanged(value -> updateTooltips = true)
+        .build()
+    );
+
     // Extras
 
     public final Setting<Boolean> byteSize = sgOther.add(new BoolSetting.Builder()
@@ -199,7 +227,8 @@ public class BetterTooltips extends Module {
     );
 
     private boolean updateTooltips = false;
-    private static final ItemStack[] ITEMS = new ItemStack[27];
+    private static final ItemStack[] PREVIEW = new ItemStack[27];
+    private static final ItemStack[] PEEK_SCREEN = new ItemStack[27];
 
     public BetterTooltips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
@@ -234,6 +263,13 @@ public class BetterTooltips extends Module {
                         .forEach(effect -> event.appendStart(getStatusText(effect)));
                 }
             }
+        }
+
+        // Food info
+        if (foodInfo.get() && event.itemStack().contains(DataComponentTypes.FOOD)) {
+            FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
+            // Those emojis really look like in-game hunger bar
+            event.appendStart(Text.literal(String.format("🍖 %d (💛 %.1f)", food.nutrition(), food.saturation())).formatted(Formatting.GRAY));
         }
 
         // Item size tooltip
@@ -277,8 +313,8 @@ public class BetterTooltips extends Module {
     private void getTooltipData(TooltipDataEvent event) {
         // Container preview
         if (previewShulkers() && Utils.hasItems(event.itemStack)) {
-            Utils.getItemsInContainerItem(event.itemStack, ITEMS);
-            event.tooltipData = new ContainerTooltipComponent(ITEMS, Utils.getShulkerColor(event.itemStack));
+            Utils.getItemsInContainerItem(event.itemStack, PREVIEW);
+            event.tooltipData = new ContainerTooltipComponent(PREVIEW, Utils.getShulkerColor(event.itemStack));
         }
 
         // EChest preview
@@ -297,7 +333,11 @@ public class BetterTooltips extends Module {
         // Book preview
         else if ((event.itemStack.getItem() == Items.WRITABLE_BOOK || event.itemStack.getItem() == Items.WRITTEN_BOOK) && previewBooks()) {
             Text page = getFirstPage(event.itemStack);
-            if (page != null) event.tooltipData = new BookTooltipComponent(page);
+            if (page != null) {
+                int pageCount = getBookPageCount(event.itemStack);
+                Text pageWithCount = page.copy().append(Text.literal(String.format(" (%d pages)", pageCount)).formatted(Formatting.GRAY));
+                event.tooltipData = new BookTooltipComponent(pageWithCount);
+            }
         }
 
         // Banner preview
@@ -328,6 +368,21 @@ public class BetterTooltips extends Module {
                 event.tooltipData = new EntityTooltipComponent(entity);
             }
         }
+
+        // Bundle preview
+        else if (event.itemStack.getItem() instanceof BundleItem && previewBundles()) {
+            if (event.itemStack.contains(DataComponentTypes.BUNDLE_CONTENTS)) {
+                BundleContentsComponent bundleContents = event.itemStack.get(DataComponentTypes.BUNDLE_CONTENTS);
+                if (bundleContents != null && !bundleContents.isEmpty()) {
+                    ItemStack[] bundleItems = new ItemStack[bundleContents.size()];
+                    int index = 0;
+                    for (ItemStack stack : bundleContents.iterate()) {
+                        bundleItems[index++] = stack;
+                    }
+                    event.tooltipData = new BundleTooltipComponent(bundleItems, bundleContents);
+                }
+            }
+        }
     }
 
     public void applyCompactShulkerTooltip(List<ItemStack> stacks, Consumer<Text> textConsumer) {
@@ -352,17 +407,20 @@ public class BetterTooltips extends Module {
     }
 
     private void appendPreviewTooltipText(ItemStackTooltipEvent event, boolean spacer) {
-        if (!isPressed() && (
+        boolean showPreviewText = !isPressed() && (
             shulkers.get() && Utils.hasItems(event.itemStack())
                 || (event.itemStack().getItem() == Items.ENDER_CHEST && echest.get())
                 || (event.itemStack().getItem() == Items.FILLED_MAP && maps.get())
                 || (event.itemStack().getItem() == Items.WRITABLE_BOOK && books.get())
                 || (event.itemStack().getItem() == Items.WRITTEN_BOOK && books.get())
                 || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get())
+                || (event.itemStack().getItem() instanceof BundleItem && bundles.get())
                 || (event.itemStack().getItem() instanceof BannerItem && banners.get())
                 || (event.itemStack().contains(DataComponentTypes.PROVIDES_BANNER_PATTERNS) && banners.get())
                 || (event.itemStack().getItem() == Items.SHIELD && banners.get())
-        )) {
+        );
+
+        if (showPreviewText) {
             // we don't want to add the spacer if the tooltip is hidden
             if (spacer) event.appendEnd(Text.literal(""));
             event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
@@ -398,6 +456,15 @@ public class BetterTooltips extends Module {
         return null;
     }
 
+    private int getBookPageCount(ItemStack bookItem) {
+        if (bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT) != null) {
+            return bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT).pages().size();
+        } else if (bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null) {
+            return bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).pages().size();
+        }
+        return 0;
+    }
+
     private BannerTooltipComponent createBannerFromBannerPatternItem(ItemStack item) {
         // I can't imagine getting the banner pattern from a banner pattern item would fail without some serious messing around
         BannerPatternsComponent component = new BannerPatternsComponent.Builder().add(mc.player.getRegistryManager().getOrThrow(RegistryKeys.BANNER_PATTERN).getOrThrow(item.get(DataComponentTypes.PROVIDES_BANNER_PATTERNS)).get(0), DyeColor.WHITE).build();
@@ -410,8 +477,31 @@ public class BetterTooltips extends Module {
         return new BannerTooltipComponent(dyeColor2, bannerPatternsComponent);
     }
 
-    public boolean middleClickOpen() {
-        return (isActive() && middleClickOpen.get()) && (!pauseInCreative.get() || !mc.player.isInCreativeMode());
+    public boolean openContents() {
+        return (isActive() && openContents.get()) && (!pauseInCreative.get() || !mc.player.isInCreativeMode());
+    }
+
+    public boolean shouldOpenContents(boolean isKey, int keycode, int modifiers) {
+        return openContents() && openContentsKey.get().matches(isKey, keycode, modifiers);
+    }
+
+    public boolean openContent(ItemStack itemStack) {
+        if (!openContents() || itemStack.isEmpty()) return false;
+
+        if (itemStack.getItem() instanceof BundleItem) {
+            if (mc.currentScreen instanceof HandledScreen) mc.currentScreen.close();
+            mc.setScreen(new ContainerInventoryScreen(itemStack));
+            return true;
+        } else if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
+            Utils.openContainer(itemStack, PEEK_SCREEN, false);
+            return true;
+        } else if (itemStack.getItem() == Items.WRITABLE_BOOK || itemStack.getItem() == Items.WRITTEN_BOOK) {
+            if (mc.currentScreen instanceof HandledScreen) mc.currentScreen.close();
+            mc.setScreen(new BookScreen(BookScreen.Contents.create(itemStack)));
+            return true;
+        }
+
+        return false;
     }
 
     public boolean previewShulkers() {
@@ -440,6 +530,10 @@ public class BetterTooltips extends Module {
 
     private boolean previewEntities() {
         return isPressed() && entitiesInBuckets.get();
+    }
+
+    public boolean previewBundles() {
+        return isPressed() && bundles.get();
     }
 
     private boolean isPressed() {
