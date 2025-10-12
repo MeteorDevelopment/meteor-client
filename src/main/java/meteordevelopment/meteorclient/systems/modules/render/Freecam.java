@@ -621,47 +621,7 @@ public class Freecam extends Module {
     }
 
     static public void withPos(Runnable c) {
-        Freecam f = Modules.get().get(Freecam.class);
-
-        Entity cameraE = MeteorClient.mc.cameraEntity;
-
-        if (!f.shouldChangeCrosshairTarget()) {
-            c.run();
-            return;
-        }
-
-        double x = cameraE.getX();
-        double y = cameraE.getY();
-        double z = cameraE.getZ();
-        double lastX = cameraE.lastX;
-        double lastY = cameraE.lastY;
-        double lastZ = cameraE.lastZ;
-        float yaw = cameraE.getYaw();
-        float pitch = cameraE.getPitch();
-        float lastYaw = cameraE.lastYaw;
-        float lastPitch = cameraE.lastPitch;
-
-        Vec3d lastPos = f.getPos(0);
-
-        ((IVec3d) cameraE.getPos()).meteor$set(f.getX(1), f.getY(1) - cameraE.getEyeHeight(cameraE.getPose()), f.getZ(1));
-        cameraE.lastX = lastPos.x;
-        cameraE.lastY = lastPos.y - cameraE.getEyeHeight(cameraE.getPose());
-        cameraE.lastZ = lastPos.z;
-        cameraE.setYaw(f.yaw);
-        cameraE.setPitch(f.pitch);
-        cameraE.lastYaw = f.lastYaw;
-        cameraE.lastPitch = f.lastPitch;
-
-        c.run();
-
-        ((IVec3d) cameraE.getPos()).meteor$set(x, y, z);
-        cameraE.lastX = lastX;
-        cameraE.lastY = lastY;
-        cameraE.lastZ = lastZ;
-        cameraE.setYaw(yaw);
-        cameraE.setPitch(pitch);
-        cameraE.lastYaw = lastYaw;
-        cameraE.lastPitch = lastPitch;
+        withPos(() -> { c.run(); return null; }); // this is silly
     }
 
 
