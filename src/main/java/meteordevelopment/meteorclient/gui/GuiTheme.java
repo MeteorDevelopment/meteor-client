@@ -88,7 +88,16 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         return button(null, texture);
     }
 
+    protected abstract WConfirmedButton confirmedButton(String text, String confirmText, GuiTexture texture);
+    public WConfirmedButton confirmedButton(String text, String confirmText) {
+        return confirmedButton(text, confirmText, null);
+    }
+    public WConfirmedButton confirmedButton(GuiTexture texture) {
+        return confirmedButton(null, null, texture);
+    }
+
     public abstract WMinus minus();
+    public abstract WConfirmedMinus confirmedMinus();
     public abstract WPlus plus();
 
     public abstract WCheckbox checkbox(boolean checked);

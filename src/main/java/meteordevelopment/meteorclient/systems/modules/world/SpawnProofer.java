@@ -115,7 +115,7 @@ public class SpawnProofer extends Module {
         }
 
         // Find spawn locations
-        for (BlockPos.Mutable blockPos : spawns) spawnPool.free(blockPos);
+        spawnPool.freeAll(spawns);
         spawns.clear();
 
         BlockIterator.register((int) Math.ceil(placeRange.get()), (int) Math.ceil(placeRange.get()), (blockPos, blockState) -> {

@@ -108,6 +108,7 @@ public class ColorSettingScreen extends WindowScreen {
             setFromSetting();
             callAction();
         };
+        resetButton.tooltip = "Reset";
 
         hueQuad.calculateFromSetting(false);
         brightnessQuad.calculateFromColor(setting.get(), false);

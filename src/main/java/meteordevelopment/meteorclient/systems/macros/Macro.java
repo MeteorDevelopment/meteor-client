@@ -60,26 +60,26 @@ public class Macro implements ISerializable<Macro> {
     }
 
     public boolean onAction() {
-            if (dirty) {
-                scripts.clear();
+        if (dirty) {
+            scripts.clear();
 
-                for (String message : messages.get()) {
-                    Script script = MeteorStarscript.compile(message);
-                    if (script != null) scripts.add(script);
-                }
-
-                dirty = false;
+            for (String message : messages.get()) {
+                Script script = MeteorStarscript.compile(message);
+                if (script != null) scripts.add(script);
             }
 
-            for (Script script : scripts) {
-                String message = MeteorStarscript.run(script);
+            dirty = false;
+        }
 
-                if (message != null) {
-                    ChatUtils.sendPlayerMsg(message);
-                }
+        for (Script script : scripts) {
+            String message = MeteorStarscript.run(script);
+
+            if (message != null) {
+                ChatUtils.sendPlayerMsg(message, false);
             }
+        }
 
-            return true;
+        return true;
     }
 
     @Override

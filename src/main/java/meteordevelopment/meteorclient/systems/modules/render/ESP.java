@@ -24,6 +24,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Vector3d;
@@ -40,6 +41,21 @@ public class ESP extends Module {
         .name("mode")
         .description("Rendering mode.")
         .defaultValue(Mode.Shader)
+        .build()
+    );
+
+    public final Setting<Boolean> highlightTarget = sgGeneral.add(new BoolSetting.Builder()
+        .name("highlight-target")
+        .description("highlights the currently targeted entity differently")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Boolean> targetHitbox = sgGeneral.add(new BoolSetting.Builder()
+        .name("target-hitbox")
+        .description("draw the hitbox of the target entity")
+        .defaultValue(true)
+        .visible(highlightTarget::get)
         .build()
     );
 
@@ -170,6 +186,22 @@ public class ESP extends Module {
         .build()
     );
 
+    private final Setting<SettingColor> targetColor = sgColors.add(new ColorSetting.Builder()
+        .name("target-color")
+        .description("The target color.")
+        .defaultValue(new SettingColor(200, 200, 200, 255))
+        .visible(highlightTarget::get)
+        .build()
+    );
+
+    private final Setting<SettingColor> targetHitboxColor = sgColors.add(new ColorSetting.Builder()
+        .name("target-hitbox-color")
+        .description("The target hitbox color.")
+        .defaultValue(new SettingColor(100, 200, 200, 255))
+        .visible(() -> highlightTarget.get() && targetHitbox.get())
+        .build()
+    );
+
     private final Color lineColor = new Color();
     private final Color sideColor = new Color();
     private final Color baseColor = new Color();
@@ -192,10 +224,12 @@ public class ESP extends Module {
 
         count = 0;
 
-        for (Entity entity : mc.world.getEntities()) {
-            if (shouldSkip(entity)) continue;
+        Entity target = null;
+        if (highlightTarget.get() && targetHitbox.get() && mc.crosshairTarget instanceof EntityHitResult hr) target = hr.getEntity();
 
-            if (mode.get() == Mode.Box || mode.get() == Mode.Wireframe) drawBoundingBox(event, entity);
+        for (Entity entity : mc.world.getEntities()) {
+            if (target != entity && shouldSkip(entity)) continue;
+            if (target == entity || mode.get() == Mode.Box || mode.get() == Mode.Wireframe) drawBoundingBox(event, entity);
             count++;
         }
     }
@@ -207,15 +241,23 @@ public class ESP extends Module {
             sideColor.set(color).a((int) (sideColor.a * fillOpacity.get()));
         }
 
-        if (mode.get() == Mode.Box) {
+        if (mode.get() == Mode.Wireframe) {
+            WireframeEntityRenderer.render(event, entity, 1, sideColor, lineColor, shapeMode.get());
+        }
+
+        boolean target = drawAsTarget(entity);
+
+        if (mode.get() == Mode.Box || (targetHitbox.get() && target)) {
             double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
             double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
             double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
 
+            ShapeMode shape = shapeMode.get();
+            if (target && mode.get() != Mode.Box) shape = ShapeMode.Lines;
+            if (target) lineColor.set(targetHitboxColor.get());
+
             Box box = entity.getBoundingBox();
-            event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
-        } else {
-            WireframeEntityRenderer.render(event, entity, 1, sideColor, lineColor, shapeMode.get());
+            event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shape, 0);
         }
     }
 
@@ -297,7 +339,12 @@ public class ESP extends Module {
 
     // Utils
 
+    public boolean drawAsTarget(Entity entity) {
+        return highlightTarget.get() && mc.crosshairTarget instanceof EntityHitResult hr && hr.getEntity() == entity;
+    }
+
     public boolean shouldSkip(Entity entity) {
+        if (drawAsTarget(entity)) return false;
         if (!entities.get().contains(entity.getType())) return true;
         if (entity == mc.player && ignoreSelf.get()) return true;
         if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
@@ -305,12 +352,20 @@ public class ESP extends Module {
     }
 
     public Color getColor(Entity entity) {
-        if (!entities.get().contains(entity.getType())) return null;
+        Color color;
+        double alpha = 1;
 
-        double alpha = getFadeAlpha(entity);
-        if (alpha == 0) return null;
+        if (drawAsTarget(entity)) {
+            color = targetColor.get();
+        } else {
+            if (!entities.get().contains(entity.getType())) return null;
 
-        Color color = getEntityTypeColor(entity);
+            alpha = getFadeAlpha(entity);
+            if (alpha == 0) return null;
+
+            color = getEntityTypeColor(entity);
+        }
+
         return baseColor.set(color.r, color.g, color.b, (int) (color.a * alpha));
     }
 

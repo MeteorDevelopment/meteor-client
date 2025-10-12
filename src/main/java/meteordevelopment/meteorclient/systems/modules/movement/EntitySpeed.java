@@ -13,9 +13,11 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.passive.HappyGhastEntity;
 import net.minecraft.util.math.Vec3d;
 
 public class EntitySpeed extends Module {
@@ -23,7 +25,7 @@ public class EntitySpeed extends Module {
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
-        .description("Horizontal speed in blocks per second.")
+        .description("Movement speed in blocks per second.")
         .defaultValue(10)
         .min(0)
         .sliderMax(50)
@@ -60,5 +62,13 @@ public class EntitySpeed extends Module {
         // Set horizontal velocity
         Vec3d vel = PlayerUtils.getHorizontalVelocity(speed.get());
         ((IVec3d) event.movement).meteor$setXZ(vel.x, vel.z);
+
+        if (entity instanceof HappyGhastEntity) {
+            double velY = 0;
+            if (mc.options.jumpKey.isPressed()) velY += speed.get();
+            if (Input.isPressed(mc.options.sprintKey)) velY -= speed.get();
+
+            ((IVec3d) event.movement).meteor$setY(velY / 20);
+        }
     }
 }
