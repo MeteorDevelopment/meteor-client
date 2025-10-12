@@ -125,7 +125,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @ModifyReturnValue(method = "isItemTooltipSticky", at = @At("RETURN"))
     private boolean isTooltipSticky(boolean original, ItemStack item) {
         if (item.getTooltipData().orElse(null) instanceof TooltipComponent component) {
-            return component.isSticky();
+            return original || component.isSticky();
         }
 
         return original;
