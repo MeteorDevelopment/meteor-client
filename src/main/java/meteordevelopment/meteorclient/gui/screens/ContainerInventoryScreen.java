@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
@@ -14,7 +16,6 @@ import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.BundleItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
@@ -37,6 +38,9 @@ public class ContainerInventoryScreen extends Screen {
     private final PlayerInventory playerInventory;
     private final int containerRows;
     private int x, y;
+
+    private int baseX, baseY;
+    private int playerY;
 
     public ContainerInventoryScreen(ItemStack containerItem) {
         super(containerItem.getName());
@@ -68,9 +72,9 @@ public class ContainerInventoryScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
 
-        int baseX = x + 8;
-        int baseY = y + 18;
-        int playerY = baseY + containerRows * SLOT_SIZE + 20;
+        baseX = x + 8;
+        baseY = y + 18;
+        playerY = baseY + containerRows * SLOT_SIZE + 20;
 
         // drawing the slot textures
         for (int row = 0; row < containerRows + 4; row++) {
@@ -107,43 +111,41 @@ public class ContainerInventoryScreen extends Screen {
 
         // drawing title headers
         context.getMatrices().pushMatrix();
-        context.getMatrices().translate((float)x, (float)y);
+        context.getMatrices().translate((float) x, (float) y);
         if (textRenderer != null) {
-            context.drawText(textRenderer, title != null && !title.getString().isEmpty() ? title : Text.literal("Container"), 8, 6, -12566464, false);
+            context.drawText(textRenderer, title, 8, 6, -12566464, false);
             context.drawText(textRenderer, playerInventory.getDisplayName(), 8, 18 + containerRows * SLOT_SIZE + 10, -12566464, false);
         }
         context.getMatrices().popMatrix();
 
-        if (mouseX >= baseX && mouseX < baseX + 9 * SLOT_SIZE) {
-            int col = (mouseX - baseX) / SLOT_SIZE;
-
-            // tooltips for the container items
-            if (mouseY >= baseY && mouseY < baseY + containerRows * SLOT_SIZE) {
-                int index = ((mouseY - baseY) / SLOT_SIZE) * 9 + col;
-                if (index < containerItems.size()) {
-                    ItemStack item = containerItems.get(index);
-                    if (!item.isEmpty()) {
-                        context.drawTooltip(textRenderer, getTooltipFromItem(mc, item), item.getTooltipData(), mouseX, mouseY);
-                    }
-                }
-            }
-
-            // tooltips for your inventory items
-            else if (mouseY >= playerY && mouseY < playerY + 4 * SLOT_SIZE) {
-                int row = (mouseY - playerY) / SLOT_SIZE;
-                int slotIndex = row < 3 ? 9 + row * 9 + col : col;
-                if (slotIndex < playerInventory.size()) {
-                    ItemStack item = playerInventory.getStack(slotIndex);
-                    if (!item.isEmpty()) {
-                        context.drawTooltip(textRenderer, getTooltipFromItem(mc, item), item.getTooltipData(), mouseX, mouseY);
-                    }
-                }
-            }
+        // drawing the tooltip
+        ItemStack item = getSelectedItem(mouseX, mouseY);
+        if (!item.isEmpty()) {
+            context.drawTooltip(textRenderer, getTooltipFromItem(mc, item), item.getTooltipData(), mouseX, mouseY);
         }
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
+
+        ItemStack stack = getSelectedItem((int) mouseX, (int) mouseY);
+        if (tooltips.shouldOpenContents(false, button, 0)) {
+            return tooltips.openContent(stack);
+        }
+
+        return false;
+    }
+
+    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
+
+        ItemStack stack = getSelectedItem((int) mc.mouse.getScaledX(mc.getWindow()), (int) mc.mouse.getScaledY(mc.getWindow()));
+        if (tooltips.shouldOpenContents(true, keyCode, modifiers)) {
+            return tooltips.openContent(stack);
+        }
+
         if (keyCode == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(keyCode, scanCode)) {
             close();
             return true;
@@ -152,13 +154,23 @@ public class ContainerInventoryScreen extends Screen {
         return false;
     }
 
-    @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            close();
-            return true;
+    private ItemStack getSelectedItem(int mouseX, int mouseY) {
+        if (mouseX < baseX || mouseX > baseX + 9 * SLOT_SIZE) return ItemStack.EMPTY;
+
+        int col = (mouseX - baseX) / SLOT_SIZE;
+        if (col > 8) return ItemStack.EMPTY;
+
+        if (mouseY >= baseY && mouseY < baseY + containerRows * SLOT_SIZE) {
+            int index = ((mouseY - baseY) / SLOT_SIZE) * 9 + col;
+            return (index < containerItems.size() ? containerItems.get(index) : ItemStack.EMPTY);
         }
 
-        return false;
+        if (mouseY >= playerY && mouseY < playerY + 4 * SLOT_SIZE) {
+            int row = (mouseY - playerY) / SLOT_SIZE;
+            int slotIndex = row < 3 ? 9 + row * 9 + col : col;
+            return playerInventory.getStack(slotIndex);
+        }
+
+        return ItemStack.EMPTY;
     }
 }

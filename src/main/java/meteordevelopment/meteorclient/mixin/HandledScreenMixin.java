@@ -24,7 +24,6 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -57,9 +56,6 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     @Shadow
     public abstract void close();
-
-    @Unique
-    private static final ItemStack[] ITEMS = new ItemStack[27];
 
     public HandledScreenMixin(Text title) {
         super(title);
@@ -100,8 +96,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(false, button, 0) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
-            if (tooltips.openContent(focusedSlot.getStack(), ITEMS)) {
+        if (tooltips.shouldOpenContents(false, button, 0) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
+            if (tooltips.openContent(focusedSlot.getStack())) {
                 cir.setReturnValue(true);
             }
         }
@@ -112,8 +108,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(true, keyCode, modifiers) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
-            if (tooltips.openContent(focusedSlot.getStack(), ITEMS)) {
+        if (tooltips.shouldOpenContents(true, keyCode, modifiers) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
+            if (tooltips.openContent(focusedSlot.getStack())) {
                 cir.setReturnValue(true);
             }
         }

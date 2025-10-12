@@ -144,6 +144,6 @@ public class BundleTooltipComponent implements TooltipComponent, MeteorTooltipDa
     }
 
     private Text getProgressBarLabel() {
-        return bundleContents.getOccupancy().compareTo(Fraction.ONE) >= 0 ? BUNDLE_FULL : null;
+        return bundleContents.getOccupancy().compareTo(Fraction.ONE) >= 0 ? BUNDLE_FULL : Text.literal(String.format("%.2f%%", bundleContents.getOccupancy().floatValue() * 100));
     }
 }

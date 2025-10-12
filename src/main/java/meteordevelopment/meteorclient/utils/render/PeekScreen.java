@@ -23,12 +23,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PeekScreen extends ShulkerBoxScreen {
     private final Identifier TEXTURE = Identifier.of("textures/gui/container/shulker_box.png");
-    private final ItemStack[] contents;
     private final ItemStack storageBlock;
 
     public PeekScreen(ItemStack storageBlock, ItemStack[] contents) {
         super(new ShulkerBoxScreenHandler(0, mc.player.getInventory(), new SimpleInventory(contents)), mc.player.getInventory(), storageBlock.getName());
-        this.contents = contents;
         this.storageBlock = storageBlock;
     }
 
@@ -36,9 +34,9 @@ public class PeekScreen extends ShulkerBoxScreen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(false, button, 0) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+        if (tooltips.shouldOpenContents(false, button, 0) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             ItemStack itemStack = focusedSlot.getStack();
-            return tooltips.openContent(itemStack, contents);
+            return tooltips.openContent(itemStack);
         }
 
         return false;
@@ -53,24 +51,14 @@ public class PeekScreen extends ShulkerBoxScreen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.middleClickOpen() && tooltips.middleClickKey().matches(true, keyCode, modifiers) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+        if (tooltips.shouldOpenContents(true, keyCode, modifiers) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             ItemStack itemStack = focusedSlot.getStack();
-            if (tooltips.openContent(itemStack, contents)) {
+            if (tooltips.openContent(itemStack)) {
                 return true;
             }
         }
 
         if (keyCode == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(keyCode, scanCode)) {
-            close();
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             close();
             return true;
         }

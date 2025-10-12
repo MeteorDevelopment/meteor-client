@@ -78,18 +78,18 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    private final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
-        .name("middle-click-open")
-        .description("Opens a GUI window with the inventory of the storage block or book when you middle click the item.")
+    private final Setting<Boolean> openContents = sgGeneral.add(new BoolSetting.Builder()
+        .name("open-contents")
+        .description("Opens a GUI window with the inventory of the storage block or book when you click the item.")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Keybind> middleClickKey = sgGeneral.add(new KeybindSetting.Builder()
-        .name("middle-click-key")
+    private final Setting<Keybind> openContentsKey = sgGeneral.add(new KeybindSetting.Builder()
+        .name("keybind")
         .description("Key to open contents (containers, books, etc.) when pressed on items.")
         .defaultValue(Keybind.fromButton(GLFW_MOUSE_BUTTON_MIDDLE))
-        .visible(middleClickOpen::get)
+        .visible(openContents::get)
         .build()
     );
 
@@ -97,7 +97,7 @@ public class BetterTooltips extends Module {
         .name("pause-in-creative")
         .description("Pauses middle click open while the player is in creative mode.")
         .defaultValue(true)
-        .visible(middleClickOpen::get)
+        .visible(openContents::get)
         .build()
     );
 
@@ -227,7 +227,8 @@ public class BetterTooltips extends Module {
     );
 
     private boolean updateTooltips = false;
-    private static final ItemStack[] ITEMS = new ItemStack[27];
+    private static final ItemStack[] PREVIEW = new ItemStack[27];
+    private static final ItemStack[] PEEK_SCREEN = new ItemStack[27];
 
     public BetterTooltips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
@@ -312,8 +313,8 @@ public class BetterTooltips extends Module {
     private void getTooltipData(TooltipDataEvent event) {
         // Container preview
         if (previewShulkers() && Utils.hasItems(event.itemStack)) {
-            Utils.getItemsInContainerItem(event.itemStack, ITEMS);
-            event.tooltipData = new ContainerTooltipComponent(ITEMS, Utils.getShulkerColor(event.itemStack));
+            Utils.getItemsInContainerItem(event.itemStack, PREVIEW);
+            event.tooltipData = new ContainerTooltipComponent(PREVIEW, Utils.getShulkerColor(event.itemStack));
         }
 
         // EChest preview
@@ -477,23 +478,23 @@ public class BetterTooltips extends Module {
         return new BannerTooltipComponent(dyeColor2, bannerPatternsComponent);
     }
 
-    public boolean middleClickOpen() {
-        return (isActive() && middleClickOpen.get()) && (!pauseInCreative.get() || !mc.player.isInCreativeMode());
+    public boolean openContents() {
+        return (isActive() && openContents.get()) && (!pauseInCreative.get() || !mc.player.isInCreativeMode());
     }
 
-    public Keybind middleClickKey() {
-        return middleClickKey.get();
+    public boolean shouldOpenContents(boolean isKey, int keycode, int modifiers) {
+        return openContents() && openContentsKey.get().matches(isKey, keycode, modifiers);
     }
 
-    public boolean openContent(ItemStack itemStack, ItemStack[] contents) {
-        if (!middleClickOpen() || itemStack.isEmpty()) return false;
+    public boolean openContent(ItemStack itemStack) {
+        if (!openContents() || itemStack.isEmpty()) return false;
 
         if (itemStack.getItem() instanceof BundleItem) {
             if (mc.currentScreen instanceof HandledScreen) mc.currentScreen.close();
             mc.setScreen(new ContainerInventoryScreen(itemStack));
             return true;
         } else if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
-            Utils.openContainer(itemStack, contents, false);
+            Utils.openContainer(itemStack, PEEK_SCREEN, false);
             return true;
         } else if (itemStack.getItem() == Items.WRITABLE_BOOK || itemStack.getItem() == Items.WRITTEN_BOOK) {
             if (mc.currentScreen instanceof HandledScreen) mc.currentScreen.close();
