@@ -36,14 +36,11 @@ import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.concurrent.Callable;
 
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -70,6 +67,13 @@ public class Freecam extends Module {
     private final Setting<Boolean> staySneaking = sgGeneral.add(new BoolSetting.Builder()
         .name("stay-sneaking")
         .description("If you are sneaking when you enter freecam, whether your player should remain sneaking.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> ignoreShift = sgControl.add(new BoolSetting.Builder()
+        .name("ignore-shift-in-GUI")
+        .description("Ignore left shift in GUIs. (only significant if GUI-move is on)")
         .defaultValue(true)
         .build()
     );
@@ -368,6 +372,9 @@ public class Freecam extends Module {
         if (checkGuiMove()) return;
         if (override) return;
 
+        // ignore shift specifically and not sneak, since that is hard-coded
+        if (ignoreShift.get() && mc.currentScreen != null && event.key == GLFW.GLFW_KEY_LEFT_SHIFT) return;
+
         boolean cancel = true;
 
         if (mc.options.forwardKey.matchesKey(event.key, 0)) {
@@ -623,7 +630,7 @@ public class Freecam extends Module {
     static public void withPos(Runnable c) {
         withPos(() -> { c.run(); return null; }); // this is silly
     }
-    
+
     public double getYaw(float tickDelta) {
         if (override || !mc.isWindowFocused()) return yaw;
         return MathHelper.lerp(tickDelta, lastYaw, yaw);
@@ -639,5 +646,11 @@ public class Freecam extends Module {
 
     public boolean shouldChangeCrosshairTarget() {
         return isActive() && !override && !preserveTarget.get();
+    }
+
+    enum GUIMoveMode {
+        Completely,
+        Shift,
+        None
     }
 }
