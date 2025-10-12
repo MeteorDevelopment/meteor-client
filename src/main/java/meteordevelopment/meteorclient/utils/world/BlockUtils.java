@@ -38,6 +38,8 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
+import java.util.function.Supplier;
+
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @SuppressWarnings("ConstantConditions")
@@ -234,6 +236,13 @@ public class BlockUtils {
      * Needs to be used in {@link TickEvent.Pre}
      */
     public static boolean breakBlock(BlockPos blockPos, boolean swing) {
+        return breakBlock(blockPos, swing ? SwingMode.Normal : SwingMode.SendPacket, () -> getDirection(blockPos));
+    }
+
+    /**
+     * Needs to be used in {@link TickEvent.Pre}
+     */
+    public static boolean breakBlock(BlockPos blockPos, SwingMode swing, Supplier<Direction> getDirection) {
         if (!canBreak(blockPos, mc.world.getBlockState(blockPos))) return false;
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field, and we don't want it to change when it has been stored in a field somewhere
@@ -245,17 +254,27 @@ public class BlockUtils {
             return true;
         }
 
+        Direction direction = getDirection.get();
         if (mc.interactionManager.isBreakingBlock())
-            mc.interactionManager.updateBlockBreakingProgress(pos, getDirection(blockPos));
-        else mc.interactionManager.attackBlock(pos, getDirection(blockPos));
+            mc.interactionManager.updateBlockBreakingProgress(pos, direction);
+        else mc.interactionManager.attackBlock(pos, direction);
 
-        if (swing) mc.player.swingHand(Hand.MAIN_HAND);
-        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        switch (swing) {
+            case None -> {}
+            case SendPacket -> mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+            case Normal -> mc.player.swingHand(Hand.MAIN_HAND);
+        }
 
         breaking = true;
         breakingThisTick = true;
 
         return true;
+    }
+
+    public enum SwingMode {
+        None,
+        SendPacket,
+        Normal
     }
 
     public static boolean canBreak(BlockPos blockPos, BlockState state) {
