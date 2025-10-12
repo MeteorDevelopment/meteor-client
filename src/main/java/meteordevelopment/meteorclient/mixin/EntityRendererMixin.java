@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.systems.modules.render.Nametags;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
@@ -38,7 +37,6 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 
     @Inject(method = "getDisplayName", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(T entity, CallbackInfoReturnable<Text> cir) {
-        if (PostProcessShaders.rendering) cir.setReturnValue(null);
         if (Modules.get().get(NoRender.class).noNametags()) cir.setReturnValue(null);
         if (!(entity instanceof PlayerEntity player)) return;
         if (Modules.get().get(Nametags.class).playerNametags() && !(EntityUtils.getGameMode(player) == null && Modules.get().get(Nametags.class).excludeBots()))
@@ -78,11 +76,6 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 
     @Inject(method = "updateShadow(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/entity/state/EntityRenderState;)V", at = @At("HEAD"), cancellable = true)
     private void updateShadow(Entity entity, EntityRenderState renderState, CallbackInfo ci) {
-        if (PostProcessShaders.rendering) {
-            ci.cancel();
-            return;
-        }
-
         if (Modules.get().get(NoRender.class).noDeadEntities() &&
             entity instanceof LivingEntity &&
             renderState instanceof LivingEntityRenderState livingEntityRenderState &&

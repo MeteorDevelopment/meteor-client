@@ -38,17 +38,17 @@ public abstract class SimpleBlockRenderer {
 
     private static final OrderedRenderCommandQueueImpl renderCommandQueue = new OrderedRenderCommandQueueImpl();
 
+    private static VertexConsumerProvider provider;
+
     private static final RenderDispatcher renderDispatcher = new RenderDispatcher(
         renderCommandQueue,
         mc.getBlockRenderManager(),
-        new WrapperImmediateVertexConsumerProvider(),
+        new WrapperImmediateVertexConsumerProvider(() -> provider),
         mc.getAtlasManager(),
         NoopOutlineVertexConsumerProvider.INSTANCE,
         NoopImmediateVertexConsumerProvider.INSTANCE,
         mc.textRenderer
     );
-
-    private static VertexConsumerProvider provider;
 
     private SimpleBlockRenderer() {}
 
@@ -111,25 +111,6 @@ public abstract class SimpleBlockRenderer {
 
                 consumer.vertex(offsetX + x, offsetY + y, offsetZ + z);
             }
-        }
-    }
-
-    private static class WrapperImmediateVertexConsumerProvider extends VertexConsumerProvider.Immediate {
-        private WrapperImmediateVertexConsumerProvider() {
-            super(null, null);
-        }
-
-        @Override
-        public VertexConsumer getBuffer(RenderLayer layer) {
-            return provider.getBuffer(layer);
-        }
-
-        @Override
-        public void draw() {
-        }
-
-        @Override
-        public void draw(RenderLayer layer) {
         }
     }
 }

@@ -9,20 +9,33 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
 import meteordevelopment.meteorclient.mixininterface.IWorldRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BlockSelection;
+import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.utils.OutlineRenderCommandQueue;
+import meteordevelopment.meteorclient.utils.render.NoopImmediateVertexConsumerProvider;
+import meteordevelopment.meteorclient.utils.render.NoopOutlineVertexConsumerProvider;
+import meteordevelopment.meteorclient.utils.render.WrapperImmediateVertexConsumerProvider;
+import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.meteorclient.utils.render.postprocess.EntityShader;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.command.RenderDispatcher;
+import net.minecraft.client.render.entity.EntityRenderManager;
 import net.minecraft.client.render.state.OutlineRenderState;
 import net.minecraft.client.render.state.WeatherRenderState;
 import net.minecraft.client.render.state.WorldBorderRenderState;
+import net.minecraft.client.render.state.WorldRenderState;
 import net.minecraft.client.util.Handle;
 import net.minecraft.client.util.ObjectAllocator;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
@@ -35,6 +48,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.function.Function;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin implements IWorldRenderer {
@@ -87,31 +104,68 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
         PostProcessShaders.beginRender();
     }
 
-    /*
-    todo Entity rendering is batched in pushEntityRenders before they are all rendered at once by calling
-      net.minecraft.client.render.entity.command.EntityRenderDispatcher.render
-    Our renders need to be rewritten
+    @Unique
+    private final OutlineRenderCommandQueue outlineRenderCommandQueue = new OutlineRenderCommandQueue();
 
-    @Inject(method = "renderEntity", at = @At("HEAD"))
-    private void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, CallbackInfo info) {
-        draw(entity, cameraX, cameraY, cameraZ, tickDelta, vertexConsumers, matrices, PostProcessShaders.CHAMS, Color.WHITE);
-        draw(entity, cameraX, cameraY, cameraZ, tickDelta, vertexConsumers, matrices, PostProcessShaders.ENTITY_OUTLINE, Modules.get().get(ESP.class).getColor(entity));
+    @Unique
+    private VertexConsumerProvider provider;
+
+    @Unique
+    private RenderDispatcher renderDispatcher;
+
+    @Inject(method = "pushEntityRenders", at = @At("TAIL"))
+    private void onPushEntityRenders(MatrixStack matrices, WorldRenderState worldState, OrderedRenderCommandQueue queue, CallbackInfo info) {
+        if (renderDispatcher == null) {
+            renderDispatcher = new RenderDispatcher(
+                outlineRenderCommandQueue,
+                mc.getBlockRenderManager(),
+                new WrapperImmediateVertexConsumerProvider(() -> provider),
+                mc.getAtlasManager(),
+                NoopOutlineVertexConsumerProvider.INSTANCE,
+                NoopImmediateVertexConsumerProvider.INSTANCE,
+                mc.textRenderer
+            );
+        }
+
+        draw(worldState, matrices, PostProcessShaders.CHAMS, entity -> Color.WHITE);
+        draw(worldState, matrices, PostProcessShaders.ENTITY_OUTLINE, entity -> Modules.get().get(ESP.class).getColor(entity));
     }
 
     @Unique
-    private void draw(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, VertexConsumerProvider vertexConsumers, MatrixStack matrices, EntityShader shader, Color color) {
-        if (shader.shouldDraw(entity) && !PostProcessShaders.isCustom(vertexConsumers) && color != null) {
-            meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
-            PostProcessShaders.rendering = true;
+    private void draw(WorldRenderState worldState, MatrixStack matrices, EntityShader shader, Function<Entity, Color> colorGetter) {
+        var camera = worldState.cameraRenderState.pos;
+        var empty = true;
 
-            shader.vertexConsumerProvider.setColor(color.getPacked());
-            renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, shader.vertexConsumerProvider);
+        for (var state : worldState.entityRenderStates) {
+            if (!shader.shouldDraw(((IEntityRenderState) state).meteor$getEntity())) continue;
 
-            PostProcessShaders.rendering = false;
-            meteor$popEntityOutlineFramebuffer();
+            var color = colorGetter.apply(((IEntityRenderState) state).meteor$getEntity());
+            if (color == null) continue;
+            outlineRenderCommandQueue.setColor(color);
+
+            var renderer = entityRenderManager.getRenderer(state);
+            var offset = renderer.getPositionOffset(state);
+
+            matrices.push();
+            matrices.translate(state.x - camera.x + offset.x, state.y - camera.y + offset.y, state.z - camera.z + offset.z);
+            renderer.render(state, matrices, outlineRenderCommandQueue, worldState.cameraRenderState);
+            matrices.pop();
+
+            empty = false;
         }
+
+        if (empty)
+            return;
+
+        meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
+        provider = shader.vertexConsumerProvider;
+
+        renderDispatcher.render();
+        outlineRenderCommandQueue.onNextFrame();
+
+        provider = null;
+        meteor$popEntityOutlineFramebuffer();
     }
-     */
 
     @Inject(method = "method_62214", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
     private void onRender(CallbackInfo ci) {
@@ -132,6 +186,9 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     @Final
     private DefaultFramebufferSet framebufferSet;
 
+    @Shadow
+    @Final
+    private EntityRenderManager entityRenderManager;
     @Unique
     private Stack<Framebuffer> framebufferStack;
 
