@@ -10,8 +10,10 @@ import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ShulkerBoxScreenHandler;
@@ -31,10 +33,10 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.shouldOpenContents(false, button, 0) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+        if (tooltips.shouldOpenContents(click) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             ItemStack itemStack = focusedSlot.getStack();
             return tooltips.openContent(itemStack);
         }
@@ -43,22 +45,22 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(Click click) {
         return false;
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.shouldOpenContents(true, keyCode, modifiers) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+        if (tooltips.shouldOpenContents(input) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             ItemStack itemStack = focusedSlot.getStack();
             if (tooltips.openContent(itemStack)) {
                 return true;
             }
         }
 
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(keyCode, scanCode)) {
+        if (input.key() == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(input)) {
             close();
             return true;
         }

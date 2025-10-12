@@ -10,12 +10,14 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.render.ItemHighlight;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
@@ -29,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 @Mixin(HandledScreen.class)
@@ -84,19 +87,19 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     // Inventory Tweaks
     @Inject(method = "mouseDragged", at = @At("TAIL"))
-    private void onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> info) {
-        if (button != GLFW_MOUSE_BUTTON_LEFT || doubleClicking || !Modules.get().get(InventoryTweaks.class).mouseDragItemMove()) return;
+    private void onMouseDragged(Click click, double offsetX, double offsetY, CallbackInfoReturnable<Boolean> cir) {
+        if (click.button() != GLFW_MOUSE_BUTTON_LEFT || doubleClicking || !Modules.get().get(InventoryTweaks.class).mouseDragItemMove()) return;
 
-        Slot slot = getSlotAt(mouseX, mouseY);
-        if (slot != null && slot.hasStack() && hasShiftDown()) onMouseClick(slot, slot.id, button, SlotActionType.QUICK_MOVE);
+        Slot slot = getSlotAt(click.x(), click.y());
+        if (slot != null && slot.hasStack() && mc.isShiftPressed()) onMouseClick(slot, slot.id, click.button(), SlotActionType.QUICK_MOVE);
     }
 
     // Middle click open
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
+    private void mouseClicked(Click click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.shouldOpenContents(false, button, 0) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
+        if (tooltips.shouldOpenContents(click) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
             if (tooltips.openContent(focusedSlot.getStack())) {
                 cir.setReturnValue(true);
             }
@@ -105,10 +108,10 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     // Keyboard input for middle click open
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void keyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+    private void keyPressed(KeyInput input, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.shouldOpenContents(true, keyCode, modifiers) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
+        if (tooltips.shouldOpenContents(input) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
             if (tooltips.openContent(focusedSlot.getStack())) {
                 cir.setReturnValue(true);
             }

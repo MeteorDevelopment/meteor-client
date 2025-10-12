@@ -9,8 +9,10 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.entity.player.PlayerInventory;
@@ -126,11 +128,11 @@ public class ContainerInventoryScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        ItemStack stack = getSelectedItem((int) mouseX, (int) mouseY);
-        if (tooltips.shouldOpenContents(false, button, 0)) {
+        ItemStack stack = getSelectedItem((int) click.x(), (int) click.y());
+        if (tooltips.shouldOpenContents(click)) {
             return tooltips.openContent(stack);
         }
 
@@ -138,15 +140,15 @@ public class ContainerInventoryScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         ItemStack stack = getSelectedItem((int) mc.mouse.getScaledX(mc.getWindow()), (int) mc.mouse.getScaledY(mc.getWindow()));
-        if (tooltips.shouldOpenContents(true, keyCode, modifiers)) {
+        if (tooltips.shouldOpenContents(input)) {
             return tooltips.openContent(stack);
         }
 
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(keyCode, scanCode)) {
+        if (input.key() == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(input)) {
             close();
             return true;
         }
