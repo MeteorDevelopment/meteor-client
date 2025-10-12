@@ -623,8 +623,7 @@ public class Freecam extends Module {
     static public void withPos(Runnable c) {
         withPos(() -> { c.run(); return null; }); // this is silly
     }
-
-
+    
     public double getYaw(float tickDelta) {
         if (override || !mc.isWindowFocused()) return yaw;
         return MathHelper.lerp(tickDelta, lastYaw, yaw);
