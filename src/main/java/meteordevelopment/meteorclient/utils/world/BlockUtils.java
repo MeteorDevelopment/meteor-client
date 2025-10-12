@@ -358,7 +358,7 @@ public class BlockUtils {
     }
 
     private static Direction getDirectionFromPlayerFacing(BlockPos pos) {
-         Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
+        Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
         if ((double) pos.getY() > eyesPos.y) {
             if (mc.world.getBlockState(pos.add(0, -1, 0)).isReplaceable()) return Direction.DOWN;
             else return mc.player.getHorizontalFacing().getOpposite();
