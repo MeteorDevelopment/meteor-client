@@ -24,7 +24,7 @@ public class CustomOutlineVertexConsumerProvider implements VertexConsumerProvid
             return new CustomVertexConsumer(this.immediate.getBuffer(optional.get()));
         }
 
-        throw new IllegalStateException("Can't render an outline for this rendertype!");
+        return NoopVertexConsumer.INSTANCE;
     }
 
     public void draw() {
