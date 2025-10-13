@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.misc.texture;
 
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.texture.NativeImage;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class ImageData {
     public int canvasHeight;
     public int framesPerColumn;
     int totalFrames;
-    public List<Integer> delays;
+    public IntList delays;
 
     public ImageData(String name) {
         this.name = name;

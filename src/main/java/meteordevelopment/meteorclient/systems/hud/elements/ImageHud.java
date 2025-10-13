@@ -19,6 +19,8 @@ import meteordevelopment.meteorclient.utils.misc.texture.ImageDataFactory;
 import meteordevelopment.meteorclient.utils.misc.texture.TextureUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
+import net.minecraft.util.thread.NameableExecutor;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -26,9 +28,11 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static meteordevelopment.meteorclient.MeteorClient.*;
 import static meteordevelopment.meteorclient.utils.misc.texture.TextureUtils.getCurrentAnimationFrame;
@@ -42,10 +46,14 @@ public class ImageHud extends HudElement {
     private static final Identifier DEFAULT_TEXTURE = Identifier.of(MOD_ID,"textures/icons/gui/default_image.png");
     private static final Identifier LOADING_TEXTURE = Identifier.of(MOD_ID,"textures/icons/gui/loading_image.png");
     private static final Color TRANSPARENT = new Color(255, 255, 255, 255);
+    private static final int DEBOUNCE_TIME = 2; // 2 Seconds before rerunning.
     private Identifier texture;
-    private final ExecutorService worker = Executors.newSingleThreadExecutor();
+    private final NameableExecutor worker = Util.getIoWorkerExecutor();
     private ImageData cachedImageData;
     private CompletableFuture<Void> currentImageDataFuture;
+    private CompletableFuture<Void> debounceTask;
+    private long lastModified = System.currentTimeMillis();
+    private String lastPath = "";
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -58,7 +66,18 @@ public class ImageHud extends HudElement {
         .name("Path")
         .description("The full path / link of the image")
         .wide()
-        .onChanged(this::composeImage)
+        .onChanged(path -> {
+           lastModified = System.currentTimeMillis();
+           if (debounceTask != null && !debounceTask.isDone()) {
+               debounceTask.cancel(false);
+           }
+           debounceTask = CompletableFuture.runAsync(() -> {
+               if (System.currentTimeMillis() - lastModified > DEBOUNCE_TIME && !lastPath.equals(path)) {
+                   lastPath = path;
+                   composeImage(path);
+               }
+           }, CompletableFuture.delayedExecutor(DEBOUNCE_TIME, TimeUnit.SECONDS, mc));
+        })
         .build()
     );
 
@@ -82,10 +101,6 @@ public class ImageHud extends HudElement {
      * @param path the URI in String format.
      */
     private void composeImage(String path) {
-        // Cancel the future immediately to recreate another texture for the user.
-        if (currentImageDataFuture != null && !currentImageDataFuture.isDone()) {
-            currentImageDataFuture.cancel(true);
-        }
         // Parse URI
         String parsed = path.replace("\"", "").replace("\\", "/");
         String name = parsed.substring(parsed.lastIndexOf("/") + 1);
@@ -93,7 +108,7 @@ public class ImageHud extends HudElement {
 
         currentImageDataFuture = CompletableFuture.supplyAsync(() -> {
             try {
-                InputStream imageFile = path.startsWith("http") ? new URL(path).openStream() : new FileInputStream(parsed);
+                InputStream imageFile = path.toLowerCase().startsWith("http") ? new URL(path).openStream() : new FileInputStream(parsed);
                 ImageInputStream stream = ImageIO.createImageInputStream(imageFile);
                 ImageReader reader = ImageIO.getImageReaders(stream).next();
                 reader.setInput(stream);
@@ -103,11 +118,13 @@ public class ImageHud extends HudElement {
                     return ImageDataFactory.fromStatic(name, reader);
                 }
             } catch (Exception e) {
-                LOG.debug("Failed to load image", e);
-                texture = null;
-                return null;
+                throw new RuntimeException(e);
             }
-        }, worker).thenAcceptAsync(data -> {
+        }, worker).exceptionallyAsync( e -> {
+            LOG.debug("Failed to load image", e);
+            texture = null;
+            return null;
+        }, mc).thenAcceptAsync(data -> {
             if (data != null) {
                 if (texture != null) mc.getTextureManager().destroyTexture(texture);
                 texture = registerTexture(data);

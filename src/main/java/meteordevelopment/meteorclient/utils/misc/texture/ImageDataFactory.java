@@ -5,6 +5,9 @@
 
 package meteordevelopment.meteorclient.utils.misc.texture;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import java.awt.*;
@@ -13,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
+import static meteordevelopment.meteorclient.MeteorClient.LOG;
 import static meteordevelopment.meteorclient.systems.hud.elements.ImageHud.MAX_TEX_SIZE;
 import static meteordevelopment.meteorclient.utils.misc.texture.Offset.getFrameOffset;
 
@@ -31,8 +35,9 @@ public class ImageDataFactory {
         imageData.framesPerColumn = MAX_TEX_SIZE / imageData.height;
         imageData.totalFrames = reader.getNumImages(true);
         imageData.canvasWidth = imageData.width * imageData.getColumns();
-        imageData.canvasHeight = Math.min(imageData.height * imageData.framesPerColumn, MAX_TEX_SIZE );
-        imageData.delays = new ArrayList<>();
+        imageData.canvasHeight = Math.min((imageData.height * imageData.totalFrames), MAX_TEX_SIZE);
+        LOG.debug("Canvas height {} {} {} {}", imageData.canvasHeight, imageData.height, imageData.framesPerColumn, MAX_TEX_SIZE);
+        imageData.delays = new IntArrayList();
         BufferedImage image = composeGIF(reader,imageData);
         imageData.texture = TextureUtils.bufferedToNative(image);
         return imageData;
@@ -49,7 +54,7 @@ public class ImageDataFactory {
         imageData.totalFrames = 1;
         imageData.canvasWidth = imageData.width;
         imageData.canvasHeight = imageData.height;
-        imageData.delays = new ArrayList<>(0);
+        imageData.delays = new IntArrayList();
         imageData.texture = TextureUtils.bufferedToNative(reader.read(0));
         return imageData;
     }
