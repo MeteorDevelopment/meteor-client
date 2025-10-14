@@ -340,11 +340,10 @@ public class AnchorAura extends Module {
 
             FindItemResult anchor = InvUtils.findInHotbar(Items.RESPAWN_ANCHOR);
             FindItemResult glowStone = InvUtils.findInHotbar(Items.GLOWSTONE);
-            if (!anchor.found() || !glowStone.found()) return;
 
             if (bestBreakDamage > 0) {
-                doBreak(anchor, glowStone);
-            } else if (bestPlaceDamage > 0 && place.get()) {
+                doBreak(glowStone);
+            } else if (bestPlaceDamage > 0 && place.get() && anchor.found() && glowStone.found()) {
                 doPlace(anchor);
             }
         });
@@ -362,18 +361,18 @@ public class AnchorAura extends Module {
         placeDelayLeft = 0;
     }
 
-    private void doBreak(FindItemResult anchor, FindItemResult glowStone) {
+    private void doBreak(FindItemResult glowStone) {
         // Set render info
         renderBlockPos = bestBreakPos;
 
         if (rotate.get()) {
-            Rotations.rotate(Rotations.getYaw(bestBreakPos), Rotations.getPitch(bestBreakPos), 40, () -> doInteract(anchor, glowStone));
+            Rotations.rotate(Rotations.getYaw(bestBreakPos), Rotations.getPitch(bestBreakPos), 40, () -> doInteract(glowStone));
         } else {
-            doInteract(anchor, glowStone);
+            doInteract(glowStone);
         }
     }
 
-    private void doInteract(FindItemResult anchor, FindItemResult glowStone) {
+    private void doInteract(FindItemResult glowStone) {
         BlockState blockState = mc.world.getBlockState(bestBreakPos);
         if (blockState.getBlock() != Blocks.RESPAWN_ANCHOR) return;
 
@@ -382,6 +381,8 @@ public class AnchorAura extends Module {
 
         // Charge the anchor
         if (charges == 0 && chargeDelayLeft++ >= chargeDelay.get()) {
+            if (!glowStone.found()) return;
+
             InvUtils.swap(glowStone.slot(), swapBack.get());
             BlockUtils.interact(new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), Hand.MAIN_HAND, swing.get());
             chargeDelayLeft = 0;
@@ -390,7 +391,10 @@ public class AnchorAura extends Module {
 
         // Explode the anchor when charged
         if (charges > 0 && breakDelayLeft++ >= breakDelay.get()) {
-            InvUtils.swap(anchor.slot(), swapBack.get());
+            FindItemResult fir = InvUtils.findInHotbar(item -> !item.getItem().equals(Items.GLOWSTONE));
+            if (!fir.found()) return;
+
+            InvUtils.swap(fir.slot(), swapBack.get());
             BlockUtils.interact(new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), Hand.MAIN_HAND, swing.get());
             breakDelayLeft = 0;
 
