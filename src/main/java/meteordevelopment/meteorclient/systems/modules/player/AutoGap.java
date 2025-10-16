@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTarge
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -83,10 +82,10 @@ public class AutoGap extends Module {
 
     private final Setting<Integer> expiryThreshold = sgPotions.add(new IntSetting.Builder()
         .name("expiry-threshold")
-        .description("Time in ticks before potion effect expiry to eat at.")
-        .defaultValue(64)
-        .min(32)
-        .sliderMax(256)
+        .description("Time in ticks before the potion effect expires to start eating.")
+        .defaultValue(60)
+        .min(0)
+        .sliderMax(200)
         .visible(beforeExpiry::get)
         .build()
     );
