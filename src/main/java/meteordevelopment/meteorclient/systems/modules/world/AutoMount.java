@@ -24,6 +24,7 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.EntityHitResult;
 
 import java.util.Set;
 
@@ -66,13 +67,22 @@ public class AutoMount extends Module {
             if (!PlayerUtils.isWithin(entity, 4)) continue;
             if ((entity instanceof MobEntity mobEntity) && !(mobEntity.hasSaddleEquipped())) continue;
             if (!(entity instanceof LlamaEntity) && entity instanceof MobEntity mobEntity && checkSaddle.get() && !mobEntity.hasSaddleEquipped()) continue;
-            interact(entity);
+            interact(entity, rotate.get());
             return;
         }
     }
 
+    private void interact(Entity entity, boolean rotate) {
+        if (rotate) {
+            Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> interact(entity));
+        } else {
+            interact(entity);
+        }
+    }
+
     private void interact(Entity entity) {
-        if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND));
-        else mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
+        EntityHitResult location = new EntityHitResult(entity, entity.getBoundingBox().getCenter());
+        mc.interactionManager.interactEntityAtLocation(mc.player, entity, location, Hand.MAIN_HAND);
+        mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
     }
 }
