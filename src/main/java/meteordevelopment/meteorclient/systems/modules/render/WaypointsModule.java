@@ -37,8 +37,9 @@ import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.List;
 
 import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords;
 
@@ -96,9 +97,8 @@ public class WaypointsModule extends Module {
         Vector3d center = new Vector3d(mc.getWindow().getFramebufferWidth() / 2.0, mc.getWindow().getFramebufferHeight() / 2.0, 0);
         int textRenderDist = textRenderDistance.get();
 
-        for (Iterator<Waypoint> it = Waypoints.get().iterator(); it.hasNext();) {
-            Waypoint waypoint = it.next();
-
+        List<Waypoint> toRemove = new ArrayList<>();
+        for (Waypoint waypoint : Waypoints.get()) {
             // Continue if this waypoint should not be rendered
             if (!waypoint.visible.get() || !Waypoints.checkDimension(waypoint)) continue;
 
@@ -114,7 +114,10 @@ public class WaypointsModule extends Module {
             if (playerAlive && waypointIsNear) {
                 switch (waypoint.actionWhenNear.get()) {
                     case Hide -> waypoint.visible.set(false);
-                    case Delete -> it.remove();
+                    case Delete -> {
+                        toRemove.add(waypoint);
+                        continue;
+                    }
                 }
             }
 
@@ -158,6 +161,8 @@ public class WaypointsModule extends Module {
 
             NametagUtils.end();
         }
+
+        Waypoints.get().removeAll(toRemove);
     }
 
     @EventHandler
@@ -198,16 +203,16 @@ public class WaypointsModule extends Module {
     private void cleanDeathWPs(int max) {
         int oldWpC = 0;
 
-        for (Iterator<Waypoint> it = Waypoints.get().iterator(); it.hasNext();) {
-            Waypoint wp = it.next();
-
+        List<Waypoint> toRemove = new ArrayList<>();
+        for (Waypoint wp : Waypoints.get()) {
             if (wp.name.get().startsWith("Death ") && wp.icon.get().equals("skull")) {
                 oldWpC++;
 
-                if (oldWpC > max)
-                    it.remove();
+                if (oldWpC > max) toRemove.add(wp);
             }
         }
+
+        Waypoints.get().removeAll(toRemove);
     }
 
     @Override

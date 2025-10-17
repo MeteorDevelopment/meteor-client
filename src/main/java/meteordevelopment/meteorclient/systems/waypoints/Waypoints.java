@@ -31,7 +31,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -105,6 +108,11 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         }
 
         return removed;
+    }
+
+    public void removeAll(Collection<Waypoint> c) {
+        boolean removed = waypoints.removeAll(c);
+        if (removed) save();
     }
 
     public Waypoint get(String name) {
