@@ -26,10 +26,15 @@ import meteordevelopment.meteorclient.systems.modules.render.Zoom;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderer;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.render.GuiRenderer;
+import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
+import net.minecraft.client.gui.render.state.GuiRenderState;
+import net.minecraft.client.render.BufferBuilderStorage;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.RenderTickCounter;
@@ -48,7 +53,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
@@ -85,14 +94,6 @@ public abstract class GameRendererMixin {
     @Final
     private BufferBuilderStorage buffers;
 
-    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/gui/render/state/GuiRenderState;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/command/RenderDispatcher;Ljava/util/List;)V"))
-    private List<SpecialGuiElementRenderer<?>> meteor$addSpecialRenderers(List<SpecialGuiElementRenderer<?>> list) {
-        list = new ArrayList<>(list);
-        list.add(new CustomBannerGuiElementRenderer(buffers.getEntityVertexConsumers(), client.getAtlasManager()));
-
-        return List.of(list.toArray(new SpecialGuiElementRenderer<?>[0]));
-    }
-
     @Shadow
     @Final
     private GuiRenderer guiRenderer;
@@ -104,6 +105,14 @@ public abstract class GameRendererMixin {
     @Shadow
     @Final
     private GuiRenderState guiState;
+
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/gui/render/state/GuiRenderState;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/command/RenderDispatcher;Ljava/util/List;)V"))
+    private List<SpecialGuiElementRenderer<?>> meteor$addSpecialRenderers(List<SpecialGuiElementRenderer<?>> list) {
+        list = new ArrayList<>(list);
+        list.add(new CustomBannerGuiElementRenderer(buffers.getEntityVertexConsumers(), client.getAtlasManager()));
+
+        return List.of(list.toArray(new SpecialGuiElementRenderer<?>[0]));
+    }
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
     private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 1) Matrix4f position, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
