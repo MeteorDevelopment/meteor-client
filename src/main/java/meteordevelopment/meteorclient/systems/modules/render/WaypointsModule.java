@@ -37,8 +37,9 @@ import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.List;
 
 import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords;
 
@@ -96,6 +97,7 @@ public class WaypointsModule extends Module {
         Vector3d center = new Vector3d(mc.getWindow().getFramebufferWidth() / 2.0, mc.getWindow().getFramebufferHeight() / 2.0, 0);
         int textRenderDist = textRenderDistance.get();
 
+        List<Waypoint> toRemove = new ArrayList<>();
         for (Waypoint waypoint : Waypoints.get()) {
             // Continue if this waypoint should not be rendered
             if (!waypoint.visible.get() || !Waypoints.checkDimension(waypoint)) continue;
@@ -104,6 +106,20 @@ public class WaypointsModule extends Module {
             BlockPos blockPos = waypoint.getPos();
             Vector3d pos = new Vector3d(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
             double dist = PlayerUtils.distanceToCamera(pos.x, pos.y, pos.z);
+
+            // Only perform hide when near check if player is alive
+            // Otherwise, death waypoints immediately get hidden
+            boolean playerAlive = (mc.player != null && !mc.player.isDead());
+            boolean waypointIsNear = waypoint.actionWhenNearCheck((int) Math.floor(dist));
+            if (playerAlive && waypointIsNear) {
+                switch (waypoint.actionWhenNear.get()) {
+                    case Hide -> waypoint.visible.set(false);
+                    case Delete -> {
+                        toRemove.add(waypoint);
+                        continue;
+                    }
+                }
+            }
 
             // Continue if this waypoint should not be rendered
             if (dist > waypoint.maxVisible.get()) continue;
@@ -145,6 +161,8 @@ public class WaypointsModule extends Module {
 
             NametagUtils.end();
         }
+
+        Waypoints.get().removeAll(toRemove);
     }
 
     @EventHandler
@@ -172,6 +190,10 @@ public class WaypointsModule extends Module {
                 .dimension(PlayerUtils.getDimension())
                 .build();
 
+            // Configure death waypoints to auto delete when the player is within 4 blocks
+            waypoint.actionWhenNear.set(Waypoint.NearAction.Delete);
+            waypoint.actionWhenNearDistance.set(4);
+
             Waypoints.get().add(waypoint);
         }
 
@@ -181,16 +203,16 @@ public class WaypointsModule extends Module {
     private void cleanDeathWPs(int max) {
         int oldWpC = 0;
 
-        for (Iterator<Waypoint> it = Waypoints.get().iterator(); it.hasNext();) {
-            Waypoint wp = it.next();
-
+        List<Waypoint> toRemove = new ArrayList<>();
+        for (Waypoint wp : Waypoints.get()) {
             if (wp.name.get().startsWith("Death ") && wp.icon.get().equals("skull")) {
                 oldWpC++;
 
-                if (oldWpC > max)
-                    it.remove();
+                if (oldWpC > max) toRemove.add(wp);
             }
         }
+
+        Waypoints.get().removeAll(toRemove);
     }
 
     @Override

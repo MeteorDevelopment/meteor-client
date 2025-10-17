@@ -5,7 +5,9 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
@@ -67,17 +69,38 @@ public class DropCommand extends Command {
         })));
 
         // Specific item
-        builder.then(argument("item", ItemStackArgumentType.itemStack(REGISTRY_ACCESS)).executes(context -> drop(player -> {
-            ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
+        builder.then(argument("item", ItemStackArgumentType.itemStack(REGISTRY_ACCESS))
+            .executes(context -> drop(player -> {
+                dropItem(player, context, Integer.MAX_VALUE);
+            }))
+            .then(argument("amount", IntegerArgumentType.integer(1))
+                .executes(context -> drop(player -> {
+                    int amount = IntegerArgumentType.getInteger(context, "amount");
+                    dropItem(player, context, amount);
+                })))
+        );
+    }
 
-            if (stack == null || stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
+    private void dropItem(ClientPlayerEntity player, CommandContext<CommandSource> context, int amount) throws CommandSyntaxException {
+        ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
+        if (stack == null || stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
 
-            for (int i = 0; i < player.getInventory().size(); i++) {
-                if (stack.getItem() == player.getInventory().getStack(i).getItem()) {
-                    InvUtils.drop().slot(i);
+        for (int i = 0; i < player.getInventory().size() && amount > 0; i++) {
+            ItemStack invStack = player.getInventory().getStack(i);
+            if (invStack.isEmpty() || stack.getItem() != invStack.getItem()) continue;
+
+            int dropCount = Math.min(amount, invStack.getCount());
+
+            if (dropCount == invStack.getCount()) {
+                InvUtils.drop().slot(i);
+            } else {
+                for (int j = 0; j < dropCount; j++) {
+                    InvUtils.dropOne().slot(i);
                 }
             }
-        })));
+
+            amount -= dropCount;
+        }
     }
 
     private int drop(PlayerConsumer consumer) throws CommandSyntaxException {

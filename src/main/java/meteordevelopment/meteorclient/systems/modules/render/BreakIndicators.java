@@ -131,13 +131,13 @@ public class BreakIndicators extends Module {
 
     private void renderPacket(Render3DEvent event, List<PacketMine.MyBlock> blocks) {
         for (PacketMine.MyBlock block : blocks) {
-            if (block.mining && block.progress != Double.POSITIVE_INFINITY) {
+            if (block.mining && block.progress() != Double.POSITIVE_INFINITY) {
                 VoxelShape shape = block.blockState.getOutlineShape(mc.world, block.blockPos);
                 if (shape == null || shape.isEmpty()) return;
 
                 Box orig = shape.getBoundingBox();
 
-                double progressNormalised = block.progress > 1 ? 1 : block.progress;
+                double progressNormalised = Math.min(1, block.progress());
                 double shrinkFactor = 1d - progressNormalised;
                 BlockPos pos = block.blockPos;
 
