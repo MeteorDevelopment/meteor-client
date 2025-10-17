@@ -156,7 +156,7 @@ public class Velocity extends Module {
             double velY = (packet.getVelocity().getY() - mc.player.getVelocity().y) * knockbackVertical.get();
             double velZ = (packet.getVelocity().getZ() - mc.player.getVelocity().z) * knockbackHorizontal.get();
             ((EntityVelocityUpdateS2CPacketAccessor) packet).meteor$setVelocity(
-                new Vec3d(velX * 8000 + mc.player.getVelocity().x * 8000, velY * 8000 + mc.player.getVelocity().y * 8000, velZ * 8000 + mc.player.getVelocity().z * 8000)
+                new Vec3d(velX + mc.player.getVelocity().x, velY + mc.player.getVelocity().y, velZ + mc.player.getVelocity().z)
             );
         }
     }
