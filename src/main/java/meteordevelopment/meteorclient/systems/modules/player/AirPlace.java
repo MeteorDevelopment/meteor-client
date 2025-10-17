@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -89,7 +90,7 @@ public class AirPlace extends Module {
         if (mc.crosshairTarget != null && mc.crosshairTarget.getType() != HitResult.Type.MISS) return;
 
         double r = customRange.get() ? range.get() : mc.player.getBlockInteractionRange();
-        hitResult = mc.getCameraEntity().raycast(r, 0, false);
+        hitResult = Freecam.withPos(() -> mc.getCameraEntity().raycast(r, 0, false));
     }
 
     @EventHandler
