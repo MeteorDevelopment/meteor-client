@@ -26,12 +26,15 @@ import meteordevelopment.meteorclient.systems.modules.render.Zoom;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderer;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.render.GuiRenderer;
+import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
 import net.minecraft.client.gui.render.state.GuiRenderState;
+import net.minecraft.client.render.BufferBuilderStorage;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.RenderTickCounter;
@@ -50,7 +53,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
@@ -85,6 +92,10 @@ public abstract class GameRendererMixin {
 
     @Shadow
     @Final
+    private BufferBuilderStorage buffers;
+
+    @Shadow
+    @Final
     private GuiRenderer guiRenderer;
 
     @Shadow
@@ -95,8 +106,16 @@ public abstract class GameRendererMixin {
     @Final
     private GuiRenderState guiState;
 
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/gui/render/state/GuiRenderState;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/command/RenderDispatcher;Ljava/util/List;)V"))
+    private List<SpecialGuiElementRenderer<?>> meteor$addSpecialRenderers(List<SpecialGuiElementRenderer<?>> list) {
+        list = new ArrayList<>(list);
+        list.add(new CustomBannerGuiElementRenderer(buffers.getEntityVertexConsumers(), client.getAtlasManager()));
+
+        return List.of(list.toArray(new SpecialGuiElementRenderer<?>[0]));
+    }
+
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
-    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 2) Matrix4f view, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
+    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 1) Matrix4f position, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
         if (!Utils.canUpdate()) return;
 
         Profilers.get().push(MeteorClient.MOD_ID + "_render");
@@ -109,12 +128,12 @@ public abstract class GameRendererMixin {
 
         // Call utility classes
 
-        RenderUtils.updateScreenCenter(projection, view);
-        NametagUtils.onRender(view);
+        RenderUtils.updateScreenCenter(projection, position);
+        NametagUtils.onRender(position);
 
         // Update model view matrix
 
-        RenderSystem.getModelViewStack().pushMatrix().mul(view);
+        RenderSystem.getModelViewStack().pushMatrix().mul(position);
 
         matrices.push();
         tiltViewWhenHurt(matrices, camera.getLastTickProgress());
@@ -225,7 +244,7 @@ public abstract class GameRendererMixin {
                 cameraE.setYaw(camera.getYaw());
                 cameraE.setPitch(camera.getPitch());
             } else {
-                ((IVec3d) cameraE.getPos()).meteor$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
+                ((IVec3d) cameraE.getEntityPos()).meteor$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
                 cameraE.lastX = freecam.prevPos.x;
                 cameraE.lastY = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
                 cameraE.lastZ = freecam.prevPos.z;
@@ -239,7 +258,7 @@ public abstract class GameRendererMixin {
             updateCrosshairTarget(tickDelta);
             freecamSet = false;
 
-            ((IVec3d) cameraE.getPos()).meteor$set(x, y, z);
+            ((IVec3d) cameraE.getEntityPos()).meteor$set(x, y, z);
             cameraE.lastX = lastX;
             cameraE.lastY = lastY;
             cameraE.lastZ = lastZ;

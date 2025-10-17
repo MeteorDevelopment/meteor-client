@@ -96,7 +96,7 @@ public class Step extends Module {
         OptionalDouble crystalDamage = Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EndCrystalEntity)
                 .filter(Entity::isAlive)
-                .mapToDouble(entity -> DamageUtils.crystalDamage(mc.player, entity.getPos()))
+                .mapToDouble(entity -> DamageUtils.crystalDamage(mc.player, entity.getEntityPos()))
                 .max();
         return crystalDamage.orElse(0.0);
     }

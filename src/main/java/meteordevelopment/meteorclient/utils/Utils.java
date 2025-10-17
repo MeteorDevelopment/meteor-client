@@ -30,6 +30,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -39,10 +40,10 @@ import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.TypedEntityData;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.inventory.StackWithSlot;
 import net.minecraft.item.*;
@@ -269,8 +270,9 @@ public class Utils {
         // todo should we remove this? are there still instances where we might get presented container items in this
         //  format? maybe on servers with weird multiversion setups - if they exist, test this code to ensure it works
         else if (components.contains(DataComponentTypes.BLOCK_ENTITY_DATA)) {
-            NbtComponent nbt2 = components.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT);
-            NbtList nbt3 = nbt2.getNbt().getListOrEmpty("Items");
+            TypedEntityData<BlockEntityType<?>> blockEntityData = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+            if (blockEntityData == null) return;
+            NbtList nbt3 = blockEntityData.copyNbtWithoutId().getListOrEmpty("Items");
 
             for (int i = 0; i < nbt3.size(); i++) {
                 Optional<NbtCompound> compound = nbt3.getCompound(i);
@@ -313,8 +315,8 @@ public class Utils {
         ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) itemStack.get(DataComponentTypes.CONTAINER));
         if (container != null && !container.meteor$getStacks().isEmpty()) return true;
 
-        NbtCompound compoundTag = itemStack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).getNbt();
-        return compoundTag != null && compoundTag.contains("Items");
+        TypedEntityData<BlockEntityType<?>> blockEntityData = itemStack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+        return blockEntityData != null && blockEntityData.contains("Items");
     }
 
     public static Reference2IntMap<StatusEffect> createStatusEffectMap() {

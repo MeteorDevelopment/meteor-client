@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.gui.widgets.containers;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.client.gui.Click;
 import net.minecraft.util.math.MathHelper;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
@@ -74,8 +75,8 @@ public abstract class WView extends WVerticalList {
     }
 
     @Override
-    public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
-        if (handleMouseOver && button == GLFW_MOUSE_BUTTON_LEFT && !used) {
+    public boolean onMouseClicked(Click click, boolean used) {
+        if (handleMouseOver && click.button() == GLFW_MOUSE_BUTTON_LEFT && !used) {
             handlePressed = true;
             return true;
         }
@@ -84,7 +85,7 @@ public abstract class WView extends WVerticalList {
     }
 
     @Override
-    public boolean onMouseReleased(double mouseX, double mouseY, int button) {
+    public boolean onMouseReleased(Click click) {
         if (handlePressed) handlePressed = false;
 
         return false;

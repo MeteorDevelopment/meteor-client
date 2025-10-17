@@ -41,7 +41,11 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
         var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).getAndUpdateRenderState(entity, 1);
+        
         state.hitbox = null;
+        state.light = 15728880;
+        state.shadowPieces.clear();
+        state.outlineColor = 0;
 
         state.bodyYaw = (float) (spin % 360);
         state.relativeHeadYaw = 0;

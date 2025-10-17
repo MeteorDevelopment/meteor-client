@@ -6,10 +6,10 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.FullScreenRenderer;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import meteordevelopment.meteorclient.utils.render.CustomOutlineVertexConsumerProvider;
 import net.minecraft.client.gl.DynamicUniformStorage;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.render.OutlineVertexConsumerProvider;
 import net.minecraft.entity.Entity;
 
 import java.nio.ByteBuffer;
@@ -18,13 +18,14 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public abstract class PostProcessShader {
-    public OutlineVertexConsumerProvider vertexConsumerProvider;
+    public CustomOutlineVertexConsumerProvider vertexConsumerProvider;
     public Framebuffer framebuffer;
     protected RenderPipeline pipeline;
 
     public void init(RenderPipeline pipeline) {
-        vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());
-        framebuffer = new SimpleFramebuffer(MeteorClient.NAME + " PostProcessShader", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), true);
+        if (vertexConsumerProvider == null) vertexConsumerProvider = new CustomOutlineVertexConsumerProvider();
+        if (framebuffer == null) framebuffer = new SimpleFramebuffer(MeteorClient.NAME + " PostProcessShader", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), true);
+
         this.pipeline = pipeline;
     }
 

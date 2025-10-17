@@ -371,7 +371,7 @@ public class Tracers extends Module {
         double speed = blinkOffscreenSpeed.get() / 4.0;
         double duration = Math.abs(Duration.between(Instant.now(), initTimer).toMillis()) * speed;
 
-        return (float)Math.abs((duration % 1000) - 500) / 500.f;
+        return (float) Math.abs((duration % 1000) - 500) / 500.f;
     }
 
     @Override

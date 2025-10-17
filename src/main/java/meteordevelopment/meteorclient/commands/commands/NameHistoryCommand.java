@@ -35,7 +35,7 @@ public class NameHistoryCommand extends Command {
         builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(context -> {
             MeteorExecutor.execute(() -> {
                 PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.get(context);
-                UUID uuid = lookUpTarget.getProfile().getId();
+                UUID uuid = lookUpTarget.getProfile().id();
 
                 NameHistory history = Http.get("https://laby.net/api/v2/user/" + uuid + "/get-profile")
                     .exceptionHandler(e -> error("There was an error fetching that users name history."))
@@ -47,7 +47,7 @@ public class NameHistoryCommand extends Command {
                     error("There was an error fetching that users name history.");
                 }
 
-                String name = lookUpTarget.getProfile().getName();
+                String name = lookUpTarget.getProfile().name();
                 MutableText initial = Text.literal(name);
                 initial.append(Text.literal(name.endsWith("s") ? "'" : "'s"));
 

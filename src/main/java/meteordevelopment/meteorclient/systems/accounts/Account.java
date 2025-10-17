@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.accounts;
 
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.yggdrasil.ServicesKeyType;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
@@ -20,8 +19,10 @@ import net.minecraft.client.session.Session;
 import net.minecraft.client.session.report.AbuseReportContext;
 import net.minecraft.client.session.report.ReporterEnvironment;
 import net.minecraft.client.texture.PlayerSkinProvider;
+import net.minecraft.client.texture.PlayerSkinTextureDownloader;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.encryption.SignatureVerifier;
+import net.minecraft.util.ApiServices;
 import net.minecraft.util.Util;
 
 import java.nio.file.Path;
@@ -44,8 +45,8 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public abstract boolean fetchInfo();
 
     public boolean login() {
-        YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).meteor$getProxy());
-        applyLoginEnvironment(authenticationService, authenticationService.createMinecraftSessionService());
+        YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(mc.getNetworkProxy());
+        applyLoginEnvironment(authenticationService);
 
         return true;
     }
@@ -66,23 +67,24 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public static void setSession(Session session) {
         MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
         mca.meteor$setSession(session);
-        UserApiService apiService;
-        apiService = mca.meteor$getAuthenticationService().createUserApiService(session.getAccessToken());
+
+        YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(mc.getNetworkProxy());
+
+        UserApiService apiService = yggdrasilAuthenticationService.createUserApiService(session.getAccessToken());
         mca.meteor$setUserApiService(apiService);
         mca.meteor$setSocialInteractionsManager(new SocialInteractionsManager(mc, apiService));
         mca.meteor$setProfileKeys(ProfileKeys.create(apiService, session, mc.runDirectory.toPath()));
         mca.meteor$setAbuseReportContext(AbuseReportContext.create(ReporterEnvironment.ofIntegratedServer(), apiService));
-        mca.meteor$setGameProfileFuture(CompletableFuture.supplyAsync(() -> mc.getSessionService().fetchProfile(mc.getSession().getUuidOrNull(), true), Util.getIoWorkerExecutor()));
+        mca.meteor$setGameProfileFuture(CompletableFuture.supplyAsync(() -> mc.getApiServices().sessionService().fetchProfile(mc.getSession().getUuidOrNull(), true), Util.getIoWorkerExecutor()));
     }
 
-    public static void applyLoginEnvironment(YggdrasilAuthenticationService authService, MinecraftSessionService sessService) {
+    public static void applyLoginEnvironment(YggdrasilAuthenticationService authService) {
         MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
-        mca.meteor$setAuthenticationService(authService);
         SignatureVerifier.create(authService.getServicesKeySet(), ServicesKeyType.PROFILE_KEY);
-        mca.meteor$setSessionService(sessService);
         PlayerSkinProvider.FileCache skinCache = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).meteor$getSkinCache();
         Path skinCachePath = ((FileCacheAccessor) skinCache).meteor$getDirectory();
-        mca.meteor$setSkinProvider(new PlayerSkinProvider(skinCachePath, sessService, mc));
+        mca.meteor$setApiServices(ApiServices.create(authService, mc.runDirectory));
+        mca.meteor$setSkinProvider(new PlayerSkinProvider(skinCachePath, mc.getApiServices(), new PlayerSkinTextureDownloader(mc.getNetworkProxy(), mc.getTextureManager(), mc), mc));
     }
 
     @Override
