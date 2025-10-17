@@ -284,7 +284,7 @@ public class Tracers extends Module {
             Color color = getEntityColor(entity);
 
             if (blinkOffscreen.get())
-                color.a *= getAlpha();
+                color.a = (int) (color.a * getAlpha());
 
             Vec2f screenCenter = new Vec2f(mc.getWindow().getFramebufferWidth() / 2.f, mc.getWindow().getFramebufferHeight() / 2.f);
 
@@ -302,8 +302,10 @@ public class Tracers extends Module {
 
             float angleYawRad = (float) Math.toRadians(angle.y);
 
-            Vector2f newPoint = new Vector2f(screenCenter.x + distanceOffscreen.get() * (float) Math.cos(angleYawRad),
-                screenCenter.y + distanceOffscreen.get() * (float) Math.sin(angleYawRad));
+            Vector2f newPoint = new Vector2f(
+                screenCenter.x + distanceOffscreen.get() * (float) Math.cos(angleYawRad),
+                screenCenter.y + distanceOffscreen.get() * (float) Math.sin(angleYawRad)
+            );
 
             Vector2f[] trianglePoints = {
                 new Vector2f(newPoint.x - sizeOffscreen.get(), newPoint.y - sizeOffscreen.get()),
@@ -313,8 +315,12 @@ public class Tracers extends Module {
 
             rotateTriangle(trianglePoints, angle.y);
 
-            Renderer2D.COLOR.triangle(trianglePoints[0].x, trianglePoints[0].y, trianglePoints[1].x, trianglePoints[1].y, trianglePoints[2].x,
-                trianglePoints[2].y, color);
+            Renderer2D.COLOR.triangle(
+                trianglePoints[2].x, trianglePoints[2].y,
+                trianglePoints[1].x, trianglePoints[1].y,
+                trianglePoints[0].x, trianglePoints[0].y,
+                color
+            );
 
             count++;
         }
