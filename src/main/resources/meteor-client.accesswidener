@@ -12,6 +12,11 @@ accessible   field   net/minecraft/client/texture/MapTextureManager$MapTexture t
 
 accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$EffectButtonWidget
 
+accessible   field   net/minecraft/client/gui/hud/PlayerListHud footer Lnet/minecraft/text/Text;
+accessible   field   net/minecraft/client/gui/hud/PlayerListHud header Lnet/minecraft/text/Text;
+accessible   field   net/minecraft/client/gui/hud/PlayerListHud ENTRY_ORDERING Ljava/util/Comparator;
+accessible   method  net/minecraft/client/gui/hud/PlayerListHud renderLatencyIcon (Lnet/minecraft/client/gui/DrawContext;IIILnet/minecraft/client/network/PlayerListEntry;)V
+
 accessible   class   net/minecraft/client/resource/ResourceReloadLogger$ReloadState
 
 accessible   class   com/mojang/blaze3d/opengl/GlStateManager$CapabilityTracker
