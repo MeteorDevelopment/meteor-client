@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.GetFovEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
@@ -28,9 +29,13 @@ import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.render.GuiRenderer;
+import net.minecraft.client.gui.render.state.GuiRenderState;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.render.fog.FogRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
@@ -78,6 +83,18 @@ public abstract class GameRendererMixin {
     @Shadow
     protected abstract void tiltViewWhenHurt(MatrixStack matrices, float tickDelta);
 
+    @Shadow
+    @Final
+    private GuiRenderer guiRenderer;
+
+    @Shadow
+    @Final
+    private FogRenderer fogRenderer;
+
+    @Shadow
+    @Final
+    private GuiRenderState guiState;
+
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
     private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 2) Matrix4f view, @Local(ordinal = 1) float tickDelta, @Local MatrixStack matrixStack) {
         if (!Utils.canUpdate()) return;
@@ -123,6 +140,23 @@ public abstract class GameRendererMixin {
     @Inject(method = "renderWorld", at = @At("TAIL"))
     private void onRenderWorldTail(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(RenderAfterWorldEvent.get());
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;render(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V", shift = At.Shift.AFTER))
+    private void onRenderGui(RenderTickCounter tickCounter, boolean tick, CallbackInfo info) {
+        if (client.currentScreen instanceof WidgetScreen widgetScreen) {
+            guiState.clear();
+            var context = new DrawContext(client, guiState);
+
+            var mouseX = (int) client.mouse.getScaledX(client.getWindow());
+            var mouseY = (int) client.mouse.getScaledY(client.getWindow());
+
+            widgetScreen.renderCustom(context, mouseX, mouseY, tickCounter.getDynamicDeltaTicks());
+
+            RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(client.getFramebuffer().getDepthAttachment(), 1.0);
+            guiRenderer.render(fogRenderer.getFogBuffer(FogRenderer.FogType.NONE));
+            guiRenderer.incrementFrame();
+        }
     }
 
     @ModifyReturnValue(method = "findCrosshairTarget", at = @At("RETURN"))

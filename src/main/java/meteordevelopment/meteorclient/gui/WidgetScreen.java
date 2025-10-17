@@ -240,8 +240,7 @@ public abstract class WidgetScreen extends Screen {
         }
     }
 
-    @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderCustom(DrawContext context, int mouseX, int mouseY, float delta) {
         int s = mc.getWindow().getScaleFactor();
         mouseX *= s;
         mouseY *= s;
