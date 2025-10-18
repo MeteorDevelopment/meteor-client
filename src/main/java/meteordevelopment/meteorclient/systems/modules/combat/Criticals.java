@@ -152,14 +152,17 @@ public class Criticals extends Module {
             }
 
             if (sendTimer <= 0) {
-                sendPackets = false;
-
-                if (attackPacket == null || swingPacket == null) return;
+                if (attackPacket == null || swingPacket == null) {
+                    sendPackets = false;
+                    return;
+                }
                 mc.getNetworkHandler().sendPacket(attackPacket);
                 mc.getNetworkHandler().sendPacket(swingPacket);
 
                 attackPacket = null;
                 swingPacket = null;
+
+                sendPackets = false;
             } else {
                 sendTimer--;
             }
