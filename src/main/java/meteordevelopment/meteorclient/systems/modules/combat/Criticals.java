@@ -182,7 +182,7 @@ public class Criticals extends Module {
 
     private boolean skipCrit() {
         if (EntityUtils.isInCobweb(mc.player) && (mode.get() == Mode.Jump || mode.get() == Mode.MiniJump))
-            return false;
+            return true;
 
         return !mc.player.isOnGround() || mc.player.isSubmergedInWater() || mc.player.isInLava() || mc.player.isClimbing();
     }
