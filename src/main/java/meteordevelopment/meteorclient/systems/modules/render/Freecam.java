@@ -118,9 +118,18 @@ public class Freecam extends Module {
         .build()
     );
 
-    private final Setting<Boolean> baritoneClick = sgGeneral.add(new BoolSetting.Builder()
+    private final SettingGroup sgPathing = settings.createGroup("Pathing");
+
+    private final Setting<Boolean> baritoneClick = sgPathing.add(new BoolSetting.Builder()
         .name("click-sets-goal")
         .description("Sets a goal to any block you click.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> requireDoubleClick = sgPathing.add(new BoolSetting.Builder()
+        .name("double-click")
+        .description("Require two clicks to start pathing.")
         .defaultValue(false)
         .build()
     );
@@ -138,6 +147,9 @@ public class Freecam extends Module {
     private boolean bobView;
 
     private boolean forward, backward, right, left, up, down, isSneaking;
+
+    private boolean clicked = false;
+    private long clickTs = 0;
 
     public Freecam() {
         super(Categories.Render, "freecam", "Allows the camera to move away from the player.");
@@ -296,6 +308,16 @@ public class Freecam extends Module {
     }
 
     private void setGoal() {
+        if (System.currentTimeMillis() - clickTs > 500) {
+            clicked = false;
+        }
+
+        if (requireDoubleClick.get() && !clicked) {
+            clickTs = System.currentTimeMillis();
+            clicked = true;
+            return;
+        }
+
         if (!(mc.crosshairTarget instanceof BlockHitResult res)) {
             return;
         }
