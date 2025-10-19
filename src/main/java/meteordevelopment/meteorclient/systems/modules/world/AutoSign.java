@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.AbstractSignEditScreenAccessor;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -22,22 +23,23 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 public class AutoSign extends Module {
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+        .name("delay")
+        .description("The tick delay between sign update packets.")
+        .defaultValue(10)
+        .range(0, 100)
+        .sliderRange(0, 100)
+        .build()
+    );
+
     private String[] text;
 
     // Some servers (e.g., 2b2t) don't like the sign packet being sent too soon after the swing or block click packets, so queue them.
     // Delaying by sleeping in the event handler may be fine for a single sign, but would visibly lag the UI at a larger scale.
     private final Queue<UpdateSignC2SPacket> queue = new ArrayDeque<>();
     private int timer = 0;
-
-    private final Setting<Integer> delay = settings.getDefaultGroup().add(new IntSetting.Builder()
-        .name("Delay")
-        .description("Tick delay between sign update packets.")
-        .min(5)
-        .max(100)
-        .sliderRange(5, 100)
-        .defaultValue(10)
-        .build()
-    );
 
     public AutoSign() {
         super(Categories.World, "auto-sign", "Automatically writes signs. The first sign's text will be used.");
