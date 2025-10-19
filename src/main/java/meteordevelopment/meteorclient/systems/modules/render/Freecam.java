@@ -351,11 +351,7 @@ public class Freecam extends Module {
     }
 
     private void setGoal() {
-        if (System.currentTimeMillis() - clickTs > 500) {
-            clicked = false;
-        }
-
-        if (requireDoubleClick.get() && !clicked) {
+        if (requireDoubleClick.get() && (!clicked || System.currentTimeMillis() - clickTs > 500)) {
             clickTs = System.currentTimeMillis();
             clicked = true;
             return;
