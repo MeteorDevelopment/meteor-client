@@ -44,6 +44,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
@@ -312,6 +313,7 @@ public class Freecam extends Module {
         if (onInput(event.key(), event.action)) event.cancel();
     }
 
+    @Nullable
     private BlockPos rayCastEntity(Vec3d posVec, Vec3d max, short maxDist) {
         EntityHitResult res = ProjectileUtil.raycast(
             mc.player,
@@ -331,6 +333,7 @@ public class Freecam extends Module {
         return BlockPos.ofFloored(vec.x, vec.y, vec.z);
     }
 
+    @Nullable
     private BlockPos rayCastBlock(Vec3d posVec, Vec3d max) {
         RaycastContext ctx = new RaycastContext(
             posVec,
