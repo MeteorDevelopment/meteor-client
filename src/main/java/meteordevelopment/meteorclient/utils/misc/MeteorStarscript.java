@@ -81,7 +81,6 @@ public class MeteorStarscript {
         ss.set("mc_version", SharedConstants.getGameVersion().name());
         ss.set("fps", () -> Value.number(MinecraftClientAccessor.meteor$getFps()));
         ss.set("ping", MeteorStarscript::ping);
-        ss.set("time", () -> Value.string(LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));
         ss.set("cps", () -> Value.number(CPSUtils.getCpsAverage()));
 
         // Meteor
