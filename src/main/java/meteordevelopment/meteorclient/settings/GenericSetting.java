@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
@@ -12,6 +14,10 @@ import java.util.function.Consumer;
 public class GenericSetting<T extends IGeneric<T>> extends Setting<T> {
     public GenericSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+    }
+
+    public WidgetScreen createScreen(GuiTheme theme) {
+        return this.get().createScreen(theme, this);
     }
 
     @Override
