@@ -43,8 +43,8 @@ public class ESPBlockData implements ICopyable<ESPBlockData>, ISerializable<ESPB
     }
 
     @Override
-    public WidgetScreen createScreen(GuiTheme theme) {
-        return new ESPBlockDataScreen(theme, this, null, null);
+    public WidgetScreen createScreen(GuiTheme theme, GenericSetting<ESPBlockData> setting) {
+        return new ESPBlockDataScreen(theme, this, setting);
     }
 
     @Override

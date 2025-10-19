@@ -11,18 +11,27 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
+import org.jetbrains.annotations.Nullable;
 
 public class ESPBlockDataScreen extends WindowScreen {
     private final ESPBlockData blockData;
-    private final Block block;
-    private final BlockDataSetting<ESPBlockData> setting;
+    private final Setting<?> setting;
+    private final @Nullable Runnable firstChangeConsumer;
 
     public ESPBlockDataScreen(GuiTheme theme, ESPBlockData blockData, Block block, BlockDataSetting<ESPBlockData> setting) {
+        this(theme, blockData, setting, () -> setting.get().put(block, blockData));
+    }
+
+    public ESPBlockDataScreen(GuiTheme theme, ESPBlockData blockData, GenericSetting<ESPBlockData> setting) {
+        this(theme, blockData, setting, null);
+    }
+
+    private ESPBlockDataScreen(GuiTheme theme, ESPBlockData blockData, Setting<?> setting, @Nullable Runnable firstChangeConsumer) {
         super(theme, "Configure Block");
 
         this.blockData = blockData;
-        this.block = block;
         this.setting = setting;
+        this.firstChangeConsumer = firstChangeConsumer;
     }
 
     @Override
@@ -106,11 +115,11 @@ public class ESPBlockDataScreen extends WindowScreen {
     }
 
     private void onChanged() {
-        if (!blockData.isChanged() && block != null && setting != null) {
-            setting.get().put(block, blockData);
-            setting.onChanged();
+        if (!blockData.isChanged() && firstChangeConsumer != null) {
+            firstChangeConsumer.run();
         }
 
+        setting.onChanged();
         blockData.changed();
     }
 }
