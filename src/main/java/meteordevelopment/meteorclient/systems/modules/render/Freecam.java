@@ -154,7 +154,6 @@ public class Freecam extends Module {
 
     private boolean forward, backward, right, left, up, down, isSneaking;
 
-    private boolean clicked = false;
     private long clickTs = 0;
 
     public Freecam() {
@@ -351,9 +350,10 @@ public class Freecam extends Module {
     }
 
     private void setGoal() {
-        if (requireDoubleClick.get() && (!clicked || System.currentTimeMillis() - clickTs > 500)) {
-            clickTs = System.currentTimeMillis();
-            clicked = true;
+        long prevClick = clickTs;
+        clickTs = System.currentTimeMillis();
+
+        if (requireDoubleClick.get() && clickTs - prevClick > 500) {
             return;
         }
 
