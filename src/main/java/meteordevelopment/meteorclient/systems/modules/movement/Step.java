@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -17,6 +18,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.OptionalDouble;
 
@@ -105,14 +108,38 @@ public class Step extends Module {
         return ((getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()));
     }
 
+    private boolean isSaferThanWith(double damage) {
+        return (isSafe() || getExplosionDamage() - damage <= 0);
+    }
+
     private double getMaxSafeHeight() {
-        if (!safeStep.get() || !isSafe()) return height.get();
+        if (!safeStep.get()) return height.get();
         double max = height.get();
         double h = 0;
+        double currentDamage =getExplosionDamage();
         Box initial = mc.player.getBoundingBox();
+
+        // all of this is to avoid running into crystals which are behind
+        // one block when holding a movement key because standing on the
+        // near edge of that block is technically safe
+
+        Vec3d inputOffset = mc.player.getRotationVector();
+        Vec2f input = mc.player.input.getMovementInput();
+        ((IVec3d) inputOffset).meteor$setY(0);
+        inputOffset = inputOffset.normalize().multiply(1.2);
+        double zdot = inputOffset.z;
+        double xdot = inputOffset.x;
+        inputOffset = new Vec3d(input.y * xdot + input.x * zdot, 0, input.x * xdot + input.y * zdot);
+
         for (int i = 1; i < max; i++) {
             mc.player.setBoundingBox(initial.offset(0, i, 0));
-            if (!isSafe()) {
+            if (!isSaferThanWith(currentDamage)) {
+                mc.player.setBoundingBox(initial);
+                return h;
+            }
+
+            mc.player.setBoundingBox(mc.player.getBoundingBox().offset(inputOffset));
+            if (!isSaferThanWith(currentDamage)) {
                 mc.player.setBoundingBox(initial);
                 return h;
             }
@@ -120,10 +147,9 @@ public class Step extends Module {
         }
         mc.player.setBoundingBox(initial.offset(0, max, 0));
 
-        if (isSafe()) h = max;
+        if (isSaferThanWith(currentDamage)) h = max;
 
         mc.player.setBoundingBox(initial);
-
         return h;
     }
 
