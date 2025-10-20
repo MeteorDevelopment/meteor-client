@@ -9,7 +9,7 @@ import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.textures.TextureFormat;
 import it.unimi.dsi.fastutil.ints.IntDoubleImmutablePair;
@@ -17,7 +17,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResolutionChangedEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
-import meteordevelopment.meteorclient.mixininterface.IGpuTexture;
 import meteordevelopment.meteorclient.renderer.FullScreenRenderer;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
@@ -212,16 +211,11 @@ public class Blur extends Module {
             .attachments(mc.getFramebuffer())
             .pipeline(MeteorRenderPipelines.BLUR_PASSTHROUGH)
             .mesh(FullScreenRenderer.mesh)
-            .sampler("u_Texture", fbos[0])
+            .sampler("u_Texture", fbos[0], RenderSystem.getSamplerCache().get(FilterMode.LINEAR)) // todo ???
             .end();
     }
 
     private void renderToFbo(GpuTextureView targetFbo, GpuTextureView sourceTexture, RenderPipeline pipeline, double offset) {
-        AddressMode prevAddressModeU = ((IGpuTexture) sourceTexture.texture()).meteor$getAddressModeU();
-        AddressMode prevAddressModeV = ((IGpuTexture) sourceTexture.texture()).meteor$getAddressModeV();
-
-        sourceTexture.texture().setAddressMode(AddressMode.CLAMP_TO_EDGE);
-
         MeshRenderer.begin()
             .attachments(targetFbo, null)
             .pipeline(pipeline)
@@ -230,10 +224,8 @@ public class Blur extends Module {
                 0.5f / targetFbo.getWidth(0), 0.5f / targetFbo.getHeight(0),
                 (float) offset
             )))
-            .sampler("u_Texture", sourceTexture)
+            .sampler("u_Texture", sourceTexture, RenderSystem.getSamplerCache().get(FilterMode.LINEAR))
             .end();
-
-        sourceTexture.texture().setAddressMode(prevAddressModeU, prevAddressModeV);
     }
 
     private boolean shouldRender() {

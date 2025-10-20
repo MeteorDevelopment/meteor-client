@@ -197,17 +197,12 @@ public class Ambience extends Module {
 
     public static class Custom extends DimensionEffects {
         public Custom() {
-            super(SkyType.END, true, false);
+            super(SkyType.END, true);
         }
 
         @Override
         public Vec3d adjustFogColor(Vec3d color, float sunHeight) {
             return color.multiply(0.15000000596046448D);
-        }
-
-        @Override
-        public boolean useThickFog(int camX, int camY) {
-            return false;
         }
     }
 

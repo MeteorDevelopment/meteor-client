@@ -114,12 +114,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if (speed != -1) info.setReturnValue(speed);
     }
 
-    @WrapWithCondition(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V"))
+    @WrapWithCondition(method = "knockbackTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V"))
     private boolean keepSprint$setVelocity(PlayerEntity instance, Vec3d vec3d) {
         return Modules.get().get(Sprint.class).stopSprinting();
     }
 
-    @WrapWithCondition(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;setSprinting(Z)V"))
+    @WrapWithCondition(method = "knockbackTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;setSprinting(Z)V"))
     private boolean keepSprint$setSprinting(PlayerEntity instance, boolean b) {
         return Modules.get().get(Sprint.class).stopSprinting();
     }

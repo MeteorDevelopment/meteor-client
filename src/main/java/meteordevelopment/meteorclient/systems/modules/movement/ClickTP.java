@@ -42,7 +42,7 @@ public class ClickTP extends Module {
         }
 
         Camera camera = mc.gameRenderer.getCamera();
-        Vec3d cameraPos = camera.getPos();
+        Vec3d cameraPos = camera.getCameraPos();
 
         // Calculate the direction the camera is looking based on its pitch and yaw, and extend this direction 210 units away from the camera position
         // 210 is used here as the maximum distance for this exploit is 200 blocks

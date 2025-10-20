@@ -20,6 +20,8 @@ import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.DefaultPermissions;
+import net.minecraft.command.permission.PermissionPredicate;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
@@ -29,6 +31,7 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.LocalDifficulty;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetAddress;
@@ -143,23 +146,22 @@ public class ServerCommand extends Command {
         info("Motd: %s", server.label != null ? server.label.getString() : "unknown");
         info("Version: %s", server.version.getString());
         info("Protocol version: %d", server.protocolVersion);
-        info("Difficulty: %s (Local: %.2f)", mc.world.getDifficulty().getTranslatableName().getString(), mc.world.getLocalDifficulty(mc.player.getBlockPos()).getLocalDifficulty());
+        info("Difficulty: %s (Local: %.2f)",
+            mc.world.getDifficulty().getTranslatableName().getString(),
+            new LocalDifficulty(mc.world.getDifficulty(), mc.world.getTimeOfDay(), mc.world.getChunk(mc.player.getBlockPos()).getInhabitedTime(), mc.world.getMoonSize()).getLocalDifficulty()
+        );
         info("Day: %d", mc.world.getTimeOfDay() / 24000L);
         info("Permission level: %s", formatPerms());
     }
 
     public String formatPerms() {
-        int p = 5;
-        while (!mc.player.hasPermissionLevel(p) && p > 0) p--;
+        PermissionPredicate permissions = mc.player.getPermissions();
 
-        return switch (p) {
-            case 0 -> "0 (No Perms)";
-            case 1 -> "1 (No Perms)";
-            case 2 -> "2 (Player Command Access)";
-            case 3 -> "3 (Server Command Access)";
-            case 4 -> "4 (Operator)";
-            default -> p + " (Unknown)";
-        };
+        if (permissions.hasPermission(DefaultPermissions.OWNERS)) return "4 (Owner)";
+        else if (permissions.hasPermission(DefaultPermissions.ADMINS)) return "3 (Admin)";
+        else if (permissions.hasPermission(DefaultPermissions.GAMEMASTERS)) return "2 (Gamemaster)";
+        else if (permissions.hasPermission(DefaultPermissions.MODERATORS)) return "1 (Moderator)";
+        else return "0 (No Perms)";
     }
 
 

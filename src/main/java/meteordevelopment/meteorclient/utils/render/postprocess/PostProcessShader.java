@@ -3,6 +3,8 @@ package meteordevelopment.meteorclient.utils.render.postprocess;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.FullScreenRenderer;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
@@ -56,7 +58,7 @@ public abstract class PostProcessShader {
                 (float) mc.getWindow().getFramebufferWidth(), (float) mc.getWindow().getFramebufferHeight(),
                 (float) glfwGetTime()
             )))
-            .sampler("u_Texture", framebuffer.getColorAttachmentView());
+            .sampler("u_Texture", framebuffer.getColorAttachmentView(), RenderSystem.getSamplerCache().get(FilterMode.NEAREST));
 
         setupPass(renderer);
 

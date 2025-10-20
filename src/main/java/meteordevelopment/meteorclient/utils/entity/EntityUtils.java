@@ -112,8 +112,8 @@ public class EntityUtils {
     }
 
     public static boolean isInRenderDistance(double posX, double posZ) {
-        double x = Math.abs(mc.gameRenderer.getCamera().getPos().x - posX);
-        double z = Math.abs(mc.gameRenderer.getCamera().getPos().z - posZ);
+        double x = Math.abs(mc.gameRenderer.getCamera().getCameraPos().x - posX);
+        double z = Math.abs(mc.gameRenderer.getCamera().getCameraPos().z - posZ);
         double d = (mc.options.getViewDistance().getValue() + 1) * 16;
 
         return x < d && z < d;

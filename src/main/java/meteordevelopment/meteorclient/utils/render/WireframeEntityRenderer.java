@@ -159,6 +159,11 @@ public class WireframeEntityRenderer {
         }
 
         @Override
+        public VertexConsumer color(int argb) {
+            return this;
+        }
+
+        @Override
         public VertexConsumer texture(float u, float v) {
             return this;
         }
@@ -175,6 +180,11 @@ public class WireframeEntityRenderer {
 
         @Override
         public VertexConsumer normal(float x, float y, float z) {
+            return this;
+        }
+
+        @Override
+        public VertexConsumer method_75298(float f) {
             return this;
         }
     }

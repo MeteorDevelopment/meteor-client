@@ -13,12 +13,12 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -63,7 +63,7 @@ public abstract class ClientWorldMixin {
      * @author Walaryne
      */
     @Inject(method = "getSkyColor", at = @At("HEAD"), cancellable = true)
-    private void onGetSkyColor(Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Integer> cir) {
+    private void onGetSkyColor(Camera camera, float tickProgress, CallbackInfoReturnable<Integer> cir) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customSkyColor.get()) {

@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.screens.CommitsScreen;
-import meteordevelopment.meteorclient.mixininterface.IText;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.MeteorToast;
@@ -70,7 +69,7 @@ public class TitleScreenCredits {
                         if (!credit.addon.getCommit().equals(res.body().commit.sha)) {
                             synchronized (credit.text) {
                                 credit.text.append(Text.literal("*").formatted(Formatting.RED));
-                                ((IText) credit.text).meteor$invalidateCache();
+//                                ((IText) credit.text).meteor$invalidateCache(); @todo why cant we cast this anymore?
                             }
                         }
                     }

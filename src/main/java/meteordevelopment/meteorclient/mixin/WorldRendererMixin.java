@@ -61,7 +61,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     }
 
     @Inject(method = "drawBlockOutline", at = @At("HEAD"), cancellable = true)
-    private void onDrawHighlightedBlockOutline(MatrixStack matrices, VertexConsumer vertexConsumer, double x, double y, double z, OutlineRenderState state, int i, CallbackInfo ci) {
+    private void onDrawHighlightedBlockOutline(MatrixStack matrices, VertexConsumer vertexConsumer, double x, double y, double z, OutlineRenderState state, int i, float f, CallbackInfo ci) {
         if (Modules.get().isActive(BlockSelection.class)) ci.cancel();
     }
 
