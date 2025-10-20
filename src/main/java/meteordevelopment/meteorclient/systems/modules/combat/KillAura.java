@@ -166,6 +166,13 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final Setting<Boolean> ignoreCreative = sgTargeting.add(new BoolSetting.Builder()
+        .name("ignore-creative")
+        .description("Whether or not to attack players with creative mode.")
+        .defaultValue(false)
+        .build()
+    );
+    
     private final Setting<Boolean> ignoreNamed = sgTargeting.add(new BoolSetting.Builder()
         .name("ignore-named")
         .description("Whether or not to attack mobs with a name.")
@@ -408,7 +415,7 @@ public class KillAura extends Module {
             if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
         }
         if (entity instanceof PlayerEntity player) {
-            if (player.isCreative()) return false;
+            if (!ignoreCreative.get() && player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
             if (shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
         }
