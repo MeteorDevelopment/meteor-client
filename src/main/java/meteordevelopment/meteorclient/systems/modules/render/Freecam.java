@@ -50,6 +50,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgPathing = settings.createGroup("Pathing");
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
@@ -125,11 +126,9 @@ public class Freecam extends Module {
         .build()
     );
 
-    private final SettingGroup sgPathing = settings.createGroup("Pathing");
-
     private final Setting<Boolean> baritoneClick = sgPathing.add(new BoolSetting.Builder()
-        .name("click-sets-goal")
-        .description("Sets a goal to any block you click.")
+        .name("click-to-path")
+        .description("Sets a pathfinding goal to any block/entity you click at.")
         .defaultValue(false)
         .build()
     );
@@ -324,9 +323,7 @@ public class Freecam extends Module {
             maxDist
         );
 
-        if (res == null) {
-            return null;
-        }
+        if (res == null) return null;
 
         Vec3d vec = res.getPos();
 
@@ -344,9 +341,7 @@ public class Freecam extends Module {
         );
 
         BlockHitResult res = mc.world.raycast(ctx);
-        if (res.getType() == HitResult.Type.MISS) {
-            return null;
-        }
+        if (res.getType() == HitResult.Type.MISS) return null;
 
         // Don't move inside block
         return res.getBlockPos().add(res.getSide().getVector());
@@ -356,9 +351,7 @@ public class Freecam extends Module {
         long prevClick = clickTs;
         clickTs = System.currentTimeMillis();
 
-        if (requireDoubleClick.get() && clickTs - prevClick > 500) {
-            return;
-        }
+        if (requireDoubleClick.get() && clickTs - prevClick > 500) return;
 
         Camera cam = mc.gameRenderer.getCamera();
         Vec3d posVec = cam.getPos();
@@ -371,9 +364,7 @@ public class Freecam extends Module {
             pos = rayCastBlock(posVec, max);
         }
 
-        if (pos == null) {
-            return;
-        }
+        if (pos == null) return;
 
         PathManagers.get().moveTo(pos);
     }
