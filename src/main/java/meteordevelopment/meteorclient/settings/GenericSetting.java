@@ -5,16 +5,19 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import meteordevelopment.meteorclient.gui.utils.IScreenFactory;
-import meteordevelopment.meteorclient.utils.misc.ICopyable;
-import meteordevelopment.meteorclient.utils.misc.ISerializable;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
 
-public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenFactory> extends Setting<T> {
+public class GenericSetting<T extends IGeneric<T>> extends Setting<T> {
     public GenericSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+    }
+
+    public WidgetScreen createScreen(GuiTheme theme) {
+        return this.get().createScreen(theme, this);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
         return get();
     }
 
-    public static class Builder<T extends ICopyable<T> & ISerializable<T> & IScreenFactory> extends SettingBuilder<Builder<T>, T, GenericSetting<T>> {
+    public static class Builder<T extends IGeneric<T>> extends SettingBuilder<Builder<T>, T, GenericSetting<T>> {
         public Builder() {
             super(null);
         }
