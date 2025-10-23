@@ -105,15 +105,16 @@ public class Step extends Module {
     }
 
     private boolean isSafe() {
-        return ((getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()));
+        return getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get();
     }
 
     private boolean isSaferThanWith(double damage) {
-        return (isSafe() || getExplosionDamage() - damage <= 0);
+        return isSafe() || getExplosionDamage() - damage <= 0;
     }
 
     private double getMaxSafeHeight() {
         if (!safeStep.get()) return height.get();
+
         double max = height.get();
         double h = 0;
         double currentDamage =getExplosionDamage();
