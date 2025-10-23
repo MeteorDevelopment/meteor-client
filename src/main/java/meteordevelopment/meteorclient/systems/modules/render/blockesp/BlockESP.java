@@ -17,14 +17,15 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.dimension.DimensionType;
 
 import java.util.Iterator;
 import java.util.List;
@@ -82,7 +83,7 @@ public class BlockESP extends Module {
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
     private final ExecutorService workerThread = Executors.newSingleThreadExecutor();
 
-    private DimensionType lastDimension;
+    private Dimension lastDimension;
 
     public BlockESP() {
         super(Categories.Render, "block-esp", "Renders specified blocks through walls.", "search");
@@ -101,7 +102,7 @@ public class BlockESP extends Module {
             searchChunk(chunk);
         }
 
-        lastDimension = mc.world.getDimension();
+        lastDimension = PlayerUtils.getDimension();
     }
 
     @Override
@@ -226,9 +227,10 @@ public class BlockESP extends Module {
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        DimensionType dimension = mc.world.getDimension();
+        Dimension dimension = PlayerUtils.getDimension();
 
         if (lastDimension != dimension) onActivate();
+
         lastDimension = dimension;
     }
 
@@ -239,7 +241,7 @@ public class BlockESP extends Module {
                 ESPChunk chunk = it.next();
 
                 if (chunk.shouldBeDeleted()) {
-                    workerThread.submit(() -> {
+                    workerThread.execute(() -> {
                         for (ESPBlock block : chunk.blocks.values()) {
                             block.group.remove(block, false);
                             block.loaded = false;
