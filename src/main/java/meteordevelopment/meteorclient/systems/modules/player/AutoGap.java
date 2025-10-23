@@ -280,8 +280,6 @@ public class AutoGap extends Module {
     }
 
     private int findSlot() {
-        boolean allowEgapSetting = allowEgap.get();
-
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
 
@@ -294,7 +292,7 @@ public class AutoGap extends Module {
             Item item = stack.getItem();
 
             // If egap was found and allowEgapSetting is true we can return the current slot
-            if (item == Items.ENCHANTED_GOLDEN_APPLE && allowEgapSetting) return i;
+            if (item == Items.ENCHANTED_GOLDEN_APPLE && allowEgap.get()) return i;
 
             // If gap was found and egap is not required we can return the current slot
             if (item == Items.GOLDEN_APPLE && !requiresEGap) return i;
