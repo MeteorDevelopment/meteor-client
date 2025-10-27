@@ -85,7 +85,7 @@ public class Rotations {
 
     @EventHandler
     private static void onSendMovementPacketsPre(SendMovementPacketsEvent.Pre event) {
-        if (mc.cameraEntity != mc.player) return;
+        if (mc.getCameraEntity() != mc.player) return;
         sentLastRotation = false;
 
         if (!rotations.isEmpty()) {
@@ -127,7 +127,7 @@ public class Rotations {
     @EventHandler
     private static void onSendMovementPacketsPost(SendMovementPacketsEvent.Post event) {
         if (!rotations.isEmpty()) {
-            if (mc.cameraEntity == mc.player) {
+            if (mc.getCameraEntity() == mc.player) {
                 rotations.get(i - 1).runCallback();
 
                 if (rotations.size() == 1) lastRotation = rotations.get(i - 1);

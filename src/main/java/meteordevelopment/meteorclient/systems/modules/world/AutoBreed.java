@@ -16,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.EntityHitResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +86,8 @@ public class AutoBreed extends Module {
                 continue;
 
             Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> {
+                EntityHitResult location = new EntityHitResult(animal, animal.getBoundingBox().getCenter());
+                mc.interactionManager.interactEntityAtLocation(mc.player, animal, location, hand.get());
                 mc.interactionManager.interactEntity(mc.player, animal, hand.get());
                 mc.player.swingHand(hand.get());
                 animalsFed.add(animal);

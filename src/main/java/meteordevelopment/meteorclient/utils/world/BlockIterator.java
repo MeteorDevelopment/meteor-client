@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.world;
 
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
@@ -15,8 +16,6 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -24,9 +23,9 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BlockIterator {
     private static final Pool<Callback> callbackPool = new Pool<>(Callback::new);
-    private static final List<Callback> callbacks = new ArrayList<>();
+    private static final List<Callback> callbacks = new ReferenceArrayList<>();
 
-    private static final List<Runnable> afterCallbacks = new ArrayList<>();
+    private static final List<Runnable> afterCallbacks = new ReferenceArrayList<>();
 
     private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private static int hRadius, vRadius;
@@ -61,15 +60,14 @@ public class BlockIterator {
                     int dy = Math.abs(y - py);
                     int dz = Math.abs(z - pz);
 
-                    for (Iterator<Callback> it = callbacks.iterator(); it.hasNext(); ) {
-                        Callback callback = it.next();
-
+                    callbacks.removeIf(callback -> {
                         if (dx <= callback.hRadius && dy <= callback.vRadius && dz <= callback.hRadius) {
                             disableCurrent = false;
                             callback.function.accept(blockPos, blockState);
-                            if (disableCurrent) it.remove();
+                            return disableCurrent;
                         }
-                    }
+                        return false;
+                    });
                 }
             }
         }
@@ -77,7 +75,7 @@ public class BlockIterator {
         hRadius = 0;
         vRadius = 0;
 
-        for (Callback callback : callbacks) callbackPool.free(callback);
+        callbackPool.freeAll(callbacks);
         callbacks.clear();
 
         for (Runnable callback : afterCallbacks) callback.run();

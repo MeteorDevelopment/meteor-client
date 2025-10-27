@@ -92,6 +92,10 @@ public class EntityUtils {
         return false;
     }
 
+    public static boolean isInCobweb(Entity entity) {
+        return mc.world.getStatesInBoxIfLoaded(entity.getBoundingBox()).anyMatch(state -> state.isOf(Blocks.COBWEB));
+    }
+
     public static boolean isInRenderDistance(Entity entity) {
         if (entity == null) return false;
         return isInRenderDistance(entity.getX(), entity.getZ());

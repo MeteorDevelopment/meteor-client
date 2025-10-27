@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -16,6 +17,9 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.OptionalDouble;
 
@@ -72,13 +76,12 @@ public class Step extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isSneaking()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isSneaking());
-        mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, 1, 0));
-        if (work && (!safeStep.get() || (getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()))){
-            mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(height.get());
+        double height = getMaxSafeHeight();
+        if (work && height > 0) {
+            mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(height);
         } else {
             mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
         }
-        mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, -1, 0));
     }
 
     @Override
@@ -96,9 +99,59 @@ public class Step extends Module {
         OptionalDouble crystalDamage = Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EndCrystalEntity)
                 .filter(Entity::isAlive)
-                .mapToDouble(entity -> DamageUtils.crystalDamage(mc.player, entity.getPos()))
+                .mapToDouble(entity -> DamageUtils.crystalDamage(mc.player, entity.getEntityPos()))
                 .max();
         return crystalDamage.orElse(0.0);
+    }
+
+    private boolean isSafe() {
+        return getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get();
+    }
+
+    private boolean isSaferThanWith(double damage) {
+        return isSafe() || getExplosionDamage() - damage <= 0;
+    }
+
+    private double getMaxSafeHeight() {
+        if (!safeStep.get()) return height.get();
+
+        double max = height.get();
+        double h = 0;
+        double currentDamage =getExplosionDamage();
+        Box initial = mc.player.getBoundingBox();
+
+        // all of this is to avoid running into crystals which are behind
+        // one block when holding a movement key because standing on the
+        // near edge of that block is technically safe
+
+        Vec3d inputOffset = mc.player.getRotationVector();
+        Vec2f input = mc.player.input.getMovementInput();
+        ((IVec3d) inputOffset).meteor$setY(0);
+        inputOffset = inputOffset.normalize().multiply(1.2);
+        double zdot = inputOffset.z;
+        double xdot = inputOffset.x;
+        inputOffset = new Vec3d(input.y * xdot + input.x * zdot, 0, input.x * xdot + input.y * zdot);
+
+        for (int i = 1; i < max; i++) {
+            mc.player.setBoundingBox(initial.offset(0, i, 0));
+            if (!isSaferThanWith(currentDamage)) {
+                mc.player.setBoundingBox(initial);
+                return h;
+            }
+
+            mc.player.setBoundingBox(mc.player.getBoundingBox().offset(inputOffset));
+            if (!isSaferThanWith(currentDamage)) {
+                mc.player.setBoundingBox(initial);
+                return h;
+            }
+            h += 1;
+        }
+        mc.player.setBoundingBox(initial.offset(0, max, 0));
+
+        if (isSaferThanWith(currentDamage)) h = max;
+
+        mc.player.setBoundingBox(initial);
+        return h;
     }
 
     public enum ActiveWhen {

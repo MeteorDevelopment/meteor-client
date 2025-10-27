@@ -5,17 +5,13 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
+import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderState;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
+import net.minecraft.client.render.block.entity.model.BannerFlagBlockModel;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
-import net.minecraft.client.render.model.ModelBaker;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BannerPatternsComponent;
 import net.minecraft.item.BannerItem;
@@ -27,19 +23,21 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class BannerTooltipComponent implements MeteorTooltipData, TooltipComponent {
     private final DyeColor color;
     private final BannerPatternsComponent patterns;
-    private final ModelPart bannerField;
+    private final BannerFlagBlockModel bannerFlag;
 
-    // should only be used when the ItemStack is a banner
+    /** Should only be used when the ItemStack is a banner */
     public BannerTooltipComponent(ItemStack banner) {
         this.color = ((BannerItem) banner.getItem()).getColor();
         this.patterns = banner.getOrDefault(DataComponentTypes.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT);
-        this.bannerField = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG).getChild("flag");
+        ModelPart modelPart = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG);
+        this.bannerFlag = new BannerFlagBlockModel(modelPart);
     }
 
     public BannerTooltipComponent(DyeColor color, BannerPatternsComponent patterns) {
         this.color = color;
         this.patterns = patterns;
-        this.bannerField = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG).getChild("flag");
+        ModelPart modelPart = mc.getLoadedEntityModels().getModelPart(EntityModelLayers.STANDING_BANNER_FLAG);
+        this.bannerFlag = new BannerFlagBlockModel(modelPart);
     }
 
     @Override
@@ -49,50 +47,24 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
 
     @Override
     public int getHeight(TextRenderer textRenderer) {
-        return 32 * 5;
+        return 40 * 2;
     }
 
     @Override
     public int getWidth(TextRenderer textRenderer) {
-        return 16 * 5;
+        return 20 * 2;
     }
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
-        mc.gameRenderer.getDiffuseLighting().setShaderLights(DiffuseLighting.Type.ITEMS_FLAT);
+        var centerX = width / 2 - getWidth(null) / 2;
 
-        bannerField.pitch = 0f;
-        bannerField.originY = -32f;
-
-        // the width and height provided to this method seem to be the dimensions of the entire tooltip,
-        // not just this component
-        int totalWidth = width;
-        width = getWidth(null);
-        height = getHeight(null);
-
-        MatrixStack matrices = new MatrixStack();
-        matrices.push();
-        matrices.translate(x + width / 2f + (totalWidth - width) / 2f, y + height * 0.775f, 0);
-
-        float s = Math.min(width, height);
-        matrices.scale(s * 0.75f, s * 0.75f, 1);
-
-        VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
-
-        BannerBlockEntityRenderer.renderCanvas(
-            matrices,
-            immediate,
-            15728880,
-            OverlayTexture.DEFAULT_UV,
-            bannerField,
-            ModelBaker.BANNER_BASE,
-            true,
-            color,
-            patterns
-        );
-
-        immediate.draw();
-
-        matrices.pop();
+        context.state.addSpecialElement(new CustomBannerGuiElementRenderState(
+            bannerFlag, color, patterns,
+            centerX + x, y,
+            centerX + x + getWidth(null), y + getHeight(null),
+            context.scissorStack.peekLast(),
+            16 * 2
+        ));
     }
 }

@@ -44,7 +44,22 @@ public class FakeClientPlayer {
         if (player == null || (!id.equals(lastId))) {
             if (world == null) {
                 world = new ClientWorld(
-                    new ClientPlayNetworkHandler(mc, new ClientConnection(NetworkSide.CLIENTBOUND), new ClientConnectionState(new GameProfile(mc.getSession().getUuidOrNull(), mc.getSession().getUsername()), null, null, null, null, mc.getCurrentServerEntry(), null, null, null, null, null)),
+                    new ClientPlayNetworkHandler(mc, new ClientConnection(NetworkSide.CLIENTBOUND), new ClientConnectionState(
+                        null,
+                        new GameProfile(mc.getSession().getUuidOrNull(), mc.getSession().getUsername()),
+                        null,
+                        null,
+                        null,
+                        null,
+                        mc.getCurrentServerEntry(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        false)
+                    ),
                     new ClientWorld.Properties(Difficulty.NORMAL, false, false),
                     world.getRegistryKey(),
                     world.getDimensionEntry(),

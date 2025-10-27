@@ -11,6 +11,8 @@ accessible   class   net/minecraft/client/texture/MapTextureManager$MapTexture
 accessible   field   net/minecraft/client/texture/MapTextureManager$MapTexture texture Lnet/minecraft/client/texture/NativeImageBackedTexture;
 
 accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$EffectButtonWidget
+accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$DoneButtonWidget
+accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$CancelButtonWidget
 
 accessible   class   net/minecraft/client/resource/ResourceReloadLogger$ReloadState
 
@@ -19,6 +21,8 @@ accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder <init> (
 accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder withSnippet (Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;)V
 
 accessible   field   net/minecraft/client/render/RenderPhase ITEM_ENTITY_TARGET Lnet/minecraft/client/render/RenderPhase$Target;
+
+accessible   field   net/minecraft/client/render/command/OrderedRenderCommandQueueImpl batchingQueues Lit/unimi/dsi/fastutil/ints/Int2ObjectAVLTreeMap;
 
 # Auto Fish
 accessible   class   net/minecraft/entity/projectile/FishingBobberEntity$State

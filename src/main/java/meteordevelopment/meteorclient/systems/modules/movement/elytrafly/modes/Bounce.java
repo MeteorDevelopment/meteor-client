@@ -9,6 +9,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightMode;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
@@ -109,7 +110,7 @@ public class Bounce extends ElytraFlightMode {
         if (!player.isTouchingWater() && !player.hasStatusEffect(StatusEffects.LEVITATION)) {
             ItemStack itemStack = player.getEquippedStack(EquipmentSlot.CHEST);
             if (itemStack.contains(DataComponentTypes.GLIDER) && !itemStack.willBreakNextUse()) {
-                player.startGliding();
+                MeteorClient.mc.executeSync(player::startGliding);
                 return true;
             } else return false;
         } else return false;

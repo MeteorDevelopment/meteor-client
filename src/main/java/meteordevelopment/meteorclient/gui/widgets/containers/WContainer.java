@@ -9,6 +9,9 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -124,26 +127,26 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button, boolean used) {
+    public boolean mouseClicked(Click click, boolean used) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().mouseClicked(mouseX, mouseY, button, used))
+                if (propagateEvents(cell.widget()) && cell.widget().mouseClicked(click, used))
                     used = true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return super.mouseClicked(mouseX, mouseY, button, used) || used;
+        return super.mouseClicked(click, used) || used;
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(Click click) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().mouseReleased(mouseX, mouseY, button)) return true;
+                if (propagateEvents(cell.widget()) && cell.widget().mouseReleased(click)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(click);
     }
 
     @Override
@@ -169,35 +172,35 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public boolean keyPressed(int key, int modifiers) {
+    public boolean keyPressed(KeyInput input) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().keyPressed(key, modifiers)) return true;
+                if (propagateEvents(cell.widget()) && cell.widget().keyPressed(input)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return onKeyPressed(key, modifiers);
+        return onKeyPressed(input);
     }
 
     @Override
-    public boolean keyRepeated(int key, int modifiers) {
+    public boolean keyRepeated(KeyInput input) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().keyRepeated(key, modifiers)) return true;
+                if (propagateEvents(cell.widget()) && cell.widget().keyRepeated(input)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return onKeyRepeated(key, modifiers);
+        return onKeyRepeated(input);
     }
 
     @Override
-    public boolean charTyped(char c) {
+    public boolean charTyped(CharInput input) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().charTyped(c)) return true;
+                if (propagateEvents(cell.widget()) && cell.widget().charTyped(input)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return super.charTyped(c);
+        return super.charTyped(input);
     }
 }

@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.gui.widgets;
 
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.client.gui.Click;
 
 public abstract class WLabel extends WPressable {
     public Color color;
@@ -26,14 +27,14 @@ public abstract class WLabel extends WPressable {
     }
 
     @Override
-    public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
-        if (action != null) return super.onMouseClicked(mouseX, mouseY, button, used);
+    public boolean onMouseClicked(Click click, boolean used) {
+        if (action != null) return super.onMouseClicked(click, used);
         return false;
     }
 
     @Override
-    public boolean onMouseReleased(double mouseX, double mouseY, int button) {
-        if (action != null) return super.onMouseReleased(mouseX, mouseY, button);
+    public boolean onMouseReleased(Click click) {
+        if (action != null) return super.onMouseReleased(click);
         return false;
     }
 

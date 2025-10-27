@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -29,6 +29,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.world.GameMode;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
@@ -66,6 +67,13 @@ public class MiddleClickExtra extends Module {
         .build()
     );
 
+    private final Setting<Boolean> disableInCreative = sgGeneral.add(new BoolSetting.Builder()
+        .name("disable-in-creative")
+        .description("Middle click action is disabled in Creative mode.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> notify = sgGeneral.add(new BoolSetting.Builder()
         .name("notify")
         .description("Notifies you when you do not have the specified item in your hotbar.")
@@ -89,8 +97,10 @@ public class MiddleClickExtra extends Module {
     }
 
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
-        if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_MIDDLE || mc.currentScreen != null) return;
+    private void onMouseClick(MouseClickEvent event) {
+        if (event.action != KeyAction.Press || event.button() != GLFW_MOUSE_BUTTON_MIDDLE || mc.currentScreen != null) return;
+
+        if (disabledByCreative()) return;
 
         if (mode.get() == Mode.AddFriend) {
             if (mc.targetedEntity == null) return;
@@ -178,6 +188,12 @@ public class MiddleClickExtra extends Module {
             if (!swapBack.get() || wasCancelled) return;
             InvUtils.swapBack();
         }
+    }
+
+    private boolean disabledByCreative() {
+        if (mc.player == null) return false;
+
+        return disableInCreative.get() && mc.player.getGameMode() == GameMode.CREATIVE;
     }
 
     public enum Mode {

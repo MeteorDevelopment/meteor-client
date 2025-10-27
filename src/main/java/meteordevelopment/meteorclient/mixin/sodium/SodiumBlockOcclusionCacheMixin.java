@@ -32,7 +32,7 @@ public abstract class SodiumBlockOcclusionCacheMixin {
     @ModifyReturnValue(method = "shouldDrawSide", at = @At("RETURN"))
     private boolean shouldDrawSide(boolean original, BlockState state, BlockView view, BlockPos pos, Direction facing) {
         if (xray.isActive()) {
-            return xray.modifyDrawSide(state, view.getBlockState(pos.offset(facing)), facing, original);
+            return xray.modifyDrawSide(state, view, pos, facing, original);
         }
 
         return original;

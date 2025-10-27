@@ -11,10 +11,13 @@ import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -85,5 +88,15 @@ public abstract class ClientWorldMixin {
         if (Modules.get().get(NoRender.class).noBarrierInvis()) {
             args.set(5, Blocks.BARRIER);
         }
+    }
+
+    @Inject(method = "addBlockBreakParticles", at = @At("HEAD"), cancellable = true)
+    private void onAddBlockBreakParticles(BlockPos blockPos, BlockState state, CallbackInfo info) {
+        if (Modules.get().get(NoRender.class).noBlockBreakParticles()) info.cancel();
+    }
+
+    @Inject(method = "spawnBlockBreakingParticle", at = @At("HEAD"), cancellable = true)
+    private void onAddBlockBreakingParticles(BlockPos blockPos, Direction direction, CallbackInfo info) {
+        if (Modules.get().get(NoRender.class).noBlockBreakParticles()) info.cancel();
     }
 }
