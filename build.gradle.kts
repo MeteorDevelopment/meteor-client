@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.loom)
+    alias(libs.plugins.fabric.loom)
     id("maven-publish")
 }
 
@@ -13,7 +13,7 @@ base {
         "local"
     }
 
-    version = properties["minecraft_version"] as String + "-" + suffix
+    version = libs.versions.minecraft.get() + "-" + suffix
 }
 
 repositories {
@@ -75,7 +75,6 @@ dependencies {
     mappings(variantOf(libs.yarn) { classifier("v2") })
     modImplementation(libs.fabric.loader)
 
-    // Use fabricApi.module() helper with version from catalog
     val fapiVersion = libs.versions.fabric.api.get()
     modInclude(fabricApi.module("fabric-api-base", fapiVersion))
     modInclude(fabricApi.module("fabric-resource-loader-v0", fapiVersion))
@@ -152,8 +151,8 @@ tasks {
             "version" to project.version,
             "build_number" to buildNumber,
             "commit" to commit,
-            "minecraft_version" to project.property("minecraft_version"),
-            "loader_version" to project.property("loader_version")
+            "minecraft_version" to libs.versions.minecraft.get(),
+            "loader_version" to libs.versions.fabric.loader.get()
         )
 
         inputs.properties(propertyMap)
@@ -215,7 +214,7 @@ publishing {
             from(components["java"])
             artifactId = "meteor-client"
 
-            version = properties["minecraft_version"] as String + "-SNAPSHOT"
+            version = libs.versions.minecraft.get() + "-SNAPSHOT"
         }
     }
 

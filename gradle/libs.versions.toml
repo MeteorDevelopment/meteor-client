@@ -60,4 +60,4 @@ netty-codec-socks = { module = "io.netty:netty-codec-socks", version.ref = "nett
 waybackauthlib = { module = "de.florianmichael:WaybackAuthLib", version.ref = "waybackauthlib" }
 
 [plugins]
-loom = { id = "fabric-loom", version.ref = "loom" }
+fabric-loom = { id = "fabric-loom", version.ref = "loom" }
