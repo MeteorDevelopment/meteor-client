@@ -4,7 +4,6 @@ import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.renderer.FullScreenRenderer;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.utils.render.CustomOutlineVertexConsumerProvider;
 import net.minecraft.client.gl.DynamicUniformStorage;
@@ -51,7 +50,7 @@ public abstract class PostProcessShader {
         var renderer = MeshRenderer.begin()
             .attachments(mc.getFramebuffer())
             .pipeline(pipeline)
-            .mesh(FullScreenRenderer.mesh)
+            .fullscreen()
             .uniform("PostData", UNIFORM_STORAGE.write(new UniformData(
                 (float) mc.getWindow().getFramebufferWidth(), (float) mc.getWindow().getFramebufferHeight(),
                 (float) glfwGetTime()

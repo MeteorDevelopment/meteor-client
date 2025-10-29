@@ -107,6 +107,10 @@ public class MeshRenderer {
         return this;
     }
 
+    public MeshRenderer fullscreen() {
+        return this.mesh(FullScreenRenderer.vbo, FullScreenRenderer.ibo);
+    }
+
     public MeshRenderer uniform(String name, GpuBufferSlice slice) {
         uniforms.put(name, slice);
         return this;

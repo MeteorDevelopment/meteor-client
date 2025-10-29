@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.events.game.ResolutionChangedEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IGpuTexture;
-import meteordevelopment.meteorclient.renderer.FullScreenRenderer;
+import meteordevelopment.meteorclient.renderer.FixedUniformStorage;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -211,7 +211,7 @@ public class Blur extends Module {
         MeshRenderer.begin()
             .attachments(mc.getFramebuffer())
             .pipeline(MeteorRenderPipelines.BLUR_PASSTHROUGH)
-            .mesh(FullScreenRenderer.mesh)
+            .fullscreen()
             .sampler("u_Texture", fbos[0])
             .end();
     }
@@ -225,11 +225,11 @@ public class Blur extends Module {
         MeshRenderer.begin()
             .attachments(targetFbo, null)
             .pipeline(pipeline)
-            .mesh(FullScreenRenderer.mesh)
             .uniform("BlurData", UNIFORM_STORAGE.write(new UniformData(
                 0.5f / targetFbo.getWidth(0), 0.5f / targetFbo.getHeight(0),
                 (float) offset
             )))
+            .fullscreen()
             .sampler("u_Texture", sourceTexture)
             .end();
 
