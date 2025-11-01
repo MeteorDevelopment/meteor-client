@@ -318,10 +318,10 @@ public class KillAura extends Module {
                 case All -> stack -> stack.getItem() instanceof AxeItem || stack.isIn(ItemTags.SWORDS) || stack.getItem() instanceof MaceItem || stack.getItem() instanceof TridentItem;
                 default -> o -> true;
             };
-            FindItemResult weaponResult = InvUtils.findInHotbar(predicate);
+            FindItemResult weaponResult = InvUtils.find(predicate, 0, 8);
 
             if (shouldShieldBreak()) {
-                FindItemResult axeResult = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof AxeItem);
+                FindItemResult axeResult = InvUtils.find(itemStack -> itemStack.getItem() instanceof AxeItem, 0, 8);
                 if (axeResult.found()) weaponResult = axeResult;
             }
 
