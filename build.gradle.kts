@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.11-SNAPSHOT"
+    alias(libs.plugins.fabric.loom)
     id("maven-publish")
 }
 
@@ -13,7 +13,7 @@ base {
         "local"
     }
 
-    version = properties["minecraft_version"] as String + "-" + suffix
+    version = libs.versions.minecraft.get() + "-" + suffix
 }
 
 repositories {
@@ -71,35 +71,34 @@ configurations {
 
 dependencies {
     // Fabric
-    minecraft("com.mojang:minecraft:${properties["minecraft_version"] as String}")
-    mappings("net.fabricmc:yarn:${properties["yarn_mappings"] as String}:v2")
-    modImplementation("net.fabricmc:fabric-loader:${properties["loader_version"] as String}")
+    minecraft(libs.minecraft)
+    mappings(variantOf(libs.yarn) { classifier("v2") })
+    modImplementation(libs.fabric.loader)
 
-    modInclude(fabricApi.module("fabric-api-base", properties["fapi_version"] as String))
-    modInclude(fabricApi.module("fabric-resource-loader-v0", properties["fapi_version"] as String))
-    modInclude(fabricApi.module("fabric-resource-loader-v1", properties["fapi_version"] as String))
+    val fapiVersion = libs.versions.fabric.api.get()
+    modInclude(fabricApi.module("fabric-api-base", fapiVersion))
+    modInclude(fabricApi.module("fabric-resource-loader-v0", fapiVersion))
+    modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
 
     // Compat fixes
-    modCompileOnly(fabricApi.module("fabric-renderer-indigo", properties["fapi_version"] as String))
-    modCompileOnly("maven.modrinth:sodium:${properties["sodium_version"] as String}") { isTransitive = false }
-    modCompileOnly("maven.modrinth:lithium:${properties["lithium_version"] as String}") { isTransitive = false }
-    modCompileOnly("maven.modrinth:iris:${properties["iris_version"] as String}") { isTransitive = false }
-    modCompileOnly("com.viaversion:viafabricplus:${properties["viafabricplus_version"] as String}") { isTransitive = false }
-    modCompileOnly("com.viaversion:viafabricplus-api:${properties["viafabricplus_version"] as String}") { isTransitive = false }
+    modCompileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
+    modCompileOnly(libs.sodium) { isTransitive = false }
+    modCompileOnly(libs.lithium) { isTransitive = false }
+    modCompileOnly(libs.iris) { isTransitive = false }
+    modCompileOnly(libs.viafabricplus) { isTransitive = false }
+    modCompileOnly(libs.viafabricplus.api) { isTransitive = false }
 
-    // Baritone (https://github.com/MeteorDevelopment/baritone)
-    modCompileOnly("meteordevelopment:baritone:${properties["baritone_version"] as String}-SNAPSHOT")
-    // ModMenu (https://github.com/TerraformersMC/ModMenu)
-    modCompileOnly("com.terraformersmc:modmenu:${properties["modmenu_version"] as String}")
+    modCompileOnly(libs.baritone)
+    modCompileOnly(libs.modmenu)
 
-    // Libraries
-    jij("meteordevelopment:orbit:${properties["orbit_version"] as String}")
-    jij("org.meteordev:starscript:${properties["starscript_version"] as String}")
-    jij("meteordevelopment:discord-ipc:${properties["discordipc_version"] as String}")
-    jij("org.reflections:reflections:${properties["reflections_version"] as String}")
-    jij("io.netty:netty-handler-proxy:${properties["netty_version"] as String}") { isTransitive = false }
-    jij("io.netty:netty-codec-socks:${properties["netty_version"] as String}") { isTransitive = false }
-    jij("de.florianmichael:WaybackAuthLib:${properties["waybackauthlib_version"] as String}")
+    // Libraries (JAR-in-JAR)
+    jij(libs.orbit)
+    jij(libs.starscript)
+    jij(libs.discord.ipc)
+    jij(libs.reflections)
+    jij(libs.netty.handler.proxy) { isTransitive = false }
+    jij(libs.netty.codec.socks) { isTransitive = false }
+    jij(libs.waybackauthlib)
 }
 
 // Handle transitive dependencies for jar-in-jar
@@ -152,8 +151,8 @@ tasks {
             "version" to project.version,
             "build_number" to buildNumber,
             "commit" to commit,
-            "minecraft_version" to project.property("minecraft_version"),
-            "loader_version" to project.property("loader_version")
+            "minecraft_version" to libs.versions.minecraft.get(),
+            "loader_version" to libs.versions.fabric.loader.get()
         )
 
         inputs.properties(propertyMap)
@@ -215,7 +214,7 @@ publishing {
             from(components["java"])
             artifactId = "meteor-client"
 
-            version = properties["minecraft_version"] as String + "-SNAPSHOT"
+            version = libs.versions.minecraft.get() + "-SNAPSHOT"
         }
     }
 
