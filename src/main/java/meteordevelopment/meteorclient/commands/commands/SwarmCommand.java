@@ -43,7 +43,7 @@ public class SwarmCommand extends Command {
     private @Nullable ObjectIntPair<String> pendingConnection;
 
     public SwarmCommand() {
-        super("swarm", "Sends commands to connected swarm workers.");
+        super("swarm");
     }
 
     @Override

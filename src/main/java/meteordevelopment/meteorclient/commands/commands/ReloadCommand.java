@@ -17,7 +17,7 @@ import net.minecraft.command.CommandSource;
 
 public class ReloadCommand extends Command {
     public ReloadCommand() {
-        super("reload", "Reloads many systems.");
+        super("reload");
     }
 
     @Override

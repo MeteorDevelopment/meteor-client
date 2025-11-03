@@ -84,7 +84,12 @@ public class MeteorTranslations {
 
     public static String translate(String key) {
         MeteorLanguage currentLang = getCurrentLanguage();
-        return currentLang.hasTranslation(key) ? currentLang.get(key) : getDefaultLanguage().get(key);
+        return currentLang.get(key, getDefaultLanguage().get(key));
+    }
+
+    public static String translate(String key, String fallback) {
+        MeteorLanguage currentLang = getCurrentLanguage();
+        return currentLang.get(key, getDefaultLanguage().get(key, fallback));
     }
 
     public static MeteorLanguage getLanguage(String lang) {

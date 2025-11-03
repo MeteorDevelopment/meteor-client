@@ -19,7 +19,7 @@ public class WaspCommand extends Command {
     private static final SimpleCommandExceptionType CANT_WASP_SELF = new SimpleCommandExceptionType(Text.literal("You cannot target yourself!"));
 
     public WaspCommand() {
-        super("wasp", "Sets the auto wasp target.");
+        super("wasp");
     }
 
     @Override

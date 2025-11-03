@@ -41,7 +41,7 @@ public class InputCommand extends Command {
     );
 
     public InputCommand() {
-        super("input", "Keyboard input simulation.");
+        super("input");
     }
 
     @Override

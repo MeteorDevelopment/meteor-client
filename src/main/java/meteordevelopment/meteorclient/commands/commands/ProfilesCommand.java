@@ -15,7 +15,7 @@ import net.minecraft.command.CommandSource;
 public class ProfilesCommand extends Command {
 
     public ProfilesCommand() {
-        super("profiles", "Loads and saves profiles.");
+        super("profiles");
     }
 
     @Override

@@ -21,7 +21,7 @@ import java.util.List;
 
 public class MacroCommand extends Command {
     public MacroCommand() {
-        super("macro", "Allows you to execute macros.");
+        super("macro");
 
         MeteorClient.EVENT_BUS.subscribe(this);
     }

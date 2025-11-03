@@ -23,7 +23,7 @@ public class GiveCommand extends Command {
     private final static SimpleCommandExceptionType NO_SPACE = new SimpleCommandExceptionType(Text.literal("No space in hotbar."));
 
     public GiveCommand() {
-        super("give", "Gives you any item.");
+        super("give");
     }
 
     @Override

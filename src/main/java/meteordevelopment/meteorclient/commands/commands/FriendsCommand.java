@@ -18,7 +18,7 @@ import net.minecraft.util.Formatting;
 
 public class FriendsCommand extends Command {
     public FriendsCommand() {
-        super("friends", "Manages friends.");
+        super("friends");
     }
 
     @Override

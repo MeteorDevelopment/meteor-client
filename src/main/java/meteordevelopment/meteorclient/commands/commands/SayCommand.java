@@ -23,7 +23,7 @@ import java.time.Instant;
 
 public class SayCommand extends Command {
     public SayCommand() {
-        super("say", "Sends messages in chat.");
+        super("say");
     }
 
     @Override

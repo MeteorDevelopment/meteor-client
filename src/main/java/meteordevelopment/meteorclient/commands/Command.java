@@ -12,6 +12,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
@@ -32,11 +33,20 @@ public abstract class Command {
     private final String description;
     private final List<String> aliases;
 
+    // todo remove in the next minecraft version update
+    @Deprecated(forRemoval = true)
     public Command(String name, String description, String... aliases) {
         this.name = name;
         this.title = Utils.nameToTitle(name);
-        this.description = description;
+        this.description = "meteor.command." + name + ".description";
         this.aliases = List.of(aliases);
+    }
+
+    public Command(String name) {
+        this.name = name;
+        this.title = Utils.nameToTitle(name);
+        this.description = "meteor.command." + name + ".description";
+        this.aliases = List.of();
     }
 
     // Helper methods to painlessly infer the CommandSource generic type argument
@@ -66,7 +76,7 @@ public abstract class Command {
     }
 
     public String getDescription() {
-        return description;
+        return MeteorTranslations.translate(description);
     }
 
     public List<String> getAliases() {
