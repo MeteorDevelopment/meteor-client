@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.addons;
 
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
+import java.io.InputStream;
+
 public abstract class MeteorAddon {
     /** This field is automatically assigned from fabric.mod.json file. */
     public String name;
@@ -32,6 +34,15 @@ public abstract class MeteorAddon {
     }
 
     public String getCommit() {
+        return null;
+    }
+
+    /**
+     * @param lang  A language code in lowercase
+     * @return      An InputStream for the relevant json translation file, or null if the addon doesn't have
+     *              a file for that language.
+     */
+    public InputStream provideLanguage(String lang) {
         return null;
     }
 }

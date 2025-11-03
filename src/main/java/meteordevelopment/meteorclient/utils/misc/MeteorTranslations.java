@@ -7,7 +7,10 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import com.google.gson.Gson;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.addons.AddonManager;
+import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.utils.PreInit;
 import net.minecraft.client.resource.language.ReorderingUtil;
 import net.minecraft.text.OrderedText;
@@ -25,11 +28,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class MeteorTranslations {
     private static final Gson GSON = new Gson();
-    private static Map<String, MeteorLanguage> languages;
+    private static final Map<String, MeteorLanguage> languages = new Object2ObjectOpenHashMap<>();
 
     @PreInit
-    public static void init() {
-        languages = new Object2ObjectOpenHashMap<>();
+    public static void preInit() {
         List<String> toLoad = new ArrayList<>(2);
         toLoad.add("en_us");
         if (!mc.options.language.equalsIgnoreCase("en_us")) toLoad.add(mc.options.language);
@@ -39,34 +41,47 @@ public class MeteorTranslations {
         }
     }
 
-    public static void loadLanguage(String language) {
-        language = language.toLowerCase();
-        if (languages.containsKey(language)) return;
+    public static void loadLanguage(String languageCode) {
+        languageCode = languageCode.toLowerCase();
+        if (languages.containsKey(languageCode)) return;
 
-        try (InputStream stream = MeteorTranslations.class.getResourceAsStream("/assets/meteor-client/language/" + language + ".json")) {
+        try (InputStream stream = MeteorTranslations.class.getResourceAsStream("/assets/meteor-client/language/" + languageCode + ".json")) {
             if (stream == null) {
-                if (language.equals("en_us")) throw new RuntimeException("Error loading the default language");
-                else MeteorClient.LOG.error("Error loading language: {}", language);
+                if (languageCode.equals("en_us")) throw new RuntimeException("Error loading the default language");
+                else MeteorClient.LOG.info("No language file found for '{}'", languageCode);
                 return;
             }
 
             // noinspection unchecked
             Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream), Object2ObjectOpenHashMap.class);
-            languages.put(language, new MeteorLanguage(map));
+            languages.put(languageCode, new MeteorLanguage(map));
 
-            MeteorClient.LOG.info("Loaded language: {}", language);
+            MeteorClient.LOG.info("Loaded language: {}", languageCode);
         } catch (IOException e) {
-            if (language.equals("en_us")) throw new RuntimeException(e);
-            else MeteorClient.LOG.error("Error loading language: {}", language, e);
+            if (languageCode.equals("en_us")) throw new RuntimeException(e);
+            else MeteorClient.LOG.error("Error loading language: {}", languageCode, e);
+        }
+
+        for (MeteorAddon addon : AddonManager.ADDONS) {
+            if (addon == MeteorClient.ADDON) continue;
+
+            try (InputStream stream = addon.provideLanguage(languageCode)) {
+                if (stream == null) continue;
+                MeteorLanguage lang = languages.getOrDefault(languageCode, new MeteorLanguage());
+
+                // noinspection unchecked
+                Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream), Object2ObjectOpenHashMap.class);
+                lang.addCustomTranslation(map);
+                languages.put(languageCode, lang);
+
+                MeteorClient.LOG.info("Loaded language {} from addon {}", languageCode, addon.name);
+            } catch (IOException e) {
+                MeteorClient.LOG.error("Error loading language {} from addon {}", languageCode, addon.name, e);
+            }
         }
     }
 
     public static String translate(String key) {
-        if (!key.startsWith("meteor.")) key = "meteor." + key;
-        return _translate(key);
-    }
-
-    private static String _translate(String key) {
         MeteorLanguage currentLang = getCurrentLanguage();
         return currentLang.hasTranslation(key) ? currentLang.get(key) : getDefaultLanguage().get(key);
     }
@@ -76,7 +91,7 @@ public class MeteorTranslations {
     }
 
     public static MeteorLanguage getCurrentLanguage() {
-        return languages.get(mc.options.language.toLowerCase());
+        return languages.getOrDefault(mc.options.language.toLowerCase(), getDefaultLanguage());
     }
 
     public static MeteorLanguage getDefaultLanguage() {
@@ -85,19 +100,43 @@ public class MeteorTranslations {
 
     public static class MeteorLanguage extends Language {
         private final Map<String, String> translations;
+        private final List<Map<String, String>> customTranslations = new ObjectArrayList<>();
+
+        public MeteorLanguage() {
+            this.translations = new Object2ObjectOpenHashMap<>();
+        }
 
         public MeteorLanguage(Map<String, String> translations) {
             this.translations = translations;
         }
 
-        @Override
-        public String get(String key, String fallback) {
-            return translations.getOrDefault(key, fallback);
+        @SuppressWarnings("unused")
+        public void addCustomTranslation(Map<String, String> customTranslation) {
+            if (customTranslations.contains(customTranslation)) return;
+
+            customTranslations.add(customTranslation);
         }
 
         @Override
-        public boolean hasTranslation(String key){
-            return translations.containsKey(key);
+        public String get(String key, String fallback) {
+            if (translations.containsKey(key)) return translations.get(key);
+
+            for (Map<String, String> customTranslation : customTranslations) {
+                if (customTranslation.containsKey(key)) return customTranslation.get(key);
+            }
+
+            return fallback;
+        }
+
+        @Override
+        public boolean hasTranslation(String key) {
+            if (translations.containsKey(key)) return true;
+
+            for (Map<String, String> customTranslation : customTranslations) {
+                if (customTranslation.containsKey(key)) return true;
+            }
+
+            return false;
         }
 
         @Override
