@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.text.MeteorTranslatableTextComponent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.ClickEvent;
@@ -53,7 +54,7 @@ public class CommandsCommand extends Command {
         }
         tooltip.append(aliases.formatted(Formatting.GRAY)).append("\n\n");
 
-        tooltip.append(Text.literal(command.getDescription()).formatted(Formatting.WHITE));
+        tooltip.append(MutableText.of(new MeteorTranslatableTextComponent(command.getDescription())).formatted(Formatting.WHITE));
 
         // Text
         MutableText text = Text.literal(Utils.nameToTitle(command.getName()));

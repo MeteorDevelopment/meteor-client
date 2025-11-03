@@ -12,7 +12,6 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
@@ -33,7 +32,7 @@ public abstract class Command {
     private final String description;
     private final List<String> aliases;
 
-    // todo remove in the next minecraft version update
+    // todo remove the description parameter in the next minecraft version update
     @Deprecated(forRemoval = true)
     public Command(String name, String description, String... aliases) {
         this.name = name;
@@ -76,7 +75,7 @@ public abstract class Command {
     }
 
     public String getDescription() {
-        return MeteorTranslations.translate(description);
+        return description;
     }
 
     public List<String> getAliases() {

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 
@@ -82,14 +83,26 @@ public class MeteorTranslations {
         }
     }
 
-    public static String translate(String key) {
+    public static String translate(String key, Object... args) {
         MeteorLanguage currentLang = getCurrentLanguage();
-        return currentLang.get(key, getDefaultLanguage().get(key));
+        String translated = currentLang.get(key, getDefaultLanguage().get(key));
+
+        try {
+            return String.format(translated, args);
+        } catch (IllegalFormatException e) {
+            return key;
+        }
     }
 
-    public static String translate(String key, String fallback) {
+    public static String translate(String key, String fallback, Object... args) {
         MeteorLanguage currentLang = getCurrentLanguage();
-        return currentLang.get(key, getDefaultLanguage().get(key, fallback));
+        String translated = currentLang.get(key, getDefaultLanguage().get(key, fallback));
+
+        try {
+            return String.format(translated, args);
+        } catch (IllegalFormatException e) {
+            return fallback;
+        }
     }
 
     public static MeteorLanguage getLanguage(String lang) {
