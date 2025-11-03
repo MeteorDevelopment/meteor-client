@@ -26,6 +26,7 @@ import java.util.Map;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
+@SuppressWarnings("unused")
 public class MeteorTranslations {
     private static final Gson GSON = new Gson();
     private static final Map<String, MeteorLanguage> languages = new Object2ObjectOpenHashMap<>();
@@ -49,14 +50,14 @@ public class MeteorTranslations {
             if (stream == null) {
                 if (languageCode.equals("en_us")) throw new RuntimeException("Error loading the default language");
                 else MeteorClient.LOG.info("No language file found for '{}'", languageCode);
-                return;
             }
+            else {
+                // noinspection unchecked
+                Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream), Object2ObjectOpenHashMap.class);
+                languages.put(languageCode, new MeteorLanguage(map));
 
-            // noinspection unchecked
-            Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream), Object2ObjectOpenHashMap.class);
-            languages.put(languageCode, new MeteorLanguage(map));
-
-            MeteorClient.LOG.info("Loaded language: {}", languageCode);
+                MeteorClient.LOG.info("Loaded language: {}", languageCode);
+            }
         } catch (IOException e) {
             if (languageCode.equals("en_us")) throw new RuntimeException(e);
             else MeteorClient.LOG.error("Error loading language: {}", languageCode, e);
@@ -110,7 +111,6 @@ public class MeteorTranslations {
             this.translations = translations;
         }
 
-        @SuppressWarnings("unused")
         public void addCustomTranslation(Map<String, String> customTranslation) {
             if (customTranslations.contains(customTranslation)) return;
 

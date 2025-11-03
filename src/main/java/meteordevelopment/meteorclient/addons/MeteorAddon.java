@@ -38,6 +38,19 @@ public abstract class MeteorAddon {
     }
 
     /**
+     * Example implementation:
+     * <pre>{@code
+     *  @Override
+     *  public InputStream provideLanguage(String lang) {
+     *      return Addon.class.getResourceAsStream("/assets/addon-name/language/" + lang + ".json")
+     *  }
+     * }
+     * </pre><br>
+     *
+     * Addons should not store their language files in the /assets/xxx/lang/ path as it opens up users to detection
+     * by servers via <a href="https://wurst.wiki/sign_translation_vulnerability">the translation exploit</a>.
+     * Storing them anywhere else should prevent them from getting picked up via the vanilla resource loader.
+     *
      * @param lang  A language code in lowercase
      * @return      An InputStream for the relevant json translation file, or null if the addon doesn't have
      *              a file for that language.
