@@ -70,14 +70,14 @@ public class AutoLog extends Module {
     );
 
     private final Setting<Boolean> onlyTrusted = sgGeneral.add(new BoolSetting.Builder()
-        .name("friends-only")
+        .name("only-trusted")
         .description("Disconnects when a player not on your friends list appears in render distance.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> instantDeath = sgGeneral.add(new BoolSetting.Builder()
-        .name("threat-of-instant-death")
+        .name("32K")
         .description("Disconnects when a player near you can instantly kill you.")
         .defaultValue(false)
         .build()
