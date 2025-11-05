@@ -36,6 +36,7 @@ import java.util.Set;
 public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgEntities = settings.createGroup("Entities");
+    private final SettingGroup sgPosition = settings.createGroup("Positions");
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
         .name("health")
@@ -61,15 +62,22 @@ public class AutoLog extends Module {
         .build()
     );
 
+    private final Setting<Boolean> posCheck = sgGeneral.add(new BoolSetting.Builder()
+        .name("position-check")
+        .description("Disconnects when you reach certain position.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> onlyTrusted = sgGeneral.add(new BoolSetting.Builder()
-        .name("only-trusted")
+        .name("friends-only")
         .description("Disconnects when a player not on your friends list appears in render distance.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> instantDeath = sgGeneral.add(new BoolSetting.Builder()
-        .name("32K")
+        .name("threat-of-instant-death")
         .description("Disconnects when a player near you can instantly kill you.")
         .defaultValue(false)
         .build()
@@ -93,6 +101,77 @@ public class AutoLog extends Module {
         .name("toggle-auto-reconnect")
         .description("Whether to disable Auto Reconnect after a logout.")
         .defaultValue(true)
+        .build()
+    );
+
+    // Position Check
+
+    private final Setting<Boolean> checkX = sgPosition.add(new BoolSetting.Builder()
+        .name("check-x-coordinate")
+        .description("Whether to check X coordinate.")
+        .defaultValue(false)
+        .visible(posCheck::get)
+        .build()
+    );
+
+    private final Setting<Relation> checkXRelation = sgPosition.add(new EnumSetting.Builder<Relation>()
+        .name("x-relation")
+        .defaultValue(Relation.Bigger)
+        .visible(() -> posCheck.get() && checkX.get())
+        .build()
+    );
+
+    private final Setting<Integer> checkXValue = sgPosition.add(new IntSetting.Builder()
+        .name("x-value")
+        .defaultValue(0)
+        .noSlider()
+        .visible(() -> posCheck.get() && checkX.get())
+        .build()
+    );
+
+    private final Setting<Boolean> checkY = sgPosition.add(new BoolSetting.Builder()
+        .name("check-y-coordinate")
+        .description("Whether to check Y coordinate.")
+        .defaultValue(false)
+        .visible(posCheck::get)
+        .build()
+    );
+
+    private final Setting<Relation> checkYRelation = sgPosition.add(new EnumSetting.Builder<Relation>()
+        .name("y-relation")
+        .defaultValue(Relation.Bigger)
+        .visible(() -> posCheck.get() && checkY.get())
+        .build()
+    );
+
+    private final Setting<Integer> checkYValue = sgPosition.add(new IntSetting.Builder()
+        .name("y-value")
+        .defaultValue(0)
+        .noSlider()
+        .visible(() -> posCheck.get() && checkY.get())
+        .build()
+    );
+
+    private final Setting<Boolean> checkZ = sgPosition.add(new BoolSetting.Builder()
+        .name("check-z-coordinate")
+        .description("Whether to check Z coordinate.")
+        .defaultValue(false)
+        .visible(posCheck::get)
+        .build()
+    );
+
+    private final Setting<Relation> checkZRelation = sgPosition.add(new EnumSetting.Builder<Relation>()
+        .name("z-relation")
+        .defaultValue(Relation.Bigger)
+        .visible(() -> posCheck.get() && checkZ.get())
+        .build()
+    );
+
+    private final Setting<Integer> checkZValue = sgPosition.add(new IntSetting.Builder()
+        .name("z-value")
+        .defaultValue(0)
+        .noSlider()
+        .visible(() -> posCheck.get() && checkZ.get())
         .build()
     );
 
@@ -173,6 +252,8 @@ public class AutoLog extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (mc.player == null || mc.world == null) return;
+
         float playerHealth = mc.player.getHealth();
         if (playerHealth <= 0) {
             this.toggle();
@@ -191,6 +272,38 @@ public class AutoLog extends Module {
             disconnect("Health was going to be lower than " + health.get() + ".");
             if (toggleOff.get()) this.toggle();
             return;
+        }
+
+        if (posCheck.get()) {
+            if (checkX.get()) {
+                double x = mc.player.getPos().getX();
+
+                if ((checkXRelation.get() == Relation.Bigger && x >= checkXValue.get()) || (checkXRelation.get() == Relation.Smaller && x <= checkXValue.get())) {
+                    disconnect("X coordinate reached.");
+                    if (toggleOff.get()) this.toggle();
+                    return;
+                }
+            }
+
+            if (checkY.get()) {
+                double y = mc.player.getPos().getY();
+
+                if ((checkYRelation.get() == Relation.Bigger && y >= checkYValue.get()) || (checkYRelation.get() == Relation.Smaller && y <= checkYValue.get())) {
+                    disconnect("Y coordinate reached.");
+                    if (toggleOff.get()) this.toggle();
+                    return;
+                }
+            }
+
+            if (checkZ.get()) {
+                double z = mc.player.getPos().getZ();
+
+                if ((checkZRelation.get() == Relation.Bigger && z >= checkZValue.get()) || (checkZRelation.get() == Relation.Smaller && z <= checkZValue.get())) {
+                    disconnect("Z coordinate reached.");
+                    if (toggleOff.get()) this.toggle();
+                    return;
+                }
+            }
         }
 
         if (!onlyTrusted.get() && !instantDeath.get() && entities.get().isEmpty())
@@ -232,8 +345,7 @@ public class AutoLog extends Module {
             if (useTotalCount.get() && totalEntities >= combinedEntityThreshold.get()) {
                 disconnect("Total number of selected entities within range exceeded the limit.");
                 if (toggleOff.get()) this.toggle();
-            }
-            else if (!useTotalCount.get()) {
+            } else if (!useTotalCount.get()) {
                 // Check if the count of each entity type exceeds the specified limit
                 for (Object2IntMap.Entry<EntityType<?>> entry : entityCounts.object2IntEntrySet()) {
                     if (entry.getIntValue() >= individualEntityThreshold.get()) {
@@ -260,17 +372,18 @@ public class AutoLog extends Module {
             autoReconnect.toggle();
         }
 
-        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(text));
+        assert mc.world != null;
+        mc.world.disconnect(text);
     }
 
     private class StaticListener {
         @EventHandler
         private void healthListener(TickEvent.Post event) {
-            if (isActive()) disableHealthListener();
-
-            else if (Utils.canUpdate()
-                && !mc.player.isDead()
-                && mc.player.getHealth() > health.get()) {
+            assert mc.player != null;
+            if (isActive()) {
+                disableHealthListener();
+            }
+            else if (Utils.canUpdate() && !mc.player.isDead() && mc.player.getHealth() > health.get()) {
                 info("Player health greater than minimum, re-enabling module.");
                 toggle();
                 disableHealthListener();
@@ -286,5 +399,10 @@ public class AutoLog extends Module {
 
     private void disableHealthListener() {
         MeteorClient.EVENT_BUS.unsubscribe(staticListener);
+    }
+
+    private enum Relation {
+        Bigger,
+        Smaller
     }
 }
