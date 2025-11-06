@@ -186,7 +186,7 @@ public class GuiRenderer {
             }
 
             double deltaX = -tooltipWidget.x + mouseX + 12;
-            double deltaY = -tooltipWidget.y + mouseX + 12;
+            double deltaY = -tooltipWidget.y + mouseY + 12;
 
             if (mouseX + 12 + tooltipWidget.width > getWindowWidth()) deltaX = -tooltipWidget.x + getWindowWidth() - tooltipWidget.width;
             if (mouseY + 12 + tooltipWidget.height > getWindowHeight()) deltaY = -tooltipWidget.y + getWindowHeight() - tooltipWidget.height;
