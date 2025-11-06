@@ -6,6 +6,8 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -49,9 +51,6 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
     @Shadow
     private ClientWorld world;
 
-    @Unique
-    private boolean worldNotNull;
-
     protected ClientPlayNetworkHandlerMixin(MinecraftClient client, ClientConnection connection, ClientConnectionState connectionState) {
         super(client, connection, connectionState);
     }
@@ -66,13 +65,13 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
     }
 
     @Inject(method = "onGameJoin", at = @At("HEAD"))
-    private void onGameJoinHead(GameJoinS2CPacket packet, CallbackInfo info) {
-        worldNotNull = world != null;
+    private void onGameJoinHead(GameJoinS2CPacket packet, CallbackInfo info, @Share("worldNotNull") LocalBooleanRef worldNotNull) {
+        worldNotNull.set(world != null);
     }
 
     @Inject(method = "onGameJoin", at = @At("TAIL"))
-    private void onGameJoinTail(GameJoinS2CPacket packet, CallbackInfo info) {
-        if (worldNotNull) {
+    private void onGameJoinTail(GameJoinS2CPacket packet, CallbackInfo info, @Share("worldNotNull") LocalBooleanRef worldNotNull) {
+        if (worldNotNull.get()) {
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
         }
 
