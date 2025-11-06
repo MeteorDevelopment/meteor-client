@@ -13,6 +13,7 @@ import net.minecraft.text.TextContent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -32,8 +33,8 @@ public class MeteorTranslatableTextComponent implements TextContent {
         this.args = args;
     }
 
-    public MeteorTranslatableTextComponent(String key) {
-        this(key, null);
+    public MeteorTranslatableTextComponent(String key, Object... args) {
+        this(key, null, args);
     }
 
     private void updateTranslations() {
@@ -66,7 +67,7 @@ public class MeteorTranslatableTextComponent implements TextContent {
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (!(o instanceof MeteorTranslatableTextComponent component)) return false;
-        return component.key.equals(this.key) && component.fallback.equals(this.fallback) && Arrays.equals(this.args, component.args);
+        return Objects.equals(this.key, component.key) && Objects.equals(this.fallback, component.fallback) && Arrays.equals(this.args, component.args);
     }
 
     @Override

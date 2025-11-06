@@ -34,7 +34,7 @@
   "meteor.command.save-map.description": "Saves a map to an image.",
   "meteor.command.say.description": "Sends messages in chat.",
   "meteor.command.server.description": "Prints server information",
-  "meteor.command.hud.description": "Allows you to view and change module settings.",
+  "meteor.command.settings.description": "Allows you to view and change module settings.",
   "meteor.command.spectate.description": "Allows you to spectate nearby players",
   "meteor.command.swarm.description": "Sends commands to connected swarm workers.",
   "meteor.command.toggle.description": "Toggles a module.",

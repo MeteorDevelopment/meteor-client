@@ -27,6 +27,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
+import meteordevelopment.meteorclient.utils.misc.text.MeteorTranslatableTextComponent;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
@@ -37,6 +38,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,5 +198,13 @@ public class MeteorClient implements ClientModInitializer {
 
     public static Identifier identifier(String path) {
         return Identifier.of(MeteorClient.MOD_ID, path);
+    }
+
+    public static MutableText translatable(String string, Object... args) {
+        return MutableText.of(new MeteorTranslatableTextComponent(string, args));
+    }
+
+    public static MutableText translatable(String string, String fallback, Object... args) {
+        return MutableText.of(new MeteorTranslatableTextComponent(string, fallback, args));
     }
 }

@@ -1,4 +1,6 @@
 {
+  "meteor.lang.translators" : "devendrapoonia",
+
   "meteor.key.open-gui": "GUI खोलें",
   "meteor.key.open-commands": "कमांड खोलें"
 }

@@ -117,16 +117,30 @@ public class MeteorTranslations {
         return languages.get("en_us");
     }
 
+    /**
+     * @return what percentage of the current language has been localised compared to the default language
+     */
+    public static double percentLocalised() {
+        // Right now there aren't enough differences between the english dialects to justify each having their own
+        // translation. Maybe that will change in the future.
+        if (isEnglish()) return 100;
+
+        double currentLangSize = languages.getOrDefault(mc.options.language.toLowerCase(), new MeteorLanguage()).translations.size();
+        return (currentLangSize / getDefaultLanguage().translations.size()) * 100;
+    }
+
+    public static boolean isEnglish() {
+        return mc.options.language.toLowerCase().startsWith("en");
+    }
+
     public static class MeteorLanguage extends Language {
-        private final Map<String, String> translations;
+        private final Map<String, String> translations = new Object2ObjectOpenHashMap<>();
         private final List<Map<String, String>> customTranslations = new ObjectArrayList<>();
 
-        public MeteorLanguage() {
-            this.translations = new Object2ObjectOpenHashMap<>();
-        }
+        public MeteorLanguage() {}
 
         public MeteorLanguage(Map<String, String> translations) {
-            this.translations = translations;
+            this.translations.putAll(translations);
         }
 
         public void addCustomTranslation(Map<String, String> customTranslation) {

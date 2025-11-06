@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.gui.utils.Cell;
+import meteordevelopment.meteorclient.gui.widgets.WLabel;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
@@ -18,13 +19,17 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.render.prompts.YesNoPrompt;
 import net.minecraft.item.Items;
+import net.minecraft.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
@@ -43,6 +48,32 @@ public class ModulesScreen extends TabScreen {
         WVerticalList help = add(theme.verticalList()).pad(4).bottom().widget();
         help.add(theme.label("Left click - Toggle module"));
         help.add(theme.label("Right click - Open module settings"));
+
+        // Translation info
+        if (MeteorTranslations.isEnglish()) return;
+        double t = MeteorTranslations.percentLocalised();
+
+        WLabel translation = add(theme.label(String.format("%.1f%% translated", t))).pad(4).bottom().right().widget();
+        translation.tooltip = "Open translation info";
+        translation.instantTooltips = true;
+        translation.action = () -> {
+            // people who translate deserve their names recognised for it
+            String translators = MeteorTranslations.translate("meteor.lang.translators", "");
+            // todo switch this to master before we merge
+            String url = "https://github.com/MeteorDevelopment/meteor-client/blob/translations/src/main/resources/assets/meteor-client/language/" + mc.options.language.toLowerCase() + ".json";
+
+            YesNoPrompt prompt = YesNoPrompt.create(theme, this)
+                .title("Translation Information")
+                .message("The current language (%s) is currently %.1f%% translated.", mc.options.language, t);
+
+            if (!translators.isEmpty()) prompt.message("Translation work done by: " + translators + ".\n");
+
+            prompt.message("")
+                .message("Do you want to open the language file for the current language?")
+                .onYes(() -> Util.getOperatingSystem().open(url))
+                .dontShowAgainCheckboxVisible(false)
+                .show();
+        };
     }
 
     @Override
