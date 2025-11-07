@@ -178,7 +178,7 @@ public class BookBot extends Module {
     private void onTick(TickEvent.Post event) {
         Predicate<ItemStack> bookPredicate = i -> {
             WritableBookContentComponent component = i.get(DataComponentTypes.WRITABLE_BOOK_CONTENT);
-            return i.getItem() == Items.WRITABLE_BOOK && (component != null || component.pages().isEmpty());
+            return i.getItem() == Items.WRITABLE_BOOK && (component == null || component.pages().isEmpty());
         };
 
         FindItemResult writableBook = InvUtils.find(bookPredicate);
