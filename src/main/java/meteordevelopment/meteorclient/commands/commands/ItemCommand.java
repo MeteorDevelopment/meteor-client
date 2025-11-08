@@ -77,6 +77,14 @@ public class ItemCommand extends Command {
             )
             .then(literal("clear")
                 .executes(context -> {
+                    itemHighlight.items.set(new ArrayList<>());
+                    itemHighlight.info("Removed all from highlighted items.");
+
+                    return SINGLE_SUCCESS;
+                })
+            )
+            .then(literal("remove")
+                .executes(context -> {
                     List<Item> items = itemHighlight.items.get();
                     ItemStack itemStack = getItemStack();
 
@@ -97,14 +105,6 @@ public class ItemCommand extends Command {
 
                     return SINGLE_SUCCESS;
                 })
-                .then(literal("*")
-                    .executes(context -> {
-                        itemHighlight.items.set(new ArrayList<>());
-                        itemHighlight.info("Removed all from highlighted items.");
-
-                        return SINGLE_SUCCESS;
-                    })
-                )
                 .then(argument("item", ItemStackArgumentType.itemStack(REGISTRY_ACCESS))
                     .executes(context -> {
                         List<Item> items = itemHighlight.items.get();
@@ -164,6 +164,14 @@ public class ItemCommand extends Command {
             )
             .then(literal("clear")
                 .executes(context -> {
+                    inventoryTweaks.autoDropItems.set(new ArrayList<>());
+                    inventoryTweaks.info("Removed all from automatically dropped items.");
+
+                    return SINGLE_SUCCESS;
+                })
+            )
+            .then(literal("remove")
+                .executes(context -> {
                     List<Item> items = inventoryTweaks.autoDropItems.get();
                     ItemStack itemStack = getItemStack();
 
@@ -184,14 +192,6 @@ public class ItemCommand extends Command {
 
                     return SINGLE_SUCCESS;
                 })
-                .then(literal("*")
-                    .executes(context -> {
-                        inventoryTweaks.autoDropItems.set(new ArrayList<>());
-                        inventoryTweaks.info("Removed all from automatically dropped items.");
-
-                        return SINGLE_SUCCESS;
-                    })
-                )
                 .then(argument("item", ItemStackArgumentType.itemStack(REGISTRY_ACCESS))
                     .executes(context -> {
                         List<Item> items = inventoryTweaks.autoDropItems.get();
@@ -251,6 +251,14 @@ public class ItemCommand extends Command {
             )
             .then(literal("clear")
                 .executes(context -> {
+                    inventoryTweaks.antiDropItems.set(new ArrayList<>());
+                    inventoryTweaks.info("Removed all from anti drop items.");
+
+                    return SINGLE_SUCCESS;
+                })
+            )
+            .then(literal("remove")
+                .executes(context -> {
                     List<Item> items = inventoryTweaks.antiDropItems.get();
                     ItemStack itemStack = getItemStack();
 
@@ -271,14 +279,6 @@ public class ItemCommand extends Command {
 
                     return SINGLE_SUCCESS;
                 })
-                .then(literal("*")
-                    .executes(context -> {
-                        inventoryTweaks.antiDropItems.set(new ArrayList<>());
-                        inventoryTweaks.info("Removed all from anti drop items.");
-
-                        return SINGLE_SUCCESS;
-                    })
-                )
                 .then(argument("item", ItemStackArgumentType.itemStack(REGISTRY_ACCESS))
                     .executes(context -> {
                         List<Item> items = inventoryTweaks.antiDropItems.get();
