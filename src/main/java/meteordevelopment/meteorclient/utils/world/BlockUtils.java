@@ -337,12 +337,16 @@ public class BlockUtils {
     // Finds the best block direction to get when interacting with the block.
     public static Direction getDirection(BlockPos pos) {
         Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
-        if ((double) pos.getY() > eyesPos.y) {
+        if (eyesPos.y - (double) pos.getY() < getBlockHeight(pos)) {
             if (mc.world.getBlockState(pos.add(0, -1, 0)).isReplaceable()) return Direction.DOWN;
             else return mc.player.getHorizontalFacing().getOpposite();
         }
         if (!mc.world.getBlockState(pos.add(0, 1, 0)).isReplaceable()) return mc.player.getHorizontalFacing().getOpposite();
         return Direction.UP;
+    }
+
+    public static double getBlockHeight(BlockPos pos) {
+        return mc.world.getBlockState(pos).getCollisionShape(mc.world, pos).getMax(Direction.Axis.Y);
     }
 
     public enum MobSpawn {
