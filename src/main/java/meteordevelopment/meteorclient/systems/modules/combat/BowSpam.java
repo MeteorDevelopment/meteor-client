@@ -60,7 +60,7 @@ public class BowSpam extends Module {
             return;
 
         if (!onlyWhenHoldingRightClick.get() || mc.options.useKey.isPressed()) {
-            boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW || mc.player.getOffHandStack().getItem() == Items.BOW;
+            boolean isBow = InvUtils.testInHands(Items.BOW);
             if (!isBow && wasBow) setPressed(false);
 
             wasBow = isBow;

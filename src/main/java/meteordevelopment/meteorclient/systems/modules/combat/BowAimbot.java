@@ -118,11 +118,12 @@ public class BowAimbot extends Module {
             return;
         }
 
-        if (mc.options.useKey.isPressed()) {
+        if (mc.options.useKey.isPressed() && itemInHand()) {
             if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
                 PathManagers.get().pause();
                 wasPathing = true;
             }
+
             aim();
         }
     }
