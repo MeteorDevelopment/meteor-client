@@ -5,21 +5,22 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 import net.minecraft.network.packet.BundlePacket;
 import net.minecraft.network.packet.BundleSplitterPacket;
 import net.minecraft.network.packet.Packet;
-import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class PacketUtilsUtil {
     private PacketUtilsUtil() {
@@ -114,26 +115,32 @@ public class PacketUtilsUtil {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     private static void processPackets(BufferedWriter writer, String packageName, String packetMapName, String reverseMapName, Predicate<Class<?>> exclusionFilter) throws IOException {
         Comparator<Class<?>> packetsComparator = Comparator
             .comparing((Class<?> cls) -> cls.getName().substring(cls.getName().lastIndexOf('.') + 1))
             .thenComparing(Class::getName);
 
-        Reflections reflections = new Reflections(packageName, Scanners.SubTypes);
-        Set<Class<? extends Packet>> packets = reflections.getSubTypesOf(Packet.class);
-        SortedSet<Class<? extends Packet>> sortedPackets = new TreeSet<>(packetsComparator);
-        sortedPackets.addAll(packets);
+        try (ScanResult scanResult = new ClassGraph()
+            .acceptPackages(packageName)
+            .enableClassInfo()
+            .ignoreClassVisibility()
+            .scan()) {
 
-        for (Class<? extends Packet> packet : sortedPackets) {
-            if (exclusionFilter.test(packet)) continue;
+            SortedSet<Class<?>> sortedPackets = scanResult
+                .getClassesImplementing(Packet.class)
+                .stream()
+                .map(ClassInfo::loadClass)
+                .filter(exclusionFilter.negate())
+                .collect(Collectors.toCollection(() -> new TreeSet<>(packetsComparator)));
 
-            String name = packet.getName();
-            String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');
-            String fullName = name.replace('$', '.');
+            for (Class<?> packet : sortedPackets) {
+                String name = packet.getName();
+                String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');
+                String fullName = name.replace('$', '.');
 
-            writer.write("        %s.put(%s.class, \"%s\");%n".formatted(packetMapName, fullName, className));
-            writer.write("        %s.put(\"%s\", %s.class);%n".formatted(reverseMapName, className, fullName));
+                writer.write("        %s.put(%s.class, \"%s\");%n".formatted(packetMapName, fullName, className));
+                writer.write("        %s.put(\"%s\", %s.class);%n".formatted(reverseMapName, className, fullName));
+            }
         }
     }
 }
