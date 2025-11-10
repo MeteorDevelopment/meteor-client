@@ -24,8 +24,8 @@ public class BowSpam extends Module {
         .name("charge")
         .description("How long to charge the bow before releasing in ticks.")
         .defaultValue(5)
-        .range(5, 20)
-        .sliderRange(5, 20)
+        .range(4, 20)
+        .sliderRange(4, 20)
         .build()
     );
 
@@ -55,12 +55,12 @@ public class BowSpam extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found())
             return;
 
         if (!onlyWhenHoldingRightClick.get() || mc.options.useKey.isPressed()) {
-            boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW;
+            boolean isBow = InvUtils.testInHands(Items.BOW);
             if (!isBow && wasBow) setPressed(false);
 
             wasBow = isBow;
