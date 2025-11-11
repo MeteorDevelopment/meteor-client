@@ -17,8 +17,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.Comparator;
-import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public final class PacketUtilsUtil {
     private PacketUtilsUtil() {
@@ -114,34 +114,27 @@ public final class PacketUtilsUtil {
     }
 
     private static String processPackets(String packageName, String packetMapName, String reverseMapName, Predicate<Class<?>> exclusionFilter) {
-        Comparator<Class<?>> packetsComparator = Comparator
-            .comparing((Class<?> cls) -> cls.getName().substring(cls.getName().lastIndexOf('.') + 1))
-            .thenComparing(Class::getName);
-
-        StringBuilder mappings = new StringBuilder(8192);
-
         try (ScanResult scanResult = new ClassGraph()
             .acceptPackages(packageName)
             .enableClassInfo()
             .ignoreClassVisibility()
             .scan()) {
 
-            var packets = scanResult.getClassesImplementing(Packet.class).stream()
+            return scanResult.getClassesImplementing(Packet.class).stream()
                 .map(ClassInfo::loadClass)
                 .filter(exclusionFilter.negate())
-                .sorted(packetsComparator)
-                .toList();
-
-            for (Class<?> packet : packets) {
-                String name = packet.getName();
-                String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');
-                String fullName = name.replace('$', '.');
-
-                mappings.append("%s.put(%s.class, \"%s\");%n".formatted(packetMapName, fullName, className));
-                mappings.append("%s.put(\"%s\", %s.class);%n".formatted(reverseMapName, className, fullName));
-            }
+                .sorted(Comparator
+                    .comparing((Class<?> cls) -> cls.getName().substring(cls.getName().lastIndexOf('.') + 1))
+                    .thenComparing(Class::getName)
+                )
+                .map(packet -> {
+                    String name = packet.getName();
+                    String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');
+                    String fullName = name.replace('$', '.');
+                    return "%s.put(%s.class, \"%s\");%n%s.put(\"%s\", %s.class);"
+                        .formatted(packetMapName, fullName, className, reverseMapName, className, fullName);
+                })
+                .collect(Collectors.joining("\n"));
         }
-
-        return mappings.toString();
     }
 }
