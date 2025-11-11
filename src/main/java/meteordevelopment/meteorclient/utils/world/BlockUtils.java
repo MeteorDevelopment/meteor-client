@@ -344,8 +344,13 @@ public class BlockUtils {
         } else if (eyePos < pos.getY() + outline.getMin(Direction.Axis.Y) && mc.world.getBlockState(pos.add(0, -1, 0)).isReplaceable()) {
             return Direction.DOWN;
         } else {
-            // insert possible additional checks here
-            return mc.player.getHorizontalFacing().getOpposite();
+            BlockPos difference = pos.subtract(mc.player.getBlockPos());
+
+            if (Math.abs(difference.getX()) > Math.abs(difference.getZ())) {
+                return difference.getX() > 0 ? Direction.WEST : Direction.EAST;
+            } else {
+                return difference.getZ() > 0 ? Direction.NORTH : Direction.SOUTH;
+            }
         }
     }
 
