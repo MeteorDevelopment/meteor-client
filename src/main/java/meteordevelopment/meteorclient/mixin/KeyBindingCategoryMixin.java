@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -24,7 +23,7 @@ public class KeyBindingCategoryMixin {
 
     @ModifyReturnValue(method = "getLabel", at = @At("RETURN"))
     private Text modifyLabel(Text original) {
-        if (id.getNamespace().equals(MeteorClient.MOD_ID)) return Text.literal(MeteorTranslations.translate(id.getPath()));
+        if (id.getNamespace().equals(MeteorClient.MOD_ID)) return MeteorClient.translatable(id.getPath());
         return original;
     }
 }

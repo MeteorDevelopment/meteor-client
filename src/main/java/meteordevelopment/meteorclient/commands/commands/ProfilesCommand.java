@@ -25,7 +25,7 @@ public class ProfilesCommand extends Command {
 
             if (profile != null) {
                 profile.load();
-                info("Loaded profile (highlight)%s(default).", profile.name.get());
+                info("loaded", profile.name.get());
             }
 
             return SINGLE_SUCCESS;
@@ -36,7 +36,7 @@ public class ProfilesCommand extends Command {
 
             if (profile != null) {
                 profile.save();
-                info("Saved profile (highlight)%s(default).", profile.name.get());
+                info("saved", profile.name.get());
             }
 
             return SINGLE_SUCCESS;
@@ -47,7 +47,7 @@ public class ProfilesCommand extends Command {
 
             if (profile != null) {
                 Profiles.get().remove(profile);
-                info("Deleted profile (highlight)%s(default).", profile.name.get());
+                info("deleted", profile.name.get());
             }
 
             return SINGLE_SUCCESS;

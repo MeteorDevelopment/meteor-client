@@ -200,11 +200,11 @@ public class MeteorClient implements ClientModInitializer {
         return Identifier.of(MeteorClient.MOD_ID, path);
     }
 
-    public static MutableText translatable(String string, Object... args) {
-        return MutableText.of(new MeteorTranslatableTextComponent(string, args));
+    public static MutableText translatable(String key, Object... args) {
+        return MutableText.of(new MeteorTranslatableTextComponent(key, args));
     }
 
-    public static MutableText translatable(String string, String fallback, Object... args) {
-        return MutableText.of(new MeteorTranslatableTextComponent(string, fallback, args));
+    public static MutableText translatable(String key, String fallback, Object... args) {
+        return MutableText.of(new MeteorTranslatableTextComponent(key, fallback, args));
     }
 }

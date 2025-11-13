@@ -23,7 +23,7 @@ public class ReloadCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            warning("Reloading systems, this may take a while.");
+            warning("reloading");
 
             Systems.load();
             Capes.init();

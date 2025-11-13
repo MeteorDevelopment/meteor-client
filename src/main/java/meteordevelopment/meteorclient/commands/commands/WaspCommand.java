@@ -7,16 +7,16 @@ package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.PlayerArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.AutoWasp;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
 
 public class WaspCommand extends Command {
-    private static final SimpleCommandExceptionType CANT_WASP_SELF = new SimpleCommandExceptionType(Text.literal("You cannot target yourself!"));
+    private static final SimpleCommandExceptionType CANT_WASP_SELF = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.wasp.exception.cant_wasp_self"));
 
     public WaspCommand() {
         super("wasp");
@@ -38,7 +38,7 @@ public class WaspCommand extends Command {
 
             wasp.target = player;
             if (!wasp.isActive()) wasp.toggle();
-            info(player.getName().getString() + " set as target.");
+            info("target", player.getName().getString());
             return SINGLE_SUCCESS;
         }));
     }

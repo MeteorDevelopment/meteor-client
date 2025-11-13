@@ -35,12 +35,12 @@ public class MacroCommand extends Command {
             .then(literal("clear")
                 .executes(context -> {
                     if (scheduleQueue.isEmpty() && scheduledMacros.isEmpty()) {
-                        error("No macros are currently scheduled.");
+                        error("none_scheduled");
                         return SINGLE_SUCCESS;
                     }
 
                     clearAll();
-                    info("Cleared all scheduled macros.");
+                    info("cleared_all");
 
                     return SINGLE_SUCCESS;
                 })
@@ -49,12 +49,12 @@ public class MacroCommand extends Command {
                         Macro macro = MacroArgumentType.get(context);
 
                         if (!isScheduled(macro)) {
-                            error("This macro is not currently scheduled.");
+                            error("not_scheduled");
                             return SINGLE_SUCCESS;
                         }
 
                         clear(macro);
-                        info("Cleared scheduled macro.");
+                        info("cleared");
                         return SINGLE_SUCCESS;
                     })
                 )

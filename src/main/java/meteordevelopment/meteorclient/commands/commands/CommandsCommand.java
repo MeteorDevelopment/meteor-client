@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -54,7 +53,7 @@ public class CommandsCommand extends Command {
         }
         tooltip.append(aliases.formatted(Formatting.GRAY)).append("\n\n");
 
-        tooltip.append(MeteorClient.translatable(command.getDescription())).formatted(Formatting.WHITE);
+        tooltip.append(translatable("description")).formatted(Formatting.WHITE);
 
         // Text
         MutableText text = Text.literal(Utils.nameToTitle(command.getName()));

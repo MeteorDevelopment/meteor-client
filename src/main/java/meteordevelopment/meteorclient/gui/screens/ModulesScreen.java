@@ -66,7 +66,7 @@ public class ModulesScreen extends TabScreen {
                 .title("Translation Information")
                 .message("The current language (%s) is currently %.1f%% translated.", mc.options.language, t);
 
-            if (!translators.isEmpty()) prompt.message("Translation work done by: " + translators + ".\n");
+            if (!translators.isEmpty()) prompt.message("Translation work done by: " + translators);
 
             prompt.message("")
                 .message("Do you want to open the language file for the current language?")

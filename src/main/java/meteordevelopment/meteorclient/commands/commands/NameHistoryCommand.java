@@ -38,13 +38,13 @@ public class NameHistoryCommand extends Command {
                 UUID uuid = lookUpTarget.getProfile().id();
 
                 NameHistory history = Http.get("https://laby.net/api/v2/user/" + uuid + "/get-profile")
-                    .exceptionHandler(e -> error("There was an error fetching that users name history."))
+                    .exceptionHandler(e -> error("error_fetching_name"))
                     .sendJson(NameHistory.class);
 
                 if (history == null) {
                     return;
                 } else if (history.username_history == null || history.username_history.length == 0) {
-                    error("There was an error fetching that users name history.");
+                    error("error_fetching_name");
                 }
 
                 String name = lookUpTarget.getProfile().name();
@@ -85,7 +85,7 @@ public class NameHistoryCommand extends Command {
                     if (!entry.accurate) {
                         MutableText text = Text.literal("*").formatted(Formatting.WHITE);
 
-                        text.setStyle(text.getStyle().withHoverEvent(new HoverEvent.ShowText(Text.literal("This name history entry is not accurate according to laby.net"))));
+                        text.setStyle(text.getStyle().withHoverEvent(new HoverEvent.ShowText(translatable("inaccurate"))));
 
                         nameText.append(text);
                     }

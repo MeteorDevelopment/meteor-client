@@ -19,7 +19,6 @@ import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.map.MapState;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
@@ -33,8 +32,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class SaveMapCommand extends Command {
-    private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(Text.literal("You must be holding a filled map."));
-    private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(Text.literal("Something went wrong."));
+    private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.save-map.exception.map_not_found"));
+    private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.save-map.exception.oops"));
 
     private final PointerBuffer filters;
 
@@ -72,24 +71,25 @@ public class SaveMapCommand extends Command {
         if (path == null) throw OOPS.create();
 
         MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.gameRenderer.getClient().getMapTextureManager();
-        MapTextureManager.MapTexture texture = textureManager.meteor$invokeGetMapTexture(map.get(DataComponentTypes.MAP_ID), state);
-        if (texture.texture.getImage() == null) throw OOPS.create();
+        try (MapTextureManager.MapTexture texture = textureManager.meteor$invokeGetMapTexture(map.get(DataComponentTypes.MAP_ID), state)) {
+            if (texture.texture.getImage() == null) throw OOPS.create();
 
-        try {
-            if (scale == 128) texture.texture.getImage().writeTo(path);
-            else {
-                int[] data = texture.texture.getImage().makePixelArray();
-                BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
-                image.setRGB(0, 0, image.getWidth(), image.getHeight(), data, 0, 128);
+            try {
+                if (scale == 128) texture.texture.getImage().writeTo(path);
+                else {
+                    int[] data = texture.texture.getImage().makePixelArray();
+                    BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+                    image.setRGB(0, 0, image.getWidth(), image.getHeight(), data, 0, 128);
 
-                BufferedImage scaledImage = new BufferedImage(scale, scale, 2);
-                scaledImage.createGraphics().drawImage(image, 0, 0, scale, scale, null);
+                    BufferedImage scaledImage = new BufferedImage(scale, scale, 2);
+                    scaledImage.createGraphics().drawImage(image, 0, 0, scale, scale, null);
 
-                ImageIO.write(scaledImage, "png", path);
+                    ImageIO.write(scaledImage, "png", path);
+                }
+            } catch (IOException e) {
+                error("error_writing_texture");
+                MeteorClient.LOG.error(e.toString());
             }
-        } catch (IOException e) {
-            error("Error writing map texture");
-            MeteorClient.LOG.error(e.toString());
         }
     }
 
