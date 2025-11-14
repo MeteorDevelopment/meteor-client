@@ -24,6 +24,8 @@ import net.minecraft.entity.LazyEntityReference;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
+
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
@@ -63,6 +65,7 @@ public class EntityOwner extends Module {
             @Nullable LazyEntityReference<LivingEntity> owner;
 
             if (entity instanceof TameableEntity tameable) owner = tameable.getOwnerReference();
+            else if (entity instanceof EnderPearlEntity pearl) owner = LazyEntityReference.of((LivingEntity)pearl.getOwner());
             else continue;
 
             if (owner != null) {
