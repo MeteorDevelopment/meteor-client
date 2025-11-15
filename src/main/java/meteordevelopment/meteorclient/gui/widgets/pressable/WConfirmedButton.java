@@ -19,8 +19,8 @@ public abstract class WConfirmedButton extends WButton {
     }
 
     @Override
-    public boolean onMouseClicked(Click click, boolean used) {
-        boolean pressed = super.onMouseClicked(click, used);
+    public boolean onMouseClicked(Click click, boolean doubled) {
+        boolean pressed = super.onMouseClicked(click, false);
         if (!pressed) {
             pressedOnce = false;
             invalidate();
