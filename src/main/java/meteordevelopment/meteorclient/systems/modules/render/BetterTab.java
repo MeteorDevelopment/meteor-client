@@ -88,9 +88,9 @@ public class BetterTab extends Module {
         Color color = null;
 
         name = playerListEntry.getDisplayName();
-        if (name == null) name = Text.literal(playerListEntry.getProfile().getName());
+        if (name == null) name = Text.literal(playerListEntry.getProfile().name());
 
-        if (playerListEntry.getProfile().getId().toString().equals(mc.player.getGameProfile().getId().toString()) && self.get()) {
+        if (playerListEntry.getProfile().id().toString().equals(mc.player.getGameProfile().id().toString()) && self.get()) {
             color = selfColor.get();
         }
         else if (friends.get() && Friends.get().isFriend(playerListEntry)) {

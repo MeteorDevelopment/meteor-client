@@ -157,7 +157,7 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
 
         @Override
         public <S> Vec3d getPosition(S source) {
-            Vec3d vec3 = mc.player.getPos();
+            Vec3d vec3 = mc.player.getEntityPos();
             return new Vec3d(this.x.toAbsoluteCoordinate(vec3.x), this.y.toAbsoluteCoordinate(vec3.y), this.z.toAbsoluteCoordinate(vec3.z));
         }
 

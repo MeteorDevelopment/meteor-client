@@ -73,6 +73,22 @@ public class AutoGap extends Module {
     );
 
     // Potions
+    private final Setting<Boolean> beforeExpiry = sgPotions.add(new BoolSetting.Builder()
+        .name("before-expiry")
+        .description("If it should eat before potion effects expire.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> expiryThreshold = sgPotions.add(new IntSetting.Builder()
+        .name("expiry-threshold")
+        .description("Time in ticks before the potion effect expires to start eating.")
+        .defaultValue(60)
+        .min(0)
+        .sliderMax(200)
+        .visible(beforeExpiry::get)
+        .build()
+    );
 
     private final Setting<Boolean> potionsRegeneration = sgPotions.add(new BoolSetting.Builder()
         .name("potions-regeneration")
@@ -255,18 +271,27 @@ public class AutoGap extends Module {
         Map<RegistryEntry<StatusEffect>, StatusEffectInstance> effects = mc.player.getActiveStatusEffects();
 
         // Regeneration
-        if (potionsRegeneration.get() && !effects.containsKey(StatusEffects.REGENERATION)) return true;
+        if (potionsRegeneration.get()) {
+            StatusEffectInstance effect = effects.get(StatusEffects.REGENERATION);
+            if (effect == null || (beforeExpiry.get() && effect.getDuration() <= expiryThreshold.get())) return true;
+        }
 
         // Fire resistance
-        if (potionsFireResistance.get() && !effects.containsKey(StatusEffects.FIRE_RESISTANCE)) {
-            requiresEGap = true;
-            return true;
+        if (potionsFireResistance.get()) {
+            StatusEffectInstance effect = effects.get(StatusEffects.FIRE_RESISTANCE);
+            if (effect == null || (beforeExpiry.get() && effect.getDuration() <= expiryThreshold.get())) {
+                requiresEGap = true;
+                return true;
+            }
         }
 
         // Absorption
-        if (potionsAbsorption.get() && !effects.containsKey(StatusEffects.ABSORPTION)) {
-            requiresEGap = true;
-            return true;
+        if (potionsAbsorption.get()) {
+            StatusEffectInstance effect = effects.get(StatusEffects.ABSORPTION);
+            if (effect == null || (beforeExpiry.get() && effect.getDuration() <= expiryThreshold.get())) {
+                requiresEGap = true;
+                return true;
+            }
         }
 
         return false;
@@ -280,31 +305,26 @@ public class AutoGap extends Module {
     }
 
     private int findSlot() {
-        boolean preferEGap = this.allowEgap.get() || requiresEGap;
-        int slot = -1;
-
         for (int i = 0; i < 9; i++) {
-            // Skip if item stack is empty
             ItemStack stack = mc.player.getInventory().getStack(i);
+
+            // Skip if item stack is empty
             if (stack.isEmpty()) continue;
 
             // Skip if item isn't a gap or egap
             if (isNotGapOrEGap(stack)) continue;
+
             Item item = stack.getItem();
 
-            // If egap was found and preferEGap is true we can return the current slot
-            if (item == Items.ENCHANTED_GOLDEN_APPLE && preferEGap) {
-                slot = i;
-                break;
-            }
+            // If egap was found and allowEgapSetting is true we can return the current slot
+            if (item == Items.ENCHANTED_GOLDEN_APPLE && allowEgap.get()) return i;
+
             // If gap was found and egap is not required we can return the current slot
-            else if (item == Items.GOLDEN_APPLE && !requiresEGap) {
-                slot = i;
-                if (!preferEGap) break;
-            }
+            if (item == Items.GOLDEN_APPLE && !requiresEGap) return i;
         }
 
-        return slot;
+        // No suitable gap or egap found
+        return -1;
     }
 
     private boolean isNotGapOrEGap(ItemStack stack) {

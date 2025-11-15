@@ -253,7 +253,7 @@ public class Flight extends Module {
 
     // Copied from ServerPlayNetworkHandler#isEntityOnAir
     private boolean isEntityOnAir(Entity entity) {
-        return entity.getWorld().getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
+        return entity.getEntityWorld().getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
     }
 
     public float getOffGroundSpeed() {

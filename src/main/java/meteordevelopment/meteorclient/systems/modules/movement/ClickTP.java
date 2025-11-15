@@ -74,7 +74,7 @@ public class ClickTP extends Module {
             double height = shape.isEmpty() ? 1 : shape.getMax(Direction.Axis.Y);
 
             Vec3d newPos = new Vec3d(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + height, pos.getZ() + 0.5 + side.getOffsetZ());
-            int packetsRequired = (int) Math.ceil(mc.player.getPos().distanceTo(newPos) / 10) - 1; // subtract 1 to account for the final packet with movement
+            int packetsRequired = (int) Math.ceil(mc.player.getEntityPos().distanceTo(newPos) / 10) - 1; // subtract 1 to account for the final packet with movement
             if (packetsRequired > 19) packetsRequired = 0;
 
             for (int packetNumber = 0; packetNumber < (packetsRequired); packetNumber++) {

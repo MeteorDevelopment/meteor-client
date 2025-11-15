@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.gui.widgets.WKeybind;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -32,25 +32,25 @@ public class KeybindSetting extends Setting<Keybind> {
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onKeyBinding(KeyEvent event) {
         if (widget == null) return;
-        if (event.action == KeyAction.Press && event.key == GLFW.GLFW_KEY_ESCAPE && widget.onClear()) event.cancel();
-        else if (event.action == KeyAction.Release && widget.onAction(true, event.key, event.modifiers)) event.cancel();
+        if (event.action == KeyAction.Press && event.key() == GLFW.GLFW_KEY_ESCAPE && widget.onClear()) event.cancel();
+        else if (event.action == KeyAction.Release && widget.onAction(true, event.key(), event.modifiers())) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private void onMouseButtonBinding(MouseButtonEvent event) {
-        if (event.action == KeyAction.Press && widget != null && widget.onAction(false, event.button, 0)) event.cancel();
+    private void onMouseClickBinding(MouseClickEvent event) {
+        if (event.action == KeyAction.Press && widget != null && widget.onAction(false, event.button(), 0)) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onKey(KeyEvent event) {
-        if (event.action == KeyAction.Release && get().matches(true, event.key, event.modifiers) && (module == null || module.isActive()) && action != null) {
+        if (event.action == KeyAction.Release && get().matches(event.input) && (module == null || module.isActive()) && action != null) {
             action.run();
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onMouseButton(MouseButtonEvent event) {
-        if (event.action == KeyAction.Release && get().matches(false, event.button, 0) && (module == null || module.isActive()) && action != null) {
+    private void onMouseClick(MouseClickEvent event) {
+        if (event.action == KeyAction.Release && get().matches(event.input) && (module == null || module.isActive()) && action != null) {
             action.run();
         }
     }

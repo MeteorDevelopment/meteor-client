@@ -9,8 +9,13 @@ import meteordevelopment.meteorclient.mixininterface.IBakedQuad;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.*;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
+import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
+import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
+import net.minecraft.client.render.command.RenderDispatcher;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.BlockModelPart;
 import net.minecraft.client.render.model.BlockStateModel;
@@ -31,17 +36,39 @@ public abstract class SimpleBlockRenderer {
     private static final Direction[] DIRECTIONS = Direction.values();
     private static final Random RANDOM = Random.create();
 
+    private static final OrderedRenderCommandQueueImpl renderCommandQueue = new OrderedRenderCommandQueueImpl();
+
+    private static VertexConsumerProvider provider;
+
+    private static final RenderDispatcher renderDispatcher = new RenderDispatcher(
+        renderCommandQueue,
+        mc.getBlockRenderManager(),
+        new WrapperImmediateVertexConsumerProvider(() -> provider),
+        mc.getAtlasManager(),
+        NoopOutlineVertexConsumerProvider.INSTANCE,
+        NoopImmediateVertexConsumerProvider.INSTANCE,
+        mc.textRenderer
+    );
+
     private SimpleBlockRenderer() {}
 
     public static void renderWithBlockEntity(BlockEntity blockEntity, float tickDelta, IVertexConsumerProvider vertexConsumerProvider) {
         vertexConsumerProvider.setOffset(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ());
         SimpleBlockRenderer.render(blockEntity.getPos(), blockEntity.getCachedState(), vertexConsumerProvider);
 
-        BlockEntityRenderer<BlockEntity> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
+        BlockEntityRenderer<BlockEntity, BlockEntityRenderState> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
 
         if (renderer != null && blockEntity.hasWorld() && blockEntity.getType().supports(blockEntity.getCachedState())) {
-            Vec3d camera = mc.gameRenderer.getCamera().getPos();
-            renderer.render(blockEntity, tickDelta, MATRICES, vertexConsumerProvider, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, camera);
+            SimpleBlockRenderer.provider = vertexConsumerProvider;
+
+            BlockEntityRenderState state = renderer.createRenderState();
+            renderer.updateRenderState(blockEntity, state, tickDelta, mc.gameRenderer.getCamera().getPos(), null);
+            renderer.render(state, MATRICES, renderCommandQueue, mc.gameRenderer.getEntityRenderStates().cameraRenderState);
+
+            renderDispatcher.render();
+            renderCommandQueue.onNextFrame();
+
+            SimpleBlockRenderer.provider = null;
         }
 
         vertexConsumerProvider.setOffset(0, 0, 0);
