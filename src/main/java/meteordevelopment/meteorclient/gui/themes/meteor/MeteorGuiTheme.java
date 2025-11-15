@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.gui.themes.meteor;
 
 import meteordevelopment.meteorclient.gui.DefaultSettingsWidgetFactory;
+import meteordevelopment.meteorclient.gui.GuiIcon;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
@@ -206,13 +207,13 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     @Override
-    protected WButton button(String text, GuiTexture texture) {
-        return w(new WMeteorButton(text, texture));
+    protected WButton button(String text, GuiIcon icon) {
+        return w(new WMeteorButton(text, icon));
     }
 
     @Override
-    protected WConfirmedButton confirmedButton(String text, String confirmText, GuiTexture texture) {
-        return w(new WMeteorConfirmedButton(text, confirmText, texture));
+    protected WConfirmedButton confirmedButton(String text, String confirmText, GuiIcon icon) {
+        return w(new WMeteorConfirmedButton(text, confirmText, icon));
     }
 
     @Override

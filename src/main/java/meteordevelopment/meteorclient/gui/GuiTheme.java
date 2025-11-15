@@ -80,21 +80,26 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
     public abstract WVerticalSeparator verticalSeparator();
 
-    protected abstract WButton button(String text, GuiTexture texture);
+    protected abstract WButton button(String text, GuiIcon icon);
     public WButton button(String text) {
         return button(text, null);
     }
-    public WButton button(GuiTexture texture) {
-        return button(null, texture);
+    public WButton button(GuiIcon icon) {
+        return button(null, icon);
     }
 
-    protected abstract WConfirmedButton confirmedButton(String text, String confirmText, GuiTexture texture);
+
+    protected abstract WConfirmedButton confirmedButton(String text, String confirmText, GuiIcon icon);
     public WConfirmedButton confirmedButton(String text, String confirmText) {
         return confirmedButton(text, confirmText, null);
     }
-    public WConfirmedButton confirmedButton(GuiTexture texture) {
-        return confirmedButton(null, null, texture);
+    public WConfirmedButton confirmedButton(GuiIcon icon) {
+        return confirmedButton(null, null, icon);
     }
+
+    // for compatibility
+    final public WButton button(GuiTexture texture) { return button(null, texture.icon()); }
+    final public WButton confirmedButton(GuiTexture texture) { return confirmedButton(null, null, texture.icon()); }
 
     public abstract WMinus minus();
     public abstract WConfirmedMinus confirmedMinus();

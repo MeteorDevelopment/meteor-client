@@ -128,7 +128,7 @@ public abstract class GroupedSetSettingScreen<T, S extends GroupedSetSetting<T>>
 
                 boolean e = expanded == s;
 
-                WButton expand = hlist.add(theme.button(e ? GuiRenderer.TRIANGLE : GuiRenderer.CIRCLE)).widget();
+                WButton expand = hlist.add(theme.button(GuiRenderer.TRIANGLE.icon(e ? 0 : -90))).widget();
                 expand.action = () -> {
                     expanded = e ? null : s;
                     reload();

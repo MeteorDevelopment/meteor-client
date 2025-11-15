@@ -13,6 +13,8 @@ import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.entity.EntityType;
 import net.minecraft.registry.Registries;
 
+import java.util.function.Predicate;
+
 public class EntityTypeSetSettingScreen extends GroupedSetSettingScreen<EntityType<?>, EntityTypeSetSetting> {
 
     public EntityTypeSetSettingScreen(GuiTheme theme, EntityTypeSetSetting setting) {
@@ -21,7 +23,8 @@ public class EntityTypeSetSettingScreen extends GroupedSetSettingScreen<EntityTy
 
     @Override
     protected boolean includeValue(EntityType<?> value) {
-        return setting.getFilter().test(value);
+        Predicate<EntityType<?>> filter = setting.getFilter();
+        return filter == null || filter.test(value);
     }
 
     @Override

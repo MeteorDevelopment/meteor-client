@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.widgets.pressable;
 
+import meteordevelopment.meteorclient.gui.GuiIcon;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 
 public abstract class WConfirmedButton extends WButton {
@@ -12,8 +13,8 @@ public abstract class WConfirmedButton extends WButton {
     protected boolean pressedOnce = false;
     protected String confirmText;
 
-    public WConfirmedButton(String text, String confirmText, GuiTexture texture) {
-        super(text, texture);
+    public WConfirmedButton(String text, String confirmText, GuiIcon icon) {
+        super(text, icon);
         this.confirmText = confirmText;
     }
 

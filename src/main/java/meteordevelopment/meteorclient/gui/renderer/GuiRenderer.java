@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.gui.renderer;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.gui.GuiIcon;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.operations.TextOperation;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
@@ -38,6 +39,7 @@ public class GuiRenderer {
 
     public static GuiTexture CIRCLE;
     public static GuiTexture TRIANGLE;
+    public static GuiTexture ARROWHEAD, ARROWHEAD_DOUBLE;
     public static GuiTexture EDIT;
     public static GuiTexture RESET;
     public static GuiTexture FAVORITE_NO, FAVORITE_YES;
@@ -70,6 +72,9 @@ public class GuiRenderer {
     public static void init() {
         CIRCLE = addTexture(MeteorClient.identifier("textures/icons/gui/circle.png"));
         TRIANGLE = addTexture(MeteorClient.identifier("textures/icons/gui/triangle.png"));
+        ARROWHEAD = addTexture(MeteorClient.identifier("textures/icons/gui/arrowhead.png"));
+        ARROWHEAD_DOUBLE = addTexture(MeteorClient.identifier("textures/icons/gui/double-arrowhead.png"));
+        FAVORITE_YES = addTexture(MeteorClient.identifier("textures/icons/gui/triangle.png"));
         EDIT = addTexture(MeteorClient.identifier("textures/icons/gui/edit.png"));
         RESET = addTexture(MeteorClient.identifier("textures/icons/gui/reset.png"));
         FAVORITE_NO = addTexture(MeteorClient.identifier("textures/icons/gui/favorite_no.png"));
@@ -232,6 +237,11 @@ public class GuiRenderer {
 
     public void rotatedQuad(double x, double y, double width, double height, double rotation, GuiTexture texture, Color color) {
         rTex.texQuad(x, y, width, height, rotation, texture.get(width, height), color);
+    }
+
+    public void iconQuad(double x, double y, double width, double height, GuiIcon icon, Color defaultColor) {
+        if (icon.color != null) defaultColor = icon.color;
+        rotatedQuad(x, y, width, height, icon.rotation, icon.texture, defaultColor);
     }
 
     public void triangle(double x1, double y1, double x2, double y2, double x3, double y3, Color color) {
