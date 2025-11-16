@@ -121,15 +121,15 @@ public class ItemSetSetting extends GroupedSetSetting<Item> {
             .get();
 
         PICKAXES = GROUPS.builtin("picks", Items.IRON_PICKAXE)
-            .items(Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.GOLDEN_HOE, Items.DIAMOND_HOE, Items.NETHERITE_HOE)
+            .items(Items.NETHERITE_PICKAXE, Items.NETHERITE_PICKAXE, Items.NETHERITE_PICKAXE, Items.NETHERITE_PICKAXE, Items.NETHERITE_PICKAXE, Items.NETHERITE_PICKAXE)
             .get();
 
         AXES = GROUPS.builtin("axes", Items.IRON_AXE)
-            .items(Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.GOLDEN_HOE, Items.DIAMOND_HOE, Items.NETHERITE_HOE)
+            .items(Items.WOODEN_AXE, Items.STONE_AXE, Items.IRON_AXE, Items.GOLDEN_AXE, Items.DIAMOND_AXE, Items.NETHERITE_AXE)
             .get();
 
         SWORDS = GROUPS.builtin("swords", Items.IRON_SWORD)
-            .items(Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.GOLDEN_HOE, Items.DIAMOND_HOE, Items.NETHERITE_HOE)
+            .items(Items.WOODEN_SWORD, Items.STONE_SWORD, Items.IRON_SWORD, Items.GOLDEN_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD)
             .get();
 
         HOES = GROUPS.builtin("hoes", Items.IRON_HOE)
@@ -140,27 +140,5 @@ public class ItemSetSetting extends GroupedSetSetting<Item> {
             .items(Items.SHEARS, Items.FLINT_AND_STEEL)
             .include(PICKAXES, AXES, HOES)
             .get();
-
-        HELMETS = GROUPS.builtin("hoes", Items.IRON_HELMET)
-            .items(Items.TURTLE_HELMET, Items.CHAINMAIL_HELMET, Items.IRON_HELMET, Items.GOLDEN_HELMET, Items.DIAMOND_HELMET, Items.NETHERITE_HELMET)
-            .get();
-
-        CHESTPLATES = GROUPS.builtin("chestplates", Items.IRON_CHESTPLATE)
-            .items(Items.CHAINMAIL_CHESTPLATE, Items.IRON_CHESTPLATE, Items.GOLDEN_CHESTPLATE, Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE)
-            .get();
-
-        LEGGINGS = GROUPS.builtin("leggings", Items.IRON_LEGGINGS)
-            .items(Items.CHAINMAIL_LEGGINGS, Items.IRON_LEGGINGS, Items.GOLDEN_LEGGINGS, Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS)
-            .get();
-
-        BOOTS = GROUPS.builtin("boots", Items.IRON_BOOTS)
-            .items(Items.CHAINMAIL_BOOTS, Items.IRON_BOOTS, Items.GOLDEN_BOOTS, Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS)
-            .get();
-
-        ARMOR = GROUPS.builtin("armor", Items.DIAMOND_CHESTPLATE)
-            .include(HELMETS, CHESTPLATES, LEGGINGS, BOOTS)
-            .get();
-
-
     }
 }

@@ -110,7 +110,7 @@ public class LiquidFiller extends Module {
         .name("whitelist")
         .description("The allowed blocks that it will use to fill up the liquid.")
         .defaultValue(Blocks.COBBLESTONE, Blocks.COBBLED_DEEPSLATE)
-        .defaultGroups(BlockListSetting.TERRAIN_ALL)
+        .defaultGroups(BlockListSetting.TERRAIN)
         .visible(() -> listMode.get() == ListMode.Whitelist)
         .build()
     );

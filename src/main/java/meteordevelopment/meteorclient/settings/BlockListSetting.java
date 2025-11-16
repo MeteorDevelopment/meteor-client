@@ -105,8 +105,8 @@ public class BlockListSetting extends GroupedSetSetting<Block> {
         }
     }
 
-    public static Groups<Block>.Group ORES, DIRTS, SANDS, STONES, STONES_ALL, TERRAIN, TERRAIN_ALL;
-
+    // These are just for testing
+    public static Groups<Block>.Group ORES, DIRTS, SANDS, STONES, TERRAIN;
     static {
         ORES = GROUPS.builtin("ores", Items.DIAMOND_ORE)
             .items(Xray.ORES).get();
@@ -117,17 +117,11 @@ public class BlockListSetting extends GroupedSetSetting<Block> {
             .items(Blocks.SAND, Blocks.RED_SAND, Blocks.GRAVEL)
             .get();
         STONES = GROUPS.builtin("stone", Items.STONE)
-            .items(Blocks.STONE, Blocks.DEEPSLATE, Blocks.NETHERRACK, Blocks.SANDSTONE, Blocks.TUFF, Blocks.BASALT)
-            .get();
-        STONES_ALL = GROUPS.builtin("stone-all", Items.DIORITE)
-            .items(Blocks.ANDESITE, Blocks.DIORITE, Blocks.GRANITE, Blocks.BLACKSTONE, Blocks.CALCITE)
-            .include(STONES)
+            .items(Blocks.STONE, Blocks.DEEPSLATE, Blocks.NETHERRACK, Blocks.SANDSTONE, Blocks.TUFF, Blocks.BASALT,
+                Blocks.ANDESITE, Blocks.DIORITE, Blocks.GRANITE, Blocks.BLACKSTONE, Blocks.CALCITE)
             .get();
         TERRAIN = GROUPS.builtin("terrain", Items.GRASS_BLOCK)
             .include(STONES, DIRTS, SANDS)
-            .get();
-        TERRAIN_ALL = GROUPS.builtin("terrain-all", Items.GRASS_BLOCK)
-            .include(STONES_ALL, DIRTS, SANDS)
             .get();
     }
 }
