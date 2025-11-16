@@ -204,14 +204,14 @@ public class InfinityMiner extends Module {
         Block[] array = new Block[targetBlocks.get().size()];
 
         baritone.getPathingBehavior().cancelEverything();
-        baritone.getMineProcess().mine(targetBlocks.get().get().toArray(array));
+        baritone.getMineProcess().mine(targetBlocks.get().getAll().toArray(array));
     }
 
     private void mineRepairBlocks() {
         Block[] array = new Block[repairBlocks.get().size()];
 
         baritone.getPathingBehavior().cancelEverything();
-        baritone.getMineProcess().mine(repairBlocks.get().get().toArray(array));
+        baritone.getMineProcess().mine(repairBlocks.get().getAll().toArray(array));
     }
 
     private void logOut() {

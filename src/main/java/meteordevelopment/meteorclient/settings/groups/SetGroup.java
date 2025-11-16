@@ -9,13 +9,14 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public abstract class SetGroup<T, G extends SetGroup<T, G>> {
+public abstract class SetGroup<T, G extends SetGroup<T, G>> implements IGroup<T, G> {
     protected Set<T> immediate = new ReferenceOpenHashSet<>();
     protected List<G> include = new ArrayList<>();
 
@@ -34,6 +35,29 @@ public abstract class SetGroup<T, G extends SetGroup<T, G>> {
         List<SetGroup<T, G>> next = new ArrayList<>();
         internalGetAll(set, seen, next);
         return set;
+    }
+
+     public Set<T> getAllMatching(Predicate<T> predicate) {
+        Set<T> set = new ReferenceOpenHashSet<>();
+        List<SetGroup<T, G>> seen = new ArrayList<>();
+        List<SetGroup<T, G>> next = new ArrayList<>();
+        if (predicate == null) internalGetAll(set, seen, next);
+        else internalGetAll(set, seen, next, predicate);
+        return set;
+    }
+
+    public void internalGetAll(Collection<T> to, Collection<SetGroup<T, G>> seen, List<SetGroup<T, G>> next, Predicate<T> predicate) {
+        next.clear();
+        next.add(this);
+        for (int i = 0; i < next.size(); i++) {
+            SetGroup<T, G> g = next.get(i);
+            if (seen.contains(g)) continue;
+            for (T t : g.immediate) {
+                if (predicate.test(t)) to.add(t);
+            }
+            next.addAll(g.include);
+            seen.add(g);
+        }
     }
 
     public void internalGetAll(Collection<T> to, Collection<SetGroup<T, G>> seen, List<SetGroup<T, G>> next) {

@@ -44,6 +44,10 @@ public abstract class GroupedSetSetting<T> extends AbstractCollectionSetting<Gro
     abstract protected Groups<T> groups();
     long version = -1;
 
+    public Groups<T>.Group createGroup(String name) {
+        return groups().builder(name).get();
+    }
+
     protected void buildSuggestions(List<String> to)
     {
         Registry<T> registry = suggestRegistry();
@@ -350,14 +354,14 @@ public abstract class GroupedSetSetting<T> extends AbstractCollectionSetting<Gro
                 if (name == null) return null;
 
                 this.name.set(name);
-                this.icon.set(tag.get("item", Identifier.CODEC).map(Registries.ITEM::get).orElse(null));
+                this.icon.set(tag.get("item", Identifier.CODEC).map(Registries.ITEM::get).orElse(Items.NETHER_STAR));
 
-                this.immediate = tag.getListOrEmpty("direct").stream().map(itemFromNbt).collect(Collectors.toSet());
-                this.include = tag.getListOrEmpty("include").stream().map(NbtElement::asString)
+                this.immediate.addAll(tag.getListOrEmpty("direct").stream().map(itemFromNbt).toList());
+                this.include.addAll(tag.getListOrEmpty("include").stream().map(NbtElement::asString)
                     .filter(Optional::isPresent).map(Optional::get).map(String::toUpperCase).map((s) -> {
                         if (GROUPS.containsKey(s)) return GROUPS.get(s);
                         return GROUPS.put(s, builder(s).get());
-                    }).toList();
+                    }).toList());
 
                 if (internalName == null) this.name.set(String.format("group%d", hashCode()));
 

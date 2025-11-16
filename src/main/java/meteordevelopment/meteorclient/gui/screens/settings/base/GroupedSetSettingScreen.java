@@ -9,17 +9,15 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import meteordevelopment.meteorclient.gui.screens.EditSystemScreen;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
-import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.settings.GroupedSetSetting;
-import meteordevelopment.meteorclient.settings.Settings;
+import meteordevelopment.meteorclient.settings.groups.IGroup;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
 import java.util.ArrayList;
@@ -33,11 +31,6 @@ public abstract class GroupedSetSettingScreen<T, S extends GroupedSetSetting<T>>
     private final Iterable<T> registry;
     private final GroupedSetSetting.Groups<T> groups;
 
-    private WTable table;
-    private String filterText = "";
-
-    private GroupedSetSetting.Groups<T>.Group expanded;
-
     public GroupedSetSettingScreen(GuiTheme theme, String title, S setting, GroupedSetSetting.Groups<T> groups, Iterable<T> registry) {
         super(theme, title);
 
@@ -46,53 +39,70 @@ public abstract class GroupedSetSettingScreen<T, S extends GroupedSetSetting<T>>
         this.groups = groups;
     }
 
-    @Override
-    public void initWidgets() {
-        // Filter
-        WTextBox filter = add(theme.textBox("")).minWidth(400).expandX().widget();
-        filter.setFocused(true);
-        filter.action = () -> {
-            filterText = filter.get().trim();
-
-            table.clear();
-            initTable();
-        };
-
-        table = add(theme.table()).expandX().widget();
-
-        initTable();
+    protected final class Context {
+        private WTable table;
+        private String filterText = "";
+        private GroupedSetSetting.Groups<T>.Group expanded = null;
+        private GroupedSetSetting.Groups<T>.Group beingEdited = null;
+        private IGroup<T, GroupedSetSetting.Groups<T>.Group> source;
+        private Runnable reload;
     }
 
-    private void initTable() {
+    private final Context ctx = new Context();
+
+    private void createWidgets(WindowScreen root, Context ctx) {
+        // Filter
+        WTextBox filter = root.add(theme.textBox("")).minWidth(400).expandX().widget();
+        filter.setFocused(true);
+
+        ctx.table = root.add(theme.table()).expandX().widget();
+
+        filter.action = () -> {
+            ctx.filterText = filter.get().trim();
+
+            ctx.table.clear();
+            initTable(ctx);
+        };
+
+        initTable(ctx);
+    }
+
+    @Override
+    public void initWidgets() {
+        this.ctx.source = this.setting.get();
+        this.ctx.reload = this::reload;
+        createWidgets(this, this.ctx);
+    }
+
+    private void initTable(Context ctx) {
 
         List<ItemUnion> list = new ArrayList<>(groups.getAll().stream().map(ItemUnion::new).toList());
 
         registry.forEach((t) -> list.add(new ItemUnion(t)));
 
         // Left (all)
-        WTable left = abc(list, true, t -> {
-            addValue(t);
+        WTable left = abc(ctx, list, true, t -> {
+            addValue(ctx, t);
 
             if (t.t != null) {
                 T v = getAdditionalValue(t.t);
-                if (v != null) addValue(t);
+                if (v != null) addValue(ctx, t);
             }
         });
 
-        if (!left.cells.isEmpty()) table.add(theme.verticalSeparator()).expandWidgetY();
+        if (!left.cells.isEmpty()) ctx.table.add(theme.verticalSeparator()).expandWidgetY();
 
         list.clear();
-        list.addAll(setting.get().getGroups().stream().map(ItemUnion::new).toList());
-
-        setting.get().getImmediate().forEach((t) -> list.add(new ItemUnion(t)));
+        list.addAll(ctx.source.getGroups().stream().map(ItemUnion::new).toList());
+        ctx.source.getImmediate().forEach((t) -> list.add(new ItemUnion(t)));
 
         // Right (selected)
-        WTable right = abc(list, false, t -> {
-            removeValue(t);
+        WTable right = abc(ctx, list, false, t -> {
+            removeValue(ctx, t);
 
             if (t.t != null) {
                 T v = getAdditionalValue(t.t);
-                if (v != null) removeValue(t);
+                if (v != null) removeValue(ctx, t);
             }
         });
 
@@ -105,67 +115,112 @@ public abstract class GroupedSetSettingScreen<T, S extends GroupedSetSetting<T>>
         else return theme.label(" @"+s.name.get()).color(color);
     }
 
-    private WTable abc(Iterable<ItemUnion> iterable, boolean isLeft, Consumer<ItemUnion> buttonAction) {
-        // Create
-        Cell<WTable> cell = this.table.add(theme.table()).top();
-        WTable table = cell.widget();
+    private void addGroupTransferButton(Context ctx, WTable table,GroupedSetSetting.Groups<T>.Group g) {
+        if (ctx.source.getImmediate().containsAll(g.getAllMatching(setting.getFilter()))) {
+            table.add(theme.button(GuiRenderer.ARROWHEAD_DOUBLE.icon(180, Color.RED))).right().top().widget().action = () -> {
+                ctx.source.removeAll(g.getAll());
+                invalidateTable(ctx);
+            };
+        } else {
+                table.add(theme.button(GuiRenderer.ARROWHEAD_DOUBLE.icon(Color.CYAN))).right().top().widget().action = () -> {
+                ctx.source.addAll(g.getAll());
+                invalidateTable(ctx);
+            };
+        }
+    }
 
+    private void addTransferButton(Context ctx, WTable table, T t) {
+        if (ctx.source.getImmediate().contains(t)) {
+            table.add(theme.button(GuiRenderer.ARROWHEAD.icon(180, Color.RED))).right().top().widget().action = () -> {
+                ctx.source.remove(t);
+                invalidateTable(ctx);
+            };
+        } else {
+            table.add(theme.button(GuiRenderer.ARROWHEAD.icon(Color.ORANGE))).right().top().widget().action = () -> {
+                ctx.source.add(t);
+                invalidateTable(ctx);
+            };
+        }
+    }
+
+    private WTable abc(Context ctx, Iterable<ItemUnion> iterable, boolean isLeft, Consumer<ItemUnion> buttonAction) {
+        // Create
+        Cell<WTable> cell = ctx.table.add(theme.table()).top();
+        WTable table = cell.widget();
 
         // Sort
         Predicate<ItemUnion> predicate = isLeft
             ? v -> Boolean.TRUE.equals(v.map(
-                t -> this.includeValue(t) && !setting.get().getImmediate().contains(t),
-            s -> !entireGroupExcluded(s) && !setting.get().getGroups().contains(s)))
+                t -> this.includeValue(t) && !ctx.source.getImmediate().contains(t),
+            s -> !entireGroupExcluded(s) && !ctx.source.getGroups().contains(s) && s != ctx.beingEdited))
             : v -> true;
 
-        Iterable<ItemUnion> sorted = SortingHelper.sort(iterable, predicate, v -> v.map(this::getValueNames, s -> new String[]{"@"+s.name.get()}), filterText);
+        Iterable<ItemUnion> sorted = SortingHelper.sort(iterable, predicate, v -> v.map(this::getValueNames, s -> new String[]{"@"+s.name.get()}), ctx.filterText);
 
         sorted.forEach(v -> {
-            table.add(v.map(this::getValueWidget, s -> {
 
-                WVerticalList vlist = theme.verticalList();
-                WTable hlist = vlist.add(theme.table()).widget();
+            WTable buttons = theme.table();
 
-                boolean e = expanded == s;
+            if (v.s == null) {
+                table.add(getValueWidget(v.t));
+                table.add(buttons).right();
+            } else {
+                GroupedSetSetting.Groups<T>.Group s = v.s;
 
-                WButton expand = hlist.add(theme.button(GuiRenderer.TRIANGLE.icon(e ? 0 : -90))).widget();
+                WTable header = table.add(theme.table()).widget();
+
+                boolean e = ctx.expanded == s;
+
+                WButton expand = header.add(theme.button(GuiRenderer.TRIANGLE.icon(e ? 0 : -90))).widget();
                 expand.action = () -> {
-                    expanded = e ? null : s;
-                    reload();
+                    ctx.expanded = e ? null : s;
+                    ctx.reload.run();
                 };
 
-                hlist.add(groupLabel(s));
+                header.add(groupLabel(s));
 
-                WTable subtable = vlist.add(theme.table()).widget();
+                // Recursive editing is confusing
+                if (ctx.beingEdited == null) {
+                    WButton edit = buttons.add(theme.button(GuiRenderer.EDIT)).right().top().widget();
+                    edit.action = () -> MeteorClient.mc.setScreen(new EditListGroupScreen(theme, s, () -> {
+                        invalidateTable(ctx);
+                        ctx.reload.run();
+                    }));
+                }
+
+                addGroupTransferButton(ctx, buttons, s);
+
+                table.add(buttons).right();
 
                 if (e) {
                     for (GroupedSetSetting.Groups<T>.Group inc : s.getGroups()) {
-                        subtable.add(theme.label("   -> "));
-                        subtable.add(groupLabel(inc));
-                        subtable.row();
+                        table.row();
+
+                        WTable label = theme.table();
+                        label.add(theme.label("   -> "));
+                        label.add(groupLabel(inc));
+                        table.add(label);
+
+                        addGroupTransferButton(ctx, table, inc);
                     }
 
                     Iterable<T> subitems = SortingHelper.sortWithPriority(s.getImmediate(), (t)->true, this::getValueNames, "", (T a, T b) -> includeValue(a) == includeValue(b) ? 0 : includeValue(a) ? -1 : 1);
 
                     subitems.forEach(t -> {
-                        subtable.add(theme.label("   -> "));
-                        subtable.add(getValueWidget(t));
-                        subtable.row();
+                        table.row();
+
+                        WTable label = theme.table();
+                        label.add(theme.label("   -> "));
+                        label.add(getValueWidget(t));
+                        table.add(label);
+
+                        addTransferButton(ctx, table, t);
                     });
                 }
 
-                return vlist;
-            }));
-
-            if (v.s != null) {
-                WButton edit = table.add(theme.button(GuiRenderer.EDIT)).right().top().widget();
-                edit.action = () -> MeteorClient.mc.setScreen(new EditListGroupScreen(theme, v.s, () -> {
-                    invalidateTable();
-                    reload();
-                }));
             }
 
-            WPressable button = table.add(isLeft ? theme.plus() : theme.minus()).expandCellX().right().top().widget();
+            WPressable button = buttons.add(isLeft ? theme.plus() : theme.minus()).expandCellX().right().top().widget();
             button.action = () -> buttonAction.accept(v);
 
             table.row();
@@ -180,32 +235,32 @@ public abstract class GroupedSetSettingScreen<T, S extends GroupedSetSetting<T>>
         return !s.anyMatch(this::includeValue);
     }
 
-    protected void invalidateTable() {
-        table.clear();
-        initTable();
+    protected void invalidateTable(Context ctx) {
+        ctx.table.clear();
+        initTable(ctx);
     }
 
-    protected void addValue(ItemUnion value) {
+    protected void addValue(Context ctx, ItemUnion value) {
         if (value.t != null) {
-            setting.get().add(value.t);
+            ctx.source.add(value.t);
             setting.onChanged();
-            invalidateTable();
+            invalidateTable(ctx);
         } else if (value.s != null) {
-            setting.get().add(value.s);
+            ctx.source.add(value.s);
             setting.onChanged();
-            invalidateTable();
+            invalidateTable(ctx);
         }
     }
 
-    protected void removeValue(ItemUnion value) {
+    protected void removeValue(Context ctx, ItemUnion value) {
        if (value.t != null) {
-            setting.get().remove(value.t);
+            ctx.source.remove(value.t);
             setting.onChanged();
-            invalidateTable();
+            invalidateTable(ctx);
         } else if (value.s != null) {
-            setting.get().remove(value.s);
+            ctx.source.remove(value.s);
             setting.onChanged();
-            invalidateTable();
+            invalidateTable(ctx);
         }
     }
 
@@ -244,25 +299,46 @@ public abstract class GroupedSetSettingScreen<T, S extends GroupedSetSetting<T>>
         }
     }
 
-    public class EditListGroupScreen extends EditSystemScreen<GroupedSetSetting.Groups<T>.Group> {
+    public class EditListGroupScreen extends WindowScreen {
+
+        private final GroupedSetSetting.Groups<T>.Group value;
+        private final Runnable reload;
+
+        private final Context ctx = new Context();
+
+        private WContainer container;
+
         public EditListGroupScreen(GuiTheme theme, GroupedSetSetting.Groups<T>.Group value, Runnable reload) {
-            super(theme, value, reload);
+            super(theme, "Editing Group");
+
+            this.value = value == null ? setting.createGroup("new-group") : value;
+            this.reload = reload;
+            this.value.builtin = false;
+
+            GroupedSetSettingScreen.this.setting.set(GroupedSetSettingScreen.this.setting.get());
         }
 
         @Override
-        public GroupedSetSetting.Groups<T>.Group create() {
-            return null;
+        public void initWidgets() {
+            container = add(theme.verticalList()).expandX().minWidth(400).padTop(4).widget();
+            container.add(theme.settings(value.settings)).expandX().padBottom(4);
+
+            add(theme.horizontalSeparator("Contents")).expandX().padBottom(4);
+
+            this.ctx.source = value;
+            this.ctx.reload = this::reload;
+            this.ctx.beingEdited = value;
+            createWidgets(this, this.ctx);
         }
 
         @Override
-        public boolean save() {
-            value.builtin = false;
-            return true;
+        protected void onClosed() {
+            this.reload.run();
         }
 
         @Override
-        public Settings getSettings() {
-            return value.settings;
+        public void tick() {
+            value.settings.tick(container, theme);
         }
     }
 }

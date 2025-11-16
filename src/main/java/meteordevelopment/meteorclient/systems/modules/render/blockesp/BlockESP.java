@@ -161,7 +161,7 @@ public class BlockESP extends Module {
     private void searchChunk(Chunk chunk) {
         workerThread.submit(() -> {
             if (!isActive()) return;
-            ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get().get());
+            ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get().getAll());
 
             if (schunk.size() > 0) {
                 synchronized (chunks) {
