@@ -17,5 +17,6 @@ public class LanguageManagerMixin {
     @Inject(method = "setLanguage", at = @At("TAIL"))
     private void onSetLanguage(String languageCode, CallbackInfo ci) {
         MeteorTranslations.loadLanguage(languageCode);
+        MeteorTranslations.clearUnusedLanguages(languageCode);
     }
 }
