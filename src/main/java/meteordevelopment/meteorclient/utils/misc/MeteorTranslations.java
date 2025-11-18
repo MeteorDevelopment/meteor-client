@@ -30,18 +30,22 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @SuppressWarnings("unused")
 public class MeteorTranslations {
+    private static final String EN_US_CODE = "en_us";
     private static final Gson GSON = new Gson();
     private static final Map<String, MeteorLanguage> languages = new Object2ObjectOpenHashMap<>();
+    private static MeteorLanguage defaultLanguage;
 
     @PreInit
     public static void preInit() {
         List<String> toLoad = new ArrayList<>(2);
-        toLoad.add("en_us");
-        if (!mc.options.language.equalsIgnoreCase("en_us")) toLoad.add(mc.options.language);
+        toLoad.add(EN_US_CODE);
+        if (!mc.options.language.equalsIgnoreCase(EN_US_CODE)) toLoad.add(mc.options.language);
 
         for (String language : toLoad) {
             loadLanguage(language);
         }
+
+        defaultLanguage = getLanguage(EN_US_CODE);
     }
 
     public static void loadLanguage(String languageCode) {
@@ -50,7 +54,7 @@ public class MeteorTranslations {
 
         try (InputStream stream = MeteorTranslations.class.getResourceAsStream("/assets/meteor-client/language/" + languageCode + ".json")) {
             if (stream == null) {
-                if (languageCode.equals("en_us")) throw new RuntimeException("Error loading the default language");
+                if (languageCode.equals(EN_US_CODE)) throw new RuntimeException("Error loading the default language");
                 else MeteorClient.LOG.info("No language file found for '{}'", languageCode);
             }
             else {
@@ -61,7 +65,7 @@ public class MeteorTranslations {
                 MeteorClient.LOG.info("Loaded language: {}", languageCode);
             }
         } catch (IOException e) {
-            if (languageCode.equals("en_us")) throw new RuntimeException("Error loading default language", e);
+            if (languageCode.equals(EN_US_CODE)) throw new RuntimeException("Error loading default language", e);
             else MeteorClient.LOG.error("Error loading language: {}", languageCode, e);
         }
 
@@ -115,7 +119,7 @@ public class MeteorTranslations {
     }
 
     public static MeteorLanguage getDefaultLanguage() {
-        return languages.get("en_us");
+        return defaultLanguage;
     }
 
     /**
