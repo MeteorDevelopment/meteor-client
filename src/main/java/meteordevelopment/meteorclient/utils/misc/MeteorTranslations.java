@@ -49,20 +49,6 @@ public class MeteorTranslations {
         defaultLanguage = getLanguage(EN_US_CODE);
     }
 
-    private static boolean hasLocalization(String languageCode) {
-        if (doesLangFileExist(MeteorClient.ADDON, languageCode)) return true;
-
-        for (MeteorAddon addon : AddonManager.ADDONS) {
-            if (doesLangFileExist(addon, languageCode)) return true;
-        }
-
-        return false;
-    }
-
-    private static boolean doesLangFileExist(MeteorAddon addon, String languageCode) {
-        return addon.getClass().getResource("/assets/" + addon.id + "/language/" + languageCode + ".json") != null;
-    }
-
     public static void loadLanguage(String languageCode) {
         if (languages.containsKey(languageCode)) return;
 
