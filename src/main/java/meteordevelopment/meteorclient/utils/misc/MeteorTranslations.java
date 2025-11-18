@@ -60,7 +60,7 @@ public class MeteorTranslations {
                 MeteorClient.LOG.info("Loaded language: {}", languageCode);
             }
         } catch (IOException e) {
-            if (languageCode.equals("en_us")) throw new RuntimeException(e);
+            if (languageCode.equals("en_us")) throw new RuntimeException("Error loading default language", e);
             else MeteorClient.LOG.error("Error loading language: {}", languageCode, e);
         }
 
