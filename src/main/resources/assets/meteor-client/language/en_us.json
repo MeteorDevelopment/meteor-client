@@ -69,6 +69,6 @@
   "meteor.command.vclip.description": "Lets you clip through blocks vertically.",
   "meteor.command.wasp.description": "Sets the auto wasp target.",
   "meteor.command.wasp.exception.cant_wasp_self": "You cannot target yourself!",
-  "meteor.command.wasp.info.target": "%d set as target.",
+  "meteor.command.wasp.info.target": "%s set as target.",
   "meteor.command.waypoint.description": "Manages waypoints."
 }
