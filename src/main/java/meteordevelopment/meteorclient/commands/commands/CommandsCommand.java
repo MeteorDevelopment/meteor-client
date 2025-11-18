@@ -53,7 +53,7 @@ public class CommandsCommand extends Command {
         }
         tooltip.append(aliases.formatted(Formatting.GRAY)).append("\n\n");
 
-        tooltip.append(translatable("description")).formatted(Formatting.WHITE);
+        tooltip.append(command.translatable("description")).formatted(Formatting.WHITE);
 
         // Text
         MutableText text = Text.literal(Utils.nameToTitle(command.getName()));
