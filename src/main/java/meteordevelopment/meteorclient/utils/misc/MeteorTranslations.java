@@ -75,6 +75,9 @@ public class MeteorTranslations {
         languageCode = languageCode.toLowerCase();
         if (languages.containsKey(languageCode)) return;
 
+        LanguageDefinition definition = languageDefinitions.get(languageCode);
+        if (definition == null) return;
+
         try (InputStream stream = MeteorTranslations.class.getResourceAsStream("/assets/meteor-client/language/" + languageCode + ".json")) {
             if (stream == null) {
                 if (languageCode.equals(EN_US_CODE)) throw new RuntimeException("Error loading the default language");
@@ -83,7 +86,7 @@ public class MeteorTranslations {
             else {
                 // noinspection unchecked
                 Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), Object2ObjectOpenHashMap.class);
-                languages.put(languageCode, new MeteorLanguage(map));
+                languages.put(languageCode, new MeteorLanguage(definition.rightToLeft(), map));
 
                 MeteorClient.LOG.info("Loaded language: {}", languageCode);
             }
@@ -97,7 +100,7 @@ public class MeteorTranslations {
 
             try (InputStream stream = addon.provideLanguage(languageCode)) {
                 if (stream == null) continue;
-                MeteorLanguage lang = languages.getOrDefault(languageCode, new MeteorLanguage());
+                MeteorLanguage lang = languages.getOrDefault(languageCode, new MeteorLanguage(definition.rightToLeft()));
 
                 // noinspection unchecked
                 Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), Object2ObjectOpenHashMap.class);
@@ -157,7 +160,7 @@ public class MeteorTranslations {
         // translation. Maybe that will change in the future.
         if (isEnglish()) return 100;
 
-        double currentLangSize = languages.getOrDefault(mc.options.language.toLowerCase(), new MeteorLanguage()).translations.size();
+        double currentLangSize = languages.getOrDefault(mc.options.language.toLowerCase(), new MeteorLanguage(false)).translations.size();
         return (currentLangSize / getDefaultLanguage().translations.size()) * 100;
     }
 
@@ -168,10 +171,14 @@ public class MeteorTranslations {
     public static class MeteorLanguage extends Language {
         private final Map<String, String> translations = new Object2ObjectOpenHashMap<>();
         private final List<Map<String, String>> customTranslations = new ObjectArrayList<>();
+        private final boolean rightToLeft;
 
-        public MeteorLanguage() {}
+        public MeteorLanguage(boolean rightToLeft) {
+            this.rightToLeft = rightToLeft;
+        }
 
-        public MeteorLanguage(Map<String, String> translations) {
+        public MeteorLanguage(boolean rightToLeft, Map<String, String> translations) {
+            this(rightToLeft);
             this.translations.putAll(translations);
         }
 
@@ -205,12 +212,12 @@ public class MeteorTranslations {
 
         @Override
         public boolean isRightToLeft() {
-            return false;
+            return this.rightToLeft;
         }
 
         @Override
         public OrderedText reorder(StringVisitable text) {
-            return ReorderingUtil.reorder(text, false);
+            return ReorderingUtil.reorder(text, this.rightToLeft);
         }
     }
 }
