@@ -47,7 +47,7 @@ public class MeteorTranslations {
 
         List<String> toLoad = new ArrayList<>(2);
         toLoad.add(EN_US_CODE);
-        if (!mc.options.language.equalsIgnoreCase(EN_US_CODE)) toLoad.add(mc.options.language);
+        if (!mc.options.language.equals(EN_US_CODE)) toLoad.add(mc.options.language);
 
         for (String language : toLoad) {
             loadLanguage(language);
@@ -71,7 +71,6 @@ public class MeteorTranslations {
     }
 
     public static void loadLanguage(String languageCode) {
-        languageCode = languageCode.toLowerCase();
         if (languages.containsKey(languageCode)) return;
 
         LanguageDefinition definition = languageDefinitions.get(languageCode);
@@ -148,7 +147,7 @@ public class MeteorTranslations {
     }
 
     public static MeteorLanguage getCurrentLanguage() {
-        return languages.getOrDefault(mc.options.language.toLowerCase(), getDefaultLanguage());
+        return languages.getOrDefault(mc.options.language, getDefaultLanguage());
     }
 
     public static MeteorLanguage getDefaultLanguage() {
@@ -163,13 +162,13 @@ public class MeteorTranslations {
         // translation. Maybe that will change in the future.
         if (isEnglish()) return 100;
 
-        MeteorLanguage currentLang = languages.get(mc.options.language.toLowerCase());
+        MeteorLanguage currentLang = languages.get(mc.options.language);
         double currentLangSize = currentLang != null ? currentLang.translations.size() : 0;
         return (currentLangSize / getDefaultLanguage().translations.size()) * 100;
     }
 
     public static boolean isEnglish() {
-        return mc.options.language.toLowerCase().startsWith("en");
+        return mc.options.language.startsWith("en");
     }
 
     public static class MeteorLanguage extends Language {
