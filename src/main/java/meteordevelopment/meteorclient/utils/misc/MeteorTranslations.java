@@ -20,6 +20,7 @@ import net.minecraft.util.Language;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.IllegalFormatException;
 import java.util.List;
@@ -54,7 +55,7 @@ public class MeteorTranslations {
             }
             else {
                 // noinspection unchecked
-                Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream), Object2ObjectOpenHashMap.class);
+                Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), Object2ObjectOpenHashMap.class);
                 languages.put(languageCode, new MeteorLanguage(map));
 
                 MeteorClient.LOG.info("Loaded language: {}", languageCode);
@@ -72,7 +73,7 @@ public class MeteorTranslations {
                 MeteorLanguage lang = languages.getOrDefault(languageCode, new MeteorLanguage());
 
                 // noinspection unchecked
-                Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream), Object2ObjectOpenHashMap.class);
+                Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), Object2ObjectOpenHashMap.class);
                 lang.addCustomTranslation(map);
                 languages.put(languageCode, lang);
 
