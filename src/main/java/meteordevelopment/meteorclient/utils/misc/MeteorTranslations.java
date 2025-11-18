@@ -22,10 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.IllegalFormatException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -93,6 +90,10 @@ public class MeteorTranslations {
         if (!languageMap.isEmpty()) {
             languages.put(languageCode, new MeteorLanguage(definition.rightToLeft(), languageMap));
         }
+    }
+
+    public static void clearUnusedLanguages(String currentLanguageCode) {
+        languages.keySet().removeIf(languageCode -> !languageCode.equals(EN_US_CODE) && !languageCode.equals(currentLanguageCode));
     }
 
     public static String translate(String key, Object... args) {
