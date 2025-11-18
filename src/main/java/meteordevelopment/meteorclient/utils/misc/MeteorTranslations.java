@@ -34,17 +34,10 @@ public class MeteorTranslations {
     private static final String EN_US_CODE = "en_us";
     private static final Gson GSON = new Gson();
     private static final Map<String, MeteorLanguage> languages = new Object2ObjectOpenHashMap<>();
-    private static final Map<String, LanguageDefinition> languageDefinitions = new Object2ObjectOpenHashMap<>();
     private static MeteorLanguage defaultLanguage;
 
     @PreInit
     public static void preInit() {
-        MinecraftClient.getInstance().getLanguageManager().getAllLanguages().forEach((code, definition) -> {
-            if (hasLocalization(code)) {
-                languageDefinitions.put(code, definition);
-            }
-        });
-
         List<String> toLoad = new ArrayList<>(2);
         toLoad.add(EN_US_CODE);
         if (!mc.options.language.equals(EN_US_CODE)) toLoad.add(mc.options.language);
@@ -73,7 +66,7 @@ public class MeteorTranslations {
     public static void loadLanguage(String languageCode) {
         if (languages.containsKey(languageCode)) return;
 
-        LanguageDefinition definition = languageDefinitions.get(languageCode);
+        LanguageDefinition definition = MinecraftClient.getInstance().getLanguageManager().getLanguage(languageCode);
         if (definition == null) return;
 
         Object2ObjectOpenHashMap<String, String> languageMap = new Object2ObjectOpenHashMap<>();
@@ -136,10 +129,6 @@ public class MeteorTranslations {
         } catch (IllegalFormatException e) {
             return fallback;
         }
-    }
-
-    public static Map<String, LanguageDefinition> getLanguageDefinitions() {
-        return languageDefinitions;
     }
 
     public static MeteorLanguage getLanguage(String lang) {
