@@ -98,7 +98,7 @@ public class MeteorTranslations {
         for (MeteorAddon addon : AddonManager.ADDONS) {
             if (addon == MeteorClient.ADDON) continue;
 
-            try (InputStream stream = addon.provideLanguage(languageCode)) {
+            try (InputStream stream = addon.getClass().getResourceAsStream("/assets/" + addon.id + "/language/" + languageCode + ".json")) {
                 if (stream == null) continue;
 
                 // noinspection unchecked
