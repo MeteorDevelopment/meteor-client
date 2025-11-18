@@ -12,6 +12,8 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.utils.PreInit;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.language.LanguageDefinition;
 import net.minecraft.client.resource.language.ReorderingUtil;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.StringVisitable;
@@ -33,10 +35,17 @@ public class MeteorTranslations {
     private static final String EN_US_CODE = "en_us";
     private static final Gson GSON = new Gson();
     private static final Map<String, MeteorLanguage> languages = new Object2ObjectOpenHashMap<>();
+    private static final Map<String, LanguageDefinition> languageDefinitions = new Object2ObjectOpenHashMap<>();
     private static MeteorLanguage defaultLanguage;
 
     @PreInit
     public static void preInit() {
+        MinecraftClient.getInstance().getLanguageManager().getAllLanguages().forEach((code, definition) -> {
+            if (hasLocalization(code)) {
+                languageDefinitions.put(code, definition);
+            }
+        });
+
         List<String> toLoad = new ArrayList<>(2);
         toLoad.add(EN_US_CODE);
         if (!mc.options.language.equalsIgnoreCase(EN_US_CODE)) toLoad.add(mc.options.language);
@@ -46,6 +55,20 @@ public class MeteorTranslations {
         }
 
         defaultLanguage = getLanguage(EN_US_CODE);
+    }
+
+    private static boolean hasLocalization(String languageCode) {
+        if (doesLangFileExist(MeteorClient.ADDON, languageCode)) return true;
+
+        for (MeteorAddon addon : AddonManager.ADDONS) {
+            if (doesLangFileExist(addon, languageCode)) return true;
+        }
+
+        return false;
+    }
+
+    private static boolean doesLangFileExist(MeteorAddon addon, String languageCode) {
+        return addon.getClass().getResource("/assets/" + addon.id + "/language/" + languageCode + ".json") != null;
     }
 
     public static void loadLanguage(String languageCode) {
@@ -108,6 +131,10 @@ public class MeteorTranslations {
         } catch (IllegalFormatException e) {
             return fallback;
         }
+    }
+
+    public static Map<String, LanguageDefinition> getLanguageDefinitions() {
+        return languageDefinitions;
     }
 
     public static MeteorLanguage getLanguage(String lang) {
