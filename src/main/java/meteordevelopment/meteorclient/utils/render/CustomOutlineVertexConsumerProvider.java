@@ -72,7 +72,7 @@ public class CustomOutlineVertexConsumerProvider implements VertexConsumerProvid
         }
 
         @Override
-        public VertexConsumer method_75298(float f) {
+        public VertexConsumer lineWidth(float width) {
             return this;
         }
     }

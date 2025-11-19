@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
-import joptsimple.internal.Strings;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -32,7 +31,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.LocalDifficulty;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -172,7 +171,7 @@ public class ServerCommand extends Command {
         plugins.replaceAll(this::formatName);
 
         if (!plugins.isEmpty()) {
-            info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
+            info("Plugins (%d): %s ", plugins.size(), String.join(", ", plugins));
         } else {
             error("No plugins found.");
         }
@@ -251,7 +250,7 @@ public class ServerCommand extends Command {
         if (ANTICHEAT_LIST.contains(name.toLowerCase())) {
             return String.format("%s%s(default)", Formatting.RED, name);
         }
-        else if (StringUtils.containsIgnoreCase(name, "exploit") || StringUtils.containsIgnoreCase(name, "cheat") || StringUtils.containsIgnoreCase(name, "illegal")) {
+        else if (Strings.CI.contains(name, "exploit") || Strings.CI.contains(name, "cheat") || Strings.CI.contains(name, "illegal")) {
             return String.format("%s%s(default)", Formatting.RED, name);
         }
 

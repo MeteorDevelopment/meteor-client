@@ -354,7 +354,7 @@ public class Freecam extends Module {
         if (requireDoubleClick.get() && clickTs - prevClick > 500) return;
 
         Camera cam = mc.gameRenderer.getCamera();
-        Vec3d posVec = cam.getPos();
+        Vec3d posVec = cam.getCameraPos();
         Vec3d lookVec = Vec3d.fromPolar(cam.getPitch(), cam.getYaw());
         short maxDist = 256;
         Vec3d max = posVec.add(lookVec.multiply(maxDist));
