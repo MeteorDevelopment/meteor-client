@@ -305,31 +305,26 @@ public class AutoGap extends Module {
     }
 
     private int findSlot() {
-        boolean preferEGap = this.allowEgap.get() || requiresEGap;
-        int slot = -1;
-
         for (int i = 0; i < 9; i++) {
-            // Skip if item stack is empty
             ItemStack stack = mc.player.getInventory().getStack(i);
+
+            // Skip if item stack is empty
             if (stack.isEmpty()) continue;
 
             // Skip if item isn't a gap or egap
             if (isNotGapOrEGap(stack)) continue;
+
             Item item = stack.getItem();
 
-            // If egap was found and preferEGap is true we can return the current slot
-            if (item == Items.ENCHANTED_GOLDEN_APPLE && preferEGap) {
-                slot = i;
-                break;
-            }
+            // If egap was found and allowEgapSetting is true we can return the current slot
+            if (item == Items.ENCHANTED_GOLDEN_APPLE && allowEgap.get()) return i;
+
             // If gap was found and egap is not required we can return the current slot
-            else if (item == Items.GOLDEN_APPLE && !requiresEGap) {
-                slot = i;
-                if (!preferEGap) break;
-            }
+            if (item == Items.GOLDEN_APPLE && !requiresEGap) return i;
         }
 
-        return slot;
+        // No suitable gap or egap found
+        return -1;
     }
 
     private boolean isNotGapOrEGap(ItemStack stack) {

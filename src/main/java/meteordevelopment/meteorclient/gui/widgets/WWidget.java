@@ -91,10 +91,10 @@ public abstract class WWidget implements BaseWidget {
 
     // Events
 
-    public boolean mouseClicked(Click click, boolean used) {
-        return onMouseClicked(click, used);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        return onMouseClicked(click, doubled);
     }
-    public boolean onMouseClicked(Click click, boolean used) { return false; }
+    public boolean onMouseClicked(Click click, boolean doubled) { return false; }
 
     public boolean mouseReleased(Click click) {
         return onMouseReleased(click);
