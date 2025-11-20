@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.profiles;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.macros.Macros;
@@ -96,11 +97,11 @@ public class Profile implements ISerializable<Profile> {
         try {
             FileUtils.deleteDirectory(getFile());
         } catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error deleting profile {}", name.get(), e);
         }
     }
 
-    private File getFile() {
+    public File getFile() {
         return new File(Profiles.FOLDER, name.get());
     }
 
