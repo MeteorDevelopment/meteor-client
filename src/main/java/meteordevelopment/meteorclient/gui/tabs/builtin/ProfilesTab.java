@@ -156,17 +156,14 @@ public class ProfilesTab extends Tab {
             nbt.remove("name");
             for (Map.Entry<String, NbtElement> entry : nbt.entrySet()) {
                 String filename = entry.getKey();
-                // super scuffed
-                if (filename.endsWith(".nbt")) p.waypoints.set(true);
-                else {
-                    Setting<Boolean> s = p.settings.get(filename, Boolean.class);
-                    if (s == null) {
-                        MeteorClient.LOG.error("Malformed imported profile setting {}", filename);
-                        continue;
-                    }
 
-                    s.set(true);
-                    filename += ".nbt";
+                switch (filename) {
+                    case "hud.nbt" -> p.hud.set(true);
+                    case "macros.nbt" -> p.macros.set(true);
+                    case "modules.nbt" -> p.modules.set(true);
+                    default -> {
+                        if (filename.endsWith(".nbt")) p.waypoints.set(true);
+                    }
                 }
 
                 File f = new File(p.getFile(), filename);
@@ -298,12 +295,11 @@ public class ProfilesTab extends Tab {
 
             try {
                 for (File f : profile.getFile().listFiles()) {
-                    // very scuffed
                     if (f.getName().equals("hud.nbt") && hud ||
                         f.getName().equals("macros.nbt") && macros ||
                         f.getName().equals("modules.nbt") && modules
                     ) {
-                        nbt.put(f.getName().replace(".nbt", ""), NbtIo.read(f.toPath()));
+                        nbt.put(f.getName(), NbtIo.read(f.toPath()));
                     }
                     else if (f.getName().endsWith(".nbt") && waypoints)
                         nbt.put(f.getName(), NbtIo.read(f.toPath()));
