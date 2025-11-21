@@ -218,7 +218,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
     private void genericW(WTable table, GenericSetting<?> setting) {
         WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
-        edit.action = () -> mc.setScreen(setting.get().createScreen(theme));
+        edit.action = () -> mc.setScreen(setting.createScreen(theme));
 
         reset(table, setting, null);
     }
@@ -450,9 +450,15 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
         WDoubleEdit component = table.add(theme.doubleEdit(value, setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.decimalPlaces, setting.noSlider)).expandX().widget();
         if (setting.onSliderRelease) {
-            component.actionOnRelease = () -> update.accept(component.get());
+            component.actionOnRelease = () -> {
+                update.accept(component.get());
+                setting.onChanged();
+            };
         } else {
-            component.action = () -> update.accept(component.get());
+            component.action = () -> {
+                update.accept(component.get());
+                setting.onChanged();
+            };
         }
 
         table.row();

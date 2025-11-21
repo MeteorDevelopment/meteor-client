@@ -443,7 +443,7 @@ public class Nametags extends Module {
 
         double width = nameWidth;
 
-        boolean renderPlayerDistance = player != mc.cameraEntity || Modules.get().isActive(Freecam.class);
+        boolean renderPlayerDistance = player != mc.getCameraEntity() || Modules.get().isActive(Freecam.class);
 
         if (displayHealth.get()) width += healthWidth;
         if (displayGameMode.get()) width += gmWidth;

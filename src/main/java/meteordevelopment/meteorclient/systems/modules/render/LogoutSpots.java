@@ -152,7 +152,7 @@ public class LogoutSpots extends Module {
                 if (mc.getNetworkHandler().getPlayerList().stream().anyMatch(playerListEntry -> playerListEntry.getProfile().equals(entry.getProfile()))) continue;
 
                 for (PlayerEntity player : lastPlayers) {
-                    if (player.getUuid().equals(entry.getProfile().getId())) {
+                    if (player.getUuid().equals(entry.getProfile().id())) {
                         add(new Entry(player));
                     }
                 }

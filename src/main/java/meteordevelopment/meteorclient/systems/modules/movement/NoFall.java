@@ -173,7 +173,7 @@ public class NoFall extends Module {
                 if (anchor.get()) PlayerUtils.centerPlayer();
 
                 // Check if there is a block within 5 blocks
-                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getEntityPos(), mc.player.getEntityPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
 
                 // Place
                 if (result != null && result.getType() == HitResult.Type.BLOCK) {

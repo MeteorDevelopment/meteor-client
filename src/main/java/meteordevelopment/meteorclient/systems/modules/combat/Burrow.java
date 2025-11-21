@@ -165,7 +165,7 @@ public class Burrow extends Module {
         if (!shouldBurrow && instant.get()) blockPos.set(mc.player.getBlockPos());
 
         if (shouldBurrow) {
-           if (rotate.get())
+            if (rotate.get())
                 Rotations.rotate(Rotations.getYaw(mc.player.getBlockPos()), Rotations.getPitch(mc.player.getBlockPos()), 50, this::burrow);
             else burrow();
 
@@ -176,7 +176,7 @@ public class Burrow extends Module {
     @EventHandler
     private void onKey(KeyEvent event) {
         if (instant.get() && !shouldBurrow) {
-            if (event.action == KeyAction.Press && mc.options.jumpKey.matchesKey(event.key, 0)) {
+            if (event.action == KeyAction.Press && mc.options.jumpKey.matchesKey(event.input)) {
                 shouldBurrow = true;
             }
             blockPos.set(mc.player.getBlockPos());

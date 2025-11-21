@@ -465,10 +465,10 @@ public class BetterChat extends Module {
         GameProfile sender = getSender(line, text);
         if (sender == null) return;
 
-        PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(sender.getId());
+        PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(sender.id());
         if (entry == null) return;
 
-        PlayerSkinDrawer.draw(context, entry.getSkinTextures(), 0, y, 8);
+        PlayerSkinDrawer.draw(context, entry.getSkinTextures(), 0, y, 8, color);
     }
 
     private GameProfile getSender(IChatHudLine line, String text) {

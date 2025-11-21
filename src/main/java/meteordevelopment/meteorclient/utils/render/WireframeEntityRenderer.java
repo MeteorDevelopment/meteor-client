@@ -16,6 +16,8 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
+import net.minecraft.client.render.command.RenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
@@ -29,6 +31,18 @@ public class WireframeEntityRenderer {
     private static final MatrixStack matrices = new MatrixStack();
 
     private static Renderer3D renderer;
+
+    private static final OrderedRenderCommandQueueImpl renderCommandQueue = new OrderedRenderCommandQueueImpl();
+
+    private static final RenderDispatcher renderDispatcher = new RenderDispatcher(
+        renderCommandQueue,
+        mc.getBlockRenderManager(),
+        MyVertexConsumerProvider.INSTANCE,
+        mc.getAtlasManager(),
+        NoopOutlineVertexConsumerProvider.INSTANCE,
+        NoopImmediateVertexConsumerProvider.INSTANCE,
+        mc.textRenderer
+    );
 
     private static Color sideColor;
     private static Color lineColor;
@@ -64,13 +78,20 @@ public class WireframeEntityRenderer {
 
         matrices.push();
         matrices.scale((float) scale, (float) scale, (float) scale);
-        renderer.render(state, matrices, MyVertexConsumerProvider.INSTANCE, 15);
+        renderer.render(state, matrices, renderCommandQueue, mc.gameRenderer.getEntityRenderStates().cameraRenderState);
         matrices.pop();
+
+        renderDispatcher.render();
+        renderCommandQueue.onNextFrame();
     }
 
-    private static class MyVertexConsumerProvider implements VertexConsumerProvider {
+    private static class MyVertexConsumerProvider extends VertexConsumerProvider.Immediate {
         public static final MyVertexConsumerProvider INSTANCE = new MyVertexConsumerProvider();
         private final Object2ObjectOpenHashMap<RenderLayer, MyVertexConsumer> buffers = new Object2ObjectOpenHashMap<>();
+
+        protected MyVertexConsumerProvider() {
+            super(null, null);
+        }
 
         @Override
         public VertexConsumer getBuffer(RenderLayer layer) {
@@ -87,6 +108,16 @@ public class WireframeEntityRenderer {
             }
 
             return vertexConsumer;
+        }
+
+        @Override
+        public void draw() {
+            throw new RuntimeException();
+        }
+
+        @Override
+        public void draw(RenderLayer layer) {
+            throw new RuntimeException();
         }
     }
 
@@ -119,40 +150,6 @@ public class WireframeEntityRenderer {
                 i = 0;
             }
 
-            return this;
-        }
-
-        @Override
-        public VertexConsumer color(int red, int green, int blue, int alpha) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer texture(float u, float v) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer overlay(int u, int v) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer light(int u, int v) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer normal(float x, float y, float z) {
-            return this;
-        }
-    }
-
-    private static class NoopVertexConsumer implements VertexConsumer {
-        private static final NoopVertexConsumer INSTANCE = new NoopVertexConsumer();
-
-        @Override
-        public VertexConsumer vertex(float x, float y, float z) {
             return this;
         }
 

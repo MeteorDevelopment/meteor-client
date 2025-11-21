@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -101,6 +101,13 @@ public class InventoryTweaks extends Module {
         .description("Disables the inventory sorter when in creative mode.")
         .defaultValue(true)
         .visible(sortingEnabled::get)
+        .build()
+    );
+
+    private final Setting<Boolean> uncapBundleScrolling = sgGeneral.add(new BoolSetting.Builder()
+        .name("uncap-bundle-scrolling")
+        .description("Whether to uncap the bundle scrolling feature to let you select any item.")
+        .defaultValue(true)
         .build()
     );
 
@@ -281,16 +288,16 @@ public class InventoryTweaks extends Module {
     private void onKey(KeyEvent event) {
         if (event.action != KeyAction.Press) return;
 
-        if (sortingKey.get().matches(true, event.key, event.modifiers)) {
+        if (sortingKey.get().matches(event.input)) {
             if (sort()) event.cancel();
         }
     }
 
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseClick(MouseClickEvent event) {
         if (event.action != KeyAction.Press) return;
 
-        if (sortingKey.get().matches(false, event.button, 0)) {
+        if (sortingKey.get().matches(event.input)) {
             if (sort()) event.cancel();
         }
     }
@@ -450,6 +457,10 @@ public class InventoryTweaks extends Module {
 
     public boolean mouseDragItemMove() {
         return isActive() && mouseDragItemMove.get();
+    }
+
+    public boolean uncapBundleScrolling() {
+        return isActive() && uncapBundleScrolling.get();
     }
 
     public boolean canSteal(ScreenHandler handler) {
