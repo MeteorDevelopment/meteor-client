@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.meteorclient.utils.network.DiscordWebhook;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -47,6 +48,7 @@ public class Notifier extends Module {
     private final SettingGroup sgVisualRange = settings.createGroup("Visual Range");
     private final SettingGroup sgPearl = settings.createGroup("Pearl");
     private final SettingGroup sgJoinsLeaves = settings.createGroup("Joins/Leaves");
+    private final SettingGroup sgDiscord = settings.createGroup("Discord Webhook");
 
     // Totem Pops
 
@@ -188,6 +190,47 @@ public class Notifier extends Module {
         .build()
     );
 
+    // Discord Webhook
+
+    private final Setting<Boolean> discordWebhookEnabled = sgDiscord.add(new BoolSetting.Builder()
+        .name("enabled")
+        .description("Enables Discord webhook notifications.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<String> webhookUrl = sgDiscord.add(new StringSetting.Builder()
+        .name("webhook-url")
+        .description("Discord webhook URL to send notifications to.")
+        .defaultValue("")
+        .visible(discordWebhookEnabled::get)
+        .build()
+    );
+
+    private final Setting<Boolean> discordPlayerDetection = sgDiscord.add(new BoolSetting.Builder()
+        .name("player-detection")
+        .description("Send Discord notification when a player enters render distance.")
+        .defaultValue(true)
+        .visible(discordWebhookEnabled::get)
+        .build()
+    );
+
+    private final Setting<Boolean> discordTotemPops = sgDiscord.add(new BoolSetting.Builder()
+        .name("totem-pops")
+        .description("Send Discord notification for totem pops.")
+        .defaultValue(false)
+        .visible(discordWebhookEnabled::get)
+        .build()
+    );
+
+    private final Setting<Boolean> discordPearls = sgDiscord.add(new BoolSetting.Builder()
+        .name("pearl-alerts")
+        .description("Send Discord notification for pearl throws.")
+        .defaultValue(false)
+        .visible(discordWebhookEnabled::get)
+        .build()
+    );
+
     private int timer;
     private boolean loginPacket = true;
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
@@ -206,12 +249,17 @@ public class Notifier extends Module {
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Despawn) {
-            if (event.entity instanceof PlayerEntity) {
-                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
+            if (event.entity instanceof PlayerEntity player) {
+                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(player)) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
                     ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getName().getString());
 
                     if (visualMakeSound.get())
                         mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
+
+                    // Send Discord webhook notification
+                    if (discordWebhookEnabled.get() && discordPlayerDetection.get() && !webhookUrl.get().isEmpty()) {
+                        sendPlayerDetectionWebhook(player, true);
+                    }
                 }
             } else {
                 MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
@@ -230,12 +278,17 @@ public class Notifier extends Module {
     @EventHandler
     private void onEntityRemoved(EntityRemovedEvent event) {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Spawn) {
-            if (event.entity instanceof PlayerEntity) {
-                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
+            if (event.entity instanceof PlayerEntity player) {
+                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(player)) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
                     ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getName().getString());
 
                     if (visualMakeSound.get())
                         mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
+
+                    // Send Discord webhook notification
+                    if (discordWebhookEnabled.get() && discordPlayerDetection.get() && !webhookUrl.get().isEmpty()) {
+                        sendPlayerDetectionWebhook(player, false);
+                    }
                 }
             } else {
                 MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
@@ -255,6 +308,11 @@ public class Notifier extends Module {
                     double d = pearlStartPosMap.get(i).distanceTo(e.getEntityPos());
                     if ((!Friends.get().isFriend(p) || !pearlIgnoreFriends.get()) && (!p.equals(mc.player) || !pearlIgnoreOwn.get())) {
                         info("(highlight)%s's(default) pearl landed at %d, %d, %d (highlight)(%.1fm away, travelled %.1fm)(default).", pearl.getOwner().getName().getString(), pearl.getBlockPos().getX(), pearl.getBlockPos().getY(), pearl.getBlockPos().getZ(), pearl.distanceTo(mc.player), d);
+
+                        // Send Discord webhook notification for pearls
+                        if (discordWebhookEnabled.get() && discordPearls.get() && !webhookUrl.get().isEmpty()) {
+                            sendPearlWebhook(p, pearl, d);
+                        }
                     }
                 }
                 pearlStartPosMap.remove(i);
@@ -321,6 +379,11 @@ public class Notifier extends Module {
                     if (totemsDistanceCheck.get() && distance > totemsDistance.get()) return;
 
                     ChatUtils.sendMsg(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+
+                    // Send Discord webhook notification for totem pops
+                    if (discordWebhookEnabled.get() && discordTotemPops.get() && !webhookUrl.get().isEmpty()) {
+                        sendTotemPopWebhook(entity, pops);
+                    }
                 }
             }
             default -> {}
@@ -358,6 +421,83 @@ public class Notifier extends Module {
 
     private int getChatId(Entity entity) {
         return chatIdMap.computeIfAbsent(entity.getUuid(), value -> random.nextInt());
+    }
+
+    // Discord Webhook Methods
+
+    private void sendPlayerDetectionWebhook(PlayerEntity player, boolean entered) {
+        String title = entered ? "Player Entered Visual Range" : "Player Left Visual Range";
+        String description = String.format("**%s** has %s your visual range!",
+            player.getName().getString(),
+            entered ? "entered" : "left");
+
+        DiscordWebhook webhook = new DiscordWebhook(webhookUrl.get());
+        webhook.setUsername("Meteor Notifier");
+
+        DiscordWebhook.Embed embed = new DiscordWebhook.Embed()
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(entered ? new java.awt.Color(0, 255, 0) : new java.awt.Color(255, 0, 0))
+            .addField("Player", player.getName().getString(), true)
+            .addField("Position", String.format("X: %d, Y: %d, Z: %d",
+                player.getBlockPos().getX(),
+                player.getBlockPos().getY(),
+                player.getBlockPos().getZ()), true)
+            .addField("Distance", String.format("%.1f blocks", PlayerUtils.distanceTo(player)), true)
+            .setTimestamp(java.time.Instant.now().toString());
+
+        webhook.addEmbed(embed);
+        webhook.send();
+    }
+
+    private void sendTotemPopWebhook(PlayerEntity player, int pops) {
+        String description = String.format("**%s** popped **%d** %s!",
+            player.getName().getString(),
+            pops,
+            pops == 1 ? "totem" : "totems");
+
+        DiscordWebhook webhook = new DiscordWebhook(webhookUrl.get());
+        webhook.setUsername("Meteor Notifier");
+
+        DiscordWebhook.Embed embed = new DiscordWebhook.Embed()
+            .setTitle("Totem Pop Alert")
+            .setDescription(description)
+            .setColor(new java.awt.Color(255, 215, 0))
+            .addField("Player", player.getName().getString(), true)
+            .addField("Total Pops", String.valueOf(pops), true)
+            .addField("Distance", String.format("%.1f blocks", PlayerUtils.distanceTo(player)), true)
+            .addField("Position", String.format("X: %d, Y: %d, Z: %d",
+                player.getBlockPos().getX(),
+                player.getBlockPos().getY(),
+                player.getBlockPos().getZ()), false)
+            .setTimestamp(java.time.Instant.now().toString());
+
+        webhook.addEmbed(embed);
+        webhook.send();
+    }
+
+    private void sendPearlWebhook(PlayerEntity player, EnderPearlEntity pearl, double distanceTravelled) {
+        String description = String.format("**%s** threw a pearl!",
+            player.getName().getString());
+
+        DiscordWebhook webhook = new DiscordWebhook(webhookUrl.get());
+        webhook.setUsername("Meteor Notifier");
+
+        DiscordWebhook.Embed embed = new DiscordWebhook.Embed()
+            .setTitle("Pearl Alert")
+            .setDescription(description)
+            .setColor(new java.awt.Color(0, 128, 128))
+            .addField("Player", player.getName().getString(), true)
+            .addField("Distance to You", String.format("%.1f blocks", pearl.distanceTo(mc.player)), true)
+            .addField("Distance Travelled", String.format("%.1f blocks", distanceTravelled), true)
+            .addField("Landing Position", String.format("X: %d, Y: %d, Z: %d",
+                pearl.getBlockPos().getX(),
+                pearl.getBlockPos().getY(),
+                pearl.getBlockPos().getZ()), false)
+            .setTimestamp(java.time.Instant.now().toString());
+
+        webhook.addEmbed(embed);
+        webhook.send();
     }
 
     private void createJoinNotifications(PlayerListS2CPacket packet) {
