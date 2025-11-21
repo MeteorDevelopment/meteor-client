@@ -231,12 +231,73 @@ public class Notifier extends Module {
         .build()
     );
 
+    private final Setting<Boolean> discordPlayerDeath = sgDiscord.add(new BoolSetting.Builder()
+        .name("player-death")
+        .description("Send Discord notification when you die.")
+        .defaultValue(false)
+        .visible(discordWebhookEnabled::get)
+        .build()
+    );
+
+    private final Setting<Boolean> discordOtherPlayerDeath = sgDiscord.add(new BoolSetting.Builder()
+        .name("other-player-death")
+        .description("Send Discord notification when other players die in render distance.")
+        .defaultValue(false)
+        .visible(discordWebhookEnabled::get)
+        .build()
+    );
+
+    private final Setting<Boolean> discordEntityDeath = sgDiscord.add(new BoolSetting.Builder()
+        .name("entity-death")
+        .description("Send Discord notification when entities die in render distance.")
+        .defaultValue(false)
+        .visible(discordWebhookEnabled::get)
+        .build()
+    );
+
+    private final Setting<Set<EntityType<?>>> discordEntityTypes = sgDiscord.add(new EntityTypeListSetting.Builder()
+        .name("entity-types")
+        .description("Which entity types to track for death notifications.")
+        .defaultValue(EntityType.ENDER_DRAGON, EntityType.WITHER)
+        .visible(() -> discordWebhookEnabled.get() && discordEntityDeath.get())
+        .build()
+    );
+
+    private final Setting<Boolean> discordPlayerMovement = sgDiscord.add(new BoolSetting.Builder()
+        .name("player-movement")
+        .description("Send Discord notification when a player moves a certain distance.")
+        .defaultValue(false)
+        .visible(discordWebhookEnabled::get)
+        .build()
+    );
+
+    private final Setting<Integer> movementDistance = sgDiscord.add(new IntSetting.Builder()
+        .name("movement-distance")
+        .description("Distance in blocks before triggering movement notification.")
+        .defaultValue(500)
+        .min(50)
+        .max(10000)
+        .sliderRange(50, 2000)
+        .visible(() -> discordWebhookEnabled.get() && discordPlayerMovement.get())
+        .build()
+    );
+
+    private final Setting<Boolean> discordIgnoreOwnMovement = sgDiscord.add(new BoolSetting.Builder()
+        .name("ignore-own-movement")
+        .description("Ignore your own movement for Discord notifications.")
+        .defaultValue(true)
+        .visible(() -> discordWebhookEnabled.get() && discordPlayerMovement.get())
+        .build()
+    );
+
     private int timer;
     private boolean loginPacket = true;
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
     private final Map<Integer, Vec3d> pearlStartPosMap = new HashMap<>();
     private final ArrayListDeque<Text> messageQueue = new ArrayListDeque<>();
+    private final Map<UUID, Vec3d> playerPositions = new HashMap<>();
+    private final Map<UUID, String> lastDeathMessages = new HashMap<>();
 
     private final Random random = new Random();
 
@@ -327,12 +388,16 @@ public class Notifier extends Module {
         totemPopMap.clear();
         chatIdMap.clear();
         pearlStartPosMap.clear();
+        playerPositions.clear();
+        lastDeathMessages.clear();
     }
 
     @Override
     public void onDeactivate() {
         timer = 0;
         messageQueue.clear();
+        playerPositions.clear();
+        lastDeathMessages.clear();
     }
 
     @EventHandler
@@ -342,6 +407,8 @@ public class Notifier extends Module {
         chatIdMap.clear();
         messageQueue.clear();
         pearlStartPosMap.clear();
+        playerPositions.clear();
+        lastDeathMessages.clear();
     }
 
     @EventHandler
@@ -404,16 +471,82 @@ public class Notifier extends Module {
             }
         }
 
-        if (!totemPops.get()) return;
-        synchronized (totemPopMap) {
-            for (PlayerEntity player : mc.world.getPlayers()) {
-                if (!totemPopMap.containsKey(player.getUuid())) continue;
+        if (totemPops.get()) {
+            synchronized (totemPopMap) {
+                for (PlayerEntity player : mc.world.getPlayers()) {
+                    if (!totemPopMap.containsKey(player.getUuid())) continue;
 
-                if (player.deathTime > 0 || player.getHealth() <= 0) {
-                    int pops = totemPopMap.removeInt(player.getUuid());
+                    if (player.deathTime > 0 || player.getHealth() <= 0) {
+                        int pops = totemPopMap.removeInt(player.getUuid());
 
-                    ChatUtils.sendMsg(getChatId(player), Formatting.GRAY, "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
-                    chatIdMap.removeInt(player.getUuid());
+                        ChatUtils.sendMsg(getChatId(player), Formatting.GRAY, "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+                        chatIdMap.removeInt(player.getUuid());
+                    }
+                }
+            }
+        }
+
+        // Discord webhook death and movement detection
+        if (discordWebhookEnabled.get() && !webhookUrl.get().isEmpty()) {
+            // Check for player deaths
+            if (discordPlayerDeath.get() || discordOtherPlayerDeath.get()) {
+                for (PlayerEntity player : mc.world.getPlayers()) {
+                    if (player.deathTime > 0 || player.getHealth() <= 0) {
+                        UUID uuid = player.getUuid();
+                        String deathKey = uuid.toString() + "_" + System.currentTimeMillis() / 1000; // Per second check
+
+                        // Only send once per death
+                        if (!lastDeathMessages.containsKey(uuid) || !lastDeathMessages.get(uuid).equals(deathKey)) {
+                            lastDeathMessages.put(uuid, deathKey);
+
+                            boolean isOwnPlayer = player.equals(mc.player);
+                            if ((isOwnPlayer && discordPlayerDeath.get()) || (!isOwnPlayer && discordOtherPlayerDeath.get())) {
+                                sendPlayerDeathWebhook(player, isOwnPlayer);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Check for entity deaths
+            if (discordEntityDeath.get()) {
+                for (Entity entity : mc.world.getEntities()) {
+                    if (entity instanceof PlayerEntity) continue; // Skip players
+                    if (!discordEntityTypes.get().contains(entity.getType())) continue;
+
+                    if (entity.isRemoved() && !entity.isAlive()) {
+                        UUID uuid = entity.getUuid();
+                        String deathKey = uuid.toString() + "_death";
+
+                        if (!lastDeathMessages.containsKey(uuid)) {
+                            lastDeathMessages.put(uuid, deathKey);
+                            sendEntityDeathWebhook(entity);
+                        }
+                    }
+                }
+            }
+
+            // Track player movement
+            if (discordPlayerMovement.get()) {
+                for (PlayerEntity player : mc.world.getPlayers()) {
+                    if (discordIgnoreOwnMovement.get() && player.equals(mc.player)) continue;
+                    if (visualRangeIgnoreFriends.get() && Friends.get().isFriend(player)) continue;
+                    if (player instanceof FakePlayerEntity) continue;
+
+                    UUID uuid = player.getUuid();
+                    Vec3d currentPos = player.getPos();
+
+                    if (playerPositions.containsKey(uuid)) {
+                        Vec3d lastPos = playerPositions.get(uuid);
+                        double distance = currentPos.distanceTo(lastPos);
+
+                        if (distance >= movementDistance.get()) {
+                            playerPositions.put(uuid, currentPos);
+                            sendPlayerMovementWebhook(player, lastPos, currentPos, distance);
+                        }
+                    } else {
+                        playerPositions.put(uuid, currentPos);
+                    }
                 }
             }
         }
@@ -421,6 +554,15 @@ public class Notifier extends Module {
 
     private int getChatId(Entity entity) {
         return chatIdMap.computeIfAbsent(entity.getUuid(), value -> random.nextInt());
+    }
+
+    private String getServerIP() {
+        if (mc.getCurrentServerEntry() != null) {
+            return mc.getCurrentServerEntry().address;
+        } else if (mc.isInSingleplayer()) {
+            return "Singleplayer";
+        }
+        return "Unknown";
     }
 
     // Discord Webhook Methods
@@ -444,6 +586,7 @@ public class Notifier extends Module {
                 player.getBlockPos().getY(),
                 player.getBlockPos().getZ()), true)
             .addField("Distance", String.format("%.1f blocks", PlayerUtils.distanceTo(player)), true)
+            .addField("Server", getServerIP(), false)
             .setTimestamp(java.time.Instant.now().toString());
 
         webhook.addEmbed(embed);
@@ -470,6 +613,7 @@ public class Notifier extends Module {
                 player.getBlockPos().getX(),
                 player.getBlockPos().getY(),
                 player.getBlockPos().getZ()), false)
+            .addField("Server", getServerIP(), false)
             .setTimestamp(java.time.Instant.now().toString());
 
         webhook.addEmbed(embed);
@@ -494,6 +638,91 @@ public class Notifier extends Module {
                 pearl.getBlockPos().getX(),
                 pearl.getBlockPos().getY(),
                 pearl.getBlockPos().getZ()), false)
+            .addField("Server", getServerIP(), false)
+            .setTimestamp(java.time.Instant.now().toString());
+
+        webhook.addEmbed(embed);
+        webhook.send();
+    }
+
+    private void sendPlayerDeathWebhook(PlayerEntity player, boolean isOwnPlayer) {
+        String title = isOwnPlayer ? "You Died!" : "Player Died";
+        String description = String.format("**%s** has died!",
+            player.getName().getString());
+
+        DiscordWebhook webhook = new DiscordWebhook(webhookUrl.get());
+        webhook.setUsername("Meteor Notifier");
+
+        DiscordWebhook.Embed embed = new DiscordWebhook.Embed()
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(new java.awt.Color(139, 0, 0))
+            .addField("Player", player.getName().getString(), true)
+            .addField("Health", String.format("%.1f", player.getHealth()), true)
+            .addField("Death Position", String.format("X: %d, Y: %d, Z: %d",
+                player.getBlockPos().getX(),
+                player.getBlockPos().getY(),
+                player.getBlockPos().getZ()), false);
+
+        if (!isOwnPlayer) {
+            embed.addField("Distance", String.format("%.1f blocks", PlayerUtils.distanceTo(player)), true);
+        }
+
+        embed.addField("Server", getServerIP(), false)
+            .setTimestamp(java.time.Instant.now().toString());
+
+        webhook.addEmbed(embed);
+        webhook.send();
+    }
+
+    private void sendEntityDeathWebhook(Entity entity) {
+        String description = String.format("**%s** has died!",
+            entity.getType().getName().getString());
+
+        DiscordWebhook webhook = new DiscordWebhook(webhookUrl.get());
+        webhook.setUsername("Meteor Notifier");
+
+        DiscordWebhook.Embed embed = new DiscordWebhook.Embed()
+            .setTitle("Entity Died")
+            .setDescription(description)
+            .setColor(new java.awt.Color(169, 169, 169))
+            .addField("Entity Type", entity.getType().getName().getString(), true)
+            .addField("Distance", String.format("%.1f blocks", entity.distanceTo(mc.player)), true)
+            .addField("Death Position", String.format("X: %d, Y: %d, Z: %d",
+                entity.getBlockPos().getX(),
+                entity.getBlockPos().getY(),
+                entity.getBlockPos().getZ()), false)
+            .addField("Server", getServerIP(), false)
+            .setTimestamp(java.time.Instant.now().toString());
+
+        webhook.addEmbed(embed);
+        webhook.send();
+    }
+
+    private void sendPlayerMovementWebhook(PlayerEntity player, Vec3d fromPos, Vec3d toPos, double distance) {
+        String description = String.format("**%s** has moved **%.1f blocks**!",
+            player.getName().getString(),
+            distance);
+
+        DiscordWebhook webhook = new DiscordWebhook(webhookUrl.get());
+        webhook.setUsername("Meteor Notifier");
+
+        DiscordWebhook.Embed embed = new DiscordWebhook.Embed()
+            .setTitle("Player Movement Alert")
+            .setDescription(description)
+            .setColor(new java.awt.Color(255, 165, 0))
+            .addField("Player", player.getName().getString(), true)
+            .addField("Distance Moved", String.format("%.1f blocks", distance), true)
+            .addField("From Position", String.format("X: %d, Y: %d, Z: %d",
+                (int) fromPos.x,
+                (int) fromPos.y,
+                (int) fromPos.z), true)
+            .addField("To Position", String.format("X: %d, Y: %d, Z: %d",
+                player.getBlockPos().getX(),
+                player.getBlockPos().getY(),
+                player.getBlockPos().getZ()), true)
+            .addField("Current Distance to You", String.format("%.1f blocks", PlayerUtils.distanceTo(player)), true)
+            .addField("Server", getServerIP(), false)
             .setTimestamp(java.time.Instant.now().toString());
 
         webhook.addEmbed(embed);
