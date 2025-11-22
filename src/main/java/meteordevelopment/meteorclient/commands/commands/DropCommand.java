@@ -10,6 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -19,14 +20,13 @@ import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.text.Text;
 
 public class DropCommand extends Command {
-    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(Text.literal("Can't drop items while in spectator."));
-    private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(Text.literal("Could not find an item with that name!"));
+    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.drop.exception.not_spectator"));
+    private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.drop.exception.no_such_item"));
 
     public DropCommand() {
-        super("drop", "Automatically drops specified items.");
+        super("drop");
     }
 
     @Override
@@ -70,9 +70,9 @@ public class DropCommand extends Command {
 
         // Specific item
         builder.then(argument("item", ItemStackArgumentType.itemStack(REGISTRY_ACCESS))
-            .executes(context -> drop(player -> {
-                dropItem(player, context, Integer.MAX_VALUE);
-            }))
+            .executes(context -> drop(player ->
+                dropItem(player, context, Integer.MAX_VALUE)
+            ))
             .then(argument("amount", IntegerArgumentType.integer(1))
                 .executes(context -> drop(player -> {
                     int amount = IntegerArgumentType.getInteger(context, "amount");

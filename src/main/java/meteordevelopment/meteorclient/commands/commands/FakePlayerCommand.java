@@ -13,12 +13,11 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.FakePlayer;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 public class FakePlayerCommand extends Command {
     public FakePlayerCommand() {
-        super("fake-player", "Manages fake players that you can use for testing.");
+        super("fake-player");
     }
 
     @Override
@@ -43,12 +42,12 @@ public class FakePlayerCommand extends Command {
                 .executes(context -> {
                     FakePlayerEntity fp = FakePlayerArgumentType.get(context);
                     if (fp == null || !FakePlayerManager.contains(fp)) {
-                        error("Couldn't find a Fake Player with that name.");
+                        error("not_found");
                         return SINGLE_SUCCESS;
                     }
 
                     FakePlayerManager.remove(fp);
-                    info("Removed Fake Player %s.".formatted(fp.getName().getString()));
+                    info("removed", fp.getName().getString());
 
                     return SINGLE_SUCCESS;
                 })
@@ -65,7 +64,7 @@ public class FakePlayerCommand extends Command {
         builder.then(literal("list")
             .executes(context -> {
                 info("--- Fake Players ((highlight)%s(default)) ---", FakePlayerManager.count());
-                FakePlayerManager.forEach(fp -> ChatUtils.info("(highlight)%s".formatted(fp.getName().getString())));
+                FakePlayerManager.forEach(fp -> info("(highlight)%s".formatted(fp.getName().getString())));
                 return SINGLE_SUCCESS;
             })
         );

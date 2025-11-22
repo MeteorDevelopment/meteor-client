@@ -21,7 +21,7 @@ import java.util.List;
 
 public class BindsCommand extends Command {
     public BindsCommand() {
-        super("binds", "List of all bound modules.");
+        super("binds");
     }
 
     @Override

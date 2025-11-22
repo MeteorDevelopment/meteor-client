@@ -9,6 +9,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -16,14 +17,13 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.text.Text;
 
 public class GiveCommand extends Command {
-    private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(Text.literal("You must be in creative mode to use this."));
-    private final static SimpleCommandExceptionType NO_SPACE = new SimpleCommandExceptionType(Text.literal("No space in hotbar."));
+    private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.give.exception.not_in_creative"));
+    private final static SimpleCommandExceptionType NO_SPACE = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.give.exception.no_space"));
 
     public GiveCommand() {
-        super("give", "Gives you any item.");
+        super("give");
     }
 
     @Override
