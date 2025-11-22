@@ -5,17 +5,17 @@
 
 package meteordevelopment.meteorclient.gui.themes.meteor.widgets.pressable;
 
+import meteordevelopment.meteorclient.gui.GuiIcon;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedButton;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
 public class WMeteorConfirmedButton extends WConfirmedButton implements MeteorWidget {
-    public WMeteorConfirmedButton(String text, String confirmText, GuiTexture texture) {
-        super(text, confirmText, texture);
+    public WMeteorConfirmedButton(String text, String confirmText, GuiIcon icon) {
+        super(text, confirmText, icon);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class WMeteorConfirmedButton extends WConfirmedButton implements MeteorWi
         }
         else {
             double ts = theme.textHeight();
-            renderer.quad(x + width / 2 - ts / 2, y + pad, ts, ts, texture, fg);
+            renderer.iconQuad(x + width / 2 - ts / 2, y + pad, ts, ts, icon, fg);
         }
     }
 }

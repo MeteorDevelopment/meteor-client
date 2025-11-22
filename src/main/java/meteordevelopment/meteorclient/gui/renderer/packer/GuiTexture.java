@@ -5,6 +5,9 @@
 
 package meteordevelopment.meteorclient.gui.renderer.packer;
 
+import meteordevelopment.meteorclient.gui.GuiIcon;
+import meteordevelopment.meteorclient.utils.render.color.Color;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,5 +34,21 @@ public class GuiTexture {
         }
 
         return closestRegion;
+    }
+
+    public GuiIcon icon() {
+        return new GuiIcon(this);
+    }
+
+    public GuiIcon icon(double rotation) {
+        return new GuiIcon(this, rotation);
+    }
+
+    public GuiIcon icon(Color color) {
+        return new GuiIcon(this, color);
+    }
+
+     public GuiIcon icon(double rotation, Color color) {
+        return new GuiIcon(this, rotation, color);
     }
 }

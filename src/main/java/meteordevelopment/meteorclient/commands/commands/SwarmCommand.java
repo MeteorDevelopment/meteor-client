@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.ModuleArgumentType;
 import meteordevelopment.meteorclient.commands.arguments.PlayerArgumentType;
 import meteordevelopment.meteorclient.pathing.PathManagers;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.Swarm;
@@ -212,7 +213,8 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker()) {
-                    Modules.get().get(InfinityMiner.class).targetBlocks.set(List.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock()));
+                    // TODO: resolve
+                    Modules.get().get(InfinityMiner.class).targetBlocks.set(new GroupSet<>(List.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock())));
                     runInfinityMiner();
                 }
             }
@@ -228,8 +230,9 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker()) {
-                    Modules.get().get(InfinityMiner.class).targetBlocks.set(List.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock()));
-                    Modules.get().get(InfinityMiner.class).repairBlocks.set(List.of(context.getArgument("repair", BlockStateArgument.class).getBlockState().getBlock()));
+                    // TODO: resolve
+                    Modules.get().get(InfinityMiner.class).targetBlocks.set(new GroupSet<>(List.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock())));
+                    Modules.get().get(InfinityMiner.class).repairBlocks.set(new GroupSet<>(List.of(context.getArgument("repair", BlockStateArgument.class).getBlockState().getBlock())));
                     runInfinityMiner();
                 }
             }

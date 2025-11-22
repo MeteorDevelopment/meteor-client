@@ -53,8 +53,8 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         factories.put(BlockSetting.class, (table, setting) -> blockW(table, (BlockSetting) setting));
         factories.put(BlockListSetting.class, (table, setting) -> blockListW(table, (BlockListSetting) setting));
         factories.put(ItemSetting.class, (table, setting) -> itemW(table, (ItemSetting) setting));
-        factories.put(ItemListSetting.class, (table, setting) -> itemListW(table, (ItemListSetting) setting));
-        factories.put(EntityTypeListSetting.class, (table, setting) -> entityTypeListW(table, (EntityTypeListSetting) setting));
+        factories.put(ItemSetSetting.class, (table, setting) -> itemListW(table, (ItemSetSetting) setting));
+        factories.put(EntityTypeSetSetting.class, (table, setting) -> entityTypeListW(table, (EntityTypeSetSetting) setting));
         factories.put(EnchantmentListSetting.class, (table, setting) -> enchantmentListW(table, (EnchantmentListSetting) setting));
         factories.put(ModuleListSetting.class, (table, setting) -> moduleListW(table, (ModuleListSetting) setting));
         factories.put(PacketListSetting.class, (table, setting) -> packetListW(table, (PacketListSetting) setting));
@@ -273,7 +273,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private void blockListW(WTable table, BlockListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new BlockListSettingScreen(theme, setting)));
+        selectW(table, setting, () -> mc.setScreen(new BlockSetSettingScreen(theme, setting)));
     }
 
     private void itemW(WTable table, ItemSetting setting) {
@@ -292,12 +292,12 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         reset(table, setting, () -> item.set(setting.get().getDefaultStack()));
     }
 
-    private void itemListW(WTable table, ItemListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new ItemListSettingScreen(theme, setting)));
+    private void itemListW(WTable table, ItemSetSetting setting) {
+        selectW(table, setting, () -> mc.setScreen(new ItemSetSettingScreen(theme, setting)));
     }
 
-    private void entityTypeListW(WTable table, EntityTypeListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new EntityTypeListSettingScreen(theme, setting)));
+    private void entityTypeListW(WTable table, EntityTypeSetSetting setting) {
+        selectW(table, setting, () -> mc.setScreen(new EntityTypeSetSettingScreen(theme, setting)));
     }
 
     private void enchantmentListW(WTable table, EnchantmentListSetting setting) {

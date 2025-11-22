@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -19,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class AutoReplenish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -70,7 +70,7 @@ public class AutoReplenish extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> excludedItems = sgGeneral.add(new ItemSetSetting.Builder()
         .name("excluded-items")
         .description("Items that won't be replenished.")
         .build()
@@ -131,7 +131,7 @@ public class AutoReplenish extends Module {
         items[slot] = stack.copy();
 
         if (slot == 9) slot = SlotUtils.OFFHAND;
-        
+
         if (excludedItems.get().contains(stack.getItem())) return;
         if (excludedItems.get().contains(prevStack.getItem())) return;
 

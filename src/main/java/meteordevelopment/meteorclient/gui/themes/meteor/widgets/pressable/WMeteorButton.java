@@ -5,15 +5,15 @@
 
 package meteordevelopment.meteorclient.gui.themes.meteor.widgets.pressable;
 
+import meteordevelopment.meteorclient.gui.GuiIcon;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 
 public class WMeteorButton extends WButton implements MeteorWidget {
-    public WMeteorButton(String text, GuiTexture texture) {
-        super(text, texture);
+    public WMeteorButton(String text, GuiIcon icon) {
+        super(text, icon);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class WMeteorButton extends WButton implements MeteorWidget {
         }
         else {
             double ts = theme.textHeight();
-            renderer.quad(x + width / 2 - ts / 2, y + pad, ts, ts, texture, theme.textColor.get());
+            renderer.iconQuad(x + width / 2 - ts / 2, y + pad, ts, ts, icon, theme.textColor.get());
         }
     }
 }

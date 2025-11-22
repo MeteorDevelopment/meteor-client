@@ -5,93 +5,93 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
+import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.Block;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.block.Blocks;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class BlockListSetting extends Setting<List<Block>> {
-    public final Predicate<Block> filter;
+public class BlockListSetting extends GroupedSetSetting<Block> {
 
-    public BlockListSetting(String name, String description, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated, Predicate<Block> filter, IVisible visible) {
-        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-
-        this.filter = filter;
+    public BlockListSetting(String name, String description, GroupSet<Block, Groups<Block>.Group> defaultValue, Consumer<GroupSet<Block, Groups<Block>.Group>> onChanged, Consumer<Setting<GroupSet<Block, Groups<Block>.Group>>> onModuleActivated, Predicate<Block> filter, IVisible visible) {
+        super(name, description, defaultValue, filter, onChanged, onModuleActivated, visible);
     }
 
     @Override
-    public void resetImpl() {
-        value = new ArrayList<>(defaultValue);
+    public Block parseItem(String str) {
+        Block block = parseId(Registries.BLOCK, str);
+        if (block != null && (filter == null || filter.test(block))) return block;
+        return null;
     }
 
     @Override
-    protected List<Block> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<Block> blocks = new ArrayList<>(values.length);
-
-        try {
-            for (String value : values) {
-                Block block = parseId(Registries.BLOCK, value);
-                if (block != null && (filter == null || filter.test(block))) blocks.add(block);
-            }
-        } catch (Exception ignored) {}
-
-        return blocks;
+    public NbtElement itemToNbt(Block block) {
+        return NbtString.of(Registries.BLOCK.getId(block).toString());
     }
 
     @Override
-    protected boolean isValueValid(List<Block> value) {
-        return true;
+    public Block itemFromNbt(NbtElement e) {
+        Block block = Registries.BLOCK.get(Identifier.of(e.asString().orElse("")));
+        if (filter == null || filter.test(block)) return block;
+        return null;
+    }
+
+    public static final Groups<Block> GROUPS = new Groups<>();
+
+    @Override
+    protected Groups<Block> groups() {
+        return GROUPS;
     }
 
     @Override
-    public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.BLOCK.getIds();
+    protected Registry<Block> suggestRegistry() {
+        return Registries.BLOCK;
     }
 
-    @Override
-    protected NbtCompound save(NbtCompound tag) {
-        NbtList valueTag = new NbtList();
-        for (Block block : get()) {
-            valueTag.add(NbtString.of(Registries.BLOCK.getId(block).toString()));
-        }
-        tag.put("value", valueTag);
-
-        return tag;
-    }
-
-    @Override
-    protected List<Block> load(NbtCompound tag) {
-        get().clear();
-
-        NbtList valueTag = tag.getListOrEmpty("value");
-        for (NbtElement tagI : valueTag) {
-            Block block = Registries.BLOCK.get(Identifier.of(tagI.asString().orElse("")));
-
-            if (filter == null || filter.test(block)) get().add(block);
-        }
-
-        return get();
-    }
-
-    public static class Builder extends SettingBuilder<Builder, List<Block>, BlockListSetting> {
+    public static class Builder extends SettingBuilder<Builder, GroupSet<Block, Groups<Block>.Group>, BlockListSetting> {
         private Predicate<Block> filter;
 
         public Builder() {
-            super(new ArrayList<>(0));
+            super(new GroupSet<>());
+        }
+
+        public Builder defaultValue(Collection<Block> defaults) {
+            if (defaultValue == null)
+                return defaultValue(defaults != null ? new GroupSet<>(defaults) : new GroupSet<>());
+            defaultValue.addAll(defaults);
+            return this;
         }
 
         public Builder defaultValue(Block... defaults) {
-            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
+            if (defaultValue == null)
+                return defaultValue(defaults != null ? new GroupSet<>(Arrays.asList(defaults)) : new GroupSet<>());
+            defaultValue.addAll(Arrays.asList(defaults));
+            return this;
+        }
+
+         @SafeVarargs
+         public final Builder defaultGroups(Groups<Block>.Group... defaults) {
+            List<Groups<Block>.Group> groups = null;
+
+            if (defaults != null)
+                groups = Arrays.stream(defaults).filter(g -> g.isOf(GROUPS)).toList();
+
+            if (defaultValue == null)
+                return defaultValue(groups != null ? new GroupSet<>(null, groups) : new GroupSet<>());
+
+            if (groups != null) defaultValue.addAllGroups(groups);
+            return this;
         }
 
         public Builder filter(Predicate<Block> filter) {
@@ -103,5 +103,25 @@ public class BlockListSetting extends Setting<List<Block>> {
         public BlockListSetting build() {
             return new BlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, filter, visible);
         }
+    }
+
+    // These are just for testing
+    public static Groups<Block>.Group ORES, DIRTS, SANDS, STONES, TERRAIN;
+    static {
+        ORES = GROUPS.builtin("ores", Items.DIAMOND_ORE)
+            .items(Xray.ORES).get();
+        DIRTS = GROUPS.builtin("dirt", Items.DIRT)
+            .items(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.DIRT_PATH, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.CLAY)
+            .get();
+        SANDS = GROUPS.builtin("sand", Items.SAND)
+            .items(Blocks.SAND, Blocks.RED_SAND, Blocks.GRAVEL)
+            .get();
+        STONES = GROUPS.builtin("stone", Items.STONE)
+            .items(Blocks.STONE, Blocks.DEEPSLATE, Blocks.NETHERRACK, Blocks.SANDSTONE, Blocks.TUFF, Blocks.BASALT,
+                Blocks.ANDESITE, Blocks.DIORITE, Blocks.GRANITE, Blocks.BLACKSTONE, Blocks.CALCITE)
+            .get();
+        TERRAIN = GROUPS.builtin("terrain", Items.GRASS_BLOCK)
+            .include(STONES, DIRTS, SANDS)
+            .get();
     }
 }
