@@ -34,6 +34,7 @@ import java.util.function.Predicate;
 public class AutoTool extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
+    private final SettingGroup sgSilk = settings.createGroup("Silk Touch");
 
     // General
 
@@ -44,10 +45,18 @@ public class AutoTool extends Module {
         .build()
     );
 
-    private final Setting<Boolean> silkTouchForEnderChest = sgGeneral.add(new BoolSetting.Builder()
-        .name("silk-touch-for-ender-chest")
-        .description("Mines Ender Chests only with the Silk Touch enchantment.")
+    private final Setting<Boolean> silkTouchEnabled = sgSilk.add(new BoolSetting.Builder()
+        .name("silk-touch-whitelist")
+        .description("Require Silk Touch for selected blocks.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<List<Block>> silkTouchBlocks = sgSilk.add(new BlockListSetting.Builder()
+        .name("whitelist-blocks")
+        .description("Blocks that should be mined with Silk Touch.")
+        .defaultValue(Blocks.ENDER_CHEST, Blocks.GLOWSTONE, Blocks.SEA_LANTERN, Blocks.GLASS, Blocks.TURTLE_EGG, Blocks.ICE, Blocks.BLUE_ICE, Blocks.PACKED_ICE)
+        .visible(silkTouchEnabled::get)
         .build()
     );
 
@@ -158,13 +167,15 @@ public class AutoTool extends Module {
         double bestScore = -1;
         bestSlot = -1;
 
+        boolean enforceSilk = silkTouchEnabled.get() && silkTouchBlocks.get().contains(blockState.getBlock());
+
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
 
             if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
             if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(itemStack.getItem())) continue;
 
-            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
+            double score = getScore(itemStack, blockState, fortuneForOresCrops.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2), enforceSilk, silkTouchBlocks.get());
             if (score < 0) continue;
 
             if (score > bestScore) {
@@ -173,7 +184,26 @@ public class AutoTool extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        // if this is a silk touch target but no silk touch tool exists,
+        // rerun selection without enforcing silk touch so we still choose a suitable tool
+        if (bestSlot == -1 && enforceSilk) {
+            for (int i = 0; i < 9; i++) {
+                ItemStack itemStack = mc.player.getInventory().getStack(i);
+
+                if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
+                if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(itemStack.getItem())) continue;
+
+                double score = getScore(itemStack, blockState, fortuneForOresCrops.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2), false, silkTouchBlocks.get());
+                if (score < 0) continue;
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestSlot = i;
+                }
+            }
+        }
+
+        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, fortuneForOresCrops.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack), silkTouchEnabled.get(), silkTouchBlocks.get())) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
             ticks = switchDelay.get();
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
@@ -193,20 +223,29 @@ public class AutoTool extends Module {
         return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
-    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
+    public static double getScore(ItemStack itemStack, BlockState state, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good, boolean silkTouchEnabled, List<Block> silkBlocks) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
+
+        boolean isSilkTarget = silkTouchEnabled && silkBlocks.contains(state.getBlock());
+
+        // for ender chest, only pickaxes are valid tool (silk touch axes will drop ec but extremely slow, so we pass it)
+        if (state.getBlock() == Blocks.ENDER_CHEST && !itemStack.isIn(ItemTags.PICKAXES)) return -1;
+        boolean bypassSuitability = isSilkTarget && allowSilkBypass(state);
+        
+        // When fortuneForOresCrops is enabled, allow crops to bypass suitability so fortune tools can be considered for crops
+        if (!bypassSuitability && fortuneOre && (state.getBlock() instanceof CropBlock || state.getBlock() instanceof NetherWartBlock)) bypassSuitability = true;
+
         if (!itemStack.isSuitableFor(state) &&
+            !bypassSuitability &&
             !(itemStack.isIn(ItemTags.SWORDS) && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock)) &&
             !(itemStack.getItem() instanceof ShearsItem && state.getBlock() instanceof LeavesBlock || state.isIn(BlockTags.WOOL)))
             return -1;
 
-        if (silkTouchEnderChest
-            && state.getBlock() == Blocks.ENDER_CHEST
-            && !Utils.hasEnchantments(itemStack, Enchantments.SILK_TOUCH)) {
-            return -1;
-        }
+        // force usage of silk touch on configured block list
+        if (isSilkTarget && !Utils.hasEnchantments(itemStack, Enchantments.SILK_TOUCH)) return -1;
 
         if (fortuneOre
+            && !isSilkTarget
             && isFortunable(state.getBlock())
             && !Utils.hasEnchantments(itemStack, Enchantments.FORTUNE)) {
             return -1;
@@ -225,7 +264,16 @@ public class AutoTool extends Module {
         if (itemStack.isIn(ItemTags.SWORDS) && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
             score += 9000 + (itemStack.get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
 
+        // Prefer hoes slightly for crops when fortune is enabled and the block is a crop.
+        if (fortuneOre && (state.getBlock() instanceof CropBlock || state.getBlock() instanceof NetherWartBlock) && itemStack.isIn(ItemTags.HOES)) score += 10;
+
         return score;
+    }
+
+    private static boolean allowSilkBypass(BlockState state) {
+        if (state.isToolRequired()) return false;
+        if (state.isIn(BlockTags.NEEDS_DIAMOND_TOOL) || state.isIn(BlockTags.NEEDS_IRON_TOOL) || state.isIn(BlockTags.NEEDS_STONE_TOOL)) return false;
+        return true;
     }
 
     public static boolean isTool(Item item) {
