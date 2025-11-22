@@ -339,9 +339,10 @@ public class BlockUtils {
     public static Direction getDirection(BlockPos pos) {
         double eyePos = mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose());
         VoxelShape outline = mc.world.getBlockState(pos).getCollisionShape(mc.world, pos);
-        if (eyePos > pos.getY() + outline.getMax(Direction.Axis.Y) && mc.world.getBlockState(pos.add(0, 1, 0)).isReplaceable()) {
+
+        if (eyePos > pos.getY() + outline.getMax(Direction.Axis.Y) && mc.world.getBlockState(pos.up()).isReplaceable()) {
             return Direction.UP;
-        } else if (eyePos < pos.getY() + outline.getMin(Direction.Axis.Y) && mc.world.getBlockState(pos.add(0, -1, 0)).isReplaceable()) {
+        } else if (eyePos < pos.getY() + outline.getMin(Direction.Axis.Y) && mc.world.getBlockState(pos.down()).isReplaceable()) {
             return Direction.DOWN;
         } else {
             BlockPos difference = pos.subtract(mc.player.getBlockPos());
