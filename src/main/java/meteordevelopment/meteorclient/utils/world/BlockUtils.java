@@ -34,6 +34,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
@@ -336,13 +337,22 @@ public class BlockUtils {
 
     // Finds the best block direction to get when interacting with the block.
     public static Direction getDirection(BlockPos pos) {
-        Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
-        if ((double) pos.getY() > eyesPos.y) {
-            if (mc.world.getBlockState(pos.add(0, -1, 0)).isReplaceable()) return Direction.DOWN;
-            else return mc.player.getHorizontalFacing().getOpposite();
+        double eyePos = mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose());
+        VoxelShape outline = mc.world.getBlockState(pos).getCollisionShape(mc.world, pos);
+
+        if (eyePos > pos.getY() + outline.getMax(Direction.Axis.Y) && mc.world.getBlockState(pos.up()).isReplaceable()) {
+            return Direction.UP;
+        } else if (eyePos < pos.getY() + outline.getMin(Direction.Axis.Y) && mc.world.getBlockState(pos.down()).isReplaceable()) {
+            return Direction.DOWN;
+        } else {
+            BlockPos difference = pos.subtract(mc.player.getBlockPos());
+
+            if (Math.abs(difference.getX()) > Math.abs(difference.getZ())) {
+                return difference.getX() > 0 ? Direction.WEST : Direction.EAST;
+            } else {
+                return difference.getZ() > 0 ? Direction.NORTH : Direction.SOUTH;
+            }
         }
-        if (!mc.world.getBlockState(pos.add(0, 1, 0)).isReplaceable()) return mc.player.getHorizontalFacing().getOpposite();
-        return Direction.UP;
     }
 
     public enum MobSpawn {
