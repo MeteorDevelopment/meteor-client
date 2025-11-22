@@ -2,7 +2,7 @@
 # Fabric (https://fabricmc.net/develop)
 minecraft = "1.21.10"
 yarn-mappings = "1.21.10+build.2"
-fabric-loader = "0.17.3"
+fabric-loader = "0.17.0"
 fabric-api = "0.136.0+1.21.10"
 
 # Plugins
