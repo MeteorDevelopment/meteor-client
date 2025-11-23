@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
@@ -130,9 +130,9 @@ public class ESP extends Module {
         .build()
     );
 
-    public final Setting<Boolean> friendOverride = sgColors.add(new BoolSetting.Builder()
-        .name("show-friend-colors")
-        .description("Whether or not to override the distance color of friends with the friend color.")
+    public final Setting<Boolean> relationOverride = sgColors.add(new BoolSetting.Builder()
+        .name("show-relation-colors")
+        .description("Whether or not to override the distance color of friends/enemies with the friend color.")
         .defaultValue(true)
         .visible(distance::get)
         .build()
@@ -380,9 +380,12 @@ public class ESP extends Module {
 
     public Color getEntityTypeColor(Entity entity) {
         if (distance.get()) {
-            if (friendOverride.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
-                return Config.get().friendColor.get();
-            } else return EntityUtils.getColorFromDistance(entity);
+            if (relationOverride.get() && entity instanceof PlayerEntity player) {
+                Targeting.Relation relation = Targeting.getRelation(player);
+                if (relation == Targeting.Relation.FRIEND) return Config.get().friendColor.get();
+                if (relation == Targeting.Relation.ENEMY) return Config.get().enemyColor.get();
+            }
+            return EntityUtils.getColorFromDistance(entity);
         } else if (entity instanceof PlayerEntity) {
             return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
         } else {

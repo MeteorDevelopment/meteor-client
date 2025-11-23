@@ -21,19 +21,21 @@ import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.command.CommandSource.suggestMatching;
 
-public class FriendArgumentType implements ArgumentType<String> {
-    private static final FriendArgumentType INSTANCE = new FriendArgumentType();
+// TODO: functionality duplication
+
+public class EnemyArgumentType implements ArgumentType<String> {
+    private static final EnemyArgumentType INSTANCE = new EnemyArgumentType();
     private static final Collection<String> EXAMPLES = List.of("seasnail8169", "MineGame159");
 
-    public static FriendArgumentType create() {
+    public static EnemyArgumentType create() {
         return INSTANCE;
     }
 
     public static SavedPlayer get(CommandContext<?> context) {
-        return Targeting.getFriend(context.getArgument("friend", String.class));
+        return Targeting.getFriend(context.getArgument("enemy", String.class));
     }
 
-    private FriendArgumentType() {}
+    private EnemyArgumentType() {}
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
@@ -42,7 +44,7 @@ public class FriendArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return suggestMatching(Streams.stream(Targeting.get().getFriends()).map(SavedPlayer::getName), builder);
+        return suggestMatching(Streams.stream(Targeting.get().getEnemies()).map(SavedPlayer::getName), builder);
     }
 
     @Override

@@ -5,130 +5,97 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
-import com.mojang.util.UndashedUuid;
-import meteordevelopment.meteorclient.systems.System;
-import meteordevelopment.meteorclient.systems.Systems;
-import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import meteordevelopment.meteorclient.systems.targeting.SavedPlayer;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
-public class Friends extends System<Friends> implements Iterable<Friend> {
-    private final List<Friend> friends = new ArrayList<>();
+// XXX: @Deprecated is spammed in order to make more squiggly lines and increase the probability of them being inspected
 
-    public Friends() {
-        super("friends");
-    }
+// Behaviour is NOT identical to old the Friends, some things might still break minorly.
+
+@Deprecated // systems.targeting.Targeting
+public class Friends implements Iterable<Friend> {
+    private static Friends INSTANCE;
+
+    private Friends() { }
 
     public static Friends get() {
-        return Systems.get(Friends.class);
+        if (INSTANCE == null) INSTANCE = new Friends();
+        return INSTANCE;
     }
 
+    @Deprecated
     public boolean add(Friend friend) {
-        if (friend.name.isEmpty() || friend.name.contains(" ")) return false;
-
-        if (!friends.contains(friend)) {
-            friends.add(friend);
-            save();
-
-            return true;
-        }
-
-        return false;
+        return Targeting.get().addFriend(friend);
     }
 
+    @Deprecated
     public boolean remove(Friend friend) {
-        if (friends.remove(friend)) {
-            save();
-            return true;
-        }
-
-        return false;
+        return Targeting.get().removeFriend(friend);
     }
 
+    @Deprecated
     public Friend get(String name) {
-        for (Friend friend : friends) {
-            if (friend.name.equalsIgnoreCase(name)) {
-                return friend;
-            }
-        }
-
-        return null;
+        return (Friend) Targeting.getFriend(name);
     }
 
+    @Deprecated
     public Friend get(PlayerEntity player) {
         return get(player.getName().getString());
     }
 
+    @Deprecated
     public Friend get(PlayerListEntry player) {
         return get(player.getProfile().name());
     }
 
+    @Deprecated
     public boolean isFriend(PlayerEntity player) {
-        return player != null && get(player) != null;
+        return Targeting.isFriend(player);
     }
 
+    @Deprecated
     public boolean isFriend(PlayerListEntry player) {
-        return get(player) != null;
+        return Targeting.isFriend(player);
     }
 
+    @Deprecated
     public boolean shouldAttack(PlayerEntity player) {
-        return !isFriend(player);
+        return Targeting.shouldAttack(player);
     }
 
+    @Deprecated
     public int count() {
-        return friends.size();
+        return Targeting.get().countFriends();
     }
 
+    @Deprecated
     public boolean isEmpty() {
-        return friends.isEmpty();
+        return Targeting.get().friendsIsEmpty();
     }
 
     @Override
     public @NotNull Iterator<Friend> iterator() {
-        return friends.iterator();
-    }
+        Iterator<SavedPlayer> it = Targeting.get().getFriends().iterator();
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return it.hasNext();
+            }
 
-    @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+            @Override
+            public Friend next() {
+                return (Friend) it.next();
+            }
 
-        tag.put("friends", NbtUtils.listToTag(friends));
-
-        return tag;
-    }
-
-    @Override
-    public Friends fromTag(NbtCompound tag) {
-        friends.clear();
-
-        for (NbtElement itemTag : tag.getListOrEmpty("friends")) {
-            NbtCompound friendTag = (NbtCompound) itemTag;
-            if (!friendTag.contains("name")) continue;
-
-            String name = friendTag.getString("name", "");
-            if (get(name) != null) continue;
-
-            String uuid = friendTag.getString("id", "");
-            Friend friend = !uuid.isBlank()
-                ? new Friend(name, UndashedUuid.fromStringLenient(uuid))
-                : new Friend(name);
-
-            friends.add(friend);
-        }
-
-        Collections.sort(friends);
-
-        MeteorExecutor.execute(() -> friends.forEach(Friend::updateInfo));
-
-        return this;
+            @Override
+            public void remove() {
+                it.remove();
+            }
+        };
     }
 }

@@ -12,10 +12,10 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
-import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -286,10 +286,10 @@ public class AnchorAura extends Module {
         }
 
         // Find a target
-        if (TargetUtils.isBadTarget(target, targetRange.get())) {
+        if (!Targeting.isValidPlayerTarget(target, targetRange.get())) {
             renderBlockPos = null;
-            target = TargetUtils.getPlayerTarget(targetRange.get(), targetPriority.get());
-            if (TargetUtils.isBadTarget(target, targetRange.get())) return;
+            target = Targeting.findPlayerTarget(targetRange.get(), targetPriority.get());
+            if (target == null) return;
         }
 
         doAnchorAura();

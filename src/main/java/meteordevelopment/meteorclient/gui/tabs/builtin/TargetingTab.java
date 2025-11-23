@@ -12,40 +12,50 @@ import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
-import meteordevelopment.meteorclient.systems.friends.Friend;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.SavedPlayer;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.client.gui.screen.Screen;
 
+import java.util.function.Consumer;
+
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class FriendsTab extends Tab {
-    public FriendsTab() {
-        super("Friends");
+public class TargetingTab extends Tab {
+    public TargetingTab() {
+        super("Players");
     }
 
     @Override
     public TabScreen createScreen(GuiTheme theme) {
-        return new FriendsScreen(theme, this);
+        return new TargetingScreen(theme, this);
     }
 
     @Override
     public boolean isScreen(Screen screen) {
-        return screen instanceof FriendsScreen;
+        return screen instanceof TargetingScreen;
     }
 
-    private static class FriendsScreen extends WindowTabScreen {
-        public FriendsScreen(GuiTheme theme, Tab tab) {
+    private static class TargetingScreen extends WindowTabScreen {
+        public TargetingScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
         }
 
         @Override
         public void initWidgets() {
-            WTable table = add(theme.table()).expandX().minWidth(400).widget();
-            initTable(table);
+            WTable outerTable = add(theme.table()).expandX().minWidth(800).widget();
+            WTable friends = outerTable.add(theme.table()).expandX().minWidth(400).top().widget();
+            outerTable.add(theme.verticalSeparator());
+            WTable enemies = outerTable.add(theme.table()).expandX().minWidth(400).top().widget();
+
+            Targeting targeting = Targeting.get();
+
+            initTable(friends, "Friends", targeting.getFriends(), targeting::removeFriend);
+            initTable(enemies, "Enemies", targeting.getEnemies(), targeting::removeEnemy);
 
             add(theme.horizontalSeparator()).expandX();
 
@@ -55,12 +65,14 @@ public class FriendsTab extends Tab {
             WTextBox nameW = list.add(theme.textBox("", (text, c) -> c != ' ')).expandX().widget();
             nameW.setFocused(true);
 
-            WPlus add = list.add(theme.plus()).widget();
-            add.action = () -> {
-                String name = nameW.get().trim();
-                Friend friend = new Friend(name);
+            WButton addF = list.add(theme.button("Friend")).widget();
+            WButton addE = list.add(theme.button("Enemy")).widget();
 
-                if (Friends.get().add(friend)) {
+            addF.action = () -> {
+                String name = nameW.get().trim();
+                SavedPlayer friend = new SavedPlayer(name);
+
+                if (targeting.addFriend(friend)) {
                     nameW.set("");
                     reload();
 
@@ -71,14 +83,30 @@ public class FriendsTab extends Tab {
                 }
             };
 
-            enterAction = add.action;
+            addE.action = () -> {
+                String name = nameW.get().trim();
+                SavedPlayer enemy = new SavedPlayer(name);
+
+                if (targeting.addEnemy(enemy)) {
+                    nameW.set("");
+                    reload();
+
+                    MeteorExecutor.execute(() -> {
+                        enemy.updateInfo();
+                        mc.execute(this::reload);
+                    });
+                }
+            };
         }
 
-        private void initTable(WTable table) {
+        private void initTable(WTable table, String title,Iterable<SavedPlayer> source, Consumer<SavedPlayer> removeAction) {
             table.clear();
-            if (Friends.get().isEmpty()) return;
 
-            Friends.get().forEach(friend ->
+            table.add(theme.label(title, true)).expandCellX().centerX();
+
+            table.row();
+
+            source.forEach(friend ->
                 MeteorExecutor.execute(() -> {
                     if (friend.headTextureNeedsUpdate()) {
                         friend.updateInfo();
@@ -86,13 +114,13 @@ public class FriendsTab extends Tab {
                 })
             );
 
-            for (Friend friend : Friends.get()) {
+            for (SavedPlayer friend : source) {
                 table.add(theme.texture(32, 32, friend.getHead().needsRotate() ? 90 : 0, friend.getHead()));
                 table.add(theme.label(friend.getName()));
 
                 WMinus remove = table.add(theme.minus()).expandCellX().right().widget();
                 remove.action = () -> {
-                    Friends.get().remove(friend);
+                    removeAction.accept(friend);
                     reload();
                 };
 
@@ -102,12 +130,12 @@ public class FriendsTab extends Tab {
 
         @Override
         public boolean toClipboard() {
-            return NbtUtils.toClipboard(Friends.get());
+            return NbtUtils.toClipboard(Targeting.get());
         }
 
         @Override
         public boolean fromClipboard() {
-            return NbtUtils.fromClipboard(Friends.get());
+            return NbtUtils.fromClipboard(Targeting.get());
         }
     }
 }

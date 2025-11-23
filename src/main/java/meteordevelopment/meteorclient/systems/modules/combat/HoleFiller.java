@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.DirectionAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
@@ -346,20 +346,11 @@ public class HoleFiller extends Module {
     }
 
     private void setTargets() {
-        targets.clear();
-
-        for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player.squaredDistanceTo(mc.player) > Math.pow(targetRange.get(), 2) ||
-                player.isCreative() ||
-                player == mc.player ||
-                player.isDead() ||
-                !Friends.get().shouldAttack(player) ||
-                (ignoreSafe.get() && isSurrounded(player)) ||
-                (onlyMoving.get() && (player.getX() - player.lastX != 0 || player.getY() - player.lastY != 0 || player.getZ() - player.lastZ != 0))
-            ) continue;
-
-            targets.add(player);
-        }
+        Targeting.findPlayerTargets(targets, targetRange.get(), (player) -> {
+            if (!Targeting.isValidPlayerTarget(player)) return false;
+            if (ignoreSafe.get() && isSurrounded(player)) return false;
+            return !onlyMoving.get() || (player.getX() - player.lastX == 0 && player.getY() - player.lastY == 0 && player.getZ() - player.lastZ == 0);
+        });
     }
 
     private boolean isSurrounded(PlayerEntity target) {

@@ -96,6 +96,13 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<SettingColor> enemyColor = sgVisual.add(new ColorSetting.Builder()
+        .name("friend-color")
+        .description("The color used to show enemies.")
+        .defaultValue(new SettingColor(255, 180, 0))
+        .build()
+    );
+
     // Modules
 
     public final Setting<List<Module>> hiddenModules = sgModules.add(new ModuleListSetting.Builder()

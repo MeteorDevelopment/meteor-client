@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
@@ -21,7 +21,6 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
-import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -237,7 +236,7 @@ public class CombatHud extends HudElement {
             Color secondaryColor = TextHud.getSectionColor(1);
 
             if (isInEditor()) playerEntity = mc.player;
-            else playerEntity = TargetUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance);
+            else playerEntity = Targeting.findPlayerTarget(range.get(), SortPriority.LowestDistance);
 
             if (playerEntity == null && !isInEditor()) return;
 
@@ -298,14 +297,22 @@ public class CombatHud extends HudElement {
             else distColor = distColor3.get();
 
             // Status Text
-            String friendText = "Unknown";
+            String classText = "Unknown";
 
-            Color friendColor = primaryColor;
+            Color classColour = primaryColor;
 
-            if (Friends.get().isFriend(playerEntity)) {
-                friendText = "Friend";
-                friendColor = Config.get().friendColor.get();
+            Targeting.Relation relation = Targeting.getRelation(playerEntity);
+
+            if (relation == Targeting.Relation.FRIEND) {
+                classText = "Friend";
+                classColour = Config.get().friendColor.get();
             } else {
+
+                if (relation == Targeting.Relation.ENEMY) {
+                    classText = "Enemy";
+                    classColour = Config.get().enemyColor.get();
+                }
+
                 boolean naked = true;
 
                 for (int position = 3; position >= 0; position--) {
@@ -315,8 +322,8 @@ public class CombatHud extends HudElement {
                 }
 
                 if (naked) {
-                    friendText = "Naked";
-                    friendColor = GREEN;
+                    classText = relation == Targeting.Relation.ENEMY ? "Naked (Enemy)" : "Naked";
+                    classColour = relation == Targeting.Relation.ENEMY ? Color.YELLOW : GREEN;
                 } else {
                     boolean threat = false;
 
@@ -330,8 +337,8 @@ public class CombatHud extends HudElement {
                     }
 
                     if (threat) {
-                        friendText = "Threat";
-                        friendColor = RED;
+                        classText = relation == Targeting.Relation.ENEMY ? "Threat (Enemy)" : "Threat";
+                        classColour = relation == Targeting.Relation.ENEMY ? Config.get().enemyColor.get() : RED;
                     }
                 }
             }
@@ -340,13 +347,13 @@ public class CombatHud extends HudElement {
 
             double breakWidth = TextRenderer.get().getWidth(breakText);
             double pingWidth = TextRenderer.get().getWidth(pingText);
-            double friendWidth = TextRenderer.get().getWidth(friendText);
+            double friendWidth = TextRenderer.get().getWidth(classText);
 
             TextRenderer.get().render(nameText, x, y, nameColor != null ? nameColor : primaryColor);
 
             y += TextRenderer.get().getHeight();
 
-            TextRenderer.get().render(friendText, x, y, friendColor);
+            TextRenderer.get().render(classText, x, y, classColour);
 
             if (displayPing.get()) {
                 TextRenderer.get().render(breakText, x + friendWidth, y, secondaryColor);

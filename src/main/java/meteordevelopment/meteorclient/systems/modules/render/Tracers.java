@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -154,7 +154,7 @@ public class Tracers extends Module {
         .build()
     );
 
-    public final Setting<Boolean> friendOverride = sgColors.add(new BoolSetting.Builder()
+    public final Setting<Boolean> relationOverride = sgColors.add(new BoolSetting.Builder()
         .name("show-friend-colors")
         .description("Whether or not to override the distance color of friends with the friend color.")
         .defaultValue(true)
@@ -218,17 +218,25 @@ public class Tracers extends Module {
     }
 
     private boolean shouldBeIgnored(Entity entity) {
-        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType()) || (ignoreSelf.get() && entity == mc.player) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity);
+        if (!PlayerUtils.isWithin(entity, maxDist.get())) return true;
+        if (!Modules.get().isActive(Freecam.class) && entity == mc.player) return true;
+        if (!entities.get().contains(entity.getType())) return true;
+        if (ignoreSelf.get() && entity == mc.player) return true;
+        if (ignoreFriends.get() && entity instanceof PlayerEntity && Targeting.isFriend((PlayerEntity) entity)) return true;
+        if (!showInvis.get() && entity.isInvisible()) return true;
+        return !EntityUtils.isInRenderDistance(entity);
     }
 
     private Color getEntityColor(Entity entity) {
-        Color color;
+        Color color = null;
 
         if (distance.get()) {
-            if (friendOverride.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
-                color = Config.get().friendColor.get();
+            if (entity instanceof PlayerEntity player && relationOverride.get()) {
+                Targeting.Relation relation = Targeting.getRelation(player);
+                if (relation == Targeting.Relation.FRIEND) color = Config.get().friendColor.get();
+                if (relation == Targeting.Relation.ENEMY) color = Config.get().enemyColor.get();
             }
-            else color = EntityUtils.getColorFromDistance(entity);
+            if (color == null) color = EntityUtils.getColorFromDistance(entity);
         }
         else if (entity instanceof PlayerEntity) {
             color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());

@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -61,10 +61,10 @@ public class AutoLog extends Module {
         .build()
     );
 
-    private final Setting<Boolean> onlyTrusted = sgGeneral.add(new BoolSetting.Builder()
-        .name("only-trusted")
-        .description("Disconnects when a player not on your friends list appears in render distance.")
-        .defaultValue(false)
+    private final Setting<Targeting.Selector> playerSelector = sgGeneral.add(new EnumSetting.Builder<Targeting.Selector>()
+        .name("players")
+        .description("Disconnects when a player appears in render distance.")
+        .defaultValue(Targeting.Selector.Enemies)
         .build()
     );
 
@@ -193,13 +193,17 @@ public class AutoLog extends Module {
             return;
         }
 
-        if (!onlyTrusted.get() && !instantDeath.get() && entities.get().isEmpty())
+        if (playerSelector.get() == Targeting.Selector.None && !instantDeath.get() && entities.get().isEmpty())
             return; // only check all entities if needed
 
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity player && player.getUuid() != mc.player.getUuid()) {
-                if (onlyTrusted.get() && player != mc.player && !Friends.get().isFriend(player)) {
-                    disconnect(Text.literal("Non-trusted player '" + Formatting.RED + player.getName().getString() + Formatting.WHITE + "' appeared in your render distance."));
+                if (player == mc.player) continue;
+
+                Targeting.Relation relation = Targeting.getRelation(player);
+
+                if (Targeting.matchesSelector(playerSelector.get(), relation)) {
+                    disconnect(Text.literal("Player '" + Formatting.RED + player.getName().getString() + Formatting.WHITE + "' (" + relation + ") appeared in your render distance."));
                     if (toggleOff.get()) this.toggle();
                     return;
                 }

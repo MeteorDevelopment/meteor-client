@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.utils.player;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -48,7 +48,7 @@ public class PlayerUtils {
     }
 
     public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
-        if (Friends.get().isFriend(entity)) {
+        if (Targeting.isFriend(entity)) {
             return color.set(Config.get().friendColor.get()).a(defaultColor.a);
         }
 
@@ -198,7 +198,7 @@ public class PlayerUtils {
                     if (crystalDamage > damageTaken) damageTaken = crystalDamage;
                 }
                 // Check for players holding swords
-                else if (entity instanceof PlayerEntity player && !Friends.get().isFriend(player) && isWithin(entity, 5)) {
+                else if (entity instanceof PlayerEntity player && !Targeting.isFriend(player) && isWithin(entity, 5)) {
                     float attackDamage = DamageUtils.getAttackDamage(player, mc.player);
                     if (attackDamage > damageTaken) damageTaken = attackDamage;
                 }

@@ -6,11 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules.misc;
 
 import meteordevelopment.meteorclient.events.entity.EntityAddedEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.StringSetting;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -27,10 +24,10 @@ public class MessageAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-friends")
-        .description("Will not send any messages to people friended.")
-        .defaultValue(false)
+    private final Setting<Targeting.Selector> selector = sgGeneral.add(new EnumSetting.Builder<Targeting.Selector>()
+        .name("target")
+        .description("What players to target with messages")
+        .defaultValue(Targeting.Selector.All)
         .build()
     );
 
@@ -40,9 +37,9 @@ public class MessageAura extends Module {
 
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
-        if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
+        if (!(event.entity instanceof PlayerEntity player) || event.entity.getUuid().equals(mc.player.getUuid())) return;
 
-        if (!ignoreFriends.get() || (ignoreFriends.get() && !Friends.get().isFriend((PlayerEntity)event.entity))) {
+        if (Targeting.matchesSelector(selector.get(), player)) {
             ChatUtils.sendPlayerMsg("/msg " + event.entity.getName().getString() + " " + message.get());
         }
     }
