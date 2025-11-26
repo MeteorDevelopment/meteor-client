@@ -453,7 +453,7 @@ public class Freecam extends Module {
         else if (event.packet instanceof PlayerRespawnS2CPacket) {
             if (isActive()) {
                 toggle();
-                info("Toggled off because the dimension was changed.");
+                info("Toggled off because you changed dimensions.");
             }
         }
     }
