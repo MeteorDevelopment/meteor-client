@@ -19,7 +19,7 @@ public class PeekCommand extends Command {
     private static final SimpleCommandExceptionType CANT_PEEK = new SimpleCommandExceptionType(Text.literal("You must be holding a storage block or looking at an item frame."));
 
     public PeekCommand() {
-        super("peek", "Lets you see what's inside storage block items.");
+        super("peek");
     }
 
     @Override

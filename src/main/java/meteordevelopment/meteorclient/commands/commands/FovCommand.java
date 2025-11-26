@@ -13,7 +13,7 @@ import net.minecraft.command.CommandSource;
 
 public class FovCommand extends Command {
     public FovCommand() {
-        super("fov", "Changes your fov.");
+        super("fov");
     }
 
     @Override

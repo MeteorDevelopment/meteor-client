@@ -14,7 +14,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class HClipCommand extends Command {
     public HClipCommand() {
-        super("hclip", "Lets you clip through blocks horizontally.");
+        super("hclip");
     }
 
     @Override

@@ -21,7 +21,7 @@ public class SpectateCommand extends Command {
     private final StaticListener shiftListener = new StaticListener();
 
     public SpectateCommand() {
-        super("spectate", "Allows you to spectate nearby players");
+        super("spectate");
     }
 
     @Override

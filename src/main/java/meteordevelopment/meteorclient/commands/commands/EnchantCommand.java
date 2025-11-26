@@ -10,6 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.RegistryEntryReferenceArgumentType;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -19,16 +20,15 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.Text;
 
 import java.util.function.ToIntFunction;
 
 public class EnchantCommand extends Command {
-    private static final SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(Text.literal("You must be in creative mode to use this."));
-    private static final SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(Text.literal("You need to hold some item to enchant."));
+    private static final SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.enchant.exception.not_in_creative"));
+    private static final SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.enchant.exception.not_holding_item"));
 
     public EnchantCommand() {
-        super("enchant", "Enchants the item in your hand. REQUIRES Creative mode.");
+        super("enchant");
     }
 
     @Override

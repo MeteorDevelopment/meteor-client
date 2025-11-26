@@ -8,6 +8,10 @@ package meteordevelopment.meteorclient.addons;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
 public abstract class MeteorAddon {
+    /** This field is automatically assigned from fabric.mod.json file.
+     * @since 1.21.11 */ // todo replace with exact version when released
+    public String id;
+
     /** This field is automatically assigned from fabric.mod.json file. */
     public String name;
 

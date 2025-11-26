@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.util.Downloader;
+import net.minecraft.util.Uuids;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,10 +36,7 @@ public class DownloaderMixin {
     @ModifyExpressionValue(method = "method_55485", at = @At(value = "INVOKE", target = "Ljava/nio/file/Path;resolve(Ljava/lang/String;)Ljava/nio/file/Path;"))
     private Path hookResolve(Path original, @Local(argsOnly = true) UUID id) {
         UUID accountId = mc.getSession().getUuidOrNull();
-        if (accountId == null) {
-            MeteorClient.LOG.warn("Failed to change resource pack download directory because the account id is null.");
-            return original;
-        }
+        if (accountId == null) accountId = Uuids.getOfflinePlayerUuid(mc.getSession().getUsername());
 
         return directory.resolve(accountId.toString()).resolve(id.toString());
     }
