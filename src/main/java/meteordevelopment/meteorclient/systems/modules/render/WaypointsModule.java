@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedMinus;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
@@ -28,6 +28,7 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -36,8 +37,9 @@ import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.ListIterator;
+import java.util.List;
 
 import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords;
 
@@ -95,6 +97,7 @@ public class WaypointsModule extends Module {
         Vector3d center = new Vector3d(mc.getWindow().getFramebufferWidth() / 2.0, mc.getWindow().getFramebufferHeight() / 2.0, 0);
         int textRenderDist = textRenderDistance.get();
 
+        List<Waypoint> toRemove = new ArrayList<>();
         for (Waypoint waypoint : Waypoints.get()) {
             // Continue if this waypoint should not be rendered
             if (!waypoint.visible.get() || !Waypoints.checkDimension(waypoint)) continue;
@@ -104,9 +107,23 @@ public class WaypointsModule extends Module {
             Vector3d pos = new Vector3d(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
             double dist = PlayerUtils.distanceToCamera(pos.x, pos.y, pos.z);
 
+            // Only perform hide when near check if player is alive
+            // Otherwise, death waypoints immediately get hidden
+            boolean playerAlive = (mc.player != null && !mc.player.isDead());
+            boolean waypointIsNear = waypoint.actionWhenNearCheck((int) Math.floor(dist));
+            if (playerAlive && waypointIsNear) {
+                switch (waypoint.actionWhenNear.get()) {
+                    case Hide -> waypoint.visible.set(false);
+                    case Delete -> {
+                        toRemove.add(waypoint);
+                        continue;
+                    }
+                }
+            }
+
             // Continue if this waypoint should not be rendered
             if (dist > waypoint.maxVisible.get()) continue;
-            if (!NametagUtils.to2D(pos, 1)) continue;
+            if (!NametagUtils.to2D(pos, waypoint.scale.get() - 0.2)) continue;
 
             // Calculate alpha and distance to center of the screen
             double distToCenter = pos.distance(center);
@@ -118,7 +135,6 @@ public class WaypointsModule extends Module {
             }
 
             // Render
-            NametagUtils.scale = waypoint.scale.get() - 0.2;
             NametagUtils.begin(pos);
 
             // Render icon
@@ -145,13 +161,15 @@ public class WaypointsModule extends Module {
 
             NametagUtils.end();
         }
+
+        Waypoints.get().removeAll(toRemove);
     }
 
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
         if (!(event.screen instanceof DeathScreen)) return;
 
-        if (!event.isCancelled()) addDeath(mc.player.getPos());
+        if (!event.isCancelled()) addDeath(mc.player.getEntityPos());
     }
 
     public void addDeath(Vec3d deathPos) {
@@ -172,6 +190,10 @@ public class WaypointsModule extends Module {
                 .dimension(PlayerUtils.getDimension())
                 .build();
 
+            // Configure death waypoints to auto delete when the player is within 4 blocks
+            waypoint.actionWhenNear.set(Waypoint.NearAction.Delete);
+            waypoint.actionWhenNearDistance.set(4);
+
             Waypoints.get().add(waypoint);
         }
 
@@ -181,15 +203,16 @@ public class WaypointsModule extends Module {
     private void cleanDeathWPs(int max) {
         int oldWpC = 0;
 
-        ListIterator<Waypoint> wps = Waypoints.get().iteratorReverse();
-        while (wps.hasPrevious()) {
-            Waypoint wp = wps.previous();
-            if (wp.name.get().startsWith("Death ") && "skull".equals(wp.icon.get())) {
+        List<Waypoint> toRemove = new ArrayList<>();
+        for (Waypoint wp : Waypoints.get()) {
+            if (wp.name.get().startsWith("Death ") && wp.icon.get().equals("skull")) {
                 oldWpC++;
-                if (oldWpC > max)
-                    Waypoints.get().remove(wp);
+
+                if (oldWpC > max) toRemove.add(wp);
             }
         }
+
+        Waypoints.get().removeAll(toRemove);
     }
 
     @Override
@@ -219,7 +242,7 @@ public class WaypointsModule extends Module {
             };
 
             WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
-            edit.action = () -> mc.setScreen(new EditWaypointScreen(theme, waypoint, null));
+            edit.action = () -> mc.setScreen(new EditWaypointScreen(theme, waypoint, () -> initTable(theme, table)));
 
             // Goto
             if (validDim) {
@@ -232,7 +255,7 @@ public class WaypointsModule extends Module {
                 };
             }
 
-            WMinus remove = table.add(theme.minus()).widget();
+            WConfirmedMinus remove = table.add(theme.confirmedMinus()).widget();
             remove.action = () -> {
                 Waypoints.get().remove(waypoint);
                 initTable(theme, table);
@@ -248,7 +271,7 @@ public class WaypointsModule extends Module {
         create.action = () -> mc.setScreen(new EditWaypointScreen(theme, null, () -> initTable(theme, table)));
     }
 
-    private class EditWaypointScreen extends EditSystemScreen<Waypoint> {
+    private static class EditWaypointScreen extends EditSystemScreen<Waypoint> {
         public EditWaypointScreen(GuiTheme theme, Waypoint value, Runnable reload) {
             super(theme, value, reload);
         }
@@ -256,14 +279,17 @@ public class WaypointsModule extends Module {
         @Override
         public Waypoint create() {
             return new Waypoint.Builder()
-                .pos(mc.player.getBlockPos().up(2))
+                .pos(MinecraftClient.getInstance().player.getBlockPos().up(2))
                 .dimension(PlayerUtils.getDimension())
                 .build();
         }
 
         @Override
         public boolean save() {
-            return !isNew || Waypoints.get().add(value);
+            if (value.name.get().isBlank()) return false;
+
+            Waypoints.get().add(value);
+            return true;
         }
 
         @Override

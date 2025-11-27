@@ -5,38 +5,56 @@
 
 package meteordevelopment.meteorclient.gui.renderer;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
-import meteordevelopment.meteorclient.renderer.DrawMode;
-import meteordevelopment.meteorclient.renderer.Mesh;
-import meteordevelopment.meteorclient.renderer.ShaderMesh;
-import meteordevelopment.meteorclient.renderer.Shaders;
+import meteordevelopment.meteorclient.renderer.MeshBuilder;
+import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 
 public class GuiDebugRenderer {
     private static final Color CELL_COLOR = new Color(25, 225, 25);
     private static final Color WIDGET_COLOR = new Color(25, 25, 225);
 
-    private final Mesh mesh = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Lines, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
+    private final MeshBuilder mesh = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED_LINES);
 
-    public void render(WWidget widget, MatrixStack matrices) {
+    public void render(WWidget widget) {
         if (widget == null) return;
 
         mesh.begin();
-
         renderWidget(widget);
-
         mesh.end();
-        mesh.render(matrices);
+
+        MeshRenderer.begin()
+            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .pipeline(MeteorRenderPipelines.WORLD_COLORED_LINES)
+            .mesh(mesh)
+            .end();
+    }
+
+    public void mouseReleased(WWidget widget, Click click, int i) {
+        if (widget == null) return;
+
+        MeteorClient.LOG.info("{} {}", widget.getClass(), i);
+
+        if (widget instanceof WContainer container) {
+            for (Cell<?> cell : container.cells) {
+                if (cell.widget().isOver(click.x(), click.y())) {
+                    mouseReleased(cell.widget(), click, i + 1);
+                }
+            }
+        }
     }
 
     private void renderWidget(WWidget widget) {
         lineBox(widget.x, widget.y, widget.width, widget.height, WIDGET_COLOR);
 
-        if (widget instanceof WContainer) {
-            for (Cell<?> cell : ((WContainer) widget).cells) {
+        if (widget instanceof WContainer container) {
+            for (Cell<?> cell : container.cells) {
                 lineBox(cell.x, cell.y, cell.width, cell.height, CELL_COLOR);
                 renderWidget(cell.widget());
             }
@@ -51,9 +69,11 @@ public class GuiDebugRenderer {
     }
 
     private void line(double x1, double y1, double x2, double y2, Color color) {
+        mesh.ensureLineCapacity();
+
         mesh.line(
-            mesh.vec2(x1, y1).color(color).next(),
-            mesh.vec2(x2, y2).color(color).next()
+            mesh.vec3(x1, y1, 0).color(color).next(),
+            mesh.vec3(x2, y2, 0).color(color).next()
         );
     }
 }

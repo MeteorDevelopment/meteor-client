@@ -7,18 +7,17 @@ package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
-import meteordevelopment.meteorclient.gui.utils.IScreenFactory;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.BlockDataSetting;
+import meteordevelopment.meteorclient.settings.GenericSetting;
 import meteordevelopment.meteorclient.settings.IBlockData;
+import meteordevelopment.meteorclient.settings.IGeneric;
 import meteordevelopment.meteorclient.utils.misc.IChangeable;
-import meteordevelopment.meteorclient.utils.misc.ICopyable;
-import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NbtCompound;
 
-public class ESPBlockData implements ICopyable<ESPBlockData>, ISerializable<ESPBlockData>, IChangeable, IBlockData<ESPBlockData>, IScreenFactory {
+public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlockData<ESPBlockData> {
     public ShapeMode shapeMode;
     public SettingColor lineColor;
     public SettingColor sideColor;
@@ -43,8 +42,8 @@ public class ESPBlockData implements ICopyable<ESPBlockData>, ISerializable<ESPB
     }
 
     @Override
-    public WidgetScreen createScreen(GuiTheme theme) {
-        return new ESPBlockDataScreen(theme, this, null, null);
+    public WidgetScreen createScreen(GuiTheme theme, GenericSetting<ESPBlockData> setting) {
+        return new ESPBlockDataScreen(theme, this, setting);
     }
 
     @Override
@@ -99,14 +98,14 @@ public class ESPBlockData implements ICopyable<ESPBlockData>, ISerializable<ESPB
 
     @Override
     public ESPBlockData fromTag(NbtCompound tag) {
-        shapeMode = ShapeMode.valueOf(tag.getString("shapeMode"));
-        lineColor.fromTag(tag.getCompound("lineColor"));
-        sideColor.fromTag(tag.getCompound("sideColor"));
+        shapeMode = ShapeMode.valueOf(tag.getString("shapeMode", ""));
+        lineColor.fromTag(tag.getCompoundOrEmpty("lineColor"));
+        sideColor.fromTag(tag.getCompoundOrEmpty("sideColor"));
 
-        tracer = tag.getBoolean("tracer");
-        tracerColor.fromTag(tag.getCompound("tracerColor"));
+        tracer = tag.getBoolean("tracer", false);
+        tracerColor.fromTag(tag.getCompoundOrEmpty("tracerColor"));
 
-        changed = tag.getBoolean("changed");
+        changed = tag.getBoolean("changed", false);
 
         return this;
     }

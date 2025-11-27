@@ -21,6 +21,9 @@
   "entrypoints": {
     "client": [
       "meteordevelopment.meteorclient.MeteorClient"
+    ],
+    "modmenu": [
+      "meteordevelopment.meteorclient.ModMenuIntegration"
     ]
   },
   "mixins": [
@@ -28,14 +31,12 @@
     "meteor-client-baritone.mixins.json",
     "meteor-client-indigo.mixins.json",
     "meteor-client-sodium.mixins.json",
-    "meteor-client-canvas.mixins.json",
     "meteor-client-lithium.mixins.json",
-    "meteor-client-indium.mixins.json",
     "meteor-client-viafabricplus.mixins.json"
   ],
   "accessWidener": "meteor-client.accesswidener",
   "custom": {
-    "meteor-client:devbuild": "${devbuild}",
+    "meteor-client:build_number": "${build_number}",
     "meteor-client:color": "145,61,226",
     "meteor-client:commit": "${commit}",
     "modmenu": {
@@ -46,15 +47,14 @@
   },
   "depends": {
     "java": ">=21",
-    "minecraft": ["${minecraft_version}"],
-    "fabricloader": ">=${loader_version}"
+    "minecraft": ["${minecraft_version}", "1.21.9"],
+    "fabricloader": ">=0.17"
   },
   "breaks": {
     "optifabric": "*",
     "feather": "*",
     "origins": "*",
-    "wurst": "*",
-    "sodium": "<0.5.8",
+    "sodium": "<0.7.0",
     "morechathistory": "*"
   }
 }

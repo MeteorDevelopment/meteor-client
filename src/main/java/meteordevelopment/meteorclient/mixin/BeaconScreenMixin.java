@@ -36,11 +36,14 @@ public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandle
         super(handler, inventory, title);
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/BeaconScreen;addButton(Lnet/minecraft/client/gui/widget/ClickableWidget;)V", ordinal = 1, shift = At.Shift.AFTER), cancellable = true)
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Ljava/util/List;clear()V", shift = At.Shift.AFTER), cancellable = true)
     private void changeButtons(CallbackInfo ci) {
         if (!Modules.get().get(BetterBeacons.class).isActive()) return;
         List<RegistryEntry<StatusEffect>> effects = BeaconBlockEntity.EFFECTS_BY_LEVEL.stream().flatMap(Collection::stream).toList();
         if (MinecraftClient.getInstance().currentScreen instanceof BeaconScreen beaconScreen) {
+            addButton(beaconScreen.new DoneButtonWidget(this.x + 164, this.y + 107));
+            addButton(beaconScreen.new CancelButtonWidget(this.x + 190, this.y + 107));
+
             for (int x = 0; x < 3; x++) {
                 for (int y = 0; y < 2; y++) {
                     RegistryEntry<StatusEffect> effect = effects.get(x * 2 + y);

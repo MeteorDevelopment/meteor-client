@@ -14,5 +14,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(SimpleEntityLookup.class)
 public interface SimpleEntityLookupAccessor {
     @Accessor("cache")
-    <T extends EntityLike> SectionedEntityCache<T> getCache();
+    <T extends EntityLike> SectionedEntityCache<T> meteor$getCache();
 }

@@ -88,7 +88,16 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         return button(null, texture);
     }
 
+    protected abstract WConfirmedButton confirmedButton(String text, String confirmText, GuiTexture texture);
+    public WConfirmedButton confirmedButton(String text, String confirmText) {
+        return confirmedButton(text, confirmText, null);
+    }
+    public WConfirmedButton confirmedButton(GuiTexture texture) {
+        return confirmedButton(null, null, texture);
+    }
+
     public abstract WMinus minus();
+    public abstract WConfirmedMinus confirmedMinus();
     public abstract WPlus plus();
 
     public abstract WCheckbox checkbox(boolean checked);
@@ -113,6 +122,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
 
     public abstract <T> WDropdown<T> dropdown(T[] values, T value);
+    @SuppressWarnings("unchecked")
     public <T extends Enum<?>> WDropdown<T> dropdown(T value) {
         Class<?> klass = value.getDeclaringClass();
         T[] values = (T[]) klass.getEnumConstants();
@@ -325,12 +335,13 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
 
     @Override
     public GuiTheme fromTag(NbtCompound tag) {
-        settings.fromTag(tag.getCompound("settings"));
+        tag.getCompound("settings").ifPresent(settings::fromTag);
 
-        NbtCompound configs = tag.getCompound("windowConfigs");
-        for (String id : configs.getKeys()) {
-            windowConfigs.put(id, new WindowConfig().fromTag(configs.getCompound(id)));
-        }
+        tag.getCompound("windowConfigs").ifPresent(configs -> {
+            for (String id : configs.getKeys()) {
+                windowConfigs.put(id, new WindowConfig().fromTag(configs.getCompound(id).get()));
+            }
+        });
 
         return this;
     }

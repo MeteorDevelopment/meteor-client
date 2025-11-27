@@ -32,13 +32,13 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public abstract class BookEditScreenMixin extends Screen {
     @Shadow @Final private List<String> pages;
     @Shadow private int currentPage;
-    @Shadow private boolean dirty;
+
+    @Shadow
+    protected abstract void updatePage();
 
     public BookEditScreenMixin(Text title) {
         super(title);
     }
-
-    @Shadow protected abstract void updateButtons();
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
@@ -86,21 +86,20 @@ public abstract class BookEditScreenMixin extends Screen {
                     try {
                         NbtCompound tag = NbtIo.readCompressed(in, NbtSizeTracker.ofUnlimitedBytes());
 
-                        NbtList listTag = tag.getList("pages", 8).copy();
+                        NbtList listTag = tag.getListOrEmpty("pages").copy();
 
                         pages.clear();
                         for(int i = 0; i < listTag.size(); ++i) {
-                            pages.add(listTag.getString(i));
+                            pages.add(listTag.getString(i, ""));
                         }
 
                         if (pages.isEmpty()) {
                             pages.add("");
                         }
 
-                        currentPage = tag.getInt("currentPage");
+                        currentPage = tag.getInt("currentPage", 0);
 
-                        dirty = true;
-                        updateButtons();
+                        updatePage();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

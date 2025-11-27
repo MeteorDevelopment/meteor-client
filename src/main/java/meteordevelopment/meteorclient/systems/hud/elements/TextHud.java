@@ -15,11 +15,11 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.starscript.Script;
-import meteordevelopment.starscript.Section;
-import meteordevelopment.starscript.compiler.Compiler;
-import meteordevelopment.starscript.compiler.Parser;
-import meteordevelopment.starscript.utils.StarscriptError;
+import org.meteordev.starscript.Script;
+import org.meteordev.starscript.Section;
+import org.meteordev.starscript.compiler.Compiler;
+import org.meteordev.starscript.compiler.Parser;
+import org.meteordev.starscript.utils.StarscriptError;
 
 import java.util.List;
 
@@ -98,9 +98,9 @@ public class TextHud extends HudElement {
 
     public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies custom text scale rather than the global one.")
+        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
-        .onChanged(integer -> recalculateSize = true)
+        .onChanged(aBoolean -> recalculateSize = true)
         .build()
     );
 
@@ -109,7 +109,7 @@ public class TextHud extends HudElement {
         .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(1)
-        .onChanged(integer -> recalculateSize = true)
+        .onChanged(aDouble -> recalculateSize = true)
         .min(0.5)
         .sliderRange(0.5, 3)
         .build()
@@ -259,7 +259,7 @@ public class TextHud extends HudElement {
     }
 
     private double getScale() {
-        return customScale.get() ? scale.get() : -1;
+        return customScale.get() ? scale.get() : Hud.get().getTextScale();
     }
 
     public static Color getSectionColor(int i) {

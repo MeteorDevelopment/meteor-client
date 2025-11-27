@@ -35,6 +35,10 @@ public class MBlockPos {
         return set(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ());
     }
 
+    public MBlockPos coerceBlockLevel(Entity entity) {
+        return set(entity.getBlockX(), (int) Math.round(entity.getY()), entity.getBlockZ());
+    }
+
     public MBlockPos offset(HorizontalDirection dir, int amount) {
         x += dir.offsetX * amount;
         z += dir.offsetZ * amount;

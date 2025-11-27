@@ -5,12 +5,14 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements;
 
+import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -21,6 +23,7 @@ public class ArmorHud extends HudElement {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDurability = settings.createGroup("Durability");
+    private final SettingGroup sgScale = settings.createGroup("Scale");
     private final SettingGroup sgBackground = settings.createGroup("Background");
 
     // General
@@ -40,21 +43,10 @@ public class ArmorHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("The scale.")
-        .defaultValue(2)
-        .onChanged(aDouble -> calculateSize())
-        .min(1)
-        .sliderRange(1, 5)
-        .build()
-    );
-
-    private final Setting<Integer> border = sgGeneral.add(new IntSetting.Builder()
-        .name("border")
-        .description("How much space to add around the element.")
-        .defaultValue(0)
-        .onChanged(integer -> calculateSize())
+    private final Setting<Boolean> showEmpty = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-empty")
+        .description("Renders barrier icons for empty slots.")
+        .defaultValue(false)
         .build()
     );
 
@@ -84,6 +76,27 @@ public class ArmorHud extends HudElement {
         .build()
     );
 
+    // Scale
+
+    private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
+        .name("custom-scale")
+        .description("Applies a custom scale to this hud element.")
+        .defaultValue(false)
+        .onChanged(aBoolean -> calculateSize())
+        .build()
+    );
+
+    private final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Custom scale.")
+        .visible(customScale::get)
+        .defaultValue(2)
+        .onChanged(aDouble -> calculateSize())
+        .min(0.5)
+        .sliderRange(0.5, 3)
+        .build()
+    );
+
     // Background
 
     private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
@@ -107,80 +120,89 @@ public class ArmorHud extends HudElement {
         calculateSize();
     }
 
-    @Override
-    public void setSize(double width, double height) {
-        super.setSize(width + border.get() * 2, height + border.get() * 2);
-    }
-
     private void calculateSize() {
         switch (orientation.get()) {
-            case Horizontal -> setSize(16 * scale.get() * 4 + 2 * 4, 16 * scale.get());
-            case Vertical -> setSize(16 * scale.get(), 16 * scale.get() * 4 + 2 * 4);
+            // Four item stacks plus
+            case Horizontal -> setSize((16 * 4 + 2 * 4) * getScale(), 16 * getScale());
+            case Vertical -> setSize(16 * getScale(), (16 * 4 + 2 * 4) * getScale());
         }
     }
 
     @Override
     public void render(HudRenderer renderer) {
-        double x = this.x;
-        double y = this.y;
-        double armorX;
-        double armorY;
+        int emptySlots = 0;
 
-        int slot = flipOrder.get() ? 3 : 0;
-        for (int position = 0; position < 4; position++) {
-            ItemStack itemStack = getItem(slot);
+        // default order is from boots to helmet
+        ItemStack[] armor = flipOrder.get() ?
+            new ItemStack[]{getItem(EquipmentSlot.HEAD), getItem(EquipmentSlot.CHEST), getItem(EquipmentSlot.LEGS), getItem(EquipmentSlot.FEET)} :
+            new ItemStack[]{getItem(EquipmentSlot.FEET), getItem(EquipmentSlot.LEGS), getItem(EquipmentSlot.CHEST), getItem(EquipmentSlot.HEAD)};
 
-            if (orientation.get() == Orientation.Vertical) {
-                armorX = x;
-                armorY = y + position * 18 * scale.get();
-            }
-            else {
-                armorX = x + position * 18 * scale.get();
-                armorY = y;
-            }
-
-            renderer.item(itemStack, (int) armorX, (int) armorY, scale.get().floatValue(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
-
-            if (itemStack.isDamageable() && !isInEditor() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
-                String message = switch (durability.get()) {
-                    case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
-                    case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
-                    default -> "err";
-                };
-
-                double messageWidth = renderer.textWidth(message);
-
-                if (orientation.get() == Orientation.Vertical) {
-                    armorX = x + 8 * scale.get() - messageWidth / 2.0;
-                    armorY = y + (18 * position * scale.get()) + (18 * scale.get() - renderer.textHeight());
-                } else {
-                    armorX = x + 18 * position * scale.get() + 8 * scale.get() - messageWidth / 2.0;
-                    armorY = y + (getHeight() - renderer.textHeight());
-                }
-
-                renderer.text(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
-            }
-
-            if (flipOrder.get()) slot--;
-            else slot++;
+        for (ItemStack stack : armor) {
+            if (stack.isEmpty()) emptySlots++;
         }
 
-        if (background.get()) {
+        if (background.get() && emptySlots < 4) {
             renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
         }
+
+        renderer.post(() -> {
+            double x = this.x;
+            double y = this.y;
+
+            double armorX, armorY;
+
+            for (int position = 0; position < 4; position++) {
+                ItemStack itemStack = armor[position];
+
+                if (orientation.get() == Orientation.Vertical) {
+                    armorX = x;
+                    armorY = y + position * 18 * getScale();
+                } else {
+                    armorX = x + position * 18 * getScale();
+                    armorY = y;
+                }
+
+                renderer.item(itemStack, (int) armorX, (int) armorY, getScale(), (itemStack.isDamageable() && durability.get() == Durability.Bar));
+
+                if (itemStack.isDamageable() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
+                    String message = switch (durability.get()) {
+                        case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
+                        case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
+                        default -> "err";
+                    };
+
+                    double messageWidth = renderer.textWidth(message);
+
+                    if (orientation.get() == Orientation.Vertical) {
+                        armorX = x + 8 * getScale() - messageWidth / 2.0;
+                        armorY = y + (18 * position * getScale()) + (18 * getScale() - renderer.textHeight());
+                    } else {
+                        armorX = x + 18 * position * getScale() + 8 * getScale() - messageWidth / 2.0;
+                        armorY = y + (getHeight() - renderer.textHeight());
+                    }
+
+                    TextRenderer.get().render(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
+                }
+            }
+        });
     }
 
-    private ItemStack getItem(int i) {
+    private ItemStack getItem(EquipmentSlot slot) {
         if (isInEditor()) {
-            return switch (i) {
-                default -> Items.NETHERITE_BOOTS.getDefaultStack();
-                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
+            return switch (slot.getEntitySlotId()) {
                 case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
+                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
+                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
+                default -> Items.NETHERITE_BOOTS.getDefaultStack();
             };
         }
 
-        return mc.player.getInventory().getArmorStack(i);
+        ItemStack stack = mc.player.getEquippedStack(slot);
+        return stack.isEmpty() && showEmpty.get() ? Items.BARRIER.getDefaultStack() : stack;
+    }
+
+    private float getScale() {
+        return customScale.get() ? scale.get().floatValue() : scale.getDefaultValue().floatValue();
     }
 
     public enum Durability {

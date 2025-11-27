@@ -211,7 +211,7 @@ public class Tracers extends Module {
     );
 
     private int count;
-    private Instant initTimer = Instant.now();
+    private final Instant initTimer = Instant.now();
 
     public Tracers() {
         super(Categories.Render, "tracers", "Displays tracer lines to specified entities.");
@@ -256,9 +256,9 @@ public class Tracers extends Module {
 
             Color color = getEntityColor(entity);
 
-            double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
-            double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
-            double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
+            double x = entity.lastX + (entity.getX() - entity.lastX) * event.tickDelta;
+            double y = entity.lastY + (entity.getY() - entity.lastY) * event.tickDelta;
+            double z = entity.lastZ + (entity.getZ() - entity.lastZ) * event.tickDelta;
 
             double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
             if (target.get() == Target.Head) y += height;
@@ -284,17 +284,17 @@ public class Tracers extends Module {
             Color color = getEntityColor(entity);
 
             if (blinkOffscreen.get())
-                color.a *= getAlpha();
+                color.a = (int) (color.a * getAlpha());
 
             Vec2f screenCenter = new Vec2f(mc.getWindow().getFramebufferWidth() / 2.f, mc.getWindow().getFramebufferHeight() / 2.f);
 
-            Vector3d projection = new Vector3d(entity.prevX, entity.prevY, entity.prevZ);
+            Vector3d projection = new Vector3d(entity.lastX, entity.lastY, entity.lastZ);
             boolean projSucceeded = NametagUtils.to2D(projection, 1, false, false);
 
             if (projSucceeded && projection.x > 0.f && projection.x < mc.getWindow().getFramebufferWidth() && projection.y > 0.f && projection.y < mc.getWindow().getFramebufferHeight())
                 continue;
 
-            projection = new Vector3d(entity.prevX, entity.prevY, entity.prevZ);
+            projection = new Vector3d(entity.lastX, entity.lastY, entity.lastZ);
             NametagUtils.to2D(projection, 1, false, true);
 
             Vector2f angle = vectorAngles(new Vector3d(screenCenter.x - projection.x, screenCenter.y - projection.y, 0));
@@ -302,8 +302,10 @@ public class Tracers extends Module {
 
             float angleYawRad = (float) Math.toRadians(angle.y);
 
-            Vector2f newPoint = new Vector2f(screenCenter.x + distanceOffscreen.get() * (float) Math.cos(angleYawRad),
-                screenCenter.y + distanceOffscreen.get() * (float) Math.sin(angleYawRad));
+            Vector2f newPoint = new Vector2f(
+                screenCenter.x + distanceOffscreen.get() * (float) Math.cos(angleYawRad),
+                screenCenter.y + distanceOffscreen.get() * (float) Math.sin(angleYawRad)
+            );
 
             Vector2f[] trianglePoints = {
                 new Vector2f(newPoint.x - sizeOffscreen.get(), newPoint.y - sizeOffscreen.get()),
@@ -313,13 +315,17 @@ public class Tracers extends Module {
 
             rotateTriangle(trianglePoints, angle.y);
 
-            Renderer2D.COLOR.triangle(trianglePoints[0].x, trianglePoints[0].y, trianglePoints[1].x, trianglePoints[1].y, trianglePoints[2].x,
-                trianglePoints[2].y, color);
+            Renderer2D.COLOR.triangle(
+                trianglePoints[2].x, trianglePoints[2].y,
+                trianglePoints[1].x, trianglePoints[1].y,
+                trianglePoints[0].x, trianglePoints[0].y,
+                color
+            );
 
             count++;
         }
 
-        Renderer2D.COLOR.render(null);
+        Renderer2D.COLOR.render();
     }
 
     private void rotateTriangle(Vector2f[] points, float ang) {
@@ -365,7 +371,7 @@ public class Tracers extends Module {
         double speed = blinkOffscreenSpeed.get() / 4.0;
         double duration = Math.abs(Duration.between(Instant.now(), initTimer).toMillis()) * speed;
 
-        return (float)Math.abs((duration % 1000) - 500) / 500.f;
+        return (float) Math.abs((duration % 1000) - 500) / 500.f;
     }
 
     @Override

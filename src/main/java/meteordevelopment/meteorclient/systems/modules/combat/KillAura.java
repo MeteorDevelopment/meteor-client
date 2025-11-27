@@ -28,6 +28,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
 import net.minecraft.entity.mob.EndermanEntity;
+import net.minecraft.entity.mob.PiglinEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.WolfEntity;
@@ -35,8 +36,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.MaceItem;
-import net.minecraft.item.SwordItem;
+import net.minecraft.item.TridentItem;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -72,6 +74,14 @@ public class KillAura extends Module {
         .name("auto-switch")
         .description("Switches to your selected weapon when attacking the target.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> swapBack = sgGeneral.add(new BoolSetting.Builder()
+        .name("swap-back")
+        .description("Switches to your previous slot when done attacking the target.")
+        .defaultValue(false)
+        .visible(autoSwitch::get)
         .build()
     );
 
@@ -236,31 +246,54 @@ public class KillAura extends Module {
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
-    public boolean attacking;
+    public boolean attacking, swapped;
+    public static int previousSlot;
 
     public KillAura() {
         super(Categories.Combat, "kill-aura", "Attacks specified entities around you.");
     }
 
     @Override
+    public void onActivate() {
+        previousSlot = -1;
+        swapped = false;
+    }
+
+    @Override
     public void onDeactivate() {
         targets.clear();
-        attacking = false;
+        stopAttacking();
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
-        if (pauseOnUse.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) return;
-        if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
-        if (TickRate.INSTANCE.getTimeSinceLastTick() >= 1f && pauseOnLag.get()) return;
-        if (pauseOnCA.get() && Modules.get().get(CrystalAura.class).isActive() && Modules.get().get(CrystalAura.class).kaTimer > 0) return;
-
+        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) {
+            stopAttacking();
+            return;
+        }
+        if (pauseOnUse.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) {
+            stopAttacking();
+            return;
+        }
+        if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) {
+            stopAttacking();
+            return;
+        }
+        if (TickRate.INSTANCE.getTimeSinceLastTick() >= 1f && pauseOnLag.get()) {
+            stopAttacking();
+            return;
+        }
+        if (pauseOnCA.get() && Modules.get().get(CrystalAura.class).isActive() && Modules.get().get(CrystalAura.class).kaTimer > 0) {
+            stopAttacking();
+            return;
+        }
         if (onlyOnLook.get()) {
             Entity targeted = mc.targetedEntity;
 
-            if (targeted == null) return;
-            if (!entityCheck(targeted)) return;
+            if (targeted == null || !entityCheck(targeted)) {
+                stopAttacking();
+                return;
+            }
 
             targets.clear();
             targets.add(mc.targetedEntity);
@@ -270,11 +303,7 @@ public class KillAura extends Module {
         }
 
         if (targets.isEmpty()) {
-            attacking = false;
-            if (wasPathing) {
-                PathManagers.get().resume();
-                wasPathing = false;
-            }
+            stopAttacking();
             return;
         }
 
@@ -283,22 +312,30 @@ public class KillAura extends Module {
         if (autoSwitch.get()) {
             Predicate<ItemStack> predicate = switch (weapon.get()) {
                 case Axe -> stack -> stack.getItem() instanceof AxeItem;
-                case Sword -> stack -> stack.getItem() instanceof SwordItem;
+                case Sword -> stack -> stack.isIn(ItemTags.SWORDS);
                 case Mace -> stack -> stack.getItem() instanceof MaceItem;
-                case All -> stack -> stack.getItem() instanceof AxeItem || stack.getItem() instanceof SwordItem || stack.getItem() instanceof MaceItem;
+                case Trident -> stack -> stack.getItem() instanceof TridentItem;
+                case All -> stack -> stack.getItem() instanceof AxeItem || stack.isIn(ItemTags.SWORDS) || stack.getItem() instanceof MaceItem || stack.getItem() instanceof TridentItem;
                 default -> o -> true;
             };
-            FindItemResult weaponResult = InvUtils.findInHotbar(predicate);
+            FindItemResult weaponResult = InvUtils.find(predicate, 0, 8);
 
             if (shouldShieldBreak()) {
-                FindItemResult axeResult = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof AxeItem);
+                FindItemResult axeResult = InvUtils.find(itemStack -> itemStack.getItem() instanceof AxeItem, 0, 8);
                 if (axeResult.found()) weaponResult = axeResult;
             }
 
+            if (!swapped) {
+                previousSlot  = mc.player.getInventory().getSelectedSlot();
+                swapped = true;
+            }
             InvUtils.swap(weaponResult.slot(), false);
         }
 
-        if (!itemInHand()) return;
+        if (!itemInHand()) {
+            stopAttacking();
+            return;
+        }
 
         attacking = true;
         if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
@@ -317,10 +354,24 @@ public class KillAura extends Module {
         }
     }
 
+    private void stopAttacking() {
+        if (!attacking) return;
+
+        attacking = false;
+        if (wasPathing) {
+            PathManagers.get().resume();
+            wasPathing = false;
+        }
+        if (swapBack.get() && swapped) {
+            InvUtils.swap(previousSlot, false);
+            swapped = false;
+        }
+    }
+
     private boolean shouldShieldBreak() {
         for (Entity target : targets) {
             if (target instanceof PlayerEntity player) {
-                if (player.blockedByShield(mc.world.getDamageSources().playerAttack(mc.player)) && shieldMode.get() == ShieldMode.Break) {
+                if (player.isBlocking() && shieldMode.get() == ShieldMode.Break) {
                     return true;
                 }
             }
@@ -330,7 +381,7 @@ public class KillAura extends Module {
     }
 
     private boolean entityCheck(Entity entity) {
-        if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
+        if (entity.equals(mc.player) || entity.equals(mc.getCameraEntity())) return false;
         if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
 
         Box hitbox = entity.getBoundingBox();
@@ -346,19 +397,20 @@ public class KillAura extends Module {
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
         if (ignoreTamed.get()) {
             if (entity instanceof Tameable tameable
-                && tameable.getOwnerUuid() != null
-                && tameable.getOwnerUuid().equals(mc.player.getUuid())
+                && tameable.getOwner() != null
+                && tameable.getOwner().equals(mc.player)
             ) return false;
         }
         if (ignorePassive.get()) {
             if (entity instanceof EndermanEntity enderman && !enderman.isAngry()) return false;
-            if (entity instanceof ZombifiedPiglinEntity piglin && !piglin.isAttacking()) return false;
+            if (entity instanceof PiglinEntity piglin && !piglin.isAttacking()) return false;
+            if (entity instanceof ZombifiedPiglinEntity zombifiedPiglin && !zombifiedPiglin.isAttacking()) return false;
             if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
         }
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
-            if (shieldMode.get() == ShieldMode.Ignore && player.blockedByShield(mc.world.getDamageSources().playerAttack(mc.player))) return false;
+            if (shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
         }
         if (entity instanceof AnimalEntity animal) {
             return switch (mobAgeFilter.get()) {
@@ -401,9 +453,10 @@ public class KillAura extends Module {
 
         return switch (weapon.get()) {
             case Axe -> mc.player.getMainHandStack().getItem() instanceof AxeItem;
-            case Sword -> mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            case Sword -> mc.player.getMainHandStack().isIn(ItemTags.SWORDS);
             case Mace -> mc.player.getMainHandStack().getItem() instanceof MaceItem;
-            case All -> mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof MaceItem;
+            case Trident -> mc.player.getMainHandStack().getItem() instanceof TridentItem;
+            case All -> mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().isIn(ItemTags.SWORDS) || mc.player.getMainHandStack().getItem() instanceof MaceItem || mc.player.getMainHandStack().getItem() instanceof TridentItem;
             default -> true;
         };
     }
@@ -423,6 +476,7 @@ public class KillAura extends Module {
         Sword,
         Axe,
         Mace,
+        Trident,
         All,
         Any
     }

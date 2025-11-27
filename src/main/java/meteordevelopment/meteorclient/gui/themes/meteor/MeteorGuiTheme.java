@@ -30,9 +30,9 @@ import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.client.util.MacWindowUtil;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static net.minecraft.client.MinecraftClient.IS_SYSTEM_MAC;
 
 public class MeteorGuiTheme extends GuiTheme {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -191,7 +191,7 @@ public class MeteorGuiTheme extends GuiTheme {
 
     @Override
     public WLabel label(String text, boolean title, double maxWidth) {
-        if (maxWidth == 0) return w(new WMeteorLabel(text, title));
+        if (maxWidth == 0 && !text.contains("\n")) return w(new WMeteorLabel(text, title));
         return w(new WMeteorMultiLabel(text, title, maxWidth));
     }
 
@@ -211,8 +211,18 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     @Override
+    protected WConfirmedButton confirmedButton(String text, String confirmText, GuiTexture texture) {
+        return w(new WMeteorConfirmedButton(text, confirmText, texture));
+    }
+
+    @Override
     public WMinus minus() {
         return w(new WMeteorMinus());
+    }
+
+    @Override
+    public WConfirmedMinus confirmedMinus() {
+        return w(new WMeteorConfirmedMinus());
     }
 
     @Override
@@ -360,7 +370,7 @@ public class MeteorGuiTheme extends GuiTheme {
     public double scale(double value) {
         double scaled = value * scale.get();
 
-        if (IS_SYSTEM_MAC) {
+        if (MacWindowUtil.IS_MAC) {
             scaled /= (double) mc.getWindow().getWidth() / mc.getWindow().getFramebufferWidth();
         }
 

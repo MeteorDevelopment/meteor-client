@@ -5,34 +5,31 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.*;
 import meteordevelopment.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.player.BreakDelay;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.client.network.SequencedPacketCreator;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,14 +47,10 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Shadow protected abstract void syncSelectedSlot();
 
     @Shadow
-    public abstract void clickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player);
-
-    @Shadow
-    @Final
-    private ClientPlayNetworkHandler networkHandler;
-
-    @Shadow
     public abstract boolean breakBlock(BlockPos pos);
+
+    @Shadow
+    public abstract void sendSequencedPacket(ClientWorld world, SequencedPacketCreator packetCreator);
 
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
     private void onClickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo info) {
@@ -67,33 +60,6 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         else if (slotId == -999) {
             // Clicking outside of inventory
             if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.currentScreenHandler.getCursorStack())).isCancelled()) info.cancel();
-        }
-    }
-
-    @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
-    public void onClickArmorSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
-        if (!Modules.get().get(InventoryTweaks.class).armorStorage()) return;
-
-        ScreenHandler screenHandler = player.currentScreenHandler;
-
-        if (screenHandler instanceof PlayerScreenHandler) {
-            if (slotId >= 5 && slotId <= 8) {
-                int armorSlot = (8 - slotId) + 36;
-                if (actionType == SlotActionType.PICKUP && !screenHandler.getCursorStack().isEmpty()) {
-                    clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
-                    clickSlot(syncId, 17, button, SlotActionType.PICKUP, player); //inv slot <-> cursor slot
-                    clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
-                    ci.cancel();
-                } else if (actionType == SlotActionType.SWAP) {
-                    if (button >= 10) {
-                        clickSlot(syncId, 45, armorSlot, SlotActionType.SWAP, player);
-                        ci.cancel();
-                    } else {
-                        clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
-                        ci.cancel();
-                    }
-                }
-            }
         }
     }
 
@@ -108,8 +74,8 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
             if (state.calcBlockBreakingDelta(mc.player, mc.world, blockPos) > 0.5f) {
                 breakBlock(blockPos);
-                networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction, sequence));
+                sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction, sequence));
                 info.setReturnValue(true);
             }
         }
@@ -153,15 +119,14 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         blockBreakingCooldown = event.cooldown;
     }
 
-    @Redirect(method = "method_41930", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;calcBlockBreakingDelta(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
-    private float deltaChange(BlockState blockState, PlayerEntity player, BlockView world, BlockPos pos) {
-        float delta = blockState.calcBlockBreakingDelta(player, world, pos);
-        if (Modules.get().get(BreakDelay.class).preventInstaBreak() && delta >= 1) {
+    @ModifyExpressionValue(method = "method_41930", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;calcBlockBreakingDelta(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
+    private float modifyBlockBreakingDelta(float original) {
+        if (Modules.get().get(BreakDelay.class).preventInstaBreak() && original >= 1) {
             BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(blockBreakingCooldown));
             blockBreakingCooldown = event.cooldown;
             return 0;
         }
-        return delta;
+        return original;
     }
 
     @Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)

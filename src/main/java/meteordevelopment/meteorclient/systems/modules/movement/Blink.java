@@ -5,12 +5,11 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.KeybindSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -18,6 +17,7 @@ import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
@@ -30,6 +30,15 @@ public class Blink extends Module {
         .name("render-original")
         .description("Renders your player model at the original position.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+        .name("pulse-delay")
+        .description("After the duration in ticks has elapsed, send all packets and start blinking again. 0 to disable.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(60)
         .build()
     );
 
@@ -49,39 +58,61 @@ public class Blink extends Module {
     private FakePlayerEntity model;
     private final Vector3d start = new Vector3d();
 
-    private boolean cancelled = false;
+    private boolean cancelled, sending;
     private int timer = 0;
 
     public Blink() {
         super(Categories.Movement, "blink", "Allows you to essentially teleport while suspending motion updates.");
+
+        runInMainMenu = true;
     }
 
     @Override
     public void onActivate() {
+        if (!Utils.canUpdate()) return;
+
         if (renderOriginal.get()) {
-            model = new FakePlayerEntity(mc.player, mc.player.getGameProfile().getName(), 20, true);
+            model = new FakePlayerEntity(mc.player, mc.player.getGameProfile().name(), 20, true);
             model.doNotPush = true;
             model.hideWhenInsideCamera = true;
+            model.noHit = true;
             model.spawn();
         }
 
-        Utils.set(start, mc.player.getPos());
+        Utils.set(start, mc.player.getEntityPos());
     }
 
     @Override
     public void onDeactivate() {
+        if (!Utils.canUpdate()) return;
+
         dumpPackets(!cancelled);
-        if (cancelled) mc.player.setPos(start.x, start.y, start.z);
+
+        if (cancelled) {
+            mc.player.setPos(start.x, start.y, start.z);
+            mc.player.setVelocity(Vec3d.ZERO);
+        }
+
         cancelled = false;
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (!Utils.canUpdate()) return;
+
         timer++;
+
+        if (delay.get() != 0 && delay.get() <= timer) {
+            onDeactivate();
+            onActivate();
+        }
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
+        if (!Utils.canUpdate()) return;
+
+        if (sending) return;
         if (!(event.packet instanceof PlayerMoveC2SPacket p)) return;
         event.cancel();
 
@@ -101,16 +132,28 @@ public class Blink extends Module {
         }
     }
 
+    @EventHandler
+    private void onJoinGame(GameJoinedEvent event) {
+        warning("Blink is currently enabled; you won't be able to interact with anything properly until you disable it!");
+    }
+
+    @EventHandler
+    private void onLeaveGame(GameLeftEvent event) {
+        onDeactivate();
+    }
+
     @Override
     public String getInfoString() {
         return String.format("%.1f", timer / 20f);
     }
 
     private void dumpPackets(boolean send) {
+        sending = true;
         synchronized (packets) {
             if (send) packets.forEach(mc.player.networkHandler::sendPacket);
             packets.clear();
         }
+        sending = false;
 
         if (model != null) {
             model.despawn();

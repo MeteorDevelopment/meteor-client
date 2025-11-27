@@ -5,18 +5,18 @@
 
 package meteordevelopment.meteorclient.gui.renderer;
 
+import it.unimi.dsi.fastutil.Stack;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.operations.TextOperation;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 import meteordevelopment.meteorclient.gui.renderer.packer.TexturePacker;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
-import meteordevelopment.meteorclient.utils.render.ByteTexture;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.DrawContext;
@@ -24,10 +24,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
@@ -35,13 +34,14 @@ public class GuiRenderer {
     private static final Color WHITE = new Color(255, 255, 255);
 
     private static final TexturePacker TEXTURE_PACKER = new TexturePacker();
-    private static ByteTexture TEXTURE;
+    private static Texture TEXTURE;
 
     public static GuiTexture CIRCLE;
     public static GuiTexture TRIANGLE;
     public static GuiTexture EDIT;
     public static GuiTexture RESET;
     public static GuiTexture FAVORITE_NO, FAVORITE_YES;
+    public static GuiTexture COPY, PASTE;
 
     public GuiTheme theme;
 
@@ -49,12 +49,12 @@ public class GuiRenderer {
     private final Renderer2D rTex = new Renderer2D(true);
 
     private final Pool<Scissor> scissorPool = new Pool<>(Scissor::new);
-    private final Stack<Scissor> scissorStack = new Stack<>();
+    private final Stack<Scissor> scissorStack = new ObjectArrayList<>();
 
     private final Pool<TextOperation> textPool = new Pool<>(TextOperation::new);
-    private final List<TextOperation> texts = new ArrayList<>();
+    private final List<TextOperation> texts = new ObjectArrayList<>();
 
-    private final List<Runnable> postTasks = new ArrayList<>();
+    private final List<Runnable> postTasks = new ObjectArrayList<>();
 
     public String tooltip, lastTooltip;
     public WWidget tooltipWidget;
@@ -75,14 +75,20 @@ public class GuiRenderer {
         FAVORITE_NO = addTexture(MeteorClient.identifier("textures/icons/gui/favorite_no.png"));
         FAVORITE_YES = addTexture(MeteorClient.identifier("textures/icons/gui/favorite_yes.png"));
 
+        COPY = addTexture(MeteorClient.identifier("textures/icons/gui/copy.png"));
+        PASTE = addTexture(MeteorClient.identifier("textures/icons/gui/paste.png"));
+
         TEXTURE = TEXTURE_PACKER.pack();
     }
 
     public void begin(DrawContext drawContext) {
         this.drawContext = drawContext;
+        this.drawContext.createNewRootLayer();
 
-        GL.enableBlend();
-        GL.enableScissorTest();
+        var matrices = drawContext.getMatrices();
+        matrices.pushMatrix();
+        matrices.scale(1.0f / mc.getWindow().getScaleFactor());
+
         scissorStart(0, 0, getWindowWidth(), getWindowHeight());
     }
 
@@ -92,7 +98,8 @@ public class GuiRenderer {
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
 
-        GL.disableScissorTest();
+        drawContext.getMatrices().popMatrix();
+        drawContext.createNewRootLayer();
     }
 
     public void beginRender() {
@@ -101,34 +108,40 @@ public class GuiRenderer {
     }
 
     public void endRender() {
+        endRender(null);
+    }
+
+    public void endRender(Scissor scissor) {
+        if (scissor != null) scissor.push();
+
         r.end();
         rTex.end();
 
-        r.render(drawContext.getMatrices());
-
-        GL.bindTexture(TEXTURE.getGlId());
-        rTex.render(drawContext.getMatrices());
+        r.render();
+        rTex.render("u_Texture", TEXTURE.getGlTextureView());
 
         // Normal text
         theme.textRenderer().begin(theme.scale(1));
         for (TextOperation text : texts) {
             if (!text.title) text.run(textPool);
         }
-        theme.textRenderer().end(drawContext.getMatrices());
+        theme.textRenderer().end();
 
         // Title text
         theme.textRenderer().begin(theme.scale(1.25));
         for (TextOperation text : texts) {
             if (text.title) text.run(textPool);
         }
-        theme.textRenderer().end(drawContext.getMatrices());
+        theme.textRenderer().end();
 
         texts.clear();
+
+        if (scissor != null) scissor.pop();
     }
 
     public void scissorStart(double x, double y, double width, double height) {
         if (!scissorStack.isEmpty()) {
-            Scissor parent = scissorStack.peek();
+            Scissor parent = scissorStack.top();
 
             if (x < parent.x) x = parent.x;
             else if (x + width > parent.x + parent.width) width -= (x + width) - (parent.x + parent.width);
@@ -136,20 +149,25 @@ public class GuiRenderer {
             if (y < parent.y) y = parent.y;
             else if (y + height > parent.y + parent.height) height -= (y + height) - (parent.y + parent.height);
 
-            parent.apply();
-            endRender();
+            endRender(parent);
         }
 
         scissorStack.push(scissorPool.get().set(x, y, width, height));
+        drawContext.enableScissor((int) x, (int) y, (int) (x + width), (int) (y + height));
+
         beginRender();
     }
 
     public void scissorEnd() {
         Scissor scissor = scissorStack.pop();
 
-        scissor.apply();
-        endRender();
+        endRender(scissor);
+
+        scissor.push();
         for (Runnable task : scissor.postTasks) task.run();
+        scissor.pop();
+
+        drawContext.disableScissor();
         if (!scissorStack.isEmpty()) beginRender();
 
         scissorPool.free(scissor);
@@ -167,7 +185,13 @@ public class GuiRenderer {
                 tooltipWidget.init();
             }
 
-            tooltipWidget.move(-tooltipWidget.x + mouseX + 12, -tooltipWidget.y + mouseY + 12);
+            double deltaX = -tooltipWidget.x + mouseX + 12;
+            double deltaY = -tooltipWidget.y + mouseY + 12;
+
+            if (mouseX + 12 + tooltipWidget.width > getWindowWidth()) deltaX = -tooltipWidget.x + getWindowWidth() - tooltipWidget.width;
+            if (mouseY + 12 + tooltipWidget.height > getWindowHeight()) deltaY = -tooltipWidget.y + getWindowHeight() - tooltipWidget.height;
+
+            tooltipWidget.move(deltaX, deltaY);
 
             setAlpha(tooltipAnimProgress);
 
@@ -230,17 +254,16 @@ public class GuiRenderer {
             rTex.texQuad(x, y, width, height, rotation, 0, 0, 1, 1, WHITE);
             rTex.end();
 
-            texture.bind();
-            rTex.render(drawContext.getMatrices());
+            rTex.render(texture.getGlTextureView());
         });
     }
 
     public void post(Runnable task) {
-        scissorStack.peek().postTasks.add(task);
+        scissorStack.top().postTasks.add(task);
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay);
+        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay, null, false);
     }
 
     public void absolutePost(Runnable task) {

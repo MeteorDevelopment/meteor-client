@@ -162,6 +162,21 @@ public class Ambience extends Module {
         .build()
     );
 
+    public final Setting<Boolean> customFogColor = sgWorld.add(new BoolSetting.Builder()
+        .name("custom-fog-color")
+        .description("Whether the fog color should be changed.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<SettingColor> fogColor = sgWorld.add(new ColorSetting.Builder()
+        .name("fog-color")
+        .description("The color of the fog.")
+        .defaultValue(new SettingColor(102, 0, 0))
+        .visible(customFogColor::get)
+        .build()
+    );
+
     public Ambience() {
         super(Categories.World, "ambience", "Change the color of various pieces of the environment.");
     }
@@ -182,7 +197,7 @@ public class Ambience extends Module {
 
     public static class Custom extends DimensionEffects {
         public Custom() {
-            super(Float.NaN, true, DimensionEffects.SkyType.END, true, false);
+            super(SkyType.END, true, false);
         }
 
         @Override
@@ -193,11 +208,6 @@ public class Ambience extends Module {
         @Override
         public boolean useThickFog(int camX, int camY) {
             return false;
-        }
-
-        @Override
-        public float[] getFogColorOverride(float skyAngle, float tickDelta) {
-            return null;
         }
     }
 

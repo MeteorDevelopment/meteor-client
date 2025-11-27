@@ -5,14 +5,21 @@
 
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
+import com.mojang.blaze3d.buffers.Std140Builder;
+import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.TextureFormat;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
+import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.utils.PostInit;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gl.DynamicUniformStorage;
 import net.minecraft.entity.Entity;
 import net.minecraft.resource.Resource;
 import org.lwjgl.stb.STBImage;
@@ -58,10 +65,10 @@ public class ChamsShader extends EntityShader {
                 IntBuffer comp = stack.mallocInt(1);
 
                 STBImage.stbi_set_flip_vertically_on_load(true);
-                ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 3);
+                ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 4);
 
-                IMAGE_TEX = new Texture();
-                IMAGE_TEX.upload(width.get(0), height.get(0), image, Texture.Format.RGB, Texture.Filter.Nearest, Texture.Filter.Nearest, false);
+                IMAGE_TEX = new Texture(width.get(0), height.get(0), TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
+                IMAGE_TEX.upload(image);
 
                 STBImage.stbi_image_free(image);
                 STBImage.stbi_set_flip_vertically_on_load(false);
@@ -78,12 +85,15 @@ public class ChamsShader extends EntityShader {
     }
 
     @Override
-    protected void setUniforms() {
-        shader.set("u_Color", chams.shaderColor.get());
+    protected void setupPass(MeshRenderer renderer) {
+        Color color = chams.shaderColor.get();
 
-        if (chams.isShader() && chams.shader.get() == Chams.Shader.Image && IMAGE_TEX != null && IMAGE_TEX.isValid()) {
-            IMAGE_TEX.bind(1);
-            shader.set("u_TextureI", 1);
+        renderer.uniform("ImageData", UNIFORM_STORAGE.write(new UniformData(
+            color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f
+        )));
+
+        if (chams.isShader() && chams.shader.get() == Chams.Shader.Image && IMAGE_TEX != null) {
+            renderer.sampler("u_TextureI", IMAGE_TEX.getGlTextureView());
         }
     }
 
@@ -97,5 +107,25 @@ public class ChamsShader extends EntityShader {
     public boolean shouldDraw(Entity entity) {
         if (!shouldDraw()) return false;
         return chams.entities.get().contains(entity.getType()) && (entity != mc.player || !chams.ignoreSelfDepth.get());
+    }
+
+    // Uniforms
+
+    private static final int UNIFORM_SIZE = new Std140SizeCalculator()
+        .putVec4()
+        .get();
+
+    private static final DynamicUniformStorage<UniformData> UNIFORM_STORAGE = new DynamicUniformStorage<>("Meteor - Image UBO", UNIFORM_SIZE, 16);
+
+    public static void flipFrame() {
+        UNIFORM_STORAGE.clear();
+    }
+
+    private record UniformData(float r, float g, float b, float a) implements DynamicUniformStorage.Uploadable {
+        @Override
+        public void write(ByteBuffer buffer) {
+            Std140Builder.intoBuffer(buffer)
+                .putVec4(r, g, b, a);
+        }
     }
 }

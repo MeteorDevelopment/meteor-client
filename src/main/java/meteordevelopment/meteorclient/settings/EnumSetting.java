@@ -16,6 +16,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
 
     private final List<String> suggestions;
 
+    @SuppressWarnings("unchecked")
     public EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
@@ -52,7 +53,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
 
     @Override
     public T load(NbtCompound tag) {
-        parse(tag.getString("value"));
+        parse(tag.getString("value", ""));
 
         return get();
     }

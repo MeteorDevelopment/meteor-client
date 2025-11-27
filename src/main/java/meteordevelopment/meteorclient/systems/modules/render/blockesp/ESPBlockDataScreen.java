@@ -11,18 +11,27 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
+import org.jetbrains.annotations.Nullable;
 
 public class ESPBlockDataScreen extends WindowScreen {
     private final ESPBlockData blockData;
-    private final Block block;
-    private final BlockDataSetting<ESPBlockData> setting;
+    private final Setting<?> setting;
+    private final @Nullable Runnable firstChangeConsumer;
 
     public ESPBlockDataScreen(GuiTheme theme, ESPBlockData blockData, Block block, BlockDataSetting<ESPBlockData> setting) {
+        this(theme, blockData, setting, () -> setting.get().put(block, blockData));
+    }
+
+    public ESPBlockDataScreen(GuiTheme theme, ESPBlockData blockData, GenericSetting<ESPBlockData> setting) {
+        this(theme, blockData, setting, null);
+    }
+
+    private ESPBlockDataScreen(GuiTheme theme, ESPBlockData blockData, Setting<?> setting, @Nullable Runnable firstChangeConsumer) {
         super(theme, "Configure Block");
 
         this.blockData = blockData;
-        this.block = block;
         this.setting = setting;
+        this.firstChangeConsumer = firstChangeConsumer;
     }
 
     @Override
@@ -37,8 +46,10 @@ public class ESPBlockDataScreen extends WindowScreen {
             .defaultValue(ShapeMode.Lines)
             .onModuleActivated(shapeModeSetting -> shapeModeSetting.set(blockData.shapeMode))
             .onChanged(shapeMode -> {
-                blockData.shapeMode = shapeMode;
-                changed(blockData, block, setting);
+                if (blockData.shapeMode != shapeMode) {
+                    blockData.shapeMode = shapeMode;
+                    onChanged();
+                }
             })
             .build()
         );
@@ -47,10 +58,12 @@ public class ESPBlockDataScreen extends WindowScreen {
             .name("line-color")
             .description("Color of lines.")
             .defaultValue(new SettingColor(0, 255, 200))
-            .onModuleActivated(settingColorSetting -> settingColorSetting.set(blockData.lineColor))
+            .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.lineColor))
             .onChanged(settingColor -> {
-                blockData.lineColor.set(settingColor);
-                changed(blockData, block, setting);
+                if (!blockData.lineColor.equals(settingColor)) {
+                    blockData.lineColor.set(settingColor);
+                    onChanged();
+                }
             })
             .build()
         );
@@ -59,10 +72,12 @@ public class ESPBlockDataScreen extends WindowScreen {
             .name("side-color")
             .description("Color of sides.")
             .defaultValue(new SettingColor(0, 255, 200, 25))
-            .onModuleActivated(settingColorSetting -> settingColorSetting.set(blockData.sideColor))
+            .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.sideColor))
             .onChanged(settingColor -> {
-                blockData.sideColor.set(settingColor);
-                changed(blockData, block, setting);
+                if (!blockData.sideColor.equals(settingColor)) {
+                    blockData.sideColor.set(settingColor);
+                    onChanged();
+                }
             })
             .build()
         );
@@ -73,8 +88,10 @@ public class ESPBlockDataScreen extends WindowScreen {
             .defaultValue(true)
             .onModuleActivated(booleanSetting -> booleanSetting.set(blockData.tracer))
             .onChanged(aBoolean -> {
-                blockData.tracer = aBoolean;
-                changed(blockData, block, setting);
+                if (blockData.tracer != aBoolean) {
+                    blockData.tracer = aBoolean;
+                    onChanged();
+                }
             })
             .build()
         );
@@ -83,10 +100,12 @@ public class ESPBlockDataScreen extends WindowScreen {
             .name("tracer-color")
             .description("Color of tracer line.")
             .defaultValue(new SettingColor(0, 255, 200, 125))
-            .onModuleActivated(settingColorSetting -> settingColorSetting.set(blockData.tracerColor))
+            .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.tracerColor))
             .onChanged(settingColor -> {
-                blockData.tracerColor = settingColor;
-                changed(blockData, block, setting);
+                if (!blockData.tracerColor.equals(settingColor)) {
+                    blockData.tracerColor.set(settingColor);
+                    onChanged();
+                }
             })
             .build()
         );
@@ -95,12 +114,12 @@ public class ESPBlockDataScreen extends WindowScreen {
         add(theme.settings(settings)).expandX();
     }
 
-    private void changed(ESPBlockData blockData, Block block, BlockDataSetting<ESPBlockData> setting) {
-        if (!blockData.isChanged() && block != null && setting != null) {
-            setting.get().put(block, blockData);
-            setting.onChanged();
+    private void onChanged() {
+        if (!blockData.isChanged() && firstChangeConsumer != null) {
+            firstChangeConsumer.run();
         }
 
+        setting.onChanged();
         blockData.changed();
     }
 }

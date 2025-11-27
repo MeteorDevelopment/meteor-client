@@ -6,19 +6,18 @@
 package meteordevelopment.meteorclient.systems.accounts;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.network.Http;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.util.Util;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class MicrosoftLogin {
@@ -47,14 +46,17 @@ public class MicrosoftLogin {
     private static final String CLIENT_ID = "4673b348-3efa-4f6a-bbb6-34e141cdc638";
     private static final int PORT = 9675;
 
-    private static HttpServer server;
-    private static Consumer<String> callback;
+    private static volatile HttpServer server;
+    private static volatile Consumer<String> callback;
 
-    public static void getRefreshToken(Consumer<String> callback) {
+    public static String getRefreshToken(Consumer<String> callback) {
         MicrosoftLogin.callback = callback;
 
         startServer();
-        Util.getOperatingSystem().open("https://login.live.com/oauth20_authorize.srf?client_id=" + CLIENT_ID + "&response_type=code&redirect_uri=http://127.0.0.1:" + PORT + "&scope=XboxLive.signin%20offline_access&prompt=select_account");
+        String url = "https://login.live.com/oauth20_authorize.srf?client_id=" + CLIENT_ID + "&response_type=code&redirect_uri=http://127.0.0.1:" + PORT + "&scope=XboxLive.signin%20offline_access&prompt=select_account";
+        Util.getOperatingSystem().open(url);
+
+        return url;
     }
 
     public static LoginData login(String refreshToken) {
@@ -112,11 +114,12 @@ public class MicrosoftLogin {
         try {
             server = HttpServer.create(new InetSocketAddress("127.0.0.1", PORT), 0);
 
-            server.createContext("/", new Handler());
-            server.setExecutor(MeteorExecutor.executor);
+            server.createContext("/", MicrosoftLogin::handleRequest);
+            server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
             server.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error starting Microsoft login server", e);
+            stopServer();
         }
     }
 
@@ -129,51 +132,46 @@ public class MicrosoftLogin {
         callback = null;
     }
 
-    private static class Handler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange req) throws IOException {
-            if (req.getRequestMethod().equals("GET")) {
-                // Login
-                List<NameValuePair> query = URLEncodedUtils.parse(req.getRequestURI(), StandardCharsets.UTF_8);
+    private static void handleRequest(HttpExchange req) throws IOException {
+        if (req.getRequestMethod().equals("GET")) {
+            // Login
+            List<NameValuePair> query = URLEncodedUtils.parse(req.getRequestURI(), StandardCharsets.UTF_8);
 
-                boolean ok = false;
+            boolean ok = false;
 
-                for (NameValuePair pair : query) {
-                    if (pair.getName().equals("code")) {
-                        handleCode(pair.getValue());
+            for (NameValuePair pair : query) {
+                if (pair.getName().equals("code")) {
+                    handleCode(pair.getValue());
 
-                        ok = true;
-                        break;
-                    }
+                    ok = true;
+                    break;
                 }
-
-                if (!ok) {
-                    writeText(req, "Cannot authenticate.");
-                    callback.accept(null);
-                }
-                else writeText(req, "You may now close this page.");
             }
 
-            stopServer();
+            if (!ok) {
+                writeText(req, "Cannot authenticate.");
+                callback.accept(null);
+            }
+            else writeText(req, "You may now close this page.");
         }
 
-        private void handleCode(String code) {
-            AuthTokenResponse res = Http.post("https://login.live.com/oauth20_token.srf")
-                .bodyForm("client_id=" + CLIENT_ID + "&code=" + code + "&grant_type=authorization_code&redirect_uri=http://127.0.0.1:" + PORT)
-                .sendJson(AuthTokenResponse.class);
+        stopServer();
+    }
 
-            if (res == null) callback.accept(null);
-            else callback.accept(res.refresh_token);
-        }
+    private static void handleCode(String code) {
+        AuthTokenResponse res = Http.post("https://login.live.com/oauth20_token.srf")
+            .bodyForm("client_id=" + CLIENT_ID + "&code=" + code + "&grant_type=authorization_code&redirect_uri=http://127.0.0.1:" + PORT)
+            .sendJson(AuthTokenResponse.class);
 
-        private void writeText(HttpExchange req, String text) throws IOException {
-            OutputStream out = req.getResponseBody();
+        if (res == null) callback.accept(null);
+        else callback.accept(res.refresh_token);
+    }
 
-            req.sendResponseHeaders(200, text.length());
-
-            out.write(text.getBytes(StandardCharsets.UTF_8));
-            out.flush();
-            out.close();
+    private static void writeText(HttpExchange req, String text) throws IOException {
+        byte[] responseBody = text.getBytes(StandardCharsets.UTF_8);
+        req.sendResponseHeaders(200, responseBody.length);
+        try (var out = req.getResponseBody()) {
+            out.write(responseBody);
         }
     }
 

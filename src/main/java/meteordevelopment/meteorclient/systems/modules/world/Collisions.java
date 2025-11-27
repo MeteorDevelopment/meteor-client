@@ -76,7 +76,7 @@ public class Collisions extends Module {
         int x = (int) (mc.player.getX() + event.movement.x) >> 4;
         int z = (int) (mc.player.getZ() + event.movement.z) >> 4;
         if (unloadedChunks.get() && !mc.world.getChunkManager().isChunkLoaded(x, z)) {
-            ((IVec3d) event.movement).set(0, event.movement.y, 0);
+            ((IVec3d) event.movement).meteor$set(0, event.movement.y, 0);
         }
     }
 
@@ -84,8 +84,8 @@ public class Collisions extends Module {
     private void onPacketSend(PacketEvent.Send event) {
         if (!unloadedChunks.get()) return;
         if (event.packet instanceof VehicleMoveC2SPacket packet) {
-            if (!mc.world.getChunkManager().isChunkLoaded((int) packet.getX() >> 4, (int) packet.getZ() >> 4)) {
-                mc.player.getVehicle().updatePosition(mc.player.getVehicle().prevX, mc.player.getVehicle().prevY, mc.player.getVehicle().prevZ);
+            if (!mc.world.getChunkManager().isChunkLoaded((int) packet.position().getX() >> 4, (int) packet.position().getZ() >> 4)) {
+                mc.player.getVehicle().updatePosition(mc.player.getVehicle().lastX, mc.player.getVehicle().lastY, mc.player.getVehicle().lastZ);
                 event.cancel();
             }
         } else if (event.packet instanceof PlayerMoveC2SPacket packet) {

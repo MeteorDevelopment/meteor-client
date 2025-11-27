@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.entity.fakeplayer;
 
 import com.mojang.authlib.GameProfile;
+import meteordevelopment.meteorclient.mixin.AbstractClientPlayerEntityAccessor;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,29 +17,22 @@ import java.util.UUID;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FakePlayerEntity extends OtherClientPlayerEntity {
-    public boolean doNotPush, hideWhenInsideCamera;
+    public boolean doNotPush, hideWhenInsideCamera, noHit;
 
     public FakePlayerEntity(PlayerEntity player, String name, float health, boolean copyInv) {
         super(mc.world, new GameProfile(UUID.randomUUID(), name));
 
         copyPositionAndRotation(player);
 
-        prevYaw = getYaw();
-        prevPitch = getPitch();
+        lastYaw = getYaw();
+        lastPitch = getPitch();
         headYaw = player.headYaw;
-        prevHeadYaw = headYaw;
+        lastHeadYaw = headYaw;
         bodyYaw = player.bodyYaw;
-        prevBodyYaw = bodyYaw;
-
-        Byte playerModel = player.getDataTracker().get(PlayerEntity.PLAYER_MODEL_PARTS);
-        dataTracker.set(PlayerEntity.PLAYER_MODEL_PARTS, playerModel);
+        lastBodyYaw = bodyYaw;
 
         getAttributes().setFrom(player.getAttributes());
         setPose(player.getPose());
-
-        capeX = getX();
-        capeY = getY();
-        capeZ = getZ();
 
         if (health <= 20) {
             setHealth(health);
@@ -63,10 +57,12 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     @Nullable
     @Override
     protected PlayerListEntry getPlayerListEntry() {
-        if (playerListEntry == null) {
-            playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        PlayerListEntry entry = super.getPlayerListEntry();
+
+        if (entry == null) {
+            ((AbstractClientPlayerEntityAccessor) this).meteor$setPlayerListEntry(mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid()));
         }
 
-        return playerListEntry;
+        return entry;
     }
 }

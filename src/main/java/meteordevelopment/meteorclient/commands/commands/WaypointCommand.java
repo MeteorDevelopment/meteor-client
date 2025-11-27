@@ -9,13 +9,12 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.BlockPosArgumentType;
 import meteordevelopment.meteorclient.commands.arguments.WaypointArgumentType;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.command.argument.Vec3ArgumentType;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 
@@ -27,7 +26,7 @@ public class WaypointCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("list").executes(context -> {
-            if (Waypoints.get().waypoints.isEmpty()) error("No created waypoints.");
+            if (Waypoints.get().isEmpty()) error("No created waypoints.");
             else {
                 info(Formatting.WHITE + "Created Waypoints:");
                 for (Waypoint waypoint : Waypoints.get()) {
@@ -47,7 +46,7 @@ public class WaypointCommand extends Command {
         })));
 
         builder.then(literal("add")
-            .then(argument("pos", Vec3ArgumentType.vec3())
+            .then(argument("pos", BlockPosArgumentType.blockPos())
                 .then(argument("waypoint", StringArgumentType.greedyString()).executes(context -> addWaypoint(context, true)))
             )
 
@@ -84,7 +83,7 @@ public class WaypointCommand extends Command {
     private int addWaypoint(CommandContext<CommandSource> context, boolean withCoords) {
         if (mc.player == null) return -1;
 
-        BlockPos pos = withCoords ? context.getArgument("pos", PosArgument.class).toAbsoluteBlockPos(mc.player.getCommandSource()) : mc.player.getBlockPos().up(2);
+        BlockPos pos = withCoords ? BlockPosArgumentType.getBlockPos(context, "pos") : mc.player.getBlockPos().up(2);
         Waypoint waypoint = new Waypoint.Builder()
             .name(StringArgumentType.getString(context, "waypoint"))
             .pos(pos)

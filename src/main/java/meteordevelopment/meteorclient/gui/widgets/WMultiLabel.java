@@ -23,47 +23,60 @@ public abstract class WMultiLabel extends WLabel {
     protected void onCalculateSize() {
         lines.clear();
 
-        String[] words = text.split(" ");
-        StringBuilder sb = new StringBuilder();
-
-        double spaceWidth = theme.textWidth(" ", 1, title);
-        double maxWidth = theme.scale(this.maxWidth);
-
-        double lineWidth = 0;
+        String[] textLines = text.split("\n");
         double maxLineWidth = 0;
 
-        int iInLine = 0;
+        if (this.maxWidth == 0) {
+            for (String line : textLines) {
+                lines.add(line);
+                double lineWidth = theme.textWidth(line, line.length(), title);
+                maxLineWidth = Math.max(maxLineWidth, lineWidth);
+            }
+        } else {
+            StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < words.length; i++) {
-            double wordWidth = theme.textWidth(words[i], words[i].length(), title);
+            double lineWidth = 0;
+            double spaceWidth = theme.textWidth(" ", 1, title);
+            double maxWidth = theme.scale(this.maxWidth);
 
-            double toAdd = wordWidth;
-            if (iInLine > 0) toAdd += spaceWidth;
+            int iInLine = 0;
 
-            if (lineWidth + toAdd > maxWidth) {
+            for (String line : textLines) {
+                for (String word : line.split(" ")) {
+                    double wordWidth = theme.textWidth(word, word.length(), title);
+
+                    double toAdd = wordWidth;
+                    if (iInLine > 0) toAdd += spaceWidth;
+
+                    if (lineWidth + toAdd > maxWidth) {
+                        lines.add(sb.toString());
+                        sb.setLength(0);
+
+                        sb.append(word);
+                        lineWidth = wordWidth;
+                        iInLine = 1;
+
+                    } else {
+                        if (iInLine > 0) {
+                            sb.append(' ');
+                            lineWidth += spaceWidth;
+                        }
+
+                        sb.append(word);
+                        lineWidth += wordWidth;
+                        iInLine++;
+                    }
+                    // now this line is not pointless!
+                    maxLineWidth = Math.max(maxLineWidth, lineWidth);
+                }
                 lines.add(sb.toString());
                 sb.setLength(0);
-
                 lineWidth = 0;
                 iInLine = 0;
-
-                i--;
             }
-            else {
-                if (iInLine > 0) {
-                    sb.append(' ');
-                    lineWidth += spaceWidth;
-                }
 
-                sb.append(words[i]);
-                lineWidth += wordWidth;
-
-                maxLineWidth = Math.max(maxLineWidth, lineWidth);
-                iInLine++;
-            }
+            if (!sb.isEmpty()) lines.add(sb.toString());
         }
-
-        if (!sb.isEmpty()) lines.add(sb.toString());
 
         width = maxLineWidth;
         height = theme.textHeight(title) * lines.size();

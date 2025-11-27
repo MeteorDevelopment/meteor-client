@@ -13,11 +13,11 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ClientPlayerInteractionManager.class)
 public interface ClientPlayerInteractionManagerAccessor {
     @Accessor("currentBreakingProgress")
-    float getBreakingProgress();
+    float meteor$getBreakingProgress();
 
     @Accessor("currentBreakingProgress")
-    void setCurrentBreakingProgress(float progress);
+    void meteor$setCurrentBreakingProgress(float progress);
 
     @Accessor("currentBreakingPos")
-    BlockPos getCurrentBreakingBlockPos();
+    BlockPos meteor$getCurrentBreakingBlockPos();
 }

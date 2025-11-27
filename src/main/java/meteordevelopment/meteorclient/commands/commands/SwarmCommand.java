@@ -28,7 +28,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -73,7 +72,7 @@ public class SwarmCommand extends Command {
                                     info("Are you sure you want to connect to '%s:%s'?", ip, port);
                                     info(Text.literal("Click here to confirm").setStyle(Style.EMPTY
                                         .withFormatting(Formatting.UNDERLINE, Formatting.GREEN)
-                                        .withClickEvent(new MeteorClickEvent(ClickEvent.Action.RUN_COMMAND, ".swarm join confirm"))
+                                        .withClickEvent(new MeteorClickEvent(".swarm join confirm"))
                                     ));
 
                                     return SINGLE_SUCCESS;

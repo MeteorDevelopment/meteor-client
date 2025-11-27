@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 public class NotebotCommand extends Command {
-    private final static SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(Text.literal("Invalid song."));
-    private final static DynamicCommandExceptionType INVALID_PATH = new DynamicCommandExceptionType(object -> Text.literal("'%s' is not a valid path.".formatted(object)));
+    private static final SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(Text.literal("Invalid song."));
+    private static final DynamicCommandExceptionType INVALID_PATH = new DynamicCommandExceptionType(object -> Text.literal("'%s' is not a valid path.".formatted(object)));
 
     int ticks = -1;
     private final Map<Integer, List<Note>> song = new HashMap<>(); // tick -> notes
@@ -144,7 +144,7 @@ public class NotebotCommand extends Command {
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof PlaySoundS2CPacket sound && sound.getSound().value().getId().getPath().contains("note_block")) {
+        if (event.packet instanceof PlaySoundS2CPacket sound && sound.getSound().value().id().getPath().contains("note_block")) {
             if (ticks == -1) ticks = 0;
             List<Note> notes = song.computeIfAbsent(ticks, tick -> new ArrayList<>());
             var note = getNote(sound);
@@ -212,7 +212,7 @@ public class NotebotCommand extends Command {
     }
 
     private NoteBlockInstrument getInstrumentFromSound(SoundEvent sound) {
-        String path = sound.getId().getPath();
+        String path = sound.id().getPath();
         if (path.contains("harp"))
             return NoteBlockInstrument.HARP;
         else if (path.contains("basedrum"))

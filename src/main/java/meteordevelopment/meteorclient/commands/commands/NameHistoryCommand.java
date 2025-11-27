@@ -19,6 +19,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
+import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,16 +35,19 @@ public class NameHistoryCommand extends Command {
         builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(context -> {
             MeteorExecutor.execute(() -> {
                 PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.get(context);
-                UUID uuid = lookUpTarget.getProfile().getId();
+                UUID uuid = lookUpTarget.getProfile().id();
 
-                NameHistory history = Http.get("https://laby.net/api/v2/user/" + uuid + "/get-profile").sendJson(NameHistory.class);
+                NameHistory history = Http.get("https://laby.net/api/v2/user/" + uuid + "/get-profile")
+                    .exceptionHandler(e -> error("There was an error fetching that users name history."))
+                    .sendJson(NameHistory.class);
 
-                if (history == null || history.username_history == null || history.username_history.length == 0) {
-                    error("There was an error fetching that users name history.");
+                if (history == null) {
                     return;
+                } else if (history.username_history == null || history.username_history.length == 0) {
+                    error("There was an error fetching that users name history.");
                 }
 
-                String name = lookUpTarget.getProfile().getName();
+                String name = lookUpTarget.getProfile().name();
                 MutableText initial = Text.literal(name);
                 initial.append(Text.literal(name.endsWith("s") ? "'" : "'s"));
 
@@ -51,13 +55,11 @@ public class NameHistoryCommand extends Command {
 
                 initial.setStyle(initial.getStyle()
                     .withColor(TextColor.fromRgb(nameColor.getPacked()))
-                    .withClickEvent(new ClickEvent(
-                            ClickEvent.Action.OPEN_URL,
-                            "https://laby.net/@" + name
+                    .withClickEvent(new ClickEvent.OpenUrl(
+                            URI.create("https://laby.net/@" + name)
                         )
                     )
-                    .withHoverEvent(new HoverEvent(
-                        HoverEvent.Action.SHOW_TEXT,
+                    .withHoverEvent(new HoverEvent.ShowText(
                         Text.literal("View on laby.net")
                             .formatted(Formatting.YELLOW)
                             .formatted(Formatting.ITALIC)
@@ -77,13 +79,13 @@ public class NameHistoryCommand extends Command {
                         DateFormat formatter = new SimpleDateFormat("hh:mm:ss, dd/MM/yyyy");
                         changed.append(Text.literal(formatter.format(entry.changed_at)).formatted(Formatting.WHITE));
 
-                        nameText.setStyle(nameText.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, changed)));
+                        nameText.setStyle(nameText.getStyle().withHoverEvent(new HoverEvent.ShowText(changed)));
                     }
 
                     if (!entry.accurate) {
                         MutableText text = Text.literal("*").formatted(Formatting.WHITE);
 
-                        text.setStyle(text.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("This name history entry is not accurate according to laby.net"))));
+                        text.setStyle(text.getStyle().withHoverEvent(new HoverEvent.ShowText(Text.literal("This name history entry is not accurate according to laby.net"))));
 
                         nameText.append(text);
                     }

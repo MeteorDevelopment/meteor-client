@@ -84,13 +84,9 @@ public class NotebotSongsScreen extends WindowScreen {
 
         table.add(theme.label(FilenameUtils.getBaseName(path.getFileName().toString()))).expandCellX();
         WButton load = table.add(theme.button("Load")).right().widget();
-        load.action = () -> {
-            notebot.loadSong(path.toFile());
-        };
+        load.action = () -> notebot.loadSong(path.toFile());
         WButton preview = table.add(theme.button("Preview")).right().widget();
-        preview.action = () -> {
-            notebot.previewSong(path.toFile());
-        };
+        preview.action = () -> notebot.previewSong(path.toFile());
 
         table.row();
     }

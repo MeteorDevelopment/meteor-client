@@ -1,7 +1,6 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
 import meteordevelopment.meteorclient.utils.PreInit;
-import net.minecraft.client.render.VertexConsumerProvider;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -10,10 +9,7 @@ public class PostProcessShaders {
     public static EntityShader ENTITY_OUTLINE;
     public static PostProcessShader STORAGE_OUTLINE;
 
-    public static boolean rendering;
-
-    private PostProcessShaders() {
-    }
+    private PostProcessShaders() {}
 
     @PreInit
     public static void init() {
@@ -39,9 +35,5 @@ public class PostProcessShaders {
         CHAMS.onResized(width, height);
         ENTITY_OUTLINE.onResized(width, height);
         STORAGE_OUTLINE.onResized(width, height);
-    }
-
-    public static boolean isCustom(VertexConsumerProvider vcp) {
-        return vcp == CHAMS.vertexConsumerProvider || vcp == ENTITY_OUTLINE.vertexConsumerProvider;
     }
 }

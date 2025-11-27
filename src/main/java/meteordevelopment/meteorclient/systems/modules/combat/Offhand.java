@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -18,7 +18,9 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.*;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.Items;
+import net.minecraft.registry.tag.ItemTags;
 
 import static meteordevelopment.orbit.EventPriority.HIGHEST;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
@@ -152,7 +154,7 @@ public class Offhand extends Module {
         if (totems <= 0) locked = false;
         else if (ticks > delayTicks.get()) {
             boolean low = mc.player.getHealth() + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions(explosion.get(), falling.get()) <= minHealth.get();
-            boolean ely = elytra.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
+            boolean ely = elytra.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isGliding();
             FindItemResult item = InvUtils.find(itemStack -> itemStack.getItem() == currentItem.item, 0, 35);
 
             // Calculates Damage from Falling, Explosions + Elyta
@@ -175,7 +177,7 @@ public class Offhand extends Module {
         // Sword Gap & Right Gap
         if (rightgapple.get()) {
             if (!locked) {
-                if (SwordGap.get() && mc.player.getMainHandStack().getItem() instanceof SwordItem) {
+                if (SwordGap.get() && mc.player.getMainHandStack().isIn(ItemTags.SWORDS)) {
                     if (isClicking) {
                         currentItem = Item.EGap;
                     }
@@ -189,12 +191,12 @@ public class Offhand extends Module {
         }
 
         // Always Gap
-        else if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysSwordGap.get()) currentItem = Item.EGap;
+        else if ((mc.player.getMainHandStack().isIn(ItemTags.SWORDS) || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysSwordGap.get()) currentItem = Item.EGap;
 
-            // Potion Click
+        // Potion Click
         else if (potionClick.get()) {
             if (!locked) {
-                if (mc.player.getMainHandStack().getItem() instanceof SwordItem) {
+                if (mc.player.getMainHandStack().isIn(ItemTags.SWORDS)) {
                     if (isClicking) {
                         currentItem = Item.Potion;
                     }
@@ -203,7 +205,7 @@ public class Offhand extends Module {
         }
 
         // Always Pot
-        else if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysPot.get()) currentItem = Item.Potion;
+        else if ((mc.player.getMainHandStack().isIn(ItemTags.SWORDS) || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysPot.get()) currentItem = Item.Potion;
 
 
         else currentItem = preferreditem.get();
@@ -236,9 +238,9 @@ public class Offhand extends Module {
     }
 
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseClick(MouseClickEvent event) {
         // Detects if the User is right-clicking
-        isClicking = mc.currentScreen == null && !Modules.get().get(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_RIGHT;
+        isClicking = mc.currentScreen == null && !Modules.get().get(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button() == GLFW_MOUSE_BUTTON_RIGHT;
     }
 
     private boolean usableItem() {

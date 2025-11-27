@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.macros;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
@@ -62,16 +62,16 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
         if (event.action == KeyAction.Release) return;
 
         for (Macro macro : macros) {
-            if (macro.onAction(true, event.key, event.modifiers)) return;
+            if (macro.onAction(true, event.key(), event.modifiers())) return;
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onButton(MouseButtonEvent event) {
+    private void onMouse(MouseClickEvent event) {
         if (event.action == KeyAction.Release) return;
 
         for (Macro macro : macros) {
-            if (macro.onAction(false, event.button, 0)) return;
+            if (macro.onAction(false, event.button(), 0)) return;
         }
     }
 
@@ -95,7 +95,7 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
     public Macros fromTag(NbtCompound tag) {
         for (Macro macro : macros) MeteorClient.EVENT_BUS.unsubscribe(macro);
 
-        macros = NbtUtils.listFromTag(tag.getList("macros", 10), Macro::new);
+        macros = NbtUtils.listFromTag(tag.getListOrEmpty("macros"), Macro::new);
 
         for (Macro macro : macros) MeteorClient.EVENT_BUS.subscribe(macro);
         return this;

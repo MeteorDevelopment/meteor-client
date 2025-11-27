@@ -19,6 +19,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.hit.BlockHitResult;
@@ -60,6 +61,14 @@ public class Trajectories extends Module {
         .build()
     );
 
+    private final Setting<Boolean> ignoreWitherSkulls = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-wither-skulls")
+        .description("Whether to ignore fired wither skulls.")
+        .defaultValue(false)
+        .visible(firedProjectiles::get)
+        .build()
+    );
+
     private final Setting<Boolean> accurate = sgGeneral.add(new BoolSetting.Builder()
         .name("accurate")
         .description("Whether or not to calculate more accurate.")
@@ -95,6 +104,38 @@ public class Trajectories extends Module {
         .name("line-color")
         .description("The line color.")
         .defaultValue(new SettingColor(255, 150, 0))
+        .build()
+    );
+
+    private final Setting<Boolean> renderPositionBox = sgRender.add(new BoolSetting.Builder()
+        .name("render-position-boxes")
+        .description("Renders the actual position the projectile will be at each tick along it's trajectory.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> positionBoxSize = sgRender.add(new DoubleSetting.Builder()
+    	.name("position-box-size")
+    	.description("The size of the box drawn at the simulated positions.")
+    	.defaultValue(0.02)
+        .sliderRange(0.01, 0.1)
+        .visible(renderPositionBox::get)
+    	.build()
+    );
+
+    private final Setting<SettingColor> positionSideColor = sgRender.add(new ColorSetting.Builder()
+        .name("position-side-color")
+        .description("The side color.")
+        .defaultValue(new SettingColor(255, 150, 0, 35))
+        .visible(renderPositionBox::get)
+        .build()
+    );
+
+    private final Setting<SettingColor> positionLineColor = sgRender.add(new ColorSetting.Builder()
+        .name("position-line-color")
+        .description("The line color.")
+        .defaultValue(new SettingColor(255, 150, 0))
+        .visible(renderPositionBox::get)
         .build()
     );
 
@@ -135,7 +176,7 @@ public class Trajectories extends Module {
         return path;
     }
 
-    private void calculatePath(PlayerEntity player, double tickDelta) {
+    private void calculatePath(PlayerEntity player, float tickDelta) {
         // Clear paths
         for (Path path : paths) path.clear();
 
@@ -169,17 +210,19 @@ public class Trajectories extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
+        float tickDelta = mc.world.getTickManager().isFrozen() ? 1 : event.tickDelta;
+
         for (PlayerEntity player : mc.world.getPlayers()) {
             if (!otherPlayers.get() && player != mc.player) continue;
 
-            calculatePath(player, event.tickDelta);
+            calculatePath(player, tickDelta);
             for (Path path : paths) path.render(event);
         }
 
         if (firedProjectiles.get()) {
             for (Entity entity : mc.world.getEntities()) {
-                if (entity instanceof ProjectileEntity) {
-                    calculateFiredPath(entity, event.tickDelta);
+                if (entity instanceof ProjectileEntity && (!ignoreWitherSkulls.get() || !(entity instanceof WitherSkullEntity))) {
+                    calculateFiredPath(entity, tickDelta);
                     for (Path path : paths) path.render(event);
                 }
             }
@@ -196,7 +239,7 @@ public class Trajectories extends Module {
         public Vector3d lastPoint;
 
         public void clear() {
-            for (Vector3d point : points) vec3s.free(point);
+            vec3s.freeAll(points);
             points.clear();
 
             hitQuad = false;
@@ -279,7 +322,12 @@ public class Trajectories extends Module {
         public void render(Render3DEvent event) {
             // Render path
             for (Vector3d point : points) {
-                if (lastPoint != null) event.renderer.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
+                if (lastPoint != null) {
+                    event.renderer.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
+                    if (renderPositionBox.get())
+                        event.renderer.box(point.x - positionBoxSize.get(), point.y - positionBoxSize.get(), point.z - positionBoxSize.get(),
+                            point.x + positionBoxSize.get(), point.y + positionBoxSize.get(), point.z + positionBoxSize.get(), positionSideColor.get(), positionLineColor.get(), shapeMode.get(), 0);
+                }
                 lastPoint = point;
             }
 
@@ -291,9 +339,9 @@ public class Trajectories extends Module {
 
             // Render entity
             if (collidingEntity != null) {
-                double x = (collidingEntity.getX() - collidingEntity.prevX) * event.tickDelta;
-                double y = (collidingEntity.getY() - collidingEntity.prevY) * event.tickDelta;
-                double z = (collidingEntity.getZ() - collidingEntity.prevZ) * event.tickDelta;
+                double x = (collidingEntity.getX() - collidingEntity.lastX) * event.tickDelta;
+                double y = (collidingEntity.getY() - collidingEntity.lastY) * event.tickDelta;
+                double z = (collidingEntity.getZ() - collidingEntity.lastZ) * event.tickDelta;
 
                 Box box = collidingEntity.getBoundingBox();
                 event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);

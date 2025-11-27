@@ -5,19 +5,22 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import net.minecraft.block.BannerBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WallBannerBlock;
-import net.minecraft.block.entity.BannerBlockEntity;
-import net.minecraft.client.model.ModelPart;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
-import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.render.block.entity.model.BannerBlockModel;
+import net.minecraft.client.render.block.entity.state.BannerBlockEntityRenderState;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.model.ModelBaker;
+import net.minecraft.client.render.state.CameraRenderState;
+import net.minecraft.client.texture.SpriteHolder;
+import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Unit;
 import net.minecraft.util.math.RotationAxis;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,63 +32,50 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BannerBlockEntityRenderer.class)
 public abstract class BannerBlockEntityRendererMixin {
-
+    @Shadow
     @Final
-    @Shadow private ModelPart pillar;
-    @Final
-    @Shadow private ModelPart crossbar;
+    private SpriteHolder materials;
 
-    @Inject(method = "render(Lnet/minecraft/block/entity/BannerBlockEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At("HEAD"), cancellable = true)
-    private void render(BannerBlockEntity bannerBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j, CallbackInfo ci) {
-        if (bannerBlockEntity.getWorld() != null) { //Don't modify banners in item form
-            NoRender.BannerRenderMode renderMode = Modules.get().get(NoRender.class).getBannerRenderMode();
-            if (renderMode == NoRender.BannerRenderMode.None) ci.cancel();
-            else if (renderMode == NoRender.BannerRenderMode.Pillar) {
-                BlockState blockState = bannerBlockEntity.getCachedState();
-                if (blockState.getBlock() instanceof BannerBlock) { //Floor banner
-                    this.pillar.visible = true;
-                    this.crossbar.visible = false;
-                    renderPillar(bannerBlockEntity, matrixStack, vertexConsumerProvider, i, j);
-                }
-                else { //Wall banner
-                    this.pillar.visible = false;
-                    this.crossbar.visible = true;
-                    renderCrossbar(bannerBlockEntity, matrixStack, vertexConsumerProvider, i, j);
-                }
-                ci.cancel();
-            }
+    @Inject(method = "render(Lnet/minecraft/client/render/block/entity/state/BannerBlockEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V", at = @At("HEAD"), cancellable = true)
+    private void injectRender1(BannerBlockEntityRenderState bannerBlockEntityRenderState, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CameraRenderState arg, CallbackInfo ci) {
+        if (Modules.get().get(NoRender.class).getBannerRenderMode() == NoRender.BannerRenderMode.None) ci.cancel();
+    }
+
+    @Inject(method = "render(Lnet/minecraft/client/render/block/entity/state/BannerBlockEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/entity/BannerBlockEntityRenderer;render(Lnet/minecraft/client/texture/SpriteHolder;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;IIFLnet/minecraft/client/render/block/entity/model/BannerBlockModel;Lnet/minecraft/client/render/block/entity/model/BannerFlagBlockModel;FLnet/minecraft/util/DyeColor;Lnet/minecraft/component/type/BannerPatternsComponent;Lnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;I)V"), cancellable = true)
+    private void injectRender2(BannerBlockEntityRenderState bannerBlockEntityRenderState, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CameraRenderState cameraRenderState, CallbackInfo ci, @Local BannerBlockModel bannerBlockModel) {
+        if (Modules.get().get(NoRender.class).getBannerRenderMode() == NoRender.BannerRenderMode.Pillar) {
+            renderPillar(
+                matrixStack,
+                orderedRenderCommandQueue,
+                bannerBlockEntityRenderState.lightmapCoordinates,
+                bannerBlockEntityRenderState.yaw,
+                bannerBlockModel,
+                this.materials,
+                bannerBlockEntityRenderState.crumblingOverlay
+            );
+            ci.cancel();
         }
     }
 
     @Unique
-    private void renderPillar(BannerBlockEntity bannerBlockEntity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
-        matrixStack.push();
-        BlockState blockState = bannerBlockEntity.getCachedState();
-        matrixStack.translate(0.5D, 0.5D, 0.5D);
-        float h = (-(Integer)blockState.get(BannerBlock.ROTATION) * 360) / 16.0F;
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(h));
-        matrixStack.push();
-        matrixStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-        VertexConsumer vertexConsumer = ModelLoader.BANNER_BASE.getVertexConsumer(vertexConsumerProvider, RenderLayer::getEntitySolid);
-        this.pillar.render(matrixStack, vertexConsumer, i, j);
-        matrixStack.pop();
-        matrixStack.pop();
+    private static void renderPillar(MatrixStack matrices, OrderedRenderCommandQueue entityRenderCommandQueue, int light, float rotation, BannerBlockModel model, SpriteHolder spriteHolder, ModelCommandRenderer.CrumblingOverlayCommand arg) {
+        matrices.push();
+        matrices.translate(0.5F, 0.0F, 0.5F);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
+        matrices.scale(0.6666667F, -0.6666667F, -0.6666667F);
+        SpriteIdentifier spriteIdentifier = ModelBaker.BANNER_BASE;
+        entityRenderCommandQueue.submitModel(
+            model,
+            Unit.INSTANCE,
+            matrices,
+            spriteIdentifier.getRenderLayer(RenderLayer::getEntitySolid),
+            light,
+            OverlayTexture.DEFAULT_UV,
+            -1,
+            spriteHolder.getSprite(spriteIdentifier),
+            0,
+            arg
+        );
+        matrices.pop();
     }
-
-    @Unique
-    private void renderCrossbar(BannerBlockEntity bannerBlockEntity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
-        matrixStack.push();
-        BlockState blockState = bannerBlockEntity.getCachedState();
-        matrixStack.translate(0.5D, -0.1666666716337204D, 0.5D);
-        float h = -blockState.get(WallBannerBlock.FACING).asRotation();
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(h));
-        matrixStack.translate(0.0D, -0.3125D, -0.4375D);
-        matrixStack.push();
-        matrixStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-        VertexConsumer vertexConsumer = ModelLoader.BANNER_BASE.getVertexConsumer(vertexConsumerProvider, RenderLayer::getEntitySolid);
-        this.crossbar.render(matrixStack, vertexConsumer, i, j);
-        matrixStack.pop();
-        matrixStack.pop();
-    }
-
 }

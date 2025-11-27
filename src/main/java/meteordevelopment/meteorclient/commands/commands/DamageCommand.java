@@ -46,7 +46,7 @@ public class DamageCommand extends Command {
         boolean antiHunger = Modules.get().isActive(AntiHunger.class);
         if (antiHunger) Modules.get().get(AntiHunger.class).toggle();
 
-        Vec3d pos = mc.player.getPos();
+        Vec3d pos = mc.player.getEntityPos();
 
         for(int i = 0; i < 80; i++) {
             sendPositionPacket(pos.x, pos.y + amount + 2.1, pos.z, false);
@@ -60,6 +60,6 @@ public class DamageCommand extends Command {
     }
 
     private void sendPositionPacket(double x, double y, double z, boolean onGround) {
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, onGround));
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, onGround, mc.player.horizontalCollision));
     }
 }
