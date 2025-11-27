@@ -42,6 +42,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
@@ -111,6 +112,7 @@ public class Modules extends System<Modules> {
         return (T) moduleInstances.get(klass);
     }
 
+    @SuppressWarnings("unused")
     public <T extends Module> Optional<T> getOptional(Class<T> klass) {
         return Optional.ofNullable(get(klass));
     }
