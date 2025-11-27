@@ -39,8 +39,8 @@ public class AntiVoid extends Module {
 
     @Override
     public void onDeactivate() {
-        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate() && Modules.get().isActive(Flight.class)) {
-            Modules.get().get(Flight.class).toggle();
+        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate()) {
+            Modules.get().get(Flight.class).disable();
         }
     }
 
@@ -49,8 +49,8 @@ public class AntiVoid extends Module {
         int minY = mc.world.getBottomY();
 
         if (mc.player.getY() > minY || mc.player.getY() < minY - 15) {
-            if (hasRun && mode.get() == Mode.Flight && Modules.get().isActive(Flight.class)) {
-                Modules.get().get(Flight.class).toggle();
+            if (hasRun && mode.get() == Mode.Flight) {
+                Modules.get().get(Flight.class).disable();
                 hasRun = false;
             }
             return;
@@ -58,7 +58,7 @@ public class AntiVoid extends Module {
 
         switch (mode.get()) {
             case Flight -> {
-                if (!Modules.get().isActive(Flight.class)) Modules.get().get(Flight.class).toggle();
+                Modules.get().get(Flight.class).enable();
                 hasRun = true;
             }
             case Jump -> mc.player.jump();

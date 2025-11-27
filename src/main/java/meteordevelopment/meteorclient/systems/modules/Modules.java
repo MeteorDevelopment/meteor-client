@@ -42,6 +42,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
@@ -106,10 +107,17 @@ public class Modules extends System<Modules> {
     }
 
     @SuppressWarnings("unchecked")
+    @Nullable
     public <T extends Module> T get(Class<T> klass) {
         return (T) moduleInstances.get(klass);
     }
 
+    @SuppressWarnings("unused")
+    public <T extends Module> Optional<T> getOptional(Class<T> klass) {
+        return Optional.ofNullable(get(klass));
+    }
+
+    @Nullable
     public Module get(String name) {
         for (Module module : moduleInstances.values()) {
             if (module.name.equalsIgnoreCase(name)) return module;
@@ -137,9 +145,7 @@ public class Modules extends System<Modules> {
     }
 
     public List<Module> getActive() {
-        synchronized (active) {
-            return active;
-        }
+        return active;
     }
 
     public Set<Module> searchTitles(String text) {
@@ -311,7 +317,7 @@ public class Modules extends System<Modules> {
     public void disableAll() {
         synchronized (active) {
             for (Module module : getAll()) {
-                if (module.isActive()) module.toggle();
+                module.disable();
             }
         }
     }
