@@ -53,6 +53,11 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
         if (Modules.get().get(NoRender.class).noFallingBlocks() && entity instanceof FallingBlockEntity) cir.setReturnValue(false);
     }
 
+    @Inject(method = "canBeCulled", at = @At("HEAD"), cancellable = true)
+    void canBeCulled(T entity, CallbackInfoReturnable<Boolean> cir) {
+        if (Modules.get().get(ESP.class).forceRender()) cir.setReturnValue(false);
+    }
+
     @ModifyReturnValue(method = "getSkyLight", at = @At("RETURN"))
     private int onGetSkyLight(int original) {
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.SKY), original);

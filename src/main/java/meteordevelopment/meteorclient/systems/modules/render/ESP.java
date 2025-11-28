@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -318,6 +319,10 @@ public class ESP extends Module {
         }
 
         Renderer2D.COLOR.render();
+    }
+
+    public boolean forceRender() {
+        return mode.get() == Mode.Shader || mode.get() == Mode.Glow;
     }
 
     private boolean checkCorner(double x, double y, double z, Vector3d min, Vector3d max) {

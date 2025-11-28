@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import it.unimi.dsi.fastutil.Stack;
@@ -168,6 +169,12 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
 
         provider = null;
         meteor$popEntityOutlineFramebuffer();
+    }
+
+    @ModifyExpressionValue(method = "fillEntityRenderStates", at = @At(value= "INVOKE", target="Lnet/minecraft/client/render/WorldRenderer;isRenderingReady(Lnet/minecraft/util/math/BlockPos;)Z"))
+    boolean fillEntityRenderStatesIsRenderingReady(boolean original) {
+        if (Modules.get().get(ESP.class).forceRender()) return true;
+        return original;
     }
 
     @Inject(method = "method_62214", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
