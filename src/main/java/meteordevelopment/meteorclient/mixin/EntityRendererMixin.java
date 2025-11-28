@@ -103,22 +103,6 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
         }
     }
 
-    @Unique
-    private ESP getESP() {
-        if (esp == null) {
-            esp = Modules.get().get(ESP.class);
-        }
-        return esp;
-    }
-
-    @Unique
-    private NoRender getNoRender() {
-        if (noRender == null) {
-            noRender = Modules.get().get(NoRender.class);
-        }
-        return noRender;
-    }
-
     // Hitboxes
 
     @ModifyReturnValue(method = "createHitbox", at = @At("TAIL"))
