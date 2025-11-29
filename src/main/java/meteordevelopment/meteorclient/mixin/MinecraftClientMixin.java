@@ -121,17 +121,14 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         Profilers.get().pop();
     }
 
-    @Inject(method = "doAttack", at = @At("HEAD"))
+    @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void onAttack(CallbackInfoReturnable<Boolean> cir) {
         CPSUtils.onAttack();
 
         NoInteract noInteract = Modules.get().get(NoInteract.class);
-        MinecraftClient client = (MinecraftClient) (Object) this;
 
-        if (noInteract.isActive() &&
-            noInteract.shouldCancelMissedAttacks() &&
-            client.crosshairTarget != null &&
-            client.crosshairTarget.getType() == HitResult.Type.MISS) {
+        if (noInteract.isActive() && noInteract.shouldCancelMissedAttacks() &&
+            crosshairTarget != null && crosshairTarget.getType() == HitResult.Type.MISS) {
             cir.setReturnValue(false);
             player.swingHand(Hand.MAIN_HAND, false);
         }
