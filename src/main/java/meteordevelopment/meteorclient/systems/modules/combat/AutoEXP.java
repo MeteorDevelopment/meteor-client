@@ -46,7 +46,6 @@ public class AutoEXP extends Module {
         .build()
     );
 
-
     private final Setting<Integer> slot = sgGeneral.add(new IntSetting.Builder()
         .name("exp-slot")
         .description("The slot to replenish exp into.")
@@ -91,7 +90,7 @@ public class AutoEXP extends Module {
         if (onlyGround.get() && !mc.player.isOnGround()) {
             return;
         }
-        
+
         if (repairingI == -1) {
             if (mode.get() != Mode.Hands) {
                 for (EquipmentSlot slot : AttributeModifierSlot.ARMOR) {
