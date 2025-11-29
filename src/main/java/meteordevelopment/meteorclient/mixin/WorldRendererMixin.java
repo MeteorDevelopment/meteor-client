@@ -58,8 +58,8 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin implements IWorldRenderer {
 
-    @Unique private NoRender noRender = null;
-    @Unique private ESP esp = null;
+    @Unique private NoRender noRender;
+    @Unique private ESP esp;
 
     // if a world exists, meteor is initialised
     @Inject(method = "setWorld", at = @At("TAIL"))
@@ -183,7 +183,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
         meteor$popEntityOutlineFramebuffer();
     }
 
-    @ModifyExpressionValue(method = "fillEntityRenderStates", at = @At(value= "INVOKE", target="Lnet/minecraft/client/render/WorldRenderer;isRenderingReady(Lnet/minecraft/util/math/BlockPos;)Z"))
+    @ModifyExpressionValue(method = "fillEntityRenderStates", at = @At(value= "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;isRenderingReady(Lnet/minecraft/util/math/BlockPos;)Z"))
     boolean fillEntityRenderStatesIsRenderingReady(boolean original) {
         if (esp.forceRender()) return true;
         return original;
