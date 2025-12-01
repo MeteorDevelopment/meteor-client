@@ -106,9 +106,12 @@ public abstract class WContainer extends WWidget {
     public boolean render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         if (super.render(renderer, mouseX, mouseY, delta)) return true;
 
+        WView view = getView();
+
         for (Cell<?> cell : cells) {
             double y = cell.widget().y;
             if (y > getWindowHeight()) break;
+            if (view != null && !view.isWidgetInView(cell.widget())) continue;
 
             if (y + cell.widget().height > 0) renderWidget(cell.widget(), renderer, mouseX, mouseY, delta);
         }
