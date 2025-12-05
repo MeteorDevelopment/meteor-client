@@ -26,6 +26,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.player.Multitask;
+import meteordevelopment.meteorclient.systems.modules.player.NoInteract;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -45,6 +46,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profilers;
 import org.jetbrains.annotations.Nullable;
@@ -85,6 +87,9 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     public ClientPlayerEntity player;
 
     @Shadow
+    private HitResult crosshairTarget;
+
+    @Shadow
     @Final
     @Mutable
     private Framebuffer framebuffer;
@@ -116,9 +121,17 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         Profilers.get().pop();
     }
 
-    @Inject(method = "doAttack", at = @At("HEAD"))
+    @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void onAttack(CallbackInfoReturnable<Boolean> cir) {
         CPSUtils.onAttack();
+
+        NoInteract noInteract = Modules.get().get(NoInteract.class);
+
+        if (noInteract.isActive() && noInteract.shouldCancelMissedAttacks() &&
+            crosshairTarget != null && crosshairTarget.getType() == HitResult.Type.MISS) {
+            cir.setReturnValue(false);
+            player.swingHand(Hand.MAIN_HAND, false);
+        }
     }
 
     @Inject(method = "doItemUse", at = @At("HEAD"))
