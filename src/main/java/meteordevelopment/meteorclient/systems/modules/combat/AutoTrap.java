@@ -11,10 +11,10 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
-import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -211,9 +211,9 @@ public class AutoTrap extends Module {
         if (!block.found()) return;
 
         // Find target to trap
-        if (TargetUtils.isBadTarget(target, targetRange.get())) {
-            target = TargetUtils.getPlayerTarget(targetRange.get(), priority.get());
-            if (TargetUtils.isBadTarget(target, targetRange.get())) return;
+        if (!Targeting.isValidPlayerTarget(target, targetRange.get())) {
+            target = Targeting.findPlayerTarget(targetRange.get(), priority.get());
+            if (target == null) return;
         }
 
         fillPlaceArray(target);

@@ -19,7 +19,7 @@ import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.DamageUtils;
@@ -559,7 +559,7 @@ public class CrystalAura extends Module {
     private Item mainItem, offItem;
 
     private int breakTimer, placeTimer, switchTimer, ticksPassed;
-    private final List<LivingEntity> targets = new ArrayList<>();
+    private final List<Entity> targets = new ArrayList<>();
 
     private final Vec3d vec3d = new Vec3d(0, 0, 0);
     private final Vec3d playerEyePos = new Vec3d(0, 0, 0);
@@ -1120,7 +1120,8 @@ public class CrystalAura extends Module {
         if (forceFacePlace.get().isPressed()) return true;
 
         // Checks if the provided crystal position should face place to any target
-        for (LivingEntity target : targets) {
+        for (Entity _target : targets) {
+            LivingEntity target = (LivingEntity) _target;
             if (EntityUtils.getTotalHealth(target) <= facePlaceHealth.get()) return true;
 
             for (EquipmentSlot slot : AttributeModifierSlot.ARMOR) {
@@ -1165,11 +1166,11 @@ public class CrystalAura extends Module {
         LivingEntity nearestTarget = null;
         double nearestDistance = Double.MAX_VALUE;
 
-        for (LivingEntity target : targets) {
+        for (Entity target : targets) {
             double distance = PlayerUtils.squaredDistanceTo(target);
 
             if (distance < nearestDistance) {
-                nearestTarget = target;
+                nearestTarget = (LivingEntity) target;
                 nearestDistance = distance;
             }
         }
@@ -1185,7 +1186,8 @@ public class CrystalAura extends Module {
             if (!(smartDelay.get() && breaking && target.hurtTime > 0)) damage = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), obsidianPos);
         }
         else {
-            for (LivingEntity target : targets) {
+            for (Entity _target : targets) {
+                LivingEntity target = (LivingEntity) _target;
                 if (smartDelay.get() && breaking && target.hurtTime > 0) continue;
 
                 float dmg = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), obsidianPos);
@@ -1210,18 +1212,11 @@ public class CrystalAura extends Module {
     }
 
     private void findTargets() {
-        targets.clear();
+        Targeting.findTargets(targets, entity -> {
+            if (!(entity instanceof LivingEntity livingEntity)) return false;
+            if (!Targeting.isValidTarget(entity)) return false;
 
-        // Living Entities
-        for (Entity entity : mc.world.getEntities()) {
-            // Ignore non-living
-            if (!(entity instanceof LivingEntity livingEntity)) continue;
-
-            // Player
             if (livingEntity instanceof PlayerEntity player) {
-                if (player.getAbilities().creativeMode || livingEntity == mc.player) continue;
-                if (!player.isAlive() || !Friends.get().shouldAttack(player)) continue;
-
                 if (ignoreNakeds.get()) {
                     if (player.getOffHandStack().isEmpty()
                         && player.getMainHandStack().isEmpty()
@@ -1229,18 +1224,14 @@ public class CrystalAura extends Module {
                         && player.getEquippedStack(EquipmentSlot.LEGS).isEmpty()
                         && player.getEquippedStack(EquipmentSlot.CHEST).isEmpty()
                         && player.getEquippedStack(EquipmentSlot.HEAD).isEmpty()
-                    ) continue;
+                    ) return false;
                 }
+            } else if (!(entities.get().contains(livingEntity.getType()))) {
+                return false;
             }
 
-            // Animals, water animals, monsters, bats, misc
-            if (!(entities.get().contains(livingEntity.getType()))) continue;
-
-            // Close enough to damage
-            if (livingEntity.squaredDistanceTo(mc.player) > targetRange.get() * targetRange.get()) continue;
-
-            targets.add(livingEntity);
-        }
+            return livingEntity.squaredDistanceTo(mc.player) > targetRange.get() * targetRange.get();
+        }, true);
     }
 
     private boolean intersectsWithEntities(Box box) {

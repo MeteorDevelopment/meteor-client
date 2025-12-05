@@ -9,14 +9,13 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.Target;
-import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -299,7 +298,7 @@ public class KillAura extends Module {
             targets.add(mc.targetedEntity);
         } else {
             targets.clear();
-            TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
+            Targeting.findTargets(targets, this::entityCheck, priority.get(), maxTargets.get());
         }
 
         if (targets.isEmpty()) {
@@ -381,8 +380,7 @@ public class KillAura extends Module {
     }
 
     private boolean entityCheck(Entity entity) {
-        if (entity.equals(mc.player) || entity.equals(mc.getCameraEntity())) return false;
-        if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
+        if (!Targeting.isValidTarget(entity)) return false;
 
         Box hitbox = entity.getBoundingBox();
         if (!PlayerUtils.isWithin(
@@ -408,8 +406,6 @@ public class KillAura extends Module {
             if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
         }
         if (entity instanceof PlayerEntity player) {
-            if (player.isCreative()) return false;
-            if (!Friends.get().shouldAttack(player)) return false;
             if (shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
         }
         if (entity instanceof AnimalEntity animal) {

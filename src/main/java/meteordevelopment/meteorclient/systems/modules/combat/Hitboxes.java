@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -103,7 +103,7 @@ public class Hitboxes extends Module {
     }
 
     public double getEntityValue(Entity entity) {
-        if (!(isActive() && testWeapon()) || (ignoreFriends.get() && entity instanceof PlayerEntity playerEntity && Friends.get().isFriend(playerEntity))) return 0;
+        if (!(isActive() && testWeapon()) || (ignoreFriends.get() && entity instanceof PlayerEntity playerEntity && Targeting.isFriend(playerEntity))) return 0;
         if (entities.get().contains(entity.getType())) return value.get();
         return 0;
     }
