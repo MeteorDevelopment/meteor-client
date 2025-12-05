@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.MeteorToast;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
 import net.minecraft.block.entity.*;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
@@ -53,6 +54,31 @@ public class StashFinder extends Module {
         .defaultValue(4)
         .min(1)
         .sliderMin(1)
+        .build()
+    );
+
+    private final Setting<List<BlockEntityType<?>>> blacklistedStorageBlocks = sgGeneral.add(new BlockEntityTypeListSetting.Builder()
+        .name("blacklisted-blocks")
+        .description("Block entities that disqualify a chunk if too many are found.")
+        .defaultValue(new ArrayList<>())
+        .build()
+    );
+
+    private final Setting<List<Block>> blacklistedBlocks = sgGeneral.add(new BlockListSetting.Builder()
+        .name("blacklisted-support-blocks")
+        .description("Blocks that prevent counting a storage block entity when it sits on them.")
+        .defaultValue(new ArrayList<>())
+        .build()
+    );
+
+    private final Setting<Integer> maximumBlacklistedCount = sgGeneral.add(new IntSetting.Builder()
+        .name("maximum-blacklisted-count")
+        .description("Maximum amount of blacklisted block entities allowed in a chunk.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMin(0)
+        .sliderMax(5000)
+        .visible(() -> !blacklistedStorageBlocks.get().isEmpty())
         .build()
     );
 
@@ -100,8 +126,26 @@ public class StashFinder extends Module {
 
         Chunk chunk = new Chunk(event.chunk().getPos());
 
+        boolean checkBlacklist = !blacklistedStorageBlocks.get().isEmpty();
+        List<BlockEntityType<?>> blacklist = blacklistedStorageBlocks.get();
+        List<Block> blockBlacklist = blacklistedBlocks.get();
+        int maxBlacklisted = maximumBlacklistedCount.get();
+        int blacklistedCount = 0;
+
         for (BlockEntity blockEntity : event.chunk().getBlockEntities().values()) {
-            if (!storageBlocks.get().contains(blockEntity.getType())) continue;
+            BlockEntityType<?> type = blockEntity.getType();
+
+            if (!storageBlocks.get().contains(type)) continue;
+
+            if (checkBlacklist && blacklist.contains(type)) {
+                blacklistedCount++;
+                if (blacklistedCount > maxBlacklisted) return;
+            }
+
+            if (!blockBlacklist.isEmpty()) {
+                BlockPos below = blockEntity.getPos().down();
+                if (blockBlacklist.contains(event.chunk().getBlockState(below).getBlock())) continue;
+            }
 
             if (blockEntity instanceof ChestBlockEntity) chunk.chests++;
             else if (blockEntity instanceof BarrelBlockEntity) chunk.barrels++;
@@ -110,7 +154,17 @@ public class StashFinder extends Module {
             else if (blockEntity instanceof AbstractFurnaceBlockEntity) chunk.furnaces++;
             else if (blockEntity instanceof DispenserBlockEntity) chunk.dispensersDroppers++;
             else if (blockEntity instanceof HopperBlockEntity) chunk.hoppers++;
+
+            if (checkBlacklist && !blockBlacklist.isEmpty()) {
+                BlockPos below = blockEntity.getPos().down();
+                if (blockBlacklist.contains(event.chunk().getBlockState(below).getBlock())) {
+                    blacklistedCount++;
+                    if (blacklistedCount > maxBlacklisted) return;
+                }
+            }
         }
+
+        if (checkBlacklist && blacklistedCount > maxBlacklisted) return;
 
         if (chunk.getTotal() >= minimumStorageCount.get()) {
             Chunk prevChunk = null;

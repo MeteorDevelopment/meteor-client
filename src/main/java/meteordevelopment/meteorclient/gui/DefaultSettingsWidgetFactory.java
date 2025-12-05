@@ -63,6 +63,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         factories.put(StatusEffectAmplifierMapSetting.class, (table, setting) -> statusEffectAmplifierMapW(table, (StatusEffectAmplifierMapSetting) setting));
         factories.put(StatusEffectListSetting.class, (table, setting) -> statusEffectListW(table, (StatusEffectListSetting) setting));
         factories.put(StorageBlockListSetting.class, (table, setting) -> storageBlockListW(table, (StorageBlockListSetting) setting));
+        factories.put(BlockEntityTypeListSetting.class, (table, setting) -> blockEntityTypeListW(table, (BlockEntityTypeListSetting) setting));
         factories.put(ScreenHandlerListSetting.class, (table, setting) -> screenHandlerListW(table, (ScreenHandlerListSetting) setting));
         factories.put(BlockDataSetting.class, (table, setting) -> blockDataW(table, (BlockDataSetting<?>) setting));
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
@@ -330,6 +331,10 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
     private void storageBlockListW(WTable table, StorageBlockListSetting setting) {
         selectW(table, setting, () -> mc.setScreen(new StorageBlockListSettingScreen(theme, setting)));
+    }
+
+    private void blockEntityTypeListW(WTable table, BlockEntityTypeListSetting setting) {
+        selectW(table, setting, () -> mc.setScreen(new BlockEntityTypeListSettingScreen(theme, setting)));
     }
 
     private void screenHandlerListW(WTable table, ScreenHandlerListSetting setting) {
