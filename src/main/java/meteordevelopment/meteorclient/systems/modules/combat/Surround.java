@@ -297,9 +297,7 @@ public class Surround extends Module {
     public void onDeactivate() {
         if (toggleBack.get() && !toActivate.isEmpty() && mc.world != null && mc.player != null) {
             for (Module module : toActivate) {
-                if (!module.isActive()) {
-                    module.toggle();
-                }
+                module.enable();
             }
         }
     }

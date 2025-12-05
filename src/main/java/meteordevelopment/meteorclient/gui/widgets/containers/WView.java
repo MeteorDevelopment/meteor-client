@@ -167,6 +167,10 @@ public abstract class WView extends WVerticalList {
         return ((widget.y >= y && widget.y <= y + height) || (widget.y + widget.height >= y && widget.y + widget.height <= y + height)) || ((y >= widget.y && y <= widget.y + widget.height) || (y + height >= widget.y && y + height <= widget.y + widget.height));
     }
 
+    protected boolean isWidgetInView(WWidget widget) {
+        return widget.y < y + height && widget.y + widget.height > y;
+    }
+
     protected double handleWidth() {
         return theme.scale(6);
     }
