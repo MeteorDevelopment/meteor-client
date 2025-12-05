@@ -164,7 +164,7 @@ public abstract class WView extends WVerticalList {
 
     @Override
     protected boolean propagateEvents(WWidget widget) {
-        return ((widget.y >= y && widget.y <= y + height) || (widget.y + widget.height >= y && widget.y + widget.height <= y + height)) || ((y >= widget.y && y <= widget.y + widget.height) || (y + height >= widget.y && y + height <= widget.y + widget.height));
+        return (mouseOver && isWidgetInView(widget)) || widget.isFocused();
     }
 
     protected double handleWidth() {
@@ -181,5 +181,9 @@ public abstract class WView extends WVerticalList {
 
     protected double handleY() {
         return y + (height - handleHeight()) * (scroll / (actualHeight - height));
+    }
+
+    public boolean isWidgetInView(WWidget widget) {
+        return widget.y < y + height && widget.y + widget.height > y;
     }
 }

@@ -320,6 +320,10 @@ public class ESP extends Module {
         Renderer2D.COLOR.render();
     }
 
+    public boolean forceRender() {
+        return isActive() && (mode.get() == Mode.Shader || mode.get() == Mode.Glow);
+    }
+
     private boolean checkCorner(double x, double y, double z, Vector3d min, Vector3d max) {
         pos.set(x, y, z);
         if (!NametagUtils.to2D(pos, 1)) return true;
