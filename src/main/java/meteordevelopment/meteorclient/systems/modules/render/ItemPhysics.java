@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.events.render.ApplyTransformationEvent;
 import meteordevelopment.meteorclient.events.render.RenderItemEntityEvent;
 import meteordevelopment.meteorclient.mixin.ItemRenderStateAccessor;
 import meteordevelopment.meteorclient.mixin.LayerRenderStateAccessor;
-import meteordevelopment.meteorclient.mixininterface.IBakedQuad;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -25,6 +24,7 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.random.Random;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.List;
 
@@ -158,16 +158,15 @@ public class ItemPhysics extends Module {
         float minY = Float.MAX_VALUE, maxY = Float.MIN_VALUE;
         float minZ = Float.MAX_VALUE, maxZ = Float.MIN_VALUE;
 
-        for (BakedQuad _quad : quads) {
-            IBakedQuad quad = (IBakedQuad) (Object) _quad;
-
+        for (BakedQuad quad : quads) {
             for (int i = 0; i < 4; i++) {
-                minY = Math.min(minY, quad.meteor$getY(i));
-                maxY = Math.max(maxY, quad.meteor$getY(i));
-                minZ = Math.min(minZ, quad.meteor$getZ(i));
-                maxZ = Math.max(maxZ, quad.meteor$getZ(i));
-                minX = Math.min(minX, quad.meteor$getX(i));
-                maxX = Math.max(maxX, quad.meteor$getX(i));
+                Vector3fc vec = quad.getPosition(i);
+                minY = Math.min(minY, vec.y());
+                maxY = Math.max(maxY, vec.y());
+                minZ = Math.min(minZ, vec.z());
+                maxZ = Math.max(maxZ, vec.z());
+                minX = Math.min(minX, vec.x());
+                maxX = Math.max(maxX, vec.x());
             }
         }
 

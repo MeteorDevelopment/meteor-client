@@ -6,7 +6,9 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
@@ -14,13 +16,19 @@ import meteordevelopment.meteorclient.events.entity.player.PlayerTickMovementEve
 import meteordevelopment.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.*;
+import meteordevelopment.meteorclient.systems.modules.player.LiquidInteract;
+import meteordevelopment.meteorclient.systems.modules.player.NoMiningTrace;
 import meteordevelopment.meteorclient.systems.modules.player.Portals;
+import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.PlayerInput;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -75,12 +83,6 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         }
     }
 
-    @ModifyExpressionValue(method = "canSprint()Z", at = @At(value = "CONSTANT", args = "floatValue=6.0f"))
-    private float onHunger(float constant) {
-        if (Modules.get().get(NoSlow.class).hunger()) return -1;
-        return constant;
-    }
-
     @ModifyExpressionValue(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/input/Input;playerInput:Lnet/minecraft/util/PlayerInput;"))
     private PlayerInput isSneaking(PlayerInput original) {
         if (Modules.get().get(Sneak.class).doPacket() || Modules.get().get(NoSlow.class).airStrict()) {
@@ -100,6 +102,28 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     @Inject(method = "tickMovement", at = @At("HEAD"))
     private void preTickMovement(CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(PlayerTickMovementEvent.get());
+    }
+
+    @ModifyReturnValue(method = "method_76763", at = @At("RETURN"))
+    private static HitResult onUpdateTargetedEntity(HitResult original, @Local HitResult hitResult) {
+        if (original instanceof EntityHitResult ehr) {
+            if (Modules.get().get(NoMiningTrace.class).canWork(ehr.getEntity()) && hitResult.getType() == HitResult.Type.BLOCK) {
+                return hitResult;
+            }
+            else if (ehr.getEntity() instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) {
+                return hitResult;
+            }
+        }
+
+        return original;
+    }
+
+    @ModifyExpressionValue(method = "method_76763", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
+    private static HitResult modifyRaycastResult(HitResult original, Entity entity, double blockInteractionRange, double entityInteractionRange, float tickProgress, @Local(ordinal = 0, argsOnly = true) double maxDistance) {
+        if (!Modules.get().isActive(LiquidInteract.class)) return original;
+        if (original.getType() != HitResult.Type.MISS) return original;
+
+        return entity.raycast(maxDistance, tickProgress, true);
     }
 
     // Sprint

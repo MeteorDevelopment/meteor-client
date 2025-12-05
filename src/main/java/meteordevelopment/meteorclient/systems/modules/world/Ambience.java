@@ -13,8 +13,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.render.DimensionEffects;
-import net.minecraft.util.math.Vec3d;
 
 /**
  * @author Walaryne
@@ -193,17 +191,6 @@ public class Ambience extends Module {
 
     private void reload() {
         if (mc.worldRenderer != null && isActive()) mc.worldRenderer.reload();
-    }
-
-    public static class Custom extends DimensionEffects {
-        public Custom() {
-            super(SkyType.END, true);
-        }
-
-        @Override
-        public Vec3d adjustFogColor(Vec3d color, float sunHeight) {
-            return color.multiply(0.15000000596046448D);
-        }
     }
 
     public SettingColor skyColor() {

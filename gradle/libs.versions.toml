@@ -1,13 +1,13 @@
 [versions]
 # Fabric (https://fabricmc.net/develop)
-minecraft = "1.21.10"
-yarn-mappings = "1.21.10+build.2"
-fabric-loader = "0.17.0"
-fabric-api = "0.136.0+1.21.10"
+minecraft = "1.21.11-rc2"
+yarn-mappings = "1.21.11-rc2+build.1"
+fabric-loader = "0.18.1"
+fabric-api = "0.139.4+1.21.11"
 
 # Plugins
 # Loom (https://github.com/FabricMC/fabric-loom)
-loom = "1.12-SNAPSHOT"
+loom = "1.14-SNAPSHOT"
 
 # Mods
 # Baritone (https://github.com/MeteorDevelopment/baritone)

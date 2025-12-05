@@ -23,7 +23,6 @@ import net.minecraft.client.gui.hud.MessageIndicator;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,9 +49,6 @@ public abstract class ChatHudMixin implements IChatHud {
     private BetterChat betterChat;
     @Unique
     private int nextId;
-
-    @Shadow
-    public abstract void addMessage(Text message, @Nullable MessageSignatureData signatureData, @Nullable MessageIndicator indicator);
 
     @Shadow
     public abstract void addMessage(Text message);
@@ -136,7 +132,7 @@ public abstract class ChatHudMixin implements IChatHud {
 
     // Player Heads
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;ceil(F)I"))
+    @ModifyExpressionValue(method = "render(Lnet/minecraft/client/gui/hud/ChatHud$Backend;IIZ)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;ceil(F)I"))
     private int onRender_modifyWidth(int width) {
         return getBetterChat().modifyChatWidth(width);
     }

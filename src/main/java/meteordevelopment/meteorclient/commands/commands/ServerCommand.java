@@ -31,6 +31,8 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.LocalDifficulty;
+import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.Strings;
 
 import java.net.InetAddress;
@@ -147,7 +149,12 @@ public class ServerCommand extends Command {
         info("Protocol version: %d", server.protocolVersion);
         info("Difficulty: %s (Local: %.2f)",
             mc.world.getDifficulty().getTranslatableName().getString(),
-            new LocalDifficulty(mc.world.getDifficulty(), mc.world.getTimeOfDay(), mc.world.getChunk(mc.player.getBlockPos()).getInhabitedTime(), mc.world.getMoonSize()).getLocalDifficulty()
+            new LocalDifficulty(
+                mc.world.getDifficulty(),
+                mc.world.getTimeOfDay(),
+                mc.world.getChunk(mc.player.getBlockPos()).getInhabitedTime(),
+                DimensionType.MOON_SIZES[mc.world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL, mc.player.getBlockPos()).getIndex()] // lol
+            ).getLocalDifficulty()
         );
         info("Day: %d", mc.world.getTimeOfDay() / 24000L);
         info("Permission level: %s", formatPerms());

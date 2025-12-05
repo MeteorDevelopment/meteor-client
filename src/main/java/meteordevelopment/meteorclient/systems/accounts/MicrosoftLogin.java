@@ -10,13 +10,10 @@ import com.sun.net.httpserver.HttpServer;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.network.Http;
 import net.minecraft.util.Util;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
@@ -134,19 +131,24 @@ public class MicrosoftLogin {
 
     private static void handleRequest(HttpExchange req) throws IOException {
         if (req.getRequestMethod().equals("GET")) {
+            System.out.println(req.getRequestURI());
+            // todo fix this shit, apache http has been removed
+
             // Login
-            List<NameValuePair> query = URLEncodedUtils.parse(req.getRequestURI(), StandardCharsets.UTF_8);
+//            List<NameValuePair> query = URLEncodedUtils.parse(req.getRequestURI(), StandardCharsets.UTF_8);
+//
+//            boolean ok = false;
+//
+//            for (NameValuePair pair : query) {
+//                if (pair.getName().equals("code")) {
+//                    handleCode(pair.getValue());
+//
+//                    ok = true;
+//                    break;
+//                }
+//            }
 
             boolean ok = false;
-
-            for (NameValuePair pair : query) {
-                if (pair.getName().equals("code")) {
-                    handleCode(pair.getValue());
-
-                    ok = true;
-                    break;
-                }
-            }
 
             if (!ok) {
                 writeText(req, "Cannot authenticate.");

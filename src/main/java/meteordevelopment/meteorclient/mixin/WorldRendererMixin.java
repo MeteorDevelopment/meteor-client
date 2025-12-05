@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.render.BlockSelection;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import meteordevelopment.meteorclient.utils.OutlineRenderCommandQueue;
 import meteordevelopment.meteorclient.utils.render.NoopImmediateVertexConsumerProvider;
 import meteordevelopment.meteorclient.utils.render.NoopOutlineVertexConsumerProvider;
@@ -78,7 +79,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
         if (Modules.get().isActive(BlockSelection.class)) ci.cancel();
     }
 
-    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;method_74752(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;Z)V"), index = 2)
+    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;updateCamera(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;Z)V"), index = 2)
     private boolean renderSetupTerrainModifyArg(boolean spectator) {
         return Modules.get().isActive(Freecam.class) || spectator;
     }
@@ -197,6 +198,16 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     @Inject(method = "onResized", at = @At("HEAD"))
     private void onResized(int width, int height, CallbackInfo info) {
         PostProcessShaders.onResized(width, height);
+    }
+
+    @ModifyArg(method = "method_62205", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/CloudRenderer;renderClouds(ILnet/minecraft/client/option/CloudRenderMode;FLnet/minecraft/util/math/Vec3d;JF)V"))
+    private int modifyColor(int original) {
+        Ambience ambience = Modules.get().get(Ambience.class);
+        if (ambience.isActive() && ambience.customCloudColor.get()) {
+            return ambience.cloudColor.get().getPacked();
+        }
+
+        return original;
     }
 
     // IWorldRenderer

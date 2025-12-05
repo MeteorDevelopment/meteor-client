@@ -132,7 +132,8 @@ public class MeshRenderer {
         }
 
         int indexCount = mesh != null ? mesh.getIndicesCount()
-            : (indexBuffer != null ? indexBuffer.size() / Integer.BYTES : -1);
+            : (int) (indexBuffer != null ? indexBuffer.size() / Integer.BYTES : -1);
+        // todo hope this is alright @minegame take a look please (lossy conversion from long to int)
 
         if (indexCount > 0) {
 
