@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class EnchantmentListSetting extends Setting<Set<RegistryKey<Enchantment>>> {
+public class EnchantmentListSetting extends AbstractCollectionSetting<Set<RegistryKey<Enchantment>>> {
     public EnchantmentListSetting(String name, String description, Set<RegistryKey<Enchantment>> defaultValue, Consumer<Set<RegistryKey<Enchantment>>> onChanged, Consumer<Setting<Set<RegistryKey<Enchantment>>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }

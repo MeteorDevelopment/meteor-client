@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.gui.screens.settings;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSettingScreen;
+import meteordevelopment.meteorclient.gui.screens.settings.base.GroupedSetSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.BlockListSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
@@ -17,9 +17,9 @@ import net.minecraft.util.Identifier;
 
 import java.util.function.Predicate;
 
-public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
-    public BlockListSettingScreen(GuiTheme theme, BlockListSetting setting) {
-        super(theme, "Select Blocks", setting, setting.get(), Registries.BLOCK);
+public class BlockSetSettingScreen extends GroupedSetSettingScreen<Block, BlockListSetting> {
+    public BlockSetSettingScreen(GuiTheme theme, BlockListSetting setting) {
+        super(theme, "Select Blocks", setting, BlockListSetting.GROUPS, Registries.BLOCK);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
             return false;
         }
 
-        Predicate<Block> filter = ((BlockListSetting) setting).filter;
+        Predicate<Block> filter = setting.getFilter();
 
         if (filter == null) return value != Blocks.AIR;
         return filter.test(value);
@@ -36,7 +36,7 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
 
     @Override
     protected WWidget getValueWidget(Block value) {
-        return theme.itemWithLabel(value.asItem().getDefaultStack(), Names.get(value));
+        return theme.itemWithLabel(value.asItem().getDefaultStack(), Names.get(value)).color(includeValue(value) ? theme.textColor() : theme.textSecondaryColor());
     }
 
     @Override

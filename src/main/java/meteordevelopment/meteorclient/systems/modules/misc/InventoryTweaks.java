@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.HandledScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -113,7 +114,7 @@ public class InventoryTweaks extends Module {
 
     // Anti drop
 
-    private final Setting<List<Item>> antiDropItems = sgAntiDrop.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> antiDropItems = sgAntiDrop.add(new ItemSetSetting.Builder()
         .name("anti-drop-items")
         .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
         .build()
@@ -134,7 +135,7 @@ public class InventoryTweaks extends Module {
 
     // Auto Drop
 
-    private final Setting<List<Item>> autoDropItems = sgAutoDrop.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> autoDropItems = sgAutoDrop.add(new ItemSetSetting.Builder()
         .name("auto-drop-items")
         .description("Items to drop.")
         .build()
@@ -199,7 +200,7 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> dumpItems = sgStealDump.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> dumpItems = sgStealDump.add(new ItemSetSetting.Builder()
         .name("dump-items")
         .description("Items to dump.")
         .build()
@@ -212,7 +213,7 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> stealItems = sgStealDump.add(new ItemListSetting.Builder()
+    private final Setting<GroupSet<Item, GroupedSetSetting.Groups<Item>.Group>> stealItems = sgStealDump.add(new ItemSetSetting.Builder()
         .name("steal-items")
         .description("Items to steal.")
         .build()
