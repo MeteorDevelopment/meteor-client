@@ -30,13 +30,6 @@ import java.util.Set;
 public class NoInteract extends Module {
     private final SettingGroup sgBlocks = settings.createGroup("Blocks");
     private final SettingGroup sgEntities = settings.createGroup("Entities");
-
-    private final Setting<Boolean> cancelMissedAttacks = sgEntities.add(new BoolSetting.Builder()
-        .name("missed-attacks")
-        .description("Cancels attacks that didn't hit anything.")
-        .defaultValue(false)
-        .build()
-    );
     // Blocks
 
     private final Setting<List<Block>> blockMine = sgBlocks.add(new BlockListSetting.Builder()
@@ -257,8 +250,5 @@ public class NoInteract extends Module {
         Interact,
         Both,
         None
-    }
-    public boolean shouldCancelMissedAttacks() {
-        return cancelMissedAttacks.get();
     }
 }
