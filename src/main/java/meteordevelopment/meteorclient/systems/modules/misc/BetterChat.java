@@ -36,6 +36,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -558,10 +559,17 @@ public class BetterChat extends Module {
 
     // Coords Protection
 
-    private static final Pattern coordRegex = Pattern.compile("(?<x>-?\\d{3,}(?:\\.\\d*)?)(?:\\s+(?<y>-?\\d{1,3}(?:\\.\\d*)?))?\\s+(?<z>-?\\d{3,}(?:\\.\\d*)?)");
-
     private boolean containsCoordinates(String message) {
-        return coordRegex.matcher(message).find();
+        int count = 0;
+
+        for (String word : message.split("\\s+")) {
+            if (NumberUtils.isParsable(word)) {
+                if (count >= 1) return true;
+                count++;
+            } else count = 0;
+        }
+
+        return false;
     }
 
     private MutableText getSendButton(String message) {
