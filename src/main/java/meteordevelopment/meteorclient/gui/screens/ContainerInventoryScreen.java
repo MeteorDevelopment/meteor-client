@@ -29,7 +29,7 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 /*
- * i couldn't figure out how to add proper outer borders for the GUI without adding custom textures. @TODO
+ * i couldn't figure out how to add proper outer borders for the GUI without adding custom textures.
  */
 public class ContainerInventoryScreen extends Screen {
     private static final Identifier SLOT_TEXTURE = Identifier.ofVanilla("container/slot");
