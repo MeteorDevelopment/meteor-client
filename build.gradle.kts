@@ -151,7 +151,8 @@ tasks {
             "version" to project.version,
             "build_number" to buildNumber,
             "commit" to commit,
-            "minecraft_version" to libs.versions.minecraft.get()
+            "minecraft_version" to libs.versions.minecraft.get(),
+            "loader_version" to libs.versions.fabric.loader.get()
         )
 
         inputs.properties(propertyMap)
