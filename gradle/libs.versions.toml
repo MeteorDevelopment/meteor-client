@@ -1,7 +1,7 @@
 [versions]
 # Fabric (https://fabricmc.net/develop)
-minecraft = "1.21.11-rc2"
-yarn-mappings = "1.21.11-rc2+build.1"
+minecraft = "1.21.11"
+yarn-mappings = "1.21.11+build.1"
 fabric-loader = "0.18.1"
 fabric-api = "0.139.4+1.21.11"
 
@@ -31,7 +31,7 @@ reflections = "0.10.2"
 # Netty (https://github.com/netty/netty)
 netty = "4.1.118.Final"
 # ViaFabricPlus (https://github.com/ViaVersion/ViaFabricPlus)
-viafabricplus = "4.3.1"
+viafabricplus = "4.3.5"
 # WaybackAuthLib (https://github.com/FlorianMichael/WaybackAuthLib)
 waybackauthlib = "1.0.1"
 
