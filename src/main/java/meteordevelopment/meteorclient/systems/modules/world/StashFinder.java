@@ -34,6 +34,7 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.*;
 import net.minecraft.item.Items;
 import net.minecraft.text.HoverEvent;
@@ -68,10 +69,21 @@ public class StashFinder extends Module {
         .build()
     );
 
+    private static final List<Block> DEFAULT_SUPPORT_BLOCK_BLACKLIST = List.of(
+        Blocks.OXIDIZED_COPPER,
+        Blocks.OXIDIZED_CUT_COPPER,
+        Blocks.TUFF_BRICKS,
+        Blocks.WAXED_COPPER_BLOCK,
+        Blocks.WAXED_OXIDIZED_COPPER,
+        Blocks.WAXED_OXIDIZED_CUT_COPPER,
+        Blocks.BARREL,
+        Blocks.WAXED_COPPER_BULB
+    );
+
     private final Setting<List<Block>> blacklistedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blacklisted-support-blocks")
         .description("Blocks that prevent counting a storage block entity when it sits on them.")
-        .defaultValue(new ArrayList<>())
+        .defaultValue(DEFAULT_SUPPORT_BLOCK_BLACKLIST)
         .build()
     );
 
