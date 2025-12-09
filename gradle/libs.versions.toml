@@ -13,11 +13,11 @@ loom = "1.14-SNAPSHOT"
 # Baritone (https://github.com/MeteorDevelopment/baritone)
 baritone = "1.21.10-SNAPSHOT"
 # Sodium (https://github.com/CaffeineMC/sodium-fabric)
-sodium = "mc1.21.10-0.7.2-fabric"
+sodium = "mc1.21.11-0.8.0-fabric"
 # Lithium (https://github.com/CaffeineMC/lithium-fabric)
 lithium = "mc1.21.10-0.20.0-fabric"
 # Iris (https://github.com/IrisShaders/Iris)
-iris = "1.9.6+1.21.10-fabric"
+iris = "1.10.0+1.21.11-fabric"
 # ModMenu (https://github.com/TerraformersMC/ModMenu)
 modmenu = "15.0.0"
 # Orbit (https://github.com/MeteorDevelopment/orbit)
