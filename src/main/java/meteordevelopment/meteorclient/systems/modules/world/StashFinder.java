@@ -9,14 +9,17 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
@@ -24,12 +27,11 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.utils.render.MeteorToast;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.render.MeteorToast;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.*;
@@ -38,27 +40,15 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class StashFinder extends Module {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private final Map<ChunkPos, Vec3d> tracePositions = new HashMap<>();
-    private final Set<ChunkPos> disabledTracePositions = new HashSet<>();
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -109,55 +99,55 @@ public class StashFinder extends Module {
         .build()
     );
 
-    private final Setting<Boolean> renderTrace = sgRender.add(new BoolSetting.Builder()
-        .name("render-trace")
+    private final Setting<Boolean> renderTracer = sgRender.add(new BoolSetting.Builder()
+        .name("render-tracer")
         .description("Renders a tracer to the last found stash.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<SettingColor> traceColor = sgRender.add(new ColorSetting.Builder()
-        .name("trace-color")
+        .name("tracer-color")
         .description("Color of the stash tracer.")
         .defaultValue(new SettingColor(255, 215, 0, 255))
-        .visible(renderTrace::get)
+        .visible(renderTracer::get)
         .build()
     );
 
-    private final Setting<Boolean> renderTraceColumn = sgRender.add(new BoolSetting.Builder()
-        .name("render-trace-column")
+    private final Setting<Integer> traceArrivalDistance = sgRender.add(new IntSetting.Builder()
+        .name("tracer-hide-at-distance")
+        .description("Hide the trace when you are this close to the stash.")
+        .defaultValue(16)
+        .min(1)
+        .sliderMin(1)
+        .sliderMax(50)
+        .visible(renderTracer::get)
+        .build()
+    );
+
+    private final Setting<Integer> traceMaxDistance = sgRender.add(new IntSetting.Builder()
+        .name("tracer-max-distance")
+        .description("Hide the trace when you are farther than this distance from the stash.")
+        .defaultValue(2000)
+        .min(10)
+        .sliderMin(50)
+        .sliderMax(10000)
+        .visible(renderTracer::get)
+        .build()
+    );
+
+    private final Setting<Boolean> renderChunkColumn = sgRender.add(new BoolSetting.Builder()
+        .name("render-chunk-column")
         .description("Renders a vertical column at the center of traced chunks.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<SettingColor> traceColumnColor = sgRender.add(new ColorSetting.Builder()
-        .name("trace-column-color")
+        .name("chunk-column-color")
         .description("Color of the stash tracer column.")
         .defaultValue(new SettingColor(255, 215, 0, 100))
-        .visible(renderTraceColumn::get)
-        .build()
-    );
-
-    private final Setting<Integer> traceArrivalDistance = sgRender.add(new IntSetting.Builder()
-        .name("trace-arrival-distance")
-        .description("Hide the trace when you are this close to the stash.")
-        .defaultValue(16)
-        .min(1)
-        .sliderMin(1)
-        .sliderMax(50)
-        .visible(renderTrace::get)
-        .build()
-    );
-
-    private final Setting<Integer> traceMaxDistance = sgRender.add(new IntSetting.Builder()
-        .name("trace-max-distance")
-        .description("Hide the trace when you are farther than this distance from the stash.")
-        .defaultValue(2000)
-        .min(10)
-        .sliderMin(50)
-        .sliderMax(10000)
-        .visible(renderTrace::get)
+        .visible(renderChunkColumn::get)
         .build()
     );
 
@@ -168,6 +158,8 @@ public class StashFinder extends Module {
         .build()
     );
 
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private final Map<ChunkPos, Vec3d> tracePositions = new HashMap<>();
     public List<Chunk> chunks = new ArrayList<>();
 
     public StashFinder() {
@@ -183,7 +175,6 @@ public class StashFinder extends Module {
     private void onTick(TickEvent.Post event) {
         if (!clearTracesBind.get().isPressed()) return;
         tracePositions.clear();
-        disabledTracePositions.clear();
     }
 
     @EventHandler
@@ -223,8 +214,8 @@ public class StashFinder extends Module {
             if (i < 0) chunks.add(chunk);
             else prevChunk = chunks.set(i, chunk);
 
-            double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-            if (!disabledTracePositions.contains(chunk.chunkPos)) {
+            if (renderTracer.get()) {
+                double y = mc.player != null ? mc.player.getEyeY() : 0.0;
                 tracePositions.put(chunk.chunkPos, new Vec3d(chunk.x, y, chunk.z));
             }
 
@@ -255,9 +246,12 @@ public class StashFinder extends Module {
 
         WVerticalList list = theme.verticalList();
 
-        // Clear
-        WButton clear = list.add(theme.button("Clear")).widget();
-        WButton clearTraces = list.add(theme.button("Clear Traces")).widget();
+        // Clear buttons
+        WHorizontalList hl = theme.horizontalList();
+        WButton clear = hl.add(theme.button("Clear Chunks")).widget();
+        WButton resetTracers = hl.add(theme.button("Reset Tracers")).widget();
+
+        list.add(hl);
 
         WTable table = new WTable();
         if (!chunks.isEmpty()) list.add(table);
@@ -266,13 +260,11 @@ public class StashFinder extends Module {
             chunks.clear();
             table.clear();
             tracePositions.clear();
-            disabledTracePositions.clear();
         };
 
-        clearTraces.action = () -> {
-            tracePositions.clear();
-            disabledTracePositions.clear();
+        resetTracers.action = () -> {
             table.clear();
+            tracePositions.clear();
             fillTable(theme, table);
         };
 
@@ -284,8 +276,17 @@ public class StashFinder extends Module {
 
     private void fillTable(GuiTheme theme, WTable table) {
         for (Chunk chunk : chunks) {
-            table.add(theme.label("Pos: " + chunk.x + ", " + chunk.z));
-            table.add(theme.label("Total: " + chunk.getTotal()));
+            table.add(theme.label("Pos: " + chunk.x + ", " + chunk.z)).padRight(10);
+            table.add(theme.label("Total: " + chunk.getTotal())).padRight(10);
+
+            WCheckbox visible = table.add(theme.checkbox(tracePositions.containsKey(chunk.chunkPos))).widget();
+            visible.action = () -> {
+                if (visible.checked) {
+                    double y = mc.player != null ? mc.player.getEyeY() : 0.0;
+                    tracePositions.put(chunk.chunkPos, new Vec3d(chunk.x, y, chunk.z));
+                }
+                else tracePositions.remove(chunk.chunkPos);
+            };
 
             WButton open = table.add(theme.button("Open")).widget();
             open.action = () -> mc.setScreen(new ChunkScreen(theme, chunk));
@@ -293,25 +294,10 @@ public class StashFinder extends Module {
             WButton gotoBtn = table.add(theme.button("Goto")).widget();
             gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(chunk.x, 0, chunk.z), true);
 
-            WButton traceToggle = table.add(theme.button("Marker:")).widget();
-            updateMarkerButton(traceToggle, tracePositions.containsKey(chunk.chunkPos));
-            traceToggle.action = () -> {
-                if (tracePositions.containsKey(chunk.chunkPos)) {
-                    tracePositions.remove(chunk.chunkPos);
-                    disabledTracePositions.add(chunk.chunkPos);
-                } else {
-                    double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                    tracePositions.put(chunk.chunkPos, new Vec3d(chunk.x, y, chunk.z));
-                    disabledTracePositions.remove(chunk.chunkPos);
-                }
-                updateMarkerButton(traceToggle, tracePositions.containsKey(chunk.chunkPos));
-            };
-
             WMinus delete = table.add(theme.minus()).widget();
             delete.action = () -> {
                 if (chunks.remove(chunk)) {
                     tracePositions.remove(chunk.chunkPos);
-                    disabledTracePositions.remove(chunk.chunkPos);
                     table.clear();
                     fillTable(theme, table);
 
@@ -383,7 +369,7 @@ public class StashFinder extends Module {
 
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error while writing the stash list to csv", e);
         }
     }
 
@@ -395,7 +381,7 @@ public class StashFinder extends Module {
             GSON.toJson(chunks, writer);
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error while writing the stash list to json", e);
         }
     }
 
@@ -413,10 +399,9 @@ public class StashFinder extends Module {
     }
 
     private void sendChatNotification(Chunk chunk) {
-        TextColor meteorPurple = TextColor.fromRgb(MeteorClient.ADDON.color.getPacked());
         MutableText coords = Text.literal(chunk.x + ", " + chunk.z)
             .setStyle(Style.EMPTY
-                .withColor(meteorPurple)
+                .withColor(Formatting.WHITE)
                 .withFormatting(Formatting.UNDERLINE)
                 .withHoverEvent(new HoverEvent.ShowText(Text.literal("Path to stash")))
                 .withClickEvent(new RunnableClickEvent(() -> PathManagers.get().moveTo(new BlockPos(chunk.x, 0, chunk.z), true))));
@@ -447,17 +432,17 @@ public class StashFinder extends Module {
             return horizontalDist <= traceArrivalDistance.get();
         });
 
-        if (!renderTrace.get() && !renderTraceColumn.get()) return;
+        if (!renderTracer.get() && !renderChunkColumn.get()) return;
 
         for (Vec3d pos : tracePositions.values()) {
             double horizontalDist = Math.hypot(pos.x - playerX, pos.z - playerZ);
             if (horizontalDist > traceMaxDistance.get()) continue;
 
-            if (renderTrace.get()) {
+            if (renderTracer.get()) {
                 event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, pos.x, eyeY, pos.z, traceColor.get());
             }
 
-            if (renderTraceColumn.get()) {
+            if (renderChunkColumn.get()) {
                 double x1 = pos.x - 0.5;
                 double x2 = pos.x + 0.5;
                 double z1 = pos.z - 0.5;
@@ -469,10 +454,6 @@ public class StashFinder extends Module {
                 event.renderer.line(x2, bottomY, z2, x2, topY, z2, traceColumnColor.get());
             }
         }
-    }
-
-    private void updateMarkerButton(WButton button, boolean enabled) {
-        button.set(enabled ? "Marker: On" : "Marker: Off");
     }
 
     public enum Mode {
