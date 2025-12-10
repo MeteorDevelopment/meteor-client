@@ -2,7 +2,9 @@
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
  */
+
 package meteordevelopment.meteorclient.mixin;
+
 import java.util.UUID;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterLocator;
@@ -72,7 +74,7 @@ public abstract class LocatorBarMixin {
         } else {
             context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, BACKGROUND, i, j, 182, 5);
         }
-        
+
         if (locatorHud != null && locatorHud.isActive() && locatorHud.showDirections.get()) {
             float yaw = MathHelper.wrapDegrees(this.client.gameRenderer.getCamera().getYaw());
             int centerX = i + 182 / 2;
@@ -89,14 +91,14 @@ public abstract class LocatorBarMixin {
         float relative = MathHelper.wrapDegrees(dirYaw - playerYaw);
         if (relative >= -60 && relative <= 60) {
             int x = centerX + MathHelper.floor(relative * 173.0 / 2.0 / 60.0);
-            
+
             context.getMatrices().pushMatrix();
             context.getMatrices().translate((float)x, (float)y);
             context.getMatrices().scale(0.65f, 0.65f);
-            
+
             int width = this.client.textRenderer.getWidth(text);
             context.drawText(this.client.textRenderer, text, -width / 2, 0, 0xFFFFFFFF, true);
-            
+
             context.getMatrices().popMatrix();
         }
     }
@@ -109,14 +111,14 @@ public abstract class LocatorBarMixin {
             World world = entity.getEntityWorld();
             TickManager tickManager = world.getTickManager();
             EntityTickProgress entityTickProgress = entityx -> tickCounter.getTickProgress(!tickManager.shouldSkipTick(entityx));
-            
+
             BetterLocator locatorHud = Modules.get().get(BetterLocator.class);
             boolean showHeads = locatorHud != null && locatorHud.isActive() && locatorHud.displayHeads.get();
             boolean showData = locatorHud != null && locatorHud.isActive() && locatorHud.displayData.get();
             boolean onlyTab = showData && locatorHud.displayOnlyOnTab.get();
             boolean showName = showData && locatorHud.displayName.get();
             boolean showCoords = showData && locatorHud.displayCoords.get();
-            
+
             boolean shouldShowData = showData && (!onlyTab || this.client.options.playerListKey.isPressed());
 
             this.client.player.networkHandler.getWaypointHandler().forEachWaypoint(
@@ -131,11 +133,11 @@ public abstract class LocatorBarMixin {
                             float dist = MathHelper.sqrt((float)waypoint.squaredDistanceTo(entity));
                             Waypoint.Config config = waypoint.getConfig();
                             WaypointStyleAsset style = this.client.getWaypointStyleAssetManager().get(config.style);
-                            
+
                             float near = style.nearDistance();
                             float far = style.farDistance();
                             float progress = 1.0f - MathHelper.clamp((dist - near) / (far - near), 0.0f, 1.0f);
-                            
+
                             float distanceScale = MathHelper.lerp(progress, 0.5f, 1.0f);
 
                             float w = 9 * distanceScale;
@@ -149,7 +151,7 @@ public abstract class LocatorBarMixin {
                                 PlayerListEntry entry = this.client.getNetworkHandler().getPlayerListEntry(uuid);
                                 if (entry != null) {
                                     Identifier skin = entry.getSkinTextures().body().texturePath();
-                                    
+
                                     context.drawTexture(RenderPipelines.GUI_TEXTURED, skin, (int)x, (int)y, 8.0f, 8.0f, (int)w, (int)h, 8, 8, 64, 64);
                                     context.drawTexture(RenderPipelines.GUI_TEXTURED, skin, (int)x, (int)y, 40.0f, 8.0f, (int)w, (int)h, 8, 8, 64, 64);
                                     renderedHead = true;
@@ -158,7 +160,7 @@ public abstract class LocatorBarMixin {
                                         context.getMatrices().pushMatrix();
                                         context.getMatrices().translate(x + w / 2, y - 5);
                                         context.getMatrices().scale(0.5f, 0.5f);
-                                        
+
                                         int textColor = -1;
                                         if (locatorHud.respectColor.get()) {
                                             textColor = (Integer)config.color
@@ -174,12 +176,12 @@ public abstract class LocatorBarMixin {
                                         if (showName) {
                                             Text name = entry.getDisplayName();
                                             if (name == null) name = Text.of(entry.getProfile().name());
-                                            
+
                                             String text = name.getString();
                                             if (showCoords) {
                                                 text += " (" + (int)dist + "m)";
                                             }
-                                            
+
                                             int width = this.client.textRenderer.getWidth(text);
                                             context.drawTextWithBackground(this.client.textRenderer, Text.of(text), -width / 2, 0, width, textColor);
                                         } else if (showCoords) {
@@ -187,7 +189,7 @@ public abstract class LocatorBarMixin {
                                             int width = this.client.textRenderer.getWidth(text);
                                             context.drawTextWithBackground(this.client.textRenderer, Text.of(text), -width / 2, 0, width, textColor);
                                         }
-                                        
+
                                         context.getMatrices().popMatrix();
                                     }
                                 }
