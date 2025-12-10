@@ -484,6 +484,7 @@ public class Modules extends System<Modules> {
     }
 
     private void initRender() {
+        add(new BetterLocator());
         add(new BetterTab());
         add(new BetterTooltips());
         add(new BlockESP());
