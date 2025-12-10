@@ -28,32 +28,41 @@ public class ChestSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Chestplate> chestplate = sgGeneral.add(new EnumSetting.Builder<Chestplate>()
-        .name("chestplate")
-        .description("Which type of chestplate to swap to.")
-        .defaultValue(Chestplate.PreferNetherite)
-        .build()
-    );
+            .name("chestplate")
+            .description("Which type of chestplate to swap to.")
+            .defaultValue(Chestplate.PreferNetherite)
+            .build());
 
     private final Setting<Boolean> preferEnchanted = sgGeneral.add(new BoolSetting.Builder()
-        .name("prefer-enchanted")
-        .description("Prefers enchanted equipment when swapping")
-        .defaultValue(false)
-        .build()
-    );
+            .name("prefer-enchanted")
+            .description("Prefers enchanted equipment when swapping")
+            .defaultValue(false)
+            .build());
+
+    private final Setting<Boolean> discourageCurseOfBinding = sgGeneral.add(new BoolSetting.Builder()
+            .name("discourage-curse-of-binding")
+            .description("Prefers equipment without curse of binding")
+            .defaultValue(false)
+            .build());
+
+    private final Setting<Boolean> blockCurseOfBinding = sgGeneral.add(new BoolSetting.Builder()
+            .name("block-curse-of-binding")
+            .description("Prevents equipment with curse of binding from being equiped")
+            .defaultValue(false)
+            .visible(discourageCurseOfBinding::get)
+            .build());
 
     private final Setting<Boolean> stayOn = sgGeneral.add(new BoolSetting.Builder()
-        .name("stay-on")
-        .description("Stays on and activates when you turn it off.")
-        .defaultValue(false)
-        .build()
-    );
+            .name("stay-on")
+            .description("Stays on and activates when you turn it off.")
+            .defaultValue(false)
+            .build());
 
     private final Setting<Boolean> closeInventory = sgGeneral.add(new BoolSetting.Builder()
-        .name("close-inventory")
-        .description("Sends inventory close after swap.")
-        .defaultValue(true)
-        .build()
-    );
+            .name("close-inventory")
+            .description("Sends inventory close after swap.")
+            .defaultValue(true)
+            .build());
 
     public ChestSwap() {
         super(Categories.Player, "chest-swap", "Automatically swaps between a chestplate and an elytra.");
@@ -62,12 +71,14 @@ public class ChestSwap extends Module {
     @Override
     public void onActivate() {
         swap();
-        if (!stayOn.get()) toggle();
+        if (!stayOn.get())
+            toggle();
     }
 
     @Override
     public void onDeactivate() {
-        if (stayOn.get()) swap();
+        if (stayOn.get())
+            swap();
     }
 
     public void swap() {
@@ -75,10 +86,12 @@ public class ChestSwap extends Module {
 
         if (currentItem.contains(DataComponentTypes.GLIDER)) {
             equipChestplate();
-        } else if (currentItem.contains(DataComponentTypes.EQUIPPABLE) && currentItem.get(DataComponentTypes.EQUIPPABLE).slot().getEntitySlotId() == EquipmentSlot.CHEST.getEntitySlotId()) {
+        } else if (currentItem.contains(DataComponentTypes.EQUIPPABLE) && currentItem.get(DataComponentTypes.EQUIPPABLE)
+                .slot().getEntitySlotId() == EquipmentSlot.CHEST.getEntitySlotId()) {
             equipElytra();
         } else {
-            if (!equipChestplate()) equipElytra();
+            if (!equipChestplate())
+                equipElytra();
         }
     }
 
@@ -92,8 +105,17 @@ public class ChestSwap extends Module {
             ItemStack itemStack = mc.player.getInventory().getMainStacks().get(i);
             Item item = itemStack.getItem();
 
-            if (!(item == Items.DIAMOND_CHESTPLATE || item == Items.NETHERITE_CHESTPLATE)) continue;
+            if (!(item == Items.DIAMOND_CHESTPLATE || item == Items.NETHERITE_CHESTPLATE)) {
+                continue;
+            }
 
+            boolean hasBinding = hasCurseOfBinding(itemStack);
+
+            if (hasBinding && discourageCurseOfBinding.get() && blockCurseOfBinding.get()) {
+                continue;
+            }
+
+            // TODO: add discourage binding logic here
             if (!preferEnchanted.get()) {
                 switch (chestplate.get()) {
                     case Diamond:
@@ -128,13 +150,17 @@ public class ChestSwap extends Module {
                 continue;
             }
 
-            boolean isPreferred =
-                (chestplate.get() == Chestplate.Diamond && item == Items.DIAMOND_CHESTPLATE) ||
+            boolean isPreferred = (chestplate.get() == Chestplate.Diamond && item == Items.DIAMOND_CHESTPLATE) ||
                     (chestplate.get() == Chestplate.Netherite && item == Items.NETHERITE_CHESTPLATE) ||
                     (chestplate.get() == Chestplate.PreferDiamond && item == Items.DIAMOND_CHESTPLATE) ||
                     (chestplate.get() == Chestplate.PreferNetherite && item == Items.NETHERITE_CHESTPLATE);
 
             int score = rateArmorEnchantments(itemStack);
+
+            if (hasBinding && discourageCurseOfBinding.get()) {
+                isPreferred = false;
+                score = 0;
+            }
 
             if (isPreferred) {
                 // If there is a preferred chestplate ignore all not preferred chesplates
@@ -151,7 +177,9 @@ public class ChestSwap extends Module {
             }
         }
 
-        if (bestSlot != -1) equip(bestSlot);
+        if (bestSlot != -1) {
+            equip(bestSlot);
+        }
         return bestSlot != -1;
     }
 
@@ -167,12 +195,22 @@ public class ChestSwap extends Module {
                 continue;
             }
 
+            boolean hasBinding = hasCurseOfBinding(item);
+
+            if (hasBinding && discourageCurseOfBinding.get() && blockCurseOfBinding.get()) {
+                continue;
+            }
+
             if (!preferEnchanted.get()) {
                 bestSlot = i;
                 break;
             }
 
             int score = rateElytraEnchantments(item);
+
+            if (hasBinding && discourageCurseOfBinding.get()) {
+                score = 0;
+            }
 
             if (score >= bestScore) {
                 bestSlot = i;
@@ -185,7 +223,8 @@ public class ChestSwap extends Module {
         }
     }
 
-    // 2 points for mending, 1 points for each level of unbreaking and any protection enchant
+    // 2 points for mending, 1 points for each level of unbreaking and any
+    // protection enchant
     private int rateArmorEnchantments(ItemStack item) {
         int score = 0;
 
@@ -227,6 +266,14 @@ public class ChestSwap extends Module {
         return score;
     }
 
+    private boolean hasCurseOfBinding(ItemStack stack) {
+        if (getEnchantmentLevel(stack, Enchantments.BINDING_CURSE) > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     public static int getEnchantmentLevel(ItemStack stack, RegistryKey<Enchantment> enchantment) {
         for (RegistryEntry<Enchantment> enchantments : stack.getEnchantments().getEnchantments()) {
             if (enchantments.toString().contains(enchantment.getValue().toString())) {
@@ -239,15 +286,18 @@ public class ChestSwap extends Module {
     private void equip(int slot) {
         InvUtils.move().from(slot).toArmor(2);
         if (closeInventory.get()) {
-            // Notchian clients send a Close Window packet with Window ID 0 to close their inventory even though there is never an Open Screen packet for the inventory.
+            // Notchian clients send a Close Window packet with Window ID 0 to close their
+            // inventory even though there is never an Open Screen packet for the inventory.
             mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(0));
         }
     }
 
     @Override
     public void sendToggledMsg() {
-        if (stayOn.get()) super.sendToggledMsg();
-        else if (Config.get().chatFeedback.get() && chatFeedback) info("Triggered (highlight)%s(default).", title);
+        if (stayOn.get())
+            super.sendToggledMsg();
+        else if (Config.get().chatFeedback.get() && chatFeedback)
+            info("Triggered (highlight)%s(default).", title);
     }
 
     public enum Chestplate {
