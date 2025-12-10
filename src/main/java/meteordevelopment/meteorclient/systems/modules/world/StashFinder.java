@@ -53,6 +53,17 @@ public class StashFinder extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
+    private static final List<Block> DEFAULT_SUPPORT_BLOCK_BLACKLIST = List.of(
+        Blocks.OXIDIZED_COPPER,
+        Blocks.OXIDIZED_CUT_COPPER,
+        Blocks.TUFF_BRICKS,
+        Blocks.WAXED_COPPER_BLOCK,
+        Blocks.WAXED_OXIDIZED_COPPER,
+        Blocks.WAXED_OXIDIZED_CUT_COPPER,
+        Blocks.BARREL,
+        Blocks.WAXED_COPPER_BULB
+    );
+
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
         .name("storage-blocks")
         .description("Select the storage blocks to search for.")
@@ -67,17 +78,6 @@ public class StashFinder extends Module {
         .min(1)
         .sliderMin(1)
         .build()
-    );
-
-    private static final List<Block> DEFAULT_SUPPORT_BLOCK_BLACKLIST = List.of(
-        Blocks.OXIDIZED_COPPER,
-        Blocks.OXIDIZED_CUT_COPPER,
-        Blocks.TUFF_BRICKS,
-        Blocks.WAXED_COPPER_BLOCK,
-        Blocks.WAXED_OXIDIZED_COPPER,
-        Blocks.WAXED_OXIDIZED_CUT_COPPER,
-        Blocks.BARREL,
-        Blocks.WAXED_COPPER_BULB
     );
 
     private final Setting<List<Block>> blacklistedBlocks = sgGeneral.add(new BlockListSetting.Builder()
@@ -171,7 +171,7 @@ public class StashFinder extends Module {
     );
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private final Map<ChunkPos, Vec3d> tracePositions = new HashMap<>();
+    private final Map<ChunkPos, Vec3d> tracerPositions = new HashMap<>();
     public List<Chunk> chunks = new ArrayList<>();
 
     public StashFinder() {
@@ -186,7 +186,7 @@ public class StashFinder extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (!clearTracesBind.get().isPressed()) return;
-        tracePositions.clear();
+        tracerPositions.clear();
     }
 
     @EventHandler
@@ -201,9 +201,7 @@ public class StashFinder extends Module {
         List<Block> blockBlacklist = blacklistedBlocks.get();
 
         for (BlockEntity blockEntity : event.chunk().getBlockEntities().values()) {
-            BlockEntityType<?> type = blockEntity.getType();
-
-            if (!storageBlocks.get().contains(type)) continue;
+            if (!storageBlocks.get().contains(blockEntity.getType())) continue;
 
             if (!blockBlacklist.isEmpty()) {
                 BlockPos below = blockEntity.getPos().down();
@@ -228,7 +226,7 @@ public class StashFinder extends Module {
 
             if (renderTracer.get()) {
                 double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                tracePositions.put(chunk.chunkPos, new Vec3d(chunk.x, y, chunk.z));
+                tracerPositions.put(chunk.chunkPos, new Vec3d(chunk.x, y, chunk.z));
             }
 
             saveJson();
@@ -271,12 +269,12 @@ public class StashFinder extends Module {
         clear.action = () -> {
             chunks.clear();
             table.clear();
-            tracePositions.clear();
+            tracerPositions.clear();
         };
 
         resetTracers.action = () -> {
             table.clear();
-            tracePositions.clear();
+            tracerPositions.clear();
             fillTable(theme, table);
         };
 
@@ -291,13 +289,13 @@ public class StashFinder extends Module {
             table.add(theme.label("Pos: " + chunk.x + ", " + chunk.z)).padRight(10);
             table.add(theme.label("Total: " + chunk.getTotal())).padRight(10);
 
-            WCheckbox visible = table.add(theme.checkbox(tracePositions.containsKey(chunk.chunkPos))).widget();
+            WCheckbox visible = table.add(theme.checkbox(tracerPositions.containsKey(chunk.chunkPos))).widget();
             visible.action = () -> {
                 if (visible.checked) {
                     double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                    tracePositions.put(chunk.chunkPos, new Vec3d(chunk.x, y, chunk.z));
+                    tracerPositions.put(chunk.chunkPos, new Vec3d(chunk.x, y, chunk.z));
                 }
-                else tracePositions.remove(chunk.chunkPos);
+                else tracerPositions.remove(chunk.chunkPos);
             };
 
             WButton open = table.add(theme.button("Open")).widget();
@@ -309,7 +307,7 @@ public class StashFinder extends Module {
             WMinus delete = table.add(theme.minus()).widget();
             delete.action = () -> {
                 if (chunks.remove(chunk)) {
-                    tracePositions.remove(chunk.chunkPos);
+                    tracerPositions.remove(chunk.chunkPos);
                     table.clear();
                     fillTable(theme, table);
 
@@ -430,15 +428,12 @@ public class StashFinder extends Module {
 
     @EventHandler
     private void onRender3D(Render3DEvent event) {
-        if (tracePositions.isEmpty() || mc.player == null) return;
+        if (tracerPositions.isEmpty() || mc.player == null) return;
 
-        double eyeY = mc.player.getEyeY();
         double playerX = mc.player.getX();
         double playerZ = mc.player.getZ();
-        int bottomY = mc.world.getBottomY();
-        int topY = bottomY + mc.world.getDimension().height();
 
-        tracePositions.entrySet().removeIf(entry -> {
+        tracerPositions.entrySet().removeIf(entry -> {
             Vec3d pos = entry.getValue();
             double horizontalDist = Math.hypot(pos.x - playerX, pos.z - playerZ);
             return horizontalDist <= traceArrivalDistance.get();
@@ -446,12 +441,14 @@ public class StashFinder extends Module {
 
         if (!renderTracer.get() && !renderChunkColumn.get()) return;
 
-        for (Vec3d pos : tracePositions.values()) {
+        for (Vec3d pos : tracerPositions.values()) {
             double horizontalDist = Math.hypot(pos.x - playerX, pos.z - playerZ);
             if (horizontalDist > traceMaxDistance.get()) continue;
 
             if (renderTracer.get()) {
-                event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, pos.x, eyeY, pos.z, traceColor.get());
+                event.renderer.line(
+                    RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, pos.x, mc.player.getEyeY(), pos.z, traceColor.get()
+                );
             }
 
             if (renderChunkColumn.get()) {
@@ -459,6 +456,9 @@ public class StashFinder extends Module {
                 double x2 = pos.x + 0.5;
                 double z1 = pos.z - 0.5;
                 double z2 = pos.z + 0.5;
+
+                int bottomY = mc.world.getBottomY();
+                int topY = bottomY + mc.world.getDimension().height();
 
                 event.renderer.line(x1, bottomY, z1, x1, topY, z1, traceColumnColor.get());
                 event.renderer.line(x1, bottomY, z2, x1, topY, z2, traceColumnColor.get());
