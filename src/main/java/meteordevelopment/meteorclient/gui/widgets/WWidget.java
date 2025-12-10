@@ -25,6 +25,7 @@ public abstract class WWidget implements BaseWidget {
     public String tooltip;
 
     public boolean mouseOver;
+    public boolean focused;
     protected boolean instantTooltips;
     protected double mouseOverTimer;
 
@@ -143,11 +144,19 @@ public abstract class WWidget implements BaseWidget {
         return parent != null ? parent.getRoot() : (this instanceof WRoot ? this : null);
     }
 
-    protected WView getView() {
+    public WView getView() {
         return this instanceof WView ? (WView) this : (parent != null ? parent.getView() : null);
     }
 
     public boolean isOver(double x, double y) {
         return x >= this.x && x <= this.x + width && y >= this.y && y <= this.y + height;
+    }
+
+    public boolean isFocused() {
+        return focused;
+    }
+
+    public void setFocused(boolean focused) {
+        if (this.focused != focused) this.focused = focused;
     }
 }
