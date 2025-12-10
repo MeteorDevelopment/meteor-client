@@ -31,15 +31,8 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
         bodyYaw = player.bodyYaw;
         lastBodyYaw = bodyYaw;
 
-        Byte playerModel = player.getDataTracker().get(PlayerEntity.PLAYER_MODEL_PARTS);
-        dataTracker.set(PlayerEntity.PLAYER_MODEL_PARTS, playerModel);
-
         getAttributes().setFrom(player.getAttributes());
         setPose(player.getPose());
-
-        capeX = getX();
-        capeY = getY();
-        capeZ = getZ();
 
         if (health <= 20) {
             setHealth(health);

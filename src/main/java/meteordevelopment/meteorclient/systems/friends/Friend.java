@@ -6,7 +6,9 @@
 package meteordevelopment.meteorclient.systems.friends;
 
 import com.mojang.util.UndashedUuid;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
+import meteordevelopment.meteorclient.utils.network.FailedHttpResponse;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadUtils;
@@ -15,6 +17,7 @@ import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.net.http.HttpResponse;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -49,11 +52,32 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
 
     public void updateInfo() {
         updating = true;
-        APIResponse res = Http.get("https://api.mojang.com/users/profiles/minecraft/" + name).sendJson(APIResponse.class);
-        if (res == null || res.name == null || res.id == null) return;
-        name = res.name;
-        id = UndashedUuid.fromStringLenient(res.id);
-        mc.execute(() -> headTexture = PlayerHeadUtils.fetchHead(id));
+        HttpResponse<APIResponse> res = null;
+
+        if (id != null) {
+            res = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + UndashedUuid.toString(id))
+                .exceptionHandler(e -> MeteorClient.LOG.error("Error while trying to connect session server for friend '{}'", name))
+                .sendJsonResponse(APIResponse.class);
+        }
+
+        // Fallback to name-based lookup
+        if (res == null || res.statusCode() != 200) {
+            res = Http.get("https://api.mojang.com/users/profiles/minecraft/" + name)
+                .exceptionHandler(e -> MeteorClient.LOG.error("Error while trying to update info for friend '{}'", name))
+                .sendJsonResponse(APIResponse.class);
+        }
+
+        if (res != null && res.statusCode() == 200) {
+            name = res.body().name;
+            id = UndashedUuid.fromStringLenient(res.body().id);
+            mc.execute(() -> headTexture = PlayerHeadUtils.fetchHead(id));
+        }
+
+        // cracked accounts shouldn't be assigned ids
+        else if (!(res instanceof FailedHttpResponse)) {
+            id = null;
+        }
+
         updating = false;
     }
 
@@ -91,7 +115,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
 
     @Override
     public int compareTo(@NotNull Friend friend) {
-        return name.compareTo(friend.name);
+        return name.compareToIgnoreCase(friend.name);
     }
 
     private static class APIResponse {

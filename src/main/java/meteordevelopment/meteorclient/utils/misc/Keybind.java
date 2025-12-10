@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.input.MouseInput;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.Objects;
@@ -85,6 +87,14 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         if (!this.isSet() || this.isKey != isKey) return false;
         if (!hasMods()) return this.value == value;
         return this.value == value && this.modifiers == modifiers;
+    }
+
+    public boolean matches(KeyInput input) {
+        return matches(true, input.key(), input.modifiers());
+    }
+
+    public boolean matches(MouseInput input) {
+        return matches(false, input.button(), 0);
     }
 
     public boolean isPressed() {

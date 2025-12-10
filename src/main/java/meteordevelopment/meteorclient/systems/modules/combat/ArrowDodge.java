@@ -111,7 +111,7 @@ public class ArrowDodge extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (Vector3d point : points) vec3s.free(point);
+        vec3s.freeAll(points);
         points.clear();
 
         for (Entity e : mc.world.getEntities()) {
@@ -157,7 +157,7 @@ public class ArrowDodge extends Module {
         switch (moveType.get()) {
             case Velocity -> mc.player.setVelocity(velX, velY, velZ);
             case Packet -> {
-                Vec3d newPos = mc.player.getPos().add(velX, velY, velZ);
+                Vec3d newPos = mc.player.getEntityPos().add(velX, velY, velZ);
                 mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y, newPos.z, false, mc.player.horizontalCollision));
                 mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y - 0.01, newPos.z, true, mc.player.horizontalCollision));
             }
@@ -165,7 +165,7 @@ public class ArrowDodge extends Module {
     }
 
     private boolean isValid(Vec3d velocity, boolean checkGround) {
-        Vec3d playerPos = mc.player.getPos().add(velocity);
+        Vec3d playerPos = mc.player.getEntityPos().add(velocity);
         Vec3d headPos = playerPos.add(0, 1, 0);
 
         for (Vector3d pos : points) {

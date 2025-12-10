@@ -75,8 +75,9 @@ public class EntityUtils {
     @SuppressWarnings("deprecation") // Use of AbstractBlock.AbstractBlockState#blocksMovement
     public static boolean isAboveWater(Entity entity) {
         BlockPos.Mutable blockPos = entity.getBlockPos().mutableCopy();
+        int bottom = mc.world.getBottomY();
 
-        for (int i = 0; i < 64; i++) {
+        while (blockPos.getY() > bottom) {
             BlockState state = mc.world.getBlockState(blockPos);
 
             if (state.blocksMovement()) break;
@@ -90,6 +91,10 @@ public class EntityUtils {
         }
 
         return false;
+    }
+
+    public static boolean isInCobweb(Entity entity) {
+        return mc.world.getStatesInBoxIfLoaded(entity.getBoundingBox()).anyMatch(state -> state.isOf(Blocks.COBWEB));
     }
 
     public static boolean isInRenderDistance(Entity entity) {

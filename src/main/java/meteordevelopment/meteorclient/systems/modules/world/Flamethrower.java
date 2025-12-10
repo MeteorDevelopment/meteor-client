@@ -138,7 +138,7 @@ public class Flamethrower extends Module {
         } else {
             if (ticks >= tickInterval.get() && !entity.isOnFire()) {
                 mc.interactionManager.interactBlock(mc.player, hand, new BlockHitResult(
-                    entity.getPos().subtract(new Vec3d(0, 1, 0)), Direction.UP, entity.getBlockPos().down(), false));
+                    entity.getEntityPos().subtract(new Vec3d(0, 1, 0)), Direction.UP, entity.getBlockPos().down(), false));
                 ticks = 0;
             }
         }

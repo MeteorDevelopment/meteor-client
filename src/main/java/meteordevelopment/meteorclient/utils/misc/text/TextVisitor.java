@@ -15,8 +15,8 @@ import java.util.Optional;
 import java.util.Queue;
 
 /**
- * An extension of {@link net.minecraft.text.StringVisitable.StyledVisitor} with access to the underlying {@link Text} objects.
- * @param <T> the optional short circuit return type, to match the semantics of {@link net.minecraft.text.StringVisitable.Visitor} and {@link net.minecraft.text.StringVisitable.StyledVisitor}.
+ * An extension of {@link StringVisitable.StyledVisitor} with access to the underlying {@link Text} objects.
+ * @param <T> the optional short circuit return type, to match the semantics of {@link StringVisitable.Visitor} and {@link StringVisitable.StyledVisitor}.
  * @author Crosby
  */
 @FunctionalInterface

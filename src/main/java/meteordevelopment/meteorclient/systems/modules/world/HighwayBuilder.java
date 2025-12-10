@@ -488,7 +488,7 @@ public class HighwayBuilder extends Module {
         setState(State.Center);
         lastBreakingPos.set(0, 0, 0);
 
-        start = mc.player.getPos();
+        start = mc.player.getEntityPos();
         blocksBroken = blocksPlaced = 0;
         displayInfo = true;
         suspended = false;
@@ -764,7 +764,7 @@ public class HighwayBuilder extends Module {
         Center {
             @Override
             protected void start(HighwayBuilder b) {
-                if (b.mc.player.getPos().isInRange(Vec3d.ofBottomCenter(b.mc.player.getBlockPos()), 0.1)) {
+                if (b.mc.player.getEntityPos().isInRange(Vec3d.ofBottomCenter(b.mc.player.getBlockPos()), 0.1)) {
                     stop(b);
                 }
             }
@@ -894,7 +894,7 @@ public class HighwayBuilder extends Module {
 
             @Override
             protected void tick(HighwayBuilder b) {
-                Vec3d vec = b.mc.player.getPos().add(b.mc.player.getVelocity()).add(0, -0.75, 0);
+                Vec3d vec = b.mc.player.getEntityPos().add(b.mc.player.getVelocity()).add(0, -0.75, 0);
                 pos.set(b.mc.player.getBlockX(), vec.y, b.mc.player.getBlockZ());
 
                 if (pos.getY() >= b.mc.player.getBlockPos().getY()) {
@@ -1314,11 +1314,18 @@ public class HighwayBuilder extends Module {
                             return;
                         }
 
-                        PlayerActionC2SPacket p = new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, bp, BlockUtils.getDirection(bp));
                         rebreakTimer = b.rebreakTimer.get();
 
-                        if (b.rotation.get().mine) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> b.mc.getNetworkHandler().sendPacket(p));
-                        else b.mc.getNetworkHandler().sendPacket(p);
+                        if (b.rotation.get().mine) {
+                            Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () ->
+                                b.mc.interactionManager.sendSequencedPacket(b.mc.world, (sequence) ->
+                                    new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, bp, BlockUtils.getDirection(bp), sequence)
+                                )
+                            );
+                        }
+                        else b.mc.interactionManager.sendSequencedPacket(b.mc.world, (sequence) ->
+                            new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, bp, BlockUtils.getDirection(bp), sequence)
+                        );
                     }
                     else {
                         if (b.rotation.get().mine) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> BlockUtils.breakBlock(bp, true));
@@ -1828,7 +1835,7 @@ public class HighwayBuilder extends Module {
                 float velocity = BowItem.getPullProgress(b.mc.player.getItemUseTime());
 
                 // Positions
-                Vec3d pos = target.getPos();
+                Vec3d pos = target.getEntityPos();
 
                 double relativeX = pos.x - b.mc.player.getX();
                 double relativeY = pos.y + 0.5 - b.mc.player.getEyeY(); // aiming a little bit above the bottom of the crystal, hopefully prevents shooting the floor or failing the raytrace check
@@ -2797,13 +2804,13 @@ public class HighwayBuilder extends Module {
         }
 
         public DoubleMineBlock startDestroying() {
-            b.mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, this.blockPos, this.direction));
+            b.mc.interactionManager.sendSequencedPacket(b.mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, this.blockPos, this.direction, sequence));
             normalStartTime = b.mc.player.age;
             return this;
         }
 
         public DoubleMineBlock stopDestroying() {
-            b.mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.blockPos, this.direction));
+            b.mc.interactionManager.sendSequencedPacket(b.mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, this.blockPos, this.direction, sequence));
             return this;
         }
 
@@ -2824,7 +2831,7 @@ public class HighwayBuilder extends Module {
             // when it isn't supposed to due to latency
             boolean timeout = progress() > 2 && (b.mc.player.age - (packet ? packetStartTime : normalStartTime) > 60);
 
-            return  distance || timeout;
+            return distance || timeout;
         }
 
         public double progress() {

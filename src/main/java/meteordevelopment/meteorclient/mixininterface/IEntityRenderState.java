@@ -5,12 +5,10 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import meteordevelopment.meteorclient.mixin.EntityRenderDispatcherMixin;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderer;
+import meteordevelopment.meteorclient.mixin.EntityRenderManagerMixin;
 import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 
 public interface IEntityRenderState {
     /**
@@ -23,8 +21,9 @@ public interface IEntityRenderState {
      *
      * @return The entity that the render state refers to
      *
-     * @see EntityRenderDispatcherMixin#render$getAndUpdateRenderState(EntityRenderState, Entity, double, double, double, float, MatrixStack, VertexConsumerProvider, int, EntityRenderer)
+     * @see EntityRenderManagerMixin#getAndUpdateRenderState$setEntity(EntityRenderState, Entity, float)
      */
+    @Nullable(value = "EntityCulling mod can prevent the code that sets the entity from running")
     Entity meteor$getEntity();
 
     void meteor$setEntity(Entity entity);

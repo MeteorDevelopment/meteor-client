@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import org.jetbrains.annotations.Nullable;
@@ -59,11 +60,11 @@ public abstract class ScreenMixin {
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void onKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+    private void onKeyPressed(KeyInput input, CallbackInfoReturnable<Boolean> cir) {
         if ((Object) (this) instanceof ChatScreen) return;
         GUIMove guiMove = Modules.get().get(GUIMove.class);
         List<Integer> arrows = List.of(GLFW_KEY_RIGHT, GLFW_KEY_LEFT, GLFW_KEY_DOWN,  GLFW_KEY_UP);
-        if ((guiMove.disableArrows() && arrows.contains(keyCode)) || (guiMove.disableSpace() && keyCode == GLFW_KEY_SPACE)) {
+        if ((guiMove.disableArrows() && arrows.contains(input.key())) || (guiMove.disableSpace() && input.key() == GLFW_KEY_SPACE)) {
             cir.setReturnValue(true);
         }
     }

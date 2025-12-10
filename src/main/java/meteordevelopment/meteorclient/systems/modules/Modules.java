@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -42,6 +42,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
@@ -53,7 +54,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class Modules extends System<Modules> {
     private static final List<Category> CATEGORIES = new ArrayList<>();
 
-    private final List<Module> modules = new ArrayList<>();
     private final Map<Class<? extends Module>, Module> moduleInstances = new Reference2ReferenceOpenHashMap<>();
     private final Map<Category, List<Module>> groups = new Reference2ReferenceOpenHashMap<>();
 
@@ -94,7 +94,6 @@ public class Modules extends System<Modules> {
         for (List<Module> modules : groups.values()) {
             modules.sort(Comparator.comparing(o -> o.title));
         }
-        modules.sort(Comparator.comparing(o -> o.title));
     }
 
     public static void registerCategory(Category category) {
@@ -108,10 +107,17 @@ public class Modules extends System<Modules> {
     }
 
     @SuppressWarnings("unchecked")
+    @Nullable
     public <T extends Module> T get(Class<T> klass) {
         return (T) moduleInstances.get(klass);
     }
 
+    @SuppressWarnings("unused")
+    public <T extends Module> Optional<T> getOptional(Class<T> klass) {
+        return Optional.ofNullable(get(klass));
+    }
+
+    @Nullable
     public Module get(String name) {
         for (Module module : moduleInstances.values()) {
             if (module.name.equalsIgnoreCase(name)) return module;
@@ -133,22 +139,13 @@ public class Modules extends System<Modules> {
         return moduleInstances.values();
     }
 
-    /**
-     * @deprecated Use {@link Modules#getAll()} instead.
-     */
-    @Deprecated(forRemoval = true)
-    public List<Module> getList() {
-        return modules;
-    }
 
     public int getCount() {
         return moduleInstances.size();
     }
 
     public List<Module> getActive() {
-        synchronized (active) {
-            return active;
-        }
+        return active;
     }
 
     public Set<Module> searchTitles(String text) {
@@ -222,12 +219,12 @@ public class Modules extends System<Modules> {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onKeyBinding(KeyEvent event) {
-        if (event.action == KeyAction.Release && onBinding(true, event.key, event.modifiers)) event.cancel();
+        if (event.action == KeyAction.Release && onBinding(true, event.key(), event.modifiers())) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private void onButtonBinding(MouseButtonEvent event) {
-        if (event.action == KeyAction.Release && onBinding(false, event.button, 0)) event.cancel();
+    private void onButtonBinding(MouseClickEvent event) {
+        if (event.action == KeyAction.Release && onBinding(false, event.button(), 0)) event.cancel();
     }
 
     private boolean onBinding(boolean isKey, int value, int modifiers) {
@@ -259,13 +256,13 @@ public class Modules extends System<Modules> {
     @EventHandler(priority = EventPriority.HIGH)
     private void onKey(KeyEvent event) {
         if (event.action == KeyAction.Repeat) return;
-        onAction(true, event.key, event.modifiers, event.action == KeyAction.Press);
+        onAction(true, event.key(), event.modifiers(), event.action == KeyAction.Press);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseClick(MouseClickEvent event) {
         if (event.action == KeyAction.Repeat) return;
-        onAction(false, event.button, 0, event.action == KeyAction.Press);
+        onAction(false, event.button(), 0, event.action == KeyAction.Press);
     }
 
     private void onAction(boolean isKey, int value, int modifiers, boolean isPress) {
@@ -320,7 +317,7 @@ public class Modules extends System<Modules> {
     public void disableAll() {
         synchronized (active) {
             for (Module module : getAll()) {
-                if (module.isActive()) module.toggle();
+                module.disable();
             }
         }
     }
@@ -378,7 +375,6 @@ public class Modules extends System<Modules> {
 
         // Add the module
         moduleInstances.put(module.getClass(), module);
-        modules.add(module);
         getGroup(module.category).add(module);
 
         // Register color settings for the module

@@ -190,11 +190,11 @@ public class Scaffold extends Module {
     private void onTick(TickEvent.Pre event) {
         if (onlyOnClick.get() && !mc.options.useKey.isPressed()) return;
 
-        Vec3d vec = mc.player.getPos().add(mc.player.getVelocity()).add(0, -0.75, 0);
+        Vec3d vec = mc.player.getEntityPos().add(mc.player.getVelocity()).add(0, -0.75, 0);
         if (airPlace.get()) {
             bp.set(vec.getX(), vec.getY(), vec.getZ());
         } else {
-            Vec3d pos = mc.player.getPos();
+            Vec3d pos = mc.player.getEntityPos();
             if (aheadDistance.get() != 0 && !towering() && !mc.world.getBlockState(mc.player.getBlockPos().down()).getCollisionShape(mc.world, mc.player.getBlockPos()).isEmpty()) {
                 Vec3d dir = Vec3d.fromPolar(0, mc.player.getYaw()).multiply(aheadDistance.get(), 0, aheadDistance.get());
                 if (mc.options.forwardKey.isPressed()) pos = pos.add(dir.x, 0, dir.z);
@@ -213,7 +213,7 @@ public class Scaffold extends Module {
         BlockPos targetBlock = bp.toImmutable();
 
         if (!airPlace.get() && (BlockUtils.getPlaceSide(bp) == null)) {
-            Vec3d pos = mc.player.getPos();
+            Vec3d pos = mc.player.getEntityPos();
             pos = pos.add(0, -0.98f, 0);
             pos.add(mc.player.getVelocity());
 
@@ -241,7 +241,7 @@ public class Scaffold extends Module {
             for (int x = (int) (bp.getX() - radius.get()); x <= bp.getX() + radius.get(); x++) {
                 for (int z = (int) (bp.getZ() - radius.get()); z <= bp.getZ() + radius.get(); z++) {
                     BlockPos blockPos = BlockPos.ofFloored(x, bp.getY(), z);
-                    if (mc.player.getPos().distanceTo(Vec3d.ofCenter(blockPos)) <= radius.get() || (x == bp.getX() && z == bp.getZ())) {
+                    if (mc.player.getEntityPos().distanceTo(Vec3d.ofCenter(blockPos)) <= radius.get() || (x == bp.getX() && z == bp.getZ())) {
                         blocks.add(blockPos);
                     }
                 }
