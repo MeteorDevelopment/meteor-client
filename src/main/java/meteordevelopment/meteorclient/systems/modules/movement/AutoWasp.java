@@ -11,11 +11,10 @@ import meteordevelopment.meteorclient.mixin.AbstractBlockAccessor;
 import meteordevelopment.meteorclient.mixin.DirectionAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
-import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
@@ -92,11 +91,11 @@ public class AutoWasp extends Module {
     @Override
     public void onActivate() {
         if (target == null || target.isRemoved()) {
-            target = (PlayerEntity) TargetUtils.get(entity -> {
-                if (!(entity instanceof PlayerEntity) || entity == mc.player) return false;
-                if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
-                return !onlyFriends.get() || Friends.get().get((PlayerEntity) entity) != null;
-            }, SortPriority.LowestDistance);
+            target = (PlayerEntity) Targeting.findTarget(SortPriority.LowestDistance,entity -> {
+                if (!(entity instanceof PlayerEntity player) || entity == mc.player) return false;
+                if (player.isDead() || player.getHealth() <= 0) return false;
+                return !onlyFriends.get() || Targeting.isFriend(player);
+            });
 
             if (target == null) {
                 error("No valid targets.");

@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -105,7 +105,7 @@ public class NoInteract extends Module {
 
     private final Setting<InteractMode> friends = sgEntities.add(new EnumSetting.Builder<InteractMode>()
         .name("friends")
-        .description("Friends cancel mode.")
+        .description("Targeting cancel mode.")
         .defaultValue(InteractMode.None)
         .build()
     );
@@ -177,9 +177,9 @@ public class NoInteract extends Module {
     }
 
     private boolean shouldAttackEntity(Entity entity) {
-        // Friends
+        // Targeting
         if ((friends.get() == InteractMode.Both || friends.get() == InteractMode.Hit) &&
-            entity instanceof PlayerEntity && !Friends.get().shouldAttack((PlayerEntity) entity)) {
+            entity instanceof PlayerEntity && !Targeting.shouldAttack((PlayerEntity) entity)) {
             return false;
         }
 
@@ -210,9 +210,9 @@ public class NoInteract extends Module {
             return false;
         }
 
-        // Friends
+        // Targeting
         if ((friends.get() == InteractMode.Both || friends.get() == InteractMode.Interact) &&
-            entity instanceof PlayerEntity && !Friends.get().shouldAttack((PlayerEntity) entity)) {
+            entity instanceof PlayerEntity && !Targeting.shouldAttack((PlayerEntity) entity)) {
             return false;
         }
 

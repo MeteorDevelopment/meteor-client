@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
-import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -92,7 +92,7 @@ public class AutoNametag extends Module {
         }
 
         // Target
-        target = TargetUtils.get(entity -> {
+        target = Targeting.findTarget(priority.get(),entity -> {
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!entities.get().contains(entity.getType())) return false;
 
@@ -100,7 +100,7 @@ public class AutoNametag extends Module {
                 return false;
 
             return entityCooldowns.getInt(entity) <= 0;
-        }, priority.get());
+        });
 
         if (target == null)
             return;

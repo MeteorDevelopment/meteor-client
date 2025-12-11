@@ -14,9 +14,10 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
-import meteordevelopment.meteorclient.utils.entity.TargetUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.player.PlayerEntity;
@@ -56,9 +57,9 @@ public class CityESP extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        PlayerEntity targetEntity = TargetUtils.getPlayerTarget(mc.player.getBlockInteractionRange() + 2, SortPriority.LowestDistance);
+        PlayerEntity targetEntity = Targeting.findPlayerTarget(mc.player.getBlockInteractionRange() + 2, SortPriority.LowestDistance);
 
-        if (TargetUtils.isBadTarget(targetEntity, mc.player.getBlockInteractionRange() + 2)) {
+        if (targetEntity == null) {
             target = null;
         } else {
             target = EntityUtils.getCityBlock(targetEntity);

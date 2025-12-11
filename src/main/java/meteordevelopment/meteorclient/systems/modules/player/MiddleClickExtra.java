@@ -14,8 +14,8 @@ import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.systems.friends.Friend;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.SavedPlayer;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -106,12 +106,12 @@ public class MiddleClickExtra extends Module {
             if (mc.targetedEntity == null) return;
             if (!(mc.targetedEntity instanceof PlayerEntity player)) return;
 
-            if (!Friends.get().isFriend(player)) {
-                Friends.get().add(new Friend(player));
+            if (!Targeting.isFriend(player)) {
+                Targeting.get().addFriend(new SavedPlayer(player));
                 info("Added %s to friends", player.getName().getString());
                 if (message.get()) ChatUtils.sendPlayerMsg("/msg " + player.getName() + " I just friended you on Meteor.");
             } else {
-                Friends.get().remove(Friends.get().get(player));
+                Targeting.get().removeFriend(Targeting.getFriend(player));
                 info("Removed %s from friends", player.getName().getString());
             }
 

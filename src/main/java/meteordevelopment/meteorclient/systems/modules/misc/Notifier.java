@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
@@ -82,17 +82,10 @@ public class Notifier extends Module {
         .build()
     );
 
-    private final Setting<Boolean> totemsIgnoreFriends = sgTotemPops.add(new BoolSetting.Builder()
-        .name("ignore-friends")
-        .description("Ignores friends totem pops.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> totemsIgnoreOthers = sgTotemPops.add(new BoolSetting.Builder()
-        .name("ignore-others")
-        .description("Ignores other players totem pops.")
-        .defaultValue(false)
+    private final Setting<Targeting.Selector> totemsSelector = sgTotemPops.add(new EnumSetting.Builder<Targeting.Selector>()
+        .name("show-others")
+        .description("What others players to show totem pops of")
+        .defaultValue(Targeting.Selector.All)
         .build()
     );
 
@@ -119,10 +112,10 @@ public class Notifier extends Module {
         .build()
     );
 
-    private final Setting<Boolean> visualRangeIgnoreFriends = sgVisualRange.add(new BoolSetting.Builder()
-        .name("ignore-friends")
-        .description("Ignores friends.")
-        .defaultValue(true)
+    private final Setting<Targeting.Selector> visualRangeSelector = sgVisualRange.add(new EnumSetting.Builder<Targeting.Selector>()
+        .name("which-players")
+        .description("Which players to notify of.")
+        .defaultValue(Targeting.Selector.Nonfriends)
         .build()
     );
 
@@ -156,10 +149,10 @@ public class Notifier extends Module {
         .build()
     );
 
-    private final Setting<Boolean> pearlIgnoreFriends = sgPearl.add(new BoolSetting.Builder()
-        .name("ignore-friends")
-        .description("Ignores friends pearls.")
-        .defaultValue(false)
+    private final Setting<Targeting.Selector> pearlSelector = sgPearl.add(new EnumSetting.Builder<Targeting.Selector>()
+        .name("which-pearls")
+        .description("Which players' pearls to notify of.")
+        .defaultValue(Targeting.Selector.All)
         .build()
     );
 
@@ -206,9 +199,10 @@ public class Notifier extends Module {
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Despawn) {
-            if (event.entity instanceof PlayerEntity) {
-                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
-                    ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getName().getString());
+            if (event.entity instanceof PlayerEntity player) {
+                Targeting.Relation relation = Targeting.getRelation(player);
+                if (Targeting.matchesSelector(visualRangeSelector.get(), relation) && (!visualRangeIgnoreFakes.get() || !(player instanceof FakePlayerEntity))) {
+                    ChatUtils.sendMsg(player.getId() + 100, Formatting.GRAY, "(highlight)%s(default) (%s) has entered your visual range!", player.getName().getString(), relation.toString());
 
                     if (visualMakeSound.get())
                         mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
@@ -230,9 +224,10 @@ public class Notifier extends Module {
     @EventHandler
     private void onEntityRemoved(EntityRemovedEvent event) {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Spawn) {
-            if (event.entity instanceof PlayerEntity) {
-                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
-                    ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getName().getString());
+            if (event.entity instanceof PlayerEntity player) {
+                Targeting.Relation relation = Targeting.getRelation(player);
+                if (Targeting.matchesSelector(visualRangeSelector.get(), relation) && (!visualRangeIgnoreFakes.get() || !(player instanceof FakePlayerEntity))) {
+                    ChatUtils.sendMsg(player.getId() + 100, Formatting.GRAY, "(highlight)%s(default) (%s) has left your visual range!", player.getName().getString(), relation.toString());
 
                     if (visualMakeSound.get())
                         mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
@@ -253,7 +248,7 @@ public class Notifier extends Module {
                 EnderPearlEntity pearl = (EnderPearlEntity) e;
                 if (pearl.getOwner() != null && pearl.getOwner() instanceof PlayerEntity p) {
                     double d = pearlStartPosMap.get(i).distanceTo(e.getEntityPos());
-                    if ((!Friends.get().isFriend(p) || !pearlIgnoreFriends.get()) && (!p.equals(mc.player) || !pearlIgnoreOwn.get())) {
+                    if (Targeting.matchesSelector(pearlSelector.get(), p) && (!p.equals(mc.player) || !pearlIgnoreOwn.get())) {
                         info("(highlight)%s's(default) pearl landed at %d, %d, %d (highlight)(%.1fm away, travelled %.1fm)(default).", pearl.getOwner().getName().getString(), pearl.getBlockPos().getX(), pearl.getBlockPos().getY(), pearl.getBlockPos().getZ(), pearl.distanceTo(mc.player), d);
                     }
                 }
@@ -308,9 +303,7 @@ public class Notifier extends Module {
                 createLeaveNotification(packet);
 
             case EntityStatusS2CPacket packet when totemPops.get() && packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING && packet.getEntity(mc.world) instanceof PlayerEntity entity -> {
-                if ((entity.equals(mc.player) && totemsIgnoreOwn.get())
-                    || (Friends.get().isFriend(entity) && totemsIgnoreOthers.get())
-                    || (!Friends.get().isFriend(entity) && totemsIgnoreFriends.get())
+                if ((entity.equals(mc.player) && totemsIgnoreOwn.get()) || !Targeting.matchesSelector(totemsSelector.get(), entity)
                 ) return;
 
                 synchronized (totemPopMap) {

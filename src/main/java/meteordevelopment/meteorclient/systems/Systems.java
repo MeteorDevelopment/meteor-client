@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.macros.Macros;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -46,7 +46,7 @@ public class Systems {
         config.settings.registerColorSettings(null);
 
         add(new Macros());
-        add(new Friends());
+        add(new Targeting());
         add(new Accounts());
         add(new Waypoints());
         add(new Profiles());
