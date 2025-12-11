@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ParticleEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.groups.GroupSet;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -21,7 +22,6 @@ import net.minecraft.particle.ParticleType;
 import net.minecraft.particle.ParticleTypes;
 
 import java.util.List;
-import java.util.Set;
 
 public class NoRender extends Module {
     private final SettingGroup sgOverlay = settings.createGroup("Overlay");
@@ -315,7 +315,7 @@ public class NoRender extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
+    private final Setting<GroupSet<Block, GroupedSetSetting.Groups<Block>.Group>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
         .name("block-entities")
         .description("Block entities (chest, shulker block, etc.) to not render.")
         .filter(block -> block instanceof BlockEntityProvider && !(block instanceof AbstractBannerBlock))
@@ -324,7 +324,7 @@ public class NoRender extends Module {
 
     // Entity
 
-    private final Setting<Set<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
+    private final Setting<GroupSet<EntityType<?>, GroupedSetSetting.Groups<EntityType<?>>.Group>> entities = sgEntity.add(new EntityTypeSetSetting.Builder()
         .name("entities")
         .description("Disables rendering of selected entities.")
         .build()

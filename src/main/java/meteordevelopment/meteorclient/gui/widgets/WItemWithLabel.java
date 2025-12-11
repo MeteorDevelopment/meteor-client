@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.gui.widgets;
 
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.utils.misc.Names;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
@@ -24,6 +25,8 @@ public class WItemWithLabel extends WHorizontalList {
     private WItem item;
     private WLabel label;
 
+    private Color color;
+
     public WItemWithLabel(ItemStack itemStack, String name) {
         this.itemStack = itemStack;
         this.name = name;
@@ -33,6 +36,7 @@ public class WItemWithLabel extends WHorizontalList {
     public void init() {
         item = add(theme.item(itemStack)).widget();
         label = add(theme.label(name + getStringToAppend())).widget();
+        if (color != null) label.color(color);
     }
 
     private String getStringToAppend() {
@@ -59,6 +63,11 @@ public class WItemWithLabel extends WHorizontalList {
 
         name = Names.get(itemStack);
         label.set(name + getStringToAppend());
+    }
+
+    public WItemWithLabel color(Color color) {
+        this.color = color;
+        return this;
     }
 
     public String getLabelText() {

@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
+public class StorageBlockListSetting extends AbstractCollectionSetting<List<BlockEntityType<?>>> {
     public static final BlockEntityType<?>[] STORAGE_BLOCKS = new BlockEntityType[]{
         BlockEntityType.BARREL,
         BlockEntityType.BLAST_FURNACE,
