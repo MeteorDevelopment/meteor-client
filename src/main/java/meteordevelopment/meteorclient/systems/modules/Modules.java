@@ -385,6 +385,7 @@ public class Modules extends System<Modules> {
         add(new AnchorAura());
         add(new AntiAnvil());
         add(new AntiBed());
+        add(new NoMissDelay());
         add(new ArrowDodge());
         add(new AutoAnvil());
         add(new AutoArmor());
