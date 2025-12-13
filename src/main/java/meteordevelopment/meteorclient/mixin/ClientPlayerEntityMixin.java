@@ -104,7 +104,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         MeteorClient.EVENT_BUS.post(PlayerTickMovementEvent.get());
     }
 
-    @ModifyReturnValue(method = "method_76763", at = @At("RETURN"))
+    @ModifyReturnValue(method = "getCrosshairTarget(FLnet/minecraft/entity/Entity;)Lnet/minecraft/util/hit/HitResult;", at = @At("RETURN"))
     private static HitResult onUpdateTargetedEntity(HitResult original, @Local HitResult hitResult) {
         if (original instanceof EntityHitResult ehr) {
             if (Modules.get().get(NoMiningTrace.class).canWork(ehr.getEntity()) && hitResult.getType() == HitResult.Type.BLOCK) {
@@ -118,7 +118,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         return original;
     }
 
-    @ModifyExpressionValue(method = "method_76763", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
+    @ModifyExpressionValue(method = "getCrosshairTarget(Lnet/minecraft/entity/Entity;DDF)Lnet/minecraft/util/hit/HitResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
     private static HitResult modifyRaycastResult(HitResult original, Entity entity, double blockInteractionRange, double entityInteractionRange, float tickProgress, @Local(ordinal = 0, argsOnly = true) double maxDistance) {
         if (!Modules.get().isActive(LiquidInteract.class)) return original;
         if (original.getType() != HitResult.Type.MISS) return original;
