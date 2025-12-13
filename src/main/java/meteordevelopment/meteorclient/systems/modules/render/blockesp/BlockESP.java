@@ -25,6 +25,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.block.BlockState;
+import net.minecraft.state.property.Property;
 
 import java.util.Iterator;
 import java.util.List;
@@ -32,61 +34,97 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.HashMap;
+import java.util.Optional;
 
 public class BlockESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     // General
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
-        .name("blocks")
-        .description("Blocks to search for.")
-        .onChanged(blocks1 -> {
-            if (isActive() && Utils.canUpdate()) onActivate();
-        })
-        .build()
+    private final Setting<List<Block>> blocks = sgGeneral.add(
+        new BlockListSetting.Builder()
+            .name("blocks")
+            .description("Blocks to search for.")
+            .onChanged(blocks1 -> {
+                if (isActive() && Utils.canUpdate()) onActivate();
+            })
+            .build()
     );
-
-    private final Setting<ESPBlockData> defaultBlockConfig = sgGeneral.add(new GenericSetting.Builder<ESPBlockData>()
-        .name("default-block-config")
-        .description("Default block config.")
-        .defaultValue(
-            new ESPBlockData(
-                ShapeMode.Lines,
-                new SettingColor(0, 255, 200),
-                new SettingColor(0, 255, 200, 25),
-                true,
-                new SettingColor(0, 255, 200, 125)
+    
+    // uncomment if NBT-Data should apply to all blocks   !!! UNTESTED !!!
+    
+    /*
+    private final Setting<List<String>> customFilters = sgGeneral.add(
+        new StringListSetting.Builder()
+            .name("NTB-Data")
+            .description(
+                "Filters with ntbdata (e.g. 'waterlogged=true')."
             )
-        )
-        .build()
+            .defaultValue(new ArrayList<>())
+            .onChanged(this::parseFilters)
+            .build()
+    );
+    */  
+
+    private final Setting<ESPBlockData> defaultBlockConfig = sgGeneral.add(
+        new GenericSetting.Builder<ESPBlockData>()
+            .name("default-block-config")
+            .description("Default block config.")
+            .defaultValue(
+                new ESPBlockData(
+                    ShapeMode.Lines,
+                    new SettingColor(0, 255, 200),
+                    new SettingColor(0, 255, 200, 25),
+                    true,
+                    new SettingColor(0, 255, 200, 125)
+                )
+            )
+            .build()
     );
 
-    private final Setting<Map<Block, ESPBlockData>> blockConfigs = sgGeneral.add(new BlockDataSetting.Builder<ESPBlockData>()
-        .name("block-configs")
-        .description("Config for each block.")
-        .defaultData(defaultBlockConfig)
-        .build()
-    );
+    private final Setting<Map<Block, ESPBlockData>> blockConfigs =
+        sgGeneral.add(
+            new BlockDataSetting.Builder<ESPBlockData>()
+                .name("block-configs")
+                .description("Config for each block.")
+                .defaultData(defaultBlockConfig)
+                .onChanged(configs -> {
+                    if (isActive() && Utils.canUpdate()) onActivate();
+                })
+                .build()
+        );
 
-    private final Setting<Boolean> tracers = sgGeneral.add(new BoolSetting.Builder()
-        .name("tracers")
-        .description("Render tracer lines.")
-        .defaultValue(false)
-        .build()
+    private final Setting<Boolean> tracers = sgGeneral.add(
+        new BoolSetting.Builder()
+            .name("tracers")
+            .description("Render tracer lines.")
+            .defaultValue(false)
+            .build()
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
-    private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
+    private final Map<
+        Block,
+        Map<Property<?>, Comparable<?>>
+    > activeFilterCache = new HashMap<>();
+
+    private final Long2ObjectMap<ESPChunk> chunks =
+        new Long2ObjectOpenHashMap<>();
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
-    private final ExecutorService workerThread = Executors.newSingleThreadExecutor();
+    private final ExecutorService workerThread =
+        Executors.newSingleThreadExecutor();
 
     private DimensionType lastDimension;
 
     public BlockESP() {
-        super(Categories.Render, "block-esp", "Renders specified blocks through walls.", "search");
-
+        super(
+            Categories.Render,
+            "block-esp",
+            "Renders specified blocks through walls.",
+            "search"
+        );
         RainbowColors.register(this::onTickRainbow);
     }
 
@@ -161,8 +199,7 @@ public class BlockESP extends Module {
     private void searchChunk(Chunk chunk) {
         workerThread.submit(() -> {
             if (!isActive()) return;
-            ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
-
+            ESPChunk schunk = ESPChunk.searchChunk(chunk, this);
             if (schunk.size() > 0) {
                 synchronized (chunks) {
                     chunks.put(chunk.getPos().toLong(), schunk);
@@ -189,8 +226,8 @@ public class BlockESP extends Module {
         int chunkZ = bz >> 4;
         long key = ChunkPos.toLong(chunkX, chunkZ);
 
-        boolean added = blocks.get().contains(event.newState.getBlock()) && !blocks.get().contains(event.oldState.getBlock());
-        boolean removed = !added && !blocks.get().contains(event.newState.getBlock()) && blocks.get().contains(event.oldState.getBlock());
+        boolean added = shouldRender(event.newState) && !shouldRender(event.oldState);
+        boolean removed = !added && !shouldRender(event.newState) && shouldRender(event.oldState);
 
         if (added || removed) {
             workerThread.submit(() -> {
@@ -262,5 +299,57 @@ public class BlockESP extends Module {
     @Override
     public String getInfoString() {
         return "%s groups".formatted(groups.size());
+    }
+
+    
+    public boolean shouldRender(BlockState state) {
+        Block block = state.getBlock();
+
+        if (blocks.get().contains(block)) {
+            ESPBlockData blockData = blockConfigs.get().get(block);
+            if (blockData != null && !blockData.stateFilters.isEmpty()) {
+                return matchesStateFilters(state, block, blockData.stateFilters);
+            }
+            return true;
+        }
+
+        // Check global state filters
+        if (activeFilterCache.containsKey(block)) {
+            Map<Property<?>, Comparable<?>> requiredProps = activeFilterCache.get(block);
+            for (Map.Entry<Property<?>,Comparable<?>> entry : requiredProps.entrySet()) {
+                if (!state.get(entry.getKey()).equals(entry.getValue())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean matchesStateFilters(BlockState state, Block block, List<String> filters) {
+        for (String filter : filters) {
+            try {
+                // Parse "key=value" format
+                String[] kv = filter.split("=");
+                if (kv.length != 2) continue;
+
+                String propertyName = kv[0].trim();
+                String expectedValue = kv[1].trim();
+
+                Property<?> property = block.getStateManager().getProperty(propertyName);
+                if (property == null) continue;
+
+                Optional<?> parsedValue = property.parse(expectedValue);
+                if (parsedValue.isEmpty()) continue;
+
+                if (!state.get(property).equals(parsedValue.get())) {
+                    return false;
+                }
+            } catch (Exception e) {
+                // Invalid filter format
+            }
+        }
+
+        return true;
     }
 }
