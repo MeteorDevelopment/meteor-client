@@ -321,7 +321,7 @@ public class Nametags extends Module {
 
         boolean freecamNotActive = !Modules.get().isActive(Freecam.class);
         boolean notThirdPerson = mc.options.getPerspective().isFirstPerson();
-        Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
+        Vec3d cameraPos = mc.gameRenderer.getCamera().getCameraPos();
 
         for (Entity entity : mc.world.getEntities()) {
             EntityType<?> type = entity.getType();

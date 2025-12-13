@@ -79,7 +79,7 @@ public abstract class LivingEntityMixin extends Entity {
         return hand;
     }
 
-    @ModifyExpressionValue(method = "getHandSwingDuration", at = @At(value = "CONSTANT", args = "intValue=6"))
+    @ModifyExpressionValue(method = "getHandSwingDuration", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/type/SwingAnimationComponent;duration()I"))
     private int getHandSwingDuration(int original) {
         if ((Object) this != mc.player) return original;
 

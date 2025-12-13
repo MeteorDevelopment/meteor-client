@@ -10,15 +10,15 @@ import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.BlockRenderLayer;
-import net.minecraft.client.render.RenderLayers;
+import net.minecraft.client.render.BlockRenderLayers;
 import net.minecraft.fluid.FluidState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(RenderLayers.class)
-public abstract class RenderLayersMixin {
+@Mixin(BlockRenderLayers.class)
+public class BlockRenderLayersMixin {
     @Inject(method = "getBlockLayer", at = @At("HEAD"), cancellable = true)
     private static void onGetBlockLayer(BlockState state, CallbackInfoReturnable<BlockRenderLayer> cir) {
         if (Modules.get() == null) return;

@@ -70,7 +70,7 @@ public class TitleScreenCredits {
                         if (!credit.addon.getCommit().equals(res.body().commit.sha)) {
                             synchronized (credit.text) {
                                 credit.text.append(Text.literal("*").formatted(Formatting.RED));
-                                ((IText) credit.text).meteor$invalidateCache();
+                                ((IText) ((Text) credit.text)).meteor$invalidateCache(); // ???
                             }
                         }
                     }

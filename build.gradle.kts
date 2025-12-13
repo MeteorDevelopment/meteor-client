@@ -81,7 +81,7 @@ dependencies {
     modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
 
     // Compat fixes
-    modCompileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
+//    modCompileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion)) TODO: re-enable when available
     modCompileOnly(libs.sodium) { isTransitive = false }
     modCompileOnly(libs.lithium) { isTransitive = false }
     modCompileOnly(libs.iris) { isTransitive = false }
@@ -151,7 +151,8 @@ tasks {
             "version" to project.version,
             "build_number" to buildNumber,
             "commit" to commit,
-            "minecraft_version" to libs.versions.minecraft.get()
+            "minecraft_version" to libs.versions.minecraft.get(),
+            "loader_version" to libs.versions.fabric.loader.get()
         )
 
         inputs.properties(propertyMap)

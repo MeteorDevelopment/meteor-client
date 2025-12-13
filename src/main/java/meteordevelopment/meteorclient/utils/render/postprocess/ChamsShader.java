@@ -75,7 +75,7 @@ public class ChamsShader extends EntityShader {
             }
         }
         catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error loading the chams shader", e);
         }
     }
 
@@ -93,7 +93,7 @@ public class ChamsShader extends EntityShader {
         )));
 
         if (chams.isShader() && chams.shader.get() == Chams.Shader.Image && IMAGE_TEX != null) {
-            renderer.sampler("u_TextureI", IMAGE_TEX.getGlTextureView());
+            renderer.sampler("u_TextureI", IMAGE_TEX.getGlTextureView(), IMAGE_TEX.getSampler());
         }
     }
 

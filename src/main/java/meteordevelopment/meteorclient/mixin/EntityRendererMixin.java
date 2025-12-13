@@ -5,11 +5,9 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.systems.modules.render.Nametags;
@@ -19,8 +17,6 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.state.EntityHitbox;
-import net.minecraft.client.render.entity.state.EntityHitboxAndView;
 import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.entity.Entity;
@@ -105,22 +101,22 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 
     // Hitboxes
 
-    @ModifyReturnValue(method = "createHitbox", at = @At("TAIL"))
-    private EntityHitboxAndView meteor$createHitbox(EntityHitboxAndView original, T entity, float tickProgress, boolean green) {
-        var v = Modules.get().get(Hitboxes.class).getEntityValue(entity);
-        if (v == 0) return original;
-
-        var builder = new ImmutableList.Builder<EntityHitbox>();
-
-        for (var hitbox : original.hitboxes()) {
-            builder.add(new EntityHitbox(
-                hitbox.x0() - v, hitbox.y0() - v, hitbox.z0() - v,
-                hitbox.x1() + v, hitbox.y1() + v, hitbox.z1() + v,
-                hitbox.offsetX(), hitbox.offsetY(), hitbox.offsetZ(),
-                hitbox.red(), hitbox.green(), hitbox.blue()
-            ));
-        }
-
-        return new EntityHitboxAndView(original.viewX(), original.viewY(), original.viewZ(), builder.build());
-    }
+//    @ModifyReturnValue(method = "createHitbox", at = @At("TAIL"))
+//    private EntityHitboxAndView meteor$createHitbox(EntityHitboxAndView original, T entity, float tickProgress, boolean green) {
+//        var v = Modules.get().get(Hitboxes.class).getEntityValue(entity);
+//        if (v == 0) return original;
+//
+//        var builder = new ImmutableList.Builder<EntityHitbox>();
+//
+//        for (var hitbox : original.hitboxes()) {
+//            builder.add(new EntityHitbox(
+//                hitbox.x0() - v, hitbox.y0() - v, hitbox.z0() - v,
+//                hitbox.x1() + v, hitbox.y1() + v, hitbox.z1() + v,
+//                hitbox.offsetX(), hitbox.offsetY(), hitbox.offsetZ(),
+//                hitbox.red(), hitbox.green(), hitbox.blue()
+//            ));
+//        }
+//
+//        return new EntityHitboxAndView(original.viewX(), original.viewY(), original.viewZ(), builder.build());
+//    }
 }

@@ -15,7 +15,6 @@ import net.minecraft.client.render.block.MovingBlockRenderState;
 import net.minecraft.client.render.command.BatchingRenderCommandQueue;
 import net.minecraft.client.render.command.ModelCommandRenderer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
-import net.minecraft.client.render.entity.state.EntityHitboxAndView;
 import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.client.render.model.BakedQuad;
@@ -48,10 +47,6 @@ public class OutlineRenderCommandQueue extends OrderedRenderCommandQueueImpl {
     private class OutlineBatchingRenderCommandQueue extends BatchingRenderCommandQueue {
         public OutlineBatchingRenderCommandQueue(OrderedRenderCommandQueueImpl orderedQueueImpl) {
             super(orderedQueueImpl);
-        }
-
-        @Override
-        public void submitDebugHitbox(MatrixStack matrices, EntityRenderState renderState, EntityHitboxAndView debugHitbox) {
         }
 
         @Override

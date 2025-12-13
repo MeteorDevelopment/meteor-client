@@ -89,7 +89,7 @@ public class HudRenderer {
                         .attachments(mc.getFramebuffer())
                         .pipeline(MeteorRenderPipelines.UI_TEXT)
                         .mesh(fontHolder.getMesh())
-                        .sampler("u_Texture", fontHolder.font.texture.getGlTextureView())
+                        .sampler("u_Texture", fontHolder.font.texture.getGlTextureView(), fontHolder.font.texture.getSampler())
                         .end();
                 }
                 else {
@@ -132,7 +132,7 @@ public class HudRenderer {
     public void texture(Identifier id, double x, double y, double width, double height, Color color) {
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
-        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTextureView());
+        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTextureView(), mc.getTextureManager().getTexture(id).getSampler());
     }
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {
@@ -234,7 +234,6 @@ public class HudRenderer {
         entity.lastHeadYaw = entity.getYaw();
 
         var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).getAndUpdateRenderState(entity, 1);
-        state.hitbox = null;
 
         entity.bodyYaw = previousBodyYaw;
         entity.setYaw(previousYaw);

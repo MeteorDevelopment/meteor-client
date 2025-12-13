@@ -6,13 +6,17 @@
 package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
-import meteordevelopment.meteorclient.mixin.HorseScreenHandlerAccessor;
 import meteordevelopment.meteorclient.mixin.ItemGroupsAccessor;
+import meteordevelopment.meteorclient.mixin.MountScreenHandlerAccessor;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.SkeletonHorseEntity;
 import net.minecraft.entity.mob.ZombieHorseEntity;
-import net.minecraft.entity.passive.*;
+import net.minecraft.entity.passive.AbstractDonkeyEntity;
+import net.minecraft.entity.passive.CamelEntity;
+import net.minecraft.entity.passive.HorseEntity;
+import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.*;
@@ -156,7 +160,7 @@ public class SlotUtils {
     }
 
     private static int horse(ScreenHandler handler, int i) {
-        AbstractHorseEntity entity = ((HorseScreenHandlerAccessor) handler).meteor$getEntity();
+        LivingEntity entity = ((MountScreenHandlerAccessor) handler).meteor$getMount();
 
         if (entity instanceof LlamaEntity llamaEntity) {
             int strength = llamaEntity.getStrength();

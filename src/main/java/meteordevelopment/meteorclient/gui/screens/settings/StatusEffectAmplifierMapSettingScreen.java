@@ -18,7 +18,7 @@ import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -60,7 +60,7 @@ public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
 
         for (StatusEffect statusEffect : statusEffects) {
             String name = Names.get(statusEffect);
-            if (!StringUtils.containsIgnoreCase(name, filterText)) continue;
+            if (!Strings.CI.contains(name, filterText)) continue;
 
             table.add(theme.itemWithLabel(getPotionStack(statusEffect), name)).expandCellX();
 

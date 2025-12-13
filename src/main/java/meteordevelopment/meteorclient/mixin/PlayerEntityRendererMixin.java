@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.network.ClientPlayerLikeEntity;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -65,11 +66,11 @@ public abstract class PlayerEntityRendererMixin<AvatarlikeEntity extends PlayerL
 
     // Chams - Hand Texture
 
-    @ModifyExpressionValue(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/RenderLayer;getEntityTranslucent(Lnet/minecraft/util/Identifier;)Lnet/minecraft/client/render/RenderLayer;"))
+    @ModifyExpressionValue(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/RenderLayers;entityTranslucent(Lnet/minecraft/util/Identifier;)Lnet/minecraft/client/render/RenderLayer;"))
     private RenderLayer renderArm$texture(RenderLayer original, MatrixStack matrixStack, OrderedRenderCommandQueue entityRenderCommandQueue, int light, Identifier skinTexture, ModelPart modelPart, boolean sleeveVisible) {
         if (chams.isActive() && chams.hand.get()) {
             Identifier texture = chams.handTexture.get() ? skinTexture : Chams.BLANK;
-            return RenderLayer.getEntityTranslucent(texture);
+            return RenderLayers.entityTranslucent(texture);
         }
 
         return original;

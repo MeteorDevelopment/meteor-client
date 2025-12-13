@@ -32,9 +32,9 @@ public abstract class EntityRenderManagerMixin {
         var entity = ((IEntityRenderState) renderState).meteor$getEntity();
 
         if (entity instanceof FakePlayerEntity player && player.hideWhenInsideCamera) {
-            int cX = MathHelper.floor(this.camera.getPos().x);
-            int cY = MathHelper.floor(this.camera.getPos().y);
-            int cZ = MathHelper.floor(this.camera.getPos().z);
+            int cX = MathHelper.floor(this.camera.getCameraPos().x);
+            int cY = MathHelper.floor(this.camera.getCameraPos().y);
+            int cZ = MathHelper.floor(this.camera.getCameraPos().z);
 
             if (cX == entity.getBlockX() && cZ == entity.getBlockZ() && (cY == entity.getBlockY() || cY == entity.getBlockY() + 1)) info.cancel();
         }
