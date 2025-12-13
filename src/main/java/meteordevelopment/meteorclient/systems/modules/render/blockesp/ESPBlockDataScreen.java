@@ -13,6 +13,8 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+
 public class ESPBlockDataScreen extends WindowScreen {
     private final ESPBlockData blockData;
     private final Setting<?> setting;
@@ -39,6 +41,7 @@ public class ESPBlockDataScreen extends WindowScreen {
         Settings settings = new Settings();
         SettingGroup sgGeneral = settings.getDefaultGroup();
         SettingGroup sgTracer = settings.createGroup("Tracer");
+        SettingGroup sgFilters = settings.createGroup("NBT-Data");
 
         sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
             .name("shape-mode")
@@ -106,6 +109,20 @@ public class ESPBlockDataScreen extends WindowScreen {
                     blockData.tracerColor.set(settingColor);
                     onChanged();
                 }
+            })
+            .build()
+        );
+
+        // Add state filters setting
+        sgFilters.add(new StringListSetting.Builder()
+            .name("NBT-Data")
+            .description("Filters with states (e.g. 'waterlogged=false', 'facing=north', 'ominous=true'). Only blocks matching ALL filters will be shown.")
+            .defaultValue(new ArrayList<>())
+            .onModuleActivated(stringSetting -> stringSetting.set(blockData.stateFilters))
+            .onChanged(filters -> {
+                blockData.stateFilters.clear();
+                blockData.stateFilters.addAll(filters);
+                onChanged();
             })
             .build()
         );

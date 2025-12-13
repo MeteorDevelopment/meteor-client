@@ -86,7 +86,7 @@ public class ESPChunk {
     }
 
 
-    public static ESPChunk searchChunk(Chunk chunk, List<Block> blocks) {
+    public static ESPChunk searchChunk(Chunk chunk, BlockESP module) {
         ESPChunk schunk = new ESPChunk(chunk.getPos().x, chunk.getPos().z);
         if (schunk.shouldBeDeleted()) return schunk;
 
@@ -100,7 +100,7 @@ public class ESPChunk {
                     blockPos.set(x, y, z);
                     BlockState bs = chunk.getBlockState(blockPos);
 
-                    if (blocks.contains(bs.getBlock())) schunk.add(blockPos, false);
+                    if (module.shouldRender(bs)) schunk.add(blockPos, false);
                 }
             }
         }
