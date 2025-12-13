@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -20,7 +21,9 @@ import net.minecraft.client.input.Input;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.JumpingMount;
 import net.minecraft.util.PlayerInput;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,7 +45,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(getMainHandStack())).isCancelled()) info.setReturnValue(false);
     }
 
-    @ModifyExpressionValue(method = "tickNausea", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;"))
+    @ModifyExpressionValue(method = "tickNausea", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;", opcode = Opcodes.GETFIELD))
     private Screen modifyNauseaCurrentScreen(Screen original) {
         if (Modules.get().isActive(Portals.class)) return null;
         return original;
@@ -81,7 +84,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         return constant;
     }
 
-    @ModifyExpressionValue(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/input/Input;playerInput:Lnet/minecraft/util/PlayerInput;"))
+    @ModifyExpressionValue(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/input/Input;playerInput:Lnet/minecraft/util/PlayerInput;", opcode = Opcodes.GETFIELD))
     private PlayerInput isSneaking(PlayerInput original) {
         if (Modules.get().get(Sneak.class).doPacket() || Modules.get().get(NoSlow.class).airStrict()) {
             return new PlayerInput(
@@ -100,6 +103,17 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     @Inject(method = "tickMovement", at = @At("HEAD"))
     private void preTickMovement(CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(PlayerTickMovementEvent.get());
+    }
+
+    @ModifyReturnValue(method = "getMountJumpStrength", at = @At("RETURN"))
+    private float modifyMountJumpStrength(float original) {
+        if (Modules.get().get(EntityControl.class).maxJump()) return 1f;
+        return original;
+    }
+
+    @Inject(method = "getJumpingMount", at = @At("RETURN"), cancellable = true)
+    private void changeJumpingMount(CallbackInfoReturnable<JumpingMount> info) {
+        if (Modules.get().get(EntityControl.class).cancelJump()) info.setReturnValue(null);
     }
 
     // Sprint
