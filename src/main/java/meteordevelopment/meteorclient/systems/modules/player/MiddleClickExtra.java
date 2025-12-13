@@ -10,10 +10,7 @@ import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -82,6 +79,14 @@ public class MiddleClickExtra extends Module {
         .build()
     );
 
+    private final Setting<String> prefix = sgGeneral.add(new StringSetting.Builder()
+        .name("Msg-prefix")
+        .description("Prefix for messages sent to players when you add them as a friend.")
+        .defaultValue("/msg")
+        .visible(() -> notify.get())
+        .build()
+    );
+
     public MiddleClickExtra() {
         super(Categories.Player, "middle-click-extra", "Perform various actions when you middle click.");
     }
@@ -109,7 +114,8 @@ public class MiddleClickExtra extends Module {
             if (!Friends.get().isFriend(player)) {
                 Friends.get().add(new Friend(player));
                 info("Added %s to friends", player.getName().getString());
-                if (message.get()) ChatUtils.sendPlayerMsg("/msg " + player.getName() + " I just friended you on Meteor.");
+                if (message.get())ChatUtils.sendPlayerMsg(prefix.get() + " " + player.getName().getString() + " I just friended you on Meteor.");
+
             } else {
                 Friends.get().remove(Friends.get().get(player));
                 info("Removed %s from friends", player.getName().getString());
