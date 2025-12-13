@@ -5,7 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import javax.net.ssl.SSLSession;
 import java.net.URI;
 import java.net.http.HttpClient;
