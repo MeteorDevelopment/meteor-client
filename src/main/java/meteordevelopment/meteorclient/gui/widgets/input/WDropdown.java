@@ -131,12 +131,13 @@ public abstract class WDropdown<T> extends WPressable {
 
     @Override
     public boolean onMouseClicked(Click click, boolean doubled) {
+        boolean used = false;
         if (!mouseOver && !root.mouseOver) expanded = false;
 
-        if (super.onMouseClicked(click, doubled)) doubled = true;
-        if (expanded && root.mouseClicked(click, doubled)) doubled = true;
+        if (super.onMouseClicked(click, doubled)) used = true;
+        if (expanded && root.mouseClicked(click, doubled)) used = true;
 
-        return doubled;
+        return used;
     }
 
     @Override
