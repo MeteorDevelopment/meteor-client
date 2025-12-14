@@ -79,11 +79,11 @@ public class MiddleClickExtra extends Module {
         .build()
     );
 
-    private final Setting<String> prefix = sgGeneral.add(new StringSetting.Builder()
-        .name("Msg-prefix")
-        .description("Prefix for messages sent to players when you add them as a friend.")
-        .defaultValue("/msg")
-        .visible(() -> notify.get())
+    private final Setting<String> notifyMessage = sgGeneral.add(new StringSetting.Builder()
+        .name("notify-message")
+        .description("Message to send to the player you added as a friend (use %player for the player's name)")
+        .defaultValue("/msg %player I just friended you on Meteor.")
+        .visible(notify::get)
         .build()
     );
 
@@ -114,7 +114,10 @@ public class MiddleClickExtra extends Module {
             if (!Friends.get().isFriend(player)) {
                 Friends.get().add(new Friend(player));
                 info("Added %s to friends", player.getName().getString());
-                if (message.get())ChatUtils.sendPlayerMsg(prefix.get() + " " + player.getName().getString() + " I just friended you on Meteor.");
+                if (message.get()) {
+                    String messageNotify = notifyMessage.get().replace("%player", player.getName().getString());
+                    ChatUtils.sendPlayerMsg(messageNotify);
+                }
 
             } else {
                 Friends.get().remove(Friends.get().get(player));
