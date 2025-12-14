@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.systems.hud.elements;
 
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.hud.*;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -151,7 +151,7 @@ public class PlayerRadarHud extends HudElement {
 
         for (PlayerEntity entity : getPlayers()) {
             if (entity.equals(mc.player)) continue;
-            if (!friends.get() && Friends.get().isFriend(entity)) continue;
+            if (!friends.get() && Targeting.isFriend(entity)) continue;
 
             String text = entity.getName().getString();
             if (distance.get()) text += String.format("(%sm)", Math.round(mc.getCameraEntity().distanceTo(entity)));
@@ -178,7 +178,7 @@ public class PlayerRadarHud extends HudElement {
 
         for (PlayerEntity entity : getPlayers()) {
             if (entity.equals(mc.player)) continue;
-            if (!friends.get() && Friends.get().isFriend(entity)) continue;
+            if (!friends.get() && Targeting.isFriend(entity)) continue;
 
             String text = entity.getName().getString();
             Color color = PlayerUtils.getPlayerColor(entity, primaryColor.get());

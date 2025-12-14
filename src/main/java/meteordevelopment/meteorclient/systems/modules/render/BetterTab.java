@@ -7,10 +7,11 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.systems.friends.Friend;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.SavedPlayer;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.network.PlayerListEntry;
@@ -57,9 +58,9 @@ public class BetterTab extends Module {
         .build()
     );
 
-    private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
-        .name("highlight-friends")
-        .description("Highlights friends in the tablist.")
+    private final Setting<Boolean> relations = sgGeneral.add(new BoolSetting.Builder()
+        .name("highlight-players")
+        .description("Highlights friends and enemies in the tablist.")
         .defaultValue(true)
         .build()
     );
@@ -93,9 +94,10 @@ public class BetterTab extends Module {
         if (playerListEntry.getProfile().id().toString().equals(mc.player.getGameProfile().id().toString()) && self.get()) {
             color = selfColor.get();
         }
-        else if (friends.get() && Friends.get().isFriend(playerListEntry)) {
-            Friend friend = Friends.get().get(playerListEntry);
-            if (friend != null) color = Config.get().friendColor.get();
+        else if (relations.get()) {
+            Targeting.Relation relation = Targeting.getRelation(playerListEntry);
+            if (relation == Targeting.Relation.FRIEND) color = Config.get().friendColor.get();
+            if (relation == Targeting.Relation.ENEMY) color = Config.get().enemyColor.get();
         }
 
         if (color != null) {

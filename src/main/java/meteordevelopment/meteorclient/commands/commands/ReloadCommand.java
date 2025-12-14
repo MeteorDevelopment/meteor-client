@@ -9,8 +9,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.systems.Systems;
-import meteordevelopment.meteorclient.systems.friends.Friend;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.SavedPlayer;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.utils.network.Capes;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.command.CommandSource;
@@ -28,7 +28,8 @@ public class ReloadCommand extends Command {
             Systems.load();
             Capes.init();
             Fonts.refresh();
-            MeteorExecutor.execute(() -> Friends.get().forEach(Friend::updateInfo));
+            MeteorExecutor.execute(() -> Targeting.get().getFriends().forEach(SavedPlayer::updateInfo));
+            MeteorExecutor.execute(() -> Targeting.get().getEnemies().forEach(SavedPlayer::updateInfo));
 
             return SINGLE_SUCCESS;
         });

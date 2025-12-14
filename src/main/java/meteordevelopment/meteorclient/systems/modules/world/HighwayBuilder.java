@@ -20,9 +20,9 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
 import meteordevelopment.meteorclient.systems.modules.player.*;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
-import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
 import meteordevelopment.meteorclient.utils.misc.MBlockPos;
 import meteordevelopment.meteorclient.utils.player.*;
@@ -1777,7 +1777,8 @@ public class HighwayBuilder extends Module {
                     InvUtils.swap(slot, false);
                 }
 
-                EndCrystalEntity potentialTarget = (EndCrystalEntity) TargetUtils.get(entity -> {
+                EndCrystalEntity potentialTarget = (EndCrystalEntity) Targeting.findTarget(SortPriority.LowestDistance,
+                    entity -> {
                     if (!(entity instanceof EndCrystalEntity endCrystal)) return false;
                     if (PlayerUtils.isWithin(endCrystal, 12) || !PlayerUtils.isWithin(endCrystal, 24)) return false;
                     if (b.ignoreCrystals.contains(endCrystal)) return false;
@@ -1788,7 +1789,7 @@ public class HighwayBuilder extends Module {
                     ((IVec3d) vec1).meteor$set(b.mc.player.getX(), b.mc.player.getY() + b.mc.player.getStandingEyeHeight(), b.mc.player.getZ());
                     ((IVec3d) vec2).meteor$set(entity.getX(), entity.getY() + 0.5, entity.getZ());
                     return b.mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, b.mc.player)).getType() == HitResult.Type.MISS;
-                }, SortPriority.LowestDistance);
+                });
 
                 if (target == null || target.isRemoved()) {
                     if (potentialTarget == null) {

@@ -10,9 +10,9 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
-import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -121,9 +121,9 @@ public class AutoAnvil extends Module {
         }
 
         // Check distance + alive
-        if (TargetUtils.isBadTarget(target, range.get())) {
-            target = TargetUtils.getPlayerTarget(range.get(), priority.get());
-            if (TargetUtils.isBadTarget(target, range.get())) return;
+        if (!Targeting.isValidPlayerTarget(target, range.get())) {
+            target = Targeting.findPlayerTarget(range.get(), priority.get());
+            if (target == null) return;
         }
 
         if (placeButton.get()) {

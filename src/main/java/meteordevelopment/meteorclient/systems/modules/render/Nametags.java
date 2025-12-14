@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -77,10 +77,10 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-friends")
-        .description("Ignore rendering nametags for friends.")
-        .defaultValue(false)
+    private final Setting<Targeting.Selector> selector = sgGeneral.add(new EnumSetting.Builder<Targeting.Selector>()
+        .name("other-players")
+        .description("Which other players to show nametags for")
+        .defaultValue(Targeting.Selector.All)
         .build()
     );
 
@@ -330,7 +330,7 @@ public class Nametags extends Module {
             if (type == EntityType.PLAYER) {
                 if ((ignoreSelf.get() || (freecamNotActive && notThirdPerson)) && entity == mc.player) continue;
                 if (EntityUtils.getGameMode((PlayerEntity) entity) == null && ignoreBots.get()) continue;
-                if (Friends.get().isFriend((PlayerEntity) entity) && ignoreFriends.get()) continue;
+                if (!Targeting.matchesSelector(selector.get(), (PlayerEntity) entity)) continue;
             }
 
             if (!culling.get() || PlayerUtils.isWithinCamera(entity, maxCullRange.get())) {

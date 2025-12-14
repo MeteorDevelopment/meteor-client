@@ -8,12 +8,11 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.systems.targeting.Targeting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
-import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -96,19 +95,14 @@ public class BowAimbot extends Module {
         if (!PlayerUtils.isAlive() || !itemInHand()) return;
         if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
 
-        target = TargetUtils.get(entity -> {
-            if (entity == mc.player || entity == mc.getCameraEntity()) return false;
-            if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+        target = Targeting.findTarget(priority.get(), entity -> {
+            if (!Targeting.isValidTarget(entity)) return false;
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!entities.get().contains(entity.getType())) return false;
             if (!nametagged.get() && entity.hasCustomName()) return false;
             if (!PlayerUtils.canSeeEntity(entity)) return false;
-            if (entity instanceof PlayerEntity) {
-                if (((PlayerEntity) entity).isCreative()) return false;
-                if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
-            }
             return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
-        }, priority.get());
+        });
 
         if (target == null) {
             if (wasPathing) {
