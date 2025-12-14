@@ -20,6 +20,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.item.Items;
+import net.minecraft.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,30 +81,30 @@ public class ModulesScreen extends TabScreen {
     protected void createSearchW(WContainer w, String text) {
         if (!text.isEmpty()) {
             // Titles
-            Set<Module> modules = Modules.get().searchTitles(text);
+            List<Pair<Module, String>> modules = Modules.get().searchTitles(text);
 
             if (!modules.isEmpty()) {
                 WSection section = w.add(theme.section("Modules")).expandX().widget();
                 section.spacing = 0;
 
                 int count = 0;
-                for (Module module : modules) {
+                for (Pair<Module, String> p : modules) {
                     if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
-                    section.add(theme.module(module)).expandX();
+                    section.add(theme.module(p.getLeft(), p.getRight())).expandX();
                     count++;
                 }
             }
 
             // Settings
-            modules = Modules.get().searchSettingTitles(text);
+            Set<Module> settings = Modules.get().searchSettingTitles(text);
 
-            if (!modules.isEmpty()) {
+            if (!settings.isEmpty()) {
                 WSection section = w.add(theme.section("Settings")).expandX().widget();
                 section.spacing = 0;
 
                 int count = 0;
-                for (Module module : modules) {
-                    if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
+                for (Module module : settings) {
+                    if (count >= Config.get().moduleSearchCount.get() || count >= settings.size()) break;
                     section.add(theme.module(module)).expandX();
                     count++;
                 }

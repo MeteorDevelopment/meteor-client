@@ -42,6 +42,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -148,21 +149,30 @@ public class Modules extends System<Modules> {
         return active;
     }
 
-    public Set<Module> searchTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Comparator.naturalOrder());
+    public List<Pair<Module, String>> searchTitles(String text) {
+        Map<Pair<Module, String>, Integer> modules = new HashMap<>();
 
         for (Module module : this.moduleInstances.values()) {
-            int score = Utils.searchLevenshteinDefault(module.title, text, false);
+            String title = module.title;
+            int score = Utils.searchLevenshteinDefault(title, text, false);
+
             if (Config.get().moduleAliases.get()) {
                 for (String alias : module.aliases) {
                     int aliasScore = Utils.searchLevenshteinDefault(alias, text, false);
-                    if (aliasScore < score) score = aliasScore;
+                    if (aliasScore < score) {
+                        title = module.title + " (" + alias + ")";
+                        score = aliasScore;
+                    }
                 }
             }
-            modules.put(module, modules.getOrDefault(module, 0) + score);
+
+            modules.put(new Pair<>(module, title), score);
         }
 
-        return modules.keySet();
+        List<Pair<Module, String>> l = new ArrayList<>(modules.keySet());
+        l.sort(Comparator.comparingInt(modules::get));
+
+        return l;
     }
 
     public Set<Module> searchSettingTitles(String text) {
