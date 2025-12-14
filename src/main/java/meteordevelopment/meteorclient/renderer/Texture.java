@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.client.texture.AbstractTexture;
@@ -19,7 +20,7 @@ import java.nio.ByteBuffer;
 public class Texture extends AbstractTexture {
     public Texture(int width, int height, TextureFormat format, FilterMode min, FilterMode mag) {
         glTexture = RenderSystem.getDevice().createTexture("", 15, format, width, height, 1, 1);
-        glTexture.setTextureFilter(min, mag, false);
+        sampler = RenderSystem.getSamplerCache().get(AddressMode.REPEAT, AddressMode.REPEAT, min, mag, false);
 
         glTextureView = RenderSystem.getDevice().createTextureView(glTexture);
     }

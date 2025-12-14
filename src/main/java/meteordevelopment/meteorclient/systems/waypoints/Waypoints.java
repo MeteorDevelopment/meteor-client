@@ -24,7 +24,7 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -71,7 +71,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         for (File file : files) {
             if (file.getName().endsWith(PNG)) {
                 try (FileInputStream inputStream = new FileInputStream(file)) {
-                    String name = StringUtils.removeEnd(file.getName(), PNG);
+                    String name = Strings.CS.removeEnd(file.getName(), PNG);
                     AbstractTexture texture = new NativeImageBackedTexture(() -> name, NativeImage.read(inputStream));
                     icons.put(name, texture);
                 }

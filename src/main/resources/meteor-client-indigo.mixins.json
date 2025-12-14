@@ -3,10 +3,7 @@
   "package": "meteordevelopment.meteorclient.mixin.indigo",
   "compatibilityLevel": "JAVA_21",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
-  "client": [
-    "AbstractTerrainRenderContextMixin",
-    "BlockRenderInfoMixin"
-  ],
+  "client": [],
   "injectors": {
     "defaultRequire": 1
   }

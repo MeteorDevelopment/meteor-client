@@ -5,12 +5,13 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.screen.MountScreenHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ClientPlayerEntity.class)
-public interface ClientPlayerEntityAccessor {
-    @Accessor("ticksSinceLastPositionPacketSent")
-    void meteor$setTicksSinceLastPositionPacketSent(int ticks);
+@Mixin(MountScreenHandler.class)
+public interface MountScreenHandlerAccessor {
+    @Accessor("mount")
+    LivingEntity meteor$getMount();
 }
