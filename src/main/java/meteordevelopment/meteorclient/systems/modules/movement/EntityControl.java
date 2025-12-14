@@ -192,7 +192,7 @@ public class EntityControl extends Module {
         double velZ = entity.getVelocity().z;
 
         // Horizontal movement
-        if (speed.get() && (!onlyOnGround.get() || entity.isOnGround()) && (inWater.get() || !entity.isTouchingWater())) {
+        if (speed.get() && (!onlyOnGround.get() || entity.isOnGround() || entity.isFlyingVehicle()) && (inWater.get() || !entity.isTouchingWater())) {
             Vec3d vel = PlayerUtils.getHorizontalVelocity(horizontalSpeed.get());
             velX = vel.x;
             velZ = vel.z;
