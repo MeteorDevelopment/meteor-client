@@ -84,6 +84,7 @@
     "EndCrystalEntityRendererMixin",
     "EntityAccessor",
     "EntityBucketItemAccessor",
+    "EntityHitboxDebugRendererMixin",
     "EntityMixin",
     "EntityRendererMixin",
     "EntityRenderManagerMixin",
