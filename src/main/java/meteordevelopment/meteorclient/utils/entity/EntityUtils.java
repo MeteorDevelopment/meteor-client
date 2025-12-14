@@ -59,7 +59,7 @@ public class EntityUtils {
             type == EntityType.LLAMA ||
             type == EntityType.TRADER_LLAMA ||
             type == EntityType.CAMEL ||
-//            type == EntityType.CAMEL_HUSK || todo 1.21.11
+            type == EntityType.CAMEL_HUSK ||
             type == EntityType.MINECART ||
             type == EntityType.OAK_BOAT ||
             type == EntityType.SPRUCE_BOAT ||
@@ -81,8 +81,8 @@ public class EntityUtils {
             type == EntityType.PALE_OAK_CHEST_BOAT ||
             type == EntityType.SPRUCE_CHEST_BOAT ||
             type == EntityType.BAMBOO_CHEST_RAFT ||
-//            type == EntityType.NAUTILUS ||
-//            type == EntityType.ZOMBIE_NAUTILUS ||
+            type == EntityType.NAUTILUS ||
+            type == EntityType.ZOMBIE_NAUTILUS ||
             type == EntityType.HAPPY_GHAST;
     }
 
