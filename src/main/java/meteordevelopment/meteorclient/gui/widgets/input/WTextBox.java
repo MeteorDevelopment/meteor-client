@@ -39,7 +39,6 @@ public abstract class WTextBox extends WWidget {
 
     protected final Renderer renderer;
 
-    protected boolean focused;
     protected DoubleList textWidths = new DoubleArrayList();
 
     protected int cursor;
@@ -109,7 +108,7 @@ public abstract class WTextBox extends WWidget {
 
     @Override
     public boolean onMouseClicked(Click click, boolean doubled) {
-        if (mouseOver && !doubled) {
+        if (mouseOver) {
             if (click.button() == GLFW_MOUSE_BUTTON_RIGHT) {
                 if (!text.isEmpty()) {
                     text = "";
@@ -121,6 +120,16 @@ public abstract class WTextBox extends WWidget {
                 }
             }
             else if (click.button() == GLFW_MOUSE_BUTTON_LEFT) {
+                if (doubled) {
+                    selecting = false;
+
+                    cursor = text.length();
+                    selectionStart = 0;
+                    selectionEnd = cursor;
+
+                    return true;
+                }
+
                 selecting = true;
 
                 double overflowWidth = getOverflowWidthForRender();
@@ -669,10 +678,7 @@ public abstract class WTextBox extends WWidget {
         cursorChanged();
     }
 
-    public boolean isFocused() {
-        return focused;
-    }
-
+    @Override
     public void setFocused(boolean focused) {
         if (this.focused && !focused && actionOnUnfocused != null) actionOnUnfocused.run();
 

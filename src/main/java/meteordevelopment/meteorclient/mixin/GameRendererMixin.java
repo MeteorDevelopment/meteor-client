@@ -18,14 +18,11 @@ import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.player.LiquidInteract;
-import meteordevelopment.meteorclient.systems.modules.player.NoMiningTrace;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.render.Zoom;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderer;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -43,8 +40,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profilers;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -104,7 +99,7 @@ public abstract class GameRendererMixin {
 
     @Shadow
     @Final
-    private GuiRenderState guiState;
+    GuiRenderState guiState;
 
     @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/gui/render/state/GuiRenderState;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/command/RenderDispatcher;Ljava/util/List;)V"))
     private List<SpecialGuiElementRenderer<?>> meteor$addSpecialRenderers(List<SpecialGuiElementRenderer<?>> list) {
@@ -124,7 +119,7 @@ public abstract class GameRendererMixin {
 
         if (renderer == null) renderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES, MeteorRenderPipelines.WORLD_COLORED);
         if (depthRenderer == null) depthRenderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH, MeteorRenderPipelines.WORLD_COLORED_DEPTH);
-        Render3DEvent event = Render3DEvent.get(matrixStack, renderer, depthRenderer, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
+        Render3DEvent event = Render3DEvent.get(matrixStack, renderer, depthRenderer, tickDelta, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
 
         // Call utility classes
 
@@ -165,10 +160,10 @@ public abstract class GameRendererMixin {
     private void onRenderGui(RenderTickCounter tickCounter, boolean tick, CallbackInfo info) {
         if (client.currentScreen instanceof WidgetScreen widgetScreen) {
             guiState.clear();
-            var context = new DrawContext(client, guiState);
-
             var mouseX = (int) client.mouse.getScaledX(client.getWindow());
             var mouseY = (int) client.mouse.getScaledY(client.getWindow());
+
+            var context = new DrawContext(client, guiState, mouseX, mouseY);
 
             widgetScreen.renderCustom(context, mouseX, mouseY, tickCounter.getDynamicDeltaTicks());
 
@@ -176,26 +171,6 @@ public abstract class GameRendererMixin {
             guiRenderer.render(fogRenderer.getFogBuffer(FogRenderer.FogType.NONE));
             guiRenderer.incrementFrame();
         }
-    }
-
-    @ModifyReturnValue(method = "findCrosshairTarget", at = @At("RETURN"))
-    private HitResult onUpdateTargetedEntity(HitResult original, @Local HitResult hitResult) {
-        if (Modules.get().get(NoMiningTrace.class).canWork(original instanceof EntityHitResult ehr ? ehr.getEntity() : null) && hitResult.getType() == HitResult.Type.BLOCK) {
-            return hitResult;
-        }
-        else if (original instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) {
-            return hitResult;
-        }
-
-        return original;
-    }
-
-    @ModifyExpressionValue(method = "findCrosshairTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
-    private HitResult modifyRaycastResult(HitResult original, Entity entity, double blockInteractionRange, double entityInteractionRange, float tickProgress, @Local(ordinal = 0, argsOnly = true) double maxDistance) {
-        if (!Modules.get().isActive(LiquidInteract.class)) return original;
-        if (original.getType() != HitResult.Type.MISS) return original;
-
-        return entity.raycast(maxDistance, tickProgress, true);
     }
 
     @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)

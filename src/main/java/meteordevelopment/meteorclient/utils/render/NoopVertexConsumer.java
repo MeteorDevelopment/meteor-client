@@ -24,6 +24,11 @@ public class NoopVertexConsumer implements VertexConsumer {
     }
 
     @Override
+    public VertexConsumer color(int argb) {
+        return this;
+    }
+
+    @Override
     public VertexConsumer texture(float u, float v) {
         return this;
     }
@@ -40,6 +45,11 @@ public class NoopVertexConsumer implements VertexConsumer {
 
     @Override
     public VertexConsumer normal(float x, float y, float z) {
+        return this;
+    }
+
+    @Override
+    public VertexConsumer lineWidth(float width) {
         return this;
     }
 }
