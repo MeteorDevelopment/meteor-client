@@ -12,9 +12,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class WTable extends WContainer {
     public double horizontalSpacing = 3;
@@ -160,6 +158,8 @@ public class WTable extends WContainer {
         columnWidths.clear();
         rowExpandCellXCounts.clear();
 
+        Map<String, IntList> columnGroups = new HashMap<>();
+
         // Loop over rows
         for (List<Cell<?>> row : rows) {
             double rowHeight = 0;
@@ -177,6 +177,8 @@ public class WTable extends WContainer {
                 if (columnWidths.size() <= i) columnWidths.add(cellWidth);
                 else columnWidths.set(i, Math.max(columnWidths.getDouble(i), cellWidth));
 
+                if (cell.group != null) columnGroups.computeIfAbsent(cell.group, k -> new IntArrayList()).add(i);
+
                 // Calculate row expandX count
                 if (cell.expandCellX) rowExpandXCount++;
             }
@@ -185,5 +187,17 @@ public class WTable extends WContainer {
             rowHeights.add(rowHeight);
             rowExpandCellXCounts.add(rowExpandXCount);
         }
+
+        // Normalize group widths
+        columnGroups.values().forEach(columns -> {
+            double maxWidth = Integer.MIN_VALUE;
+            for (int i : columns) {
+                maxWidth = Math.max(maxWidth, columnWidths.getDouble(i));
+            }
+
+            for (int i : columns) {
+                columnWidths.set(i, maxWidth);
+            }
+        });
     }
 }
