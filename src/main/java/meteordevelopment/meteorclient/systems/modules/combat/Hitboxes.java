@@ -98,6 +98,14 @@ public class Hitboxes extends Module {
         .build()
     );
 
+    private final Setting<Boolean> spear = sgWeapon.add(new BoolSetting.Builder()
+        .name("spear")
+        .description("Enable when holding a spear.")
+        .defaultValue(true)
+        .visible(onlyOnWeapon::get)
+        .build()
+    );
+
     public Hitboxes() {
         super(Categories.Combat, "hitboxes", "Expands an entity's hitboxes.");
     }
@@ -117,6 +125,7 @@ public class Hitboxes extends Module {
             if (shovel.get() && itemStack.isIn(ItemTags.SHOVELS)) return true;
             if (hoe.get() && itemStack.isIn(ItemTags.HOES)) return true;
             if (mace.get() && itemStack.getItem() instanceof MaceItem) return true;
+            if (spear.get() && itemStack.isIn(ItemTags.SPEARS)) return true;
             return false;
         });
     }

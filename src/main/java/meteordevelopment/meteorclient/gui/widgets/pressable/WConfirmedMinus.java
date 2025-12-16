@@ -12,7 +12,7 @@ public class WConfirmedMinus extends WMinus {
 
     @Override
     public boolean onMouseClicked(Click click, boolean doubled) {
-        boolean pressed = super.onMouseClicked(click, false);
+        boolean pressed = super.onMouseClicked(click, doubled);
         if (!pressed) {
             pressedOnce = false;
         }

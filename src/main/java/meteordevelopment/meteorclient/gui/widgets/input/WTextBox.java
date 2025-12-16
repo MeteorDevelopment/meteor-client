@@ -108,7 +108,7 @@ public abstract class WTextBox extends WWidget {
 
     @Override
     public boolean onMouseClicked(Click click, boolean doubled) {
-        if (mouseOver && !doubled) {
+        if (mouseOver) {
             if (click.button() == GLFW_MOUSE_BUTTON_RIGHT) {
                 if (!text.isEmpty()) {
                     text = "";
@@ -120,6 +120,16 @@ public abstract class WTextBox extends WWidget {
                 }
             }
             else if (click.button() == GLFW_MOUSE_BUTTON_LEFT) {
+                if (doubled) {
+                    selecting = false;
+
+                    cursor = text.length();
+                    selectionStart = 0;
+                    selectionEnd = cursor;
+
+                    return true;
+                }
+
                 selecting = true;
 
                 double overflowWidth = getOverflowWidthForRender();

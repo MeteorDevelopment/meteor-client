@@ -32,7 +32,7 @@ public abstract class CompassStateMixin {
         if (Modules.get().isActive(Freecam.class)) {
             Vec3d vec3d = Vec3d.ofCenter(to);
             Camera camera = mc.gameRenderer.getCamera();
-            return Math.atan2(vec3d.getZ() - camera.getPos().z, vec3d.getX() - camera.getPos().x) / (float) (Math.PI * 2);
+            return Math.atan2(vec3d.getZ() - camera.getCameraPos().z, vec3d.getX() - camera.getCameraPos().x) / (float) (Math.PI * 2);
         }
 
         return original;

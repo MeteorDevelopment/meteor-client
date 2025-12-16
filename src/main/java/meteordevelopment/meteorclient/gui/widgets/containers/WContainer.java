@@ -152,12 +152,11 @@ public abstract class WContainer extends WWidget {
     public boolean mouseClicked(Click click, boolean doubled) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().mouseClicked(click, doubled))
-                    doubled = true;
+                if (propagateEvents(cell.widget()) && cell.widget().mouseClicked(click, doubled)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return super.mouseClicked(click, doubled) || doubled;
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
