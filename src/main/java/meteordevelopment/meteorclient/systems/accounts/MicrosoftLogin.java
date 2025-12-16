@@ -6,21 +6,23 @@
 package meteordevelopment.meteorclient.systems.accounts;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.network.Http;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import net.minecraft.util.Pair;
 import net.minecraft.util.Util;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public class MicrosoftLogin {
     private MicrosoftLogin() {
     }
@@ -47,8 +49,8 @@ public class MicrosoftLogin {
     private static final String CLIENT_ID = "4673b348-3efa-4f6a-bbb6-34e141cdc638";
     private static final int PORT = 9675;
 
-    private static HttpServer server;
-    private static Consumer<String> callback;
+    private static volatile HttpServer server;
+    private static volatile Consumer<String> callback;
 
     public static String getRefreshToken(Consumer<String> callback) {
         MicrosoftLogin.callback = callback;
@@ -115,11 +117,12 @@ public class MicrosoftLogin {
         try {
             server = HttpServer.create(new InetSocketAddress("127.0.0.1", PORT), 0);
 
-            server.createContext("/", new Handler());
-            server.setExecutor(MeteorExecutor.executor);
+            server.createContext("/", MicrosoftLogin::handleRequest);
+            server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
             server.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error starting Microsoft login server", e);
+            stopServer();
         }
     }
 
@@ -132,52 +135,114 @@ public class MicrosoftLogin {
         callback = null;
     }
 
-    private static class Handler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange req) throws IOException {
-            if (req.getRequestMethod().equals("GET")) {
-                // Login
-                List<NameValuePair> query = URLEncodedUtils.parse(req.getRequestURI(), StandardCharsets.UTF_8);
+    private static void handleRequest(HttpExchange req) throws IOException {
+        if (req.getRequestMethod().equals("GET")) {
+            // Login
+            List<Pair<String, String>> query = parseURL(req.getRequestURI().getRawQuery());
 
-                boolean ok = false;
+            boolean ok = false;
+            for (Pair<String, String> pair : query) {
+                if (pair.getLeft().equals("code")) {
+                    handleCode(pair.getRight());
 
-                for (NameValuePair pair : query) {
-                    if (pair.getName().equals("code")) {
-                        handleCode(pair.getValue());
-
-                        ok = true;
-                        break;
-                    }
+                    ok = true;
+                    break;
                 }
-
-                if (!ok) {
-                    writeText(req, "Cannot authenticate.");
-                    callback.accept(null);
-                }
-                else writeText(req, "You may now close this page.");
             }
 
-            stopServer();
+
+            if (!ok) {
+                writeText(req, "Cannot authenticate.");
+                callback.accept(null);
+            }
+            else writeText(req, "You may now close this page.");
         }
 
-        private void handleCode(String code) {
-            AuthTokenResponse res = Http.post("https://login.live.com/oauth20_token.srf")
-                .bodyForm("client_id=" + CLIENT_ID + "&code=" + code + "&grant_type=authorization_code&redirect_uri=http://127.0.0.1:" + PORT)
-                .sendJson(AuthTokenResponse.class);
+        stopServer();
+    }
 
-            if (res == null) callback.accept(null);
-            else callback.accept(res.refresh_token);
+    private static void handleCode(String code) {
+        AuthTokenResponse res = Http.post("https://login.live.com/oauth20_token.srf")
+            .bodyForm("client_id=" + CLIENT_ID + "&code=" + code + "&grant_type=authorization_code&redirect_uri=http://127.0.0.1:" + PORT)
+            .sendJson(AuthTokenResponse.class);
+
+        if (res == null) callback.accept(null);
+        else callback.accept(res.refresh_token);
+    }
+
+    private static void writeText(HttpExchange req, String text) throws IOException {
+        byte[] responseBody = text.getBytes(StandardCharsets.UTF_8);
+        req.sendResponseHeaders(200, responseBody.length);
+        try (var out = req.getResponseBody()) {
+            out.write(responseBody);
+        }
+    }
+
+    // reimplementation of apache https URLEncodedUtils#parse
+    private static List<Pair<String, String>> parseURL(String string) {
+        List<Pair<String, String>> query = new ArrayList<>();
+        char[] buf = string.toCharArray();
+        int i = 0;
+        while (i < buf.length) {
+            StringBuilder name = new StringBuilder();
+            StringBuilder value = new StringBuilder();
+
+            for (; i < buf.length; i++) {
+                if (buf[i] == '&' || buf[i] == ';' || buf[i] == '=') break;
+                else name.append(buf[i]);
+            }
+
+            if (i < buf.length) {
+                char ch = buf[i];
+                i += 1;
+
+                if (ch == '=') {
+                    for (; i < buf.length; i++) {
+                        if (buf[i] == '&' || buf[i] == ';') {
+                            i += 1;
+                            break;
+                        } else value.append(buf[i]);
+                    }
+                }
+            }
+
+            if (!name.isEmpty()) {
+                query.add(new Pair<>(urlDecode(name.toString()), urlDecode(value.toString())));
+            }
         }
 
-        private void writeText(HttpExchange req, String text) throws IOException {
-            OutputStream out = req.getResponseBody();
+        return query;
+    }
 
-            req.sendResponseHeaders(200, text.length());
+    // near 1:1 copy of apache https URLEncodedUtils#urlDecode
+    // not really necessary for this particular use case but doesn't hurt to be thorough
+    private static String urlDecode(String s) {
+        if (s == null) return null;
 
-            out.write(text.getBytes(StandardCharsets.UTF_8));
-            out.flush();
-            out.close();
+        final ByteBuffer bb = ByteBuffer.allocate(s.length());
+        final CharBuffer cb = CharBuffer.wrap(s);
+        while (cb.hasRemaining()) {
+            final char c = cb.get();
+            if (c == '%' && cb.remaining() >= 2) {
+                final char uc = cb.get();
+                final char lc = cb.get();
+                final int u = Character.digit(uc, 16);
+                final int l = Character.digit(lc, 16);
+                if (u != -1 && l != -1) {
+                    bb.put((byte) ((u << 4) + l));
+                } else {
+                    bb.put((byte) '%');
+                    bb.put((byte) uc);
+                    bb.put((byte) lc);
+                }
+            } else if (c == '+') {
+                bb.put((byte) ' ');
+            } else {
+                bb.put((byte) c);
+            }
         }
+        bb.flip();
+        return StandardCharsets.UTF_8.decode(bb).toString();
     }
 
     private static class AuthTokenResponse {

@@ -136,7 +136,7 @@ public class PacketMine extends Module {
 
     @Override
     public void onDeactivate() {
-        for (MyBlock block : blocks) blockPool.free(block);
+        blockPool.freeAll(blocks);
         blocks.clear();
 
         if (shouldUpdateSlot) {

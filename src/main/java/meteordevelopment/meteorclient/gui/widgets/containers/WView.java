@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.gui.widgets.containers;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.client.gui.Click;
 import net.minecraft.util.math.MathHelper;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
@@ -74,8 +75,8 @@ public abstract class WView extends WVerticalList {
     }
 
     @Override
-    public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
-        if (handleMouseOver && button == GLFW_MOUSE_BUTTON_LEFT && !used) {
+    public boolean onMouseClicked(Click click, boolean doubled) {
+        if (handleMouseOver && click.button() == GLFW_MOUSE_BUTTON_LEFT && !doubled) {
             handlePressed = true;
             return true;
         }
@@ -84,7 +85,7 @@ public abstract class WView extends WVerticalList {
     }
 
     @Override
-    public boolean onMouseReleased(double mouseX, double mouseY, int button) {
+    public boolean onMouseReleased(Click click) {
         if (handlePressed) handlePressed = false;
 
         return false;
@@ -109,7 +110,7 @@ public abstract class WView extends WVerticalList {
 
             //scroll += Math.round(theme.scale(mouseDelta + mouseDelta * ((height / actualHeight) * 0.7627725)));
             //scroll += Math.round(theme.scale(mouseDelta * (1 / (height / actualHeight))));
-            scroll += Math.round(mouseDelta * ((actualHeight - handleHeight() / 2) / height)); // TODO: Someone improve this
+            scroll += Math.round(mouseDelta * ((actualHeight - handleHeight() / 2) / height));
             scroll = MathHelper.clamp(scroll, 0, actualHeight - height);
 
             targetScroll = scroll;
@@ -163,7 +164,7 @@ public abstract class WView extends WVerticalList {
 
     @Override
     protected boolean propagateEvents(WWidget widget) {
-        return ((widget.y >= y && widget.y <= y + height) || (widget.y + widget.height >= y && widget.y + widget.height <= y + height)) || ((y >= widget.y && y <= widget.y + widget.height) || (y + height >= widget.y && y + height <= widget.y + widget.height));
+        return (mouseOver && isWidgetInView(widget)) || widget.isFocused();
     }
 
     protected double handleWidth() {
@@ -180,5 +181,9 @@ public abstract class WView extends WVerticalList {
 
     protected double handleY() {
         return y + (height - handleHeight()) * (scroll / (actualHeight - height));
+    }
+
+    public boolean isWidgetInView(WWidget widget) {
+        return widget.y < y + height && widget.y + widget.height > y;
     }
 }

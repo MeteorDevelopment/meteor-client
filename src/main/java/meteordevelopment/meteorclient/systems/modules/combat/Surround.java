@@ -297,9 +297,7 @@ public class Surround extends Module {
     public void onDeactivate() {
         if (toggleBack.get() && !toActivate.isEmpty() && mc.world != null && mc.player != null) {
             for (Module module : toActivate) {
-                if (!module.isActive()) {
-                    module.toggle();
-                }
+                module.enable();
             }
         }
     }
@@ -390,7 +388,7 @@ public class Surround extends Module {
                 placePos.getX() + 1, placePos.getY() + 1, placePos.getZ() + 1
             );
 
-            Predicate<Entity> entityPredicate = entity -> entity instanceof EndCrystalEntity && DamageUtils.crystalDamage(mc.player, entity.getPos()) < PlayerUtils.getTotalHealth();
+            Predicate<Entity> entityPredicate = entity -> entity instanceof EndCrystalEntity && DamageUtils.crystalDamage(mc.player, entity.getEntityPos()) < PlayerUtils.getTotalHealth();
 
             for (Entity crystal : mc.world.getOtherEntities(null, box, entityPredicate)) {
                 if (rotate.get()) {

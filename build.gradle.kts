@@ -1,7 +1,6 @@
 plugins {
-    id("fabric-loom") version "1.10-SNAPSHOT"
+    alias(libs.plugins.fabric.loom)
     id("maven-publish")
-    id("com.gradleup.shadow") version "9.0.0-beta11"
 }
 
 base {
@@ -14,7 +13,7 @@ base {
         "local"
     }
 
-    version = properties["minecraft_version"] as String + "-" + suffix
+    version = libs.versions.minecraft.get() + "-" + suffix
 }
 
 repositories {
@@ -50,7 +49,7 @@ repositories {
 }
 
 val modInclude: Configuration by configurations.creating
-val library: Configuration by configurations.creating
+val jij: Configuration by configurations.creating
 
 configurations {
     // include mods
@@ -61,48 +60,76 @@ configurations {
         extendsFrom(modInclude)
     }
 
-    // include libraries
+    // include libraries (jar-in-jar)
     implementation.configure {
-        extendsFrom(library)
+        extendsFrom(jij)
     }
-    shadow.configure {
-        extendsFrom(library)
+    include.configure {
+        extendsFrom(jij)
     }
 }
 
 dependencies {
     // Fabric
-    minecraft("com.mojang:minecraft:${properties["minecraft_version"] as String}")
-    mappings("net.fabricmc:yarn:${properties["yarn_mappings"] as String}:v2")
-    modImplementation("net.fabricmc:fabric-loader:${properties["loader_version"] as String}")
+    minecraft(libs.minecraft)
+    mappings(variantOf(libs.yarn) { classifier("v2") })
+    modImplementation(libs.fabric.loader)
 
-    modInclude(fabricApi.module("fabric-api-base", properties["fapi_version"] as String))
-    modInclude(fabricApi.module("fabric-resource-loader-v0", properties["fapi_version"] as String))
+    val fapiVersion = libs.versions.fabric.api.get()
+    modInclude(fabricApi.module("fabric-api-base", fapiVersion))
+    modInclude(fabricApi.module("fabric-resource-loader-v0", fapiVersion))
+    modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
 
     // Compat fixes
-    modCompileOnly(fabricApi.module("fabric-renderer-indigo", properties["fapi_version"] as String))
-    modCompileOnly("maven.modrinth:sodium:${properties["sodium_version"] as String}") { isTransitive = false }
-    modCompileOnly("maven.modrinth:lithium:${properties["lithium_version"] as String}") { isTransitive = false }
-    modCompileOnly("maven.modrinth:iris:${properties["iris_version"] as String}") { isTransitive = false }
-    modCompileOnly("com.viaversion:viafabricplus:${properties["viafabricplus_version"] as String}") { isTransitive = false }
-    modCompileOnly("com.viaversion:viafabricplus-api:${properties["viafabricplus_version"] as String}") { isTransitive = false }
+//    modCompileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion)) TODO: re-enable when available
+    modCompileOnly(libs.sodium) { isTransitive = false }
+    modCompileOnly(libs.lithium) { isTransitive = false }
+    modCompileOnly(libs.iris) { isTransitive = false }
+    modCompileOnly(libs.viafabricplus) { isTransitive = false }
+    modCompileOnly(libs.viafabricplus.api) { isTransitive = false }
 
-    // Baritone (https://github.com/MeteorDevelopment/baritone)
-    modCompileOnly("meteordevelopment:baritone:${properties["baritone_version"] as String}-SNAPSHOT")
-    // ModMenu (https://github.com/TerraformersMC/ModMenu)
-    modCompileOnly("com.terraformersmc:modmenu:${properties["modmenu_version"] as String}")
+    modCompileOnly(libs.baritone)
+    modCompileOnly(libs.modmenu)
 
-    // Libraries
-    library("meteordevelopment:orbit:${properties["orbit_version"] as String}")
-    library("org.meteordev:starscript:${properties["starscript_version"] as String}")
-    library("meteordevelopment:discord-ipc:${properties["discordipc_version"] as String}")
-    library("org.reflections:reflections:${properties["reflections_version"] as String}")
-    library("io.netty:netty-handler-proxy:${properties["netty_version"] as String}") { isTransitive = false }
-    library("io.netty:netty-codec-socks:${properties["netty_version"] as String}") { isTransitive = false }
-    library("de.florianmichael:WaybackAuthLib:${properties["waybackauthlib_version"] as String}")
+    // Libraries (JAR-in-JAR)
+    jij(libs.orbit)
+    jij(libs.starscript)
+    jij(libs.discord.ipc)
+    jij(libs.reflections)
+    jij(libs.netty.handler.proxy) { isTransitive = false }
+    jij(libs.netty.codec.socks) { isTransitive = false }
+    jij(libs.waybackauthlib)
+}
 
-    // Launch sub project
-    shadow(project(":launch"))
+// Handle transitive dependencies for jar-in-jar
+// Based on implementation from BaseProject by FlorianMichael/EnZaXD
+// Source: https://github.com/FlorianMichael/BaseProject/blob/main/src/main/kotlin/de/florianmichael/baseproject/Fabric.kt
+// Licensed under Apache License 2.0
+afterEvaluate {
+    val jijConfig = configurations.findByName("jij") ?: return@afterEvaluate
+
+    // Dependencies to exclude from jar-in-jar
+    val excluded = setOf(
+        "org.slf4j",    // Logging provided by Minecraft
+        "jsr305"        // Compile time annotations only
+    )
+
+
+    jijConfig.incoming.resolutionResult.allDependencies.forEach { dep ->
+        val requested = dep.requested.displayName
+
+        if (excluded.any { requested.contains(it) }) return@forEach
+
+        val compileOnlyDep = dependencies.create(requested) {
+            isTransitive = false
+        }
+
+        val implDep = dependencies.create(compileOnlyDep)
+
+        dependencies.add("compileOnlyApi", compileOnlyDep)
+        dependencies.add("implementation", implDep)
+        dependencies.add("include", compileOnlyDep)
+    }
 }
 
 loom {
@@ -124,8 +151,8 @@ tasks {
             "version" to project.version,
             "build_number" to buildNumber,
             "commit" to commit,
-            "minecraft_version" to project.property("minecraft_version"),
-            "loader_version" to project.property("loader_version")
+            "minecraft_version" to libs.versions.minecraft.get(),
+            "loader_version" to libs.versions.fabric.loader.get()
         )
 
         inputs.properties(propertyMap)
@@ -140,6 +167,10 @@ tasks {
         from("LICENSE") {
             rename { "${it}_${inputs.properties["archivesName"]}" }
         }
+
+        // Launch sub project
+        dependsOn(":launch:compileJava")
+        from(project(":launch").layout.buildDirectory.dir("classes/java/main"))
 
         manifest {
             attributes["Main-Class"] = "meteordevelopment.meteorclient.Main"
@@ -160,27 +191,6 @@ tasks {
         options.release = 21
         options.compilerArgs.add("-Xlint:deprecation")
         options.compilerArgs.add("-Xlint:unchecked")
-    }
-
-    shadowJar {
-        configurations = listOf(project.configurations.shadow.get())
-
-        inputs.property("archivesName", project.base.archivesName.get())
-
-        from("LICENSE") {
-            rename { "${it}_${inputs.properties["archivesName"]}" }
-        }
-
-        dependencies {
-            exclude {
-                it.moduleGroup == "org.slf4j"
-            }
-        }
-    }
-
-    remapJar {
-        dependsOn(shadowJar)
-        inputFile.set(shadowJar.get().archiveFile)
     }
 
     javadoc {
@@ -204,7 +214,7 @@ publishing {
             from(components["java"])
             artifactId = "meteor-client"
 
-            version = properties["minecraft_version"] as String + "-SNAPSHOT"
+            version = libs.versions.minecraft.get() + "-SNAPSHOT"
         }
     }
 

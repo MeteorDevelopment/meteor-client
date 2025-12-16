@@ -19,6 +19,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.hit.BlockHitResult;
@@ -57,6 +58,14 @@ public class Trajectories extends Module {
         .name("fired-projectiles")
         .description("Calculates trajectories for already fired projectiles.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> ignoreWitherSkulls = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-wither-skulls")
+        .description("Whether to ignore fired wither skulls.")
+        .defaultValue(false)
+        .visible(firedProjectiles::get)
         .build()
     );
 
@@ -212,7 +221,7 @@ public class Trajectories extends Module {
 
         if (firedProjectiles.get()) {
             for (Entity entity : mc.world.getEntities()) {
-                if (entity instanceof ProjectileEntity) {
+                if (entity instanceof ProjectileEntity && (!ignoreWitherSkulls.get() || !(entity instanceof WitherSkullEntity))) {
                     calculateFiredPath(entity, tickDelta);
                     for (Path path : paths) path.render(event);
                 }
@@ -230,7 +239,7 @@ public class Trajectories extends Module {
         public Vector3d lastPoint;
 
         public void clear() {
-            for (Vector3d point : points) vec3s.free(point);
+            vec3s.freeAll(points);
             points.clear();
 
             hitQuad = false;

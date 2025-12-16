@@ -39,7 +39,7 @@ public class Input {
     }
 
     public static boolean isPressed(KeyBinding bind) {
-        return isKeyPressed(getKey(bind));
+        return isKeyPressed(getKey(bind)) || isButtonPressed(getKey(bind));
     }
 
     public static boolean isKeyPressed(int key) {

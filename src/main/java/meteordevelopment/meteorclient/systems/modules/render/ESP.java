@@ -320,6 +320,10 @@ public class ESP extends Module {
         Renderer2D.COLOR.render();
     }
 
+    public boolean forceRender() {
+        return isActive() && (mode.get() == Mode.Shader || mode.get() == Mode.Glow);
+    }
+
     private boolean checkCorner(double x, double y, double z, Vector3d min, Vector3d max) {
         pos.set(x, y, z);
         if (!NametagUtils.to2D(pos, 1)) return true;
@@ -347,7 +351,7 @@ public class ESP extends Module {
         if (drawAsTarget(entity)) return false;
         if (!entities.get().contains(entity.getType())) return true;
         if (entity == mc.player && ignoreSelf.get()) return true;
-        if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
+        if (entity == mc.getCameraEntity() && mc.options.getPerspective().isFirstPerson()) return true;
         return !EntityUtils.isInRenderDistance(entity);
     }
 

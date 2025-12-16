@@ -96,7 +96,7 @@ public class SafeWalk extends Module {
             }
 
             else {
-                BlockHitResult raycastResult = mc.world.raycast(new RaycastContext(mc.player.getPos(), new Vec3d(mc.player.getX(), mc.world.getBottomY(), mc.player.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.WATER, mc.player));
+                BlockHitResult raycastResult = mc.world.raycast(new RaycastContext(mc.player.getEntityPos(), new Vec3d(mc.player.getX(), mc.world.getBottomY(), mc.player.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.WATER, mc.player));
                 if (raycastResult.getType() != HitResult.Type.MISS) {
                     if ((int) (mc.player.getY() - raycastResult.getBlockPos().up().getY()) < fallDistance.get()) return;
                 }

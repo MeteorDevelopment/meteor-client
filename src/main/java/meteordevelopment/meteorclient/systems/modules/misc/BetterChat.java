@@ -407,6 +407,9 @@ public class BetterChat extends Module {
 
     private static final Pattern TIMESTAMP_REGEX = Pattern.compile("^<\\d{1,2}:\\d{1,2}>");
 
+    public ChatHudLine.Visible line;
+
+
     /** Registers a custom player head to render based on a message prefix */
     public static void registerCustomHead(String prefix, Identifier texture) {
         CUSTOM_HEAD_ENTRIES.add(new CustomHeadEntry(prefix, texture));
@@ -422,23 +425,20 @@ public class BetterChat extends Module {
         return width;
     }
 
-    public void beforeDrawMessage(DrawContext context, ChatHudLine.Visible line, int y, int color) {
-        if (!isActive() || !playerHeads.get()) return;
+
+    public void beforeDrawMessage(DrawContext context, int y, int color) {
+        if (!isActive() || !playerHeads.get() || line == null) return;
 
         // Only draw the first line of multi line messages
         if (((IChatHudLineVisible) (Object) line).meteor$isStartOfEntry())  {
             drawTexture(context, (IChatHudLine) (Object) line, y, color);
         }
-
-        // Offset
-        context.getMatrices().pushMatrix();
-        context.getMatrices().translate(10, 0);
     }
 
-    public void afterDrawMessage(DrawContext context) {
+    public void afterDrawMessage() {
         if (!isActive() || !playerHeads.get()) return;
 
-        context.getMatrices().popMatrix();
+        line = null;
     }
 
     private void drawTexture(DrawContext context, IChatHudLine line, int y, int color) {
@@ -465,10 +465,10 @@ public class BetterChat extends Module {
         GameProfile sender = getSender(line, text);
         if (sender == null) return;
 
-        PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(sender.getId());
+        PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(sender.id());
         if (entry == null) return;
 
-        PlayerSkinDrawer.draw(context, entry.getSkinTextures(), 0, y, 8);
+        PlayerSkinDrawer.draw(context, entry.getSkinTextures(), 0, y, 8, color);
     }
 
     private GameProfile getSender(IChatHudLine line, String text) {
