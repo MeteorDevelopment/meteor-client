@@ -91,7 +91,7 @@ public abstract class ClientConnectionMixin {
 
     @Inject(method = "addHandlers", at = @At("RETURN"))
     private static void onAddHandlers(ChannelPipeline pipeline, NetworkSide side, boolean local, PacketSizeLogger packetSizeLogger, CallbackInfo ci) {
-        if (side != NetworkSide.CLIENTBOUND) return;
+        if (side != NetworkSide.CLIENTBOUND || local) return;
 
         Proxy proxy = Proxies.get().getEnabled();
         if (proxy == null) return;
