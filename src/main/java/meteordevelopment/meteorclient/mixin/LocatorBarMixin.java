@@ -108,7 +108,7 @@ public abstract class LocatorBarMixin {
     private void renderMeteorWaypoints(DrawContext context, int centerX, int centerY) {
         if (!module.displayWaypoints.get()) return;
 
-        Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
+        Vec3d cameraPos = client.gameRenderer.getCamera().getCameraPos();
         float playerYaw = MathHelper.wrapDegrees(client.gameRenderer.getCamera().getYaw());
         boolean showData = (module.displayWaypointName.get() || module.displayWaypointDistance.get()) && (!module.displayWaypointOnlyOnTab.get() || client.options.playerListKey.isPressed());
 
