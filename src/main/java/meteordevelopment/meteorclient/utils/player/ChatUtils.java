@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.player;
 
 import com.mojang.brigadier.StringReader;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.mixininterface.IChatHud;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -182,7 +183,7 @@ public class ChatUtils {
     private static Text getPrefix() {
         if (customPrefixes.isEmpty()) {
             forcedPrefixClassName = null;
-            return PREFIX;
+            return GuiThemes.get().prefix();
         }
 
         boolean foundChatUtils = false;
@@ -204,16 +205,16 @@ public class ChatUtils {
             }
         }
 
-        if (className == null) return PREFIX;
+        if (className == null) return GuiThemes.get().prefix();
 
         for (Pair<String, Supplier<Text>> pair : customPrefixes) {
             if (className.startsWith(pair.getLeft())) {
                 Text prefix = pair.getRight().get();
-                return prefix != null ? prefix : PREFIX;
+                return prefix != null ? prefix : GuiThemes.get().prefix();
             }
         }
 
-        return PREFIX;
+        return GuiThemes.get().prefix();
     }
 
     private static MutableText formatMsg(String message, Formatting defaultColor) {
