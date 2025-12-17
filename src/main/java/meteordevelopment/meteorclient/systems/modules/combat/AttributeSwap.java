@@ -26,8 +26,8 @@ import net.minecraft.registry.tag.ItemTags;
 
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSmart = settings.createGroup("Smart Options");
-    private final SettingGroup sgEnchants = settings.createGroup("Enchant Options");
+    private final SettingGroup sgSmart = settings.createGroup("Swapping Options");
+    private final SettingGroup sgMace = settings.createGroup("Mace Options");
     private final SettingGroup sgWeapon = settings.createGroup("Weapon Options");
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -72,14 +72,6 @@ public class AttributeSwap extends Module {
         .build()
     );
 
-    private final Setting<Boolean> smartEnchantSwap = sgSmart.add(new BoolSetting.Builder()
-        .name("enchant-swap")
-        .description("Swaps to an item with useful combat enchantments.")
-        .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart)
-        .build()
-    );
-
     private final Setting<Boolean> smartDurability = sgSmart.add(new BoolSetting.Builder()
         .name("durability-saver")
         .description("Swaps to a non-damageable item to save durability on the main weapon.")
@@ -88,35 +80,51 @@ public class AttributeSwap extends Module {
         .build()
     );
 
-    private final Setting<Boolean> enchantFireAspect = sgEnchants.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enchantFireAspect = sgSmart.add(new BoolSetting.Builder()
         .name("fire-aspect")
-        .description("Swaps to an item with Fire Aspect.")
+        .description("Swaps to an item with Fire Aspect to set the target on fire, if target isn't already on fire")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart && smartEnchantSwap.get())
+        .visible(() -> mode.get() == Mode.Smart)
         .build()
     );
 
-    private final Setting<Boolean> enchantLooting = sgEnchants.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enchantLooting = sgSmart.add(new BoolSetting.Builder()
         .name("looting")
-        .description("Swaps to an item with Looting.")
+        .description("Swaps to an item with Looting for better drops or more experience. Only prefers for mobs (but fire aspet is priority)")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart && smartEnchantSwap.get())
+        .visible(() -> mode.get() == Mode.Smart)
         .build()
     );
 
-    private final Setting<Boolean> enchantBreach = sgEnchants.add(new BoolSetting.Builder()
-        .name("breach")
-        .description("Swaps to an item with Breach (Mace).")
+    private final Setting<Boolean> regularMace = sgMace.add(new BoolSetting.Builder()
+        .name("regular-mace")
+        .description("Swaps to a regular Mace when falling if no better option is available.")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart && smartEnchantSwap.get())
+        .visible(() -> mode.get() == Mode.Smart)
         .build()
     );
 
-    private final Setting<Boolean> enchantDensity = sgEnchants.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enchantDensity = sgMace.add(new BoolSetting.Builder()
         .name("density")
-        .description("Swaps to an item with Density (Mace).")
+        .description("Swaps to a Mace with Density to deal increased damage when falling.")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart && smartEnchantSwap.get())
+        .visible(() -> mode.get() == Mode.Smart)
+        .build()
+    );
+
+    private final Setting<Boolean> enchantBreach = sgMace.add(new BoolSetting.Builder()
+        .name("breach")
+        .description("Swaps to a Mace with Breach to reduce the target's armor effectiveness.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart)
+        .build()
+    );
+
+    private final Setting<Boolean> enchantWindBurst = sgMace.add(new BoolSetting.Builder()
+        .name("wind-burst")
+        .description("Swaps to a Mace with Wind Burst to launch up when hitting while falling.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart)
         .build()
     );
 
@@ -253,15 +261,23 @@ public class AttributeSwap extends Module {
 
         boolean isFalling = mc.player.fallDistance > 1.5;
         boolean durability = smartDurability.get();
-        boolean enchantSwap = smartEnchantSwap.get();
+
+        boolean isLiving = target instanceof LivingEntity;
+        boolean isPlayer = target instanceof PlayerEntity;
+        boolean isOnFire = target != null && target.isOnFire();
+        double armor = (isLiving) ? ((LivingEntity) target).getAttributeValue(EntityAttributes.ARMOR) : 0;
+        float health = (isLiving) ? ((LivingEntity) target).getHealth() : 0;
 
         int bestSlot = -1;
-        double bestScore = getItemScore(currentStack, target, isFalling, durability, enchantSwap);
+        double bestScore = getItemScore(currentStack, target, isFalling, durability, isLiving, isPlayer, isOnFire, armor, health);
 
         for (int i = 0; i < 9; i++) {
             if (i == mc.player.getInventory().getSelectedSlot()) continue;
 
-            double score = getItemScore(mc.player.getInventory().getStack(i), target, isFalling, durability, enchantSwap);
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.isEmpty() && !durability) continue;
+
+            double score = getItemScore(stack, target, isFalling, durability, isLiving, isPlayer, isOnFire, armor, health);
             if (score > bestScore) {
                 bestScore = score;
                 bestSlot = i;
@@ -271,17 +287,23 @@ public class AttributeSwap extends Module {
         return bestSlot;
     }
 
-    private double getItemScore(ItemStack stack, Entity target, boolean isFalling, boolean durability, boolean enchantSwap) {
+    private double getItemScore(ItemStack stack, Entity target, boolean isFalling, boolean durability, boolean isLiving, boolean isPlayer, boolean isOnFire, double armor, float health) {
         double score = 0;
 
-        if (durability) score += getDurabilityScore(stack);
-        if (enchantSwap && !stack.isEmpty()) score += getEnchantScore(stack, target, isFalling);
+        if (durability) {
+             double duraScore = getDurabilityScore(stack);
+             score += duraScore;
+        }
+
+        if (stack.isEmpty()) return score;
+
+        score += getCombatScore(stack, target, isFalling, isLiving, isPlayer, isOnFire, armor, health);
 
         return score;
     }
 
     private double getDurabilityScore(ItemStack stack) {
-        if (stack.isEmpty() || !stack.isDamageable()) return 4;
+        if (!stack.isDamageable()) return 4;
 
         int unbreaking = Utils.getEnchantmentLevel(stack, Enchantments.UNBREAKING);
         if (unbreaking > 0) return unbreaking * 0.05;
@@ -289,39 +311,40 @@ public class AttributeSwap extends Module {
         return 0;
     }
 
-    private double getEnchantScore(ItemStack stack, Entity target, boolean isFalling) {
+    private double getCombatScore(ItemStack stack, Entity target, boolean isFalling, boolean isLiving, boolean isPlayer, boolean isOnFire, double armor, float health) {
         double score = 0;
 
-        score += getFireAspectScore(stack, target);
-        score += getLootingScore(stack, target);
-        score += getBreachScore(stack, target);
+        score += getFireAspectScore(stack, isOnFire);
+        score += getLootingScore(stack, isPlayer, isLiving, isOnFire, health);
+        score += getBreachScore(stack, isLiving, armor);
         score += getDensityScore(stack, isFalling);
+        score += getWindBurstScore(stack, isFalling);
+        score += getMaceScore(stack, isFalling);
 
         return score;
     }
 
-    private double getFireAspectScore(ItemStack stack, Entity target) {
-        if (!enchantFireAspect.get() || target == null) return 0;
+    private double getFireAspectScore(ItemStack stack, boolean isOnFire) {
+        if (!enchantFireAspect.get() || isOnFire) return 0;
         int level = Utils.getEnchantmentLevel(stack, Enchantments.FIRE_ASPECT);
-        return (level > 0 && !target.isOnFire()) ? 30 : 0;
+        return (level > 0) ? 30 : 0;
     }
 
-    private double getLootingScore(ItemStack stack, Entity target) {
-        if (!enchantLooting.get() || target == null) return 0;
+    private double getLootingScore(ItemStack stack, boolean isPlayer, boolean isLiving, boolean isOnFire, float health) {
+        if (!enchantLooting.get() || isPlayer) return 0;
         int level = Utils.getEnchantmentLevel(stack, Enchantments.LOOTING);
-        if (level > 0 && !(target instanceof PlayerEntity)) {
-            boolean execute = (target instanceof LivingEntity l && l.getHealth() < 20) || target.isOnFire();
+        if (level > 0) {
+            boolean execute = (isLiving && health < 20) || isOnFire;
             return level * (execute ? 10 : 5);
         }
         return 0;
     }
 
-    private double getBreachScore(ItemStack stack, Entity target) {
-        if (!enchantBreach.get() || target == null) return 0;
+    private double getBreachScore(ItemStack stack, boolean isLiving, double armor) {
+        if (!enchantBreach.get() || !isLiving || armor <= 0) return 0;
         int level = Utils.getEnchantmentLevel(stack, Enchantments.BREACH);
-        if (level > 0 && target instanceof LivingEntity l) {
-            double armor = l.getAttributeValue(EntityAttributes.ARMOR);
-            if (armor > 0) return level * armor * 0.3;
+        if (level > 0) {
+            return level * armor * 0.3;
         }
         return 0;
     }
@@ -330,6 +353,19 @@ public class AttributeSwap extends Module {
         if (!enchantDensity.get() || !isFalling) return 0;
         int level = Utils.getEnchantmentLevel(stack, Enchantments.DENSITY);
         if (level > 0) return 50 + (level * mc.player.fallDistance * 2);
+        return 0;
+    }
+
+    private double getWindBurstScore(ItemStack stack, boolean isFalling) {
+        if (!enchantWindBurst.get() || !isFalling) return 0;
+        int level = Utils.getEnchantmentLevel(stack, Enchantments.WIND_BURST);
+        if (level > 0) return level * 20;
+        return 0;
+    }
+
+    private double getMaceScore(ItemStack stack, boolean isFalling) {
+        if (!regularMace.get() || !isFalling) return 0;
+        if (stack.getItem() instanceof MaceItem) return 40;
         return 0;
     }
 
