@@ -48,6 +48,10 @@ public class InputCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         for (Pair<KeyBinding, String> keyBinding : holdKeys) {
             builder.then(literal(keyBinding.getSecond())
+                .executes(context -> {
+                    activeHandlers.add(new KeypressHandler(keyBinding.getFirst(), 1));
+                    return SINGLE_SUCCESS;
+                })
                 .then(argument("ticks", IntegerArgumentType.integer(1))
                     .executes(context -> {
                         activeHandlers.add(new KeypressHandler(keyBinding.getFirst(), context.getArgument("ticks", Integer.class)));
