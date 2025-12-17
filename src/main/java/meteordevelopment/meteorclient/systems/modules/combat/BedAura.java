@@ -34,7 +34,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.World;
 
 public class BedAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -208,7 +208,7 @@ public class BedAura extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         // Check if beds can explode here
-        if (!mc.world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.BED_RULE_GAMEPLAY).explodes()) {
+        if (mc.world.getRegistryKey() == World.OVERWORLD) {
             error("You can't blow up beds in this dimension, disabling.");
             toggle();
             return;
