@@ -3,7 +3,7 @@
 minecraft = "1.21.11"
 yarn-mappings = "1.21.11+build.3"
 fabric-loader = "0.18.2"
-fabric-api = "0.139.5+1.21.11"
+fabric-api = "0.140.0+1.21.11"
 
 # Plugins
 # Loom (https://github.com/FabricMC/fabric-loom)
