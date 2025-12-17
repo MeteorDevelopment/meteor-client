@@ -40,6 +40,8 @@ public class ReflectInit {
     }
 
     public static void init(Class<? extends Annotation> annotation) {
+        Set<Method> allInitTasks = new HashSet<>();
+
         for (String pkg : packages) {
             try (ScanResult scanResult = new ClassGraph()
                 .acceptPackages(pkg)
@@ -54,15 +56,17 @@ public class ReflectInit {
                     .map(MethodInfo::loadClassAndGetMethod)
                     .collect(Collectors.toSet());
 
-                if (initTasks.isEmpty()) continue;
-
-                Map<Class<?>, List<Method>> byClass = initTasks.stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
-                Set<Method> left = new HashSet<>(initTasks);
-
-                for (Method m; (m = left.stream().findAny().orElse(null)) != null; ) {
-                    reflectInit(m, annotation, left, byClass);
-                }
+                allInitTasks.addAll(initTasks);
             }
+        }
+
+        if (allInitTasks.isEmpty()) return;
+
+        Map<Class<?>, List<Method>> byClass = allInitTasks.stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
+        Set<Method> left = new HashSet<>(allInitTasks);
+
+        for (Method m; (m = left.stream().findAny().orElse(null)) != null; ) {
+            reflectInit(m, annotation, left, byClass);
         }
     }
 
