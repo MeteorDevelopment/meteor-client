@@ -81,7 +81,7 @@ dependencies {
     modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
 
     // Compat fixes
-//    modCompileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion)) TODO: re-enable when available
+    modCompileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
     modCompileOnly(libs.sodium) { isTransitive = false }
     modCompileOnly(libs.lithium) { isTransitive = false }
     modCompileOnly(libs.iris) { isTransitive = false }
