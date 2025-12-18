@@ -14,20 +14,26 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.MaceItem;
 import net.minecraft.item.TridentItem;
+import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.registry.tag.ItemTags;
 
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSmart = settings.createGroup("Swapping Options");
-    private final SettingGroup sgMace = settings.createGroup("Mace Options");
+    private final SettingGroup sgSwappingOptions = settings.createGroup("Swapping Options");
+    private final SettingGroup sgSwordEnchants = settings.createGroup("Sword Enchants");
+    private final SettingGroup sgMaceEnchants = settings.createGroup("Mace Enchants");
+    private final SettingGroup sgOtherEnchants = settings.createGroup("Other Enchants");
     private final SettingGroup sgWeapon = settings.createGroup("Weapon Options");
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -59,12 +65,13 @@ public class AttributeSwap extends Module {
         .description("Delay in ticks before swapping back.")
         .defaultValue(2)
         .min(0)
+        .max(100)
         .sliderRange(0, 20)
         .visible(swapBack::get)
         .build()
     );
 
-    private final Setting<Boolean> smartShieldBreak = sgSmart.add(new BoolSetting.Builder()
+    private final Setting<Boolean> smartShieldBreak = sgSwappingOptions.add(new BoolSetting.Builder()
         .name("shield-breaker")
         .description("Automatically swaps to an axe if the target is blocking.")
         .defaultValue(true)
@@ -72,7 +79,7 @@ public class AttributeSwap extends Module {
         .build()
     );
 
-    private final Setting<Boolean> smartDurability = sgSmart.add(new BoolSetting.Builder()
+    private final Setting<Boolean> smartDurability = sgSwappingOptions.add(new BoolSetting.Builder()
         .name("durability-saver")
         .description("Swaps to a non-damageable item to save durability on the main weapon.")
         .defaultValue(true)
@@ -80,51 +87,115 @@ public class AttributeSwap extends Module {
         .build()
     );
 
-    private final Setting<Boolean> enchantFireAspect = sgSmart.add(new BoolSetting.Builder()
+    private final Setting<Boolean> swordSwapping = sgSwappingOptions.add(new BoolSetting.Builder()
+        .name("sword-swapping")
+        .description("Enables smart swapping for sword enchantments.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart)
+        .build()
+    );
+
+    private final Setting<Boolean> maceSwapping = sgSwappingOptions.add(new BoolSetting.Builder()
+        .name("mace-swapping")
+        .description("Enables smart swapping for mace enchantments.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart)
+        .build()
+    );
+
+    private final Setting<Boolean> otherSwapping = sgSwappingOptions.add(new BoolSetting.Builder()
+        .name("other-swapping")
+        .description("Enables smart swapping for other enchantments like Impaling.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart)
+        .build()
+    );
+
+    private final Setting<Boolean> enchantFireAspect = sgSwordEnchants.add(new BoolSetting.Builder()
         .name("fire-aspect")
         .description("Swaps to an item with Fire Aspect to set the target on fire, if target isn't already on fire")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart)
+        .visible(() -> mode.get() == Mode.Smart && swordSwapping.get())
         .build()
     );
 
-    private final Setting<Boolean> enchantLooting = sgSmart.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enchantLooting = sgSwordEnchants.add(new BoolSetting.Builder()
         .name("looting")
-        .description("Swaps to an item with Looting for better drops or more experience. Only prefers for mobs (but fire aspet is priority)")
+        .description("Swaps to an item with Looting for better drops or more experience. Only prefers for mobs (but fire aspect is priority)")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart)
+        .visible(() -> mode.get() == Mode.Smart && swordSwapping.get())
         .build()
     );
 
-    private final Setting<Boolean> regularMace = sgMace.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enchantSharpness = sgSwordEnchants.add(new BoolSetting.Builder()
+        .name("sharpness")
+        .description("Swaps to an item with Sharpness for increased damage against all entities.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart && swordSwapping.get())
+        .build()
+    );
+
+    private final Setting<Boolean> enchantSmite = sgSwordEnchants.add(new BoolSetting.Builder()
+        .name("smite")
+        .description("Swaps to an item with Smite for increased damage against undead mobs.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart && swordSwapping.get())
+        .build()
+    );
+
+    private final Setting<Boolean> enchantBaneOfArthropods = sgSwordEnchants.add(new BoolSetting.Builder()
+        .name("bane-of-arthropods")
+        .description("Swaps to an item with Bane of Arthropods for increased damage against arthropods.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart && swordSwapping.get())
+        .build()
+    );
+
+    private final Setting<Boolean> enchantSweepingEdge = sgSwordEnchants.add(new BoolSetting.Builder()
+        .name("sweeping-edge")
+        .description("Swaps to an item with Sweeping Edge for increased sweeping attack damage.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart && swordSwapping.get())
+        .build()
+    );
+
+    private final Setting<Boolean> regularMace = sgMaceEnchants.add(new BoolSetting.Builder()
         .name("regular-mace")
         .description("Swaps to a regular Mace when falling if no better option is available.")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart)
+        .visible(() -> mode.get() == Mode.Smart && maceSwapping.get())
         .build()
     );
 
-    private final Setting<Boolean> enchantDensity = sgMace.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enchantDensity = sgMaceEnchants.add(new BoolSetting.Builder()
         .name("density")
         .description("Swaps to a Mace with Density to deal increased damage when falling.")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart)
+        .visible(() -> mode.get() == Mode.Smart && maceSwapping.get())
         .build()
     );
 
-    private final Setting<Boolean> enchantBreach = sgMace.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enchantBreach = sgMaceEnchants.add(new BoolSetting.Builder()
         .name("breach")
         .description("Swaps to a Mace with Breach to reduce the target's armor effectiveness.")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart)
+        .visible(() -> mode.get() == Mode.Smart && maceSwapping.get())
         .build()
     );
 
-    private final Setting<Boolean> enchantWindBurst = sgMace.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enchantWindBurst = sgMaceEnchants.add(new BoolSetting.Builder()
         .name("wind-burst")
         .description("Swaps to a Mace with Wind Burst to launch up when hitting while falling.")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Smart)
+        .visible(() -> mode.get() == Mode.Smart && maceSwapping.get())
+        .build()
+    );
+
+    private final Setting<Boolean> enchantImpaling = sgOtherEnchants.add(new BoolSetting.Builder()
+        .name("impaling")
+        .description("Swaps to an item with Impaling for increased damage against aquatic mobs.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart && otherSwapping.get())
         .build()
     );
 
@@ -265,11 +336,15 @@ public class AttributeSwap extends Module {
         boolean isLiving = target instanceof LivingEntity;
         boolean isPlayer = target instanceof PlayerEntity;
         boolean isOnFire = target != null && target.isOnFire();
+        boolean isUndead = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_SMITE);
+        boolean isArthropod = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS);
+        boolean isAquatic = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_IMPALING);
+        boolean hasFireResistance = isLiving && (((LivingEntity) target).hasStatusEffect(StatusEffects.FIRE_RESISTANCE) || hasFireProtectionArmor((LivingEntity) target));
         double armor = (isLiving) ? ((LivingEntity) target).getAttributeValue(EntityAttributes.ARMOR) : 0;
         float health = (isLiving) ? ((LivingEntity) target).getHealth() : 0;
 
         int bestSlot = -1;
-        double bestScore = getItemScore(currentStack, target, isFalling, durability, isLiving, isPlayer, isOnFire, armor, health);
+        double bestScore = getItemScore(currentStack, target, isFalling, durability, isLiving, isPlayer, isOnFire, hasFireResistance, isUndead, isArthropod, isAquatic, armor, health);
 
         for (int i = 0; i < 9; i++) {
             if (i == mc.player.getInventory().getSelectedSlot()) continue;
@@ -277,7 +352,7 @@ public class AttributeSwap extends Module {
             ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.isEmpty() && !durability) continue;
 
-            double score = getItemScore(stack, target, isFalling, durability, isLiving, isPlayer, isOnFire, armor, health);
+            double score = getItemScore(stack, target, isFalling, durability, isLiving, isPlayer, isOnFire, hasFireResistance, isUndead, isArthropod, isAquatic, armor, health);
             if (score > bestScore) {
                 bestScore = score;
                 bestSlot = i;
@@ -287,7 +362,7 @@ public class AttributeSwap extends Module {
         return bestSlot;
     }
 
-    private double getItemScore(ItemStack stack, Entity target, boolean isFalling, boolean durability, boolean isLiving, boolean isPlayer, boolean isOnFire, double armor, float health) {
+    private double getItemScore(ItemStack stack, Entity target, boolean isFalling, boolean durability, boolean isLiving, boolean isPlayer, boolean isOnFire, boolean hasFireResistance, boolean isUndead, boolean isArthropod, boolean isAquatic, double armor, float health) {
         double score = 0;
 
         if (durability) {
@@ -297,7 +372,7 @@ public class AttributeSwap extends Module {
 
         if (stack.isEmpty()) return score;
 
-        score += getCombatScore(stack, target, isFalling, isLiving, isPlayer, isOnFire, armor, health);
+        score += getCombatScore(stack, target, isFalling, isLiving, isPlayer, isOnFire, hasFireResistance, isUndead, isArthropod, isAquatic, armor, health);
 
         return score;
     }
@@ -311,11 +386,16 @@ public class AttributeSwap extends Module {
         return 0;
     }
 
-    private double getCombatScore(ItemStack stack, Entity target, boolean isFalling, boolean isLiving, boolean isPlayer, boolean isOnFire, double armor, float health) {
+    private double getCombatScore(ItemStack stack, Entity target, boolean isFalling, boolean isLiving, boolean isPlayer, boolean isOnFire, boolean hasFireResistance, boolean isUndead, boolean isArthropod, boolean isAquatic, double armor, float health) {
         double score = 0;
 
-        score += getFireAspectScore(stack, isOnFire);
+        score += getFireAspectScore(stack, isOnFire, hasFireResistance);
         score += getLootingScore(stack, isPlayer, isLiving, isOnFire, health);
+        score += getSharpnessScore(stack, isOnFire);
+        score += getSmiteScore(stack, isUndead, isOnFire);
+        score += getBaneOfArthropodsScore(stack, isArthropod, isOnFire);
+        score += getSweepingEdgeScore(stack);
+        score += getImpalingScore(stack, isAquatic);
         score += getBreachScore(stack, isLiving, armor);
         score += getDensityScore(stack, isFalling);
         score += getWindBurstScore(stack, isFalling);
@@ -324,8 +404,8 @@ public class AttributeSwap extends Module {
         return score;
     }
 
-    private double getFireAspectScore(ItemStack stack, boolean isOnFire) {
-        if (!enchantFireAspect.get() || isOnFire) return 0;
+    private double getFireAspectScore(ItemStack stack, boolean isOnFire, boolean hasFireResistance) {
+       if (!enchantFireAspect.get() || isOnFire || hasFireResistance) return 0;
         int level = Utils.getEnchantmentLevel(stack, Enchantments.FIRE_ASPECT);
         return (level > 0) ? 30 : 0;
     }
@@ -336,6 +416,55 @@ public class AttributeSwap extends Module {
         if (level > 0) {
             boolean execute = (isLiving && health < 20) || isOnFire;
             return level * (execute ? 10 : 5);
+        }
+        return 0;
+    }
+
+    private double getSharpnessScore(ItemStack stack, boolean isOnFire) {
+        if (!enchantSharpness.get()) return 0;
+        int level = Utils.getEnchantmentLevel(stack, Enchantments.SHARPNESS);
+        if (level > 0) {
+            double baseScore = (1 + 0.5 * (level - 1)) * 3;
+            return isOnFire ? baseScore * 1.5 : baseScore;
+        }
+        return 0;
+    }
+
+    private double getSmiteScore(ItemStack stack, boolean isUndead, boolean isOnFire) {
+        if (!enchantSmite.get() || !isUndead) return 0;
+        int level = Utils.getEnchantmentLevel(stack, Enchantments.SMITE);
+        if (level > 0) {
+            double baseScore = level * 5;
+            return isOnFire ? baseScore * 1.5 : baseScore;
+        }
+        return 0;
+    }
+
+    private double getBaneOfArthropodsScore(ItemStack stack, boolean isArthropod, boolean isOnFire) {
+        if (!enchantBaneOfArthropods.get() || !isArthropod) return 0;
+        int level = Utils.getEnchantmentLevel(stack, Enchantments.BANE_OF_ARTHROPODS);
+        if (level > 0) {
+            double baseScore = level * 5;
+            return isOnFire ? baseScore * 1.5 : baseScore;
+        }
+        return 0;
+    }
+
+    private double getSweepingEdgeScore(ItemStack stack) {
+        if (!enchantSweepingEdge.get()) return 0;
+        int level = Utils.getEnchantmentLevel(stack, Enchantments.SWEEPING_EDGE);
+        if (level > 0) {
+            return level * 3;
+        }
+        return 0;
+    }
+
+    private double getImpalingScore(ItemStack stack, boolean isAquatic) {
+        if (!enchantImpaling.get() || !isAquatic) return 0;
+
+        int level = Utils.getEnchantmentLevel(stack, Enchantments.IMPALING);
+        if (level > 0) {
+            return level * 5;
         }
         return 0;
     }
@@ -367,6 +496,17 @@ public class AttributeSwap extends Module {
         if (!regularMace.get() || !isFalling) return 0;
         if (stack.getItem() instanceof MaceItem) return 40;
         return 0;
+    }
+
+    private boolean hasFireProtectionArmor(LivingEntity entity) {
+        for (EquipmentSlot slot : AttributeModifierSlot.ARMOR) {
+            ItemStack stack = entity.getEquippedStack(slot);
+            if (stack.isEmpty()) continue;
+
+            int fireProtection = Utils.getEnchantmentLevel(stack, Enchantments.FIRE_PROTECTION);
+            if (fireProtection > 0) return true;
+        }
+       return false;
     }
 
     public enum Mode {
