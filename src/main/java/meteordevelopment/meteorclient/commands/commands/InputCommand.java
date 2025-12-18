@@ -133,9 +133,10 @@ public class InputCommand extends Command {
 
         @EventHandler
         private void onTick(TickEvent.Post event) {
+            if (ticks == totalTicks) press(key);
+
             if (ticks-- > 0) {
                 key.setPressed(true);
-                press(key);
             } else {
                 key.setPressed(false);
                 MeteorClient.EVENT_BUS.unsubscribe(this);
