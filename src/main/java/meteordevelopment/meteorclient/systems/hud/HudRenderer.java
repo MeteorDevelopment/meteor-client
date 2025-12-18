@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
+import meteordevelopment.meteorclient.gui.renderer.packer.TextureRegion;
 import meteordevelopment.meteorclient.renderer.*;
 import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
 import meteordevelopment.meteorclient.renderer.text.Font;
@@ -133,6 +134,18 @@ public class HudRenderer {
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
         Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTextureView(), mc.getTextureManager().getTexture(id).getSampler());
+    }
+
+    public void texture(Identifier id, double x, double y, double width, double height, TextureRegion textureRegion, Color color, float scale) {
+        Renderer2D.TEXTURE.begin();
+        Renderer2D.TEXTURE.texQuad(x, y, width * scale, height * scale, textureRegion, color);
+        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTextureView());
+    }
+
+    public void texture(Identifier id, double x, double y, double width, double height, Color color, float scale) {
+        Renderer2D.TEXTURE.begin();
+        Renderer2D.TEXTURE.texQuad(x, y, width * scale, height * scale, color);
+        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTextureView());
     }
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {
