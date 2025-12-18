@@ -47,6 +47,13 @@ public class Scaffold extends Module {
         .build()
     );
 
+    private final Setting<Boolean> allowAnyBlock = sgGeneral.add(new BoolSetting.Builder()
+        .name("allow-any-block")
+        .description("Whether to allow scaffold to place any block in the game (still follows white/black list).")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> fastTower = sgGeneral.add(new BoolSetting.Builder()
         .name("fast-tower")
         .description("Whether or not to scaffold upwards faster.")
@@ -300,6 +307,7 @@ public class Scaffold extends Module {
         if (blocksFilter.get() == ListMode.Blacklist && blocks.get().contains(block)) return false;
         else if (blocksFilter.get() == ListMode.Whitelist && !blocks.get().contains(block)) return false;
 
+        if (allowAnyBlock.get()) return true;
         if (!Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, pos))) return false;
         return !(block instanceof FallingBlock) || !FallingBlock.canFallThrough(mc.world.getBlockState(pos));
     }
