@@ -67,7 +67,6 @@ public class MapHud extends HudElement {
         .defaultValue(1)
         .min(0.5)
         .sliderRange(0.5, 3)
-        .onChanged(s -> this.setSize(192 * s, 192 * s))
         .build()
     );
 
@@ -96,6 +95,9 @@ public class MapHud extends HudElement {
 
     @Override
     public void tick(HudRenderer renderer) {
+        double scale = this.scale.get();
+        this.setSize(128 * scale, 128 * scale);
+
         if (!Utils.canUpdate()) {
             return;
         }
@@ -149,9 +151,9 @@ public class MapHud extends HudElement {
 
             Matrix3x2fStack matrices = renderer.drawContext.getMatrices();
             matrices.pushMatrix();
-            matrices.translate(this.x / 3f, this.y / 3f);
-            float scale = this.scale.get().floatValue() / 2;
-            matrices.scale(scale, scale);
+            matrices.scale(1f / mc.getWindow().getScaleFactor());
+            matrices.translate(this.x, this.y);
+            matrices.scale(scale.get().floatValue());
             renderer.drawContext.drawMap(renderState);
             matrices.popMatrix();
         });
