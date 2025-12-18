@@ -24,8 +24,6 @@ import net.minecraft.item.map.MapState;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
 
-import java.awt.*;
-
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class MapHud extends HudElement {
@@ -38,16 +36,17 @@ public class MapHud extends HudElement {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("Which map to render.")
+        .description("How to determine which map to render.")
         .defaultValue(Mode.Simple)
         .build()
     );
 
-    private final Setting<Integer> slotId = sgGeneral.add(new IntSetting.Builder()
-        .name("slot-id")
+    private final Setting<Integer> slotIndex = sgGeneral.add(new IntSetting.Builder()
+        .name("slot-index")
         .description("Which slot to grab the map from.")
-        .visible(() -> mode.get() == Mode.SlotId)
-        .defaultValue(1)
+        .visible(() -> mode.get() == Mode.SlotIndex)
+        .defaultValue(0)
+        .sliderRange(0, 40)
         .build()
     );
 
@@ -55,7 +54,8 @@ public class MapHud extends HudElement {
         .name("map-id")
         .description("Which map id to render from. Must be in your inventory!")
         .visible(() -> mode.get() == Mode.MapId)
-        .defaultValue(1)
+        .defaultValue(0)
+        .noSlider()
         .build()
     );
 
@@ -104,7 +104,7 @@ public class MapHud extends HudElement {
 
         ItemStack mapStack = ItemStack.EMPTY;
         switch (mode.get()) {
-            case SlotId -> mapStack = mc.player.getInventory().getStack(slotId.get());
+            case SlotIndex -> mapStack = mc.player.getInventory().getStack(slotIndex.get());
             case MapId -> {
                 FindItemResult mapResult = InvUtils.find(stack -> {
                     MapIdComponent mapIdComponent = stack.get(DataComponentTypes.MAP_ID);
@@ -160,7 +160,7 @@ public class MapHud extends HudElement {
     }
 
     private enum Mode {
-        SlotId,
+        SlotIndex,
         MapId,
         Simple
     }
