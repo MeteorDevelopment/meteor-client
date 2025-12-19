@@ -1,0 +1,168 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.settings.groups;
+
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+
+public abstract class SetGroup<T, G extends SetGroup<T, G>> implements IGroup<T, G> {
+    protected Set<T> immediate = new ReferenceOpenHashSet<>();
+    protected List<G> include = new ArrayList<>();
+
+    final protected SetGroupEnumeration enumeration;
+
+    public boolean isOf(SetGroupEnumeration of) { return enumeration == of; };
+
+    @Unmodifiable
+    public Set<T> getImmediate() {
+        return immediate;
+    }
+
+    public Set<T> getAll() {
+        Set<T> set = new ReferenceOpenHashSet<>();
+        List<SetGroup<T, G>> seen = new ArrayList<>();
+        List<SetGroup<T, G>> next = new ArrayList<>();
+        internalGetAll(set, seen, next);
+        return set;
+    }
+
+     public Set<T> getAllMatching(Predicate<T> predicate) {
+        Set<T> set = new ReferenceOpenHashSet<>();
+        List<SetGroup<T, G>> seen = new ArrayList<>();
+        List<SetGroup<T, G>> next = new ArrayList<>();
+        if (predicate == null) internalGetAll(set, seen, next);
+        else internalGetAll(set, seen, next, predicate);
+        return set;
+    }
+
+    public void internalGetAll(Collection<T> to, Collection<SetGroup<T, G>> seen, List<SetGroup<T, G>> next, Predicate<T> predicate) {
+        next.clear();
+        next.add(this);
+        for (int i = 0; i < next.size(); i++) {
+            SetGroup<T, G> g = next.get(i);
+            if (seen.contains(g)) continue;
+            for (T t : g.immediate) {
+                if (predicate.test(t)) to.add(t);
+            }
+            next.addAll(g.include);
+            seen.add(g);
+        }
+    }
+
+    public void internalGetAll(Collection<T> to, Collection<SetGroup<T, G>> seen, List<SetGroup<T, G>> next) {
+        next.clear();
+        next.add(this);
+        for (int i = 0; i < next.size(); i++) {
+            SetGroup<T, G> g = next.get(i);
+            if (seen.contains(g)) continue;
+            to.addAll(g.immediate);
+            next.addAll(g.include);
+            seen.add(g);
+        }
+    }
+
+    public boolean anyMatch(Predicate<T> predicate) {
+        List<SetGroup<T, G>> seen = new ArrayList<>();
+        List<SetGroup<T, G>> next = new ArrayList<>();
+        next.add(this);
+        for (int i = 0; i < next.size(); i++) {
+            SetGroup<T, G> g = next.get(i);
+            if (seen.contains(g)) continue;
+            if (g.immediate.stream().anyMatch(predicate)) return true;
+            next.addAll(g.include);
+            seen.add(g);
+        }
+        return false;
+    }
+
+    @Unmodifiable
+    public List<G> getGroups() {
+        return include;
+    }
+
+    public boolean add(T t) {
+        if (!immediate.contains(t)) {
+            immediate.add(t);
+            enumeration.invalidate();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean add(G g) {
+        if (!include.contains(g)) {
+            include.add(g);
+            enumeration.invalidate();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean remove(G g) {
+        if (include.remove(g)) {
+            enumeration.invalidate();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean remove(T t) {
+        if (immediate.remove(t)) {
+            enumeration.invalidate();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean addAll(@NotNull Collection<? extends T> collection) {
+        boolean modified = false;
+        for (T t : collection) {
+            if (!immediate.contains(t)) {
+                immediate.add(t);
+                modified = true;
+            }
+        }
+        if (modified) enumeration.invalidate();
+        return modified;
+    }
+
+    public boolean addAllGroups(Collection<G> collection) {
+        boolean modified = false;
+        for (G g : collection) {
+            if (!include.contains(g)) {
+                include.add(g);
+                modified = true;
+            }
+        }
+        if (modified) enumeration.invalidate();;
+        return modified;
+    }
+
+    public boolean removeAll(@NotNull Collection<T> collection) {
+        enumeration.invalidate();
+        return immediate.removeAll(collection);
+    }
+
+    public boolean removeAllGroups(@NotNull Collection<G> collection) {
+        enumeration.invalidate();
+        return include.removeAll(collection);
+    }
+
+    public SetGroup(SetGroupEnumeration t) { enumeration = t; }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj;
+    }
+}

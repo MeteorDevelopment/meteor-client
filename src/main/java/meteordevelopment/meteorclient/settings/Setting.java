@@ -5,10 +5,14 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.IGetter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -17,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
@@ -162,6 +167,14 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         if (registry.containsId(id)) return registry.get(id);
 
         return null;
+    }
+
+    public CompletableFuture<Suggestions> buildSuggestions(SuggestionsBuilder builder) {
+        Iterable<Identifier> identifiers = getIdentifierSuggestions();
+        if (identifiers != null) {
+            return CommandSource.suggestIdentifiers(identifiers, builder);
+        }
+        return CommandSource.suggestMatching(getSuggestions(), builder);
     }
 
     @SuppressWarnings("unchecked")

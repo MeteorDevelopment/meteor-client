@@ -5,17 +5,17 @@
 
 package meteordevelopment.meteorclient.gui.widgets.pressable;
 
-import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
+import meteordevelopment.meteorclient.gui.GuiIcon;
 
 public abstract class WButton extends WPressable {
     protected String text;
     protected double textWidth;
 
-    protected GuiTexture texture;
+    protected GuiIcon icon;
 
-    public WButton(String text, GuiTexture texture) {
+    public WButton(String text, GuiIcon icon) {
         this.text = text;
-        this.texture = texture;
+        this.icon = icon;
 
         if (text == null) instantTooltips = true;
     }

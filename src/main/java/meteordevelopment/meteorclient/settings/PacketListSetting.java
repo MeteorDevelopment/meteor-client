@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> {
+public class PacketListSetting extends AbstractCollectionSetting<Set<Class<? extends Packet<?>>>> {
     public final Predicate<Class<? extends Packet<?>>> filter;
     private static List<String> suggestions;
 

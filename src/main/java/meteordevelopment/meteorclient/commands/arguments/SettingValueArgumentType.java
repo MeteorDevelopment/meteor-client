@@ -12,8 +12,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.settings.Setting;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.Identifier;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -39,6 +37,7 @@ public class SettingValueArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+
         Setting<?> setting;
 
         try {
@@ -47,11 +46,6 @@ public class SettingValueArgumentType implements ArgumentType<String> {
             return Suggestions.empty();
         }
 
-        Iterable<Identifier> identifiers = setting.getIdentifierSuggestions();
-        if (identifiers != null) {
-            return CommandSource.suggestIdentifiers(identifiers, builder);
-        }
-
-        return CommandSource.suggestMatching(setting.getSuggestions(), builder);
+        return setting.buildSuggestions(builder);
     }
 }
