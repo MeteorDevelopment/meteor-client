@@ -41,7 +41,7 @@ public class ESPBlockDataScreen extends WindowScreen {
         Settings settings = new Settings();
         SettingGroup sgGeneral = settings.getDefaultGroup();
         SettingGroup sgTracer = settings.createGroup("Tracer");
-        SettingGroup sgFilters = settings.createGroup("NBT-Data");
+        SettingGroup sgFilters = settings.createGroup("stateFilters");
 
         sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
             .name("shape-mode")
@@ -115,7 +115,7 @@ public class ESPBlockDataScreen extends WindowScreen {
 
         // Add state filters setting
         sgFilters.add(new StringListSetting.Builder()
-            .name("NBT-Data")
+            .name("stateFilters")
             .description("Filters with states (e.g. 'waterlogged=false', 'facing=north', 'ominous=true'). Only blocks matching ALL filters will be shown.")
             .defaultValue(new ArrayList<>())
             .onModuleActivated(stringSetting -> stringSetting.set(blockData.stateFilters))

@@ -31,7 +31,7 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
     public boolean tracer;
     public SettingColor tracerColor;
 
-    public List<String> stateFilters = new ArrayList<>();
+    public final List<String> stateFilters = new ArrayList<>();
     
     private boolean changed;
 
@@ -108,7 +108,7 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
         for (String filter : stateFilters) {
             filtersList.add(NbtString.of(filter));
         }
-        tag.put("NBT-Data", filtersList);
+        tag.put("stateFilters", filtersList);
 
         tag.putBoolean("changed", changed);
 
@@ -125,7 +125,7 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
         tracerColor.fromTag(tag.getCompoundOrEmpty("tracerColor"));
 
         stateFilters.clear();
-        tag.getList("NBT-Data").ifPresent(filtersList -> {
+        tag.getList("stateFilters").ifPresent(filtersList -> {
             for (int i = 0; i < filtersList.size(); i++) {
                 filtersList.getString(i).ifPresent(stateFilters::add);
             }

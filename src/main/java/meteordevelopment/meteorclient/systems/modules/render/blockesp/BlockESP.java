@@ -42,89 +42,60 @@ public class BlockESP extends Module {
 
     // General
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(
-        new BlockListSetting.Builder()
-            .name("blocks")
-            .description("Blocks to search for.")
-            .onChanged(blocks1 -> {
-                if (isActive() && Utils.canUpdate()) onActivate();
-            })
-            .build()
+    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+        .name("blocks")
+        .description("Blocks to search for.")
+        .onChanged(blocks1 -> {
+            if (isActive() && Utils.canUpdate()) onActivate();
+        })
+        .build()
     );
-    
-    // uncomment if NBT-Data should apply to all blocks   !!! UNTESTED !!!
-    
-    /*
-    private final Setting<List<String>> customFilters = sgGeneral.add(
-        new StringListSetting.Builder()
-            .name("NTB-Data")
-            .description(
-                "Filters with ntbdata (e.g. 'waterlogged=true')."
+
+    private final Setting<ESPBlockData> defaultBlockConfig = sgGeneral.add(new GenericSetting.Builder<ESPBlockData>()
+        .name("default-block-config")
+        .description("Default block config.")
+        .defaultValue(
+            new ESPBlockData(
+                ShapeMode.Lines,
+                new SettingColor(0, 255, 200),
+                new SettingColor(0, 255, 200, 25),
+                true,
+                new SettingColor(0, 255, 200, 125)
             )
-            .defaultValue(new ArrayList<>())
-            .onChanged(this::parseFilters)
-            .build()
-    );
-    */  
-
-    private final Setting<ESPBlockData> defaultBlockConfig = sgGeneral.add(
-        new GenericSetting.Builder<ESPBlockData>()
-            .name("default-block-config")
-            .description("Default block config.")
-            .defaultValue(
-                new ESPBlockData(
-                    ShapeMode.Lines,
-                    new SettingColor(0, 255, 200),
-                    new SettingColor(0, 255, 200, 25),
-                    true,
-                    new SettingColor(0, 255, 200, 125)
-                )
-            )
-            .build()
+        )
+        .build()
     );
 
-    private final Setting<Map<Block, ESPBlockData>> blockConfigs =
-        sgGeneral.add(
-            new BlockDataSetting.Builder<ESPBlockData>()
-                .name("block-configs")
-                .description("Config for each block.")
-                .defaultData(defaultBlockConfig)
-                .onChanged(configs -> {
-                    if (isActive() && Utils.canUpdate()) onActivate();
-                })
-                .build()
-        );
+    private final Setting<Map<Block, ESPBlockData>> blockConfigs = sgGeneral.add(new BlockDataSetting.Builder<ESPBlockData>()
+        .name("block-configs")
+        .description("Config for each block.")
+        .defaultData(defaultBlockConfig)
+        .onChanged(configs -> {
+            if (isActive() && Utils.canUpdate()) onActivate(); 
+        })
+        .build()
+    );
 
-    private final Setting<Boolean> tracers = sgGeneral.add(
-        new BoolSetting.Builder()
-            .name("tracers")
-            .description("Render tracer lines.")
-            .defaultValue(false)
-            .build()
+    private final Setting<Boolean> tracers = sgGeneral.add(new BoolSetting.Builder()
+        .name("tracers")
+        .description("Render tracer lines.")
+        .defaultValue(false)
+        .build()
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
-    private final Map<
-        Block,
-        Map<Property<?>, Comparable<?>>
-    > activeFilterCache = new HashMap<>();
+    private final Map<Block, Map<Property<?>, Comparable<?>>> activeFilterCache = new HashMap<>();
 
-    private final Long2ObjectMap<ESPChunk> chunks =
-        new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
-    private final ExecutorService workerThread =
-        Executors.newSingleThreadExecutor();
+    private final ExecutorService workerThread = Executors.newSingleThreadExecutor();
 
     private DimensionType lastDimension;
 
     public BlockESP() {
-        super(
-            Categories.Render,
-            "block-esp",
-            "Renders specified blocks through walls.",
-            "search"
-        );
+        super(Categories.Render, "block-esp", "Renders specified blocks through walls.", "search");
+
         RainbowColors.register(this::onTickRainbow);
     }
 
