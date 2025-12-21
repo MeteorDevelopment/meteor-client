@@ -9,8 +9,8 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.MixinPlugin;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.GetFovEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
@@ -27,7 +27,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderer;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
-import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.render.GuiRenderer;
@@ -129,7 +128,8 @@ public abstract class GameRendererMixin {
 
         matrices.push();
         tiltViewWhenHurt(matrices, camera.getLastTickProgress());
-        if (client.options.getBobView().getValue()) bobView(matrices, camera.getLastTickProgress());
+        if (client.options.getBobView().getValue())
+            bobView(matrices, camera.getLastTickProgress());
 
         Matrix4f inverseBob = new Matrix4f(matrices.peek().getPositionMatrix()).invert();
         RenderSystem.getModelViewStack().mul(inverseBob);
@@ -137,7 +137,7 @@ public abstract class GameRendererMixin {
 
         // Call utility classes (apply bob correction when Iris shaders are active)
 
-        Matrix4f correctedPosition = (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) ? new Matrix4f(position).mul(inverseBob) : position;
+        Matrix4f correctedPosition = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(position).mul(inverseBob) : position;
         RenderUtils.updateScreenCenter(projection, correctedPosition);
         NametagUtils.onRender(position);
 
