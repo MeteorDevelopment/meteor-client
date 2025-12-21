@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -40,10 +39,6 @@ public class RenderUtils {
     @PostInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RenderUtils.class);
-    }
-
-    public static boolean isShaderPackInUse() {
-        return IrisApi.getInstance().isShaderPackInUse();
     }
 
     // Items
