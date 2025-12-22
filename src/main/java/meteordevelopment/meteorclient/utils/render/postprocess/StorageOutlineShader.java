@@ -14,7 +14,7 @@ public class StorageOutlineShader extends PostProcessShader {
     private Framebuffer mcFramebuffer;
 
     public StorageOutlineShader() {
-        init(MeteorRenderPipelines.POST_OUTLINE);
+        super(MeteorRenderPipelines.POST_OUTLINE);
     }
 
     @Override

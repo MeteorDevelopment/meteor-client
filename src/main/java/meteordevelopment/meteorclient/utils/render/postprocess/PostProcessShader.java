@@ -7,7 +7,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
-import meteordevelopment.meteorclient.utils.render.CustomOutlineVertexConsumerProvider;
 import net.minecraft.client.gl.DynamicUniformStorage;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
@@ -19,15 +18,12 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public abstract class PostProcessShader {
-    public CustomOutlineVertexConsumerProvider vertexConsumerProvider;
-    public Framebuffer framebuffer;
-    protected RenderPipeline pipeline;
+    protected final RenderPipeline pipeline;
+    public final Framebuffer framebuffer;
 
-    public void init(RenderPipeline pipeline) {
-        if (vertexConsumerProvider == null) vertexConsumerProvider = new CustomOutlineVertexConsumerProvider();
-        if (framebuffer == null) framebuffer = new SimpleFramebuffer(MeteorClient.NAME + " PostProcessShader", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), true);
-
+    protected PostProcessShader(RenderPipeline pipeline) {
         this.pipeline = pipeline;
+        this.framebuffer = new SimpleFramebuffer(MeteorClient.NAME + " PostProcessShader " + this.getClass().getSimpleName(), mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), true);
     }
 
     protected abstract boolean shouldDraw();

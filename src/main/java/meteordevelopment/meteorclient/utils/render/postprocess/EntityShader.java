@@ -1,13 +1,20 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.mixininterface.IWorldRenderer;
-
-import java.util.OptionalInt;
+import meteordevelopment.meteorclient.utils.render.CustomOutlineVertexConsumerProvider;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class EntityShader extends PostProcessShader {
+    public final CustomOutlineVertexConsumerProvider vertexConsumerProvider;
+
+    protected EntityShader(RenderPipeline pipeline) {
+        super(pipeline);
+        this.vertexConsumerProvider = new CustomOutlineVertexConsumerProvider();
+    }
+
     @Override
     public boolean beginRender() {
         if (super.beginRender()) {
@@ -29,6 +36,6 @@ public abstract class EntityShader extends PostProcessShader {
     }
 
     public void endRender() {
-        endRender(() -> vertexConsumerProvider.draw());
+        endRender(vertexConsumerProvider::draw);
     }
 }
