@@ -14,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.MaceItem;
+import net.minecraft.item.TridentItem;
 import net.minecraft.registry.tag.ItemTags;
 
 import java.util.Set;
@@ -98,6 +99,22 @@ public class Hitboxes extends Module {
         .build()
     );
 
+    private final Setting<Boolean> spear = sgWeapon.add(new BoolSetting.Builder()
+        .name("spear")
+        .description("Enable when holding a spear.")
+        .defaultValue(true)
+        .visible(onlyOnWeapon::get)
+        .build()
+    );
+
+    private final Setting<Boolean> trident = sgWeapon.add(new BoolSetting.Builder()
+        .name("trident")
+        .description("Enable when holding a trident.")
+        .defaultValue(true)
+        .visible(onlyOnWeapon::get)
+        .build()
+    );
+
     public Hitboxes() {
         super(Categories.Combat, "hitboxes", "Expands an entity's hitboxes.");
     }
@@ -117,6 +134,8 @@ public class Hitboxes extends Module {
             if (shovel.get() && itemStack.isIn(ItemTags.SHOVELS)) return true;
             if (hoe.get() && itemStack.isIn(ItemTags.HOES)) return true;
             if (mace.get() && itemStack.getItem() instanceof MaceItem) return true;
+            if (spear.get() && itemStack.isIn(ItemTags.SPEARS)) return true;
+            if (trident.get() && itemStack.getItem() instanceof TridentItem) return true;
             return false;
         });
     }

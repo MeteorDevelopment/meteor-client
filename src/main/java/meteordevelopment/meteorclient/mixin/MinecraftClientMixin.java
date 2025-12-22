@@ -178,8 +178,8 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         doItemUseCalled = true;
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;Z)V", at = @At("HEAD"))
-    private void onDisconnect(Screen screen, boolean transferring, CallbackInfo info) {
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;ZZ)V", at = @At("HEAD"))
+    private void onDisconnect(Screen screen, boolean transferring, boolean stopSound, CallbackInfo info) {
         if (world != null) {
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
         }

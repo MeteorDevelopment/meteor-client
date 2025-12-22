@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -17,17 +16,13 @@ import meteordevelopment.meteorclient.mixininterface.IChatHudLineVisible;
 import meteordevelopment.meteorclient.mixininterface.IMessageHandler;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
-import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.gui.hud.MessageIndicator;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,7 +37,7 @@ import java.util.List;
 public abstract class ChatHudMixin implements IChatHud {
     @Shadow
     @Final
-    private MinecraftClient client;
+    MinecraftClient client;
     @Shadow
     @Final
     private List<ChatHudLine.Visible> visibleMessages;
@@ -56,9 +51,6 @@ public abstract class ChatHudMixin implements IChatHud {
     private int nextId;
 
     @Shadow
-    public abstract void addMessage(Text message, @Nullable MessageSignatureData signatureData, @Nullable MessageIndicator indicator);
-
-    @Shadow
     public abstract void addMessage(Text message);
 
     @Override
@@ -68,19 +60,19 @@ public abstract class ChatHudMixin implements IChatHud {
         nextId = 0;
     }
 
-    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V", shift = At.Shift.AFTER))
+    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Ljava/util/List;addFirst(Ljava/lang/Object;)V", shift = At.Shift.AFTER))
     private void onAddMessageAfterNewChatHudLineVisible(ChatHudLine message, CallbackInfo ci) {
         ((IChatHudLine) (Object) visibleMessages.getFirst()).meteor$setId(nextId);
     }
 
-    @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V", shift = At.Shift.AFTER))
+    @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;addFirst(Ljava/lang/Object;)V", shift = At.Shift.AFTER))
     private void onAddMessageAfterNewChatHudLine(ChatHudLine message, CallbackInfo ci) {
         ((IChatHudLine) (Object) messages.getFirst()).meteor$setId(nextId);
     }
 
     @SuppressWarnings("DataFlowIssue")
     @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
-    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Local(ordinal = 1) int j) {
+    private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @SuppressWarnings("LocalMayBeArgsOnly") @Local(ordinal = 1) int j) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
         if (handler == null) return line;
 
@@ -140,27 +132,9 @@ public abstract class ChatHudMixin implements IChatHud {
 
     // Player Heads
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;ceil(F)I"))
+    @ModifyExpressionValue(method = "render(Lnet/minecraft/client/gui/hud/ChatHud$Backend;IIZ)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;ceil(F)I"))
     private int onRender_modifyWidth(int width) {
         return getBetterChat().modifyChatWidth(width);
-    }
-
-    @ModifyReceiver(method = "method_71991", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/OrderedText;III)V"))
-    private DrawContext onRender_beforeDrawTextWithShadow(DrawContext context, TextRenderer textRenderer, OrderedText text, int x, int y, int color, @Local(argsOnly = true) ChatHudLine.Visible line) {
-        getBetterChat().beforeDrawMessage(context, line, y, color);
-        return context;
-    }
-
-    @Inject(method = "method_71991", at = @At("TAIL"))
-    private void onRender_afterDrawTextWithShadow(int i, DrawContext context, float f, int j, int k, int l, ChatHudLine.Visible visible, int m, float g, CallbackInfo info) {
-        getBetterChat().afterDrawMessage(context);
-    }
-
-    // No Message Signature Indicator
-
-    @ModifyExpressionValue(method = "method_71992", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;indicator()Lnet/minecraft/client/gui/hud/MessageIndicator;"))
-    private MessageIndicator onRender_modifyIndicator(MessageIndicator indicator) {
-        return Modules.get().get(NoRender.class).noMessageSignatureIndicator() ? null : indicator;
     }
 
     // Anti spam
@@ -172,7 +146,7 @@ public abstract class ChatHudMixin implements IChatHud {
         getBetterChat().lines.addFirst(list.size());
     }
 
-    @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;"))
+    @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;removeLast()Ljava/lang/Object;"))
     private void onRemoveMessage(ChatHudLine message, CallbackInfo ci) {
         if (Modules.get() == null) return;
 

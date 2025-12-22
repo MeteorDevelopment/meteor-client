@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WRoot;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.containers.WView;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.input.CharInput;
@@ -84,6 +85,8 @@ public abstract class WDropdown<T> extends WPressable {
     @Override
     protected void onPressed(int button) {
         expanded = !expanded;
+        root.setFocused(expanded);
+        setFocused(expanded);
     }
 
     public T get() {
@@ -108,7 +111,10 @@ public abstract class WDropdown<T> extends WPressable {
         animProgress += (expanded ? 1 : -1) * delta * 14;
         animProgress = MathHelper.clamp(animProgress, 0, 1);
 
-        if (!render && animProgress > 0) {
+        WView view = getView();
+        boolean rootInView = view == null || view.isWidgetInView(root);
+
+        if (!render && animProgress > 0 && rootInView) {
             renderer.absolutePost(() -> {
                 renderer.scissorStart(x, y + height, width, root.height * animProgress);
                 root.render(renderer, mouseX, mouseY, delta);
@@ -125,12 +131,13 @@ public abstract class WDropdown<T> extends WPressable {
 
     @Override
     public boolean onMouseClicked(Click click, boolean doubled) {
+        boolean used = false;
         if (!mouseOver && !root.mouseOver) expanded = false;
 
-        if (super.onMouseClicked(click, doubled)) doubled = true;
-        if (expanded && root.mouseClicked(click, doubled)) doubled = true;
+        if (super.onMouseClicked(click, doubled)) used = true;
+        if (expanded && root.mouseClicked(click, doubled)) used = true;
 
-        return doubled;
+        return used;
     }
 
     @Override

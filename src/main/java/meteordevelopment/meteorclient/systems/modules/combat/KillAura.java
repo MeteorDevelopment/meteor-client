@@ -33,10 +33,7 @@ import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.MaceItem;
-import net.minecraft.item.TridentItem;
+import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Hand;
@@ -47,7 +44,6 @@ import net.minecraft.world.GameMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 
 public class KillAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -56,10 +52,19 @@ public class KillAura extends Module {
 
     // General
 
-    private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
-        .name("weapon")
-        .description("Only attacks an entity when a specified weapon is in your hand.")
-        .defaultValue(Weapon.All)
+    private final Setting<AttackItems> attackWhenHolding = sgGeneral.add(new EnumSetting.Builder<AttackItems>()
+        .name("attack-when-holding")
+        .description("Only attacks an entity when a specified item is in your hand.")
+        .defaultValue(AttackItems.Weapons)
+        .build()
+    );
+
+    private final Setting<List<Item>> weapons = sgGeneral.add(new ItemListSetting.Builder()
+        .name("selected-weapon-types")
+        .description("Which types of weapons to attack with (if you select the diamond sword, any type of sword may be used to attack).")
+        .defaultValue(Items.DIAMOND_SWORD, Items.DIAMOND_AXE, Items.TRIDENT)
+        .filter(FILTER::contains)
+        .visible(() -> attackWhenHolding.get() == AttackItems.Weapons)
         .build()
     );
 
@@ -72,7 +77,7 @@ public class KillAura extends Module {
 
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-switch")
-        .description("Switches to your selected weapon when attacking the target.")
+        .description("Switches to an acceptable weapon when attacking the target.")
         .defaultValue(false)
         .build()
     );
@@ -81,6 +86,14 @@ public class KillAura extends Module {
         .name("swap-back")
         .description("Switches to your previous slot when done attacking the target.")
         .defaultValue(false)
+        .visible(autoSwitch::get)
+        .build()
+    );
+
+    private final Setting<ShieldMode> shieldMode = sgGeneral.add(new EnumSetting.Builder<ShieldMode>()
+        .name("shield-mode")
+        .description("Will try and use an axe to break target shields.")
+        .defaultValue(ShieldMode.Break)
         .visible(autoSwitch::get)
         .build()
     );
@@ -103,14 +116,6 @@ public class KillAura extends Module {
         .name("pause-baritone")
         .description("Freezes Baritone temporarily until you are finished attacking the entity.")
         .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<ShieldMode> shieldMode = sgGeneral.add(new EnumSetting.Builder<ShieldMode>()
-        .name("shield-mode")
-        .description("Will try and use an axe to break target shields.")
-        .defaultValue(ShieldMode.Break)
-        .visible(() -> autoSwitch.get() && weapon.get() != Weapon.Axe)
         .build()
     );
 
@@ -243,6 +248,7 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final static ArrayList<Item> FILTER = new ArrayList<>(List.of(Items.DIAMOND_SWORD, Items.DIAMOND_AXE, Items.DIAMOND_PICKAXE, Items.DIAMOND_SHOVEL, Items.DIAMOND_HOE, Items.MACE, Items.DIAMOND_SPEAR, Items.TRIDENT));
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
@@ -310,15 +316,8 @@ public class KillAura extends Module {
         Entity primary = targets.getFirst();
 
         if (autoSwitch.get()) {
-            Predicate<ItemStack> predicate = switch (weapon.get()) {
-                case Axe -> stack -> stack.getItem() instanceof AxeItem;
-                case Sword -> stack -> stack.isIn(ItemTags.SWORDS);
-                case Mace -> stack -> stack.getItem() instanceof MaceItem;
-                case Trident -> stack -> stack.getItem() instanceof TridentItem;
-                case All -> stack -> stack.getItem() instanceof AxeItem || stack.isIn(ItemTags.SWORDS) || stack.getItem() instanceof MaceItem || stack.getItem() instanceof TridentItem;
-                default -> o -> true;
-            };
-            FindItemResult weaponResult = InvUtils.find(predicate, 0, 8);
+            FindItemResult weaponResult = new FindItemResult(mc.player.getInventory().getSelectedSlot(), -1);
+            if (attackWhenHolding.get() == AttackItems.Weapons) weaponResult = InvUtils.find(this::acceptableWeapon, 0, 8);
 
             if (shouldShieldBreak()) {
                 FindItemResult axeResult = InvUtils.find(itemStack -> itemStack.getItem() instanceof AxeItem, 0, 8);
@@ -329,10 +328,11 @@ public class KillAura extends Module {
                 previousSlot  = mc.player.getInventory().getSelectedSlot();
                 swapped = true;
             }
+
             InvUtils.swap(weaponResult.slot(), false);
         }
 
-        if (!itemInHand()) {
+        if (!acceptableWeapon(mc.player.getMainHandStack())) {
             stopAttacking();
             return;
         }
@@ -448,17 +448,18 @@ public class KillAura extends Module {
         hitTimer = 0;
     }
 
-    private boolean itemInHand() {
-        if (shouldShieldBreak()) return mc.player.getMainHandStack().getItem() instanceof AxeItem;
+    private boolean acceptableWeapon(ItemStack stack) {
+        if (shouldShieldBreak()) return stack.getItem() instanceof AxeItem;
+        if (attackWhenHolding.get() == AttackItems.All) return true;
 
-        return switch (weapon.get()) {
-            case Axe -> mc.player.getMainHandStack().getItem() instanceof AxeItem;
-            case Sword -> mc.player.getMainHandStack().isIn(ItemTags.SWORDS);
-            case Mace -> mc.player.getMainHandStack().getItem() instanceof MaceItem;
-            case Trident -> mc.player.getMainHandStack().getItem() instanceof TridentItem;
-            case All -> mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().isIn(ItemTags.SWORDS) || mc.player.getMainHandStack().getItem() instanceof MaceItem || mc.player.getMainHandStack().getItem() instanceof TridentItem;
-            default -> true;
-        };
+        if (weapons.get().contains(Items.DIAMOND_SWORD) && stack.isIn(ItemTags.SWORDS)) return true;
+        if (weapons.get().contains(Items.DIAMOND_AXE) && stack.isIn(ItemTags.AXES)) return true;
+        if (weapons.get().contains(Items.DIAMOND_PICKAXE) && stack.isIn(ItemTags.PICKAXES)) return true;
+        if (weapons.get().contains(Items.DIAMOND_SHOVEL) && stack.isIn(ItemTags.SHOVELS)) return true;
+        if (weapons.get().contains(Items.DIAMOND_HOE) && stack.isIn(ItemTags.HOES)) return true;
+        if (weapons.get().contains(Items.MACE) && stack.getItem() instanceof MaceItem) return true;
+        if (weapons.get().contains(Items.DIAMOND_SPEAR) && stack.isIn(ItemTags.SPEARS)) return true;
+        return weapons.get().contains(Items.TRIDENT) && stack.getItem() instanceof TridentItem;
     }
 
     public Entity getTarget() {
@@ -472,13 +473,9 @@ public class KillAura extends Module {
         return null;
     }
 
-    public enum Weapon {
-        Sword,
-        Axe,
-        Mace,
-        Trident,
-        All,
-        Any
+    public enum AttackItems {
+        Weapons,
+        All
     }
 
     public enum RotationMode {

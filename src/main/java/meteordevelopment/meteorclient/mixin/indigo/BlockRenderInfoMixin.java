@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(BlockRenderInfo.class)
-public class BlockRenderInfoMixin {
+public abstract class BlockRenderInfoMixin {
     @Shadow
     public BlockState blockState;
 

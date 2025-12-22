@@ -129,7 +129,7 @@ public class CustomTextRenderer implements TextRenderer {
                 .attachments(MinecraftClient.getInstance().getFramebuffer())
                 .pipeline(MeteorRenderPipelines.UI_TEXT)
                 .mesh(mesh)
-                .sampler("u_Texture", font.texture.getGlTextureView())
+                .sampler("u_Texture", font.texture.getGlTextureView(), font.texture.getSampler())
                 .end();
         }
 

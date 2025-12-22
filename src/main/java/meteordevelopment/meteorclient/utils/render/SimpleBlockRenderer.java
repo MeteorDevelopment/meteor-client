@@ -5,11 +5,10 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import meteordevelopment.meteorclient.mixininterface.IBakedQuad;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
@@ -24,6 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
+import org.joml.Vector3fc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +62,7 @@ public abstract class SimpleBlockRenderer {
             SimpleBlockRenderer.provider = vertexConsumerProvider;
 
             BlockEntityRenderState state = renderer.createRenderState();
-            renderer.updateRenderState(blockEntity, state, tickDelta, mc.gameRenderer.getCamera().getPos(), null);
+            renderer.updateRenderState(blockEntity, state, tickDelta, mc.gameRenderer.getCamera().getCameraPos(), null);
             renderer.render(state, MATRICES, renderCommandQueue, mc.gameRenderer.getEntityRenderStates().cameraRenderState);
 
             renderDispatcher.render();
@@ -77,7 +77,7 @@ public abstract class SimpleBlockRenderer {
     public static void render(BlockPos pos, BlockState state, VertexConsumerProvider consumerProvider) {
         if (state.getRenderType() != BlockRenderType.MODEL) return;
 
-        VertexConsumer consumer = consumerProvider.getBuffer(RenderLayer.getSolid());
+        VertexConsumer consumer = consumerProvider.getBuffer(RenderLayers.solid());
 
         BlockStateModel model = mc.getBlockRenderManager().getModel(state);
         model.addParts(RANDOM, PARTS);
@@ -101,15 +101,10 @@ public abstract class SimpleBlockRenderer {
     }
 
     private static void renderQuads(List<BakedQuad> quads, float offsetX, float offsetY, float offsetZ, VertexConsumer consumer) {
-        for (BakedQuad bakedQuad : quads) {
-            IBakedQuad quad = (IBakedQuad) (Object) bakedQuad;
-
+        for (BakedQuad quad : quads) {
             for (int j = 0; j < 4; j++) {
-                float x = quad.meteor$getX(j);
-                float y = quad.meteor$getY(j);
-                float z = quad.meteor$getZ(j);
-
-                consumer.vertex(offsetX + x, offsetY + y, offsetZ + z);
+                Vector3fc vec = quad.getPosition(j);
+                consumer.vertex(offsetX + vec.x(), offsetY + vec.y(), offsetZ + vec.z());
             }
         }
     }
