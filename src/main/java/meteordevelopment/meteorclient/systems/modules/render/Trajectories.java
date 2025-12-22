@@ -19,6 +19,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.TridentEntity;
 import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
@@ -221,7 +222,10 @@ public class Trajectories extends Module {
 
         if (firedProjectiles.get()) {
             for (Entity entity : mc.world.getEntities()) {
-                if (entity instanceof ProjectileEntity && (!ignoreWitherSkulls.get() || !(entity instanceof WitherSkullEntity))) {
+                if (entity instanceof ProjectileEntity) {
+                    if (ignoreWitherSkulls.get() && entity instanceof WitherSkullEntity) continue;
+                    if (entity instanceof TridentEntity trident && trident.noClip) continue;
+
                     calculateFiredPath(entity, tickDelta);
                     for (Path path : paths) path.render(event);
                 }
