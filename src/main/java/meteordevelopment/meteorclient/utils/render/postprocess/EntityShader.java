@@ -4,6 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.mixininterface.IWorldRenderer;
 import meteordevelopment.meteorclient.utils.render.CustomOutlineVertexConsumerProvider;
+import net.minecraft.entity.Entity;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -14,6 +15,8 @@ public abstract class EntityShader extends PostProcessShader {
         super(pipeline);
         this.vertexConsumerProvider = new CustomOutlineVertexConsumerProvider();
     }
+
+    public abstract boolean shouldDraw(Entity entity);
 
     @Override
     public boolean beginRender() {

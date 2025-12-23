@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import net.minecraft.client.gl.DynamicUniformStorage;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.entity.Entity;
 
 import java.nio.ByteBuffer;
 
@@ -27,7 +26,6 @@ public abstract class PostProcessShader {
     }
 
     protected abstract boolean shouldDraw();
-    public abstract boolean shouldDraw(Entity entity);
 
     protected void preDraw() {}
     protected void postDraw() {}
