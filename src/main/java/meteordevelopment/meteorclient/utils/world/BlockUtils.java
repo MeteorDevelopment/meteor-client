@@ -385,7 +385,7 @@ public class BlockUtils {
         .buildOrThrow();
 
     public static String getDisplayName(Block block) {
-        if (BLOCK_NAME_OVERRIDES.containsKey(block) && mc.options.language.equals(Language.DEFAULT_LANGUAGE)) {
+        if (BLOCK_NAME_OVERRIDES.containsKey(block) && mc.options.language.startsWith("en_")) {
             return BLOCK_NAME_OVERRIDES.get(block);
         } else {
             return StringHelper.stripTextFormat(I18n.translate(block.getTranslationKey()));
