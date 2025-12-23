@@ -32,7 +32,11 @@ public abstract class PostProcessShader {
 
     protected abstract void setupPass(MeshRenderer renderer);
 
-    public void clearTexture() {}
+    public void clearTexture() {
+        if (this.shouldDraw()) {
+            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorAttachment(), 0);
+        }
+    }
 
     public void submitVertices(Runnable draw) {
         if (!shouldDraw()) return;
