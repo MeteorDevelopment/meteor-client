@@ -205,7 +205,7 @@ public class Trajectories extends Module {
         for (Path path : paths) path.clear();
 
         // Calculate paths
-        if (!simulator.set(entity, accurate.get())) return;
+        if (!simulator.set(entity)) return;
         getEmptyPath().setStart(entity, tickDelta).calculate();
     }
 
