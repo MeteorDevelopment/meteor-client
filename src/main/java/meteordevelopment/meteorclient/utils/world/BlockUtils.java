@@ -37,10 +37,7 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.FluidTags;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringHelper;
+import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -388,7 +385,7 @@ public class BlockUtils {
         .buildOrThrow();
 
     public static String getDisplayName(Block block) {
-        if (BLOCK_NAME_OVERRIDES.containsKey(block)) {
+        if (BLOCK_NAME_OVERRIDES.containsKey(block) && mc.options.language.equals(Language.DEFAULT_LANGUAGE)) {
             return BLOCK_NAME_OVERRIDES.get(block);
         } else {
             return StringHelper.stripTextFormat(I18n.translate(block.getTranslationKey()));
