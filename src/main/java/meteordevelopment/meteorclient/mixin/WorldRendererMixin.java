@@ -192,7 +192,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
 
     @Inject(method = "method_62214", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
     private void onRender(CallbackInfo ci) {
-        PostProcessShaders.endRender();
+        PostProcessShaders.submitEntityVertices();
     }
 
     @Inject(method = "onResized", at = @At("HEAD"))

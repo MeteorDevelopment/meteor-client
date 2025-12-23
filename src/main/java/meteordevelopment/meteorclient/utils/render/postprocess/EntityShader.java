@@ -19,13 +19,10 @@ public abstract class EntityShader extends PostProcessShader {
     public abstract boolean shouldDraw(Entity entity);
 
     @Override
-    public boolean beginRender() {
-        if (super.beginRender()) {
+    public void clearTexture() {
+        if (this.shouldDraw()) {
             RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorAttachment(), 0);
-            return true;
         }
-
-        return false;
     }
 
     @Override
@@ -38,7 +35,7 @@ public abstract class EntityShader extends PostProcessShader {
         ((IWorldRenderer) mc.worldRenderer).meteor$popEntityOutlineFramebuffer();
     }
 
-    public void endRender() {
-        endRender(vertexConsumerProvider::draw);
+    public void submitVertices() {
+        submitVertices(vertexConsumerProvider::draw);
     }
 }

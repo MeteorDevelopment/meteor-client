@@ -32,16 +32,18 @@ public abstract class PostProcessShader {
 
     protected abstract void setupPass(MeshRenderer renderer);
 
-    public boolean beginRender() {
-        return shouldDraw();
-    }
+    public void clearTexture() {}
 
-    public void endRender(Runnable draw) {
+    public void submitVertices(Runnable draw) {
         if (!shouldDraw()) return;
 
         preDraw();
         draw.run();
         postDraw();
+    }
+
+    public void render() {
+        if (!shouldDraw()) return;
 
         var renderer = MeshRenderer.begin()
             .attachments(mc.getFramebuffer())
