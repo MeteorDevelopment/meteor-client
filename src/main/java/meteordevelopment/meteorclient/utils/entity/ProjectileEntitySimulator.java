@@ -16,10 +16,7 @@ import meteordevelopment.meteorclient.utils.misc.MissHitResult;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ChargedProjectilesComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.EntityType;
+import net.minecraft.entity.*;
 import net.minecraft.entity.projectile.*;
 import net.minecraft.entity.projectile.thrown.*;
 import net.minecraft.fluid.FluidState;
@@ -45,6 +42,7 @@ public class ProjectileEntitySimulator {
 
     private Entity simulatingEntity;
     private EntityDimensions dimensions;
+    private int age;
     private double gravity;
     private float airDrag, waterDrag;
     private boolean isTouchingWater;
@@ -87,8 +85,13 @@ public class ProjectileEntitySimulator {
 
         switch (item) {
             case BowItem ignored -> {
-                float charge = BowItem.getPullProgress(mc.player.getItemUseTime());
-                if (charge <= 0.1) return false;
+                if (!(user instanceof LivingEntity livingEntity)) return false;
+                float charge = BowItem.getPullProgress(livingEntity.getItemUseTime());
+
+                if (charge <= 0.1) {
+                    if (user == mc.player) charge = 1;
+                    else return false;
+                }
 
                 set(user, angleOffset, accurate, tickDelta, ARROW.withPower(charge * 3));
             }
@@ -163,12 +166,7 @@ public class ProjectileEntitySimulator {
             velocity.add(vel.x, user.isOnGround() ? 0.0D : vel.y, vel.z);
         }
 
-        this.gravity = data.gravity();
-        this.airDrag = data.airDrag();
-        this.waterDrag = data.waterDrag();
-        this.simulatingEntity = data.entity().create(mc.world, null);
-        this.dimensions = simulatingEntity.getDimensions(simulatingEntity.getPose());
-        this.isTouchingWater = simulatingEntity.isTouchingWater();
+        setSimulationData(data.entity().create(mc.world, null), data);
     }
 
     public void setFishingBobber(Entity user, float tickDelta, MotionData data) {
@@ -197,12 +195,7 @@ public class ProjectileEntitySimulator {
         double l = velocity.length();
         velocity.mul(0.6 / l + 0.5, 0.6 / l + 0.5, 0.6 / l + 0.5);
 
-        this.simulatingEntity = data.entity().create(mc.world, null);
-        this.dimensions = simulatingEntity.getDimensions(simulatingEntity.getPose());
-        this.gravity = data.gravity();
-        this.airDrag = data.airDrag();
-        this.waterDrag = data.waterDrag();
-        this.isTouchingWater = simulatingEntity.isTouchingWater();
+        setSimulationData(data.entity().create(mc.world, null), data);
     }
 
 
@@ -243,15 +236,21 @@ public class ProjectileEntitySimulator {
         double speed = entity.getVelocity().length();
         velocity.set(entity.getVelocity().x, entity.getVelocity().y, entity.getVelocity().z).normalize().mul(speed);
 
+        setSimulationData(entity, data);
+    }
+
+    private void setSimulationData(Entity entity, MotionData data) {
         this.gravity = data.gravity();
         this.airDrag = data.airDrag();
         this.waterDrag = data.waterDrag();
         this.simulatingEntity = entity;
         this.dimensions = simulatingEntity.getDimensions(simulatingEntity.getPose());
         this.isTouchingWater = simulatingEntity.isTouchingWater();
+        this.age = simulatingEntity.age;
     }
 
     public HitResult tick() {
+        age++;
         ((IVec3d) prevPos3d).meteor$set(pos);
 
         // gravity -> drag -> position
@@ -327,8 +326,10 @@ public class ProjectileEntitySimulator {
     /**
      * {@link ProjectileUtil#getCollision(Vec3d, Entity, java.util.function.Predicate, Vec3d, net.minecraft.world.World, float, RaycastContext.ShapeType)}
      *
-     * Vanilla checks from the current to the next position. We check from the previous to the current positions - it
-     * solves the issue of the collision check from the starting position not working properly
+     * Vanilla checks from the current to the next position, while we check from the previous to the current positions.
+     * This solves the issue of the collision check from the starting position not working properly - otherwise, the
+     * simulated projectile may move from its start position through a block, only running the collision check afterwards.
+     * The vanilla game has other code to deal with this but this is the easiest way for us to fix it.
      */
     private HitResult getCollision() {
         HitResult hitResult = mc.world.getCollisionsIncludingWorldBorder(new RaycastContext(
@@ -342,12 +343,17 @@ public class ProjectileEntitySimulator {
             ((IVec3d) pos3d).meteor$set(hitResult.getPos());
         }
 
+        // When entities are spawned, they first move and then check collisions against their current and next positions.
+        // Since we move and then check from the previous to the current position, it can sometimes detect thrown
+        // projectiles as colliding against ourselves, which does not happen for the first tick of movement.
+        if (age <= 1) return hitResult;
+
         HitResult hitResult2 = ProjectileUtil.getEntityCollision(
             mc.world,
             simulatingEntity,
             prevPos3d,
             pos3d,
-            dimensions.getBoxAt(pos3d).stretch(velocity.x, velocity.y, velocity.z).expand(1.0D),
+            dimensions.getBoxAt(prevPos3d).stretch(velocity.x, velocity.y, velocity.z).expand(1.0D),
             entity -> !entity.isSpectator() && entity.isAlive() && entity.canHit(),
             ProjectileUtil.getToleranceMargin(simulatingEntity)
         );

@@ -87,6 +87,14 @@ public class Trajectories extends Module {
 
     // Render
 
+    private final Setting<Integer> ignoreFirstTicks = sgRender.add(new IntSetting.Builder()
+        .name("ignore-rendering-first-ticks")
+        .description("Ignores rendering the first ticks, to make the rest of the path more visible.")
+        .defaultValue(3)
+        .min(0)
+        .build()
+    );
+
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .description("How the shapes are rendered.")
@@ -325,13 +333,27 @@ public class Trajectories extends Module {
 
         public void render(Render3DEvent event) {
             // Render path
-            for (Vector3d point : points) {
-                if (lastPoint != null) {
-                    event.renderer.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
-                    if (renderPositionBox.get())
-                        event.renderer.box(point.x - positionBoxSize.get(), point.y - positionBoxSize.get(), point.z - positionBoxSize.get(),
-                            point.x + positionBoxSize.get(), point.y + positionBoxSize.get(), point.z + positionBoxSize.get(), positionSideColor.get(), positionLineColor.get(), shapeMode.get(), 0);
+
+            for (int i = (points.size() <= ignoreFirstTicks.get() ? 0 : ignoreFirstTicks.get()); i < points.size(); i++) {
+                Vector3d point = points.get(i);
+
+                if (lastPoint == null) {
+                    if (i > 1) lastPoint = points.get(i - 1);
+                    else {
+                        lastPoint = point;
+                        continue;
+                    }
                 }
+
+                event.renderer.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
+                if (renderPositionBox.get()) {
+                    event.renderer.box(
+                        point.x - positionBoxSize.get(), point.y - positionBoxSize.get(), point.z - positionBoxSize.get(),
+                        point.x + positionBoxSize.get(), point.y + positionBoxSize.get(), point.z + positionBoxSize.get(),
+                        positionSideColor.get(), positionLineColor.get(), shapeMode.get(), 0
+                    );
+                }
+
                 lastPoint = point;
             }
 
