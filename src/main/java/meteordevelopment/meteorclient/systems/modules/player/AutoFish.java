@@ -55,12 +55,30 @@ public class AutoFish extends Module {
         .build()
     );
 
+    private final Setting<Integer> castDelayVariance = sgGeneral.add(new IntSetting.Builder()
+        .name("cast-delay-variance")
+        .description("Variance of randomness added to cast delay.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(20)
+        .build()
+    );
+
     private final Setting<Integer> catchDelay = sgGeneral.add(new IntSetting.Builder()
         .name("catch-delay")
         .description("How long to wait after hooking a fish to reel it in.")
         .defaultValue(6)
         .min(1)
         .sliderMax(20)
+        .build()
+    );
+
+    private final Setting<Integer> catchDelayVariance = sgGeneral.add(new IntSetting.Builder()
+        .name("catch-delay-variance")
+        .description("Variance of randomness added to catch delay.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(6) // This is the highest possible variance that won't miss fish (assuming the base catch delay is less than 2). Since the randomization is clamped to 3 standard deviations, 6 would produce a maximum delay of 18 ticks, which is just within the shortest Java edition catch window of 1 second.
         .build()
     );
 
@@ -118,7 +136,7 @@ public class AutoFish extends Module {
 
         if (!wasHooked) {
             if (((FishingBobberEntityAccessor) mc.player.fishHook).meteor$hasCaughtFish()) {
-                catchDelayLeft = catchDelay.get();
+                catchDelayLeft = catchDelay.get() + getRandomExtraDelay(catchDelayVariance.get());
                 wasHooked = true;
             }
 
@@ -136,7 +154,7 @@ public class AutoFish extends Module {
     private void useRod() {
         Utils.rightClick();
         wasHooked = false;
-        castDelayLeft = castDelay.get();
+        castDelayLeft = castDelay.get() + getRandomExtraDelay(castDelayVariance.get());
     }
 
     private int findBestRod() {
@@ -165,5 +183,16 @@ public class AutoFish extends Module {
         }
 
         return bestSlot;
+    }
+
+    private double getRandomExtraDelay(int variance) {
+        if(variance == 0) {
+            return 0;
+        }
+
+        // Generate a value with standard normal distribution via Box-Muller transform
+        double scale = Math.sqrt(-2 * Math.log(Utils.random(0.0001, 1.0)));
+        double angle = Math.PI * Utils.random(0.0, 1.0); // Multiply by only 1 pi to avoid negative values
+        return Math.round(Math.min(scale * Math.sin(angle), 3.0) * variance); // Clamp to 3 standard deviations
     }
 }
