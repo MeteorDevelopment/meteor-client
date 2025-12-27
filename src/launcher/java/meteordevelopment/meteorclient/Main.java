@@ -34,26 +34,23 @@ public class Main {
                 getOS().open("https://meteorclient.com/faq/installation");
                 break;
             case 1: {
-                String path;
-
-                switch (getOS()) {
-                    case WINDOWS:
-                        path = System.getenv("AppData") + "/.minecraft/mods";
-                        break;
-                    case OSX:
-                        path = System.getProperty("user.home") + "/Library/Application Support/minecraft/mods";
-                        break;
-                    default:
-                        path = System.getProperty("user.home") + "/.minecraft";
-                        break;
-                }
-
-                File mods = new File(path);
+                File mods = new File(getModsFolder());
                 if (!mods.exists()) mods.mkdirs();
-
                 getOS().open(mods);
                 break;
             }
+        }
+    }
+
+    private static String getModsFolder() {
+        String userHome = System.getProperty("user.home");
+        switch (getOS()) {
+            case WINDOWS:
+                return System.getenv("AppData") + "/.minecraft/mods";
+            case OSX:
+                return userHome + "/Library/Application Support/minecraft/mods";
+            default:
+                return userHome + "/.minecraft/mods";
         }
     }
 
