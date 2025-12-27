@@ -23,6 +23,7 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.combat.NoMissDelay;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.player.Multitask;
@@ -43,8 +44,11 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profilers;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +61,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mixin(value = MinecraftClient.class, priority = 1001)
 public abstract class MinecraftClientMixin implements IMinecraftClient {
@@ -83,6 +88,9 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Shadow
     @Nullable
     public ClientPlayerEntity player;
+
+    @Shadow
+    private HitResult crosshairTarget;
 
     @Shadow
     @Final
@@ -116,9 +124,53 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         Profilers.get().pop();
     }
 
-    @Inject(method = "doAttack", at = @At("HEAD"))
+    // NoMissDelay
+
+    @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void onAttack(CallbackInfoReturnable<Boolean> cir) {
         CPSUtils.onAttack();
+
+        NoMissDelay noMissDelay = Modules.get().get(NoMissDelay.class);
+
+        if (!noMissDelay.isActive()) return;
+        if (noMissDelay.getOnlywithsword() && !hasAttackCooldown(player.getMainHandStack())) return;
+
+        if (noMissDelay.getCancelnoncrits() && player.getAttackCooldownProgress(0.5F) < 1.0F) {
+            cir.setReturnValue(false);
+            if (noMissDelay.shouldSwing()) player.swingHand(Hand.MAIN_HAND, false);
+            return;
+        }
+
+        if (crosshairTarget == null) {
+            cir.setReturnValue(false);
+            if (noMissDelay.shouldSwing()) player.swingHand(Hand.MAIN_HAND, false);
+            return;
+        }
+
+        HitResult.Type type = crosshairTarget.getType();
+
+        if (type == HitResult.Type.MISS ||
+            (noMissDelay.getCancelblockattacks() && type == HitResult.Type.BLOCK)) {
+            cir.setReturnValue(false);
+            if (noMissDelay.shouldSwing()) player.swingHand(Hand.MAIN_HAND, false);
+        }
+    }
+
+    private static boolean hasAttackCooldown(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+
+        AtomicBoolean hasAttack = new AtomicBoolean(false); //Thread safe just in case
+
+        stack.applyAttributeModifiers(EquipmentSlot.MAINHAND,
+            (attribute, modifier) -> {
+                if (attribute.equals(EntityAttributes.ATTACK_DAMAGE) ||
+                    attribute.equals(EntityAttributes.ATTACK_SPEED)) {
+                    hasAttack.set(true);
+                }
+            }
+        );
+
+        return hasAttack.get();
     }
 
     @Inject(method = "doItemUse", at = @At("HEAD"))
