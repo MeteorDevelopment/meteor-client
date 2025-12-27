@@ -69,6 +69,8 @@ configurations {
     }
 }
 
+sourceSets.create("launcher")
+
 dependencies {
     // Fabric
     minecraft(libs.minecraft)
@@ -100,6 +102,16 @@ dependencies {
     jij(libs.waybackauthlib)
 }
 
+sourceSets {
+    val launcher = getByName("launcher")
+
+    launcher.apply {
+        java {
+            srcDir("src/launcher/java")
+        }
+    }
+}
+
 // Handle transitive dependencies for jar-in-jar
 // Based on implementation from BaseProject by FlorianMichael/EnZaXD
 // Source: https://github.com/FlorianMichael/BaseProject/blob/main/src/main/kotlin/de/florianmichael/baseproject/Fabric.kt
@@ -112,7 +124,6 @@ afterEvaluate {
         "org.slf4j",    // Logging provided by Minecraft
         "jsr305"        // Compile time annotations only
     )
-
 
     jijConfig.incoming.resolutionResult.allDependencies.forEach { dep ->
         val requested = dep.requested.displayName
@@ -135,12 +146,6 @@ loom {
     accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")
 }
 
-afterEvaluate {
-    tasks.migrateMappings.configure {
-        outputDir.set(project.file("src/main/java"))
-    }
-}
-
 tasks {
     processResources {
         val buildNumber = project.findProperty("build_number")?.toString() ?: ""
@@ -160,6 +165,13 @@ tasks {
         }
     }
 
+    // Compile launcher with Java 8 for backwards compatibility
+    getByName<JavaCompile>("compileLauncherJava") {
+        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+        targetCompatibility = JavaVersion.VERSION_1_8.toString()
+        options.compilerArgs.add("-Xlint:-options")
+    }
+
     jar {
         inputs.property("archivesName", project.base.archivesName.get())
 
@@ -167,9 +179,10 @@ tasks {
             rename { "${it}_${inputs.properties["archivesName"]}" }
         }
 
-        // Launch sub project
-        dependsOn(":launch:compileJava")
-        from(project(":launch").layout.buildDirectory.dir("classes/java/main"))
+        // Include launcher classes
+        val launcher = sourceSets.getByName("launcher")
+        from(launcher.output.classesDirs)
+        from(launcher.output.resourcesDir)
 
         manifest {
             attributes["Main-Class"] = "meteordevelopment.meteorclient.Main"
@@ -187,7 +200,6 @@ tasks {
     }
 
     withType<JavaCompile> {
-        options.release = 21
         options.compilerArgs.add("-Xlint:deprecation")
         options.compilerArgs.add("-Xlint:unchecked")
     }
