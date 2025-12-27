@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
@@ -76,7 +77,7 @@ public class Names {
     }
 
     public static String get(Block block) {
-        return blockNames.computeIfAbsent(block, block1 -> StringHelper.stripTextFormat(I18n.translate(block1.getTranslationKey())));
+        return blockNames.computeIfAbsent(block, block1 -> BlockUtils.getDisplayName(block));
     }
 
     /**

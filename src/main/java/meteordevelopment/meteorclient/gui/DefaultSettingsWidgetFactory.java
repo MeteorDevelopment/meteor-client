@@ -249,7 +249,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void blockW(WTable table, BlockSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
 
-        WItem item = list.add(theme.item(setting.get().asItem().getDefaultStack())).widget();
+        WItem item = list.add(theme.block(setting.get())).widget();
 
         WButton select = list.add(theme.button("Select")).widget();
         select.action = () -> {

@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "meteor-client:block/soul_fire_display"
+  }
+}

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.world;
 
+import com.google.common.collect.ImmutableMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -20,16 +21,23 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.item.model.ItemModel;
+import net.minecraft.client.render.item.model.MissingItemModel;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.FluidTags;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
+import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -38,6 +46,9 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
+
+import java.util.Map;
+import java.util.Set;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -285,6 +296,99 @@ public class BlockUtils {
         } else {
             int i = mc.player.canHarvest(state) ? 30 : 100;
             return breakSpeed / f / (float) i;
+        }
+    }
+
+    // GUI Display
+
+    // special blocks with no standard block models, manually map to item model
+    private static final Map<Block, Item> HARDCODED_MAPPINGS = Map.of(
+        Blocks.WATER, Items.WATER_BUCKET,
+        Blocks.LAVA, Items.LAVA_BUCKET,
+        Blocks.BUBBLE_COLUMN, Items.WATER_BUCKET,
+        Blocks.END_PORTAL, Items.ENDER_EYE,
+        Blocks.END_GATEWAY, Items.ENDER_EYE,
+        Blocks.PISTON_HEAD, Items.PISTON,
+        Blocks.MOVING_PISTON, Items.PISTON
+    );
+
+    // block whose block models look better than their item models
+    private static final Set<Block> FORCED_BLOCK_DISPLAY = Set.of(
+        Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON
+    );
+
+    public static ItemStack getDisplayStack(Block block) {
+        ItemStack stack = block.asItem().getDefaultStack();
+        if (stack.isEmpty() == block.getDefaultState().isAir() && !FORCED_BLOCK_DISPLAY.contains(block)) {
+            return stack;
+        }
+
+        if (HARDCODED_MAPPINGS.containsKey(block)) {
+            return HARDCODED_MAPPINGS.get(block).getDefaultStack();
+        }
+
+        // replace with block model
+        Identifier blockId = Registries.BLOCK.getId(block);
+        Identifier displayModelId = MeteorClient.identifier(blockId.getPath() + "_display");
+
+        ItemModel model = MinecraftClient.getInstance().getBakedModelManager().getItemModel(displayModelId);
+
+        if (!(model instanceof MissingItemModel)) {
+            ItemStack replacement = Items.STICK.getDefaultStack(); // cant be air
+            replacement.set(DataComponentTypes.ITEM_MODEL, displayModelId);
+            return replacement;
+        }
+
+        // unknown missing block, render nothing
+        return stack;
+    }
+
+    private static final Map<Block, String> BLOCK_NAME_OVERRIDES = ImmutableMap.<Block, String>builder()
+        .put(Blocks.WALL_TORCH, "Wall Torch")
+        .put(Blocks.REDSTONE_WALL_TORCH, "Redstone Wall Torch")
+        .put(Blocks.SOUL_WALL_TORCH, "Soul Wall Torch")
+        .put(Blocks.COPPER_WALL_TORCH, "Copper Wall Torch")
+
+        .put(Blocks.SKELETON_WALL_SKULL, "Skeleton Wall Skull")
+        .put(Blocks.WITHER_SKELETON_WALL_SKULL, "Wither Skeleton Wall Skull")
+        .put(Blocks.ZOMBIE_WALL_HEAD, "Zombie Wall Head")
+        .put(Blocks.PLAYER_WALL_HEAD, "Player Wall Head")
+        .put(Blocks.DRAGON_WALL_HEAD, "Dragon Wall Head")
+        .put(Blocks.PIGLIN_WALL_HEAD, "Piglin Wall Head")
+        .put(Blocks.CREEPER_WALL_HEAD, "Creeper Wall Head")
+
+        .put(Blocks.OAK_WALL_SIGN, "Oak Wall Sign")
+        .put(Blocks.BIRCH_WALL_SIGN, "Birch Wall Sign")
+        .put(Blocks.SPRUCE_WALL_SIGN, "Spruce Wall Sign")
+        .put(Blocks.ACACIA_WALL_SIGN, "Acacia Wall Sign")
+        .put(Blocks.CHERRY_WALL_SIGN, "Cherry Wall Sign")
+        .put(Blocks.JUNGLE_WALL_SIGN, "Jungle Wall Sign")
+        .put(Blocks.BAMBOO_WALL_SIGN, "Bamboo Wall Sign")
+        .put(Blocks.WARPED_WALL_SIGN, "Warped Wall Sign")
+        .put(Blocks.CRIMSON_WALL_SIGN, "Crimson Wall Sign")
+        .put(Blocks.DARK_OAK_WALL_SIGN, "Dark Oak Wall Sign")
+        .put(Blocks.PALE_OAK_WALL_SIGN, "Pale Oak Wall Sign")
+        .put(Blocks.MANGROVE_WALL_SIGN, "Mangrove Wall Sign")
+
+        .put(Blocks.OAK_WALL_HANGING_SIGN, "Oak Wall Hanging Sign")
+        .put(Blocks.BIRCH_WALL_HANGING_SIGN, "Birch Wall Hanging Sign")
+        .put(Blocks.SPRUCE_WALL_HANGING_SIGN, "Spruce Wall Hanging Sign")
+        .put(Blocks.ACACIA_WALL_HANGING_SIGN, "Acacia Wall Hanging Sign")
+        .put(Blocks.CHERRY_WALL_HANGING_SIGN, "Cherry Wall Hanging Sign")
+        .put(Blocks.JUNGLE_WALL_HANGING_SIGN, "Jungle Wall Hanging Sign")
+        .put(Blocks.BAMBOO_WALL_HANGING_SIGN, "Bamboo Wall Hanging Sign")
+        .put(Blocks.WARPED_WALL_HANGING_SIGN, "Warped Wall Hanging Sign")
+        .put(Blocks.CRIMSON_WALL_HANGING_SIGN, "Crimson Wall Hanging Sign")
+        .put(Blocks.DARK_OAK_WALL_HANGING_SIGN, "Dark Oak Wall Hanging Sign")
+        .put(Blocks.PALE_OAK_WALL_HANGING_SIGN, "Pale Oak Wall Hanging Sign")
+        .put(Blocks.MANGROVE_WALL_HANGING_SIGN, "Mangrove Wall Hanging Sign")
+        .buildOrThrow();
+
+    public static String getDisplayName(Block block) {
+        if (BLOCK_NAME_OVERRIDES.containsKey(block) && mc.options.language.startsWith("en_")) {
+            return BLOCK_NAME_OVERRIDES.get(block);
+        } else {
+            return StringHelper.stripTextFormat(I18n.translate(block.getTranslationKey()));
         }
     }
 

@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "meteor-client:block/attached_pumpkin_stem_display"
+  }
+}

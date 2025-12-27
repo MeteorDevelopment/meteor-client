@@ -28,6 +28,8 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
+import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -174,6 +176,16 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
     public WItemWithLabel itemWithLabel(ItemStack stack) {
         return itemWithLabel(stack, Names.get(stack.getItem()));
+    }
+
+    public WItem block(Block block) {
+        return w(new WItem(BlockUtils.getDisplayStack(block)));
+    }
+    public WItemWithLabel blockWithLabel(Block block, String name) {
+        return w(new WItemWithLabel(BlockUtils.getDisplayStack(block), name));
+    }
+    public WItemWithLabel blockWithLabel(Block block) {
+        return blockWithLabel(block, Names.get(block));
     }
 
     public WTexture texture(double width, double height, double rotation, Texture texture) {
