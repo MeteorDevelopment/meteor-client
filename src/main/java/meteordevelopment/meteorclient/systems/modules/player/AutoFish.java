@@ -57,10 +57,10 @@ public class AutoFish extends Module {
 
     private final Setting<Integer> castDelayVariance = sgGeneral.add(new IntSetting.Builder()
         .name("cast-delay-variance")
-        .description("Variance of randomness added to cast delay.")
+        .description("Maximum amount of randomness added to cast delay.")
         .defaultValue(0)
         .min(0)
-        .sliderMax(20)
+        .sliderMax(30)
         .build()
     );
 
@@ -75,10 +75,10 @@ public class AutoFish extends Module {
 
     private final Setting<Integer> catchDelayVariance = sgGeneral.add(new IntSetting.Builder()
         .name("catch-delay-variance")
-        .description("Variance of randomness added to catch delay.")
+        .description("Maximum amount of randomness added to catch delay.")
         .defaultValue(0)
         .min(0)
-        .sliderMax(6) // This is the highest possible variance that won't miss fish (assuming the base catch delay is less than 2). Since the randomization is clamped to 3 standard deviations, 6 would produce a maximum delay of 18 ticks, which is just within the shortest Java edition catch window of 1 second.
+        .sliderMax(10) // Since the shortest Java edition catch window is 20 ticks, this is the highest possible variance that won't miss fish.
         .build()
     );
 
@@ -136,7 +136,7 @@ public class AutoFish extends Module {
 
         if (!wasHooked) {
             if (((FishingBobberEntityAccessor) mc.player.fishHook).meteor$hasCaughtFish()) {
-                catchDelayLeft = catchDelay.get() + getRandomExtraDelay(catchDelayVariance.get());
+                catchDelayLeft = randomizeDelay(catchDelay.get(), catchDelayVariance.get());
                 wasHooked = true;
             }
 
@@ -154,7 +154,7 @@ public class AutoFish extends Module {
     private void useRod() {
         Utils.rightClick();
         wasHooked = false;
-        castDelayLeft = castDelay.get() + getRandomExtraDelay(castDelayVariance.get());
+        castDelayLeft = randomizeDelay(castDelay.get(), castDelayVariance.get());
     }
 
     private int findBestRod() {
@@ -185,14 +185,19 @@ public class AutoFish extends Module {
         return bestSlot;
     }
 
-    private double getRandomExtraDelay(int variance) {
-        if(variance == 0) {
-            return 0;
-        }
+    private double randomizeDelay(int delay, int variance) {
+        if (variance == 0) return delay;
 
-        // Generate a value with standard normal distribution via Box-Muller transform
+        // Sample the standard normal distribution via Box-Muller transform
         double scale = Math.sqrt(-2 * Math.log(Utils.random(0.0001, 1.0)));
-        double angle = Math.PI * Utils.random(0.0, 1.0); // Multiply by only 1 pi to avoid negative values
-        return Math.round(Math.min(scale * Math.sin(angle), 3.0) * variance); // Clamp to 3 standard deviations
+        double angle = Math.TAU * Utils.random(0.0, 1.0);
+        double norm = scale * Math.cos(angle);
+
+        // Clamp to 3 standard deviations and re-scale to [-3.0, +3.0]
+        final double MAX_SD = 3.0;
+        norm = Math.clamp(norm, -MAX_SD, MAX_SD) / MAX_SD;
+
+        delay += Math.round((float)(norm * variance));
+        return Math.max(1, delay);
     }
 }
