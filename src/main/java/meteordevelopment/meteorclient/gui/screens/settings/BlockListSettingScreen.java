@@ -36,7 +36,7 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
 
     @Override
     protected WWidget getValueWidget(Block block) {
-        return theme.blockWithLabel(block);
+        return theme.blockWithLabel(block.getDefaultState());
     }
 
     @Override

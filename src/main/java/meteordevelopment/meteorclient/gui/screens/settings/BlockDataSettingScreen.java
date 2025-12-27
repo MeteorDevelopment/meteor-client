@@ -41,7 +41,7 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
 
     @Override
     protected WWidget getValueWidget(Block block) {
-        return theme.blockWithLabel(block);
+        return theme.blockWithLabel(block.getDefaultState());
     }
 
     @Override
