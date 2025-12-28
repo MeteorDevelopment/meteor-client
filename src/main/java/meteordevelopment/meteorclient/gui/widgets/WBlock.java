@@ -9,6 +9,8 @@ import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.render.SimpleBlockRenderer;
@@ -22,8 +24,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-
 public class WBlock extends WWidget {
     private static final int TEXTURE_SIZE = 64;
 
@@ -31,7 +31,7 @@ public class WBlock extends WWidget {
     private static Texture DEPTH;
     private static ProjectionMatrix2 PROJECTION;
 
-    private static final HashMap<BlockState, BlockRenderData> TEXTURES = new HashMap<>();
+    private static final Reference2ObjectMap<BlockState, BlockRenderData> TEXTURES = new Reference2ObjectOpenHashMap<>();
 
     protected BlockState state;
 
@@ -66,8 +66,8 @@ public class WBlock extends WWidget {
         // Render block
         Texture texture;
 
-        if (TEXTURES.containsKey(state)) {
-            BlockRenderData renderData = TEXTURES.get(state);
+        @Nullable BlockRenderData renderData = TEXTURES.get(state);
+        if (renderData != null) {
             texture = renderData.texture();
             if (renderData.animated()) {
                 renderBlock(texture, state);
