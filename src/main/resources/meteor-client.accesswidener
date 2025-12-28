@@ -30,3 +30,5 @@ accessible   method  net/minecraft/client/network/ClientPlayerInteractionManager
 
 accessible   class   net/minecraft/client/gui/DrawContext$ScissorStack
 accessible   field   net/minecraft/client/render/RenderSetup outputTarget Lnet/minecraft/client/render/OutputTarget;
+
+accessible   method   net/minecraft/entity/projectile/ProjectileEntity deflectsAgainstWorldBorder ()Z
