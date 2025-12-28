@@ -181,17 +181,15 @@ public abstract class SimpleBlockRenderer {
             if (blockEntity != null) {
                 BlockEntityRenderer<BlockEntity, BlockEntityRenderState> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
                 if (renderer != null && blockEntity.getType().supports(blockEntity.getCachedState())) {
-                    try {
-                        RenderDispatcher renderDispatcher = new RenderDispatcher(
-                            renderCommandQueue,
-                            mc.getBlockRenderManager(),
-                            vertexConsumerProvider,
-                            mc.getAtlasManager(),
-                            NoopOutlineVertexConsumerProvider.INSTANCE,
-                            NoopImmediateVertexConsumerProvider.INSTANCE,
-                            mc.textRenderer
-                        );
-
+                    try (RenderDispatcher renderDispatcher = new RenderDispatcher(
+                        renderCommandQueue,
+                        mc.getBlockRenderManager(),
+                        vertexConsumerProvider,
+                        mc.getAtlasManager(),
+                        NoopOutlineVertexConsumerProvider.INSTANCE,
+                        NoopImmediateVertexConsumerProvider.INSTANCE,
+                        mc.textRenderer
+                    )) {
                         BlockEntityRenderState renderState = renderer.createRenderState();
                         renderer.updateRenderState(blockEntity, renderState, tickDelta, mc.gameRenderer.getCamera().getCameraPos(), null);
                         renderer.render(renderState, matrices, renderCommandQueue, mc.gameRenderer.getEntityRenderStates().cameraRenderState);
