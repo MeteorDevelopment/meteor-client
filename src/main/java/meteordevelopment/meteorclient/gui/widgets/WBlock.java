@@ -20,6 +20,7 @@ import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
@@ -30,7 +31,7 @@ public class WBlock extends WWidget {
     private static Texture DEPTH;
     private static ProjectionMatrix2 PROJECTION;
 
-    private static final HashMap<BlockState, Texture> TEXTURES = new HashMap<>();
+    private static final HashMap<BlockState, BlockRenderData> TEXTURES = new HashMap<>();
 
     protected BlockState state;
 
@@ -51,8 +52,7 @@ public class WBlock extends WWidget {
         if (state.isAir()) return;
 
         // Render as an item model
-        //var stack = state.getBlock().asItem().getDefaultStack();
-        var stack = ItemStack.EMPTY;
+        ItemStack stack = state.getBlock().asItem().getDefaultStack();
 
         if (!stack.isEmpty()) {
             renderer.post(() -> {
@@ -64,26 +64,39 @@ public class WBlock extends WWidget {
         }
 
         // Render block
-        //var texture = TEXTURES.get(state);
-        var texture = renderBlock(state);
+        Texture texture;
 
-        /*if (texture == null) {
-            texture = renderBlock(state);
-            TEXTURES.put(state, texture);
-        }*/
+        if (TEXTURES.containsKey(state)) {
+            BlockRenderData renderData = TEXTURES.get(state);
+            texture = renderData.texture();
+            if (renderData.animated()) {
+                renderBlock(texture, state);
+            }
+        } else {
+            texture = renderBlock(null, state);
+            TEXTURES.put(state, new BlockRenderData(
+                texture,
+                SimpleBlockRenderer.hasAnimatedTextures(state)
+            ));
+        }
 
         renderer.texture(x, y, width, height, 0, texture);
-        renderer.post(texture::close);
     }
 
-    private static Texture renderBlock(BlockState state) {
+    private static Texture renderBlock(@Nullable Texture color, BlockState state) {
         if (IMMEDIATE == null) {
             IMMEDIATE = VertexConsumerProvider.immediate(new BufferAllocator(1536));
             DEPTH = new Texture(TEXTURE_SIZE, TEXTURE_SIZE, TextureFormat.DEPTH32, FilterMode.NEAREST, FilterMode.NEAREST);
             PROJECTION = new ProjectionMatrix2("Offscreen block renderer", -100, 100, true);
         }
 
-        var color = new Texture(TEXTURE_SIZE, TEXTURE_SIZE, TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
+        if (color == null) {
+            color = new Texture(TEXTURE_SIZE, TEXTURE_SIZE, TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
+        }
+
+        var commands = RenderSystem.getDevice().createCommandEncoder();
+        commands.clearDepthTexture(DEPTH.getGlTexture(), 1);
+        commands.clearColorTexture(color.getGlTexture(), 0);
 
         RenderSystem.outputColorTextureOverride = color.getGlTextureView();
         RenderSystem.outputDepthTextureOverride = DEPTH.getGlTextureView();
@@ -97,9 +110,6 @@ public class WBlock extends WWidget {
         view.rotateXYZ(30 * (float) (Math.PI / 180.0), 45 * (float) (Math.PI / 180.0), 0);
         view.scale(0.625f, 0.625f, -0.625f);
         view.translate(0.5f, 0, -0.5f);
-
-        var commands = RenderSystem.getDevice().createCommandEncoder();
-        commands.clearDepthTexture(DEPTH.getGlTexture(), 1);
 
         SimpleBlockRenderer.renderShaded(BlockPos.ORIGIN, state, new MatrixStack(), IMMEDIATE.getBuffer(RenderLayers.cutout()));
         IMMEDIATE.draw();
@@ -116,4 +126,6 @@ public class WBlock extends WWidget {
     public void setState(BlockState state) {
         this.state = state;
     }
+
+    private record BlockRenderData(Texture texture, boolean animated) {}
 }

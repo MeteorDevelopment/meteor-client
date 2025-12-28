@@ -171,6 +171,38 @@ public abstract class SimpleBlockRenderer {
         }
     }
 
+    public static boolean hasAnimatedTextures(BlockState state) {
+        if (!state.getFluidState().isEmpty()) {
+            return true;
+        }
+
+        BlockStateModel model = mc.getBlockRenderManager().getModel(state);
+        RANDOM.setSeed(42L);
+        model.addParts(RANDOM, PARTS);
+
+        try {
+            for (BlockModelPart part : PARTS) {
+                for (Direction direction : DIRECTIONS) {
+                    for (BakedQuad quad : part.getQuads(direction)) {
+                        if (quad.sprite().getContents().isAnimated()) {
+                            return true;
+                        }
+                    }
+                }
+
+                for (BakedQuad quad : part.getQuads(null)) {
+                    if (quad.sprite().getContents().isAnimated()) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        } finally {
+            PARTS.clear();
+        }
+    }
+
     private record StaticBlockRenderView(BlockPos originPos, BlockState originState) implements BlockRenderView {
         @Override
         public float getBrightness(Direction direction, boolean shaded) {
