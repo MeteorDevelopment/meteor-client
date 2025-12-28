@@ -277,7 +277,7 @@ public class ProjectileEntitySimulator {
             tickIsTouchingWater();
         }
         // gravity -> position > drag
-        // accurate for fishing bobbers and firework rockets
+        // accurate for fishing bobbers and firework rockets, will need to revisit if more projectiles are added
         else if (simulatingEntity instanceof ProjectileEntity) {
             tickIsTouchingWater();
             velocity.sub(0, gravity, 0);
