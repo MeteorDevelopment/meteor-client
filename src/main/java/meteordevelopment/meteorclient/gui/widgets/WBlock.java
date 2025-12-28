@@ -108,7 +108,7 @@ public class WBlock extends WWidget {
 
         view.rotateXYZ(30 * (float) (Math.PI / 180.0), 45 * (float) (Math.PI / 180.0), 0);
         view.scale(0.625f, 0.625f, -0.625f);
-        view.translate(0.5f, 0, -0.5f);
+        view.translate(0.55f, 0, -0.5f);
 
         SimpleBlockRenderer.renderFull(null, BlockPos.ORIGIN, state, null, new MatrixStack(), MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks(), IMMEDIATE);
         IMMEDIATE.draw();
@@ -154,7 +154,7 @@ public class WBlock extends WWidget {
 
         view.rotateXYZ(30 * (float) (Math.PI / 180.0), 45 * (float) (Math.PI / 180.0), 0);
         view.scale(0.625f, 0.625f, -0.625f);
-        view.translate(0.5f, 0, -0.5f);
+        view.translate(0.55f, 0, -0.5f);
 
         SimpleBlockRenderer.renderFull(null, BlockPos.ORIGIN, state, null, new MatrixStack(), MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks(), IMMEDIATE);
         IMMEDIATE.draw();
