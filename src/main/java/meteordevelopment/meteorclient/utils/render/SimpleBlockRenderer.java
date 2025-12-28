@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -42,6 +44,7 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class SimpleBlockRenderer {
+    private static final boolean FABRIC_FLUID_RENDERER = FabricLoader.getInstance().isModLoaded("fabric-rendering-fluids-v1");
     private static final MatrixStack MATRICES = new MatrixStack();
     private static final List<BlockModelPart> PARTS = new ArrayList<>();
     private static final Direction[] DIRECTIONS = Direction.values();
@@ -114,13 +117,23 @@ public abstract class SimpleBlockRenderer {
         }
 
         if (!state.getFluidState().isEmpty()) {
-            MinecraftClient.getInstance().getBlockRenderManager().renderFluid(
-                pos,
-                renderView,
-                consumer,
-                state,
-                state.getFluidState()
-            );
+            if (FABRIC_FLUID_RENDERER) {
+                FluidRenderHandlerRegistry.INSTANCE.get(state.getFluidState().getFluid()).renderFluid(
+                    pos,
+                    renderView,
+                    consumer,
+                    state,
+                    state.getFluidState()
+                );
+            } else {
+                MinecraftClient.getInstance().getBlockRenderManager().renderFluid(
+                    pos,
+                    renderView,
+                    consumer,
+                    state,
+                    state.getFluidState()
+                );
+            }
         }
     }
 

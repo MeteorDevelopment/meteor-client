@@ -81,6 +81,7 @@ dependencies {
 
     // Compat fixes
     modCompileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
+    modCompileOnly(fabricApi.module("fabric-rendering-fluids-v1", fapiVersion))
     modCompileOnly(libs.sodium) { isTransitive = false }
     modCompileOnly(libs.lithium) { isTransitive = false }
     modCompileOnly(libs.iris) { isTransitive = false }
