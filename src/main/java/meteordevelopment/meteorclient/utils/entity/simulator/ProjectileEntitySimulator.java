@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.utils.entity;
+package meteordevelopment.meteorclient.utils.entity.simulator;
 
 import meteordevelopment.meteorclient.mixin.CrossbowItemAccessor;
 import meteordevelopment.meteorclient.mixin.ProjectileInGroundAccessor;
@@ -12,22 +12,28 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Sneak;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.MissHitResult;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ChargedProjectilesComponent;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
+import net.minecraft.entity.mob.BreezeEntity;
 import net.minecraft.entity.projectile.*;
 import net.minecraft.entity.projectile.thrown.*;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.*;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -40,9 +46,9 @@ public class ProjectileEntitySimulator {
     public final Vector3d pos = new Vector3d();
     private final Vector3d velocity = new Vector3d();
 
-    private Entity simulatingEntity;
+    private ProjectileEntity simulatingEntity;
     private EntityDimensions dimensions;
-    private int age;
+    private int age, pierceLevel;
     private double gravity;
     private float airDrag, waterDrag;
     private boolean isTouchingWater;
@@ -103,7 +109,9 @@ public class ProjectileEntitySimulator {
                 if (projectilesComponent.contains(Items.FIREWORK_ROCKET)) {
                     set(user, angleOffset, accurate, tickDelta, FIREWORK_ROCKET.withPower(speed));
                 }
-                else set(user, angleOffset,accurate, tickDelta, ARROW.withPower(speed));
+                else set(user, angleOffset, accurate, tickDelta, ARROW.withPower(speed));
+
+                this.pierceLevel = projectilesComponent.contains(Items.FIREWORK_ROCKET) ? 0 : Utils.getEnchantmentLevel(itemStack, Enchantments.PIERCING);
             }
             case WindChargeItem ignored         -> set(user, angleOffset, accurate, tickDelta, WIND_CHARGE);
             case TridentItem ignored            -> set(user, angleOffset, accurate, tickDelta, TRIDENT);
@@ -148,15 +156,15 @@ public class ProjectileEntitySimulator {
             z = Math.cos(yaw * 0.017453292) * Math.cos(pitch * 0.017453292);
         }
         else {
-            Vec3d vec3d = user.getOppositeRotationVector(1.0F);
-            Quaterniond quaternion = new Quaterniond().setAngleAxis(angleOffset, vec3d.x, vec3d.y, vec3d.z);
-            Vec3d vec3d2 = user.getRotationVec(1.0F);
-            Vector3d vector3f = new Vector3d(vec3d2.x, vec3d2.y, vec3d2.z);
-            vector3f.rotate(quaternion);
+            Vec3d oppositeRotationVec = user.getOppositeRotationVector(1.0F);
+            Quaterniond quaternion = new Quaterniond().setAngleAxis(angleOffset, oppositeRotationVec.x, oppositeRotationVec.y, oppositeRotationVec.z);
+            Vec3d rotationVec = user.getRotationVec(1.0F);
+            Vector3d vector3d = new Vector3d(rotationVec.x, rotationVec.y, rotationVec.z);
+            vector3d.rotate(quaternion);
 
-            x = vector3f.x;
-            y = vector3f.y;
-            z = vector3f.z;
+            x = vector3d.x;
+            y = vector3d.y;
+            z = vector3d.z;
         }
 
          velocity.set(x, y, z).normalize().mul(data.power());
@@ -166,7 +174,7 @@ public class ProjectileEntitySimulator {
             velocity.add(vel.x, user.isOnGround() ? 0.0D : vel.y, vel.z);
         }
 
-        setSimulationData(data.entity().create(mc.world, null), data);
+        setSimulationData((ProjectileEntity) data.entity().create(mc.world, null), data);
     }
 
     public void setFishingBobber(Entity user, float tickDelta, MotionData data) {
@@ -195,7 +203,7 @@ public class ProjectileEntitySimulator {
         double l = velocity.length();
         velocity.mul(0.6 / l + 0.5, 0.6 / l + 0.5, 0.6 / l + 0.5);
 
-        setSimulationData(data.entity().create(mc.world, null), data);
+        setSimulationData((ProjectileEntity) data.entity().create(mc.world, null), data);
     }
 
 
@@ -230,7 +238,7 @@ public class ProjectileEntitySimulator {
         return true;
     }
 
-    public void set(Entity entity, MotionData data) {
+    public void set(ProjectileEntity entity, MotionData data) {
         pos.set(entity.getX(), entity.getY(), entity.getZ());
 
         double speed = entity.getVelocity().length();
@@ -239,7 +247,7 @@ public class ProjectileEntitySimulator {
         setSimulationData(entity, data);
     }
 
-    private void setSimulationData(Entity entity, MotionData data) {
+    private void setSimulationData(ProjectileEntity entity, MotionData data) {
         this.gravity = data.gravity();
         this.airDrag = data.airDrag();
         this.waterDrag = data.waterDrag();
@@ -247,9 +255,10 @@ public class ProjectileEntitySimulator {
         this.dimensions = simulatingEntity.getDimensions(simulatingEntity.getPose());
         this.isTouchingWater = simulatingEntity.isTouchingWater();
         this.age = simulatingEntity.age;
+        this.pierceLevel = 0;
     }
 
-    public HitResult tick() {
+    public SimulationStep tick() {
         age++;
         ((IVec3d) prevPos3d).meteor$set(pos);
 
@@ -277,19 +286,18 @@ public class ProjectileEntitySimulator {
         }
 
         // Check if below world
-        if (pos.y < mc.world.getBottomY()) return MissHitResult.INSTANCE;
+        if (pos.y < mc.world.getBottomY()) return SimulationStep.MISS;
 
         // Check if chunk is loaded
         int chunkX = ChunkSectionPos.getSectionCoord(pos.x);
         int chunkZ = ChunkSectionPos.getSectionCoord(pos.z);
-        if (!mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) return MissHitResult.INSTANCE;
+        if (!mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) return SimulationStep.MISS;
 
         // Check for collision
         ((IVec3d) pos3d).meteor$set(pos);
-        if (pos3d.equals(prevPos3d)) return MissHitResult.INSTANCE;
+        if (pos3d.equals(prevPos3d)) return SimulationStep.MISS;
 
-        HitResult hitResult = getCollision();
-        return hitResult.getType() == HitResult.Type.MISS ? null : hitResult;
+        return getCollision();
     }
 
     /**
@@ -325,42 +333,123 @@ public class ProjectileEntitySimulator {
 
     /**
      * {@link ProjectileUtil#getCollision(Vec3d, Entity, java.util.function.Predicate, Vec3d, net.minecraft.world.World, float, RaycastContext.ShapeType)}
-     *
+     * <p>
      * Vanilla checks from the current to the next position, while we check from the previous to the current positions.
      * This solves the issue of the collision check from the starting position not working properly - otherwise, the
      * simulated projectile may move from its start position through a block, only running the collision check afterwards.
      * The vanilla game has other code to deal with this but this is the easiest way for us to fix it.
      */
-    private HitResult getCollision() {
-        HitResult hitResult = mc.world.getCollisionsIncludingWorldBorder(new RaycastContext(
+    private SimulationStep getCollision() {
+        HitResult blockCollision = mc.world.getCollisionsIncludingWorldBorder(new RaycastContext(
             prevPos3d,
             pos3d,
             RaycastContext.ShapeType.COLLIDER,
             waterDrag == 0 ? RaycastContext.FluidHandling.ANY : RaycastContext.FluidHandling.NONE,
             simulatingEntity
         ));
-        if (hitResult.getType() != HitResult.Type.MISS) {
-            ((IVec3d) pos3d).meteor$set(hitResult.getPos());
+        if (blockCollision.getType() != HitResult.Type.MISS) {
+            ((IVec3d) pos3d).meteor$set(blockCollision.getPos());
         }
 
-        // When entities are spawned, they first move and then check collisions against their current and next positions.
-        // Since we move and then check from the previous to the current position, it can sometimes detect thrown
-        // projectiles as colliding against ourselves, which does not happen for the first tick of movement.
-        if (age <= 1) return hitResult;
+        /** {@link PersistentProjectileEntity#applyCollision(BlockHitResult)} */
+        if (simulatingEntity instanceof PersistentProjectileEntity) {
+            Collection<EntityHitResult> entityCollisions = ProjectileUtil.collectPiercingCollisions(
+                mc.world,
+                simulatingEntity,
+                prevPos3d,
+                pos3d,
+                dimensions.getBoxAt(prevPos3d).stretch(velocity.x, velocity.y, velocity.z).expand(1.0D),
+                entity -> !entity.isSpectator() && entity.isAlive() && entity.canHit(),
+                getToleranceMargin(),
+                RaycastContext.ShapeType.COLLIDER,
+                false
+            );
 
-        HitResult hitResult2 = ProjectileUtil.getEntityCollision(
-            mc.world,
-            simulatingEntity,
-            prevPos3d,
-            pos3d,
-            dimensions.getBoxAt(prevPos3d).stretch(velocity.x, velocity.y, velocity.z).expand(1.0D),
-            entity -> !entity.isSpectator() && entity.isAlive() && entity.canHit(),
-            ProjectileUtil.getToleranceMargin(simulatingEntity)
-        );
-        if (hitResult2 != null) {
-            hitResult = hitResult2;
+            // prevent simulating projectiles as colliding with ourselves on the first tick of movement
+            entityCollisions.removeIf(collision -> age <= 1 && collision.getEntity() == mc.player);
+            if (entityCollisions.isEmpty()) return new SimulationStep(hitOrDeflect(blockCollision), blockCollision);
+
+            boolean stop = false;
+            ArrayList<EntityHitResult> hits = new ArrayList<>();
+            for (EntityHitResult result : entityCollisions) {
+                boolean hit = hitOrDeflect(result);
+                if (!hit) break;
+
+                hits.add(result);
+                if (pierceLevel <= 0) {
+                    stop = true;
+                    break;
+                }
+
+                pierceLevel--;
+            }
+
+            return new SimulationStep(stop, hits.toArray(new HitResult[0]));
+        }
+        else {
+            HitResult entityCollision = ProjectileUtil.getEntityCollision(
+                mc.world,
+                simulatingEntity,
+                prevPos3d,
+                pos3d,
+                dimensions.getBoxAt(prevPos3d).stretch(velocity.x, velocity.y, velocity.z).expand(1.0D),
+                entity -> !entity.isSpectator() && entity.isAlive() && entity.canHit(),
+                getToleranceMargin()
+            );
+
+            if (entityCollision == null || (age <= 1 && entityCollision instanceof EntityHitResult ehr && ehr.getEntity() == mc.player)) {
+                return new SimulationStep(hitOrDeflect(blockCollision), blockCollision);
+            }
+
+            if (hitOrDeflect(entityCollision)) return new SimulationStep(true, entityCollision);
+            return new SimulationStep(false);
+        }
+    }
+
+    /**
+     * {@link ProjectileEntity#hitOrDeflect(HitResult)}
+     * {@link ProjectileEntity#onCollision(HitResult)}
+     * {@link ProjectileDeflection}
+     */
+    private boolean hitOrDeflect(HitResult hitResult) {
+        if (hitResult instanceof EntityHitResult entityHitResult) {
+            Entity entity = entityHitResult.getEntity();
+            Utils.set(pos, entityHitResult.getPos());
+
+            if ((entity instanceof BreezeEntity && !(simulatingEntity instanceof AbstractWindChargeEntity)) || entity.getProjectileDeflection(simulatingEntity) == ProjectileDeflection.SIMPLE) {
+                velocity.mul(-0.5);
+                return false;
+            }
+
+            // if we keep this it makes trajectories look awful when you throw wind charges
+//            if (entity.getType().isIn(EntityTypeTags.REDIRECTABLE_PROJECTILE) && entity instanceof ProjectileEntity projectileEntity) {
+//                Utils.set(velocity, projectileEntity.getRotationVector());
+//                return false;
+//            }
+
+            // not perfectly accurate but you would otherwise have to trace significant amounts of the damage stack
+            if (entity instanceof LivingEntity livingEntity && livingEntity.isBlocking() && simulatingEntity instanceof PersistentProjectileEntity) {
+                velocity.mul(-0.5).mul(0.2);
+                return velocity.lengthSquared() < 1.0E-7;
+            }
+
+            return true;
+        }
+        else if (hitResult instanceof BlockHitResult bhr) {
+            Utils.set(pos, bhr.getPos());
+
+            if (simulatingEntity.deflectsAgainstWorldBorder() && bhr.isAgainstWorldBorder()) {
+                velocity.mul(-0.5).mul(0.2);
+                return false;
+            }
+
+            return bhr.getType() != HitResult.Type.MISS;
         }
 
-        return hitResult;
+        return false;
+    }
+
+    private float getToleranceMargin() {
+        return Math.max(0.0F, Math.min(0.3F, (age - 2) / 20.0F));
     }
 }
