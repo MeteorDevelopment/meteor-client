@@ -332,6 +332,23 @@ public class BlockUtils {
         .put(Blocks.DARK_OAK_WALL_HANGING_SIGN, "Dark Oak Wall Hanging Sign")
         .put(Blocks.PALE_OAK_WALL_HANGING_SIGN, "Pale Oak Wall Hanging Sign")
         .put(Blocks.MANGROVE_WALL_HANGING_SIGN, "Mangrove Wall Hanging Sign")
+
+        .put(Blocks.YELLOW_WALL_BANNER, "Yellow Wall Banner")
+        .put(Blocks.RED_WALL_BANNER, "Red Wall Banner")
+        .put(Blocks.LIME_WALL_BANNER, "Lime Wall Banner")
+        .put(Blocks.PINK_WALL_BANNER, "Pink Wall Banner")
+        .put(Blocks.GRAY_WALL_BANNER, "Gray Wall Banner")
+        .put(Blocks.CYAN_WALL_BANNER, "Cyan Wall Banner")
+        .put(Blocks.BLUE_WALL_BANNER, "Blue Wall Banner")
+        .put(Blocks.WHITE_WALL_BANNER, "White Wall Banner")
+        .put(Blocks.LIGHT_BLUE_WALL_BANNER, "Light Blue Wall Banner")
+        .put(Blocks.BROWN_WALL_BANNER, "Brown Wall Banner")
+        .put(Blocks.GREEN_WALL_BANNER, "Green Wall Banner")
+        .put(Blocks.BLACK_WALL_BANNER, "Black Wall Banner")
+        .put(Blocks.ORANGE_WALL_BANNER, "Orange Wall Banner")
+        .put(Blocks.PURPLE_WALL_BANNER, "Purple Wall Banner")
+        .put(Blocks.MAGENTA_WALL_BANNER, "Magenta Wall Banner")
+        .put(Blocks.LIGHT_GRAY_WALL_BANNER, "Light Gray Wall Banner")
         .buildOrThrow();
 
     public static String getDisplayName(Block block) {

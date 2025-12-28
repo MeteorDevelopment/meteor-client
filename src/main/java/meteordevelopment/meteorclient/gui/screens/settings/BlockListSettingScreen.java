@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
 
 import java.util.function.Predicate;
 
@@ -24,10 +23,6 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
 
     @Override
     protected boolean includeValue(Block value) {
-        if (Registries.BLOCK.getId(value).getPath().endsWith("_wall_banner")) {
-            return false;
-        }
-
         Predicate<Block> filter = ((BlockListSetting) setting).filter;
 
         if (filter == null) return value != Blocks.AIR;
@@ -45,13 +40,5 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
             Names.get(value),
             Registries.BLOCK.getId(value).toString()
         };
-    }
-
-    @Override
-    protected Block getAdditionalValue(Block value) {
-        String path = Registries.BLOCK.getId(value).getPath();
-        if (!path.endsWith("_banner")) return null;
-
-        return Registries.BLOCK.get(Identifier.ofVanilla(path.substring(0, path.length() - 6) + "wall_banner"));
     }
 }
