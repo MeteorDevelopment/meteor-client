@@ -94,14 +94,14 @@ public class WBlock extends WWidget {
         view.pushMatrix().identity();
         view.scale(TEXTURE_SIZE);
 
-        view.rotateXYZ(30 * (float) (Math.PI / 180.0), 225 * (float) (Math.PI / 180.0), 0);
+        view.rotateXYZ(30 * (float) (Math.PI / 180.0), 45 * (float) (Math.PI / 180.0), 0);
         view.scale(0.625f, 0.625f, -0.625f);
-        view.translate(-1, 0.5f, 0);
+        view.translate(0.5f, 0, -0.5f);
 
         var commands = RenderSystem.getDevice().createCommandEncoder();
         commands.clearDepthTexture(DEPTH.getGlTexture(), 1);
 
-        SimpleBlockRenderer.render(BlockPos.ORIGIN, state, new MatrixStack(), IMMEDIATE.getBuffer(RenderLayers.cutout()));
+        SimpleBlockRenderer.renderShaded(BlockPos.ORIGIN, state, new MatrixStack(), IMMEDIATE.getBuffer(RenderLayers.cutout()));
         IMMEDIATE.draw();
 
         view.popMatrix();
