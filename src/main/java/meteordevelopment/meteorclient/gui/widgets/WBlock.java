@@ -13,8 +13,8 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.render.SimpleBlockRenderer;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.ProjectionMatrix2;
-import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
@@ -111,7 +111,7 @@ public class WBlock extends WWidget {
         view.scale(0.625f, 0.625f, -0.625f);
         view.translate(0.5f, 0, -0.5f);
 
-        SimpleBlockRenderer.renderShaded(BlockPos.ORIGIN, state, new MatrixStack(), IMMEDIATE.getBuffer(RenderLayers.cutout()));
+        SimpleBlockRenderer.renderFull(null, BlockPos.ORIGIN, state, null, new MatrixStack(), MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks(), IMMEDIATE);
         IMMEDIATE.draw();
 
         view.popMatrix();

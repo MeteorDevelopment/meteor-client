@@ -5,10 +5,12 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -45,7 +47,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class SimpleBlockRenderer {
     private static final boolean FABRIC_FLUID_RENDERER = FabricLoader.getInstance().isModLoaded("fabric-rendering-fluids-v1");
-    private static final MatrixStack MATRICES = new MatrixStack();
     private static final List<BlockModelPart> PARTS = new ArrayList<>();
     private static final Direction[] DIRECTIONS = Direction.values();
     private static final Random RANDOM = Random.create();
@@ -67,37 +68,86 @@ public abstract class SimpleBlockRenderer {
 
     private SimpleBlockRenderer() {}
 
-    public static void renderWithBlockEntity(BlockEntity blockEntity, float tickDelta, VertexConsumerProvider vertexConsumerProvider) {
-        MATRICES.push();
-        MATRICES.translate(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ());
+    public static void renderFlat(@Nullable BlockRenderView renderView, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, MatrixStack matrices, float tickDelta, VertexConsumerProvider vertexConsumerProvider) {
+        matrices.push();
+        matrices.translate(pos.getX(), pos.getY(), pos.getZ());
 
-        // Render block model
-        var consumer = vertexConsumerProvider.getBuffer(RenderLayers.solid());
-        SimpleBlockRenderer.renderFlat(blockEntity.getPos(), blockEntity.getCachedState(), MATRICES, consumer);
-
-        // Render block entity
-        BlockEntityRenderer<BlockEntity, BlockEntityRenderState> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
-
-        if (renderer != null && blockEntity.hasWorld() && blockEntity.getType().supports(blockEntity.getCachedState())) {
-            SimpleBlockRenderer.provider = vertexConsumerProvider;
-
-            BlockEntityRenderState state = renderer.createRenderState();
-            renderer.updateRenderState(blockEntity, state, tickDelta, mc.gameRenderer.getCamera().getCameraPos(), null);
-            renderer.render(state, MATRICES, renderCommandQueue, mc.gameRenderer.getEntityRenderStates().cameraRenderState);
-
-            renderDispatcher.render();
-            renderCommandQueue.onNextFrame();
-
-            SimpleBlockRenderer.provider = null;
+        if (renderView == null) {
+            renderView = new StaticBlockRenderView(pos, state);
         }
 
-        MATRICES.pop();
+        // Render block model
+        if (state.getRenderType() == BlockRenderType.MODEL) {
+            VertexConsumer consumer = vertexConsumerProvider.getBuffer(RenderLayers.solid());
+
+            BlockStateModel model = mc.getBlockRenderManager().getModel(state);
+            RANDOM.setSeed(state.getRenderingSeed(pos));
+            model.addParts(RANDOM, PARTS);
+
+            matrices.translate(state.getModelOffset(pos));
+            Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+
+            for (BlockModelPart part : PARTS) {
+                for (Direction direction : DIRECTIONS) {
+                    List<BakedQuad> quads = part.getQuads(direction);
+                    if (!quads.isEmpty()) renderQuads(quads, matrix4f, consumer);
+                }
+
+                List<BakedQuad> quads = part.getQuads(null);
+                if (!quads.isEmpty()) renderQuads(quads, matrix4f, consumer);
+            }
+
+            PARTS.clear();
+        }
+
+        // Render fluid
+        if (!state.getFluidState().isEmpty()) {
+            VertexConsumer consumer = vertexConsumerProvider.getBuffer(RenderLayers.solid());
+            renderFluid(renderView, pos, state, consumer);
+        }
+
+        // Render block entity
+        if (blockEntity != null || state.getBlock() instanceof BlockWithEntity) {
+            if (blockEntity == null && state.getBlock() instanceof BlockWithEntity blockWithEntity) {
+                blockEntity = blockWithEntity.createBlockEntity(pos, state);
+            }
+
+            if (blockEntity != null) {
+                BlockEntityRenderer<BlockEntity, BlockEntityRenderState> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
+                if (renderer != null && blockEntity.getType().supports(blockEntity.getCachedState())) {
+                    try {
+                        SimpleBlockRenderer.provider = vertexConsumerProvider;
+
+                        BlockEntityRenderState renderState = renderer.createRenderState();
+                        renderer.updateRenderState(blockEntity, renderState, tickDelta, mc.gameRenderer.getCamera().getCameraPos(), null);
+                        renderer.render(renderState, matrices, renderCommandQueue, mc.gameRenderer.getEntityRenderStates().cameraRenderState);
+
+                        renderDispatcher.render();
+                        renderCommandQueue.onNextFrame();
+
+                        SimpleBlockRenderer.provider = null;
+                    } catch (Throwable t) {
+                        MeteorClient.LOG.error("Oops! no render", t);
+                    }
+                }
+            }
+        }
+
+        matrices.pop();
     }
 
-    public static void renderShaded(BlockPos pos, BlockState state, MatrixStack matrices, VertexConsumer consumer) {
-        BlockRenderView renderView = new StaticBlockRenderView(pos, state);
+    public static void renderFull(@Nullable BlockRenderView renderView, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, MatrixStack matrices, float tickDelta, VertexConsumerProvider.Immediate vertexConsumerProvider) {
+        matrices.push();
+        matrices.translate(pos.getX(), pos.getY(), pos.getZ());
 
+        if (renderView == null) {
+            renderView = new StaticBlockRenderView(pos, state);
+        }
+
+        // Render block model
         if (state.getRenderType() == BlockRenderType.MODEL) {
+            VertexConsumer consumer = vertexConsumerProvider.getBuffer(RenderLayers.cutout());
+
             BlockStateModel model = mc.getBlockRenderManager().getModel(state);
             RANDOM.setSeed(42L);
             model.addParts(RANDOM, PARTS);
@@ -116,48 +166,66 @@ public abstract class SimpleBlockRenderer {
             PARTS.clear();
         }
 
+        // Render fluid
         if (!state.getFluidState().isEmpty()) {
-            if (FABRIC_FLUID_RENDERER) {
-                FluidRenderHandlerRegistry.INSTANCE.get(state.getFluidState().getFluid()).renderFluid(
-                    pos,
-                    renderView,
-                    consumer,
-                    state,
-                    state.getFluidState()
-                );
-            } else {
-                MinecraftClient.getInstance().getBlockRenderManager().renderFluid(
-                    pos,
-                    renderView,
-                    consumer,
-                    state,
-                    state.getFluidState()
-                );
+            VertexConsumer consumer = vertexConsumerProvider.getBuffer(RenderLayers.cutout());
+            renderFluid(renderView, pos, state, consumer);
+        }
+
+        // Render block entity
+        if (blockEntity != null || state.getBlock() instanceof BlockWithEntity) {
+            if (blockEntity == null && state.getBlock() instanceof BlockWithEntity blockWithEntity) {
+                blockEntity = blockWithEntity.createBlockEntity(pos, state);
+            }
+
+            if (blockEntity != null) {
+                BlockEntityRenderer<BlockEntity, BlockEntityRenderState> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
+                if (renderer != null && blockEntity.getType().supports(blockEntity.getCachedState())) {
+                    try {
+                        RenderDispatcher renderDispatcher = new RenderDispatcher(
+                            renderCommandQueue,
+                            mc.getBlockRenderManager(),
+                            vertexConsumerProvider,
+                            mc.getAtlasManager(),
+                            NoopOutlineVertexConsumerProvider.INSTANCE,
+                            NoopImmediateVertexConsumerProvider.INSTANCE,
+                            mc.textRenderer
+                        );
+
+                        BlockEntityRenderState renderState = renderer.createRenderState();
+                        renderer.updateRenderState(blockEntity, renderState, tickDelta, mc.gameRenderer.getCamera().getCameraPos(), null);
+                        renderer.render(renderState, matrices, renderCommandQueue, mc.gameRenderer.getEntityRenderStates().cameraRenderState);
+
+                        renderDispatcher.render();
+                        renderCommandQueue.onNextFrame();
+                    } catch (Throwable t) {
+                        MeteorClient.LOG.error("Oops! no render", t);
+                    }
+                }
             }
         }
+
+        matrices.pop();
     }
 
-    public static void renderFlat(BlockPos pos, BlockState state, MatrixStack matrices, VertexConsumer consumer) {
-        if (state.getRenderType() != BlockRenderType.MODEL) return;
-
-        BlockStateModel model = mc.getBlockRenderManager().getModel(state);
-        RANDOM.setSeed(state.getRenderingSeed(pos));
-        model.addParts(RANDOM, PARTS);
-
-        matrices.translate(state.getModelOffset(pos));
-        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-
-        for (BlockModelPart part : PARTS) {
-            for (Direction direction : DIRECTIONS) {
-                List<BakedQuad> quads = part.getQuads(direction);
-                if (!quads.isEmpty()) renderQuads(quads, matrix4f, consumer);
-            }
-
-            List<BakedQuad> quads = part.getQuads(null);
-            if (!quads.isEmpty()) renderQuads(quads, matrix4f, consumer);
+    private static void renderFluid(BlockRenderView renderView, BlockPos pos, BlockState state, VertexConsumer consumer) {
+        if (FABRIC_FLUID_RENDERER) {
+            FluidRenderHandlerRegistry.INSTANCE.get(state.getFluidState().getFluid()).renderFluid(
+                pos,
+                renderView,
+                consumer,
+                state,
+                state.getFluidState()
+            );
+        } else {
+            MinecraftClient.getInstance().getBlockRenderManager().renderFluid(
+                pos,
+                renderView,
+                consumer,
+                state,
+                state.getFluidState()
+            );
         }
-
-        PARTS.clear();
     }
 
     private static void renderQuads(List<BakedQuad> quads, Matrix4f matrix4f, VertexConsumer consumer) {
