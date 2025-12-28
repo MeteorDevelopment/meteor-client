@@ -67,7 +67,7 @@ public abstract class SimpleBlockRenderer {
 
     private SimpleBlockRenderer() {}
 
-    public static void renderWithBlockEntity(BlockEntity blockEntity, float tickDelta, IVertexConsumerProvider vertexConsumerProvider) {
+    public static void renderWithBlockEntity(BlockEntity blockEntity, float tickDelta, VertexConsumerProvider vertexConsumerProvider) {
         MATRICES.push();
         MATRICES.translate(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ());
 

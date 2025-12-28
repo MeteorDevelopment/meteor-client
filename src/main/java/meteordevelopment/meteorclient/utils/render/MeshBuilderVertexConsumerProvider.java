@@ -9,8 +9,9 @@ import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
 
-public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvider {
+public class MeshBuilderVertexConsumerProvider implements VertexConsumerProvider {
     private final MeshBuilderVertexConsumer vertexConsumer;
 
     public MeshBuilderVertexConsumerProvider(MeshBuilder mesh) {
@@ -26,15 +27,8 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
         vertexConsumer.fixedColor(color.r, color.g, color.b, color.a);
     }
 
-    @Override
-    public void setOffset(int offsetX, int offsetY, int offsetZ) {
-        vertexConsumer.setOffset(offsetX, offsetY, offsetZ);
-    }
-
     public static class MeshBuilderVertexConsumer implements VertexConsumer {
         private final MeshBuilder mesh;
-
-        private int offsetX, offsetY, offsetZ;
 
         private final double[] xs = new double[4];
         private final double[] ys = new double[4];
@@ -47,17 +41,11 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
             this.mesh = mesh;
         }
 
-        public void setOffset(int offsetX, int offsetY, int offsetZ) {
-            this.offsetX = offsetX;
-            this.offsetY = offsetY;
-            this.offsetZ = offsetZ;
-        }
-
         @Override
         public VertexConsumer vertex(float x, float y, float z) {
-            xs[i] = (double) offsetX + x;
-            ys[i] = (double) offsetY + y;
-            zs[i] = (double) offsetZ + z;
+            xs[i] = x;
+            ys[i] = y;
+            zs[i] = z;
 
             if (++i >= 4) {
                 mesh.ensureQuadCapacity();
