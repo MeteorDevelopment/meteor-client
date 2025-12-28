@@ -199,14 +199,17 @@ public class Trajectories extends Module {
 
         // Calculate paths
         if (!simulator.set(player, itemStack, 0, accurate.get(), tickDelta)) return;
-        getEmptyPath().calculate().ignoreFirstTicks();
+        Path p = getEmptyPath().calculate();
+        if (player == mc.player) p.ignoreFirstTicks();
 
         if (itemStack.getItem() instanceof CrossbowItem && Utils.hasEnchantment(itemStack, Enchantments.MULTISHOT)) {
             if (!simulator.set(player, itemStack, MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // left multishot arrow
-            getEmptyPath().calculate().ignoreFirstTicks();
+            p = getEmptyPath().calculate();
+            if (player == mc.player) p.ignoreFirstTicks();
 
             if (!simulator.set(player, itemStack, -MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // right multishot arrow
-            getEmptyPath().calculate().ignoreFirstTicks();
+            p = getEmptyPath().calculate();
+            if (player == mc.player) p.ignoreFirstTicks();
         }
     }
 
