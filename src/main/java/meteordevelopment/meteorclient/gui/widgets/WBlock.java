@@ -77,8 +77,8 @@ public class WBlock extends WWidget {
         if (IMMEDIATE == null) {
             IMMEDIATE = VertexConsumerProvider.immediate(new BufferAllocator(1536));
             DEPTH = new Texture(TEXTURE_SIZE, TEXTURE_SIZE, TextureFormat.DEPTH32, FilterMode.NEAREST, FilterMode.NEAREST);
-            PROJECTION_TEXTURE = new ProjectionMatrix2("Offscreen block renderer", -100, 100, true);
-            PROJECTION_SCREEN = new ProjectionMatrix2("Ughhghgh", -100, 100, false);
+            PROJECTION_TEXTURE = new ProjectionMatrix2("Block widget texture projection", -100, 100, true);
+            PROJECTION_SCREEN = new ProjectionMatrix2("Block widget screen projection", -100, 100, false);
         }
 
         if (chached) {
