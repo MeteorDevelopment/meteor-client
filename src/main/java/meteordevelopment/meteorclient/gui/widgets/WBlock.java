@@ -12,6 +12,7 @@ import com.mojang.blaze3d.textures.TextureFormat;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.renderer.Scissor;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.render.SimpleBlockRenderer;
 import net.minecraft.block.BlockState;
@@ -19,21 +20,26 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.ProjectionMatrix2;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.BufferAllocator;
+import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class WBlock extends WWidget {
     private static final int TEXTURE_SIZE = 64;
 
     private static VertexConsumerProvider.Immediate IMMEDIATE;
     private static Texture DEPTH;
-    private static ProjectionMatrix2 PROJECTION;
+    private static ProjectionMatrix2 PROJECTION_TEXTURE;
+    private static ProjectionMatrix2 PROJECTION_SCREEN;
 
-    private static final Reference2ObjectMap<BlockState, BlockRenderData> TEXTURES = new Reference2ObjectOpenHashMap<>();
+    private static final Reference2ObjectMap<BlockState, Texture> TEXTURES = new Reference2ObjectOpenHashMap<>();
 
     protected BlockState state;
+    protected boolean initialized;
+    protected boolean chached;
 
     public WBlock(BlockState state) {
         this.state = state;
@@ -64,35 +70,28 @@ public class WBlock extends WWidget {
         }
 
         // Render block
-        Texture texture;
-
-        @Nullable BlockRenderData renderData = TEXTURES.get(state);
-        if (renderData != null) {
-            texture = renderData.texture();
-            if (renderData.animated()) {
-                renderBlock(texture, state);
-            }
-        } else {
-            texture = renderBlock(null, state);
-            TEXTURES.put(state, new BlockRenderData(
-                texture,
-                SimpleBlockRenderer.hasAnimatedTextures(state)
-            ));
+        if (!initialized) {
+            chached = !SimpleBlockRenderer.hasAnimatedTextures(state);
         }
 
-        renderer.texture(x, y, width, height, 0, texture);
-    }
-
-    private static Texture renderBlock(@Nullable Texture color, BlockState state) {
         if (IMMEDIATE == null) {
             IMMEDIATE = VertexConsumerProvider.immediate(new BufferAllocator(1536));
             DEPTH = new Texture(TEXTURE_SIZE, TEXTURE_SIZE, TextureFormat.DEPTH32, FilterMode.NEAREST, FilterMode.NEAREST);
-            PROJECTION = new ProjectionMatrix2("Offscreen block renderer", -100, 100, true);
+            PROJECTION_TEXTURE = new ProjectionMatrix2("Offscreen block renderer", -100, 100, true);
+            PROJECTION_SCREEN = new ProjectionMatrix2("Ughhghgh", -100, 100, false);
         }
 
-        if (color == null) {
-            color = new Texture(TEXTURE_SIZE, TEXTURE_SIZE, TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
+        if (chached) {
+            Texture texture = TEXTURES.computeIfAbsent(state, WBlock::renderToTexture);
+            renderer.texture(x, y, width, height, 0, texture);
+        } else {
+            Optional<Scissor> scissorOpt = renderer.getScissor();
+            renderer.post(() -> renderDirectly(scissorOpt, state, (float) x, (float) y, (float) width, (float) height, (float) theme.scale(0.5d)));
         }
+    }
+
+    private static Texture renderToTexture(BlockState state) {
+        Texture color = new Texture(TEXTURE_SIZE, TEXTURE_SIZE, TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
 
         var commands = RenderSystem.getDevice().createCommandEncoder();
         commands.clearDepthTexture(DEPTH.getGlTexture(), 1);
@@ -101,7 +100,7 @@ public class WBlock extends WWidget {
         RenderSystem.outputColorTextureOverride = color.getGlTextureView();
         RenderSystem.outputDepthTextureOverride = DEPTH.getGlTextureView();
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(PROJECTION.set(TEXTURE_SIZE, TEXTURE_SIZE), ProjectionType.PERSPECTIVE);
+        RenderSystem.setProjectionMatrix(PROJECTION_TEXTURE.set(TEXTURE_SIZE, TEXTURE_SIZE), ProjectionType.PERSPECTIVE);
 
         var view = RenderSystem.getModelViewStack();
         view.pushMatrix().identity();
@@ -123,9 +122,51 @@ public class WBlock extends WWidget {
         return color;
     }
 
-    public void setState(BlockState state) {
-        this.state = state;
+    private static void renderDirectly(Optional<Scissor> scissorOpt, BlockState state, float x, float y, float width, float height, float scale) {
+        Window window = MinecraftClient.getInstance().getWindow();
+
+        int framebufferHeight = window.getFramebufferHeight();
+        float canonicalY = framebufferHeight - y - height;
+
+        if (scissorOpt.isPresent()) {
+            Scissor scissor = scissorOpt.get();
+            int canonicalScissorY = framebufferHeight - scissor.y - scissor.height;
+
+            int x1 = Math.max((int) x, scissor.x);
+            int y1 = Math.max((int) canonicalY, canonicalScissorY);
+            int x2 = Math.min((int) (x + width), scissor.x + scissor.width);
+            int y2 = Math.min((int) (canonicalY + height), canonicalScissorY + scissor.height);
+            int w = x2 - x1;
+            int h = y2 - y1;
+
+            RenderSystem.enableScissorForRenderTypeDraws(x1, y1, w, h);
+        } else {
+            RenderSystem.enableScissorForRenderTypeDraws((int) x, (int) (canonicalY), (int) width, (int) height);
+        }
+
+        RenderSystem.backupProjectionMatrix();
+        RenderSystem.setProjectionMatrix(PROJECTION_SCREEN.set(window.getFramebufferWidth(), window.getFramebufferHeight()), ProjectionType.PERSPECTIVE);
+
+        var view = RenderSystem.getModelViewStack();
+        view.pushMatrix().identity();
+        view.translate(x, canonicalY, 0);
+        view.scale(TEXTURE_SIZE * scale);
+
+        view.rotateXYZ(30 * (float) (Math.PI / 180.0), 45 * (float) (Math.PI / 180.0), 0);
+        view.scale(0.625f, 0.625f, -0.625f);
+        view.translate(0.5f, 0, -0.5f);
+
+        SimpleBlockRenderer.renderFull(null, BlockPos.ORIGIN, state, null, new MatrixStack(), MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks(), IMMEDIATE);
+        IMMEDIATE.draw();
+
+        view.popMatrix();
+
+        RenderSystem.restoreProjectionMatrix();
+        RenderSystem.disableScissorForRenderTypeDraws();
     }
 
-    private record BlockRenderData(Texture texture, boolean animated) {}
+    public void setState(BlockState state) {
+        this.state = state;
+        this.initialized = false;
+    }
 }
