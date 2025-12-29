@@ -390,8 +390,8 @@ public class Modules extends System<Modules> {
         // Register color settings for the module
         module.settings.registerColorSettings(module);
     }
-
     private void initCombat() {
+        add(new AimAssist());
         add(new AnchorAura());
         add(new AntiAnvil());
         add(new AntiBed());
@@ -465,15 +465,17 @@ public class Modules extends System<Modules> {
         add(new AutoWalk());
         add(new AutoWasp());
         add(new Blink());
+        add(new BoatFly());
         add(new ClickTP());
+        add(new Confuse());
         add(new ElytraBoost());
         add(new ElytraFly());
         add(new EntityControl());
+        add(new EntitySpeed());
         add(new FastClimb());
         add(new Flight());
         add(new GUIMove());
         add(new HighJump());
-        add(new Jesus());
         add(new LongJump());
         add(new NoFall());
         add(new NoSlow());
@@ -541,7 +543,9 @@ public class Modules extends System<Modules> {
         add(new AutoSign());
         add(new AutoSmelter());
         add(new BuildHeight());
+        add(new ChunkTweaks());
         add(new Collisions());
+        add(new Damages());
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new Flamethrower());
@@ -551,8 +555,10 @@ public class Modules extends System<Modules> {
         add(new NoGhostBlocks());
         add(new Nuker());
         add(new PacketMine());
+        add(new Quantities());
         add(new StashFinder());
         add(new SpawnProofer());
+        add(new Telekinesis());
         add(new Timer());
         add(new VeinMiner());
 
@@ -577,6 +583,7 @@ public class Modules extends System<Modules> {
         add(new ServerSpoof());
         add(new SoundBlocker());
         add(new Spam());
+        add(new TickManipulator());
         add(new Swarm());
     }
 }
