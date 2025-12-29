@@ -6,8 +6,15 @@
 package meteordevelopment.meteorclient.mixin;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
@@ -15,6 +22,7 @@ import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.world.Damages;
 import meteordevelopment.meteorclient.systems.modules.world.Quantities;
 
 import net.minecraft.entity.LivingEntity;
@@ -24,11 +32,6 @@ import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.network.ServerPlayerEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import org.jetbrains.annotations.Nullable; 
 
