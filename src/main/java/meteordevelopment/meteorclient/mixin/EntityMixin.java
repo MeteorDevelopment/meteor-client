@@ -138,9 +138,6 @@ public abstract class EntityMixin {
         if ((Object) this == mc.player) {
             MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(type, movement));
         }
-        else {
-            MeteorClient.EVENT_BUS.post(EntityMoveEvent.get((Entity) (Object) this, movement));
-        }
     }
 
     @ModifyExpressionValue(method = "getVelocityMultiplier", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
