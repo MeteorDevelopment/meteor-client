@@ -42,6 +42,13 @@ public class Telekinesis extends Module {
         .build()
     );
 
+    private final Setting<Boolean> cases = sgBounds.add(new BoolSetting.Builder()
+        .name("cases")
+        .description("Disables/enables black/white cases.")
+        .defaultValue(false)
+        .build()
+    );
+    
     public Telekinesis()
     {
         super(Categories.World, "telekinesis", "Move entities in third axis.");
@@ -54,7 +61,12 @@ public class Telekinesis extends Module {
 
     public boolean inFrames(Entity entity)
     {
-        return switch(filter.get()) {case White -> {entities.get().contains(entity.getType());} case Black -> {!entities.get().contains(entity.getType());}};
+        switch(filter.get())
+        {
+            case White -> {entities.get().contains(entity.getType());} 
+            case Black -> {!entities.get().contains(entity.getType());}
+        }
+        return cases.get();
     }
 
     public enum Filter
