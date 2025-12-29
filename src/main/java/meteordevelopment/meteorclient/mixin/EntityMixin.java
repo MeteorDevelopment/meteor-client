@@ -20,6 +20,7 @@ import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.render.FreeLook;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.systems.modules.world.Telekinesis;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
@@ -160,11 +161,22 @@ public abstract class EntityMixin {
     }
 
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)
-    private void onGetTargetingMargin(CallbackInfoReturnable<Float> info) {
+    private void onGetTargetingMargin(CallbackInfoReturnable<Float> info)
+    {
         double v = Modules.get().get(Hitboxes.class).getEntityValue((Entity) (Object) this);
-        if (v != 0) info.setReturnValue((float) v);
+        if (Modules.get().get(Hitboxes.class).mode.get() == Modules.get().get(Hitboxes.class).mode.get().Margin && v != 0) info.setReturnValue((float) v);
     }
 
+    @Inject(at = @At("HEAD"), method = "Lnet/minecraft/entity/Entity;getBoundingBox", cancellable = true)
+	public final void onGetBoundingBox(CallbackInfoReturnable<Box> cir)
+	{
+        Entity thisObj = (Entity)(Object)this;
+        Box boundingBox = thisObj.boundingBox;
+
+        if(boundingBox.equals(null)) return;
+		if(Modules.get().get(Hitboxes.class).mode.get() == Modules.get().get(Hitboxes.class).mode.get().Box)
+            cir.setReturnValue(Modules.get().get(Hitboxes.class).getEntityBox(thisObj));
+	}
     @Inject(method = "isInvisibleTo", at = @At("HEAD"), cancellable = true)
     private void onIsInvisibleTo(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
         if (player == null) info.setReturnValue(false);
@@ -216,4 +228,13 @@ public abstract class EntityMixin {
             ci.cancel();
         }
     }
+
+    @Inject(at = @At("INVOKE"), method = "Lnet/minecraft/entity/Entity;tick()V", cancellable = true)
+    private void inEntityTick(CallbackInfo ci)
+    {
+		Entity thisObj = (Entity)(Object)this;
+		
+		if(Modules.get().get(Telekinesis.class).inList(thisObj))
+		thisObj.setVelocity(Modules.get().get(Telekinesis.class).velocity.get().x, Modules.get().get(Telekinesis.class).velocity.get().y, Modules.get().get(Telekinesis.class).velocity.get().z);
+	}
 }
