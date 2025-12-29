@@ -465,13 +465,10 @@ public class Modules extends System<Modules> {
         add(new AutoWalk());
         add(new AutoWasp());
         add(new Blink());
-        add(new BoatFly());
         add(new ClickTP());
-        add(new Confuse());
         add(new ElytraBoost());
         add(new ElytraFly());
         add(new EntityControl());
-        add(new EntitySpeed());
         add(new FastClimb());
         add(new Flight());
         add(new GUIMove());
@@ -543,7 +540,6 @@ public class Modules extends System<Modules> {
         add(new AutoSign());
         add(new AutoSmelter());
         add(new BuildHeight());
-        add(new ChunkTweaks());
         add(new Collisions());
         add(new Damages());
         add(new EChestFarmer());
