@@ -29,11 +29,8 @@ public class AccountInfoScreen extends WindowScreen {
         TokenAccount e = (TokenAccount) account;
         WHorizontalList l = add(theme.horizontalList()).expandX().widget();
 
-        String tokenLabel = switch (account.getType()) {
-            case TheAltening -> "TheAltening token:";
-            case Session -> "";
-            default -> account.getType() + " token:";
-        };
+        String tokenLabel = account.getType() + " token:";
+        if (account.getType() == AccountType.Session) tokenLabel = "";
 
         WButton copy = theme.button("Copy");
         copy.action = () -> mc.keyboard.setClipboard(e.getToken());

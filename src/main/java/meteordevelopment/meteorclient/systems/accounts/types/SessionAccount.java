@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.accounts.types;
 
 import com.mojang.util.UndashedUuid;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
@@ -42,14 +43,20 @@ public class SessionAccount extends Account<SessionAccount> implements TokenAcco
     public boolean fetchInfo() {
         if (accessToken == null || accessToken.isBlank()) return false;
 
-        ProfileResponse profile = Http.get("https://api.minecraftservices.com/minecraft/profile")
-            .bearer(accessToken)
-            .sendJson(ProfileResponse.class);
+        ProfileResponse profile;
+        try {
+            profile = Http.get("https://api.minecraftservices.com/minecraft/profile")
+                .bearer(accessToken)
+                .sendJson(ProfileResponse.class);
+        } catch (IllegalArgumentException e) {
+            MeteorClient.LOG.error("Invalid session account token", e);
+            return false;
+        }
 
         if (profile == null || profile.id == null || profile.name == null) return false;
 
         cache.username = profile.name;
-        cache.uuid = normalizeUuid(profile.id);
+        cache.uuid = profile.id;
 
         return true;
     }
@@ -65,30 +72,19 @@ public class SessionAccount extends Account<SessionAccount> implements TokenAcco
         return true;
     }
 
-//    public void setAccessToken(String accessToken) {
-//        this.accessToken = accessToken;
-//    }
-
     @Override
     public String getToken() {
         return accessToken;
     }
 
-    private String normalizeUuid(String uuid) {
-        if (uuid == null) return "";
-        String raw = uuid.replace("-", "");
-        if (raw.length() != 32) return uuid;
-        return raw.substring(0, 8) + "-" + raw.substring(8, 12) + "-" + raw.substring(12, 16) + "-" + raw.substring(16, 20) + "-" + raw.substring(20);
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof SessionAccount account2)) return false;
+        return account2.name.equals(this.name);
     }
 
     private static class ProfileResponse {
         public String id;
         public String name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof SessionAccount)) return false;
-        return ((SessionAccount) o).name.equals(this.name);
     }
 }

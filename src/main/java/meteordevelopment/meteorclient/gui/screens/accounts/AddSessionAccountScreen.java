@@ -19,15 +19,10 @@ public class AddSessionAccountScreen extends AddAccountScreen {
     public void initWidgets() {
         WTable t = add(theme.table()).widget();
 
-        // Label (display name in the list)
-//        t.add(theme.label("Label: "));
-//        WTextBox label = t.add(theme.textBox("SessionAccount")).minWidth(400).expandX().widget();
-//        label.setFocused(true);
-//        t.row();
-
         // Access token
         t.add(theme.label("Access Token: "));
         WTextBox token = t.add(theme.textBox("")).minWidth(400).expandX().widget();
+        token.setFocused(true);
         t.row();
 
         // Add
