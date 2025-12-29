@@ -80,12 +80,7 @@ public class Telekinesis extends Module {
 
     public boolean inFrames(Entity entity)
     {
-        switch(filter.get())
-        {        
-            case White -> {for (String white : whiteuuids.get()) return StringUtils.containsIgnoreCase(entity.getUuid().toString(), white);}
-            case Black -> {for (String black : blackuuids.get()) return !StringUtils.containsIgnoreCase(entity.getUuid().toString(), black);}
-        }
-        return (PlayerUtils.isWithin(entity, range.get()) || PlayerUtils.inFov(entity, fov.get())) && entities.get().contains(entity.getType());
+        return switch(filter.get()) {case White -> {entities.get().contains(entity.getType());} case Black -> {!entities.get().contains(entity.getType());}};
     }
 
     public enum Filter
