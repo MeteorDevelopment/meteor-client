@@ -5,23 +5,32 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import java.util.List;
+
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.world.Quantities;
+
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
+import org.jetbrains.annotations.Nullable; 
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -49,5 +58,30 @@ public abstract class ItemStackMixin {
         if (user == mc.player) {
             MeteorClient.EVENT_BUS.post(StoppedUsingItemEvent.get((ItemStack) (Object) this));
         }
+    }
+
+    @Inject(at = @At("HEAD"), method = "damage(ILnet/minecraft/server/world/ServerWorld;Lnet/minecraft/server/network/ServerPlayerEntity;Ljava/util/function/Consumer;)V", cancellable = true)
+    private void isDamage(int amount, ServerWorld world, @Nullable ServerPlayerEntity player, Consumer<Item> breakCallback, CallbackInfo ci)
+    {
+        ItemStack itemStack = (ItemStack)(Object)this;
+        Item thisObj = itemStack.getItem();
+        if(Modules.get().get(Damages.class).inItemsList(thisObj))
+        ci.cancel();
+    }
+
+    @Inject(at = @At("HEAD"), method = "increment(I)V", cancellable = true)
+    private void incrementControl(int amount, CallbackInfo ci)
+    {
+        ItemStack itemStack = (ItemStack)(Object)this;
+        Item thisObj = itemStack.getItem();
+        if (Modules.get().get(Quantities.class).incr(thisObj)) ci.cancel();
+    }
+
+    @Inject(at = @At("HEAD"), method = "decrement(I)V", cancellable = true)
+    private void decrementControl(int amount, CallbackInfo ci)
+    {
+        ItemStack itemStack = (ItemStack)(Object)this;
+        Item thisObj = itemStack.getItem();
+        if (Modules.get().get(Quantities.class).decr(thisObj)) ci.cancel();
     }
 }
