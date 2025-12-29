@@ -22,6 +22,8 @@ accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder withSnip
 
 accessible   field   net/minecraft/client/render/command/OrderedRenderCommandQueueImpl batchingQueues Lit/unimi/dsi/fastutil/ints/Int2ObjectAVLTreeMap;
 
+accessible  field   net/minecraft/entity/Entity  boundingBox Lnet/minecraft/util/math/Box;
+
 # Auto Fish
 accessible   class   net/minecraft/entity/projectile/FishingBobberEntity$State
 accessible   field   net/minecraft/entity/projectile/FishingBobberEntity state Lnet/minecraft/entity/projectile/FishingBobberEntity$State;
