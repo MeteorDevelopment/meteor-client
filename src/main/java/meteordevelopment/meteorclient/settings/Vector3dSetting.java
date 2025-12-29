@@ -80,7 +80,7 @@ public class Vector3dSetting extends Setting<Vector3d> {
 
     public static class Builder extends SettingBuilder<Builder, Vector3d, Vector3dSetting> {
         public double min = Double.NEGATIVE_INFINITY, max = Double.POSITIVE_INFINITY;
-        public double sliderMin = 0, sliderMax = 10;
+        public double sliderMin = -1, sliderMax = 1;
         public boolean onSliderRelease = false;
         public int decimalPlaces = 3;
         public boolean noSlider = false;
