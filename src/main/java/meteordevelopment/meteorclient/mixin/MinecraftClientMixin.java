@@ -28,6 +28,7 @@ import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.player.Multitask;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
+import meteordevelopment.meteorclient.systems.modules.misc.TickManipulator;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CPSUtils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
@@ -93,6 +94,13 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
         firstFrame = true;
+    }
+
+    @Inject(at = @At("HEAD"), method = "tick", cancellable = true)
+    private void work(CallbackInfo ci)
+    {
+        if(Modules.get().get(TickManipulator.class).clientTime())
+        ci.cancel();
     }
 
     @Inject(at = @At("HEAD"), method = "tick")
