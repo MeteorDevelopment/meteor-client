@@ -64,7 +64,7 @@ public class Telekinesis extends Module {
         switch(filter.get())
         {
             case White -> {return entities.get().contains(entity.getType());}
-            case Black -> (return !entities.get().contains(entity.getType());}
+            case Black -> {return !entities.get().contains(entity.getType());}
         }
         return cases.get();
     }
