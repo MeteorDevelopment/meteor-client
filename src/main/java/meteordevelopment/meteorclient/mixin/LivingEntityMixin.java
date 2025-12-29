@@ -19,17 +19,20 @@ import meteordevelopment.meteorclient.systems.modules.player.NoStatusEffects;
 import meteordevelopment.meteorclient.systems.modules.player.OffhandCrash;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.systems.modules.world.Damages;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
+import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
@@ -79,7 +82,7 @@ public abstract class LivingEntityMixin extends Entity {
         return hand;
     }
 
-    @ModifyExpressionValue(method = "getHandSwingDuration", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/type/SwingAnimationComponent;duration()I"))
+    @ModifyExpressionValue(method = "getHandSwingDuration", at = @At(value = "CONSTANT", args = "intValue=6"))
     private int getHandSwingDuration(int original) {
         if ((Object) this != mc.player) return original;
 
@@ -112,7 +115,6 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyReturnValue(method = "hasStatusEffect", at = @At("RETURN"))
     private boolean hasStatusEffect(boolean original, RegistryEntry<StatusEffect> effect) {
-        if (effect == null || effect.value() == null) return original;
         if (Modules.get().get(NoStatusEffects.class).shouldBlock(effect.value())) return false;
 
         return original;
@@ -147,5 +149,13 @@ public abstract class LivingEntityMixin extends Entity {
 
         // only add the extra velocity if you're actually moving, otherwise you'll jump in place and move forward
         return original && (Math.abs(mc.player.forwardSpeed) > 1.0E-5F || Math.abs(mc.player.sidewaysSpeed) > 1.0E-5F);
+    }
+
+    @Inject(at = @At("INVOKE"), method = "damage(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;F)Z", cancellable = true)
+    public void cancelDamage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir)
+    {
+		Entity thisObj = (Entity)(Object)this;
+        if(Modules.get().get(Damages.class).inEntityList(thisObj))
+        cir.setReturnValue(false);
     }
 }
