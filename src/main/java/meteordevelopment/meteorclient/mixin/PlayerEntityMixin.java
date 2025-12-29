@@ -71,22 +71,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     @ModifyReturnValue(method = "getBlockBreakingSpeed", at = @At(value = "RETURN"))
-    public float onGetBlockBreakingSpeed(float breakSpeed, BlockState block) {
-        if (!getEntityWorld().isClient()) return breakSpeed;
-
+    public float onGetBlockBreakingSpeed(float breakSpeed, BlockState block)
+    {
         SpeedMine speedMine = Modules.get().get(SpeedMine.class);
-        if (!speedMine.isActive() || speedMine.mode.get() != SpeedMine.Mode.Normal || !speedMine.filter(block.getBlock())) return breakSpeed;
-
-        float breakSpeedMod = (float) (breakSpeed * speedMine.modifier.get());
-
-        if (mc.crosshairTarget instanceof BlockHitResult bhr) {
-            BlockPos pos = bhr.getBlockPos();
-            if (speedMine.modifier.get() < 1 || (BlockUtils.canInstaBreak(pos, breakSpeed) == BlockUtils.canInstaBreak(pos, breakSpeedMod))) {
-                return breakSpeedMod;
-            } else {
-                return 0.9f / BlockUtils.calcBlockBreakingDelta2(pos, 1);
-            }
-        }
+        if (block.getBlock() != null && speedMine.isActive() && speedMine.mode.get() == SpeedMine.Mode.Normal && speedMine.filter(block.getBlock()))
+            return breakSpeed + speedMine.modifier.get().floatValue();
 
         return breakSpeed;
     }
