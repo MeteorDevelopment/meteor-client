@@ -38,6 +38,6 @@ public class GhostHand extends Module {
 
     public boolean inBlockList(Block block)
     {
-        return isActive && blocks.get().contains(block);
+        return isActive() && blocks.get().contains(block);
     }
 }
