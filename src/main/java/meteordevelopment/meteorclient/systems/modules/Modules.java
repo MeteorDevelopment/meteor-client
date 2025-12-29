@@ -391,7 +391,6 @@ public class Modules extends System<Modules> {
         module.settings.registerColorSettings(module);
     }
     private void initCombat() {
-        add(new AimAssist());
         add(new AnchorAura());
         add(new AntiAnvil());
         add(new AntiBed());
