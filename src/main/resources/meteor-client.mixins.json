@@ -135,6 +135,7 @@
     "MinecraftClientAccessor",
     "MinecraftClientMixin",
     "MinecraftServerAccessor",
+    "MinecraftServerMixin",
     "MobEntityMixin",
     "MobSpawnerBlockEntityRendererMixin",
     "MountScreenHandlerAccessor",
