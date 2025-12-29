@@ -35,36 +35,10 @@ public class Telekinesis extends Module {
         .build()
     );
 
-    private final Setting<Double> fov = sgBounds.add(new DoubleSetting.Builder()
-       .name("fov")
-       .description("Will only move entities in the fov.")
-       .build()
-    );
-
-    private final Setting<Double> range = sgBounds.add(new DoubleSetting.Builder()
-       .name("range")
-       .description("The range at which an entity can be moved.")
-       .build()
-    );
-
     private final Setting<Filter> filter = sgBounds.add(new EnumSetting.Builder<Filter>()
         .name("filter")
         .description("Entity filter settings.")
         .defaultValue(Filter.Black)
-        .build()
-    );
-
-    private final Setting<List<String>> whiteuuids = sgBounds.add(new StringListSetting.Builder()
-        .name("white-uuids")
-        .description("Filter entities by uuid")
-        .visible(() -> filter.get() == Filter.White)
-        .build()
-    );
-
-    private final Setting<List<String>> blackuuids = sgBounds.add(new StringListSetting.Builder()
-        .name("black-uuids")
-        .description("Filter entities by uuid")
-        .visible(() -> filter.get() == Filter.Black)
         .build()
     );
 
