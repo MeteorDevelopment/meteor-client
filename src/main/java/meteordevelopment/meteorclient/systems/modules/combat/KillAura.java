@@ -272,7 +272,7 @@ public class KillAura extends Module {
     private final Setting<Double> predictMultiplier = sgElytra.add(new DoubleSetting.Builder()
         .name("prediction")
         .description("How much to predict target movement.")
-        .defaultValue(1.0)
+        .defaultValue(1.5)
         .min(0)
         .sliderMax(5.0)
         .visible(elytraTarget::get)
@@ -281,7 +281,7 @@ public class KillAura extends Module {
 
     private final Setting<Boolean> autoFirework = sgElytra.add(new BoolSetting.Builder()
         .name("auto-firework")
-        .description("Automatically uses fireworks to maintain flight speed and chase target.")
+        .description("Uses fireworks to maintain speed and automatically chase targets that get too far away.")
         .defaultValue(true)
         .visible(elytraTarget::get)
         .build()
@@ -346,7 +346,7 @@ public class KillAura extends Module {
             return;
         }
         
-        // Target Selection
+        // 1. SELECT TARGETS (Using extra range if gliding)
         targets.clear();
         if (onlyOnLook.get()) {
             Entity targeted = mc.targetedEntity;
@@ -364,14 +364,19 @@ public class KillAura extends Module {
 
         Entity primary = targets.getFirst();
 
+        // 2. RUN ELYTRA LOGIC (ROTATION + FIREWORKS)
+        // This is now independent of the attack return check
         boolean isElytraActive = elytraTarget.get() && ((LivingEntity)mc.player).isGliding();
         if (isElytraActive) {
             runElytraTarget(primary);
         }
 
-        // Re-check entity for attack range (normal range)
+        // 3. COMBAT RANGE CHECK
+        // We only continue if we are within the ACTUAL attack range
         if (!entityCheck(primary, false)) {
-            stopAttacking();
+            // Note: We don't call stopAttacking() here because we want 
+            // the module to stay active for rotations/fireworks
+            attacking = false;
             return;
         }
 
@@ -394,7 +399,7 @@ public class KillAura extends Module {
         }
 
         if (!acceptableWeapon(mc.player.getMainHandStack())) {
-            stopAttacking();
+            attacking = false;
             return;
         }
 
@@ -415,7 +420,6 @@ public class KillAura extends Module {
     private void runElytraTarget(Entity target) {
         if (target == null) return;
 
-        // Eyes pos
         Vec3d targetPos = new Vec3d(target.getX(), target.getY() + target.getEyeHeight(target.getPose()), target.getZ());
         
         if (predictMultiplier.get() > 0) {
@@ -434,7 +438,6 @@ public class KillAura extends Module {
 
         Rotations.rotate(Rotations.getYaw(steerPos), Rotations.getPitch(steerPos), 10, null);
 
-        // velocity adjustment
         Vec3d steerVec = steerPos.subtract(playerPos).normalize();
         double currentSpeed = mc.player.getVelocity().length();
 
@@ -443,12 +446,13 @@ public class KillAura extends Module {
             mc.player.setVelocity(newVelocity.x, newVelocity.y, newVelocity.z);
         }
 
-        // Auto Firework
+        // FIREWORK LOGIC
         if (autoFirework.get()) {
             if (fireworkTimer > 0) {
                 fireworkTimer--;
             } else {
-                if (currentSpeed < 1.0 || distance > idealDist + 10) {
+                // If moving slow OR target is escaping (distance > hitRange + buffer)
+                if (currentSpeed < 1.0 || distance > (range.get() + 2.0)) {
                     FindItemResult firework = InvUtils.find(item -> item.getItem() == Items.FIREWORK_ROCKET);
                     if (firework.found()) {
                         int prevSlot = mc.player.getInventory().getSelectedSlot();
