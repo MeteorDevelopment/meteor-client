@@ -281,7 +281,7 @@ public class KillAura extends Module {
 
     private final Setting<Boolean> autoFirework = sgElytra.add(new BoolSetting.Builder()
         .name("auto-firework")
-        .description("Automatically uses fireworks to maintain flight speed and chase targets.")
+        .description("Automatically uses fireworks to maintain flight speed and chase target.")
         .defaultValue(true)
         .visible(elytraTarget::get)
         .build()
