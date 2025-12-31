@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -20,11 +20,15 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @NullMarked
@@ -67,6 +71,22 @@ public class PacketLogger extends Module {
         .build()
     );
 
+    private final Setting<Boolean> showSummary = sgOutput.add(new BoolSetting.Builder()
+        .name("show-summary")
+        .description("Show final packet count summary when module is deactivated.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> logToChat = sgOutput.add(new BoolSetting.Builder()
+        .name("log-to-chat")
+        .description("Log packets to chat.")
+        .defaultValue(true)
+        .build()
+    );
+
+    // File logging settings
+
     private final Setting<Boolean> logToFile = sgOutput.add(new BoolSetting.Builder()
         .name("log-to-file")
         .description("Save packet logs to a file in the meteor-client folder.")
@@ -84,18 +104,37 @@ public class PacketLogger extends Module {
         .build()
     );
 
-    private final Setting<Boolean> showSummary = sgOutput.add(new BoolSetting.Builder()
-        .name("show-summary")
-        .description("Show final packet count summary when module is deactivated.")
-        .defaultValue(true)
+    private final Setting<Integer> maxFileSizeMB = sgOutput.add(new IntSetting.Builder()
+        .name("max-file-size-mb")
+        .description("Maximum size per log file in MB. Creates new file when exceeded.")
+        .defaultValue(10)
+        .min(1)
+        .sliderMax(100)
+        .visible(logToFile::get)
         .build()
     );
 
-    private final Object2IntOpenHashMap<Class<? extends Packet<?>>> packetCounts = new Object2IntOpenHashMap<>();
-    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
-    private final DateTimeFormatter fileNameFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+    private final Setting<Integer> maxTotalLogsMB = sgOutput.add(new IntSetting.Builder()
+        .name("max-total-logs-mb")
+        .description("Maximum total disk space for all packet logs in MB. Deletes oldest when exceeded.")
+        .defaultValue(50)
+        .min(1)
+        .sliderMax(500)
+        .visible(logToFile::get)
+        .build()
+    );
+
+    private static final Path PACKET_LOGS_DIR = MeteorClient.FOLDER.toPath().resolve("packet-logs");
+    private static final Charset LOG_CHARSET = StandardCharsets.UTF_8;
+    private static final int LINE_SEPARATOR_BYTES = System.lineSeparator().getBytes(LOG_CHARSET).length;
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+    private static final DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+    private final Reference2IntOpenHashMap<Class<? extends Packet<?>>> packetCounts = new Reference2IntOpenHashMap<>();
     private @Nullable BufferedWriter fileWriter;
     private long lastFlushMs;
+    private long currentFileSizeBytes;
+    private int currentFileIndex;
+    private @Nullable LocalDateTime sessionStartTime;
 
     public PacketLogger() {
         super(Categories.Misc, "packet-logger", "Allows you to log certain packets.");
@@ -115,15 +154,20 @@ public class PacketLogger extends Module {
 
         packetCounts.clear();
         lastFlushMs = System.currentTimeMillis();
+        sessionStartTime = LocalDateTime.now();
+        currentFileIndex = 0;
+        currentFileSizeBytes = 0;
 
         if (logToFile.get()) {
             try {
-                Path logPath = MeteorClient.FOLDER.toPath().resolve("packet-logs");
-                Files.createDirectories(logPath);
+                Files.createDirectories(PACKET_LOGS_DIR);
+                cleanupOldLogs();
 
-                String fileName = "packets-%s.log".formatted(LocalDateTime.now().format(fileNameFormatter));
-                fileWriter = Files.newBufferedWriter(logPath.resolve(fileName), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-                info("Logging packets to file: %s", fileName);
+                String fileName = "packets-%s-%d.log".formatted(
+                    sessionStartTime.format(FILE_NAME_FORMATTER),
+                    currentFileIndex
+                );
+                fileWriter = Files.newBufferedWriter(PACKET_LOGS_DIR.resolve(fileName), LOG_CHARSET, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
             } catch (IOException e) {
                 error("Failed to create packet log file: %s", e.getMessage());
                 fileWriter = null;
@@ -138,7 +182,6 @@ public class PacketLogger extends Module {
             try {
                 fileWriter.flush();
                 fileWriter.close();
-                info("Closed packet log file.");
             } catch (IOException e) {
                 error("Failed to close packet log file: %s", e.getMessage());
             }
@@ -146,8 +189,9 @@ public class PacketLogger extends Module {
         }
 
         if (showSummary.get() && !packetCounts.isEmpty()) {
-            info("Final packet counts:");
-            packetCounts.object2IntEntrySet().stream()
+            int totalPackets = packetCounts.values().intStream().sum();
+            info("Final packet counts (total %d):", totalPackets);
+            packetCounts.reference2IntEntrySet().stream()
                 .sorted((a, b) -> Integer.compare(b.getIntValue(), a.getIntValue()))
                 .forEach(e -> info("  %s: %d", PacketUtils.getName(e.getKey()), e.getIntValue()));
         }
@@ -164,7 +208,7 @@ public class PacketLogger extends Module {
         StringBuilder msg = new StringBuilder(128);
 
         if (showTimestamp.get()) {
-            msg.append("[").append(LocalDateTime.now().format(timeFormatter)).append("] ");
+            msg.append("[").append(LocalDateTime.now().format(TIME_FORMATTER)).append("] ");
         }
 
         msg.append(direction).append(" ");
@@ -179,13 +223,21 @@ public class PacketLogger extends Module {
         }
 
         // Log to chat
-        info(msg.toString());
+        if (logToChat.get()) info(msg.toString());
 
         // Log to file
         if (logToFile.get() && fileWriter != null) {
             try {
-                fileWriter.write(msg.toString());
+                String line = msg.toString();
+                int lineBytes = line.getBytes(LOG_CHARSET).length + LINE_SEPARATOR_BYTES;
+
+                if (currentFileSizeBytes + lineBytes > maxFileSizeMB.get() * 1024L * 1024L) {
+                    rotateLogFile();
+                }
+
+                fileWriter.write(line);
                 fileWriter.newLine();
+                currentFileSizeBytes += lineBytes;
 
                 // Flush periodically, not on every packet
                 long now = System.currentTimeMillis();
@@ -204,6 +256,65 @@ public class PacketLogger extends Module {
                 fileWriter = null;
             }
         }
+    }
+
+    /**
+     * Rotates the current log file when it exceeds the maximum size.
+     */
+    private void rotateLogFile() throws IOException {
+        fileWriter.flush();
+        fileWriter.close();
+
+        currentFileIndex++;
+
+        String fileName = "packets-%s-%d.log".formatted(
+            sessionStartTime.format(FILE_NAME_FORMATTER),
+            currentFileIndex
+        );
+
+        fileWriter = Files.newBufferedWriter(PACKET_LOGS_DIR.resolve(fileName), LOG_CHARSET, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        currentFileSizeBytes = 0;
+
+        cleanupOldLogs();
+    }
+
+    /**
+     * Cleans up old log files if total size exceeds the maximum limit.
+     */
+    private void cleanupOldLogs() throws IOException {
+        long maxBytes = maxTotalLogsMB.get() * 1024L * 1024L;
+
+        List<LogFileEntry> logFiles = new ArrayList<>();
+
+        try (var stream = Files.list(PACKET_LOGS_DIR)) {
+            for (Path p : stream.toList()) {
+                String name = p.getFileName().toString();
+                if (!name.startsWith("packets-") || !name.endsWith(".log")) continue;
+
+                try {
+                    logFiles.add(new LogFileEntry(
+                        p,
+                        Files.size(p),
+                        Files.getLastModifiedTime(p).toMillis()
+                    ));
+                } catch (IOException ignored) {
+                    // Skip unreadable files
+                }
+            }
+        }
+
+        logFiles.sort((a, b) -> Long.compare(b.lastModified(), a.lastModified()));
+
+        long totalSize = 0;
+        for (LogFileEntry entry : logFiles) {
+            totalSize += entry.size();
+            if (totalSize > maxBytes) {
+                Files.deleteIfExists(entry.path());
+            }
+        }
+    }
+
+    private record LogFileEntry(Path path, long size, long lastModified) {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
