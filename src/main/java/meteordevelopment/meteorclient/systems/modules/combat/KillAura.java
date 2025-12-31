@@ -39,6 +39,7 @@ import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ public class KillAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTargeting = settings.createGroup("Targeting");
     private final SettingGroup sgTiming = settings.createGroup("Timing");
+    private final SettingGroup sgElytra = settings.createGroup("Elytra Target");
 
     // General
 
@@ -248,12 +250,61 @@ public class KillAura extends Module {
         .build()
     );
 
+    // Elytra Target
+
+    private final Setting<Boolean> elytraTarget = sgElytra.add(new BoolSetting.Builder()
+        .name("elytra-target")
+        .description("Automatically flies towards the target when using Elytra.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> extraRange = sgElytra.add(new DoubleSetting.Builder()
+        .name("extra-range")
+        .description("Extra range for the Elytra Target rotations.")
+        .defaultValue(2.0)
+        .min(0)
+        .sliderMax(10.0)
+        .visible(elytraTarget::get)
+        .build()
+    );
+
+    private final Setting<Double> predictMultiplier = sgElytra.add(new DoubleSetting.Builder()
+        .name("prediction")
+        .description("How much to predict target movement.")
+        .defaultValue(1.0)
+        .min(0)
+        .sliderMax(5.0)
+        .visible(elytraTarget::get)
+        .build()
+    );
+
+    private final Setting<Boolean> autoFirework = sgElytra.add(new BoolSetting.Builder()
+        .name("auto-firework")
+        .description("Automatically uses fireworks to maintain flight speed.")
+        .defaultValue(true)
+        .visible(elytraTarget::get)
+        .build()
+    );
+
+    private final Setting<Integer> fireworkDelay = sgElytra.add(new IntSetting.Builder()
+        .name("firework-delay")
+        .description("Ticks between using fireworks.")
+        .defaultValue(5)
+        .min(1)
+        .sliderMax(20)
+        .visible(autoFirework::get)
+        .build()
+    );
+
     private final static ArrayList<Item> FILTER = new ArrayList<>(List.of(Items.DIAMOND_SWORD, Items.DIAMOND_AXE, Items.DIAMOND_PICKAXE, Items.DIAMOND_SHOVEL, Items.DIAMOND_HOE, Items.MACE, Items.DIAMOND_SPEAR, Items.TRIDENT));
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
     public boolean attacking, swapped;
     public static int previousSlot;
+
+    private int fireworkTimer = 0;
 
     public KillAura() {
         super(Categories.Combat, "kill-aura", "Attacks specified entities around you.");
@@ -263,6 +314,7 @@ public class KillAura extends Module {
     public void onActivate() {
         previousSlot = -1;
         swapped = false;
+        fireworkTimer = 0;
     }
 
     @Override
@@ -293,19 +345,16 @@ public class KillAura extends Module {
             stopAttacking();
             return;
         }
+        
+        // Target Selection
+        targets.clear();
         if (onlyOnLook.get()) {
             Entity targeted = mc.targetedEntity;
-
-            if (targeted == null || !entityCheck(targeted)) {
-                stopAttacking();
-                return;
+            if (targeted != null && entityCheck(targeted, true)) {
+                targets.add(targeted);
             }
-
-            targets.clear();
-            targets.add(mc.targetedEntity);
         } else {
-            targets.clear();
-            TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
+            TargetUtils.getList(targets, entity -> entityCheck(entity, true), priority.get(), maxTargets.get());
         }
 
         if (targets.isEmpty()) {
@@ -315,6 +364,18 @@ public class KillAura extends Module {
 
         Entity primary = targets.getFirst();
 
+        boolean isElytraActive = elytraTarget.get() && ((LivingEntity)mc.player).isGliding();
+        if (isElytraActive) {
+            runElytraTarget(primary);
+        }
+
+        // Re-check entity for attack range (normal range)
+        if (!entityCheck(primary, false)) {
+            stopAttacking();
+            return;
+        }
+
+        // Auto Switch
         if (autoSwitch.get()) {
             FindItemResult weaponResult = new FindItemResult(mc.player.getInventory().getSelectedSlot(), -1);
             if (attackWhenHolding.get() == AttackItems.Weapons) weaponResult = InvUtils.find(this::acceptableWeapon, 0, 8);
@@ -338,13 +399,67 @@ public class KillAura extends Module {
         }
 
         attacking = true;
-        if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
+
+        if (!isElytraActive) {
+            if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
+        }
+
         if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
             PathManagers.get().pause();
             wasPathing = true;
         }
 
         if (delayCheck()) targets.forEach(this::attack);
+    }
+
+    private void runElytraTarget(Entity target) {
+        if (target == null) return;
+
+        // Eyes pos
+        Vec3d targetPos = new Vec3d(target.getX(), target.getY() + target.getEyeHeight(target.getPose()), target.getZ());
+        
+        if (predictMultiplier.get() > 0) {
+            targetPos = targetPos.add(target.getVelocity().multiply(predictMultiplier.get()));
+        }
+
+        Vec3d playerPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        Vec3d directionToTarget = targetPos.subtract(playerPos).normalize();
+        double distance = playerPos.distanceTo(targetPos);
+        double idealDist = 1;
+
+        Vec3d steerPos = targetPos;
+        if (distance < idealDist) {
+            steerPos = targetPos.subtract(directionToTarget.multiply(idealDist - distance));
+        }
+
+        Rotations.rotate(Rotations.getYaw(steerPos), Rotations.getPitch(steerPos), 10, null);
+
+        // velocity adjustment
+        Vec3d steerVec = steerPos.subtract(playerPos).normalize();
+        double currentSpeed = mc.player.getVelocity().length();
+
+        if (currentSpeed > 0.1) {
+            Vec3d newVelocity = steerVec.multiply(currentSpeed);
+            mc.player.setVelocity(newVelocity.x, newVelocity.y, newVelocity.z);
+        }
+
+        // Auto Firework
+        if (autoFirework.get()) {
+            if (fireworkTimer > 0) {
+                fireworkTimer--;
+            } else {
+                if (currentSpeed < 1.0 || distance > idealDist + 10) {
+                    FindItemResult firework = InvUtils.find(item -> item.getItem() == Items.FIREWORK_ROCKET);
+                    if (firework.found()) {
+                        int prevSlot = mc.player.getInventory().getSelectedSlot();
+                        InvUtils.swap(firework.slot(), false);
+                        mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                        InvUtils.swap(prevSlot, false);
+                        fireworkTimer = fireworkDelay.get();
+                    }
+                }
+            }
+        }
     }
 
     @EventHandler
@@ -380,16 +495,21 @@ public class KillAura extends Module {
         return false;
     }
 
-    private boolean entityCheck(Entity entity) {
+    private boolean entityCheck(Entity entity, boolean useExtraRange) {
         if (entity.equals(mc.player) || entity.equals(mc.getCameraEntity())) return false;
         if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
+
+        double currentRange = range.get();
+        if (useExtraRange && elytraTarget.get() && ((LivingEntity)mc.player).isGliding()) {
+            currentRange += extraRange.get();
+        }
 
         Box hitbox = entity.getBoundingBox();
         if (!PlayerUtils.isWithin(
             MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
             MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
             MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
-            range.get()
+            currentRange
         )) return false;
 
         if (!entities.get().contains(entity.getType())) return false;
