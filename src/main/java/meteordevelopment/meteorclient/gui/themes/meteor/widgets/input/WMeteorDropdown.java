@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.gui.themes.meteor.widgets.input;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
+import meteordevelopment.meteorclient.gui.themes.meteor.MeteorTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.widgets.input.WDropdown;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -28,7 +28,7 @@ public class WMeteorDropdown<T> extends WDropdown<T> implements MeteorWidget {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        MeteorGuiTheme theme = theme();
+        MeteorTheme theme = theme();
         double pad = pad();
         double s = theme.textHeight();
 
@@ -44,7 +44,7 @@ public class WMeteorDropdown<T> extends WDropdown<T> implements MeteorWidget {
     private static class WRoot extends WDropdownRoot implements MeteorWidget {
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            MeteorGuiTheme theme = theme();
+            MeteorTheme theme = theme();
             double s = theme.scale(2);
             Color c = theme.outlineColor.get();
 
@@ -65,7 +65,7 @@ public class WMeteorDropdown<T> extends WDropdown<T> implements MeteorWidget {
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            MeteorGuiTheme theme = theme();
+            MeteorTheme theme = theme();
 
             Color color = theme.backgroundColor.get(pressed, mouseOver, true);
             int preA = color.a;

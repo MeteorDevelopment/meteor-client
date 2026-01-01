@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.gui.themes.meteor.widgets;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
+import meteordevelopment.meteorclient.gui.themes.meteor.MeteorTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.widgets.WHorizontalSeparator;
 
@@ -22,7 +22,7 @@ public class WMeteorHorizontalSeparator extends WHorizontalSeparator implements 
     }
 
     private void renderWithoutText(GuiRenderer renderer) {
-        MeteorGuiTheme theme = theme();
+        MeteorTheme theme = theme();
         double s = theme.scale(1);
         double w = width / 2;
 
@@ -31,7 +31,7 @@ public class WMeteorHorizontalSeparator extends WHorizontalSeparator implements 
     }
 
     private void renderWithText(GuiRenderer renderer) {
-        MeteorGuiTheme theme = theme();
+        MeteorTheme theme = theme();
         double s = theme.scale(2);
         double h = theme.scale(1);
 

@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.gui.themes.meteor.widgets.input;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
+import meteordevelopment.meteorclient.gui.themes.meteor.MeteorTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.themes.meteor.widgets.WMeteorLabel;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
@@ -32,7 +32,7 @@ public class WMeteorTextBox extends WTextBox implements MeteorWidget {
         return new WVerticalList() {
             @Override
             protected void onRender(GuiRenderer renderer1, double mouseX, double mouseY, double delta) {
-                MeteorGuiTheme theme1 = theme();
+                MeteorTheme theme1 = theme();
                 double s = theme1.scale(2);
                 Color c = theme1.outlineColor.get();
 
@@ -107,7 +107,7 @@ public class WMeteorTextBox extends WTextBox implements MeteorWidget {
 
         renderBackground(renderer, this, false, false);
 
-        MeteorGuiTheme theme = theme();
+        MeteorTheme theme = theme();
         double pad = pad();
         double overflowWidth = getOverflowWidthForRender();
 

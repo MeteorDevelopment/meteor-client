@@ -11,12 +11,12 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
 public interface MeteorWidget extends BaseWidget {
-    default MeteorGuiTheme theme() {
-        return (MeteorGuiTheme) getTheme();
+    default MeteorTheme theme() {
+        return (MeteorTheme) getTheme();
     }
 
     default void renderBackground(GuiRenderer renderer, WWidget widget, Color outlineColor, Color backgroundColor) {
-        MeteorGuiTheme theme = theme();
+        MeteorTheme theme = theme();
         double s = theme.scale(2);
 
         renderer.quad(widget.x + s, widget.y + s, widget.width - s * 2, widget.height - s * 2, backgroundColor);
@@ -28,7 +28,7 @@ public interface MeteorWidget extends BaseWidget {
     }
 
     default void renderBackground(GuiRenderer renderer, WWidget widget, boolean pressed, boolean mouseOver) {
-        MeteorGuiTheme theme = theme();
+        MeteorTheme theme = theme();
         renderBackground(renderer, widget, theme.outlineColor.get(pressed, mouseOver), theme.backgroundColor.get(pressed, mouseOver));
     }
 }

@@ -144,6 +144,33 @@ public class Nuker extends Module {
         .build()
     );
 
+    private final Setting<Boolean> randomDelay = sgGeneral.add(new BoolSetting.Builder()
+        .name("random-delay")
+        .description("Add random delays between block breaks for more legit behavior.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> minRandomDelay = sgGeneral.add(new DoubleSetting.Builder()
+        .name("min-random-delay")
+        .description("Minimum random delay in seconds.")
+        .defaultValue(0.25)
+        .min(0.0)
+        .sliderMax(2.0)
+        .visible(randomDelay::get)
+        .build()
+    );
+
+    private final Setting<Double> maxRandomDelay = sgGeneral.add(new DoubleSetting.Builder()
+        .name("max-random-delay")
+        .description("Maximum random delay in seconds.")
+        .defaultValue(0.75)
+        .min(0.1)
+        .sliderMax(5.0)
+        .visible(randomDelay::get)
+        .build()
+    );
+
     private final Setting<Integer> maxBlocksPerTick = sgGeneral.add(new IntSetting.Builder()
         .name("max-blocks-per-tick")
         .description("Maximum blocks to try to break per tick. Useful when insta mining.")
@@ -155,7 +182,7 @@ public class Nuker extends Module {
     private final Setting<SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<SortMode>()
         .name("sort-mode")
         .description("The blocks you want to mine first.")
-        .defaultValue(SortMode.Closest)
+        .defaultValue(SortMode.Crosshair)
         .build()
     );
 
@@ -180,10 +207,35 @@ public class Nuker extends Module {
         .build()
     );
 
+    private final Setting<Boolean> strictVisibility = sgGeneral.add(new BoolSetting.Builder()
+        .name("strict-visibility")
+        .description("Only mine blocks that are clearly visible (no mining through blocks).")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
         .description("Rotates server-side to the block being mined.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> smoothRotate = sgGeneral.add(new BoolSetting.Builder()
+        .name("smooth-rotate")
+        .description("Smoothly rotates to the target block instead of instant rotation.")
+        .defaultValue(false)
+        .visible(rotate::get)
+        .build()
+    );
+
+    private final Setting<Double> rotateSpeed = sgGeneral.add(new DoubleSetting.Builder()
+        .name("rotate-speed")
+        .description("Speed of smooth rotation in degrees per tick.")
+        .defaultValue(30.0)
+        .min(1.0)
+        .sliderMax(180.0)
+        .visible(smoothRotate::get)
         .build()
     );
 
@@ -293,6 +345,10 @@ public class Nuker extends Module {
 
     private int timer;
     private int noBlockTimer;
+    private float targetYaw, targetPitch;
+    private float currentYaw, currentPitch;
+    private int randomDelayTimer;
+    private boolean waitingForRandomDelay;
 
     private final BlockPos.Mutable pos1 = new BlockPos.Mutable(); // Rendering for cubes
     private final BlockPos.Mutable pos2 = new BlockPos.Mutable();
@@ -308,7 +364,17 @@ public class Nuker extends Module {
         firstBlock = true;
         timer = 0;
         noBlockTimer = 0;
+        randomDelayTimer = 0;
+        waitingForRandomDelay = false;
         interacted.clear();
+        
+        // Initialize rotation values
+        if (mc.player != null) {
+            currentYaw = mc.player.getYaw();
+            currentPitch = mc.player.getPitch();
+            targetYaw = currentYaw;
+            targetPitch = currentPitch;
+        }
     }
 
     @EventHandler
@@ -339,6 +405,16 @@ public class Nuker extends Module {
 
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
+        // Handle random delay
+        if (waitingForRandomDelay) {
+            if (randomDelayTimer > 0) {
+                randomDelayTimer--;
+                return; // Wait for random delay to finish
+            } else {
+                waitingForRandomDelay = false;
+            }
+        }
+        
         // Update timer
         if (timer > 0) {
             timer--;
@@ -445,6 +521,8 @@ public class Nuker extends Module {
             // Sort blocks
             if (sortMode.get() == SortMode.TopDown)
                 blocks.sort(Comparator.comparingDouble(value -> -value.getY()));
+            else if (sortMode.get() == SortMode.Crosshair)
+                blocks.sort(Comparator.comparingDouble(this::getCrosshairDistance));
             else if (sortMode.get() != SortMode.None)
                 blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
 
@@ -477,13 +555,62 @@ public class Nuker extends Module {
 
                 boolean canInstaMine = BlockUtils.canInstaBreak(block);
 
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(block), Rotations.getPitch(block), () -> breakBlock(block));
-                else breakBlock(block);
+                if (rotate.get()) {
+                    if (smoothRotate.get()) {
+                        // Set target rotation for smooth movement
+                        targetYaw = (float) Rotations.getYaw(block);
+                        targetPitch = (float) Rotations.getPitch(block);
+                        
+                        // Check if rotation is close enough to target
+                        if (isRotationCloseEnough()) {
+                            // Apply final rotation and break block
+                            Rotations.rotate(targetYaw, targetPitch, null);
+                            breakBlock(block);
+                        } else {
+                            // Apply smooth rotation and wait for next tick
+                            applySmoothRotation();
+                            // Don't break block yet, wait for rotation to complete
+                            if (!canInstaMine) break; // Exit loop for non-insta blocks
+                        }
+                    } else {
+                        // Use instant rotation
+                        Rotations.rotate(Rotations.getYaw(block), Rotations.getPitch(block), () -> breakBlock(block));
+                    }
+                } else {
+                    breakBlock(block);
+                }
 
                 if (enableRenderBreaking.get()) RenderUtils.renderTickingBlock(block, sideColor.get(), lineColor.get(), shapeModeBreak.get(), 0, 8, true, false);
                 lastBlockPos.set(block);
 
                 count++;
+                
+                // Apply random delay after breaking a block
+                if (randomDelay.get()) {
+                    // Only apply delay if this isn't the last block we're processing this tick
+                    boolean shouldDelay = true;
+                    
+                    // Don't delay if this is insta mining and we can break more
+                    if (canInstaMine && !packetMine.get() && count < maxBlocksPerTick.get() - 1 && count < blocks.size() - 1) {
+                        shouldDelay = true;
+                    }
+                    // Don't delay if this is the last block due to any limiting factor
+                    else if (count >= maxBlocksPerTick.get() - 1 || 
+                             (!canInstaMine && !packetMine.get()) ||
+                             (count >= blocks.size() - 1)) {
+                        shouldDelay = false;
+                    }
+                    
+                    if (shouldDelay) {
+                        double minDelay = minRandomDelay.get();
+                        double maxDelay = maxRandomDelay.get();
+                        double randomDelaySeconds = minDelay + Math.random() * (maxDelay - minDelay);
+                        randomDelayTimer = (int) (randomDelaySeconds * 20); // Convert to ticks
+                        waitingForRandomDelay = true;
+                        break; // Exit loop to wait for delay
+                    }
+                }
+                
                 if (!canInstaMine && !packetMine.get() /* With packet mine attempt to break everything possible at once */) break;
             }
 
@@ -492,6 +619,52 @@ public class Nuker extends Module {
             // Clear current block positions
             blocks.clear();
         });
+    }
+
+    private void applySmoothRotation() {
+        // Calculate rotation differences
+        float yawDiff = normalizeAngle(targetYaw - currentYaw);
+        float pitchDiff = normalizeAngle(targetPitch - currentPitch);
+        
+        // Apply rotation speed limits
+        float maxRotation = (float) (rotateSpeed.get().doubleValue());
+        
+        // Smooth yaw rotation
+        if (Math.abs(yawDiff) <= maxRotation) {
+            currentYaw = targetYaw;
+        } else {
+            currentYaw += (yawDiff > 0 ? maxRotation : -maxRotation);
+        }
+        
+        // Smooth pitch rotation
+        if (Math.abs(pitchDiff) <= maxRotation) {
+            currentPitch = targetPitch;
+        } else {
+            currentPitch += (pitchDiff > 0 ? maxRotation : -maxRotation);
+        }
+        
+        // Clamp pitch to valid range (-90 to 90)
+        currentPitch = Math.max(-90f, Math.min(90f, currentPitch));
+        
+        // Apply rotation to player
+        mc.player.setYaw(currentYaw);
+        mc.player.setPitch(currentPitch);
+    }
+    
+    private boolean isRotationCloseEnough() {
+        float yawDiff = Math.abs(normalizeAngle(targetYaw - currentYaw));
+        float pitchDiff = Math.abs(normalizeAngle(targetPitch - currentPitch));
+        
+        // Consider rotation close enough if within 5 degrees
+        return yawDiff <= 5.0f && pitchDiff <= 5.0f;
+    }
+    
+    private float normalizeAngle(float angle) {
+        // Normalize angle to -180 to 180 range
+        angle = angle % 360f;
+        if (angle > 180f) angle -= 360f;
+        if (angle < -180f) angle += 360f;
+        return angle;
     }
 
     private void breakBlock(BlockPos blockPos) {
@@ -513,14 +686,105 @@ public class Nuker extends Module {
         }
     }
 
+    private double getCrosshairDistance(BlockPos pos) {
+        Vec3d playerPos = mc.player.getEyePos();
+        Vec3d blockCenter = pos.toCenterPos();
+        
+        // Get player look direction
+        float yaw = mc.player.getYaw();
+        float pitch = mc.player.getPitch();
+        
+        // Convert to radians
+        double yawRad = Math.toRadians(yaw);
+        double pitchRad = Math.toRadians(pitch);
+        
+        // Calculate look vector
+        double lookX = -Math.sin(yawRad) * Math.cos(pitchRad);
+        double lookY = -Math.sin(pitchRad);
+        double lookZ = Math.cos(yawRad) * Math.cos(pitchRad);
+        
+        // Vector from player to block
+        double toBlockX = blockCenter.x - playerPos.x;
+        double toBlockY = blockCenter.y - playerPos.y;
+        double toBlockZ = blockCenter.z - playerPos.z;
+        
+        // Calculate dot product and magnitudes
+        double dot = toBlockX * lookX + toBlockY * lookY + toBlockZ * lookZ;
+        double lookMag = Math.sqrt(lookX * lookX + lookY * lookY + lookZ * lookZ);
+        double toBlockMag = Math.sqrt(toBlockX * toBlockX + toBlockY * toBlockY + toBlockZ * toBlockZ);
+        
+        // Calculate angle (0 = perfectly aligned, 180 = opposite)
+        if (lookMag == 0 || toBlockMag == 0) return 180.0;
+        double cosAngle = dot / (lookMag * toBlockMag);
+        cosAngle = Math.max(-1.0, Math.min(1.0, cosAngle)); // Clamp to valid range
+        double angle = Math.toDegrees(Math.acos(cosAngle));
+        
+        return angle;
+    }
+
     private boolean isOutOfRange(BlockPos blockPos) {
         Vec3d pos = blockPos.toCenterPos();
-        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
-        BlockHitResult result = mc.world.raycast(raycastContext);
-        if (result == null || !result.getBlockPos().equals(blockPos))
-            return !PlayerUtils.isWithin(pos, wallsRange.get());
-
+        
+        // First check if block is within interaction range
+        if (!PlayerUtils.isWithin(pos, 6.0)) return true;
+        
+        // Enhanced raycast check with multiple points
+        if (!isBlockVisible(blockPos)) return true;
+        
         return false;
+    }
+    
+    private boolean isBlockVisible(BlockPos blockPos) {
+        Vec3d playerEye = mc.player.getEyePos();
+        Vec3d centerPoint = blockPos.toCenterPos();
+        
+        // If strict visibility is enabled, only allow clearly visible blocks
+        if (strictVisibility.get()) {
+            // Check direct line of sight to the block
+            RaycastContext directRaycast = new RaycastContext(playerEye, centerPoint, 
+                RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+            BlockHitResult directResult = mc.world.raycast(directRaycast);
+            
+            // Block must be directly visible
+            if (directResult == null || !directResult.getBlockPos().equals(blockPos)) {
+                return false; // Blocked by something
+            }
+            
+            // Additional check: make sure we can reach it
+            double distance = playerEye.distanceTo(centerPoint);
+            if (distance > 6.0) return false;
+            
+            return true;
+        } else {
+            // Original behavior - allow walls range
+            RaycastContext centerRaycast = new RaycastContext(playerEye, centerPoint, 
+                RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+            BlockHitResult centerResult = mc.world.raycast(centerRaycast);
+            
+            // If center raycast doesn't hit our target block, it's blocked
+            if (centerResult == null || !centerResult.getBlockPos().equals(blockPos)) {
+                // Only allow if within walls range and the blocking block is passable or breakable
+                if (!PlayerUtils.isWithin(centerPoint, wallsRange.get())) {
+                    return false;
+                }
+                
+                // Check what's blocking us
+                if (centerResult != null) {
+                    BlockPos blockingPos = centerResult.getBlockPos();
+                    if (!mc.world.getBlockState(blockingPos).isAir() && 
+                        mc.world.getBlockState(blockingPos).getHardness(mc.world, blockingPos) > 0) {
+                        // Blocked by solid block - only allow if within walls range
+                        return PlayerUtils.isWithin(centerPoint, wallsRange.get());
+                    }
+                }
+            }
+            
+            // Additional check: make sure we can actually reach the block for mining
+            double distance = playerEye.distanceTo(centerPoint);
+            if (distance > 6.0) return false; // Standard reach limit
+            
+            return true;
+        }
     }
 
     private void addTargetedBlockToList() {
@@ -564,7 +828,8 @@ public class Nuker extends Module {
         None,
         Closest,
         Furthest,
-        TopDown
+        TopDown,
+        Crosshair
     }
 
     public enum Shape {

@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.gui;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
+import meteordevelopment.meteorclient.gui.themes.meteor.ClassicGuiTheme;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.PreInit;
 import net.minecraft.nbt.NbtCompound;
@@ -31,6 +32,7 @@ public class GuiThemes {
 
     @PreInit
     public static void init() {
+        add(new ClassicGuiTheme());
         add(new MeteorGuiTheme());
     }
 
@@ -46,7 +48,7 @@ public class GuiThemes {
             }
         }
 
-        if (theme == null) select("Meteor");
+        if (theme == null) select("Classic");
     }
 
     public static void add(GuiTheme theme) {

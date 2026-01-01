@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.gui.themes.meteor.widgets.pressable;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
+import meteordevelopment.meteorclient.gui.themes.meteor.MeteorTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedMinus;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 public class WMeteorConfirmedMinus extends WConfirmedMinus implements MeteorWidget {
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        MeteorGuiTheme theme = theme();
+        MeteorTheme theme = theme();
         double pad = pad();
         double s = theme.scale(3);
 

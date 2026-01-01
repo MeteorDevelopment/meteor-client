@@ -18,6 +18,7 @@ import net.minecraft.client.gui.screen.DisconnectedScreen;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.List;
+import java.util.Random;
 
 public class Spam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -86,6 +87,13 @@ public class Spam extends Module {
         .build()
     );
 
+    private final Setting<Boolean> variations = sgGeneral.add(new BoolSetting.Builder()
+        .name("variations")
+        .description("Randomly modifies messages to bypass anti-spam detection.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> bypass = sgGeneral.add(new BoolSetting.Builder()
         .name("bypass")
         .description("Add random text at the end of the message to try to bypass anti spams.")
@@ -112,9 +120,93 @@ public class Spam extends Module {
 
     private int messageI, timer, splitNum;
     private String text;
+    private final Random rng = new Random();
 
     public Spam() {
         super(Categories.Misc, "spam", "Spams specified messages in chat.");
+    }
+
+    private String applyVariations(String message) {
+        StringBuilder result = new StringBuilder();
+        
+        for (int i = 0; i < message.length(); i++) {
+            char c = message.charAt(i);
+            
+            // Skip spaces for most variations
+            if (c == ' ') {
+                result.append(c);
+                continue;
+            }
+            
+            // Apply balanced variations - good mix of changes and readability
+            switch (rng.nextInt(8)) {
+                case 0: // Random case (frequent)
+                    if (Character.isLetter(c)) {
+                        result.append(rng.nextBoolean() ? Character.toUpperCase(c) : Character.toLowerCase(c));
+                    } else {
+                        result.append(c);
+                    }
+                    break;
+                    
+                case 1: // Leet speak substitution (moderate)
+                    result.append(leetSpeak(c));
+                    break;
+                    
+                case 2: // Add invisible character (rare)
+                    if (rng.nextInt(15) == 0) {
+                        result.append(c).append('\u200B'); // Zero-width space
+                    } else {
+                        result.append(c);
+                    }
+                    break;
+                    
+                case 3: // Replace with similar looking character (moderate)
+                    result.append(similarChar(c));
+                    break;
+                    
+                case 4: // Add extra space (rare)
+                    if (rng.nextInt(20) == 0 && i < message.length() - 1 && message.charAt(i + 1) != ' ') {
+                        result.append(c).append(' ');
+                    } else {
+                        result.append(c);
+                    }
+                    break;
+                    
+                default: // No change (37.5% chance)
+                    result.append(c);
+                    break;
+            }
+        }
+        
+        return result.toString();
+    }
+    
+    private char leetSpeak(char c) {
+        switch (Character.toLowerCase(c)) {
+            case 'a': return rng.nextInt(2) == 0 ? (rng.nextBoolean() ? '4' : '@') : c;
+            case 'e': return rng.nextInt(2) == 0 ? '3' : c;
+            case 'i': return rng.nextInt(3) == 0 ? '1' : c;
+            case 'o': return rng.nextInt(2) == 0 ? '0' : c;
+            case 's': return rng.nextInt(3) == 0 ? (rng.nextBoolean() ? '5' : '$') : c;
+            case 't': return rng.nextInt(3) == 0 ? '7' : c;
+            case 'l': return rng.nextInt(4) == 0 ? '1' : c;
+            case 'g': return rng.nextInt(5) == 0 ? '9' : c;
+            case 'b': return rng.nextInt(5) == 0 ? '8' : c;
+            default: return c;
+        }
+    }
+    
+    private char similarChar(char c) {
+        switch (Character.toLowerCase(c)) {
+            case 'a': return rng.nextInt(4) == 0 ? (rng.nextBoolean() ? 'á' : 'à') : c;
+            case 'e': return rng.nextInt(4) == 0 ? (rng.nextBoolean() ? 'é' : 'è') : c;
+            case 'i': return rng.nextInt(5) == 0 ? (rng.nextBoolean() ? 'í' : 'ì') : c;
+            case 'o': return rng.nextInt(4) == 0 ? (rng.nextBoolean() ? 'ó' : 'ò') : c;
+            case 'u': return rng.nextInt(6) == 0 ? (rng.nextBoolean() ? 'ú' : 'ù') : c;
+            case 'n': return rng.nextInt(8) == 0 ? 'ñ' : c;
+            case 'c': return rng.nextInt(10) == 0 ? 'ç' : c;
+            default: return c;
+        }
     }
 
     @Override
@@ -151,6 +243,12 @@ public class Spam extends Module {
                 }
 
                 text = messages.get().get(i);
+                
+                // Apply variations if enabled
+                if (variations.get()) {
+                    text = applyVariations(text);
+                }
+                
                 if (bypass.get()) {
                     String bypass = RandomStringUtils.insecure().nextAlphabetic(length.get());
                     if (!uppercase.get()) bypass = bypass.toLowerCase();
