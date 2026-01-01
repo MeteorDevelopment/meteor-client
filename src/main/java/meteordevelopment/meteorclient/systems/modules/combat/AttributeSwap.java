@@ -5,10 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
+import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import net.minecraft.entity.Entity;
-import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -16,10 +15,11 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
@@ -313,12 +313,12 @@ public class AttributeSwap extends Module {
         if (!onlyOnWeapon.get()) return true;
         return InvUtils.testInMainHand(item ->
             (sword.get() && item.isIn(ItemTags.SWORDS)) ||
-            (axe.get() && item.isIn(ItemTags.AXES)) ||
-            (pickaxe.get() && item.isIn(ItemTags.PICKAXES)) ||
-            (shovel.get() && item.isIn(ItemTags.SHOVELS)) ||
-            (hoe.get() && item.isIn(ItemTags.HOES)) ||
-            (mace.get() && item.getItem() instanceof MaceItem) ||
-            (trident.get() && item.getItem() instanceof TridentItem)
+                (axe.get() && item.isIn(ItemTags.AXES)) ||
+                (pickaxe.get() && item.isIn(ItemTags.PICKAXES)) ||
+                (shovel.get() && item.isIn(ItemTags.SHOVELS)) ||
+                (hoe.get() && item.isIn(ItemTags.HOES)) ||
+                (mace.get() && item.getItem() instanceof MaceItem) ||
+                (trident.get() && item.getItem() instanceof TridentItem)
         );
     }
 
@@ -340,11 +340,11 @@ public class AttributeSwap extends Module {
         boolean isArthropod = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS);
         boolean isAquatic = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_IMPALING);
         boolean hasFireResistance = isLiving && (((LivingEntity) target).hasStatusEffect(StatusEffects.FIRE_RESISTANCE) || hasFireProtectionArmor((LivingEntity) target));
-        double armor = (isLiving) ? ((LivingEntity) target).getAttributeValue(EntityAttributes.ARMOR) : 0;
-        float health = (isLiving) ? ((LivingEntity) target).getHealth() : 0;
+        double armor = isLiving ? ((LivingEntity) target).getAttributeValue(EntityAttributes.ARMOR) : 0;
+        float health = isLiving ? ((LivingEntity) target).getHealth() : 0;
 
         int bestSlot = -1;
-        double bestScore = getItemScore(currentStack, target, isFalling, durability, isLiving, isPlayer, isOnFire, hasFireResistance, isUndead, isArthropod, isAquatic, armor, health);
+        double bestScore = getItemScore(currentStack, isFalling, durability, isLiving, isPlayer, isOnFire, hasFireResistance, isUndead, isArthropod, isAquatic, armor, health);
 
         for (int i = 0; i < 9; i++) {
             if (i == mc.player.getInventory().getSelectedSlot()) continue;
@@ -352,7 +352,7 @@ public class AttributeSwap extends Module {
             ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.isEmpty() && !durability) continue;
 
-            double score = getItemScore(stack, target, isFalling, durability, isLiving, isPlayer, isOnFire, hasFireResistance, isUndead, isArthropod, isAquatic, armor, health);
+            double score = getItemScore(stack, isFalling, durability, isLiving, isPlayer, isOnFire, hasFireResistance, isUndead, isArthropod, isAquatic, armor, health);
             if (score > bestScore) {
                 bestScore = score;
                 bestSlot = i;
@@ -362,17 +362,16 @@ public class AttributeSwap extends Module {
         return bestSlot;
     }
 
-    private double getItemScore(ItemStack stack, Entity target, boolean isFalling, boolean durability, boolean isLiving, boolean isPlayer, boolean isOnFire, boolean hasFireResistance, boolean isUndead, boolean isArthropod, boolean isAquatic, double armor, float health) {
+    private double getItemScore(ItemStack stack, boolean isFalling, boolean durability, boolean isLiving, boolean isPlayer, boolean isOnFire, boolean hasFireResistance, boolean isUndead, boolean isArthropod, boolean isAquatic, double armor, float health) {
         double score = 0;
 
         if (durability) {
-             double duraScore = getDurabilityScore(stack);
-             score += duraScore;
+            score += getDurabilityScore(stack);
         }
 
         if (stack.isEmpty()) return score;
 
-        score += getCombatScore(stack, target, isFalling, isLiving, isPlayer, isOnFire, hasFireResistance, isUndead, isArthropod, isAquatic, armor, health);
+        score += getCombatScore(stack, isFalling, isLiving, isPlayer, isOnFire, hasFireResistance, isUndead, isArthropod, isAquatic, armor, health);
 
         return score;
     }
@@ -386,26 +385,32 @@ public class AttributeSwap extends Module {
         return 0;
     }
 
-    private double getCombatScore(ItemStack stack, Entity target, boolean isFalling, boolean isLiving, boolean isPlayer, boolean isOnFire, boolean hasFireResistance, boolean isUndead, boolean isArthropod, boolean isAquatic, double armor, float health) {
+    private double getCombatScore(ItemStack stack, boolean isFalling, boolean isLiving, boolean isPlayer, boolean isOnFire, boolean hasFireResistance, boolean isUndead, boolean isArthropod, boolean isAquatic, double armor, float health) {
         double score = 0;
 
-        score += getFireAspectScore(stack, isOnFire, hasFireResistance);
-        score += getLootingScore(stack, isPlayer, isLiving, isOnFire, health);
-        score += getSharpnessScore(stack, isOnFire);
-        score += getSmiteScore(stack, isUndead, isOnFire);
-        score += getBaneOfArthropodsScore(stack, isArthropod, isOnFire);
-        score += getSweepingEdgeScore(stack);
-        score += getImpalingScore(stack, isAquatic);
-        score += getBreachScore(stack, isLiving, armor);
-        score += getDensityScore(stack, isFalling);
-        score += getWindBurstScore(stack, isFalling);
-        score += getMaceScore(stack, isFalling);
+        if (swordSwapping.get()) {
+            score += getFireAspectScore(stack, isOnFire, hasFireResistance);
+            score += getLootingScore(stack, isPlayer, isLiving, isOnFire, health);
+            score += getSharpnessScore(stack, isOnFire);
+            score += getSmiteScore(stack, isUndead, isOnFire);
+            score += getBaneOfArthropodsScore(stack, isArthropod, isOnFire);
+            score += getSweepingEdgeScore(stack);
+        }
+        if (maceSwapping.get()) {
+            score += getBreachScore(stack, isLiving, armor);
+            score += getDensityScore(stack, isFalling);
+            score += getWindBurstScore(stack, isFalling);
+            score += getMaceScore(stack, isFalling);
+        }
+        if (otherSwapping.get()) {
+            score += getImpalingScore(stack, isAquatic);
+        }
 
         return score;
     }
 
     private double getFireAspectScore(ItemStack stack, boolean isOnFire, boolean hasFireResistance) {
-       if (!enchantFireAspect.get() || isOnFire || hasFireResistance) return 0;
+        if (!enchantFireAspect.get() || isOnFire || hasFireResistance) return 0;
         int level = Utils.getEnchantmentLevel(stack, Enchantments.FIRE_ASPECT);
         return (level > 0) ? 30 : 0;
     }
@@ -506,7 +511,7 @@ public class AttributeSwap extends Module {
             int fireProtection = Utils.getEnchantmentLevel(stack, Enchantments.FIRE_PROTECTION);
             if (fireProtection > 0) return true;
         }
-       return false;
+        return false;
     }
 
     public enum Mode {
