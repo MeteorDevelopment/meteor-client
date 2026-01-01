@@ -80,7 +80,8 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
             if (modifiers != 0 && isKeyMod(value)) return false;
             return value != GLFW_KEY_UNKNOWN && value != GLFW_KEY_ESCAPE;
         }
-        return value != GLFW_MOUSE_BUTTON_LEFT && value != GLFW_MOUSE_BUTTON_RIGHT;
+        // 只限制右键，允许绑定左键
+        return value != GLFW_MOUSE_BUTTON_RIGHT;
     }
 
     public boolean matches(boolean isKey, int value, int modifiers) {

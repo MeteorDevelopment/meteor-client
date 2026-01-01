@@ -26,6 +26,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.player.Multitask;
+import meteordevelopment.meteorclient.systems.modules.combat.FastPlace;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -175,6 +176,14 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         FastUse fastUse = Modules.get().get(FastUse.class);
         if (fastUse.isActive()) {
             itemUseCooldown = fastUse.getItemUseCooldown(itemStack);
+        }
+        
+        // FastPlace support
+        FastPlace fastPlace = Modules.get().get(FastPlace.class);
+        if (fastPlace.isActive() && itemStack.getItem() instanceof net.minecraft.item.BlockItem) {
+            if (fastPlace.shouldFastPlace(itemStack)) {
+                itemUseCooldown = fastPlace.getCooldown();
+            }
         }
     }
 

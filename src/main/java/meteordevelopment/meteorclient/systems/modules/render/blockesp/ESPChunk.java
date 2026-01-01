@@ -86,7 +86,7 @@ public class ESPChunk {
     }
 
 
-    public static ESPChunk searchChunk(Chunk chunk, List<Block> blocks) {
+    public static ESPChunk searchChunk(Chunk chunk, List<Block> blocks1, List<Block> blocks2) {
         ESPChunk schunk = new ESPChunk(chunk.getPos().x, chunk.getPos().z);
         if (schunk.shouldBeDeleted()) return schunk;
 
@@ -100,7 +100,10 @@ public class ESPChunk {
                     blockPos.set(x, y, z);
                     BlockState bs = chunk.getBlockState(blockPos);
 
-                    if (blocks.contains(bs.getBlock())) schunk.add(blockPos, false);
+                    // Check if block is in either group
+                    if (blocks1.contains(bs.getBlock()) || blocks2.contains(bs.getBlock())) {
+                        schunk.add(blockPos, false);
+                    }
                 }
             }
         }

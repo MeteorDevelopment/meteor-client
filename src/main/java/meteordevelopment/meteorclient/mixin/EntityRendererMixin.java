@@ -52,9 +52,16 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
     @Inject(method = "getDisplayName", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(T entity, CallbackInfoReturnable<Text> cir) {
         if (noRender.noNametags()) cir.setReturnValue(null);
-        if (!(entity instanceof PlayerEntity player)) return;
-        if (Modules.get().get(Nametags.class).playerNametags() && !(EntityUtils.getGameMode(player) == null && Modules.get().get(Nametags.class).excludeBots()))
+        
+        // 检查Nametags模块的hideVanilla设置
+        Nametags nametags = Modules.get().get(Nametags.class);
+        if (nametags.isActive() && nametags.hideVanilla.get()) cir.setReturnValue(null);
+        
+        // 只有玩家可以显示nameTag，非玩家实体即使有自定义名称也不显示
+        if (!(entity instanceof PlayerEntity) && entity.hasCustomName()) {
             cir.setReturnValue(null);
+            return;
+        }
     }
 
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)

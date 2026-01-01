@@ -4,6 +4,9 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
+    "PreventChannelLeakMixin",
+    "FabricLoaderMixin",
+    "ClientBrandRetrieverMixin",
     "AbstractBlockAccessor",
     "AbstractBlockMixin",
     "AbstractBlockStateMixin",

@@ -22,7 +22,7 @@ public class ModuleInfosHud extends HudElement {
     private final Setting<List<Module>> modules = sgGeneral.add(new ModuleListSetting.Builder()
         .name("modules")
         .description("Which modules to display")
-        .defaultValue(KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class, Surround.class)
+        .defaultValue(KillAura.class, CrystalAura.class)
         .build()
     );
 

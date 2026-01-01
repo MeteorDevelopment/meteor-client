@@ -17,15 +17,19 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+
+import static org.lwjgl.glfw.GLFW.*;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.DimensionType;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,10 +42,19 @@ public class BlockESP extends Module {
 
     // General
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
-        .name("blocks")
-        .description("Blocks to search for.")
-        .onChanged(blocks1 -> {
+    private final Setting<List<Block>> blocks1 = sgGeneral.add(new BlockListSetting.Builder()
+        .name("blocks-1")
+        .description("Blocks to search for in group 1.")
+        .onChanged(blocks -> {
+            if (isActive() && Utils.canUpdate()) onActivate();
+        })
+        .build()
+    );
+
+    private final Setting<List<Block>> blocks2 = sgGeneral.add(new BlockListSetting.Builder()
+        .name("blocks-2")
+        .description("Blocks to search for in group 2.")
+        .onChanged(blocks -> {
             if (isActive() && Utils.canUpdate()) onActivate();
         })
         .build()
@@ -76,11 +89,44 @@ public class BlockESP extends Module {
         .build()
     );
 
+    // Group keybinds
+
+    public final Setting<Boolean> enableGroupKeybinds = sgGeneral.add(new BoolSetting.Builder()
+        .name("enable-group-keybinds")
+        .description("Enable keybinds to toggle different groups.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Keybind> group1Key = sgGeneral.add(new KeybindSetting.Builder()
+        .name("group-1-key")
+        .description("Key to toggle group 1 visibility.")
+        .defaultValue(Keybind.fromKey(GLFW_KEY_1))
+        .visible(enableGroupKeybinds::get)
+        .build()
+    );
+
+    public final Setting<Keybind> group2Key = sgGeneral.add(new KeybindSetting.Builder()
+        .name("group-2-key")
+        .description("Key to toggle group 2 visibility.")
+        .defaultValue(Keybind.fromKey(GLFW_KEY_2))
+        .visible(enableGroupKeybinds::get)
+        .build()
+    );
+
+    // Initial state: only group 1 is visible
+    public boolean showGroup1 = true;
+    public boolean showGroup2 = false;
+    private boolean wasGroup1KeyPressed = false;
+    private boolean wasGroup2KeyPressed = false;
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
     private final ExecutorService workerThread = Executors.newSingleThreadExecutor();
+    private int group1Counter = 0;
+    private int group2Counter = 0;
 
     private DimensionType lastDimension;
 
@@ -140,11 +186,29 @@ public class BlockESP extends Module {
     }
 
     public ESPGroup newGroup(Block block) {
-        synchronized (chunks) {
-            ESPGroup group = new ESPGroup(block);
-            groups.add(group);
-            return group;
+        synchronized (groups) {
+            // Determine which group counter to use based on block type
+            if (blocks1.get().contains(block)) {
+                // For group 1 blocks, use positive IDs
+                ESPGroup group = new ESPGroup(++group1Counter, block, 1);
+                groups.add(group);
+                return group;
+            } else {
+                // For group 2 blocks, use negative IDs
+                ESPGroup group = new ESPGroup(-(++group2Counter), block, 2);
+                groups.add(group);
+                return group;
+            }
         }
+    }
+    
+    // Getters for group lists
+    public List<Block> getBlocks1() {
+        return blocks1.get();
+    }
+    
+    public List<Block> getBlocks2() {
+        return blocks2.get();
     }
 
     public void removeGroup(ESPGroup group) {
@@ -161,7 +225,8 @@ public class BlockESP extends Module {
     private void searchChunk(Chunk chunk) {
         workerThread.submit(() -> {
             if (!isActive()) return;
-            ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
+            
+            ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks1.get(), blocks2.get());
 
             if (schunk.size() > 0) {
                 synchronized (chunks) {
@@ -189,8 +254,17 @@ public class BlockESP extends Module {
         int chunkZ = bz >> 4;
         long key = ChunkPos.toLong(chunkX, chunkZ);
 
-        boolean added = blocks.get().contains(event.newState.getBlock()) && !blocks.get().contains(event.oldState.getBlock());
-        boolean removed = !added && !blocks.get().contains(event.newState.getBlock()) && blocks.get().contains(event.oldState.getBlock());
+        // Check if the block was added or removed from either group
+        boolean newBlockInGroup1 = blocks1.get().contains(event.newState.getBlock());
+        boolean newBlockInGroup2 = blocks2.get().contains(event.newState.getBlock());
+        boolean oldBlockInGroup1 = blocks1.get().contains(event.oldState.getBlock());
+        boolean oldBlockInGroup2 = blocks2.get().contains(event.oldState.getBlock());
+        
+        boolean newBlockInAnyGroup = newBlockInGroup1 || newBlockInGroup2;
+        boolean oldBlockInAnyGroup = oldBlockInGroup1 || oldBlockInGroup2;
+        
+        boolean added = newBlockInAnyGroup && !oldBlockInAnyGroup;
+        boolean removed = !newBlockInAnyGroup && oldBlockInAnyGroup;
 
         if (added || removed) {
             workerThread.submit(() -> {
@@ -230,6 +304,38 @@ public class BlockESP extends Module {
 
         if (lastDimension != dimension) onActivate();
         lastDimension = dimension;
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Pre event) {
+        if (enableGroupKeybinds.get()) {
+            boolean isGroup1KeyPressed = group1Key.get().isPressed();
+            boolean isGroup2KeyPressed = group2Key.get().isPressed();
+            
+            // Group 1 key debounce - mutually exclusive with group 2
+            if (isGroup1KeyPressed && !wasGroup1KeyPressed) {
+                if (!showGroup1) {
+                    showGroup1 = true;
+                    showGroup2 = false;
+                }
+            }
+            
+            // Group 2 key debounce - mutually exclusive with group 1
+            if (isGroup2KeyPressed && !wasGroup2KeyPressed) {
+                if (!showGroup2) {
+                    showGroup2 = true;
+                    showGroup1 = false;
+                }
+            }
+            
+            // Update key states
+            wasGroup1KeyPressed = isGroup1KeyPressed;
+            wasGroup2KeyPressed = isGroup2KeyPressed;
+        } else {
+            // Reset key states when group keybinds are disabled
+            wasGroup1KeyPressed = false;
+            wasGroup2KeyPressed = false;
+        }
     }
 
     @EventHandler

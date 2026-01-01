@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 
+import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
@@ -40,6 +41,7 @@ import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -154,6 +156,12 @@ public class Freecam extends Module {
     private boolean bobView;
 
     private boolean forward, backward, right, left, up, down, isSneaking;
+    
+    // 保存玩家状态
+    private double playerX, playerY, playerZ;
+    private double playerVelX, playerVelY, playerVelZ;
+    private boolean playerOnGround;
+    private float playerFallDistance;
 
     private long clickTs = 0;
 
@@ -174,6 +182,19 @@ public class Freecam extends Module {
 
         perspective = mc.options.getPerspective();
         speedValue = speed.get();
+
+        // 保存玩家状态
+        playerX = mc.player.getX();
+        playerY = mc.player.getY();
+        playerZ = mc.player.getZ();
+        
+        Vec3d velocity = mc.player.getVelocity();
+        playerVelX = velocity.x;
+        playerVelY = velocity.y;
+        playerVelZ = velocity.z;
+        
+        playerOnGround = mc.player.isOnGround();
+        playerFallDistance = (float) mc.player.fallDistance;
 
         Utils.set(pos, mc.gameRenderer.getCamera().getPos());
         Utils.set(prevPos, mc.gameRenderer.getCamera().getPos());
@@ -212,6 +233,17 @@ public class Freecam extends Module {
             mc.options.getBobView().setValue(bobView);
         }
 
+        // 恢复玩家状态
+        if (mc.player != null) {
+            mc.player.setPos(playerX, playerY, playerZ);
+            
+            Vec3d velocity = mc.player.getVelocity();
+            ((IVec3d) velocity).meteor$set(playerVelX, playerVelY, playerVelZ);
+            
+            mc.player.setOnGround(playerOnGround);
+            mc.player.fallDistance = playerFallDistance;
+        }
+
         isSneaking = false;
     }
 
@@ -235,82 +267,100 @@ public class Freecam extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.getCameraEntity().isInsideWall()) mc.getCameraEntity().noClip = true;
-        if (!perspective.isFirstPerson()) mc.options.setPerspective(Perspective.FIRST_PERSON);
+        // 优化穿墙处理
+        if (mc.getCameraEntity().isInsideWall()) {
+            mc.getCameraEntity().noClip = true;
+        }
+        
+        // 确保第一人称视角
+        if (!perspective.isFirstPerson()) {
+            mc.options.setPerspective(Perspective.FIRST_PERSON);
+        }
 
+        // 优化视角计算
         Vec3d forward = Vec3d.fromPolar(0, yaw);
         Vec3d right = Vec3d.fromPolar(0, yaw + 90);
         double velX = 0;
         double velY = 0;
         double velZ = 0;
 
-        if (rotate.get()) {
-            BlockPos crossHairPos;
-            Vec3d crossHairPosition;
-
+        // 优化自动旋转逻辑
+        if (rotate.get() && mc.crosshairTarget != null) {
             if (mc.crosshairTarget instanceof EntityHitResult) {
-                crossHairPos = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
-                Rotations.rotate(Rotations.getYaw(crossHairPos), Rotations.getPitch(crossHairPos), 0, null);
-            } else {
-                crossHairPosition = mc.crosshairTarget.getPos();
-                crossHairPos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
+                Entity entity = ((EntityHitResult) mc.crosshairTarget).getEntity();
+                Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), 0, null);
+            } else if (mc.crosshairTarget instanceof BlockHitResult) {
+                BlockHitResult blockHit = (BlockHitResult) mc.crosshairTarget;
+                Vec3d hitPos = blockHit.getPos();
+                BlockPos blockPos = blockHit.getBlockPos();
 
-                if (!mc.world.getBlockState(crossHairPos).isAir()) {
-                    Rotations.rotate(Rotations.getYaw(crossHairPosition), Rotations.getPitch(crossHairPosition), 0, null);
+                if (!mc.world.getBlockState(blockPos).isAir()) {
+                    Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), 0, null);
                 }
             }
         }
 
-        double s = 0.5;
-        if (Input.isPressed(mc.options.sprintKey)) s = 1;
+        // 优化速度计算
+        double speedMultiplier = Input.isPressed(mc.options.sprintKey) ? 1.0 : 0.5;
+        double effectiveSpeed = speedMultiplier * speedValue;
 
-        boolean a = false;
+        // 优化移动方向处理
+        boolean movingForward = false;
         if (this.forward) {
-            velX += forward.x * s * speedValue;
-            velZ += forward.z * s * speedValue;
-            a = true;
+            velX += forward.x * effectiveSpeed;
+            velZ += forward.z * effectiveSpeed;
+            movingForward = true;
         }
         if (this.backward) {
-            velX -= forward.x * s * speedValue;
-            velZ -= forward.z * s * speedValue;
-            a = true;
+            velX -= forward.x * effectiveSpeed;
+            velZ -= forward.z * effectiveSpeed;
+            movingForward = true;
         }
 
-        boolean b = false;
+        boolean movingSideways = false;
         if (this.right) {
-            velX += right.x * s * speedValue;
-            velZ += right.z * s * speedValue;
-            b = true;
+            velX += right.x * effectiveSpeed;
+            velZ += right.z * effectiveSpeed;
+            movingSideways = true;
         }
         if (this.left) {
-            velX -= right.x * s * speedValue;
-            velZ -= right.z * s * speedValue;
-            b = true;
+            velX -= right.x * effectiveSpeed;
+            velZ -= right.z * effectiveSpeed;
+            movingSideways = true;
         }
 
-        if (a && b) {
-            double diagonal = 1 / Math.sqrt(2);
-            velX *= diagonal;
-            velZ *= diagonal;
+        // 优化对角线移动速度
+        if (movingForward && movingSideways) {
+            double diagonalFactor = 1 / Math.sqrt(2);
+            velX *= diagonalFactor;
+            velZ *= diagonalFactor;
         }
 
+        // 优化垂直移动
         if (this.up) {
-            velY += s * speedValue;
+            velY += effectiveSpeed;
         }
         if (this.down) {
-            velY -= s * speedValue;
+            velY -= effectiveSpeed;
         }
 
+        // 更新位置
         prevPos.set(pos);
         pos.set(pos.x + velX, pos.y + velY, pos.z + velZ);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onKey(KeyEvent event) {
-        if (Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
+        // 优先检查F3键，避免调试时的干扰
+        if (event.key() == GLFW.GLFW_KEY_F3) return;
+        
+        // 检查GUI移动设置
         if (checkGuiMove()) return;
 
-        if (onInput(event.key(), event.action)) event.cancel();
+        // 处理输入并取消事件
+        if (onInput(event.key(), event.action)) {
+            event.cancel();
+        }
     }
 
     @Nullable
@@ -372,41 +422,44 @@ public class Freecam extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onMouseClick(MouseClickEvent event) {
+        // 检查GUI移动设置
         if (checkGuiMove()) return;
 
+        // 优化Baritone路径设置逻辑
         if (baritoneClick.get() && event.action == KeyAction.Press && mc.options.attackKey.matchesMouse(event.click)) {
             setGoal();
         }
 
-        if (onInput(event.button(), event.action)) event.cancel();
+        // 处理鼠标输入并取消事件
+        if (onInput(event.button(), event.action)) {
+            event.cancel();
+        }
     }
 
     private boolean onInput(int key, KeyAction action) {
+        boolean isPressed = action != KeyAction.Release;
+        
+        // 优化输入处理逻辑，使用更清晰的条件结构
         if (Input.getKey(mc.options.forwardKey) == key) {
-            forward = action != KeyAction.Release;
+            forward = isPressed;
             mc.options.forwardKey.setPressed(false);
-        }
-        else if (Input.getKey(mc.options.backKey) == key) {
-            backward = action != KeyAction.Release;
+        } else if (Input.getKey(mc.options.backKey) == key) {
+            backward = isPressed;
             mc.options.backKey.setPressed(false);
-        }
-        else if (Input.getKey(mc.options.rightKey) == key) {
-            right = action != KeyAction.Release;
+        } else if (Input.getKey(mc.options.rightKey) == key) {
+            right = isPressed;
             mc.options.rightKey.setPressed(false);
-        }
-        else if (Input.getKey(mc.options.leftKey) == key) {
-            left = action != KeyAction.Release;
+        } else if (Input.getKey(mc.options.leftKey) == key) {
+            left = isPressed;
             mc.options.leftKey.setPressed(false);
-        }
-        else if (Input.getKey(mc.options.jumpKey) == key) {
-            up = action != KeyAction.Release;
+        } else if (Input.getKey(mc.options.jumpKey) == key) {
+            up = isPressed;
             mc.options.jumpKey.setPressed(false);
-        }
-        else if (Input.getKey(mc.options.sneakKey) == key) {
-            down = action != KeyAction.Release;
+        } else if (Input.getKey(mc.options.sneakKey) == key) {
+            down = isPressed;
             mc.options.sneakKey.setPressed(false);
-        }
-        else {
+        } else {
+            // 不是相关按键，不处理
             return false;
         }
 
@@ -415,10 +468,10 @@ public class Freecam extends Module {
 
     @EventHandler(priority = EventPriority.LOW)
     private void onMouseScroll(MouseScrollEvent event) {
+        // 优化速度滚动调整逻辑，提供更平滑的体验
         if (speedScrollSensitivity.get() > 0 && mc.currentScreen == null) {
             speedValue += event.value * 0.25 * (speedScrollSensitivity.get() * speedValue);
-            if (speedValue < 0.1) speedValue = 0.1;
-
+            speedValue = Math.max(speedValue, 0.1); // 确保速度不会低于0.1
             event.cancel();
         }
     }
@@ -428,11 +481,29 @@ public class Freecam extends Module {
         event.cancel();
     }
 
+
+
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         if (!toggleOnLog.get()) return;
 
         toggle();
+    }
+
+    @EventHandler
+    private void onPlayerMove(PlayerMoveEvent event) {
+        // 防止玩家在Freecam模式下移动，保持位置稳定
+        if (mc.player != null) {
+            // 使用正确的方式修改移动
+            ((IVec3d) event.movement).meteor$set(0, 0, 0);
+            
+            // 保持玩家在原来的位置，防止重力影响
+            mc.player.setPos(playerX, playerY, playerZ);
+            
+            // 保持玩家原来的地面状态和下落距离
+            mc.player.setOnGround(playerOnGround);
+            mc.player.fallDistance = playerFallDistance;
+        }
     }
 
     @EventHandler
@@ -459,9 +530,11 @@ public class Freecam extends Module {
     }
 
     private boolean checkGuiMove() {
+        // 优化GUI移动检查逻辑
+        if (mc.currentScreen == null) return false;
+        
         GUIMove guiMove = Modules.get().get(GUIMove.class);
-        if (mc.currentScreen != null && !guiMove.isActive()) return true;
-        return (mc.currentScreen != null && guiMove.isActive() && guiMove.skip());
+        return !guiMove.isActive() || guiMove.skip();
     }
 
     public void changeLookDirection(double deltaX, double deltaY) {
@@ -475,10 +548,12 @@ public class Freecam extends Module {
     }
 
     public boolean renderHands() {
+        // 控制是否在Freecam模式下渲染玩家手部
         return !isActive() || renderHands.get();
     }
 
     public boolean staySneaking() {
+        // 优化潜行状态保持逻辑
         return isActive() && !mc.player.getAbilities().flying && staySneaking.get() && isSneaking;
     }
 

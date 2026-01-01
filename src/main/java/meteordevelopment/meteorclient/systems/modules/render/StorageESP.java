@@ -33,8 +33,12 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +60,14 @@ public class StorageESP extends Module {
         .name("storage-blocks")
         .description("Select the storage blocks to display.")
         .defaultValue(StorageBlockListSetting.STORAGE_BLOCKS)
+        .build()
+    );
+    
+    // 新增：箱子矿车开关
+    private final Setting<Boolean> chestMinecarts = sgGeneral.add(new BoolSetting.Builder()
+        .name("chest-minecarts")
+        .description("Display chest minecarts.")
+        .defaultValue(true)
         .build()
     );
 
@@ -165,77 +177,73 @@ public class StorageESP extends Module {
     private final Setting<SettingColor> openedColor = sgOpened.add(new ColorSetting.Builder()
         .name("opened-color")
         .description("Optional setting to change colors of opened chests, as opposed to not rendering. Disabled at zero opacity.")
-        .defaultValue(new SettingColor(203, 90, 203, 0)) // TRANSPARENT BY DEFAULT.
+        .defaultValue(new SettingColor(203, 90, 203, 0))
         .build()
     );
 
-
     private final Color lineColor = new Color(0, 0, 0, 0);
     private final Color sideColor = new Color(0, 0, 0, 0);
-    private boolean render;
+    
     private int count;
 
     private final MeshBuilder mesh;
     private final MeshBuilderVertexConsumerProvider vertexConsumerProvider;
 
     public StorageESP() {
-        super(Categories.Render, "storage-esp", "Renders all specified storage blocks.");
+        super(Categories.Render, "storage-esp", "Renders all specified storage blocks and minecarts.");
 
         mesh = new MeshBuilder(MeteorRenderPipelines.WORLD_COLORED);
         vertexConsumerProvider = new MeshBuilderVertexConsumerProvider(mesh);
     }
+    
+    private boolean getBlockEntityColor(BlockEntity blockEntity) {
+        if (!storageBlocks.get().contains(blockEntity.getType())) return false;
 
-    private void getBlockEntityColor(BlockEntity blockEntity) {
-        render = false;
-
-        if (!storageBlocks.get().contains(blockEntity.getType())) return;
-
-        if (blockEntity instanceof TrappedChestBlockEntity) lineColor.set(trappedChest.get()); // Must come before ChestBlockEntity as it is the superclass of TrappedChestBlockEntity
-        else if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
-        else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
-        else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
+        if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
         else if (blockEntity instanceof EnderChestBlockEntity) lineColor.set(enderChest.get());
-        else if (blockEntity instanceof AbstractFurnaceBlockEntity || blockEntity instanceof BrewingStandBlockEntity || blockEntity instanceof ChiseledBookshelfBlockEntity || blockEntity instanceof CrafterBlockEntity || blockEntity instanceof DispenserBlockEntity || blockEntity instanceof DecoratedPotBlockEntity || blockEntity instanceof HopperBlockEntity) lineColor.set(other.get());
-        else return;
+        else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
+        else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
+        else if (blockEntity instanceof TrappedChestBlockEntity) lineColor.set(trappedChest.get());
+        else if (blockEntity instanceof AbstractFurnaceBlockEntity 
+              || blockEntity instanceof DispenserBlockEntity 
+              || blockEntity instanceof HopperBlockEntity
+              || blockEntity instanceof BrewingStandBlockEntity 
+              || blockEntity instanceof ChiseledBookshelfBlockEntity 
+              || blockEntity instanceof CrafterBlockEntity 
+              || blockEntity instanceof DecoratedPotBlockEntity) {
+            lineColor.set(other.get());
+        } 
+        else return false;
 
-        render = true;
-
-        if (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) {
-            sideColor.set(lineColor);
-            sideColor.a = fillOpacity.get();
-        }
+        return true;
     }
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WVerticalList list = theme.verticalList();
-
-        // Button to Clear Interacted Blocks
         WButton clear = list.add(theme.button("Clear Rendering Cache")).expandX().widget();
-
         clear.action = interactedBlocks::clear;
-
         return list;
     }
 
     @EventHandler
     private void onBlockInteract(InteractBlockEvent event) {
         BlockPos pos = event.result.getBlockPos();
-        BlockEntity blockEntity = mc.world.getBlockEntity(pos);
+        if (interactedBlocks.contains(pos)) return;
 
+        BlockEntity blockEntity = mc.world.getBlockEntity(pos);
         if (blockEntity == null) return;
 
         interactedBlocks.add(pos);
         if (blockEntity instanceof ChestBlockEntity chestBlockEntity) {
             BlockState state = chestBlockEntity.getCachedState();
-            ChestType chestType = state.get(ChestBlock.CHEST_TYPE);
-
-            if (chestType == ChestType.LEFT || chestType == ChestType.RIGHT) {
-                // It's part of a double chest
-                Direction facing = state.get(ChestBlock.FACING);
-                BlockPos otherPartPos = pos.offset(chestType == ChestType.LEFT ? facing.rotateYClockwise() : facing.rotateYCounterclockwise());
-
-                interactedBlocks.add(otherPartPos);
+            if (state.contains(ChestBlock.CHEST_TYPE)) {
+                ChestType chestType = state.get(ChestBlock.CHEST_TYPE);
+                if (chestType != ChestType.SINGLE && state.contains(ChestBlock.FACING)) {
+                    Direction facing = state.get(ChestBlock.FACING);
+                    BlockPos otherPartPos = pos.offset(chestType == ChestType.LEFT ? facing.rotateYClockwise() : facing.rotateYCounterclockwise());
+                    interactedBlocks.add(otherPartPos);
+                }
             }
         }
     }
@@ -243,60 +251,109 @@ public class StorageESP extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         count = 0;
+        
+        // 修复崩溃：不要在这里调用 mesh.begin()，在循环内部判断 count==0 时调用
+        boolean isShader = mode.get() == Mode.Shader;
 
+        // 1. 渲染方块实体 (箱子、桶等)
         for (BlockEntity blockEntity : Utils.blockEntities()) {
-            // Check if the block has been interacted with (opened)
             boolean interacted = interactedBlocks.contains(blockEntity.getPos());
-            if (interacted && hideOpened.get()) continue;  // Skip rendering if "hideOpened" is true
+            if (interacted && hideOpened.get()) continue;
 
-            getBlockEntityColor(blockEntity);
+            if (!getBlockEntityColor(blockEntity)) continue;
 
-            // Set the color to openedColor if its alpha is greater than 0
             if (interacted && openedColor.get().a > 0) {
-                // openedColor takes precedence.
                 lineColor.set(openedColor.get());
-                sideColor.set(openedColor.get());
-                sideColor.a = fillOpacity.get(); // Maintain fill opacity setting for consistency
             }
 
-            if (render) {
-                double dist = PlayerUtils.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
-                double a = 1;
-                if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
+            if (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) {
+                sideColor.set(lineColor);
+                sideColor.a = fillOpacity.get();
+            }
 
-                if (a < 0.075) continue;
+            double dist = PlayerUtils.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
+            double alphaFactor = getAlphaFactor(dist);
 
-                // Only start a mesh when there's something to render
-                if (count == 0 && mode.get() == Mode.Shader) {
-                    mesh.begin();
+            if (alphaFactor <= 0.0) continue;
+
+            // 懒加载开启 Mesh
+            if (count == 0 && isShader) {
+                mesh.begin();
+            }
+
+            int prevLineA = lineColor.a;
+            int prevSideA = sideColor.a;
+            lineColor.a *= alphaFactor;
+            sideColor.a *= alphaFactor;
+
+            if (tracers.get()) {
+                event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, 
+                    blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5, lineColor);
+            }
+
+            if (mode.get() == Mode.Box) {
+                renderBox(event, blockEntity);
+            } else if (isShader) {
+                renderShader(event, blockEntity);
+            }
+
+            lineColor.a = prevLineA;
+            sideColor.a = prevSideA;
+
+            count++;
+        }
+
+        // 2. 渲染箱子矿车
+        if (chestMinecarts.get() && mc.world != null) {
+            for (Entity entity : mc.world.getEntities()) {
+                if (entity instanceof ChestMinecartEntity minecart) {
+                    lineColor.set(chest.get());
+
+                    if (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) {
+                        sideColor.set(lineColor);
+                        sideColor.a = fillOpacity.get();
+                    }
+
+                    double dist = PlayerUtils.squaredDistanceTo(minecart.getX(), minecart.getY(), minecart.getZ());
+                    double alphaFactor = getAlphaFactor(dist);
+
+                    if (alphaFactor <= 0.0) continue;
+
+                    // 懒加载开启 Mesh (如果之前方块实体循环没开过)
+                    if (count == 0 && isShader) {
+                        mesh.begin();
+                    }
+
+                    int prevLineA = lineColor.a;
+                    int prevSideA = sideColor.a;
+                    lineColor.a *= alphaFactor;
+                    sideColor.a *= alphaFactor;
+
+                    if (tracers.get()) {
+                        event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, 
+                            minecart.getX(), minecart.getY(), minecart.getZ(), lineColor);
+                    }
+
+                    // 矿车 Box 渲染 (透视效果由 Meteor 渲染管线保证)
+                    double x = MathHelper.lerp(event.tickDelta, minecart.lastRenderX, minecart.getX()) - minecart.getX();
+                    double y = MathHelper.lerp(event.tickDelta, minecart.lastRenderY, minecart.getY()) - minecart.getY();
+                    double z = MathHelper.lerp(event.tickDelta, minecart.lastRenderZ, minecart.getZ()) - minecart.getZ();
+                    
+                    Box box = minecart.getBoundingBox();
+                    event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
+
+                    // Shader 模式下，目前仅绘制简单的 Box 轮廓作为回退，因为Shader主要针对BlockEntity
+                    // 如果需要在 Shader 模式下也显示高亮，这里使用 Box 渲染是一个权衡
+                    
+                    lineColor.a = prevLineA;
+                    sideColor.a = prevSideA;
+
+                    count++;
                 }
-
-                int prevLineA = lineColor.a;
-                int prevSideA = sideColor.a;
-
-                lineColor.a *= a;
-                sideColor.a *= a;
-
-                if (tracers.get()) {
-                    event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5, lineColor);
-                }
-
-                if (mode.get() == Mode.Box) {
-                    renderBox(event, blockEntity);
-                }
-
-                if (mode.get() == Mode.Shader) {
-                    renderShader(event, blockEntity);
-                }
-
-                lineColor.a = prevLineA;
-                sideColor.a = prevSideA;
-
-                count++;
             }
         }
 
-        if (mode.get() == Mode.Shader && count > 0) {
+        if (isShader && count > 0) {
             PostProcessShaders.STORAGE_OUTLINE.endRender(() -> MeshRenderer.begin()
                 .attachments(mc.getFramebuffer())
                 .clearColor(Color.CLEAR)
@@ -306,22 +363,32 @@ public class StorageESP extends Module {
             );
         }
     }
-
+    
+    private double getAlphaFactor(double distSq) {
+        double fadeDist = fadeDistance.get();
+        double fadeDistSq = fadeDist * fadeDist;
+        if (distSq > fadeDistSq) return 1.0;
+        
+        double a = distSq / fadeDistSq;
+        return a < 0.075 ? 0.0 : a;
+    }
 
     private void renderBox(Render3DEvent event, BlockEntity blockEntity) {
         double x1 = blockEntity.getPos().getX();
         double y1 = blockEntity.getPos().getY();
         double z1 = blockEntity.getPos().getZ();
 
-        double x2 = blockEntity.getPos().getX() + 1;
-        double y2 = blockEntity.getPos().getY() + 1;
-        double z2 = blockEntity.getPos().getZ() + 1;
+        double x2 = x1 + 1;
+        double y2 = y1 + 1;
+        double z2 = z1 + 1;
 
         int excludeDir = 0;
         if (blockEntity instanceof ChestBlockEntity) {
             BlockState state = mc.world.getBlockState(blockEntity.getPos());
-            if ((state.getBlock() == Blocks.CHEST || state.getBlock() == Blocks.TRAPPED_CHEST) && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
-                excludeDir = Dir.get(ChestBlock.getFacing(state));
+            if ((state.getBlock() == Blocks.CHEST || state.getBlock() == Blocks.TRAPPED_CHEST) && state.contains(ChestBlock.CHEST_TYPE) && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
+                if (state.contains(ChestBlock.FACING)) {
+                    excludeDir = Dir.get(ChestBlock.getFacing(state));
+                }
             }
         }
 

@@ -6,148 +6,138 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.entity.player.ClipAtLedgeEvent;
-import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.renderer.ShapeMode;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.PlayerInput;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.util.shape.VoxelShape;
+
+import java.util.stream.StreamSupport;
 
 public class SafeWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
 
-    private final Setting<Integer> fallDistance = sgGeneral.add(new IntSetting.Builder()
-        .name("minimum-fall-distance")
-        .description("The minimum number of blocks you are expected to fall before the module activates.")
-        .defaultValue(1)
-        .min(1)
+    private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
+        .name("only-on-ground")
+        .description("仅在地面时生效")
+        .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> sneak = sgGeneral.add(new BoolSetting.Builder()
         .name("sneak")
-        .description("Sneak when approaching edge of block.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> safeSneak = sgGeneral.add(new BoolSetting.Builder()
-        .name("safe-sneak")
-        .description("Prevent you from falling if sneak doesn't trigger correctly.")
+        .description("边缘自动潜行 (Eagle模式，防回弹推荐)")
         .defaultValue(true)
+        .build()
+    );
+    
+    private final Setting<Double> lookAhead = sgGeneral.add(new DoubleSetting.Builder()
+        .name("look-ahead")
+        .description("提前检测距离 (值越大越早潜行)")
+        .defaultValue(0.5)
+        .min(0.1)
+        .max(2.0)
         .visible(sneak::get)
         .build()
     );
 
-    private final Setting<Boolean> sneakSprint = sgGeneral.add(new BoolSetting.Builder()
-        .name("sneak-on-sprint")
-        .description("Sneak even when sprinting at the block edge.")
-        .defaultValue(true)
-        .visible(sneak::get)
+    private final Setting<Integer> minFallDistance = sgGeneral.add(new IntSetting.Builder()
+        .name("min-fall-distance")
+        .description("仅当掉落高度大于此值时生效")
+        .defaultValue(0)
+        .min(0)
+        .max(10)
         .build()
     );
 
-    private final Setting<Double> edgeDistance = sgGeneral.add(new DoubleSetting.Builder()
-        .name("edge-distance")
-        .description("Distance offset before reaching an edge.")
-        .defaultValue(0.30)
-        .sliderRange(0.00, 0.30)
-        .decimalPlaces(2)
-        .visible(sneak::get)
-        .build()
-    );
-
-    private final Setting<Boolean> renderEdgeDistance = sgRender.add(new BoolSetting.Builder()
-        .name("render")
-        .description("Render edge distance helper.")
-        .defaultValue(false)
-        .visible(sneak::get)
-        .build()
-    );
-
-    private final Setting<Boolean> renderPlayerBox = sgRender.add(new BoolSetting.Builder()
-        .name("render-player-box")
-        .description("Render player box helper.")
-        .defaultValue(false)
-        .visible(() -> sneak.get() && renderEdgeDistance.get())
-        .build()
-    );
+    private boolean sneakingByModule;
 
     public SafeWalk() {
-        super(Categories.Movement, "safe-walk", "Prevents you from walking off blocks.");
+        super(Categories.Movement, "safe-walk", "防止掉落 (Eagle 优化版)");
+    }
+
+    @Override
+    public void onDeactivate() {
+        if (sneakingByModule) {
+            setSneak(false);
+        }
+    }
+
+    @EventHandler
+    private void onPreTick(TickEvent.Pre event) {
+        if (mc.world == null || mc.player == null) return;
+        if (onlyOnGround.get() && !mc.player.isOnGround()) {
+            if (sneakingByModule) setSneak(false);
+            return;
+        }
+
+        if (sneak.get()) {
+            if (isOverEdge()) {
+                if (!mc.options.sneakKey.isPressed()) {
+                    setSneak(true);
+                }
+            } else {
+                if (sneakingByModule) {
+                    setSneak(false);
+                }
+            }
+        }
     }
 
     @EventHandler
     private void onClipAtLedge(ClipAtLedgeEvent event) {
-        if (fallDistance.get() > 1) {
-            // meteordevelopment.meteorclient.utils.entity.DamageUtils.fallDamage
-            int surface = mc.world.getWorldChunk(mc.player.getBlockPos()).getHeightmap(Heightmap.Type.MOTION_BLOCKING).get(mc.player.getBlockX() & 15, mc.player.getBlockZ() & 15);
-            if (mc.player.getBlockY() >= surface) {
-                if (mc.player.getBlockY() - surface < fallDistance.get()) return;
-            }
+        if (mc.world == null || mc.player == null) return;
+        if (onlyOnGround.get() && !mc.player.isOnGround()) return;
 
-            else {
-                BlockHitResult raycastResult = mc.world.raycast(new RaycastContext(mc.player.getEntityPos(), new Vec3d(mc.player.getX(), mc.world.getBottomY(), mc.player.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.WATER, mc.player));
-                if (raycastResult.getType() != HitResult.Type.MISS) {
-                    if ((int) (mc.player.getY() - raycastResult.getBlockPos().up().getY()) < fallDistance.get()) return;
-                }
-            }
-        }
+        if (minFallDistance.get() > 0 && isSafeFall()) return;
 
         if (sneak.get()) {
-            boolean closeToEdge = false;
-            boolean isSprinting = !sneakSprint.get() && mc.options.sprintKey.isPressed();
-
-            Box playerBox = mc.player.getBoundingBox();
-            Box adjustedBox = getAdjustedPlayerBox(playerBox);
-
-            if (mc.world.isSpaceEmpty(mc.player, adjustedBox) && mc.player.isOnGround()) closeToEdge = true;
-
-            if (!isSprinting) {
-                if (closeToEdge) {
-                    mc.player.input.playerInput = new PlayerInput(
-                        mc.player.input.playerInput.forward(),
-                        mc.player.input.playerInput.backward(),
-                        mc.player.input.playerInput.left(),
-                        mc.player.input.playerInput.right(),
-                        mc.player.input.playerInput.jump(),
-                        true,
-                        mc.player.input.playerInput.sprint()
-                    );
-                } else if (safeSneak.get()) {
-                    event.setClip(true);
-                }
-            }
+            if (mc.player.isSneaking()) return;
+            event.setClip(true);
         } else {
-            if (!mc.player.isSneaking()) event.setClip(true);
+            event.setClip(true);
         }
     }
-
-    private Box getAdjustedPlayerBox(Box playerBox) {
-        return playerBox.stretch(0, -mc.player.getStepHeight(), 0)
-            .expand(-edgeDistance.get(), 0, -edgeDistance.get());
+    
+    private void setSneak(boolean pressed) {
+        mc.options.sneakKey.setPressed(pressed);
+        sneakingByModule = pressed;
     }
 
-    @EventHandler
-    private void onRender(Render3DEvent event) {
-        if (sneak.get() && renderEdgeDistance.get()) {
-            Box playerBox = mc.player.getBoundingBox();
-            Box adjustedBox = getAdjustedPlayerBox(playerBox);
+    private boolean isOverEdge() {
+        Vec3d velocity = mc.player.getVelocity();
+        if (velocity.x == 0 && velocity.z == 0) return false;
 
-            event.renderer.box(adjustedBox, Color.BLUE, Color.RED, ShapeMode.Lines, 0);
+        // 修复：手动构建 Vec3d 替代 getPos()，解决编译报错
+        Vec3d playerPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        
+        // 预测玩家下一帧的位置
+        // lookAhead 决定了提前量
+        // Vec3d nextPos = playerPos.add(velocity.x * lookAhead.get(), 0, velocity.z * lookAhead.get()); // 如果需要用到 nextPos 可以这样写
+        
+        // 构建检测框
+        Box box = mc.player.getBoundingBox().offset(velocity.x * lookAhead.get(), 0, velocity.z * lookAhead.get());
+        // 向下延伸检测是否有方块
+        Box checkArea = box.offset(0, -1.0, 0);
 
-            if (renderPlayerBox.get()) {
-                event.renderer.box(playerBox, Color.BLUE, Color.GREEN, ShapeMode.Lines, 0);
-            }
-        }
+        boolean hasGround = StreamSupport.stream(mc.world.getBlockCollisions(mc.player, checkArea).spliterator(), false)
+            .map(VoxelShape::getBoundingBox)
+            .anyMatch(blockBox -> blockBox.maxY > mc.player.getY() - 1.0);
+
+        return !hasGround && !isSafeFall();
+    }
+    
+    private boolean isSafeFall() {
+        if (minFallDistance.get() == 0) return false;
+
+        Box box = mc.player.getBoundingBox();
+        Box checkArea = box.offset(0, -minFallDistance.get(), 0);
+
+        return StreamSupport.stream(mc.world.getBlockCollisions(mc.player, checkArea).spliterator(), false)
+            .map(VoxelShape::getBoundingBox)
+            .anyMatch(blockBox -> blockBox.maxY > mc.player.getY() - minFallDistance.get());
     }
 }

@@ -112,6 +112,11 @@ public class MeteorClient implements ClientModInitializer {
             }
         });
 
+        EVENT_BUS.registerLambdaFactory("nekiplay.meteorplus", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+        EVENT_BUS.registerLambdaFactory("nekiplay.meteorplus.features", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+        EVENT_BUS.registerLambdaFactory("nekiplay.meteorplus.features.modules", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+        EVENT_BUS.registerLambdaFactory("nekiplay.meteorplus.features.modules.combat", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+
         // Register init classes
         ReflectInit.registerPackages();
 

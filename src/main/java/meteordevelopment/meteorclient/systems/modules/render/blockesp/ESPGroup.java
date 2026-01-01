@@ -19,14 +19,18 @@ import java.util.Set;
 public class ESPGroup {
     private static final BlockESP blockEsp = Modules.get().get(BlockESP.class);
 
+    public final int id;
+    public final int groupNumber;
     private final Block block;
 
     public final UnorderedArrayList<ESPBlock> blocks = new UnorderedArrayList<>();
 
     private double sumX, sumY, sumZ;
 
-    public ESPGroup(Block block) {
+    public ESPGroup(int id, Block block, int groupNumber) {
+        this.id = id;
         this.block = block;
+        this.groupNumber = groupNumber;
     }
 
     public void add(ESPBlock block, boolean removeFromOld, boolean splitGroup) {
@@ -133,12 +137,20 @@ public class ESPGroup {
     }
 
     public void merge(ESPGroup group) {
+        if (group == null || group == this) return;
+        
         blocks.ensureCapacity(blocks.size() + group.blocks.size());
         for (ESPBlock block : group.blocks) add(block, false, false);
         blockEsp.removeGroup(group);
     }
 
     public void render(Render3DEvent event) {
+        // Check if group is visible
+        if (blockEsp.enableGroupKeybinds.get()) {
+            if (groupNumber == 1 && !blockEsp.showGroup1) return;
+            if (groupNumber == 2 && !blockEsp.showGroup2) return;
+        }
+
         ESPBlockData blockData = blockEsp.getBlockData(block);
 
         if (blockData.tracer) {

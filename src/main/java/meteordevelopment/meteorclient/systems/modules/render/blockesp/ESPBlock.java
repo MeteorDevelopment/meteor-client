@@ -72,26 +72,58 @@ public class ESPBlock {
 
     private void assignGroup() {
         ESPGroup firstGroup = null;
+        boolean isInGroup1 = blockEsp.getBlocks1().contains(state.getBlock());
+        boolean isInGroup2 = blockEsp.getBlocks2().contains(state.getBlock());
 
+        // First check if the block is in both groups
+        if (isInGroup1 && isInGroup2) {
+            // If in both groups, use group 1 as default
+            isInGroup2 = false;
+        }
+
+        // Check neighbours of the same group
         for (int side : SIDES) {
             if ((neighbours & side) != side) continue;
 
             ESPBlock neighbour = getSideBlock(side);
             if (neighbour == null || neighbour.group == null) continue;
 
-            if (firstGroup == null) {
-                firstGroup = neighbour.group;
+            // Check if neighbour is in the same group as current block
+            boolean neighbourInGroup1 = blockEsp.getBlocks1().contains(neighbour.state.getBlock());
+            boolean neighbourInGroup2 = blockEsp.getBlocks2().contains(neighbour.state.getBlock());
+            
+            // If current block is in group 1, only consider group 1 neighbours
+            if (isInGroup1 && neighbourInGroup1) {
+                if (firstGroup == null) {
+                    firstGroup = neighbour.group;
+                } else if (firstGroup != neighbour.group) {
+                    firstGroup.merge(neighbour.group);
+                }
             }
-            else {
-                if (firstGroup != neighbour.group) firstGroup.merge(neighbour.group);
+            // If current block is in group 2, only consider group 2 neighbours
+            else if (isInGroup2 && neighbourInGroup2) {
+                if (firstGroup == null) {
+                    firstGroup = neighbour.group;
+                } else if (firstGroup != neighbour.group) {
+                    firstGroup.merge(neighbour.group);
+                }
             }
         }
 
         if (firstGroup == null) {
-            firstGroup = blockEsp.newGroup(state.getBlock());
+            // Create a new group with appropriate group ID
+            if (isInGroup1) {
+                // For group 1 blocks, create groups with odd IDs
+                firstGroup = blockEsp.newGroup(state.getBlock());
+            } else if (isInGroup2) {
+                // For group 2 blocks, create groups with even IDs
+                firstGroup = blockEsp.newGroup(state.getBlock());
+            }
         }
 
-        firstGroup.add(this);
+        if (firstGroup != null) {
+            firstGroup.add(this);
+        }
     }
 
     public void update() {
@@ -169,6 +201,15 @@ public class ESPBlock {
     }
 
     public void render(Render3DEvent event) {
+        // Check if group is valid and visible
+        if (group == null) return;
+        
+        // Check if group is visible
+        if (blockEsp.enableGroupKeybinds.get()) {
+            if (group.groupNumber == 1 && !blockEsp.showGroup1) return;
+            if (group.groupNumber == 2 && !blockEsp.showGroup2) return;
+        }
+
         double x1 = x;
         double y1 = y;
         double z1 = z;
