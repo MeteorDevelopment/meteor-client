@@ -325,7 +325,8 @@ public class AttributeSwap extends Module {
     private int getSmartSlot(Entity target) {
         ItemStack currentStack = mc.player.getMainHandStack();
 
-        if (target != null && smartShieldBreak.get() && target instanceof LivingEntity living && living.isBlocking() && !(currentStack.getItem() instanceof AxeItem)) {
+        if (target != null && smartShieldBreak.get() && target instanceof LivingEntity living && living.isBlocking()) {
+            if (currentStack.getItem() instanceof AxeItem) return -1;
             int axeSlot = InvUtils.findInHotbar(item -> item.getItem() instanceof AxeItem).slot();
             if (axeSlot != -1) return axeSlot;
         }
