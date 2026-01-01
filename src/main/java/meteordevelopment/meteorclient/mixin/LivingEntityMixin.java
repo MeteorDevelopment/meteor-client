@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.HighJump;
+import meteordevelopment.meteorclient.systems.modules.movement.NoJumpDelay;
 import meteordevelopment.meteorclient.systems.modules.movement.Sprint;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
@@ -147,5 +148,14 @@ public abstract class LivingEntityMixin extends Entity {
 
         // only add the extra velocity if you're actually moving, otherwise you'll jump in place and move forward
         return original && (Math.abs(mc.player.forwardSpeed) > 1.0E-5F || Math.abs(mc.player.sidewaysSpeed) > 1.0E-5F);
+    }
+
+    @Unique
+    NoJumpDelay noJumpDelay = Modules.get().get(NoJumpDelay.class);
+
+    @ModifyConstant(method = "tickMovement", constant = @Constant(intValue = 10))
+    int onTickMovement(int constant) {
+        if (noJumpDelay.isActive()) return 0;
+        return constant;
     }
 }
