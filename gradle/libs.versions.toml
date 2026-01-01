@@ -26,8 +26,8 @@ orbit = "0.2.4"
 starscript = "0.2.5"
 # DiscordRPC (https://github.com/MeteorDevelopment/java-discord-rpc)
 discordipc = "1.1"
-# Reflections (https://github.com/ronmamo/reflections)
-reflections = "0.10.2"
+# Classgraph (https://github.com/classgraph/classgraph)
+classgraph = "4.8.184"
 # Netty (https://github.com/netty/netty)
 netty = "4.2.7.Final"
 # ViaFabricPlus (https://github.com/ViaVersion/ViaFabricPlus)
@@ -54,7 +54,7 @@ viafabricplus-api = { module = "com.viaversion:viafabricplus-api", version.ref =
 orbit = { module = "meteordevelopment:orbit", version.ref = "orbit" }
 starscript = { module = "org.meteordev:starscript", version.ref = "starscript" }
 discord-ipc = { module = "meteordevelopment:discord-ipc", version.ref = "discordipc" }
-reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
+classgraph = { module = "io.github.classgraph:classgraph", version.ref = "classgraph" }
 netty-handler-proxy = { module = "io.netty:netty-handler-proxy", version.ref = "netty" }
 netty-codec-socks = { module = "io.netty:netty-codec-socks", version.ref = "netty" }
 waybackauthlib = { module = "de.florianmichael:WaybackAuthLib", version.ref = "waybackauthlib" }
