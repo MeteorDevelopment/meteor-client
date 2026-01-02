@@ -43,8 +43,8 @@ public abstract class WSlider extends WWidget {
     }
 
     @Override
-    public boolean onMouseClicked(Click click, boolean used) {
-        if (mouseOver && !used) {
+    public boolean onMouseClicked(Click click, boolean doubled) {
+        if (mouseOver && !doubled) {
             valueAtDragStart = value;
             double handleSize = handleSize();
 
@@ -53,6 +53,7 @@ public abstract class WSlider extends WWidget {
             if (action != null) action.run();
 
             dragging = true;
+            setFocused(true);
             return true;
         }
 
@@ -112,6 +113,7 @@ public abstract class WSlider extends WWidget {
             }
 
             dragging = false;
+            setFocused(false);
             return true;
         }
 

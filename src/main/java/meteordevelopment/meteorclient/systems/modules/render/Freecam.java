@@ -36,6 +36,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -174,8 +175,8 @@ public class Freecam extends Module {
         perspective = mc.options.getPerspective();
         speedValue = speed.get();
 
-        Utils.set(pos, mc.gameRenderer.getCamera().getPos());
-        Utils.set(prevPos, mc.gameRenderer.getCamera().getPos());
+        Utils.set(pos, mc.gameRenderer.getCamera().getCameraPos());
+        Utils.set(prevPos, mc.gameRenderer.getCamera().getCameraPos());
 
         if (mc.options.getPerspective() == Perspective.THIRD_PERSON_FRONT) {
             yaw += 180;
@@ -354,7 +355,7 @@ public class Freecam extends Module {
         if (requireDoubleClick.get() && clickTs - prevClick > 500) return;
 
         Camera cam = mc.gameRenderer.getCamera();
-        Vec3d posVec = cam.getPos();
+        Vec3d posVec = cam.getCameraPos();
         Vec3d lookVec = Vec3d.fromPolar(cam.getPitch(), cam.getYaw());
         short maxDist = 256;
         Vec3d max = posVec.add(lookVec.multiply(maxDist));
@@ -447,6 +448,12 @@ public class Freecam extends Module {
             if (mc.player.getHealth() - packet.getHealth() > 0 && toggleOnDamage.get()) {
                 toggle();
                 info("Toggled off because you took damage.");
+            }
+        }
+        else if (event.packet instanceof PlayerRespawnS2CPacket) {
+            if (isActive()) {
+                toggle();
+                info("Toggled off because you changed dimensions.");
             }
         }
     }

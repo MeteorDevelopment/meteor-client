@@ -246,7 +246,6 @@ public class Utils {
         return false;
     }
 
-    @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static void getItemsInContainerItem(ItemStack itemStack, ItemStack[] items) {
         if (itemStack.getItem() == Items.ENDER_CHEST) {
             for (int i = 0; i < EChestMemory.ITEMS.size(); i++) {
@@ -267,8 +266,6 @@ public class Utils {
                 if (i >= 0 && i < items.length) items[i] = stacks.get(i);
             }
         }
-        // todo should we remove this? are there still instances where we might get presented container items in this
-        //  format? maybe on servers with weird multiversion setups - if they exist, test this code to ensure it works
         else if (components.contains(DataComponentTypes.BLOCK_ENTITY_DATA)) {
             TypedEntityData<BlockEntityType<?>> blockEntityData = components.get(DataComponentTypes.BLOCK_ENTITY_DATA);
             if (blockEntityData == null) return;
@@ -310,7 +307,6 @@ public class Utils {
         return WHITE;
     }
 
-    @SuppressWarnings("deprecation") // Use of NbtCompound#getNbt
     public static boolean hasItems(ItemStack itemStack) {
         ContainerComponentAccessor container = ((ContainerComponentAccessor) (Object) itemStack.get(DataComponentTypes.CONTAINER));
         if (container != null && !container.meteor$getStacks().isEmpty()) return true;

@@ -191,7 +191,7 @@ public class MeteorGuiTheme extends GuiTheme {
 
     @Override
     public WLabel label(String text, boolean title, double maxWidth) {
-        if (maxWidth == 0) return w(new WMeteorLabel(text, title));
+        if (maxWidth == 0 && !text.contains("\n")) return w(new WMeteorLabel(text, title));
         return w(new WMeteorMultiLabel(text, title, maxWidth));
     }
 
@@ -276,8 +276,8 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     @Override
-    public WWidget module(Module module) {
-        return w(new WMeteorModule(module));
+    public WWidget module(Module module, String title) {
+        return w(new WMeteorModule(module, title));
     }
 
     @Override

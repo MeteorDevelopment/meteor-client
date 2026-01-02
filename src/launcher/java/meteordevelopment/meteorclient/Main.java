@@ -19,40 +19,45 @@ public class Main {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
         int option = JOptionPane.showOptionDialog(
-                null,
-                "To install Meteor Client you need to put it in your mods folder and run Fabric for latest Minecraft version.",
-                "Meteor Client",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.ERROR_MESSAGE,
-                null,
-                new String[] { "Open Wiki", "Open Mods Folder" },
-                null
+            null,
+            "To install Meteor Client you need to put it in your mods folder and run Fabric for latest Minecraft version.",
+            "Meteor Client",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.ERROR_MESSAGE,
+            null,
+            new String[]{"Open Wiki", "Open Mods Folder"},
+            null
         );
 
         switch (option) {
-            case 0: getOS().open("https://meteorclient.com/faq/installation"); break;
+            case 0:
+                getOS().open("https://meteorclient.com/faq/installation");
+                break;
             case 1: {
-                String path;
-
-                switch (getOS()) {
-                    case WINDOWS: path = System.getenv("AppData") + "/.minecraft/mods"; break;
-                    case OSX:     path = System.getProperty("user.home") + "/Library/Application Support/minecraft/mods"; break;
-                    default:      path = System.getProperty("user.home") + "/.minecraft"; break;
-                }
-
-                File mods = new File(path);
+                File mods = new File(getModsFolder());
                 if (!mods.exists()) mods.mkdirs();
-
                 getOS().open(mods);
                 break;
             }
         }
     }
 
+    private static String getModsFolder() {
+        String userHome = System.getProperty("user.home");
+        switch (getOS()) {
+            case WINDOWS:
+                return System.getenv("AppData") + "/.minecraft/mods";
+            case OSX:
+                return userHome + "/Library/Application Support/minecraft/mods";
+            default:
+                return userHome + "/.minecraft/mods";
+        }
+    }
+
     private static OperatingSystem getOS() {
         String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 
-        if (os.contains("linux") || os.contains("unix"))  return OperatingSystem.LINUX;
+        if (os.contains("linux") || os.contains("unix")) return OperatingSystem.LINUX;
         if (os.contains("mac")) return OperatingSystem.OSX;
         if (os.contains("win")) return OperatingSystem.WINDOWS;
 
@@ -64,13 +69,13 @@ public class Main {
         WINDOWS {
             @Override
             protected String[] getURLOpenCommand(URL url) {
-                return new String[] { "rundll32", "url.dll,FileProtocolHandler", url.toString() };
+                return new String[]{"rundll32", "url.dll,FileProtocolHandler", url.toString()};
             }
         },
         OSX {
             @Override
             protected String[] getURLOpenCommand(URL url) {
-                return new String[] { "open", url.toString() };
+                return new String[]{"open", url.toString()};
             }
         },
         UNKNOWN;
@@ -106,7 +111,7 @@ public class Main {
                 string = string.replace("file:", "file://");
             }
 
-            return new String[] { "xdg-open", string };
+            return new String[]{"xdg-open", string};
         }
     }
 }

@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
-import joptsimple.internal.Strings;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -20,6 +19,8 @@ import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.DefaultPermissions;
+import net.minecraft.command.permission.PermissionPredicate;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
@@ -29,7 +30,10 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.apache.commons.lang3.StringUtils;
+import net.minecraft.world.LocalDifficulty;
+import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.dimension.DimensionType;
+import org.apache.commons.lang3.Strings;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -39,7 +43,7 @@ import java.util.Random;
 import java.util.Set;
 
 public class ServerCommand extends Command {
-    private static final Set<String> ANTICHEAT_LIST = Set.of("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx", "vulcan", "abc", "spartan", "kauri", "anticheatreloaded", "witherac", "godseye", "matrix", "wraith", "antixrayheuristics", "grimac");
+    private static final Set<String> ANTICHEAT_LIST = Set.of("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx", "vulcan", "abc", "spartan", "kauri", "anticheatreloaded", "witherac", "godseye", "matrix", "wraith", "antixrayheuristics", "grimac", "themis", "foxaddition", "guardianac", "ggintegrity", "lightanticheat", "anarchyexploitfixes");
     private static final Set<String> VERSION_ALIASES = Set.of("version", "ver", "about", "bukkit:version", "bukkit:ver", "bukkit:about"); // aliases for bukkit:version
     private String alias;
     private int ticks = 0;
@@ -143,23 +147,27 @@ public class ServerCommand extends Command {
         info("Motd: %s", server.label != null ? server.label.getString() : "unknown");
         info("Version: %s", server.version.getString());
         info("Protocol version: %d", server.protocolVersion);
-        info("Difficulty: %s (Local: %.2f)", mc.world.getDifficulty().getTranslatableName().getString(), mc.world.getLocalDifficulty(mc.player.getBlockPos()).getLocalDifficulty());
+        info("Difficulty: %s (Local: %.2f)",
+            mc.world.getDifficulty().getTranslatableName().getString(),
+            new LocalDifficulty(
+                mc.world.getDifficulty(),
+                mc.world.getTimeOfDay(),
+                mc.world.getChunk(mc.player.getBlockPos()).getInhabitedTime(),
+                DimensionType.MOON_SIZES[mc.world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL, mc.player.getBlockPos()).getIndex()] // lol
+            ).getLocalDifficulty()
+        );
         info("Day: %d", mc.world.getTimeOfDay() / 24000L);
         info("Permission level: %s", formatPerms());
     }
 
     public String formatPerms() {
-        int p = 5;
-        while (!mc.player.hasPermissionLevel(p) && p > 0) p--;
+        PermissionPredicate permissions = mc.player.getPermissions();
 
-        return switch (p) {
-            case 0 -> "0 (No Perms)";
-            case 1 -> "1 (No Perms)";
-            case 2 -> "2 (Player Command Access)";
-            case 3 -> "3 (Server Command Access)";
-            case 4 -> "4 (Operator)";
-            default -> p + " (Unknown)";
-        };
+        if (permissions.hasPermission(DefaultPermissions.OWNERS)) return "4 (Owner)";
+        else if (permissions.hasPermission(DefaultPermissions.ADMINS)) return "3 (Admin)";
+        else if (permissions.hasPermission(DefaultPermissions.GAMEMASTERS)) return "2 (Gamemaster)";
+        else if (permissions.hasPermission(DefaultPermissions.MODERATORS)) return "1 (Moderator)";
+        else return "0 (No Perms)";
     }
 
 
@@ -170,7 +178,7 @@ public class ServerCommand extends Command {
         plugins.replaceAll(this::formatName);
 
         if (!plugins.isEmpty()) {
-            info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
+            info("Plugins (%d): %s ", plugins.size(), String.join(", ", plugins));
         } else {
             error("No plugins found.");
         }
@@ -249,7 +257,7 @@ public class ServerCommand extends Command {
         if (ANTICHEAT_LIST.contains(name.toLowerCase())) {
             return String.format("%s%s(default)", Formatting.RED, name);
         }
-        else if (StringUtils.containsIgnoreCase(name, "exploit") || StringUtils.containsIgnoreCase(name, "cheat") || StringUtils.containsIgnoreCase(name, "illegal")) {
+        else if (Strings.CI.contains(name, "exploit") || Strings.CI.contains(name, "cheat") || Strings.CI.contains(name, "illegal")) {
             return String.format("%s%s(default)", Formatting.RED, name);
         }
 

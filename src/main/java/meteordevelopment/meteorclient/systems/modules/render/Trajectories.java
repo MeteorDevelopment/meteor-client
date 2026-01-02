@@ -11,7 +11,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.entity.ProjectileEntitySimulator;
+import meteordevelopment.meteorclient.utils.entity.simulator.ProjectileEntitySimulator;
+import meteordevelopment.meteorclient.utils.entity.simulator.SimulationStep;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -19,6 +20,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.TridentEntity;
 import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
@@ -85,6 +87,14 @@ public class Trajectories extends Module {
     );
 
     // Render
+
+    private final Setting<Integer> ignoreFirstTicks = sgRender.add(new IntSetting.Builder()
+        .name("ignore-rendering-first-ticks")
+        .description("Ignores rendering the first given ticks, to make the rest of the path more visible.")
+        .defaultValue(3)
+        .min(0)
+        .build()
+    );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
@@ -189,14 +199,17 @@ public class Trajectories extends Module {
 
         // Calculate paths
         if (!simulator.set(player, itemStack, 0, accurate.get(), tickDelta)) return;
-        getEmptyPath().calculate();
+        Path p = getEmptyPath().calculate();
+        if (player == mc.player) p.ignoreFirstTicks();
 
         if (itemStack.getItem() instanceof CrossbowItem && Utils.hasEnchantment(itemStack, Enchantments.MULTISHOT)) {
             if (!simulator.set(player, itemStack, MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // left multishot arrow
-            getEmptyPath().calculate();
+            p = getEmptyPath().calculate();
+            if (player == mc.player) p.ignoreFirstTicks();
 
             if (!simulator.set(player, itemStack, -MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // right multishot arrow
-            getEmptyPath().calculate();
+            p = getEmptyPath().calculate();
+            if (player == mc.player) p.ignoreFirstTicks();
         }
     }
 
@@ -204,7 +217,7 @@ public class Trajectories extends Module {
         for (Path path : paths) path.clear();
 
         // Calculate paths
-        if (!simulator.set(entity, accurate.get())) return;
+        if (!simulator.set(entity)) return;
         getEmptyPath().setStart(entity, tickDelta).calculate();
     }
 
@@ -221,7 +234,10 @@ public class Trajectories extends Module {
 
         if (firedProjectiles.get()) {
             for (Entity entity : mc.world.getEntities()) {
-                if (entity instanceof ProjectileEntity && (!ignoreWitherSkulls.get() || !(entity instanceof WitherSkullEntity))) {
+                if (entity instanceof ProjectileEntity) {
+                    if (ignoreWitherSkulls.get() && entity instanceof WitherSkullEntity) continue;
+                    if (entity instanceof TridentEntity trident && trident.noClip) continue; // when it's returning via loyalty
+
                     calculateFiredPath(entity, tickDelta);
                     for (Path path : paths) path.render(event);
                 }
@@ -235,31 +251,33 @@ public class Trajectories extends Module {
         private boolean hitQuad, hitQuadHorizontal;
         private double hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2;
 
-        private Entity collidingEntity;
+        private final List<Entity> collidingEntities = new ArrayList<>();
         public Vector3d lastPoint;
+        private int start;
 
         public void clear() {
             vec3s.freeAll(points);
             points.clear();
 
             hitQuad = false;
-            collidingEntity = null;
+            collidingEntities.clear();
             lastPoint = null;
+            start = 0;
         }
 
-        public void calculate() {
+        public Path calculate() {
             addPoint();
 
             for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
-                HitResult result = simulator.tick();
+                SimulationStep result = simulator.tick();
 
-                if (result != null) {
-                    processHitResult(result);
-                    break;
-                }
+                processHitResults(result);
+                if (result.shouldStop) break;
 
                 addPoint();
             }
+
+            return this;
         }
 
         public Path setStart(Entity entity, double tickDelta) {
@@ -276,58 +294,75 @@ public class Trajectories extends Module {
             points.add(vec3s.get().set(simulator.pos));
         }
 
-        private void processHitResult(HitResult result) {
-            if (result.getType() == HitResult.Type.BLOCK) {
-                BlockHitResult r = (BlockHitResult) result;
+        private void processHitResults(SimulationStep step) {
+            for (int i = 0; i < step.hitResults.length; i++) {
+                HitResult result = step.hitResults[i];
+                if (result.getType() == HitResult.Type.BLOCK) {
+                    BlockHitResult r = (BlockHitResult) result;
 
-                hitQuad = true;
-                hitQuadX1 = r.getPos().x;
-                hitQuadY1 = r.getPos().y;
-                hitQuadZ1 = r.getPos().z;
-                hitQuadX2 = r.getPos().x;
-                hitQuadY2 = r.getPos().y;
-                hitQuadZ2 = r.getPos().z;
+                    hitQuad = true;
+                    hitQuadX1 = r.getPos().x;
+                    hitQuadY1 = r.getPos().y;
+                    hitQuadZ1 = r.getPos().z;
+                    hitQuadX2 = r.getPos().x;
+                    hitQuadY2 = r.getPos().y;
+                    hitQuadZ2 = r.getPos().z;
 
-                if (r.getSide() == Direction.UP || r.getSide() == Direction.DOWN) {
-                    hitQuadHorizontal = true;
-                    hitQuadX1 -= 0.25;
-                    hitQuadZ1 -= 0.25;
-                    hitQuadX2 += 0.25;
-                    hitQuadZ2 += 0.25;
-                }
-                else if (r.getSide() == Direction.NORTH || r.getSide() == Direction.SOUTH) {
-                    hitQuadHorizontal = false;
-                    hitQuadX1 -= 0.25;
-                    hitQuadY1 -= 0.25;
-                    hitQuadX2 += 0.25;
-                    hitQuadY2 += 0.25;
-                }
-                else {
-                    hitQuadHorizontal = false;
-                    hitQuadZ1 -= 0.25;
-                    hitQuadY1 -= 0.25;
-                    hitQuadZ2 += 0.25;
-                    hitQuadY2 += 0.25;
-                }
+                    if (r.getSide() == Direction.UP || r.getSide() == Direction.DOWN) {
+                        hitQuadHorizontal = true;
+                        hitQuadX1 -= 0.25;
+                        hitQuadZ1 -= 0.25;
+                        hitQuadX2 += 0.25;
+                        hitQuadZ2 += 0.25;
+                    }
+                    else if (r.getSide() == Direction.NORTH || r.getSide() == Direction.SOUTH) {
+                        hitQuadHorizontal = false;
+                        hitQuadX1 -= 0.25;
+                        hitQuadY1 -= 0.25;
+                        hitQuadX2 += 0.25;
+                        hitQuadY2 += 0.25;
+                    }
+                    else {
+                        hitQuadHorizontal = false;
+                        hitQuadZ1 -= 0.25;
+                        hitQuadY1 -= 0.25;
+                        hitQuadZ2 += 0.25;
+                        hitQuadY2 += 0.25;
+                    }
 
-                points.add(Utils.set(vec3s.get(), result.getPos()));
+                    points.add(Utils.set(vec3s.get(), result.getPos()));
+                }
+                else if (result.getType() == HitResult.Type.ENTITY) {
+                    Entity entity = ((EntityHitResult) result).getEntity();
+                    collidingEntities.add(entity);
+
+                    if (step.shouldStop && i == step.hitResults.length - 1) {
+                        points.add(Utils.set(vec3s.get(), result.getPos()));
+                    }
+                }
             }
-            else if (result.getType() == HitResult.Type.ENTITY) {
-                collidingEntity = ((EntityHitResult) result).getEntity();
+        }
 
-                points.add(Utils.set(vec3s.get(), result.getPos()).add(0, collidingEntity.getHeight() / 2, 0));
-            }
+        public void ignoreFirstTicks() {
+            start = points.size() <= ignoreFirstTicks.get() ? 0 : ignoreFirstTicks.get();
         }
 
         public void render(Render3DEvent event) {
             // Render path
-            for (Vector3d point : points) {
+            for (int i = start; i < points.size(); i++) {
+                Vector3d point = points.get(i);
+
                 if (lastPoint != null) {
                     event.renderer.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
-                    if (renderPositionBox.get())
-                        event.renderer.box(point.x - positionBoxSize.get(), point.y - positionBoxSize.get(), point.z - positionBoxSize.get(),
-                            point.x + positionBoxSize.get(), point.y + positionBoxSize.get(), point.z + positionBoxSize.get(), positionSideColor.get(), positionLineColor.get(), shapeMode.get(), 0);
+                    if (renderPositionBox.get()) {
+                        event.renderer.box(
+                            point.x - positionBoxSize.get(), point.y - positionBoxSize.get(), point.z - positionBoxSize.get(),
+                            point.x + positionBoxSize.get(), point.y + positionBoxSize.get(), point.z + positionBoxSize.get(),
+                            positionSideColor.get(), positionLineColor.get(), shapeMode.get(), 0
+                        );
+                    }
                 }
+
                 lastPoint = point;
             }
 
@@ -338,7 +373,7 @@ public class Trajectories extends Module {
             }
 
             // Render entity
-            if (collidingEntity != null) {
+            for (Entity collidingEntity : collidingEntities) {
                 double x = (collidingEntity.getX() - collidingEntity.lastX) * event.tickDelta;
                 double y = (collidingEntity.getY() - collidingEntity.lastY) * event.tickDelta;
                 double z = (collidingEntity.getZ() - collidingEntity.lastZ) * event.tickDelta;

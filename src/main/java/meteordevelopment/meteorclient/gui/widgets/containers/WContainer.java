@@ -62,6 +62,12 @@ public abstract class WContainer extends WWidget {
         }
     }
 
+    @Override
+    public boolean isFocused() {
+        for (Cell<?> cell : cells) if (cell.widget().isFocused()) return true;
+        return false;
+    }
+
     // Layout
 
     @Override
@@ -106,11 +112,16 @@ public abstract class WContainer extends WWidget {
     public boolean render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         if (super.render(renderer, mouseX, mouseY, delta)) return true;
 
-        for (Cell<?> cell : cells) {
-            double y = cell.widget().y;
-            if (y > getWindowHeight()) break;
+        WView view = getView();
+        double windowHeight = getWindowHeight();
 
-            if (y + cell.widget().height > 0) renderWidget(cell.widget(), renderer, mouseX, mouseY, delta);
+        for (Cell<?> cell : cells) {
+            WWidget widget = cell.widget();
+
+            if (widget.y > windowHeight) break;
+            if (widget.y + widget.height <= 0) continue;
+
+            if (shouldRenderWidget(widget, view)) renderWidget(widget, renderer, mouseX, mouseY, delta);
         }
 
         return false;
@@ -120,6 +131,17 @@ public abstract class WContainer extends WWidget {
         widget.render(renderer, mouseX, mouseY, delta);
     }
 
+    private boolean shouldRenderWidget(WWidget widget, WView view) {
+        if (view == null) return true;
+        if (!view.isWidgetInView(widget)) return false;
+
+        if (widget.mouseOver && !view.mouseOver) {
+            widget.mouseOver = false;
+        }
+
+        return true;
+    }
+
     // Events
 
     protected boolean propagateEvents(WWidget widget) {
@@ -127,15 +149,14 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean used) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().mouseClicked(click, used))
-                    used = true;
+                if (propagateEvents(cell.widget()) && cell.widget().mouseClicked(click, doubled)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return super.mouseClicked(click, used) || used;
+        return super.mouseClicked(click, doubled);
     }
 
     @Override

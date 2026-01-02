@@ -25,6 +25,7 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.SimpleBlockRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShader;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
@@ -297,13 +298,14 @@ public class StorageESP extends Module {
         }
 
         if (mode.get() == Mode.Shader && count > 0) {
-            PostProcessShaders.STORAGE_OUTLINE.endRender(() -> MeshRenderer.begin()
-                .attachments(mc.getFramebuffer())
+            MeshRenderer.begin()
+                .attachments(PostProcessShaders.STORAGE_OUTLINE.framebuffer)
                 .clearColor(Color.CLEAR)
                 .pipeline(MeteorRenderPipelines.WORLD_COLORED)
                 .mesh(mesh, event.matrices)
-                .end()
-            );
+                .end();
+
+            PostProcessShaders.STORAGE_OUTLINE.render();
         }
     }
 

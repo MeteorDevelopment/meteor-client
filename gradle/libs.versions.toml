@@ -1,0 +1,63 @@
+[versions]
+# Fabric (https://fabricmc.net/develop)
+minecraft = "1.21.11"
+yarn-mappings = "1.21.11+build.3"
+fabric-loader = "0.18.2"
+fabric-api = "0.140.0+1.21.11"
+
+# Plugins
+# Loom (https://github.com/FabricMC/fabric-loom)
+loom = "1.14-SNAPSHOT"
+
+# Mods
+# Baritone (https://github.com/MeteorDevelopment/baritone)
+baritone = "1.21.10-SNAPSHOT"
+# Sodium (https://github.com/CaffeineMC/sodium-fabric)
+sodium = "mc1.21.11-0.8.0-fabric"
+# Lithium (https://github.com/CaffeineMC/lithium-fabric)
+lithium = "mc1.21.11-0.21.1-fabric"
+# Iris (https://github.com/IrisShaders/Iris)
+iris = "1.10.2+1.21.11-fabric"
+# ModMenu (https://github.com/TerraformersMC/ModMenu)
+modmenu = "15.0.0"
+# Orbit (https://github.com/MeteorDevelopment/orbit)
+orbit = "0.2.4"
+# Starscript (https://github.com/MeteorDevelopment/starscript)
+starscript = "0.2.5"
+# DiscordRPC (https://github.com/MeteorDevelopment/java-discord-rpc)
+discordipc = "1.1"
+# Reflections (https://github.com/ronmamo/reflections)
+reflections = "0.10.2"
+# Netty (https://github.com/netty/netty)
+netty = "4.2.7.Final"
+# ViaFabricPlus (https://github.com/ViaVersion/ViaFabricPlus)
+viafabricplus = "4.4.0"
+# WaybackAuthLib (https://github.com/FlorianMichael/WaybackAuthLib)
+waybackauthlib = "1.0.1"
+
+[libraries]
+# Fabric base
+minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
+yarn = { module = "net.fabricmc:yarn", version.ref = "yarn-mappings" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+
+# Mods
+sodium = { module = "maven.modrinth:sodium", version.ref = "sodium" }
+lithium = { module = "maven.modrinth:lithium", version.ref = "lithium" }
+iris = { module = "maven.modrinth:iris", version.ref = "iris" }
+baritone = { module = "meteordevelopment:baritone", version.ref = "baritone" }
+modmenu = { module = "com.terraformersmc:modmenu", version.ref = "modmenu" }
+viafabricplus = { module = "com.viaversion:viafabricplus", version.ref = "viafabricplus" }
+viafabricplus-api = { module = "com.viaversion:viafabricplus-api", version.ref = "viafabricplus" }
+
+# Libraries
+orbit = { module = "meteordevelopment:orbit", version.ref = "orbit" }
+starscript = { module = "org.meteordev:starscript", version.ref = "starscript" }
+discord-ipc = { module = "meteordevelopment:discord-ipc", version.ref = "discordipc" }
+reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
+netty-handler-proxy = { module = "io.netty:netty-handler-proxy", version.ref = "netty" }
+netty-codec-socks = { module = "io.netty:netty-codec-socks", version.ref = "netty" }
+waybackauthlib = { module = "de.florianmichael:WaybackAuthLib", version.ref = "waybackauthlib" }
+
+[plugins]
+fabric-loom = { id = "fabric-loom", version.ref = "loom" }

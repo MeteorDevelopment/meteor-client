@@ -320,6 +320,10 @@ public class ESP extends Module {
         Renderer2D.COLOR.render();
     }
 
+    public boolean forceRender() {
+        return isActive() && (mode.get() == Mode.Shader || mode.get() == Mode.Glow);
+    }
+
     private boolean checkCorner(double x, double y, double z, Vector3d min, Vector3d max) {
         pos.set(x, y, z);
         if (!NametagUtils.to2D(pos, 1)) return true;
@@ -351,6 +355,10 @@ public class ESP extends Module {
         return !EntityUtils.isInRenderDistance(entity);
     }
 
+    public boolean shouldSkip(EntityType<?> entityType) {
+        return !entities.get().contains(entityType);
+    }
+
     public Color getColor(Entity entity) {
         Color color;
         double alpha = 1;
@@ -370,7 +378,7 @@ public class ESP extends Module {
     }
 
     private double getFadeAlpha(Entity entity) {
-        double dist = PlayerUtils.squaredDistanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ() + entity.getWidth() / 2);
+        double dist = PlayerUtils.squaredDistanceToCamera(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ());
         double fadeDist = Math.pow(fadeDistance.get(), 2);
         double alpha = 1;
         if (dist <= fadeDist * fadeDist) alpha = (float) (Math.sqrt(dist) / fadeDist);

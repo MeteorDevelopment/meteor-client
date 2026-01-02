@@ -16,7 +16,9 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gl.GpuSampler;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +44,7 @@ public class MeshRenderer {
     private @Nullable GpuBuffer indexBuffer;
     private Matrix4f matrix;
     private final HashMap<String, GpuBufferSlice> uniforms = new HashMap<>();
-    private final HashMap<String, GpuTextureView> samplers = new HashMap<>();
+    private final HashMap<String, Pair<GpuTextureView, GpuSampler>> samplers = new HashMap<>();
 
     private MeshRenderer() {}
 
@@ -116,9 +118,9 @@ public class MeshRenderer {
         return this;
     }
 
-    public MeshRenderer sampler(String name, GpuTextureView view) {
-        if (name != null && view != null) {
-            samplers.put(name, view);
+    public MeshRenderer sampler(String name, GpuTextureView view, GpuSampler sampler) {
+        if (name != null && view != null && sampler != null) {
+            samplers.put(name, new Pair<>(view, sampler));
         }
 
         return this;
@@ -130,7 +132,8 @@ public class MeshRenderer {
         }
 
         int indexCount = mesh != null ? mesh.getIndicesCount()
-            : (indexBuffer != null ? indexBuffer.size() / Integer.BYTES : -1);
+            : (int) (indexBuffer != null ? indexBuffer.size() / Integer.BYTES : -1);
+        // todo hope this is alright @minegame take a look please (lossy conversion from long to int)
 
         if (indexCount > 0) {
 
@@ -168,7 +171,7 @@ public class MeshRenderer {
                 }
 
                 for (var name : samplers.keySet()) {
-                    pass.bindSampler(name, samplers.get(name));
+                    pass.bindTexture(name, samplers.get(name).getLeft(), samplers.get(name).getRight());
                 }
 
                 pass.setVertexBuffer(0, vertexBuffer);
@@ -198,7 +201,7 @@ public class MeshRenderer {
     }
 
     private static void applyCameraPos() {
-        Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
+        Vec3d cameraPos = mc.gameRenderer.getCamera().getCameraPos();
         RenderSystem.getModelViewStack().translate(0, (float) -cameraPos.y, 0);
     }
 }

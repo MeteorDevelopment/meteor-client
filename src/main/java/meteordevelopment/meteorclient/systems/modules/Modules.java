@@ -30,8 +30,8 @@ import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
-import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
+import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
@@ -42,6 +42,8 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.util.Pair;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
@@ -106,10 +108,17 @@ public class Modules extends System<Modules> {
     }
 
     @SuppressWarnings("unchecked")
+    @Nullable
     public <T extends Module> T get(Class<T> klass) {
         return (T) moduleInstances.get(klass);
     }
 
+    @SuppressWarnings("unused")
+    public <T extends Module> Optional<T> getOptional(Class<T> klass) {
+        return Optional.ofNullable(get(klass));
+    }
+
+    @Nullable
     public Module get(String name) {
         for (Module module : moduleInstances.values()) {
             if (module.name.equalsIgnoreCase(name)) return module;
@@ -137,26 +146,33 @@ public class Modules extends System<Modules> {
     }
 
     public List<Module> getActive() {
-        synchronized (active) {
-            return active;
-        }
+        return active;
     }
 
-    public Set<Module> searchTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Comparator.naturalOrder());
+    public List<Pair<Module, String>> searchTitles(String text) {
+        Map<Pair<Module, String>, Integer> modules = new HashMap<>();
 
         for (Module module : this.moduleInstances.values()) {
-            int score = Utils.searchLevenshteinDefault(module.title, text, false);
+            String title = module.title;
+            int score = Utils.searchLevenshteinDefault(title, text, false);
+
             if (Config.get().moduleAliases.get()) {
                 for (String alias : module.aliases) {
                     int aliasScore = Utils.searchLevenshteinDefault(alias, text, false);
-                    if (aliasScore < score) score = aliasScore;
+                    if (aliasScore < score) {
+                        title = module.title + " (" + alias + ")";
+                        score = aliasScore;
+                    }
                 }
             }
-            modules.put(module, modules.getOrDefault(module, 0) + score);
+
+            modules.put(new Pair<>(module, title), score);
         }
 
-        return modules.keySet();
+        List<Pair<Module, String>> l = new ArrayList<>(modules.keySet());
+        l.sort(Comparator.comparingInt(modules::get));
+
+        return l;
     }
 
     public Set<Module> searchSettingTitles(String text) {
@@ -311,7 +327,7 @@ public class Modules extends System<Modules> {
     public void disableAll() {
         synchronized (active) {
             for (Module module : getAll()) {
-                if (module.isActive()) module.toggle();
+                module.disable();
             }
         }
     }
@@ -380,6 +396,7 @@ public class Modules extends System<Modules> {
         add(new AntiAnvil());
         add(new AntiBed());
         add(new ArrowDodge());
+        add(new AttributeSwap());
         add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
@@ -449,12 +466,10 @@ public class Modules extends System<Modules> {
         add(new AutoWalk());
         add(new AutoWasp());
         add(new Blink());
-        add(new BoatFly());
         add(new ClickTP());
         add(new ElytraBoost());
         add(new ElytraFly());
         add(new EntityControl());
-        add(new EntitySpeed());
         add(new FastClimb());
         add(new Flight());
         add(new GUIMove());

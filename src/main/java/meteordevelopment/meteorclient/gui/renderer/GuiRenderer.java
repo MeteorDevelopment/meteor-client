@@ -118,7 +118,7 @@ public class GuiRenderer {
         rTex.end();
 
         r.render();
-        rTex.render("u_Texture", TEXTURE.getGlTextureView());
+        rTex.render("u_Texture", TEXTURE.getGlTextureView(), TEXTURE.getSampler());
 
         // Normal text
         theme.textRenderer().begin(theme.scale(1));
@@ -185,7 +185,13 @@ public class GuiRenderer {
                 tooltipWidget.init();
             }
 
-            tooltipWidget.move(-tooltipWidget.x + mouseX + 12, -tooltipWidget.y + mouseY + 12);
+            double deltaX = -tooltipWidget.x + mouseX + 12;
+            double deltaY = -tooltipWidget.y + mouseY + 12;
+
+            if (mouseX + 12 + tooltipWidget.width > getWindowWidth()) deltaX = -tooltipWidget.x + getWindowWidth() - tooltipWidget.width;
+            if (mouseY + 12 + tooltipWidget.height > getWindowHeight()) deltaY = -tooltipWidget.y + getWindowHeight() - tooltipWidget.height;
+
+            tooltipWidget.move(deltaX, deltaY);
 
             setAlpha(tooltipAnimProgress);
 
@@ -248,7 +254,7 @@ public class GuiRenderer {
             rTex.texQuad(x, y, width, height, rotation, 0, 0, 1, 1, WHITE);
             rTex.end();
 
-            rTex.render(texture.getGlTextureView());
+            rTex.render(texture.getGlTextureView(), texture.getSampler());
         });
     }
 
