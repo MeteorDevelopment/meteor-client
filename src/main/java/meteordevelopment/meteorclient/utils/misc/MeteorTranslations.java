@@ -17,12 +17,14 @@ import net.minecraft.client.resource.language.ReorderingUtil;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.util.Language;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -118,6 +120,17 @@ public class MeteorTranslations {
         }
     }
 
+    public static String translate(String key, Supplier<String> fallback, Object... args) {
+        MeteorLanguage currentLang = getCurrentLanguage();
+        String translated = currentLang.get(key, getDefaultLanguage().get(key, fallback));
+
+        try {
+            return String.format(translated, args);
+        } catch (IllegalFormatException e) {
+            return fallback.get();
+        }
+    }
+
     public static MeteorLanguage getLanguage(String lang) {
         return languages.get(lang);
     }
@@ -159,6 +172,11 @@ public class MeteorTranslations {
         @Override
         public String get(String key, String fallback) {
             return translations.getOrDefault(key, fallback);
+        }
+
+        public String get(String key, Supplier<String> fallback) {
+            @Nullable String string = translations.get(key);
+            return string != null ? string : fallback.get();
         }
 
         @Override
