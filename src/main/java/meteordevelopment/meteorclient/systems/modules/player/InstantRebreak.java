@@ -25,11 +25,10 @@ import net.minecraft.util.math.Direction;
 
 public class InstantRebreak extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("The delay between break attempts.")
         .defaultValue(0)
         .min(0)
         .sliderMax(20)
@@ -38,14 +37,12 @@ public class InstantRebreak extends Module {
 
     private final Setting<Boolean> pick = sgGeneral.add(new BoolSetting.Builder()
         .name("only-pick")
-        .description("Only tries to mine the block if you are holding a pickaxe.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Faces the block being mined server side.")
         .defaultValue(true)
         .build()
     );
@@ -54,28 +51,24 @@ public class InstantRebreak extends Module {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
-        .description("Renders an overlay on the block being broken.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The color of the sides of the blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 10))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The color of the lines of the blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 255))
         .build()
     );
@@ -85,7 +78,7 @@ public class InstantRebreak extends Module {
     private Direction direction;
 
     public InstantRebreak() {
-        super(Categories.Player, "instant-rebreak", "Instantly re-breaks blocks in the same position.");
+        super(Categories.Player, "instant-rebreak");
     }
 
     @Override

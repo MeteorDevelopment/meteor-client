@@ -43,23 +43,21 @@ import java.util.*;
 import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class Notifier extends Module {
-    private final SettingGroup sgTotemPops = settings.createGroup("Totem Pops");
-    private final SettingGroup sgVisualRange = settings.createGroup("Visual Range");
-    private final SettingGroup sgPearl = settings.createGroup("Pearl");
-    private final SettingGroup sgJoinsLeaves = settings.createGroup("Joins/Leaves");
+    private final SettingGroup sgTotemPops = settings.createGroup("totem-pops");
+    private final SettingGroup sgVisualRange = settings.createGroup("visual-range");
+    private final SettingGroup sgPearl = settings.createGroup("pearl");
+    private final SettingGroup sgJoinsLeaves = settings.createGroup("joins/leaves");
 
     // Totem Pops
 
     private final Setting<Boolean> totemPops = sgTotemPops.add(new BoolSetting.Builder()
         .name("totem-pops")
-        .description("Notifies you when a player pops a totem.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> totemsDistanceCheck = sgTotemPops.add(new BoolSetting.Builder()
         .name("distance-check")
-        .description("Limits the distance in which the pops are recognized.")
         .defaultValue(false)
         .visible(totemPops::get)
         .build()
@@ -67,7 +65,6 @@ public class Notifier extends Module {
 
     private final Setting<Integer> totemsDistance = sgTotemPops.add(new IntSetting.Builder()
         .name("player-radius")
-        .description("The radius in which to log totem pops.")
         .defaultValue(30)
         .sliderRange(1, 50)
         .range(1, 100)
@@ -77,21 +74,18 @@ public class Notifier extends Module {
 
     private final Setting<Boolean> totemsIgnoreOwn = sgTotemPops.add(new BoolSetting.Builder()
         .name("ignore-own")
-        .description("Ignores your own totem pops.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> totemsIgnoreFriends = sgTotemPops.add(new BoolSetting.Builder()
         .name("ignore-friends")
-        .description("Ignores friends totem pops.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> totemsIgnoreOthers = sgTotemPops.add(new BoolSetting.Builder()
         .name("ignore-others")
-        .description("Ignores other players totem pops.")
         .defaultValue(false)
         .build()
     );
@@ -100,42 +94,36 @@ public class Notifier extends Module {
 
     private final Setting<Boolean> visualRange = sgVisualRange.add(new BoolSetting.Builder()
         .name("visual-range")
-        .description("Notifies you when an entity enters your render distance.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Event> event = sgVisualRange.add(new EnumSetting.Builder<Event>()
         .name("event")
-        .description("When to log the entities.")
         .defaultValue(Event.Both)
         .build()
     );
 
     private final Setting<Set<EntityType<?>>> entities = sgVisualRange.add(new EntityTypeListSetting.Builder()
         .name("entities")
-        .description("Which entities to notify about.")
         .defaultValue(EntityType.PLAYER)
         .build()
     );
 
     private final Setting<Boolean> visualRangeIgnoreFriends = sgVisualRange.add(new BoolSetting.Builder()
         .name("ignore-friends")
-        .description("Ignores friends.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> visualRangeIgnoreFakes = sgVisualRange.add(new BoolSetting.Builder()
         .name("ignore-fake-players")
-        .description("Ignores fake players.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> visualMakeSound = sgVisualRange.add(new BoolSetting.Builder()
         .name("sound")
-        .description("Emits a sound effect on enter / leave")
         .defaultValue(true)
         .build()
     );
@@ -144,21 +132,18 @@ public class Notifier extends Module {
 
     private final Setting<Boolean> pearl = sgPearl.add(new BoolSetting.Builder()
         .name("pearl")
-        .description("Notifies you when a player is teleported using an ender pearl.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> pearlIgnoreOwn = sgPearl.add(new BoolSetting.Builder()
         .name("ignore-own")
-        .description("Ignores your own pearls.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> pearlIgnoreFriends = sgPearl.add(new BoolSetting.Builder()
         .name("ignore-friends")
-        .description("Ignores friends pearls.")
         .defaultValue(false)
         .build()
     );
@@ -167,14 +152,12 @@ public class Notifier extends Module {
 
     private final Setting<JoinLeaveModes> joinsLeavesMode = sgJoinsLeaves.add(new EnumSetting.Builder<JoinLeaveModes>()
         .name("player-joins-leaves")
-        .description("How to handle player join/leave notifications.")
         .defaultValue(JoinLeaveModes.None)
         .build()
     );
 
     private final Setting<Integer> notificationDelay = sgJoinsLeaves.add(new IntSetting.Builder()
         .name("notification-delay")
-        .description("How long to wait in ticks before posting the next join/leave notification in your chat.")
         .range(0, 1000)
         .sliderRange(0, 100)
         .defaultValue(0)
@@ -183,7 +166,6 @@ public class Notifier extends Module {
 
     private final Setting<Boolean> simpleNotifications = sgJoinsLeaves.add(new BoolSetting.Builder()
         .name("simple-notifications")
-        .description("Display join/leave notifications without a prefix, to reduce chat clutter.")
         .defaultValue(true)
         .build()
     );
@@ -198,7 +180,7 @@ public class Notifier extends Module {
     private final Random random = new Random();
 
     public Notifier() {
-        super(Categories.Misc, "notifier", "Notifies you of different events.");
+        super(Categories.Misc, "notifier");
     }
 
     // Visual Range

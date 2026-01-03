@@ -23,7 +23,6 @@ public class PotionSaver extends Module {
 
     private final Setting<List<StatusEffect>> effects = sgGeneral.add(new StatusEffectListSetting.Builder()
         .name("effects")
-        .description("The effects to preserve.")
         .defaultValue(
             STRENGTH.value(),
             ABSORPTION.value(),
@@ -45,13 +44,12 @@ public class PotionSaver extends Module {
 
     public final Setting<Boolean> onlyWhenStationary = sgGeneral.add(new BoolSetting.Builder()
         .name("only-when-stationary")
-        .description("Only freezes effects when you aren't moving.")
         .defaultValue(false)
         .build()
     );
 
     public PotionSaver() {
-        super(Categories.Player, "potion-saver", "Stops potion effects ticking when you stand still.");
+        super(Categories.Player, "potion-saver");
     }
 
     public boolean shouldFreeze(StatusEffect effect) {

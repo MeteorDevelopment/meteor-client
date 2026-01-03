@@ -27,7 +27,6 @@ public class AutoSign extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("The tick delay between sign update packets.")
         .defaultValue(10)
         .range(0, 100)
         .sliderRange(0, 100)
@@ -42,7 +41,7 @@ public class AutoSign extends Module {
     private int timer = 0;
 
     public AutoSign() {
-        super(Categories.World, "auto-sign", "Automatically writes signs. The first sign's text will be used.");
+        super(Categories.World, "auto-sign");
     }
 
     @Override

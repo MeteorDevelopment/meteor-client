@@ -40,7 +40,7 @@ public class ModuleScreen extends WindowScreen {
     private WCheckbox active;
 
     public ModuleScreen(GuiTheme theme, Module module) {
-        super(theme, theme.favorite(module.favorite), module.title);
+        super(theme, theme.favorite(module.favorite), module.getTitle());
         ((WFavorite) window.icon).action = () -> module.favorite = ((WFavorite) window.icon).checked;
 
         this.module = module;
@@ -49,7 +49,7 @@ public class ModuleScreen extends WindowScreen {
     @Override
     public void initWidgets() {
         // Description
-        add(theme.label(module.description, getWindowWidth() / 2.0));
+        add(theme.label(module.getDescription(), getWindowWidth() / 2.0));
 
         if (module.addon != null && module.addon != MeteorClient.ADDON) {
             WHorizontalList addon = add(theme.horizontalList()).expandX().widget();

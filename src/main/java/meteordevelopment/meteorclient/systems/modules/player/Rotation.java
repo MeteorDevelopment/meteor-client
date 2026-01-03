@@ -15,21 +15,19 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 
 public class Rotation extends Module {
-    private final SettingGroup sgYaw = settings.createGroup("Yaw");
-    private final SettingGroup sgPitch = settings.createGroup("Pitch");
+    private final SettingGroup sgYaw = settings.createGroup("yaw");
+    private final SettingGroup sgPitch = settings.createGroup("pitch");
 
     // Yaw
 
     private final Setting<LockMode> yawLockMode = sgYaw.add(new EnumSetting.Builder<LockMode>()
         .name("yaw-lock-mode")
-        .description("The way in which your yaw is locked.")
         .defaultValue(LockMode.Simple)
         .build()
     );
 
     private final Setting<Double> yawAngle = sgYaw.add(new DoubleSetting.Builder()
         .name("yaw-angle")
-        .description("Yaw angle in degrees.")
         .defaultValue(0)
         .sliderMax(360)
         .max(360)
@@ -41,14 +39,12 @@ public class Rotation extends Module {
 
     private final Setting<LockMode> pitchLockMode = sgPitch.add(new EnumSetting.Builder<LockMode>()
         .name("pitch-lock-mode")
-        .description("The way in which your pitch is locked.")
         .defaultValue(LockMode.Simple)
         .build()
     );
 
     private final Setting<Double> pitchAngle = sgPitch.add(new DoubleSetting.Builder()
         .name("pitch-angle")
-        .description("Pitch angle in degrees.")
         .defaultValue(0)
         .range(-90, 90)
         .sliderRange(-90, 90)
@@ -57,7 +53,7 @@ public class Rotation extends Module {
     );
 
     public Rotation() {
-        super(Categories.Player, "rotation", "Changes/locks your yaw and pitch.");
+        super(Categories.Player, "rotation");
     }
 
     @Override

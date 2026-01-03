@@ -44,14 +44,13 @@ import java.util.function.Predicate;
 
 public class Surround extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgToggles = settings.createGroup("Toggles");
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgToggles = settings.createGroup("toggles");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
-        .description("What blocks to use for surround.")
         .defaultValue(Blocks.OBSIDIAN, Blocks.CRYING_OBSIDIAN, Blocks.NETHERITE_BLOCK)
         .filter(this::blockFilter)
         .build()
@@ -59,7 +58,6 @@ public class Surround extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("Delay, in ticks, between block placements.")
         .min(0)
         .defaultValue(0)
         .build()
@@ -67,7 +65,6 @@ public class Surround extends Module {
 
     private final Setting<Integer> blocksPerTick = sgGeneral.add(new IntSetting.Builder()
         .name("blocks-per-tick")
-        .description("How many blocks to place in one tick.")
         .defaultValue(1)
         .min(1)
         .build()
@@ -75,42 +72,36 @@ public class Surround extends Module {
 
     private final Setting<Center> center = sgGeneral.add(new EnumSetting.Builder<Center>()
         .name("center")
-        .description("Teleports you to the center of the block.")
         .defaultValue(Center.Incomplete)
         .build()
     );
 
     private final Setting<Boolean> doubleHeight = sgGeneral.add(new BoolSetting.Builder()
         .name("double-height")
-        .description("Places obsidian on top of the original surround blocks to prevent people from face-placing you.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-ground")
-        .description("Works only when you are standing on blocks.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
         .name("air-place")
-        .description("Allows Surround to place blocks in the air.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> toggleModules = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-modules")
-        .description("Turn off other modules when surround is activated.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> toggleBack = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-back-on")
-        .description("Turn the other modules back on when surround is deactivated.")
         .defaultValue(false)
         .visible(toggleModules::get)
         .build()
@@ -118,21 +109,18 @@ public class Surround extends Module {
 
     private final Setting<List<Module>> modules = sgGeneral.add(new ModuleListSetting.Builder()
         .name("modules")
-        .description("Which modules to disable on activation.")
         .visible(toggleModules::get)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Automatically faces towards the obsidian being placed.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> protect = sgGeneral.add(new BoolSetting.Builder()
         .name("protect")
-        .description("Attempts to break crystals around surround positions to prevent surround break.")
         .defaultValue(true)
         .build()
     );
@@ -141,21 +129,18 @@ public class Surround extends Module {
 
     private final Setting<Boolean> toggleOnYChange = sgToggles.add(new BoolSetting.Builder()
         .name("toggle-on-y-change")
-        .description("Automatically disables when your y level changes (step, jumping, etc).")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> toggleOnComplete = sgToggles.add(new BoolSetting.Builder()
         .name("toggle-on-complete")
-        .description("Toggles off when all blocks are placed.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> toggleOnDeath = sgToggles.add(new BoolSetting.Builder()
         .name("toggle-on-death")
-        .description("Toggles off when you die.")
         .defaultValue(true)
         .build()
     );
@@ -164,35 +149,30 @@ public class Surround extends Module {
 
     private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
         .name("swing")
-        .description("Render your hand swinging when placing surround blocks.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
-        .description("Renders a block overlay where the obsidian will be placed.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> renderBelow = sgRender.add(new BoolSetting.Builder()
         .name("below")
-        .description("Renders the block below you.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> safeSideColor = sgRender.add(new ColorSetting.Builder()
         .name("safe-side-color")
-        .description("The side color for safe blocks.")
         .defaultValue(new SettingColor(13, 255, 0, 0))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Lines)
         .build()
@@ -200,7 +180,6 @@ public class Surround extends Module {
 
     private final Setting<SettingColor> safeLineColor = sgRender.add(new ColorSetting.Builder()
         .name("safe-line-color")
-        .description("The line color for safe blocks.")
         .defaultValue(new SettingColor(13, 255, 0, 0))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Sides)
         .build()
@@ -208,7 +187,6 @@ public class Surround extends Module {
 
     private final Setting<SettingColor> normalSideColor = sgRender.add(new ColorSetting.Builder()
         .name("normal-side-color")
-        .description("The side color for normal blocks.")
         .defaultValue(new SettingColor(0, 255, 238, 12))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Lines)
         .build()
@@ -216,7 +194,6 @@ public class Surround extends Module {
 
     private final Setting<SettingColor> normalLineColor = sgRender.add(new ColorSetting.Builder()
         .name("normal-line-color")
-        .description("The line color for normal blocks.")
         .defaultValue(new SettingColor(0, 255, 238, 100))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Sides)
         .build()
@@ -224,7 +201,6 @@ public class Surround extends Module {
 
     private final Setting<SettingColor> unsafeSideColor = sgRender.add(new ColorSetting.Builder()
         .name("unsafe-side-color")
-        .description("The side color for unsafe blocks.")
         .defaultValue(new SettingColor(204, 0, 0, 12))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Lines)
         .build()
@@ -232,7 +208,6 @@ public class Surround extends Module {
 
     private final Setting<SettingColor> unsafeLineColor = sgRender.add(new ColorSetting.Builder()
         .name("unsafe-line-color")
-        .description("The line color for unsafe blocks.")
         .defaultValue(new SettingColor(204, 0, 0, 100))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Sides)
         .build()
@@ -242,7 +217,7 @@ public class Surround extends Module {
     private int timer;
 
     public Surround() {
-        super(Categories.Combat, "surround", "Surrounds you in blocks to prevent massive crystal damage.");
+        super(Categories.Combat, "surround");
     }
 
     // Render

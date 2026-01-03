@@ -46,28 +46,25 @@ import java.util.Set;
 
 public class Nuker extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgWhitelist = settings.createGroup("whitelist");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
     private final Setting<Shape> shape = sgGeneral.add(new EnumSetting.Builder<Shape>()
         .name("shape")
-        .description("The shape of nuking algorithm.")
         .defaultValue(Shape.Sphere)
         .build()
     );
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("The way the blocks are broken.")
         .defaultValue(Mode.Flatten)
         .build()
     );
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
         .name("range")
-        .description("The break range.")
         .defaultValue(4)
         .min(0)
         .visible(() -> shape.get() != Shape.Cube)
@@ -76,7 +73,6 @@ public class Nuker extends Module {
 
     private final Setting<Integer> range_up = sgGeneral.add(new IntSetting.Builder()
         .name("up")
-        .description("The break range.")
         .defaultValue(1)
         .min(0)
         .visible(() -> shape.get() == Shape.Cube)
@@ -85,7 +81,6 @@ public class Nuker extends Module {
 
     private final Setting<Integer> range_down = sgGeneral.add(new IntSetting.Builder()
         .name("down")
-        .description("The break range.")
         .defaultValue(1)
         .min(0)
         .visible(() -> shape.get() == Shape.Cube)
@@ -94,7 +89,6 @@ public class Nuker extends Module {
 
     private final Setting<Integer> range_left = sgGeneral.add(new IntSetting.Builder()
         .name("left")
-        .description("The break range.")
         .defaultValue(1)
         .min(0)
         .visible(() -> shape.get() == Shape.Cube)
@@ -103,7 +97,6 @@ public class Nuker extends Module {
 
     private final Setting<Integer> range_right = sgGeneral.add(new IntSetting.Builder()
         .name("right")
-        .description("The break range.")
         .defaultValue(1)
         .min(0)
         .visible(() -> shape.get() == Shape.Cube)
@@ -112,7 +105,6 @@ public class Nuker extends Module {
 
     private final Setting<Integer> range_forward = sgGeneral.add(new IntSetting.Builder()
         .name("forward")
-        .description("The break range.")
         .defaultValue(1)
         .min(0)
         .visible(() -> shape.get() == Shape.Cube)
@@ -121,7 +113,6 @@ public class Nuker extends Module {
 
     private final Setting<Integer> range_back = sgGeneral.add(new IntSetting.Builder()
         .name("back")
-        .description("The break range.")
         .defaultValue(1)
         .min(0)
         .visible(() -> shape.get() == Shape.Cube)
@@ -130,7 +121,6 @@ public class Nuker extends Module {
 
     private final Setting<Double> wallsRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("walls-range")
-        .description("Range in which to break when behind blocks.")
         .defaultValue(4.0)
         .min(0)
         .sliderMax(6)
@@ -139,14 +129,12 @@ public class Nuker extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("Delay in ticks between breaking blocks.")
         .defaultValue(0)
         .build()
     );
 
     private final Setting<Integer> maxBlocksPerTick = sgGeneral.add(new IntSetting.Builder()
         .name("max-blocks-per-tick")
-        .description("Maximum blocks to try to break per tick. Useful when insta mining.")
         .defaultValue(1)
         .min(1)
         .build()
@@ -154,35 +142,30 @@ public class Nuker extends Module {
 
     private final Setting<SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<SortMode>()
         .name("sort-mode")
-        .description("The blocks you want to mine first.")
         .defaultValue(SortMode.Closest)
         .build()
     );
 
     private final Setting<Boolean> packetMine = sgGeneral.add(new BoolSetting.Builder()
         .name("packet-mine")
-        .description("Attempt to instamine everything at once.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> suitableTools = sgGeneral.add(new BoolSetting.Builder()
         .name("only-suitable-tools")
-        .description("Only mines when using an appropriate for the block.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> interact = sgGeneral.add(new BoolSetting.Builder()
         .name("interact")
-        .description("Interacts with the block instead of mining.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Rotates server-side to the block being mined.")
         .defaultValue(true)
         .build()
     );
@@ -191,28 +174,24 @@ public class Nuker extends Module {
 
     private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
         .name("list-mode")
-        .description("Selection mode.")
         .defaultValue(ListMode.Blacklist)
         .build()
     );
 
     private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("blacklist")
-        .description("The blocks you don't want to mine.")
         .visible(() -> listMode.get() == ListMode.Blacklist)
         .build()
     );
 
     private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
         .name("whitelist")
-        .description("The blocks you want to mine.")
         .visible(() -> listMode.get() == ListMode.Whitelist)
         .build()
     );
 
     private final Setting<Keybind> selectBlockBind = sgWhitelist.add(new KeybindSetting.Builder()
         .name("select-block-bind")
-        .description("Adds targeted block to list when this button is pressed.")
         .defaultValue(Keybind.none())
         .build()
     );
@@ -221,49 +200,42 @@ public class Nuker extends Module {
 
     private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
         .name("swing")
-        .description("Whether to swing hand client-side.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
         .name("bounding-box")
-        .description("Enable rendering bounding box for Cube and Uniform Cube.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeModeBox = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("nuke-box-mode")
-        .description("How the shape for the bounding box is rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColorBox = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color of the bounding box.")
         .defaultValue(new SettingColor(16,106,144, 100))
         .build()
     );
 
     private final Setting<SettingColor> lineColorBox = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color of the bounding box.")
         .defaultValue(new SettingColor(16,106,144, 255))
         .build()
     );
 
     private final Setting<Boolean> enableRenderBreaking = sgRender.add(new BoolSetting.Builder()
         .name("broken-blocks")
-        .description("Enable rendering bounding box for Cube and Uniform Cube.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeModeBreak = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("nuke-block-mode")
-        .description("How the shapes for broken blocks are rendered.")
         .defaultValue(ShapeMode.Both)
         .visible(enableRenderBreaking::get)
         .build()
@@ -271,7 +243,6 @@ public class Nuker extends Module {
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color of the target block rendering.")
         .defaultValue(new SettingColor(255, 0, 0, 80))
         .visible(enableRenderBreaking::get)
         .build()
@@ -279,7 +250,6 @@ public class Nuker extends Module {
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color of the target block rendering.")
         .defaultValue(new SettingColor(255, 0, 0, 255))
         .visible(enableRenderBreaking::get)
         .build()
@@ -300,7 +270,7 @@ public class Nuker extends Module {
     int maxv = 0;
 
     public Nuker() {
-        super(Categories.World, "nuker", "Breaks blocks around you.");
+        super(Categories.World, "nuker");
     }
 
     @Override

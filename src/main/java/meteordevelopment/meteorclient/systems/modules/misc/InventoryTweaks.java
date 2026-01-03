@@ -43,24 +43,22 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class InventoryTweaks extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSorting = settings.createGroup("Sorting");
-    private final SettingGroup sgAntiDrop = settings.createGroup("Anti Drop");
-    private final SettingGroup sgAutoDrop = settings.createGroup("Auto Drop");
-    private final SettingGroup sgStealDump = settings.createGroup("Steal and Dump");
-    private final SettingGroup sgAutoSteal = settings.createGroup("Auto Steal");
+    private final SettingGroup sgSorting = settings.createGroup("sorting");
+    private final SettingGroup sgAntiDrop = settings.createGroup("anti-drop");
+    private final SettingGroup sgAutoDrop = settings.createGroup("auto-drop");
+    private final SettingGroup sgStealDump = settings.createGroup("steal-and-dump");
+    private final SettingGroup sgAutoSteal = settings.createGroup("auto-steal");
 
     // General
 
     private final Setting<Boolean> mouseDragItemMove = sgGeneral.add(new BoolSetting.Builder()
         .name("mouse-drag-item-move")
-        .description("Moving mouse over items while holding shift will transfer it to the other container.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> xCarry = sgGeneral.add(new BoolSetting.Builder()
         .name("xcarry")
-        .description("Allows you to store four extra item stacks in your crafting grid.")
         .defaultValue(true)
         .onChanged(v -> {
             if (v || !Utils.canUpdate()) return;
@@ -74,14 +72,12 @@ public class InventoryTweaks extends Module {
 
     private final Setting<Boolean> sortingEnabled = sgSorting.add(new BoolSetting.Builder()
         .name("sorting-enabled")
-        .description("Automatically sorts stacks in inventory.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Keybind> sortingKey = sgSorting.add(new KeybindSetting.Builder()
         .name("sorting-key")
-        .description("Key to trigger the sort.")
         .visible(sortingEnabled::get)
         .defaultValue(Keybind.fromButton(GLFW.GLFW_MOUSE_BUTTON_MIDDLE))
         .build()
@@ -89,7 +85,6 @@ public class InventoryTweaks extends Module {
 
     private final Setting<Integer> sortingDelay = sgSorting.add(new IntSetting.Builder()
         .name("sorting-delay")
-        .description("Delay in ticks between moving items when sorting.")
         .visible(sortingEnabled::get)
         .defaultValue(1)
         .min(0)
@@ -98,7 +93,6 @@ public class InventoryTweaks extends Module {
 
     private final Setting<Boolean> disableInCreative = sgSorting.add(new BoolSetting.Builder()
         .name("disable-in-creative")
-        .description("Disables the inventory sorter when in creative mode.")
         .defaultValue(true)
         .visible(sortingEnabled::get)
         .build()
@@ -106,7 +100,6 @@ public class InventoryTweaks extends Module {
 
     private final Setting<Boolean> uncapBundleScrolling = sgGeneral.add(new BoolSetting.Builder()
         .name("uncap-bundle-scrolling")
-        .description("Whether to uncap the bundle scrolling feature to let you select any item.")
         .defaultValue(true)
         .build()
     );
@@ -115,20 +108,17 @@ public class InventoryTweaks extends Module {
 
     private final Setting<List<Item>> antiDropItems = sgAntiDrop.add(new ItemListSetting.Builder()
         .name("anti-drop-items")
-        .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
         .build()
     );
 
     private final Setting<Boolean> antiItemFrame = sgAntiDrop.add(new BoolSetting.Builder()
         .name("item-frames")
-        .description("Prevent anti-drop items from being placed in item frames or pots")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Keybind> antiDropOverrideBind = sgAntiDrop.add(new KeybindSetting.Builder()
         .name("override-bind")
-        .description("Hold this bind to temporarily bypass anti-drop")
         .build()
     );
 
@@ -136,27 +126,23 @@ public class InventoryTweaks extends Module {
 
     private final Setting<List<Item>> autoDropItems = sgAutoDrop.add(new ItemListSetting.Builder()
         .name("auto-drop-items")
-        .description("Items to drop.")
         .build()
     );
 
     private final Setting<Boolean> autoDropExcludeEquipped = sgAutoDrop.add(new BoolSetting.Builder()
         .name("exclude-equipped")
-        .description("Whether or not to drop items equipped in armor slots.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> autoDropExcludeHotbar = sgAutoDrop.add(new BoolSetting.Builder()
         .name("exclude-hotbar")
-        .description("Whether or not to drop items from your hotbar.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> autoDropOnlyFullStacks = sgAutoDrop.add(new BoolSetting.Builder()
         .name("only-full-stacks")
-        .description("Only drops the items if the stack is full.")
         .defaultValue(false)
         .build()
     );
@@ -165,28 +151,24 @@ public class InventoryTweaks extends Module {
 
     public final Setting<List<ScreenHandlerType<?>>> stealScreens = sgStealDump.add(new ScreenHandlerListSetting.Builder()
         .name("steal-screens")
-        .description("Select the screens to display buttons and auto steal.")
         .defaultValue(List.of(ScreenHandlerType.GENERIC_9X3, ScreenHandlerType.GENERIC_9X6))
         .build()
     );
 
     private final Setting<Boolean> buttons = sgStealDump.add(new BoolSetting.Builder()
         .name("inventory-buttons")
-        .description("Shows steal and dump buttons in container guis.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> stealDrop = sgStealDump.add(new BoolSetting.Builder()
         .name("steal-drop")
-        .description("Drop items to the ground instead of stealing them.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> dropBackwards = sgStealDump.add(new BoolSetting.Builder()
         .name("drop-backwards")
-        .description("Drop items behind you.")
         .defaultValue(false)
         .visible(stealDrop::get)
         .build()
@@ -194,27 +176,23 @@ public class InventoryTweaks extends Module {
 
     private final Setting<ListMode> dumpFilter = sgStealDump.add(new EnumSetting.Builder<ListMode>()
         .name("dump-filter")
-        .description("Dump mode.")
         .defaultValue(ListMode.None)
         .build()
     );
 
     private final Setting<List<Item>> dumpItems = sgStealDump.add(new ItemListSetting.Builder()
         .name("dump-items")
-        .description("Items to dump.")
         .build()
     );
 
     private final Setting<ListMode> stealFilter = sgStealDump.add(new EnumSetting.Builder<ListMode>()
         .name("steal-filter")
-        .description("Steal mode.")
         .defaultValue(ListMode.None)
         .build()
     );
 
     private final Setting<List<Item>> stealItems = sgStealDump.add(new ItemListSetting.Builder()
         .name("steal-items")
-        .description("Items to steal.")
         .build()
     );
 
@@ -222,7 +200,6 @@ public class InventoryTweaks extends Module {
 
     private final Setting<Boolean> autoSteal = sgAutoSteal.add(new BoolSetting.Builder()
         .name("auto-steal")
-        .description("Automatically removes all possible items when you open a container.")
         .defaultValue(false)
         .onChanged(val -> checkAutoStealSettings())
         .build()
@@ -230,7 +207,6 @@ public class InventoryTweaks extends Module {
 
     private final Setting<Boolean> autoDump = sgAutoSteal.add(new BoolSetting.Builder()
         .name("auto-dump")
-        .description("Automatically dumps all possible items when you open a container.")
         .defaultValue(false)
         .onChanged(val -> checkAutoStealSettings())
         .build()
@@ -238,7 +214,6 @@ public class InventoryTweaks extends Module {
 
     private final Setting<Integer> autoStealDelay = sgAutoSteal.add(new IntSetting.Builder()
         .name("delay")
-        .description("The minimum delay between stealing the next stack in milliseconds.")
         .defaultValue(20)
         .sliderMax(1000)
         .build()
@@ -246,7 +221,6 @@ public class InventoryTweaks extends Module {
 
     private final Setting<Integer> autoStealInitDelay = sgAutoSteal.add(new IntSetting.Builder()
         .name("initial-delay")
-        .description("The initial delay before stealing in milliseconds. 0 to use normal delay instead.")
         .defaultValue(50)
         .sliderMax(1000)
         .build()
@@ -254,7 +228,6 @@ public class InventoryTweaks extends Module {
 
     private final Setting<Integer> autoStealRandomDelay = sgAutoSteal.add(new IntSetting.Builder()
         .name("random")
-        .description("Randomly adds a delay of up to the specified time in milliseconds.")
         .min(0)
         .sliderMax(1000)
         .defaultValue(50)
@@ -265,7 +238,7 @@ public class InventoryTweaks extends Module {
     private boolean invOpened;
 
     public InventoryTweaks() {
-        super(Categories.Misc, "inventory-tweaks", "Various inventory related utilities.");
+        super(Categories.Misc, "inventory-tweaks");
     }
 
     @Override

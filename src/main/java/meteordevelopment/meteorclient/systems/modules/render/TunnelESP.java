@@ -42,7 +42,6 @@ public class TunnelESP extends Module {
 
     private final Setting<Double> height = sgGeneral.add(new DoubleSetting.Builder()
         .name("height")
-        .description("Height of the rendered box.")
         .defaultValue(0.1)
         .sliderMax(2)
         .build()
@@ -50,28 +49,24 @@ public class TunnelESP extends Module {
 
     private final Setting<Boolean> connected = sgGeneral.add(new BoolSetting.Builder()
         .name("connected")
-        .description("If neighbouring holes should be connected.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgGeneral.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color.")
         .defaultValue(new SettingColor(255, 175, 25, 50))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color.")
         .defaultValue(new SettingColor(255, 175, 25, 255))
         .build()
     );
@@ -79,7 +74,7 @@ public class TunnelESP extends Module {
     private final Long2ObjectMap<TChunk> chunks = new Long2ObjectOpenHashMap<>();
 
     public TunnelESP() {
-        super(Categories.Render, "tunnel-esp", "Highlights tunnels.");
+        super(Categories.Render, "tunnel-esp");
     }
 
     @Override

@@ -36,14 +36,12 @@ public class ServerSpoof extends Module {
 
     private final Setting<Boolean> spoofBrand = sgGeneral.add(new BoolSetting.Builder()
         .name("spoof-brand")
-        .description("Whether or not to spoof the brand.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<String> brand = sgGeneral.add(new StringSetting.Builder()
         .name("brand")
-        .description("Specify the brand that will be send to the server.")
         .defaultValue("vanilla")
         .visible(spoofBrand::get)
         .build()
@@ -51,21 +49,18 @@ public class ServerSpoof extends Module {
 
     private final Setting<Boolean> resourcePack = sgGeneral.add(new BoolSetting.Builder()
         .name("resource-pack")
-        .description("Spoof accepting server resource pack.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> blockChannels = sgGeneral.add(new BoolSetting.Builder()
         .name("block-channels")
-        .description("Whether or not to block some channels.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<List<String>> channels = sgGeneral.add(new StringListSetting.Builder()
         .name("channels")
-        .description("If the channel contains the keyword, this outgoing channel will be blocked.")
         .defaultValue("fabric", "minecraft:register")
         .visible(blockChannels::get)
         .build()
@@ -75,7 +70,7 @@ public class ServerSpoof extends Module {
     public boolean silentAcceptResourcePack = false;
 
     public ServerSpoof() {
-        super(Categories.Misc, "server-spoof", "Spoof client brand, resource pack and channels.");
+        super(Categories.Misc, "server-spoof");
 
         runInMainMenu = true;
     }

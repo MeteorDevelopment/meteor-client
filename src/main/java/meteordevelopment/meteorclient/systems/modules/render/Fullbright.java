@@ -24,7 +24,6 @@ public class Fullbright extends Module {
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("The mode to use for Fullbright.")
         .defaultValue(Mode.Gamma)
         .onChanged(mode -> {
             if (isActive()) {
@@ -37,7 +36,6 @@ public class Fullbright extends Module {
 
     public final Setting<LightType> lightType = sgGeneral.add(new EnumSetting.Builder<LightType>()
         .name("light-type")
-        .description("Which type of light to use for Luminance mode.")
         .defaultValue(LightType.BLOCK)
         .visible(() -> mode.get() == Mode.Luminance)
         .onChanged(integer -> {
@@ -48,7 +46,6 @@ public class Fullbright extends Module {
 
     private final Setting<Integer> minimumLightLevel = sgGeneral.add(new IntSetting.Builder()
         .name("minimum-light-level")
-        .description("Minimum light level when using Luminance mode.")
         .visible(() -> mode.get() == Mode.Luminance)
         .defaultValue(8)
         .range(0, 15)
@@ -60,7 +57,7 @@ public class Fullbright extends Module {
     );
 
     public Fullbright() {
-        super(Categories.Render, "fullbright", "Lights up your world!");
+        super(Categories.Render, "fullbright");
     }
 
     @Override

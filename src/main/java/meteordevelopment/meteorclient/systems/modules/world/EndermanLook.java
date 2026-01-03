@@ -27,21 +27,19 @@ public class EndermanLook extends Module {
 
     private final Setting<Mode> lookMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("look-mode")
-        .description("How this module behaves.")
         .defaultValue(Mode.Away)
         .build()
     );
 
     private final Setting<Boolean> stun = sgGeneral.add(new BoolSetting.Builder()
         .name("stun-hostiles")
-        .description("Automatically stares at hostile endermen to stun them in place.")
         .defaultValue(true)
         .visible(() -> lookMode.get() == Mode.Away)
         .build()
     );
 
     public EndermanLook() {
-        super(Categories.World, "enderman-look", "Either looks at all Endermen or prevents you from looking at Endermen.");
+        super(Categories.World, "enderman-look");
     }
 
     @EventHandler

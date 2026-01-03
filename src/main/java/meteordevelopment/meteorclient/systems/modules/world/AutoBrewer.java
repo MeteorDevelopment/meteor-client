@@ -25,7 +25,6 @@ public class AutoBrewer extends Module {
 
     private final Setting<MyPotion> potion = sgGeneral.add(new PotionSetting.Builder()
         .name("potion")
-        .description("The type of potion to brew.")
         .defaultValue(MyPotion.Strength)
         .build()
     );
@@ -35,7 +34,7 @@ public class AutoBrewer extends Module {
     private int timer;
 
     public AutoBrewer() {
-        super(Categories.World, "auto-brewer", "Automatically brews the specified potion.");
+        super(Categories.World, "auto-brewer");
     }
 
     @Override

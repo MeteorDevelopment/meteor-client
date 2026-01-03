@@ -51,7 +51,7 @@ import java.util.*;
 
 public class StashFinder extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     private static final List<Block> DEFAULT_SUPPORT_BLOCK_BLACKLIST = List.of(
         Blocks.OXIDIZED_COPPER,
@@ -66,14 +66,12 @@ public class StashFinder extends Module {
 
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
         .name("storage-blocks")
-        .description("Select the storage blocks to search for.")
         .defaultValue(StorageBlockListSetting.STORAGE_BLOCKS)
         .build()
     );
 
     private final Setting<Integer> minimumStorageCount = sgGeneral.add(new IntSetting.Builder()
         .name("minimum-storage-count")
-        .description("The minimum amount of storage blocks in a chunk to record the chunk.")
         .defaultValue(4)
         .min(1)
         .sliderMin(1)
@@ -82,14 +80,12 @@ public class StashFinder extends Module {
 
     private final Setting<List<Block>> blacklistedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blacklisted-support-blocks")
-        .description("Blocks that prevent counting a storage block entity when it sits on them.")
         .defaultValue(DEFAULT_SUPPORT_BLOCK_BLACKLIST)
         .build()
     );
 
     private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
         .name("minimum-distance")
-        .description("The minimum distance you must be from spawn to record a certain chunk.")
         .defaultValue(0)
         .min(0)
         .sliderMax(10000)
@@ -98,14 +94,12 @@ public class StashFinder extends Module {
 
     private final Setting<Boolean> sendNotifications = sgGeneral.add(new BoolSetting.Builder()
         .name("notifications")
-        .description("Sends Minecraft notifications when new stashes are found.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Mode> notificationMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("notification-mode")
-        .description("The mode to use for notifications.")
         .defaultValue(Mode.Both)
         .visible(sendNotifications::get)
         .build()
@@ -113,14 +107,12 @@ public class StashFinder extends Module {
 
     private final Setting<Boolean> renderTracer = sgRender.add(new BoolSetting.Builder()
         .name("render-tracer")
-        .description("Renders a tracer to the last found stash.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<SettingColor> traceColor = sgRender.add(new ColorSetting.Builder()
         .name("tracer-color")
-        .description("Color of the stash tracer.")
         .defaultValue(new SettingColor(255, 215, 0, 255))
         .visible(renderTracer::get)
         .build()
@@ -128,7 +120,6 @@ public class StashFinder extends Module {
 
     private final Setting<Integer> traceArrivalDistance = sgRender.add(new IntSetting.Builder()
         .name("tracer-hide-at-distance")
-        .description("Hide the trace when you are this close to the stash.")
         .defaultValue(16)
         .min(1)
         .sliderMin(1)
@@ -139,7 +130,6 @@ public class StashFinder extends Module {
 
     private final Setting<Integer> traceMaxDistance = sgRender.add(new IntSetting.Builder()
         .name("tracer-max-distance")
-        .description("Hide the trace when you are farther than this distance from the stash.")
         .defaultValue(2000)
         .min(10)
         .sliderMin(50)
@@ -150,14 +140,12 @@ public class StashFinder extends Module {
 
     private final Setting<Boolean> renderChunkColumn = sgRender.add(new BoolSetting.Builder()
         .name("render-chunk-column")
-        .description("Renders a vertical column at the center of traced chunks.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<SettingColor> traceColumnColor = sgRender.add(new ColorSetting.Builder()
         .name("chunk-column-color")
-        .description("Color of the stash tracer column.")
         .defaultValue(new SettingColor(255, 215, 0, 100))
         .visible(renderChunkColumn::get)
         .build()
@@ -165,7 +153,6 @@ public class StashFinder extends Module {
 
     private final Setting<Keybind> clearTracesBind = sgRender.add(new KeybindSetting.Builder()
         .name("clear-traces-bind")
-        .description("Keybind to clear all stash traces.")
         .defaultValue(Keybind.none())
         .build()
     );
@@ -175,7 +162,7 @@ public class StashFinder extends Module {
     public List<Chunk> chunks = new ArrayList<>();
 
     public StashFinder() {
-        super(Categories.World, "stash-finder", "Searches loaded chunks for storage blocks. Saves to <your minecraft folder>/meteor-client");
+        super(Categories.World, "stash-finder");
     }
 
     @Override
@@ -236,12 +223,12 @@ public class StashFinder extends Module {
                 switch (notificationMode.get()) {
                     case Chat -> sendChatNotification(chunk);
                     case Toast -> {
-                        MeteorToast toast = new MeteorToast.Builder(title).icon(Items.CHEST).text("Found Stash!").build();
+                        MeteorToast toast = new MeteorToast.Builder(this.getTitle()).icon(Items.CHEST).text("Found Stash!").build();
                         mc.getToastManager().add(toast);
                     }
                     case Both -> {
                         sendChatNotification(chunk);
-                        MeteorToast toast = new MeteorToast.Builder(title).icon(Items.CHEST).text("Found Stash!").build();
+                        MeteorToast toast = new MeteorToast.Builder(this.getTitle()).icon(Items.CHEST).text("Found Stash!").build();
                         mc.getToastManager().add(toast);
                     }
                 }

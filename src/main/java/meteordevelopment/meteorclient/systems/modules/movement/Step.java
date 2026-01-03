@@ -28,7 +28,6 @@ public class Step extends Module {
 
     public final Setting<Double> height = sgGeneral.add(new DoubleSetting.Builder()
         .name("height")
-        .description("Step height.")
         .defaultValue(1.25)
         .min(0)
         .build()
@@ -36,21 +35,18 @@ public class Step extends Module {
 
     private final Setting<ActiveWhen> activeWhen = sgGeneral.add(new EnumSetting.Builder<ActiveWhen>()
         .name("active-when")
-        .description("Step is active when you meet these requirements.")
         .defaultValue(ActiveWhen.Always)
         .build()
     );
 
     private final Setting<Boolean> safeStep = sgGeneral.add(new BoolSetting.Builder()
         .name("safe-step")
-        .description("Doesn't let you step out of a hole if you are low on health or there is a crystal nearby.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> stepHealth = sgGeneral.add(new IntSetting.Builder()
         .name("step-health")
-        .description("The health you stop being able to step at.")
         .defaultValue(5)
         .range(1, 36)
         .sliderRange(1, 36)
@@ -62,7 +58,7 @@ public class Step extends Module {
     private boolean prevPathManagerStep;
 
     public Step() {
-        super(Categories.Movement, "step", "Allows you to walk up full blocks instantly.");
+        super(Categories.Movement, "step");
     }
 
     @Override

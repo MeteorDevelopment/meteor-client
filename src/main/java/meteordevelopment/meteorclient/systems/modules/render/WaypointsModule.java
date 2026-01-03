@@ -48,11 +48,10 @@ public class WaypointsModule extends Module {
     private static final Color TEXT = new Color(255, 255, 255);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgDeathPosition = settings.createGroup("Death Position");
+    private final SettingGroup sgDeathPosition = settings.createGroup("death-position");
 
     public final Setting<Integer> textRenderDistance = sgGeneral.add(new IntSetting.Builder()
         .name("text-render-distance")
-        .description("Maximum distance from the center of the screen at which text will be rendered.")
         .defaultValue(100)
         .min(0)
         .sliderMax(200)
@@ -61,7 +60,6 @@ public class WaypointsModule extends Module {
 
     private final Setting<Integer> waypointFadeDistance = sgGeneral.add(new IntSetting.Builder()
         .name("waypoint-fade-distance")
-        .description("The distance to a waypoint at which it begins to start fading.")
         .defaultValue(20)
         .sliderRange(0, 100)
         .min(0)
@@ -70,7 +68,6 @@ public class WaypointsModule extends Module {
 
     private final Setting<Integer> maxDeathPositions = sgDeathPosition.add(new IntSetting.Builder()
         .name("max-death-positions")
-        .description("The amount of death positions to save, 0 to disable")
         .defaultValue(0)
         .min(0)
         .sliderMax(20)
@@ -80,13 +77,12 @@ public class WaypointsModule extends Module {
 
     private final Setting<Boolean> dpChat = sgDeathPosition.add(new BoolSetting.Builder()
         .name("chat")
-        .description("Send a chat message with your position once you die")
         .defaultValue(false)
         .build()
     );
 
     public WaypointsModule() {
-        super(Categories.Render, "waypoints", "Allows you to create waypoints.");
+        super(Categories.Render, "waypoints");
     }
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");

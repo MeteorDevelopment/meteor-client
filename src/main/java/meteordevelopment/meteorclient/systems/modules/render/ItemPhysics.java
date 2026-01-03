@@ -35,7 +35,6 @@ public class ItemPhysics extends Module {
 
     private final Setting<Boolean> randomRotation = sgGeneral.add(new BoolSetting.Builder()
         .name("random-rotation")
-        .description("Adds a random rotation to every item.")
         .defaultValue(true)
         .build()
     );
@@ -44,7 +43,7 @@ public class ItemPhysics extends Module {
     private boolean skipTransformation;
 
     public ItemPhysics() {
-        super(Categories.Render, "item-physics", "Applies physics to items on the ground.");
+        super(Categories.Render, "item-physics");
     }
 
     @EventHandler

@@ -34,7 +34,6 @@ public class SpeedMine extends Module {
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
-        .description("Selected blocks.")
         .filter(block -> block.getHardness() > 0)
         .visible(() -> mode.get() != Mode.Haste)
         .build()
@@ -42,7 +41,6 @@ public class SpeedMine extends Module {
 
     private final Setting<ListMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<ListMode>()
         .name("blocks-filter")
-        .description("How to use the blocks setting.")
         .defaultValue(ListMode.Blacklist)
         .visible(() -> mode.get() != Mode.Haste)
         .build()
@@ -50,7 +48,6 @@ public class SpeedMine extends Module {
 
     public final Setting<Double> modifier = sgGeneral.add(new DoubleSetting.Builder()
         .name("modifier")
-        .description("Mining speed modifier. An additional value of 0.2 is equivalent to one haste level (1.2 = haste 1).")
         .defaultValue(1.4)
         .visible(() -> mode.get() == Mode.Normal)
         .min(0)
@@ -59,7 +56,6 @@ public class SpeedMine extends Module {
 
     private final Setting<Integer> hasteAmplifier = sgGeneral.add(new IntSetting.Builder()
         .name("haste-amplifier")
-        .description("What value of haste to give you. Above 2 not recommended.")
         .defaultValue(2)
         .min(1)
         .visible(() -> mode.get() == Mode.Haste)
@@ -69,7 +65,6 @@ public class SpeedMine extends Module {
 
     private final Setting<Boolean> instamine = sgGeneral.add(new BoolSetting.Builder()
         .name("instamine")
-        .description("Whether or not to instantly mine blocks under certain conditions.")
         .defaultValue(true)
         .visible(() -> mode.get() == Mode.Damage)
         .build()
@@ -77,14 +72,13 @@ public class SpeedMine extends Module {
 
     private final Setting<Boolean> grimBypass = sgGeneral.add(new BoolSetting.Builder()
         .name("grim-bypass")
-        .description("Bypasses Grim's fastbreak check, working as of 2.3.58")
         .defaultValue(false)
         .visible(() -> mode.get() == Mode.Damage)
         .build()
     );
 
     public SpeedMine() {
-        super(Categories.Player, "speed-mine", "Allows you to quickly mine blocks.");
+        super(Categories.Player, "speed-mine");
     }
 
     @Override

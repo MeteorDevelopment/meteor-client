@@ -28,34 +28,30 @@ public class Collisions extends Module {
 
     public final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
-        .description("What blocks should be added collision box.")
         .filter(this::blockFilter)
         .build()
     );
 
     private final Setting<Boolean> magma = sgGeneral.add(new BoolSetting.Builder()
         .name("magma")
-        .description("Prevents you from walking over magma blocks.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> unloadedChunks = sgGeneral.add(new BoolSetting.Builder()
         .name("unloaded-chunks")
-        .description("Stops you from going into unloaded chunks.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> ignoreBorder = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-border")
-        .description("Removes world border collision.")
         .defaultValue(false)
         .build()
     );
 
     public Collisions() {
-        super(Categories.World, "collisions", "Adds collision boxes to certain blocks/areas.");
+        super(Categories.World, "collisions");
     }
 
     @EventHandler

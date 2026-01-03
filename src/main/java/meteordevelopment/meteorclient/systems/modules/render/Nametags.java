@@ -49,22 +49,20 @@ import java.util.*;
 
 public class Nametags extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgPlayers = settings.createGroup("Players");
-    private final SettingGroup sgItems = settings.createGroup("Items");
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgPlayers = settings.createGroup("players");
+    private final SettingGroup sgItems = settings.createGroup("items");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
-        .description("Select entities to draw nametags on.")
         .defaultValue(EntityType.PLAYER, EntityType.ITEM)
         .build()
     );
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("The scale of the nametag.")
         .defaultValue(1.1)
         .min(0.1)
         .build()
@@ -72,35 +70,30 @@ public class Nametags extends Module {
 
     private final Setting<Boolean> ignoreSelf = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-self")
-        .description("Ignore yourself when in third person or freecam.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-friends")
-        .description("Ignore rendering nametags for friends.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> ignoreBots = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-bots")
-        .description("Only render non-bot nametags.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> culling = sgGeneral.add(new BoolSetting.Builder()
         .name("culling")
-        .description("Only render a certain number of nametags at a certain distance.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Double> maxCullRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("culling-range")
-        .description("Only render nametags within this distance of your player.")
         .defaultValue(20)
         .min(0)
         .sliderMax(200)
@@ -110,7 +103,6 @@ public class Nametags extends Module {
 
     private final Setting<Integer> maxCullCount = sgGeneral.add(new IntSetting.Builder()
         .name("culling-count")
-        .description("Only render this many nametags.")
         .defaultValue(50)
         .min(1)
         .sliderRange(1, 100)
@@ -122,42 +114,36 @@ public class Nametags extends Module {
 
     private final Setting<Boolean> displayHealth = sgPlayers.add(new BoolSetting.Builder()
         .name("health")
-        .description("Shows the player's health.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> displayGameMode = sgPlayers.add(new BoolSetting.Builder()
         .name("gamemode")
-        .description("Shows the player's GameMode.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> displayDistance = sgPlayers.add(new BoolSetting.Builder()
         .name("distance")
-        .description("Shows the distance between you and the player.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> displayPing = sgPlayers.add(new BoolSetting.Builder()
         .name("ping")
-        .description("Shows the player's ping.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> displayItems = sgPlayers.add(new BoolSetting.Builder()
         .name("items")
-        .description("Displays armor and hand items above the name tags.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Double> itemSpacing = sgPlayers.add(new DoubleSetting.Builder()
         .name("item-spacing")
-        .description("The spacing between items.")
         .defaultValue(2)
         .range(0, 10)
         .visible(displayItems::get)
@@ -166,7 +152,6 @@ public class Nametags extends Module {
 
     private final Setting<Boolean> ignoreEmpty = sgPlayers.add(new BoolSetting.Builder()
         .name("ignore-empty-slots")
-        .description("Doesn't add spacing where an empty item stack would be.")
         .defaultValue(true)
         .visible(displayItems::get)
         .build()
@@ -174,7 +159,6 @@ public class Nametags extends Module {
 
     private final Setting<Durability> itemDurability = sgPlayers.add(new EnumSetting.Builder<Durability>()
         .name("durability")
-        .description("Displays item durability as either a total, percentage, or neither.")
         .defaultValue(Durability.None)
         .visible(displayItems::get)
         .build()
@@ -182,7 +166,6 @@ public class Nametags extends Module {
 
     private final Setting<Boolean> displayEnchants = sgPlayers.add(new BoolSetting.Builder()
         .name("display-enchants")
-        .description("Displays item enchantments on the items.")
         .defaultValue(false)
         .visible(displayItems::get)
         .build()
@@ -190,7 +173,6 @@ public class Nametags extends Module {
 
     private final Setting<Set<RegistryKey<Enchantment>>> shownEnchantments = sgPlayers.add(new EnchantmentListSetting.Builder()
         .name("shown-enchantments")
-        .description("The enchantments that are shown on nametags.")
         .visible(() -> displayItems.get() && displayEnchants.get())
         .defaultValue(
             Enchantments.PROTECTION,
@@ -203,7 +185,6 @@ public class Nametags extends Module {
 
     private final Setting<Position> enchantPos = sgPlayers.add(new EnumSetting.Builder<Position>()
         .name("enchantment-position")
-        .description("Where the enchantments are rendered.")
         .defaultValue(Position.Above)
         .visible(() -> displayItems.get() && displayEnchants.get())
         .build()
@@ -211,7 +192,6 @@ public class Nametags extends Module {
 
     private final Setting<Integer> enchantLength = sgPlayers.add(new IntSetting.Builder()
         .name("enchant-name-length")
-        .description("The length enchantment names are trimmed to.")
         .defaultValue(3)
         .range(1, 5)
         .sliderRange(1, 5)
@@ -221,7 +201,6 @@ public class Nametags extends Module {
 
     private final Setting<Double> enchantTextScale = sgPlayers.add(new DoubleSetting.Builder()
         .name("enchant-text-scale")
-        .description("The scale of the enchantment text.")
         .defaultValue(1)
         .range(0.1, 2)
         .sliderRange(0.1, 2)
@@ -233,7 +212,6 @@ public class Nametags extends Module {
 
     private final Setting<Boolean> itemCount = sgItems.add(new BoolSetting.Builder()
         .name("show-count")
-        .description("Displays the number of items in the stack.")
         .defaultValue(true)
         .build()
     );
@@ -242,21 +220,18 @@ public class Nametags extends Module {
 
     private final Setting<SettingColor> background = sgRender.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("The color of the nametag background.")
         .defaultValue(new SettingColor(0, 0, 0, 75))
         .build()
     );
 
     private final Setting<SettingColor> nameColor = sgRender.add(new ColorSetting.Builder()
         .name("name-color")
-        .description("The color of the nametag names.")
         .defaultValue(new SettingColor())
         .build()
     );
 
     private final Setting<SettingColor> pingColor = sgRender.add(new ColorSetting.Builder()
         .name("ping-color")
-        .description("The color of the nametag ping.")
         .defaultValue(new SettingColor(20, 170, 170))
         .visible(displayPing::get)
         .build()
@@ -264,7 +239,6 @@ public class Nametags extends Module {
 
     private final Setting<SettingColor> gamemodeColor = sgRender.add(new ColorSetting.Builder()
         .name("gamemode-color")
-        .description("The color of the nametag gamemode.")
         .defaultValue(new SettingColor(232, 185, 35))
         .visible(displayGameMode::get)
         .build()
@@ -272,7 +246,6 @@ public class Nametags extends Module {
 
     private final Setting<DistanceColorMode> distanceColorMode = sgRender.add(new EnumSetting.Builder<DistanceColorMode>()
         .name("distance-color-mode")
-        .description("The mode to color the nametag distance with.")
         .defaultValue(DistanceColorMode.Gradient)
         .visible(displayDistance::get)
         .build()
@@ -280,7 +253,6 @@ public class Nametags extends Module {
 
     private final Setting<SettingColor> distanceColor = sgRender.add(new ColorSetting.Builder()
         .name("distance-color")
-        .description("The color of the nametag distance.")
         .defaultValue(new SettingColor(150, 150, 150))
         .visible(() -> displayDistance.get() && distanceColorMode.get() == DistanceColorMode.Flat)
         .build()
@@ -298,7 +270,7 @@ public class Nametags extends Module {
     private final List<Entity> entityList = new ArrayList<>();
 
     public Nametags() {
-        super(Categories.Render, "nametags", "Displays customizable nametags above players, items and other entities.");
+        super(Categories.Render, "nametags");
     }
 
     private static String ticksToTime(int ticks) {

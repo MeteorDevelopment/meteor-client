@@ -31,7 +31,7 @@ public class Marker extends Module {
     private final ArrayList<BaseMarker> markers = new ArrayList<>();
 
     public Marker() {
-        super(Categories.Render, "marker", "Renders shapes. Useful for large scale projects");
+        super(Categories.Render, "marker");
     }
 
     @EventHandler

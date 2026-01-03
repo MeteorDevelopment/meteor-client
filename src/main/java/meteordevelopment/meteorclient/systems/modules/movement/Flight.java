@@ -22,11 +22,10 @@ import net.minecraft.util.math.Vec3d;
 
 public class Flight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick"); //Pog
+    private final SettingGroup sgAntiKick = settings.createGroup("anti-kick"); //Pog
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("The mode for Flight.")
         .defaultValue(Mode.Abilities)
         .onChanged(mode -> {
             if (!isActive() || !Utils.canUpdate()) return;
@@ -37,7 +36,6 @@ public class Flight extends Module {
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
-        .description("Your speed when flying.")
         .defaultValue(0.1)
         .min(0.0)
         .build()
@@ -45,14 +43,12 @@ public class Flight extends Module {
 
     private final Setting<Boolean> verticalSpeedMatch = sgGeneral.add(new BoolSetting.Builder()
         .name("vertical-speed-match")
-        .description("Matches your vertical speed to your horizontal speed, otherwise uses vanilla ratio.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> noSneak = sgGeneral.add(new BoolSetting.Builder()
         .name("no-sneak")
-        .description("Prevents you from sneaking while flying.")
         .defaultValue(false)
         .visible(() -> mode.get() == Mode.Velocity)
         .build()
@@ -60,14 +56,12 @@ public class Flight extends Module {
 
     private final Setting<AntiKickMode> antiKickMode = sgAntiKick.add(new EnumSetting.Builder<AntiKickMode>()
         .name("mode")
-        .description("The mode for anti kick.")
         .defaultValue(AntiKickMode.Packet)
         .build()
     );
 
     private final Setting<Integer> delay = sgAntiKick.add(new IntSetting.Builder()
         .name("delay")
-        .description("The amount of delay, in ticks, between flying down a bit and return to original position")
         .defaultValue(20)
         .min(1)
         .sliderMax(200)
@@ -77,7 +71,6 @@ public class Flight extends Module {
     // Anti Kick
     private final Setting<Integer> offTime = sgAntiKick.add(new IntSetting.Builder()
         .name("off-time")
-        .description("The amount of delay, in ticks, to fly down a bit to reset floating ticks.")
         .defaultValue(1)
         .min(1)
         .sliderRange(1, 20)
@@ -91,7 +84,7 @@ public class Flight extends Module {
     private double lastPacketY = Double.MAX_VALUE;
 
     public Flight() {
-        super(Categories.Movement, "flight", "FLYYYY! No Fall is recommended with this module.");
+        super(Categories.Movement, "flight");
     }
 
     @Override

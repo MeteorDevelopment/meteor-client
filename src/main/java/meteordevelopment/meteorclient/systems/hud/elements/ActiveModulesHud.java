@@ -213,7 +213,7 @@ public class ActiveModulesHud extends HudElement {
         }
 
         modules.sort((e1, e2) -> switch (sort.get()) {
-            case Alphabetical -> e1.title.compareTo(e2.title);
+            case Alphabetical -> e1.getTitle().compareTo(e2.getTitle());
             case Biggest -> Double.compare(getModuleWidth(renderer, e2), getModuleWidth(renderer, e1));
             case Smallest -> Double.compare(getModuleWidth(renderer, e1), getModuleWidth(renderer, e2));
         });
@@ -275,10 +275,10 @@ public class ActiveModulesHud extends HudElement {
             }
         }
 
-        renderer.text(module.title, x, y, color, shadow.get(), getScale());
+        renderer.text(module.getTitle(), x, y, color, shadow.get(), getScale());
 
         double textHeight = renderer.textHeight(shadow.get(), getScale());
-        double textLength = renderer.textWidth(module.title, shadow.get(), getScale());
+        double textLength = renderer.textWidth(module.getTitle(), shadow.get(), getScale());
 
         if (showKeybind.get() && module.keybind.isSet()) {
             String keybindStr = " [" + module.keybind + "]";
@@ -341,7 +341,7 @@ public class ActiveModulesHud extends HudElement {
     }
 
     private double getModuleWidth(HudRenderer renderer, Module module) {
-        double width = renderer.textWidth(module.title, shadow.get(), getScale());
+        double width = renderer.textWidth(module.getTitle(), shadow.get(), getScale());
 
         if (showKeybind.get() && module.keybind.isSet()) {
             width += renderer.textWidth(" [" + module.keybind + "]", shadow.get(), getScale());

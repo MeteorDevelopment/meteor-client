@@ -43,15 +43,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Jesus extends Module {
-    private final SettingGroup sgGeneral = settings.createGroup("General");
-    private final SettingGroup sgWater = settings.createGroup("Water");
-    private final SettingGroup sgLava = settings.createGroup("Lava");
+    private final SettingGroup sgGeneral = settings.createGroup("general");
+    private final SettingGroup sgWater = settings.createGroup("water");
+    private final SettingGroup sgLava = settings.createGroup("lava");
 
     // General
 
     private final Setting<Boolean> powderSnow = sgGeneral.add(new BoolSetting.Builder()
         .name("powder-snow")
-        .description("Walk on powder snow.")
         .defaultValue(true)
         .build()
     );
@@ -60,14 +59,12 @@ public class Jesus extends Module {
 
     private final Setting<Mode> waterMode = sgWater.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("How to treat the water.")
         .defaultValue(Mode.Solid)
         .build()
     );
 
     private final Setting<Boolean> dipIfBurning = sgWater.add(new BoolSetting.Builder()
         .name("dip-if-burning")
-        .description("Lets you go into the water when you are burning.")
         .defaultValue(true)
         .visible(() -> waterMode.get() == Mode.Solid)
         .build()
@@ -75,7 +72,6 @@ public class Jesus extends Module {
 
     private final Setting<Boolean> dipOnSneakWater = sgWater.add(new BoolSetting.Builder()
         .name("dip-on-sneak")
-        .description("Lets you go into the water when your sneak key is held.")
         .defaultValue(true)
         .visible(() -> waterMode.get() == Mode.Solid)
         .build()
@@ -83,7 +79,6 @@ public class Jesus extends Module {
 
     private final Setting<Boolean> dipOnFallWater = sgWater.add(new BoolSetting.Builder()
         .name("dip-on-fall")
-        .description("Lets you go into the water when you fall over a certain height.")
         .defaultValue(true)
         .visible(() -> waterMode.get() == Mode.Solid)
         .build()
@@ -91,7 +86,6 @@ public class Jesus extends Module {
 
     private final Setting<Integer> dipFallHeightWater = sgWater.add(new IntSetting.Builder()
         .name("dip-fall-height")
-        .description("The fall height at which you will go into the water.")
         .defaultValue(4)
         .range(1, 255)
         .sliderRange(3, 20)
@@ -103,14 +97,12 @@ public class Jesus extends Module {
 
     private final Setting<Mode> lavaMode = sgLava.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("How to treat the lava.")
         .defaultValue(Mode.Solid)
         .build()
     );
 
     private final Setting<Boolean> dipIfFireResistant = sgLava.add(new BoolSetting.Builder()
         .name("dip-if-resistant")
-        .description("Lets you go into the lava if you have Fire Resistance effect.")
         .defaultValue(true)
         .visible(() -> lavaMode.get() == Mode.Solid)
         .build()
@@ -118,7 +110,6 @@ public class Jesus extends Module {
 
     private final Setting<Boolean> dipOnSneakLava = sgLava.add(new BoolSetting.Builder()
         .name("dip-on-sneak")
-        .description("Lets you go into the lava when your sneak key is held.")
         .defaultValue(true)
         .visible(() -> lavaMode.get() == Mode.Solid)
         .build()
@@ -126,7 +117,6 @@ public class Jesus extends Module {
 
     private final Setting<Boolean> dipOnFallLava = sgLava.add(new BoolSetting.Builder()
         .name("dip-on-fall")
-        .description("Lets you go into the lava when you fall over a certain height.")
         .defaultValue(true)
         .visible(() -> lavaMode.get() == Mode.Solid)
         .build()
@@ -134,7 +124,6 @@ public class Jesus extends Module {
 
     private final Setting<Integer> dipFallHeightLava = sgLava.add(new IntSetting.Builder()
         .name("dip-fall-height")
-        .description("The fall height at which you will go into the lava.")
         .defaultValue(4)
         .range(1, 255)
         .sliderRange(3, 20)
@@ -155,7 +144,7 @@ public class Jesus extends Module {
     public boolean isInBubbleColumn = false;
 
     public Jesus() {
-        super(Categories.Movement, "jesus", "Walk on liquids and powder snow like Jesus.");
+        super(Categories.Movement, "jesus");
     }
 
     @Override

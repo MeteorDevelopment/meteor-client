@@ -23,7 +23,7 @@ public class GhostHand extends Module {
     private final Set<BlockPos> posList = new ObjectOpenHashSet<>();
 
     public GhostHand() {
-        super(Categories.Player, "ghost-hand", "Opens containers through walls.");
+        super(Categories.Player, "ghost-hand");
     }
 
     @EventHandler

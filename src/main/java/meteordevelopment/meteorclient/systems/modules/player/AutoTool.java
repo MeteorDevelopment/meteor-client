@@ -33,41 +33,36 @@ import java.util.function.Predicate;
 
 public class AutoTool extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
+    private final SettingGroup sgWhitelist = settings.createGroup("whitelist");
 
     // General
 
     private final Setting<EnchantPreference> prefer = sgGeneral.add(new EnumSetting.Builder<EnchantPreference>()
         .name("prefer")
-        .description("Either to prefer Silk Touch, Fortune, or none.")
         .defaultValue(EnchantPreference.Fortune)
         .build()
     );
 
     private final Setting<Boolean> silkTouchForEnderChest = sgGeneral.add(new BoolSetting.Builder()
         .name("silk-touch-for-ender-chest")
-        .description("Mines Ender Chests only with the Silk Touch enchantment.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> fortuneForOresCrops = sgGeneral.add(new BoolSetting.Builder()
         .name("fortune-for-ores-and-crops")
-        .description("Mines Ores and crops only with the Fortune enchantment.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
         .name("anti-break")
-        .description("Stops you from breaking your tool.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> breakDurability = sgGeneral.add(new IntSetting.Builder()
         .name("anti-break-percentage")
-        .description("The durability percentage to stop using a tool.")
         .defaultValue(10)
         .range(1, 100)
         .sliderRange(1, 100)
@@ -77,14 +72,12 @@ public class AutoTool extends Module {
 
     private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
         .name("switch-back")
-        .description("Switches your hand to whatever was selected when releasing your attack key.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> switchDelay = sgGeneral.add((new IntSetting.Builder()
         .name("switch-delay")
-        .description("Delay in ticks before switching tools.")
         .defaultValue(0)
         .build()
     ));
@@ -93,14 +86,12 @@ public class AutoTool extends Module {
 
     private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
         .name("list-mode")
-        .description("Selection mode.")
         .defaultValue(ListMode.Blacklist)
         .build()
     );
 
     private final Setting<List<Item>> whitelist = sgWhitelist.add(new ItemListSetting.Builder()
         .name("whitelist")
-        .description("The tools you want to use.")
         .visible(() -> listMode.get() == ListMode.Whitelist)
         .filter(AutoTool::isTool)
         .build()
@@ -108,7 +99,6 @@ public class AutoTool extends Module {
 
     private final Setting<List<Item>> blacklist = sgWhitelist.add(new ItemListSetting.Builder()
         .name("blacklist")
-        .description("The tools you don't want to use.")
         .visible(() -> listMode.get() == ListMode.Blacklist)
         .filter(AutoTool::isTool)
         .build()
@@ -120,7 +110,7 @@ public class AutoTool extends Module {
     private int bestSlot;
 
     public AutoTool() {
-        super(Categories.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
+        super(Categories.Player, "auto-tool");
     }
 
     @EventHandler

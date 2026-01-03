@@ -25,21 +25,18 @@ public class BossStack extends Module {
 
     public final Setting<Boolean> stack = sgGeneral.add(new BoolSetting.Builder()
         .name("stack")
-        .description("Stacks boss bars and adds a counter to the text.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> hideName = sgGeneral.add(new BoolSetting.Builder()
         .name("hide-name")
-        .description("Hides the names of boss bars.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Double> spacing = sgGeneral.add(new DoubleSetting.Builder()
         .name("bar-spacing")
-        .description("The spacing reduction between each boss bar.")
         .defaultValue(10)
         .min(0)
         .build()
@@ -48,7 +45,7 @@ public class BossStack extends Module {
     public static final Map<ClientBossBar, Integer> barMap = new WeakHashMap<>();
 
     public BossStack() {
-        super(Categories.Render, "boss-stack", "Stacks boss bars to make your HUD less cluttered.");
+        super(Categories.Render, "boss-stack");
     }
 
     @EventHandler

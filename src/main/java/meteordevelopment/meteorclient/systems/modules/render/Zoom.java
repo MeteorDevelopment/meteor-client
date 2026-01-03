@@ -26,7 +26,6 @@ public class Zoom extends Module {
 
     private final Setting<Double> zoom = sgGeneral.add(new DoubleSetting.Builder()
         .name("zoom")
-        .description("How much to zoom.")
         .defaultValue(6)
         .min(1)
         .build()
@@ -34,7 +33,6 @@ public class Zoom extends Module {
 
     private final Setting<Double> scrollSensitivity = sgGeneral.add(new DoubleSetting.Builder()
         .name("scroll-sensitivity")
-        .description("Allows you to change zoom value using scroll wheel. 0 to disable.")
         .defaultValue(1)
         .min(0)
         .build()
@@ -42,28 +40,24 @@ public class Zoom extends Module {
 
     private final Setting<Boolean> smooth = sgGeneral.add(new BoolSetting.Builder()
         .name("smooth")
-        .description("Smooth transition.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> cinematic = sgGeneral.add(new BoolSetting.Builder()
         .name("cinematic")
-        .description("Enables cinematic camera.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> hideHud = sgGeneral.add(new BoolSetting.Builder()
         .name("hide-HUD")
-        .description("Whether or not to hide the Minecraft HUD.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
         .name("show-hands")
-        .description("Whether or not to render your hands.")
         .defaultValue(false)
         .visible(() -> !hideHud.get())
         .build()
@@ -79,7 +73,7 @@ public class Zoom extends Module {
     private boolean hudManualToggled;
 
     public Zoom() {
-        super(Categories.Render, "zoom", "Zooms your view.");
+        super(Categories.Render, "zoom");
         autoSubscribe = false;
     }
 

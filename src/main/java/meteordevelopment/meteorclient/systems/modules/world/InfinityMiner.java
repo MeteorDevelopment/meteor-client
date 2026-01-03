@@ -34,15 +34,15 @@ import net.minecraft.util.math.BlockPos;
 import java.util.List;
 import java.util.function.Predicate;
 
+// todo map
 public class InfinityMiner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgWhenFull = settings.createGroup("When Full");
+    private final SettingGroup sgWhenFull = settings.createGroup("when-full");
 
     // General
 
     public final Setting<List<Block>> targetBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("target-blocks")
-        .description("The target blocks to mine.")
         .defaultValue(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE)
         .filter(this::filterBlocks)
         .build()
@@ -50,14 +50,12 @@ public class InfinityMiner extends Module {
 
     public final Setting<List<Item>> targetItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("target-items")
-        .description("The target items to collect.")
         .defaultValue(Items.DIAMOND)
         .build()
     );
 
     public final Setting<List<Block>> repairBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("repair-blocks")
-        .description("The repair blocks to mine.")
         .defaultValue(Blocks.COAL_ORE, Blocks.REDSTONE_ORE, Blocks.NETHER_QUARTZ_ORE)
         .filter(this::filterBlocks)
         .build()
@@ -65,7 +63,6 @@ public class InfinityMiner extends Module {
 
     public final Setting<Double> startRepairing = sgGeneral.add(new DoubleSetting.Builder()
         .name("repair-threshold")
-        .description("The durability percentage at which to start repairing.")
         .defaultValue(20)
         .range(1, 99)
         .sliderRange(1, 99)
@@ -74,7 +71,6 @@ public class InfinityMiner extends Module {
 
     public final Setting<Double> startMining = sgGeneral.add(new DoubleSetting.Builder()
         .name("mine-threshold")
-        .description("The durability percentage at which to start mining.")
         .defaultValue(70)
         .range(1, 99)
         .sliderRange(1, 99)
@@ -85,14 +81,12 @@ public class InfinityMiner extends Module {
 
     public final Setting<Boolean> walkHome = sgWhenFull.add(new BoolSetting.Builder()
         .name("walk-home")
-        .description("Will walk 'home' when your inventory is full.")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<Boolean> logOut = sgWhenFull.add(new BoolSetting.Builder()
         .name("log-out")
-        .description("Logs out when your inventory is full. Will walk home FIRST if walk home is enabled.")
         .defaultValue(false)
         .build()
     );
@@ -106,7 +100,7 @@ public class InfinityMiner extends Module {
     private boolean repairing;
 
     public InfinityMiner() {
-        super(Categories.World, "infinity-miner", "Allows you to essentially mine forever by mining repair blocks when the durability gets low. Needs a mending pickaxe.");
+        super(Categories.World, "infinity-miner");
     }
 
     @Override

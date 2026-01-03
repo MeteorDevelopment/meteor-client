@@ -61,12 +61,11 @@ import java.util.stream.Collectors;
 public class Notebot extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgNoteMap = settings.createGroup("Note Map", false);
-    private final SettingGroup sgRender = settings.createGroup("Render", true);
+    private final SettingGroup sgNoteMap = settings.createGroup("note-map", false);
+    private final SettingGroup sgRender = settings.createGroup("render", true);
 
     public final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
         .name("tick-delay")
-        .description("The delay when loading a song.")
         .defaultValue(1)
         .sliderRange(1, 20)
         .min(1)
@@ -75,7 +74,6 @@ public class Notebot extends Module {
 
     public final Setting<Integer> concurrentTuneBlocks = sgGeneral.add(new IntSetting.Builder()
         .name("concurrent-tune-blocks")
-        .description("How many noteblocks can be tuned at the same time. On Paper it is recommended to set it to 1 to avoid bugs.")
         .defaultValue(1)
         .min(1)
         .sliderRange(1, 20)
@@ -84,56 +82,48 @@ public class Notebot extends Module {
 
     public final Setting<NotebotUtils.NotebotMode> mode = sgGeneral.add(new EnumSetting.Builder<NotebotUtils.NotebotMode>()
         .name("mode")
-        .description("Select mode of notebot")
         .defaultValue(NotebotUtils.NotebotMode.ExactInstruments)
         .build()
     );
 
     public final Setting<InstrumentDetectMode> instrumentDetectMode = sgGeneral.add(new EnumSetting.Builder<InstrumentDetectMode>()
         .name("instrument-detect-mode")
-        .description("Select an instrument detect mode. Can be useful when server has a plugin that modifies noteblock state (e.g ItemsAdder) but noteblock can still play the right note")
         .defaultValue(InstrumentDetectMode.BlockState)
         .build()
     );
 
     public final Setting<Boolean> polyphonic = sgGeneral.add(new BoolSetting.Builder()
         .name("polyphonic")
-        .description("Whether or not to allow multiple notes to be played at the same time")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> autoRotate = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-rotate")
-        .description("Should client look at note block when it wants to hit it")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> autoPlay = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-play")
-        .description("Auto plays random songs")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<Boolean> roundOutOfRange = sgGeneral.add(new BoolSetting.Builder()
         .name("round-out-of-range")
-        .description("Rounds out of range notes")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<Boolean> swingArm = sgGeneral.add(new BoolSetting.Builder()
         .name("swing-arm")
-        .description("Should swing arm on hit")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Integer> checkNoteblocksAgainDelay = sgGeneral.add(new IntSetting.Builder()
         .name("check-noteblocks-again-delay")
-        .description("How much delay should be between end of tuning and checking again")
         .defaultValue(10)
         .min(1)
         .sliderRange(1, 20)
@@ -142,84 +132,72 @@ public class Notebot extends Module {
 
     public final Setting<Boolean> renderText = sgRender.add(new BoolSetting.Builder()
         .name("render-text")
-        .description("Whether or not to render the text above noteblocks.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> renderBoxes = sgRender.add(new BoolSetting.Builder()
         .name("render-boxes")
-        .description("Whether or not to render the outline around the noteblocks.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     public final Setting<SettingColor> untunedSideColor = sgRender.add(new ColorSetting.Builder()
         .name("untuned-side-color")
-        .description("The color of the sides of the untuned blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 10))
         .build()
     );
 
     public final Setting<SettingColor> untunedLineColor = sgRender.add(new ColorSetting.Builder()
         .name("untuned-line-color")
-        .description("The color of the lines of the untuned blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 255))
         .build()
     );
 
     public final Setting<SettingColor> tunedSideColor = sgRender.add(new ColorSetting.Builder()
         .name("tuned-side-color")
-        .description("The color of the sides of the tuned blocks being rendered.")
         .defaultValue(new SettingColor(0, 204, 0, 10))
         .build()
     );
 
     public final Setting<SettingColor> tunedLineColor = sgRender.add(new ColorSetting.Builder()
         .name("tuned-line-color")
-        .description("The color of the lines of the tuned blocks being rendered.")
         .defaultValue(new SettingColor(0, 204, 0, 255))
         .build()
     );
 
     public final Setting<SettingColor> tuneHitSideColor = sgRender.add(new ColorSetting.Builder()
         .name("hit-side-color")
-        .description("The color of the sides being rendered on noteblock tune hit.")
         .defaultValue(new SettingColor(255, 153, 0, 10))
         .build()
     );
 
     private final Setting<SettingColor> tuneHitLineColor = sgRender.add(new ColorSetting.Builder()
         .name("hit-line-color")
-        .description("The color of the lines being rendered on noteblock tune hit.")
         .defaultValue(new SettingColor(255, 153, 0, 255))
         .build()
     );
 
     public final Setting<SettingColor> scannedNoteblockSideColor = sgRender.add(new ColorSetting.Builder()
         .name("scanned-noteblock-side-color")
-        .description("The color of the sides of the scanned noteblocks being rendered.")
         .defaultValue(new SettingColor(255, 255, 0, 30))
         .build()
     );
 
     private final Setting<SettingColor> scannedNoteblockLineColor = sgRender.add(new ColorSetting.Builder()
         .name("scanned-noteblock-line-color")
-        .description("The color of the lines of the scanned noteblocks being rendered.")
         .defaultValue(new SettingColor(255, 255, 0, 255))
         .build()
     );
 
     public final Setting<Double> noteTextScale = sgRender.add(new DoubleSetting.Builder()
         .name("note-text-scale")
-        .description("The scale.")
         .defaultValue(1.5)
         .min(0)
         .build()
@@ -227,7 +205,6 @@ public class Notebot extends Module {
 
     public final Setting<Boolean> showScannedNoteblocks = sgRender.add(new BoolSetting.Builder()
         .name("show-scanned-noteblocks")
-        .description("Show scanned Noteblocks")
         .defaultValue(false)
         .build()
     );
@@ -252,7 +229,7 @@ public class Notebot extends Module {
 
 
     public Notebot() {
-        super(Categories.Misc, "notebot", "Plays noteblock nicely");
+        super(Categories.Misc, "notebot");
 
         for (NoteBlockInstrument inst : NoteBlockInstrument.values()) {
             NotebotUtils.OptionalInstrument optionalInstrument = NotebotUtils.OptionalInstrument.fromMinecraftInstrument(inst);

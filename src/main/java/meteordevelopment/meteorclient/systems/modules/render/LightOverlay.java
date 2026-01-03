@@ -24,13 +24,12 @@ import java.util.List;
 
 public class LightOverlay extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgColors = settings.createGroup("Colors");
+    private final SettingGroup sgColors = settings.createGroup("colors");
 
     // General
 
     private final Setting<Integer> horizontalRange = sgGeneral.add(new IntSetting.Builder()
         .name("horizontal-range")
-        .description("Horizontal range in blocks.")
         .defaultValue(8)
         .min(0)
         .build()
@@ -38,7 +37,6 @@ public class LightOverlay extends Module {
 
     private final Setting<Integer> verticalRange = sgGeneral.add(new IntSetting.Builder()
         .name("vertical-range")
-        .description("Vertical range in blocks.")
         .defaultValue(4)
         .min(0)
         .build()
@@ -46,14 +44,12 @@ public class LightOverlay extends Module {
 
     private final Setting<Boolean> seeThroughBlocks = sgGeneral.add(new BoolSetting.Builder()
         .name("see-through-blocks")
-        .description("Allows you to see the lines through blocks.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> lightLevel = sgGeneral.add(new IntSetting.Builder()
         .name("light-level")
-        .description("Which light levels to render. Old spawning light: 7.")
         .defaultValue(0)
         .min(0)
         .sliderMax(15)
@@ -64,14 +60,12 @@ public class LightOverlay extends Module {
 
     private final Setting<SettingColor> color = sgColors.add(new ColorSetting.Builder()
         .name("color")
-        .description("Color of places where mobs can currently spawn.")
         .defaultValue(new SettingColor(225, 25, 25))
         .build()
     );
 
     private final Setting<SettingColor> potentialColor = sgColors.add(new ColorSetting.Builder()
         .name("potential-color")
-        .description("Color of places where mobs can potentially spawn (eg at night).")
         .defaultValue(new SettingColor(225, 225, 25))
         .build()
     );
@@ -80,7 +74,7 @@ public class LightOverlay extends Module {
     private final List<Cross> crosses = new ArrayList<>();
 
     public LightOverlay() {
-        super(Categories.Render, "light-overlay", "Shows blocks where mobs can spawn.");
+        super(Categories.Render, "light-overlay");
     }
 
     @EventHandler

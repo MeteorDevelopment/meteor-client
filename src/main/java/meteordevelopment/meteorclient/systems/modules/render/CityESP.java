@@ -23,27 +23,24 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 
 public class CityESP extends Module {
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // Render
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color of the rendering.")
         .defaultValue(new SettingColor(225, 0, 0, 75))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color of the rendering.")
         .defaultValue(new SettingColor(225, 0, 0, 255))
         .build()
     );
@@ -51,7 +48,7 @@ public class CityESP extends Module {
     private BlockPos target;
 
     public CityESP() {
-        super(Categories.Render, "city-esp", "Displays blocks that can be broken in order to city another player.");
+        super(Categories.Render, "city-esp");
     }
 
     @EventHandler
