@@ -15,6 +15,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,6 +24,17 @@ import java.util.List;
 public class Settings implements ISerializable<Settings>, Iterable<SettingGroup> {
     private SettingGroup defaultGroup;
     public final List<SettingGroup> groups = new ArrayList<>(1);
+    /// {@code null} when {@link Settings} is internal, should not be passed to {@link GuiTheme#settings(Settings)}
+    public final @Nullable String baseTranslationKey;
+
+    public Settings(@NotNull String baseTranslationKey) {
+        this.baseTranslationKey = baseTranslationKey;
+    }
+
+    /// @apiNote marks this {@link Settings} as internal, using it in user-facing UIs will throw
+    public Settings() {
+        this.baseTranslationKey = null;
+    }
 
     public void onActivated() {
         for (SettingGroup group : groups) {

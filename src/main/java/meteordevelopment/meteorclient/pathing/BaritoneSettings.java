@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BaritoneSettings implements IPathManager.ISettings {
-    private final Settings settings = new Settings();
+    private final Settings settings = new Settings("baritone");
 
     private Setting<Boolean> walkOnWater, walkOnLava;
     private Setting<Boolean> step, noFall;

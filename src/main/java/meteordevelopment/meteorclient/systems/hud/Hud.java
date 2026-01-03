@@ -31,7 +31,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     public static final HudGroup GROUP = new HudGroup("Meteor");
 
     public boolean active;
-    public Settings settings = new Settings();
+    public Settings settings = new Settings("hud");
 
     public final Map<String, HudElementInfo<?>> infos = new TreeMap<>();
     private final List<HudElement> elements = new ArrayList<>();

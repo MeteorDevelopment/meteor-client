@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Waypoint implements ISerializable<Waypoint> {
-    public final Settings settings = new Settings();
+    public final Settings settings = new Settings("waypoint");
 
     private final SettingGroup sgVisual = settings.createGroup("Visual");
     private final SettingGroup sgPosition = settings.createGroup("Position");

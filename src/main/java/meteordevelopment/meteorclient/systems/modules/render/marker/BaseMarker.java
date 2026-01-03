@@ -17,40 +17,47 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.nbt.NbtCompound;
 
 public abstract class BaseMarker implements ISerializable<BaseMarker> {
-    public final Settings settings = new Settings();
+    public final Settings settings;
 
-    protected final SettingGroup sgBase = settings.createGroup("Base");
+    protected final SettingGroup sgBase;
 
-    public final Setting<String> name = sgBase.add(new StringSetting.Builder()
-        .name("name")
-        .description("Custom name for this marker.")
-        .build()
-    );
+    public final Setting<String> name;
+    protected final Setting<String> description;
+    private final Setting<Dimension> dimension;
+    private final Setting<Boolean> active;
 
-    protected final Setting<String> description = sgBase.add(new StringSetting.Builder()
-        .name("description")
-        .description("Custom description for this marker.")
-        .build()
-    );
+    public BaseMarker(String type) {
+        this.settings = new Settings(type);
 
-    private final Setting<Dimension> dimension = sgBase.add(new EnumSetting.Builder<Dimension>()
-        .name("dimension")
-        .description("In which dimension this marker should be visible.")
-        .defaultValue(Dimension.Overworld)
-        .build()
-    );
+        this.sgBase = settings.createGroup("Base");
 
-    private final Setting<Boolean> active = sgBase.add(new BoolSetting.Builder()
-        .name("active")
-        .description("Is this marker visible.")
-        .defaultValue(false)
-        .build()
-    );
+        this.name = sgBase.add(new StringSetting.Builder()
+            .name("name")
+            .description("Custom name for this marker.")
+            .build()
+        );
+        this.name.set(type);
 
-    public BaseMarker(String name) {
-        this.name.set(name);
+        this.description = sgBase.add(new StringSetting.Builder()
+            .name("description")
+            .description("Custom description for this marker.")
+            .build()
+        );
 
-        dimension.set(PlayerUtils.getDimension());
+        this.dimension = sgBase.add(new EnumSetting.Builder<Dimension>()
+            .name("dimension")
+            .description("In which dimension this marker should be visible.")
+            .defaultValue(Dimension.Overworld)
+            .build()
+        );
+        this.dimension.set(PlayerUtils.getDimension());
+
+        this.active = sgBase.add(new BoolSetting.Builder()
+            .name("active")
+            .description("Is this marker visible.")
+            .defaultValue(false)
+            .build()
+        );
     }
 
     protected void render(Render3DEvent event) {}

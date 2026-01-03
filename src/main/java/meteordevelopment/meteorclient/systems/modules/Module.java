@@ -37,7 +37,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public final Color color;
 
     public final MeteorAddon addon;
-    public final Settings settings = new Settings();
+    public final Settings settings;
 
     private boolean active;
 
@@ -60,6 +60,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         this.description = description;
         this.aliases = aliases;
         this.color = Color.fromHsv(Utils.random(0.0, 360.0), 0.35, 1);
+        this.settings = new Settings("module." + name);
 
         String classname = this.getClass().getName();
         for (MeteorAddon addon : AddonManager.ADDONS) {

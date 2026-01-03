@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Profile implements ISerializable<Profile> {
-    public final Settings settings = new Settings();
+    public final Settings settings = new Settings("profile");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSave = settings.createGroup("Save");

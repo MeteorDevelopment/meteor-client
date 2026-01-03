@@ -40,7 +40,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public static final double TITLE_TEXT_SCALE = 1.25;
 
     public final String name;
-    public final Settings settings = new Settings();
+    public final Settings settings;
 
     public boolean disableHoverColor;
 
@@ -50,6 +50,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
 
     public GuiTheme(String name) {
         this.name = name;
+        this.settings = new Settings("theme." + name);
     }
 
     public void beforeRender() {
