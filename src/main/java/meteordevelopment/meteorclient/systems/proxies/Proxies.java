@@ -18,7 +18,7 @@ import java.util.concurrent.*;
 import java.util.regex.Pattern;
 
 public class Proxies extends System<Proxies> implements Iterable<Proxy> {
-    public final Settings settings = new Settings();
+    public final Settings settings = new Settings("proxies");
     private final SettingGroup sgRefreshing = settings.createGroup("Refreshing");
     private final SettingGroup sgCleanup = settings.createGroup("Cleanup");
 

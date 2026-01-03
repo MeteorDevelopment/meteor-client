@@ -22,7 +22,7 @@ import java.util.Objects;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Macro implements ISerializable<Macro> {
-    public final Settings settings = new Settings();
+    public final Settings settings = new Settings("macro");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

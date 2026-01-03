@@ -25,7 +25,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 public class Proxy implements ISerializable<Proxy> {
-    public final Settings settings = new Settings();
+    public final Settings settings = new Settings("proxy");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgOptional = settings.createGroup("Optional");

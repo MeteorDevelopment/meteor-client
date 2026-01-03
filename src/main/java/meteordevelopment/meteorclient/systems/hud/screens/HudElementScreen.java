@@ -36,7 +36,7 @@ public class HudElementScreen extends WindowScreen {
 
         this.element = element;
 
-        settings = new Settings();
+        settings = new Settings("hud.base");
         SettingGroup sg = settings.createGroup("Anchors");
         sg.add(new BoolSetting.Builder()
             .name("auto-anchors")

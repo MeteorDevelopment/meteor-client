@@ -24,7 +24,7 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Config extends System<Config> {
-    public final Settings settings = new Settings();
+    public final Settings settings = new Settings("config");
 
     private final SettingGroup sgVisual = settings.createGroup("Visual");
     private final SettingGroup sgModules = settings.createGroup("Modules");
