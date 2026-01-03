@@ -214,6 +214,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
 
     public WWidget settings(Settings settings, String filter) {
+        if (settings.baseTranslationKey == null) throw new IllegalArgumentException("Cannot use internal Settings in a GuiTheme!");
         return settingsFactory.create(this, settings, filter);
     }
     public WWidget settings(Settings settings) {
