@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.settings;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -76,6 +77,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
 
     public SettingGroup getGroup(String name) {
+        name = Utils.titleToName(name);
         for (SettingGroup sg : this) {
             if (sg.name.equals(name)) return sg;
         }
@@ -88,7 +90,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
 
     public SettingGroup getDefaultGroup() {
-        if (defaultGroup == null) defaultGroup = createGroup("General");
+        if (defaultGroup == null) defaultGroup = createGroup("general");
         return defaultGroup;
     }
 
