@@ -20,7 +20,6 @@ public class TimeChanger extends Module {
 
     private final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
         .name("time")
-        .description("The specified time to be set.")
         .defaultValue(0)
         .sliderRange(-20000, 20000)
         .build()
@@ -29,7 +28,7 @@ public class TimeChanger extends Module {
     long oldTime;
 
     public TimeChanger() {
-        super(Categories.Render, "time-changer", "Makes you able to set a custom time.");
+        super(Categories.Render, "time-changer");
     }
 
     @Override

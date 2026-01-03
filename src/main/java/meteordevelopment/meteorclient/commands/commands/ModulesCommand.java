@@ -40,11 +40,11 @@ public class ModulesCommand extends Command {
         // Hover tooltip
         MutableText tooltip = Text.literal("");
 
-        tooltip.append(Text.literal(module.title).formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
+        tooltip.append(module.getTitleText().formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
         tooltip.append(Text.literal(module.name).formatted(Formatting.GRAY)).append("\n\n");
-        tooltip.append(Text.literal(module.description).formatted(Formatting.WHITE));
+        tooltip.append(module.getDescriptionText().formatted(Formatting.WHITE));
 
-        MutableText finalModule = Text.literal(module.title);
+        MutableText finalModule = module.getTitleText();
         if (!module.isActive()) finalModule.formatted(Formatting.GRAY);
         if (!module.equals(Modules.get().getGroup(module.category).getLast())) finalModule.append(Text.literal(", ").formatted(Formatting.GRAY));
         finalModule.setStyle(finalModule.getStyle().withHoverEvent(new HoverEvent.ShowText(tooltip)));

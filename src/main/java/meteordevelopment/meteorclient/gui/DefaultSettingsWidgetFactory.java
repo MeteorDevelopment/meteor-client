@@ -23,6 +23,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.resource.language.I18n;
 import org.apache.commons.lang3.Strings;
@@ -81,7 +82,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
         // Add all settings
         for (SettingGroup group : settings.groups) {
-            group(list, group, filter, removeInfoList);
+            group(list, group, filter, removeInfoList, settings.baseTranslationKey);
         }
 
         // Calculate width and set it as minimum width
@@ -101,8 +102,9 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         return 6;
     }
 
-    private void group(WVerticalList list, SettingGroup group, String filter, List<RemoveInfo> removeInfoList) {
-        WSection section = list.add(theme.section(group.name, group.sectionExpanded)).expandX().widget();
+    private void group(WVerticalList list, SettingGroup group, String filter, List<RemoveInfo> removeInfoList, String baseKey) {
+        String groupKey = group.name.equals("general") ? "module.base.general" : baseKey + "." + group.name;
+        WSection section = list.add(theme.section(MeteorTranslations.translate(groupKey, group.name), group.sectionExpanded)).expandX().widget();
         section.action = () -> group.sectionExpanded = section.isExpanded();
 
         WTable table = section.add(theme.table()).expandX().widget();
@@ -110,7 +112,9 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         RemoveInfo removeInfo = null;
 
         for (Setting<?> setting : group) {
-            if (!Strings.CI.contains(setting.title, filter)) continue;
+            String settingKey = groupKey + "." + setting.name;
+            String title = MeteorTranslations.translate(settingKey, () -> Utils.nameToTitle(setting.name));
+            if (!Strings.CI.contains(title, filter) && !Strings.CI.contains(setting.name, filter)) continue;
 
             boolean visible = setting.isVisible();
             setting.lastWasVisible = visible;
@@ -119,7 +123,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
                 removeInfo.markRowForRemoval();
             }
 
-            table.add(theme.label(setting.title)).top().marginTop(settingTitleTopMargin()).widget().tooltip = setting.description;
+            table.add(theme.label(title)).top().marginTop(settingTitleTopMargin()).widget().tooltip = MeteorTranslations.translate(settingKey + ".description");
 
             Factory factory = getFactory(setting.getClass());
             if (factory != null) factory.create(table, setting);

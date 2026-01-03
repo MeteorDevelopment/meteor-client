@@ -26,14 +26,12 @@ public class AutoTotem extends Module {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("Determines when to hold a totem, strict will always hold.")
         .defaultValue(Mode.Smart)
         .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("The ticks between slot movements.")
         .defaultValue(0)
         .min(0)
         .build()
@@ -41,7 +39,6 @@ public class AutoTotem extends Module {
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
         .name("health")
-        .description("The health to hold a totem at.")
         .defaultValue(10)
         .range(0, 36)
         .sliderMax(36)
@@ -51,7 +48,6 @@ public class AutoTotem extends Module {
 
     private final Setting<Boolean> elytra = sgGeneral.add(new BoolSetting.Builder()
         .name("elytra")
-        .description("Will always hold a totem when flying with elytra.")
         .defaultValue(true)
         .visible(() -> mode.get() == Mode.Smart)
         .build()
@@ -59,7 +55,6 @@ public class AutoTotem extends Module {
 
     private final Setting<Boolean> fall = sgGeneral.add(new BoolSetting.Builder()
         .name("fall")
-        .description("Will hold a totem when fall damage could kill you.")
         .defaultValue(true)
         .visible(() -> mode.get() == Mode.Smart)
         .build()
@@ -67,7 +62,6 @@ public class AutoTotem extends Module {
 
     private final Setting<Boolean> explosion = sgGeneral.add(new BoolSetting.Builder()
         .name("explosion")
-        .description("Will hold a totem when explosion damage could kill you.")
         .defaultValue(true)
         .visible(() -> mode.get() == Mode.Smart)
         .build()
@@ -77,7 +71,7 @@ public class AutoTotem extends Module {
     private int totems, ticks;
 
     public AutoTotem() {
-        super(Categories.Combat, "auto-totem", "Automatically equips a totem in your offhand.");
+        super(Categories.Combat, "auto-totem");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

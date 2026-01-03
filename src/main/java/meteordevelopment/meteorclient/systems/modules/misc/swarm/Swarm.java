@@ -24,14 +24,12 @@ public class Swarm extends Module {
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("What type of client to run.")
         .defaultValue(Mode.Host)
         .build()
     );
 
     private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
         .name("ip")
-        .description("The IP address of the host server.")
         .defaultValue("localhost")
         .visible(() -> mode.get() == Mode.Worker)
         .build()
@@ -39,7 +37,6 @@ public class Swarm extends Module {
 
     private final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
         .name("port")
-        .description("The port used for connections.")
         .defaultValue(6969)
         .range(1, 65535)
         .noSlider()
@@ -50,7 +47,7 @@ public class Swarm extends Module {
     public SwarmWorker worker;
 
     public Swarm() {
-        super(Categories.Misc, "swarm", "Allows you to control multiple instances of Meteor from one central host.");
+        super(Categories.Misc, "swarm");
     }
 
     @Override

@@ -23,12 +23,11 @@ public class SoundBlocker extends Module {
 
     private final Setting<List<SoundEvent>> sounds = sgGeneral.add(new SoundEventListSetting.Builder()
         .name("sounds")
-        .description("Sounds to block.")
         .build()
     );
 
     public SoundBlocker() {
-        super(Categories.Misc, "sound-blocker", "Cancels out selected sounds.");
+        super(Categories.Misc, "sound-blocker");
     }
 
     @EventHandler

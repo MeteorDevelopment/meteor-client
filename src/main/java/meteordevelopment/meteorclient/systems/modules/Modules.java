@@ -93,7 +93,7 @@ public class Modules extends System<Modules> {
 
     public void sortModules() {
         for (List<Module> modules : groups.values()) {
-            modules.sort(Comparator.comparing(o -> o.title));
+            modules.sort(Comparator.comparing(o -> o.getTitle()));
         }
     }
 
@@ -153,20 +153,21 @@ public class Modules extends System<Modules> {
         Map<Pair<Module, String>, Integer> modules = new HashMap<>();
 
         for (Module module : this.moduleInstances.values()) {
-            String title = module.title;
+            String title = module.getTitle();
             int score = Utils.searchLevenshteinDefault(title, text, false);
 
+            String display = title;
             if (Config.get().moduleAliases.get()) {
                 for (String alias : module.aliases) {
                     int aliasScore = Utils.searchLevenshteinDefault(alias, text, false);
                     if (aliasScore < score) {
-                        title = module.title + " (" + alias + ")";
+                        display = title + " (" + alias + ")";
                         score = aliasScore;
                     }
                 }
             }
 
-            modules.put(new Pair<>(module, title), score);
+            modules.put(new Pair<>(module, display), score);
         }
 
         List<Pair<Module, String>> l = new ArrayList<>(modules.keySet());

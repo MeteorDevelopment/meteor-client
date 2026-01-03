@@ -38,28 +38,24 @@ public class Burrow extends Module {
 
     private final Setting<Block> block = sgGeneral.add(new EnumSetting.Builder<Block>()
         .name("block-to-use")
-        .description("The block to use for Burrow.")
         .defaultValue(Block.EChest)
         .build()
     );
 
     private final Setting<Boolean> instant = sgGeneral.add(new BoolSetting.Builder()
         .name("instant")
-        .description("Jumps with packets rather than vanilla jump.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> automatic = sgGeneral.add(new BoolSetting.Builder()
         .name("automatic")
-        .description("Automatically burrows on activate rather than waiting for jump.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Double> triggerHeight = sgGeneral.add(new DoubleSetting.Builder()
         .name("trigger-height")
-        .description("How high you have to jump before a rubberband is triggered.")
         .defaultValue(1.12)
         .range(0.01, 1.4)
         .sliderRange(0.01, 1.4)
@@ -68,7 +64,6 @@ public class Burrow extends Module {
 
     private final Setting<Double> rubberbandHeight = sgGeneral.add(new DoubleSetting.Builder()
         .name("rubberband-height")
-        .description("How far to attempt to cause rubberband.")
         .defaultValue(12)
         .sliderMin(-30)
         .sliderMax(30)
@@ -77,7 +72,6 @@ public class Burrow extends Module {
 
     private final Setting<Double> timer = sgGeneral.add(new DoubleSetting.Builder()
         .name("timer")
-        .description("Timer override.")
         .defaultValue(1)
         .min(0.01)
         .sliderRange(0.01, 10)
@@ -86,21 +80,18 @@ public class Burrow extends Module {
 
     private final Setting<Boolean> onlyInHole = sgGeneral.add(new BoolSetting.Builder()
         .name("only-in-holes")
-        .description("Stops you from burrowing when not in a hole.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> center = sgGeneral.add(new BoolSetting.Builder()
         .name("center")
-        .description("Centers you to the middle of the block before burrowing.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Faces the block you place server-side.")
         .defaultValue(true)
         .build()
     );
@@ -109,7 +100,7 @@ public class Burrow extends Module {
     private boolean shouldBurrow;
 
     public Burrow() {
-        super(Categories.Combat, "burrow", "Attempts to clip you into a block.");
+        super(Categories.Combat, "burrow");
     }
 
     @Override

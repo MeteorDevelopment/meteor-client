@@ -22,15 +22,15 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.hit.BlockHitResult;
 import org.lwjgl.glfw.GLFW;
 
+// todo map
 public class Excavator extends Module {
     private final IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRendering = settings.createGroup("Rendering");
+    private final SettingGroup sgRendering = settings.createGroup("rendering");
 
     // Keybindings
     private final Setting<Keybind> selectionBind = sgGeneral.add(new KeybindSetting.Builder()
         .name("selection-bind")
-        .description("Bind to draw selection.")
         .defaultValue(Keybind.fromButton(GLFW.GLFW_MOUSE_BUTTON_RIGHT))
         .build()
     );
@@ -38,14 +38,12 @@ public class Excavator extends Module {
     // Logging
     private final Setting<Boolean> logSelection = sgGeneral.add(new BoolSetting.Builder()
         .name("log-selection")
-        .description("Logs the selection coordinates to the chat.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> keepActive = sgGeneral.add(new BoolSetting.Builder()
         .name("keep-active")
-        .description("Keep the module active after finishing the excavation.")
         .defaultValue(false)
         .build()
     );
@@ -53,21 +51,18 @@ public class Excavator extends Module {
     // Rendering
     private final Setting<ShapeMode> shapeMode = sgRendering.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRendering.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color.")
         .defaultValue(new SettingColor(255, 255, 255, 50))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRendering.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color.")
         .defaultValue(new SettingColor(255, 255, 255, 255))
         .build()
     );
@@ -82,7 +77,7 @@ public class Excavator extends Module {
     private BetterBlockPos start, end;
 
     public Excavator() {
-        super(Categories.World, "excavator", "Excavate a selection area.");
+        super(Categories.World, "excavator");
     }
 
     @Override

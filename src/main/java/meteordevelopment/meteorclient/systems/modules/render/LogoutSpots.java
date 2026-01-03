@@ -36,13 +36,12 @@ public class LogoutSpots extends Module {
     private static final Color RED = new Color(225, 25, 25);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("The scale.")
         .defaultValue(1)
         .min(0)
         .build()
@@ -50,7 +49,6 @@ public class LogoutSpots extends Module {
 
     private final Setting<Boolean> fullHeight = sgGeneral.add(new BoolSetting.Builder()
         .name("full-height")
-        .description("Displays the height as the player's full height.")
         .defaultValue(true)
         .build()
     );
@@ -59,35 +57,30 @@ public class LogoutSpots extends Module {
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color.")
         .defaultValue(new SettingColor(255, 0, 255, 55))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color.")
         .defaultValue(new SettingColor(255, 0, 255))
         .build()
     );
 
     private final Setting<SettingColor> nameColor = sgRender.add(new ColorSetting.Builder()
         .name("name-color")
-        .description("The name color.")
         .defaultValue(new SettingColor(255, 255, 255))
         .build()
     );
 
     private final Setting<SettingColor> nameBackgroundColor = sgRender.add(new ColorSetting.Builder()
         .name("name-background-color")
-        .description("The name background color.")
         .defaultValue(new SettingColor(0, 0, 0, 75))
         .build()
     );
@@ -101,7 +94,7 @@ public class LogoutSpots extends Module {
     private DimensionType lastDimension;
 
     public LogoutSpots() {
-        super(Categories.Render, "logout-spots", "Displays a box where another player has logged out at.");
+        super(Categories.Render, "logout-spots");
         lineColor.onChanged();
     }
 

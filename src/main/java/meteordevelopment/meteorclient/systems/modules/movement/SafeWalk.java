@@ -23,11 +23,10 @@ import net.minecraft.world.RaycastContext;
 
 public class SafeWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     private final Setting<Integer> fallDistance = sgGeneral.add(new IntSetting.Builder()
         .name("minimum-fall-distance")
-        .description("The minimum number of blocks you are expected to fall before the module activates.")
         .defaultValue(1)
         .min(1)
         .build()
@@ -35,14 +34,12 @@ public class SafeWalk extends Module {
 
     private final Setting<Boolean> sneak = sgGeneral.add(new BoolSetting.Builder()
         .name("sneak")
-        .description("Sneak when approaching edge of block.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> safeSneak = sgGeneral.add(new BoolSetting.Builder()
         .name("safe-sneak")
-        .description("Prevent you from falling if sneak doesn't trigger correctly.")
         .defaultValue(true)
         .visible(sneak::get)
         .build()
@@ -50,7 +47,6 @@ public class SafeWalk extends Module {
 
     private final Setting<Boolean> sneakSprint = sgGeneral.add(new BoolSetting.Builder()
         .name("sneak-on-sprint")
-        .description("Sneak even when sprinting at the block edge.")
         .defaultValue(true)
         .visible(sneak::get)
         .build()
@@ -58,7 +54,6 @@ public class SafeWalk extends Module {
 
     private final Setting<Double> edgeDistance = sgGeneral.add(new DoubleSetting.Builder()
         .name("edge-distance")
-        .description("Distance offset before reaching an edge.")
         .defaultValue(0.30)
         .sliderRange(0.00, 0.30)
         .decimalPlaces(2)
@@ -68,7 +63,6 @@ public class SafeWalk extends Module {
 
     private final Setting<Boolean> renderEdgeDistance = sgRender.add(new BoolSetting.Builder()
         .name("render")
-        .description("Render edge distance helper.")
         .defaultValue(false)
         .visible(sneak::get)
         .build()
@@ -76,14 +70,13 @@ public class SafeWalk extends Module {
 
     private final Setting<Boolean> renderPlayerBox = sgRender.add(new BoolSetting.Builder()
         .name("render-player-box")
-        .description("Render player box helper.")
         .defaultValue(false)
         .visible(() -> sneak.get() && renderEdgeDistance.get())
         .build()
     );
 
     public SafeWalk() {
-        super(Categories.Movement, "safe-walk", "Prevents you from walking off blocks.");
+        super(Categories.Movement, "safe-walk");
     }
 
     @EventHandler

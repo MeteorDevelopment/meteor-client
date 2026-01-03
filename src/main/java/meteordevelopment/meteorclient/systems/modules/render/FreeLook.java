@@ -17,27 +17,24 @@ import org.lwjgl.glfw.GLFW;
 
 public class FreeLook extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgArrows = settings.createGroup("Arrows");
+    private final SettingGroup sgArrows = settings.createGroup("arrows");
 
     // General
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("Which entity to rotate.")
         .defaultValue(Mode.Player)
         .build()
     );
 
     public final Setting<Boolean> togglePerspective = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-perspective")
-        .description("Changes your perspective on toggle.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Double> sensitivity = sgGeneral.add(new DoubleSetting.Builder()
         .name("camera-sensitivity")
-        .description("How fast the camera moves in camera mode.")
         .defaultValue(8)
         .min(0)
         .sliderMax(10)
@@ -48,14 +45,12 @@ public class FreeLook extends Module {
 
     public final Setting<Boolean> arrows = sgArrows.add(new BoolSetting.Builder()
         .name("arrows-control-opposite")
-        .description("Allows you to control the other entities rotation with the arrow keys.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Double> arrowSpeed = sgArrows.add(new DoubleSetting.Builder()
         .name("arrow-speed")
-        .description("Rotation speed with arrow keys.")
         .defaultValue(4)
         .min(0)
         .build()
@@ -67,7 +62,7 @@ public class FreeLook extends Module {
     private Perspective prePers;
 
     public FreeLook() {
-        super(Categories.Render, "free-look", "Allows more rotation options in third person.");
+        super(Categories.Render, "free-look");
     }
 
     @Override

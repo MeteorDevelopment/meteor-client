@@ -21,21 +21,18 @@ public class FakePlayer extends Module {
 
     public final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
         .name("name")
-        .description("The name of the fake player.")
         .defaultValue("seasnail8169")
         .build()
     );
 
     public final Setting<Boolean> copyInv = sgGeneral.add(new BoolSetting.Builder()
         .name("copy-inv")
-        .description("Copies your inventory to the fake player.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
         .name("health")
-        .description("The fake player's default health.")
         .defaultValue(20)
         .min(1)
         .sliderRange(1, 100)
@@ -45,7 +42,7 @@ public class FakePlayer extends Module {
     private WTable table;
 
     public FakePlayer() {
-        super(Categories.Player, "fake-player", "Spawns a client-side fake player for testing usages. No need to be active.");
+        super(Categories.Player, "fake-player");
     }
 
     @Override

@@ -37,27 +37,24 @@ public class AutoMount extends Module {
 
     private final Setting<Boolean> checkSaddle = sgGeneral.add(new BoolSetting.Builder()
         .name("check-saddle")
-        .description("Checks if the entity contains a saddle before mounting.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Faces the entity you mount.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
-        .description("Rideable entities.")
         .filter(EntityUtils::isRideable)
         .build()
     );
 
     public AutoMount() {
-        super(Categories.World, "auto-mount", "Automatically mounts entities.");
+        super(Categories.World, "auto-mount");
     }
 
     @EventHandler

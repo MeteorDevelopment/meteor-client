@@ -48,35 +48,31 @@ import java.util.regex.PatternSyntaxException;
 
 public class BetterChat extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgFilter = settings.createGroup("Filter");
-    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
-    private final SettingGroup sgPrefix = settings.createGroup("Prefix");
-    private final SettingGroup sgSuffix = settings.createGroup("Suffix");
+    private final SettingGroup sgFilter = settings.createGroup("filter");
+    private final SettingGroup sgLongerChat = settings.createGroup("longer-chat");
+    private final SettingGroup sgPrefix = settings.createGroup("prefix");
+    private final SettingGroup sgSuffix = settings.createGroup("suffix");
 
     private final Setting<Boolean> annoy = sgGeneral.add(new BoolSetting.Builder()
         .name("annoy")
-        .description("Makes your messages aNnOyInG.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> fancy = sgGeneral.add(new BoolSetting.Builder()
         .name("fancy-chat")
-        .description("Makes your messages ғᴀɴᴄʏ!")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> timestamps = sgGeneral.add(new BoolSetting.Builder()
         .name("timestamps")
-        .description("Adds client-side time stamps to the beginning of chat messages.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> showSeconds = sgGeneral.add(new BoolSetting.Builder()
         .name("show-seconds")
-        .description("Shows seconds in the chat message timestamps")
         .defaultValue(false)
         .visible(timestamps::get)
         .onChanged(o -> updateDateFormat())
@@ -85,21 +81,18 @@ public class BetterChat extends Module {
 
     private final Setting<Boolean> playerHeads = sgGeneral.add(new BoolSetting.Builder()
         .name("player-heads")
-        .description("Displays player heads next to their messages.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> coordsProtection = sgGeneral.add(new BoolSetting.Builder()
         .name("coords-protection")
-        .description("Prevents you from sending messages in chat that may contain coordinates.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> keepHistory = sgGeneral.add(new BoolSetting.Builder()
         .name("keep-history")
-        .description("Prevents the chat history from being cleared when disconnecting.")
         .defaultValue(true)
         .build()
     );
@@ -108,14 +101,12 @@ public class BetterChat extends Module {
 
     private final Setting<Boolean> antiSpam = sgFilter.add(new BoolSetting.Builder()
         .name("anti-spam")
-        .description("Blocks duplicate messages from filling your chat.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Integer> antiSpamDepth = sgFilter.add(new IntSetting.Builder()
         .name("depth")
-        .description("How many messages to filter.")
         .defaultValue(20)
         .min(1)
         .sliderMin(1)
@@ -125,21 +116,18 @@ public class BetterChat extends Module {
 
     private final Setting<Boolean> antiClear = sgFilter.add(new BoolSetting.Builder()
         .name("anti-clear")
-        .description("Prevents servers from clearing chat.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> filterRegex = sgFilter.add(new BoolSetting.Builder()
         .name("filter-regex")
-        .description("Filter out chat messages that match the regex filter.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<List<String>> regexFilters = sgFilter.add(new StringListSetting.Builder()
         .name("regex-filter")
-        .description("Regex filter used for filtering chat messages.")
         .visible(filterRegex::get)
         .onChanged(strings -> compileFilterRegexList())
         .build()
@@ -150,21 +138,18 @@ public class BetterChat extends Module {
 
     private final Setting<Boolean> infiniteChatBox = sgLongerChat.add(new BoolSetting.Builder()
         .name("infinite-chat-box")
-        .description("Lets you type infinitely long messages.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> longerChatHistory = sgLongerChat.add(new BoolSetting.Builder()
         .name("longer-chat-history")
-        .description("Extends chat length.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Integer> longerChatLines = sgLongerChat.add(new IntSetting.Builder()
         .name("extra-lines")
-        .description("The amount of extra chat lines.")
         .defaultValue(1000)
         .min(0)
         .sliderRange(0, 1000)
@@ -176,21 +161,18 @@ public class BetterChat extends Module {
 
     private final Setting<Boolean> prefix = sgPrefix.add(new BoolSetting.Builder()
         .name("prefix")
-        .description("Adds a prefix to your chat messages.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> prefixRandom = sgPrefix.add(new BoolSetting.Builder()
         .name("random")
-        .description("Uses a random number as your prefix.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<String> prefixText = sgPrefix.add(new StringSetting.Builder()
         .name("text")
-        .description("The text to add as your prefix.")
         .defaultValue("> ")
         .visible(() -> !prefixRandom.get())
         .build()
@@ -198,7 +180,6 @@ public class BetterChat extends Module {
 
     private final Setting<Boolean> prefixSmallCaps = sgPrefix.add(new BoolSetting.Builder()
         .name("small-caps")
-        .description("Uses small caps in the prefix.")
         .defaultValue(false)
         .visible(() -> !prefixRandom.get())
         .build()
@@ -208,21 +189,18 @@ public class BetterChat extends Module {
 
     private final Setting<Boolean> suffix = sgSuffix.add(new BoolSetting.Builder()
         .name("suffix")
-        .description("Adds a suffix to your chat messages.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> suffixRandom = sgSuffix.add(new BoolSetting.Builder()
         .name("random")
-        .description("Uses a random number as your suffix.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<String> suffixText = sgSuffix.add(new StringSetting.Builder()
         .name("text")
-        .description("The text to add as your suffix.")
         .defaultValue(" | meteor on crack!")
         .visible(() -> !suffixRandom.get())
         .build()
@@ -230,7 +208,6 @@ public class BetterChat extends Module {
 
     private final Setting<Boolean> suffixSmallCaps = sgSuffix.add(new BoolSetting.Builder()
         .name("small-caps")
-        .description("Uses small caps in the suffix.")
         .defaultValue(true)
         .visible(() -> !suffixRandom.get())
         .build()
@@ -245,7 +222,7 @@ public class BetterChat extends Module {
     public final IntList lines = new IntArrayList();
 
     public BetterChat() {
-        super(Categories.Misc, "better-chat", "Improves your chat experience in various ways.");
+        super(Categories.Misc, "better-chat");
 
         String[] a = "abcdefghijklmnopqrstuvwxyz".split("");
         String[] b = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴩqʀꜱᴛᴜᴠᴡxyᴢ".split("");

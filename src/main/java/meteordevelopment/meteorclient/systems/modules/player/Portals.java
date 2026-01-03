@@ -10,6 +10,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 
 public class Portals extends Module {
     public Portals() {
-        super(Categories.Player, "portals", "Allows you to use GUIs normally while in a Nether Portal.");
+        super(Categories.Player, "portals");
     }
 }

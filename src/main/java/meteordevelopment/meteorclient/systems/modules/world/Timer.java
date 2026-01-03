@@ -16,7 +16,6 @@ public class Timer extends Module {
 
     private final Setting<Double> multiplier = sgGeneral.add(new DoubleSetting.Builder()
         .name("multiplier")
-        .description("The timer multiplier amount.")
         .defaultValue(1)
         .min(0.1)
         .sliderMin(0.1)
@@ -27,7 +26,7 @@ public class Timer extends Module {
     private double override = 1;
 
     public Timer() {
-        super(Categories.World, "timer", "Changes the speed of everything in your game.");
+        super(Categories.World, "timer");
     }
 
     public double getMultiplier() {

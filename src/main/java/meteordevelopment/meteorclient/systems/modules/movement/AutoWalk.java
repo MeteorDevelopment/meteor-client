@@ -31,7 +31,6 @@ public class AutoWalk extends Module {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("Walking mode.")
         .defaultValue(Mode.Smart)
         .onChanged(mode1 -> {
             if (isActive() && Utils.canUpdate()) {
@@ -49,7 +48,6 @@ public class AutoWalk extends Module {
 
     private final Setting<Direction> direction = sgGeneral.add(new EnumSetting.Builder<Direction>()
         .name("simple-direction")
-        .description("The direction to walk in simple mode.")
         .defaultValue(Direction.Forwards)
         .onChanged(direction1 -> {
             if (isActive()) unpress();
@@ -60,14 +58,12 @@ public class AutoWalk extends Module {
 
     private final Setting<Boolean> disableOnInput = sgGeneral.add(new BoolSetting.Builder()
         .name("disable-on-input")
-        .description("Disable module on manual movement input")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> disableOnY = sgGeneral.add(new BoolSetting.Builder()
         .name("disable-on-y-change")
-        .description("Disable module if player moves vertically")
         .defaultValue(false)
         .visible(() -> mode.get() == Mode.Simple)
         .build()
@@ -75,14 +71,13 @@ public class AutoWalk extends Module {
 
     private final Setting<Boolean> waitForChunks = sgGeneral.add(new BoolSetting.Builder()
         .name("no-unloaded-chunks")
-        .description("Do not allow movement into unloaded chunks")
         .defaultValue(true)
         .visible(() -> mode.get() == Mode.Simple)
         .build()
     );
 
     public AutoWalk() {
-        super(Categories.Movement, "auto-walk", "Automatically walks forward.");
+        super(Categories.Movement, "auto-walk");
     }
 
     @Override

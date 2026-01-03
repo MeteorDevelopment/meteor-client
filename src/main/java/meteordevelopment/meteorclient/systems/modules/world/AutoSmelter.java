@@ -27,7 +27,6 @@ public class AutoSmelter extends Module {
 
     private final Setting<List<Item>> fuelItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("fuel-items")
-        .description("Items to use as fuel")
         .defaultValue(Items.COAL, Items.CHARCOAL)
         .filter(this::fuelItemFilter)
         .bypassFilterWhenSavingAndLoading()
@@ -36,7 +35,6 @@ public class AutoSmelter extends Module {
 
     private final Setting<List<Item>> smeltableItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("smeltable-items")
-        .description("Items to smelt")
         .defaultValue(Items.IRON_ORE, Items.GOLD_ORE, Items.COPPER_ORE, Items.RAW_IRON, Items.RAW_COPPER, Items.RAW_GOLD)
         .filter(this::smeltableItemFilter)
         .bypassFilterWhenSavingAndLoading()
@@ -45,13 +43,12 @@ public class AutoSmelter extends Module {
 
     private final Setting<Boolean> disableWhenOutOfItems = sgGeneral.add(new BoolSetting.Builder()
         .name("disable-when-out-of-items")
-        .description("Disable the module when you run out of items")
         .defaultValue(true)
         .build()
     );
 
     public AutoSmelter() {
-        super(Categories.World, "auto-smelter", "Automatically smelts items from your inventory");
+        super(Categories.World, "auto-smelter");
     }
 
     private boolean fuelItemFilter(Item item) {

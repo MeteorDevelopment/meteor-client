@@ -39,55 +39,48 @@ public class SelfTrap extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("whitelist")
-        .description("Which blocks to use.")
         .defaultValue(Blocks.OBSIDIAN, Blocks.NETHERITE_BLOCK)
         .build()
     );
 
     private final Setting<TopMode> topPlacement = sgGeneral.add(new EnumSetting.Builder<TopMode>()
         .name("top-mode")
-        .description("Which positions to place on your top half.")
         .defaultValue(TopMode.Top)
         .build()
     );
 
     private final Setting<BottomMode> bottomPlacement = sgGeneral.add(new EnumSetting.Builder<BottomMode>()
         .name("bottom-mode")
-        .description("Which positions to place on your bottom half.")
         .defaultValue(BottomMode.None)
         .build()
     );
 
     private final Setting<Integer> delaySetting = sgGeneral.add(new IntSetting.Builder()
         .name("place-delay")
-        .description("How many ticks between block placements.")
         .defaultValue(1)
         .build()
     );
 
     private final Setting<Boolean> center = sgGeneral.add(new BoolSetting.Builder()
         .name("center")
-        .description("Centers you on the block you are standing on before placing.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
         .name("turn-off")
-        .description("Turns off after placing.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Sends rotation packets to the server when placing.")
         .defaultValue(true)
         .build()
     );
@@ -96,28 +89,24 @@ public class SelfTrap extends Module {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
-        .description("Renders a block overlay where the blocks will be placed.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The color of the sides of the blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 10))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The color of the lines of the blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 255))
         .build()
     );
@@ -127,7 +116,7 @@ public class SelfTrap extends Module {
     private int delay;
 
     public SelfTrap(){
-        super(Categories.Combat, "self-trap", "Places blocks above your head.");
+        super(Categories.Combat, "self-trap");
     }
 
     @Override

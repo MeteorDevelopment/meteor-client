@@ -26,7 +26,6 @@ public class AutoReplenish extends Module {
 
     private final Setting<Integer> minCount = sgGeneral.add(new IntSetting.Builder()
         .name("min-count")
-        .description("Replenish a slot when it reaches this item count.")
         .defaultValue(8)
         .min(1)
         .sliderRange(1, 63)
@@ -35,7 +34,6 @@ public class AutoReplenish extends Module {
 
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("How long in ticks to wait between replenishing your hotbar.")
         .defaultValue(1)
         .min(0)
         .build()
@@ -43,21 +41,18 @@ public class AutoReplenish extends Module {
 
     private final Setting<Boolean> offhand = sgGeneral.add(new BoolSetting.Builder()
         .name("offhand")
-        .description("Whether or not to replenish items in your offhand.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> unstackable = sgGeneral.add(new BoolSetting.Builder()
         .name("unstackable")
-        .description("Replenish unstackable items.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> sameEnchants = sgGeneral.add(new BoolSetting.Builder()
         .name("same-enchants")
-        .description("Only replace unstackables with items that have the same enchants.")
         .defaultValue(true)
         .visible(unstackable::get)
         .build()
@@ -65,14 +60,12 @@ public class AutoReplenish extends Module {
 
     private final Setting<Boolean> searchHotbar = sgGeneral.add(new BoolSetting.Builder()
         .name("search-hotbar")
-        .description("Combine stacks in your hotbar/offhand as a last resort.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<List<Item>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("excluded-items")
-        .description("Items that won't be replenished.")
         .build()
     );
 
@@ -85,7 +78,7 @@ public class AutoReplenish extends Module {
     private int tickDelayLeft;
 
     public AutoReplenish() {
-        super(Categories.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
+        super(Categories.Player, "auto-replenish");
 
         Arrays.fill(items, Items.AIR.getDefaultStack());
     }
@@ -131,7 +124,7 @@ public class AutoReplenish extends Module {
         items[slot] = stack.copy();
 
         if (slot == 9) slot = SlotUtils.OFFHAND;
-        
+
         if (excludedItems.get().contains(stack.getItem())) return;
         if (excludedItems.get().contains(prevStack.getItem())) return;
 

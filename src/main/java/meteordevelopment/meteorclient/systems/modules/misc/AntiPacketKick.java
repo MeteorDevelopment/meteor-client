@@ -16,21 +16,19 @@ public class AntiPacketKick extends Module {
 
     public final Setting<Boolean> catchExceptions = sgGeneral.add(new BoolSetting.Builder()
         .name("catch-exceptions")
-        .description("Drops corrupted packets.")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<Boolean> logExceptions = sgGeneral.add(new BoolSetting.Builder()
         .name("log-exceptions")
-        .description("Logs caught exceptions.")
         .defaultValue(false)
         .visible(catchExceptions::get)
         .build()
     );
 
     public AntiPacketKick() {
-        super(Categories.Misc, "anti-packet-kick", "Attempts to prevent you from being disconnected by large packets.");
+        super(Categories.Misc, "anti-packet-kick");
     }
 
     public boolean catchExceptions() {

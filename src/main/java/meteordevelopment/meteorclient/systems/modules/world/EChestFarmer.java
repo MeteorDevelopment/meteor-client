@@ -33,18 +33,16 @@ import net.minecraft.util.shape.VoxelShape;
 
 public class EChestFarmer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("self-toggle")
-        .description("Disables when you reach the desired amount of obsidian.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> ignoreExisting = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-existing")
-        .description("Ignores existing obsidian in your inventory and mines the total target amount.")
         .defaultValue(true)
         .visible(selfToggle::get)
         .build()
@@ -52,7 +50,6 @@ public class EChestFarmer extends Module {
 
     private final Setting<Integer> amount = sgGeneral.add(new IntSetting.Builder()
         .name("amount")
-        .description("The amount of obsidian to farm.")
         .defaultValue(64)
         .sliderMax(128)
         .range(8, 512)
@@ -65,35 +62,30 @@ public class EChestFarmer extends Module {
 
     private final Setting<Boolean> swingHand = sgRender.add(new BoolSetting.Builder()
         .name("swing-hand")
-        .description("Swing hand client-side.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
-        .description("Renders a block overlay where the obsidian will be placed.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The color of the sides of the blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 50))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The color of the lines of the blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 255))
         .build()
     );
@@ -104,7 +96,7 @@ public class EChestFarmer extends Module {
     private int startCount;
 
     public EChestFarmer() {
-        super(Categories.World, "echest-farmer", "Places and breaks EChests to farm obsidian.");
+        super(Categories.World, "echest-farmer");
     }
 
     @Override

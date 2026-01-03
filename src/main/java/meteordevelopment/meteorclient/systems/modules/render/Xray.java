@@ -35,7 +35,6 @@ public class Xray extends Module {
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("whitelist")
-        .description("Which blocks to show x-rayed.")
         .defaultValue(ORES)
         .onChanged(v -> {
             if (isActive()) mc.worldRenderer.reload();
@@ -45,7 +44,6 @@ public class Xray extends Module {
 
     public final Setting<Integer> opacity = sgGeneral.add(new IntSetting.Builder()
         .name("opacity")
-        .description("The opacity for all other blocks.")
         .defaultValue(25)
         .range(0, 255)
         .sliderMax(255)
@@ -57,7 +55,6 @@ public class Xray extends Module {
 
     private final Setting<Boolean> exposedOnly = sgGeneral.add(new BoolSetting.Builder()
         .name("exposed-only")
-        .description("Show only exposed ores.")
         .defaultValue(false)
         .onChanged(onChanged -> {
             if (isActive()) mc.worldRenderer.reload();
@@ -65,7 +62,7 @@ public class Xray extends Module {
         .build());
 
     public Xray() {
-        super(Categories.Render, "xray", "Only renders specified blocks. Good for mining.");
+        super(Categories.Render, "xray");
     }
 
     @Override

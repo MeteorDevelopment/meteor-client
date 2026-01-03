@@ -18,35 +18,31 @@ import java.util.List;
 import java.util.Random;
 
 public class AntiAFK extends Module {
-    private final SettingGroup sgActions = settings.createGroup("Actions");
-    private final SettingGroup sgMessages = settings.createGroup("Messages");
+    private final SettingGroup sgActions = settings.createGroup("actions");
+    private final SettingGroup sgMessages = settings.createGroup("messages");
 
     // Actions
 
     private final Setting<Boolean> jump = sgActions.add(new BoolSetting.Builder()
         .name("jump")
-        .description("Jump randomly.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> swing = sgActions.add(new BoolSetting.Builder()
         .name("swing")
-        .description("Swings your hand.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> sneak = sgActions.add(new BoolSetting.Builder()
         .name("sneak")
-        .description("Sneaks and unsneaks quickly.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> sneakTime = sgActions.add(new IntSetting.Builder()
         .name("sneak-time")
-        .description("How many ticks to stay sneaked.")
         .defaultValue(5)
         .min(1)
         .sliderMin(1)
@@ -56,7 +52,6 @@ public class AntiAFK extends Module {
 
     private final Setting<Boolean> strafe = sgActions.add(new BoolSetting.Builder()
         .name("strafe")
-        .description("Strafe right and left.")
         .defaultValue(false)
         .onChanged(aBoolean -> {
             strafeTimer = 0;
@@ -72,14 +67,12 @@ public class AntiAFK extends Module {
 
     private final Setting<Boolean> spin = sgActions.add(new BoolSetting.Builder()
         .name("spin")
-        .description("Spins the player in place.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<SpinMode> spinMode = sgActions.add(new EnumSetting.Builder<SpinMode>()
         .name("spin-mode")
-        .description("The method of rotating.")
         .defaultValue(SpinMode.Server)
         .visible(spin::get)
         .build()
@@ -87,7 +80,6 @@ public class AntiAFK extends Module {
 
     private final Setting<Integer> spinSpeed = sgActions.add(new IntSetting.Builder()
         .name("speed")
-        .description("The speed to spin you.")
         .defaultValue(7)
         .visible(spin::get)
         .build()
@@ -95,7 +87,6 @@ public class AntiAFK extends Module {
 
     private final Setting<Integer> pitch = sgActions.add(new IntSetting.Builder()
         .name("pitch")
-        .description("The pitch to send to the server.")
         .defaultValue(0)
         .range(-90, 90)
         .sliderRange(-90, 90)
@@ -108,14 +99,12 @@ public class AntiAFK extends Module {
 
     private final Setting<Boolean> sendMessages = sgMessages.add(new BoolSetting.Builder()
         .name("send-messages")
-        .description("Sends messages to prevent getting kicked for AFK.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> randomMessage = sgMessages.add(new BoolSetting.Builder()
         .name("random")
-        .description("Selects a random message from your message list.")
         .defaultValue(false)
         .visible(sendMessages::get)
         .build()
@@ -123,7 +112,6 @@ public class AntiAFK extends Module {
 
     private final Setting<Integer> delay = sgMessages.add(new IntSetting.Builder()
         .name("delay")
-        .description("The delay between specified messages in seconds.")
         .defaultValue(15)
         .min(0)
         .sliderMax(30)
@@ -133,7 +121,6 @@ public class AntiAFK extends Module {
 
     private final Setting<List<String>> messages = sgMessages.add(new StringListSetting.Builder()
         .name("messages")
-        .description("The messages to choose from.")
         .defaultValue(
             "Meteor on top!",
             "Meteor on crack!"
@@ -143,7 +130,7 @@ public class AntiAFK extends Module {
     );
 
     public AntiAFK() {
-        super(Categories.Player, "anti-afk", "Performs different actions to prevent getting kicked while AFK.");
+        super(Categories.Player, "anti-afk");
     }
 
     private final Random random = new Random();

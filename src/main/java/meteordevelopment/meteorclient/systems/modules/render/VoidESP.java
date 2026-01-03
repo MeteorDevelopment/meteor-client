@@ -30,20 +30,18 @@ public class VoidESP extends Module {
     private static final Direction[] SIDES = {Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST};
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
     private final Setting<Boolean> airOnly = sgGeneral.add(new BoolSetting.Builder()
         .name("air-only")
-        .description("Checks bedrock only for air blocks.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
         .name("horizontal-radius")
-        .description("Horizontal radius in which to search for holes.")
         .defaultValue(64)
         .min(0)
         .sliderMax(256)
@@ -52,7 +50,6 @@ public class VoidESP extends Module {
 
     private final Setting<Integer> holeHeight = sgGeneral.add(new IntSetting.Builder()
         .name("hole-height")
-        .description("The minimum hole height to be rendered.")
         .defaultValue(1)
         .min(1)
         .sliderRange(1, 5)
@@ -61,7 +58,6 @@ public class VoidESP extends Module {
 
     private final Setting<Boolean> netherRoof = sgGeneral.add(new BoolSetting.Builder()
         .name("nether-roof")
-        .description("Check for holes in nether roof.")
         .defaultValue(true)
         .build()
     );
@@ -70,21 +66,18 @@ public class VoidESP extends Module {
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("fill-color")
-        .description("The color that fills holes in the void.")
         .defaultValue(new SettingColor(225, 25, 25, 50))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The color to draw lines of holes to the void.")
         .defaultValue(new SettingColor(225, 25, 255))
         .build()
     );
@@ -95,7 +88,7 @@ public class VoidESP extends Module {
     private final List<Void> voidHoles = new ArrayList<>();
 
     public VoidESP() {
-        super(Categories.Render, "void-esp", "Renders holes in bedrock layers that lead to the void.");
+        super(Categories.Render, "void-esp");
     }
 
     @EventHandler

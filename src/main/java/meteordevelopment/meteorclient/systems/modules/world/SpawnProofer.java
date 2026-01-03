@@ -31,7 +31,6 @@ public class SpawnProofer extends Module {
 
     private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
         .name("place-delay")
-        .description("The tick delay between placing blocks.")
         .defaultValue(1)
         .range(0, 10)
         .build()
@@ -39,7 +38,6 @@ public class SpawnProofer extends Module {
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("place-range")
-        .description("How far away from the player you can place a block.")
         .defaultValue(4.5)
         .min(0)
         .sliderMax(6)
@@ -48,7 +46,6 @@ public class SpawnProofer extends Module {
 
     private final Setting<Double> wallsRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("walls-range")
-        .description("How far away from the player you can place a block behind walls.")
         .defaultValue(4.5)
         .min(0)
         .sliderMax(6)
@@ -57,7 +54,6 @@ public class SpawnProofer extends Module {
 
     private final Setting<Integer> blocksPerTick = sgGeneral.add(new IntSetting.Builder()
         .name("blocks-per-tick")
-        .description("How many blocks to place in one tick.")
         .defaultValue(1)
         .min(1)
         .build()
@@ -65,7 +61,6 @@ public class SpawnProofer extends Module {
 
     private final Setting<Integer> lightLevel = sgGeneral.add(new IntSetting.Builder()
         .name("light-level")
-        .description("Light levels to spawn proof. Old spawning light: 7.")
         .defaultValue(0)
         .min(0)
         .sliderMax(15)
@@ -74,7 +69,6 @@ public class SpawnProofer extends Module {
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
-        .description("Block to use for spawn proofing.")
         .defaultValue(Blocks.TORCH, Blocks.STONE_BUTTON, Blocks.STONE_SLAB)
         .filter(this::filterBlocks)
         .build()
@@ -82,14 +76,12 @@ public class SpawnProofer extends Module {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("Which spawn types should be spawn proofed.")
         .defaultValue(Mode.Both)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Rotates towards the blocks being placed.")
         .defaultValue(true)
         .build()
     );
@@ -99,7 +91,7 @@ public class SpawnProofer extends Module {
     private int timer;
 
     public SpawnProofer() {
-        super(Categories.World, "spawn-proofer", "Automatically spawnproofs unlit areas.");
+        super(Categories.World, "spawn-proofer");
     }
 
     @EventHandler

@@ -27,28 +27,24 @@ public class AutoEXP extends Module {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("Which items to repair.")
         .defaultValue(Mode.Both)
         .build()
     );
 
     private final Setting<Boolean> replenish = sgGeneral.add(new BoolSetting.Builder()
         .name("replenish")
-        .description("Automatically replenishes exp into a selected hotbar slot.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> onlyGround = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-ground")
-        .description("Only throw when the player is on the ground.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> slot = sgGeneral.add(new IntSetting.Builder()
         .name("exp-slot")
-        .description("The slot to replenish exp into.")
         .visible(replenish::get)
         .defaultValue(6)
         .range(1, 9)
@@ -58,7 +54,6 @@ public class AutoEXP extends Module {
 
     private final Setting<Integer> minThreshold = sgGeneral.add(new IntSetting.Builder()
         .name("min-threshold")
-        .description("The minimum durability percentage that an item needs to fall to, to be repaired.")
         .defaultValue(30)
         .range(1, 100)
         .sliderRange(1, 100)
@@ -67,7 +62,6 @@ public class AutoEXP extends Module {
 
     private final Setting<Integer> maxThreshold = sgGeneral.add(new IntSetting.Builder()
         .name("max-threshold")
-        .description("The maximum durability percentage to repair items to.")
         .defaultValue(80)
         .range(1, 100)
         .sliderRange(1, 100)
@@ -77,7 +71,7 @@ public class AutoEXP extends Module {
     private int repairingI;
 
     public AutoEXP() {
-        super(Categories.Combat, "auto-exp", "Automatically repairs your armor and tools in pvp.");
+        super(Categories.Combat, "auto-exp");
     }
 
     @Override

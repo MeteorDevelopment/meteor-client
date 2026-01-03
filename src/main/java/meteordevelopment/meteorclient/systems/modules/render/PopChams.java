@@ -30,14 +30,12 @@ public class PopChams extends Module {
 
     private final Setting<Boolean> onlyOne = sgGeneral.add(new BoolSetting.Builder()
         .name("only-one")
-        .description("Only allow one ghost per player.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Double> renderTime = sgGeneral.add(new DoubleSetting.Builder()
         .name("render-time")
-        .description("How long the ghost is rendered in seconds.")
         .defaultValue(1)
         .min(0.1)
         .sliderMax(6)
@@ -46,7 +44,6 @@ public class PopChams extends Module {
 
     private final Setting<Double> yModifier = sgGeneral.add(new DoubleSetting.Builder()
         .name("y-modifier")
-        .description("How much should the Y position of the ghost change per second.")
         .defaultValue(0.75)
         .sliderRange(-4, 4)
         .build()
@@ -54,7 +51,6 @@ public class PopChams extends Module {
 
     private final Setting<Double> scaleModifier = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale-modifier")
-        .description("How much should the scale of the ghost change per second.")
         .defaultValue(-0.25)
         .sliderRange(-4, 4)
         .build()
@@ -62,28 +58,24 @@ public class PopChams extends Module {
 
     private final Setting<Boolean> fadeOut = sgGeneral.add(new BoolSetting.Builder()
         .name("fade-out")
-        .description("Fades out the color.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgGeneral.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color.")
         .defaultValue(new SettingColor(255, 255, 255, 25))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color.")
         .defaultValue(new SettingColor(255, 255, 255, 127))
         .build()
     );
@@ -91,7 +83,7 @@ public class PopChams extends Module {
     private final List<GhostPlayer> ghosts = new ArrayList<>();
 
     public PopChams() {
-        super(Categories.Render, "pop-chams", "Renders a ghost where players pop totem.");
+        super(Categories.Render, "pop-chams");
     }
 
     @Override

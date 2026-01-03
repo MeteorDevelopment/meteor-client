@@ -23,11 +23,10 @@ import net.minecraft.util.Hand;
 
 public class BowSpam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgCrossbows = settings.createGroup("Crossbows");
+    private final SettingGroup sgCrossbows = settings.createGroup("crossbows");
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
         .name("charge")
-        .description("How long to charge the bow before releasing in ticks.")
         .defaultValue(5)
         .range(4, 20)
         .sliderRange(4, 20)
@@ -36,21 +35,18 @@ public class BowSpam extends Module {
 
     private final Setting<Boolean> onlyWhenHoldingRightClick = sgGeneral.add(new BoolSetting.Builder()
         .name("when-holding-right-click")
-        .description("Works only when holding right click.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> spamCrossbows = sgCrossbows.add(new BoolSetting.Builder()
         .name("spam-crossbows")
-        .description("Whether to spam loaded crossbows; takes priority over charging bows.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Integer> crossbowDelay = sgCrossbows.add(new IntSetting.Builder()
         .name("crossbow-delay")
-        .description("Delay between shooting crossbows in ticks.")
         .defaultValue(10)
         .sliderRange(0, 20)
         .min(0)
@@ -59,7 +55,6 @@ public class BowSpam extends Module {
 
     private final Setting<Boolean> searchInventory = sgCrossbows.add(new BoolSetting.Builder()
         .name("search-inventory")
-        .description("Whether to search your inventory to find loaded crossbows.")
         .defaultValue(true)
         .build()
     );
@@ -69,7 +64,7 @@ public class BowSpam extends Module {
     private int ticks = 0;
 
     public BowSpam() {
-        super(Categories.Combat, "bow-spam", "Spams bows and crossbows.", "auto-bow", "crossbow-spam", "auto-crossbow");
+        super(Categories.Combat, "bow-spam", "auto-bow", "crossbow-spam", "auto-crossbow");
     }
 
     @Override

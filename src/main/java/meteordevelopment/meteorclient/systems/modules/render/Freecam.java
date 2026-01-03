@@ -51,11 +51,10 @@ import org.lwjgl.glfw.GLFW;
 
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgPathing = settings.createGroup("Pathing");
+    private final SettingGroup sgPathing = settings.createGroup("pathing");
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
-        .description("Your speed while in freecam.")
         .onChanged(aDouble -> speedValue = aDouble)
         .defaultValue(1.0)
         .min(0.0)
@@ -64,7 +63,6 @@ public class Freecam extends Module {
 
     private final Setting<Double> speedScrollSensitivity = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed-scroll-sensitivity")
-        .description("Allows you to change speed value using scroll wheel. 0 to disable.")
         .defaultValue(0)
         .min(0)
         .sliderMax(2)
@@ -73,70 +71,60 @@ public class Freecam extends Module {
 
     private final Setting<Boolean> staySneaking = sgGeneral.add(new BoolSetting.Builder()
         .name("stay-sneaking")
-        .description("If you are sneaking when you enter freecam, whether your player should remain sneaking.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> toggleOnDamage = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-on-damage")
-        .description("Disables freecam when you take damage.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> toggleOnDeath = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-on-death")
-        .description("Disables freecam when you die.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> toggleOnLog = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-on-log")
-        .description("Disables freecam when you disconnect from a server.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> reloadChunks = sgGeneral.add(new BoolSetting.Builder()
         .name("reload-chunks")
-        .description("Disables cave culling.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
         .name("show-hands")
-        .description("Whether or not to render your hands in freecam.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Rotates to the block or entity you are looking at.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> staticView = sgGeneral.add(new BoolSetting.Builder()
         .name("static")
-        .description("Disables settings that move the view.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> baritoneClick = sgPathing.add(new BoolSetting.Builder()
         .name("click-to-path")
-        .description("Sets a pathfinding goal to any block/entity you click at.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> requireDoubleClick = sgPathing.add(new BoolSetting.Builder()
         .name("double-click")
-        .description("Require two clicks to start pathing.")
         .defaultValue(false)
         .build()
     );
@@ -158,7 +146,7 @@ public class Freecam extends Module {
     private long clickTs = 0;
 
     public Freecam() {
-        super(Categories.Render, "freecam", "Allows the camera to move away from the player.");
+        super(Categories.Render, "freecam");
     }
 
     @Override

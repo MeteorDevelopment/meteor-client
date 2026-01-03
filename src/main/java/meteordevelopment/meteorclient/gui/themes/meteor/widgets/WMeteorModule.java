@@ -30,7 +30,7 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
     public WMeteorModule(Module module, String title) {
         this.module = module;
         this.title = title;
-        this.tooltip = module.description;
+        this.tooltip = module.getDescription();
 
         if (module.isActive()) {
             animationProgress1 = 1;

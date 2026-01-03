@@ -20,20 +20,18 @@ public class NoGhostBlocks extends Module {
 
     private final Setting<Boolean> breaking = sgGeneral.add(new BoolSetting.Builder()
         .name("breaking")
-        .description("Whether to apply for block breaking actions.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> placing = sgGeneral.add(new BoolSetting.Builder()
         .name("placing")
-        .description("Whether to apply for block placement actions.")
         .defaultValue(true)
         .build()
     );
 
     public NoGhostBlocks() {
-        super(Categories.World, "no-ghost-blocks", "Attempts to prevent ghost blocks arising.");
+        super(Categories.World, "no-ghost-blocks");
     }
 
     @EventHandler

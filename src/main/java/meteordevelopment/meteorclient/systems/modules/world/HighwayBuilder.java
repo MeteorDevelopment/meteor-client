@@ -108,17 +108,16 @@ public class HighwayBuilder extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgDigging = settings.createGroup("Digging");
-    private final SettingGroup sgPaving = settings.createGroup("Paving");
-    private final SettingGroup sgInventory = settings.createGroup("Inventory");
-    private final SettingGroup sgRenderDigging = settings.createGroup("Render Digging");
-    private final SettingGroup sgRenderPaving = settings.createGroup("Render Paving");
+    private final SettingGroup sgDigging = settings.createGroup("digging");
+    private final SettingGroup sgPaving = settings.createGroup("paving");
+    private final SettingGroup sgInventory = settings.createGroup("inventory");
+    private final SettingGroup sgRenderDigging = settings.createGroup("render-digging");
+    private final SettingGroup sgRenderPaving = settings.createGroup("render-paving");
 
     // General
 
     private final Setting<Integer> width = sgGeneral.add(new IntSetting.Builder()
         .name("width")
-        .description("Width of the highway.")
         .defaultValue(4)
         .range(1, 5)
         .sliderRange(1, 5)
@@ -127,7 +126,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Integer> height = sgGeneral.add(new IntSetting.Builder()
         .name("height")
-        .description("Height of the highway.")
         .defaultValue(3)
         .range(2, 5)
         .sliderRange(2, 5)
@@ -136,21 +134,18 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Floor> floor = sgGeneral.add(new EnumSetting.Builder<Floor>()
         .name("floor")
-        .description("What floor placement mode to use.")
         .defaultValue(Floor.Replace)
         .build()
     );
 
     private final Setting<Boolean> railings = sgGeneral.add(new BoolSetting.Builder()
         .name("railings")
-        .description("Builds railings next to the highway.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> cornerBlock = sgGeneral.add(new BoolSetting.Builder()
         .name("corner-support-block")
-        .description("Places a support block underneath the railings, to prevent air placing.")
         .defaultValue(true)
         .visible(railings::get)
         .build()
@@ -158,35 +153,30 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> mineAboveRailings = sgGeneral.add(new BoolSetting.Builder()
         .name("mine-above-railings")
-        .description("Mines blocks above railings.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Rotation> rotation = sgGeneral.add(new EnumSetting.Builder<Rotation>()
         .name("rotation")
-        .description("Mode of rotation.")
         .defaultValue(Rotation.Both)
         .build()
     );
 
     private final Setting<Boolean> disconnectOnToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("disconnect-on-toggle")
-        .description("Automatically disconnects when the module is turned off, for example for not having enough blocks.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> pauseOnLag = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-on-lag")
-        .description("Pauses the current process while the server stops responding.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> destroyCrystalTraps = sgGeneral.add(new BoolSetting.Builder()
         .name("destroy-crystal-traps")
-        .description("Use a bow to defuse crystal traps safely from a distance. An infinity bow is recommended.")
         .defaultValue(true)
         .build()
     );
@@ -195,14 +185,12 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> doubleMine = sgDigging.add(new BoolSetting.Builder()
         .name("double-mine")
-        .description("Whether to double mine blocks when applicable (normal mine and packet mine simultaneously).")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> fastBreak = sgDigging.add(new BoolSetting.Builder()
         .name("fast-break")
-        .description("Whether to finish breaking blocks faster than normal while double mining.")
         .defaultValue(true)
         .visible(doubleMine::get)
         .build()
@@ -210,14 +198,12 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> dontBreakTools = sgDigging.add(new BoolSetting.Builder()
         .name("dont-break-tools")
-        .description("Don't break tools.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> breakDurability = sgDigging.add(new IntSetting.Builder()
         .name("durability-percentage")
-        .description("The durability percentage at which to stop using a tool.")
         .defaultValue(2)
         .range(1, 100)
         .sliderRange(1, 100)
@@ -227,7 +213,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Integer> savePickaxes = sgDigging.add(new IntSetting.Builder()
         .name("save-pickaxes")
-        .description("How many pickaxes to ensure are saved. Hitting this number in your inventory will trigger a restock or the module toggling off.")
         .defaultValue(1)
         .range(0, 36)
         .sliderRange(0, 36)
@@ -237,7 +222,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Integer> breakDelay = sgDigging.add(new IntSetting.Builder()
         .name("break-delay")
-        .description("The delay between breaking blocks.")
         .defaultValue(0)
         .min(0)
         .build()
@@ -245,7 +229,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Integer> blocksPerTick = sgDigging.add(new IntSetting.Builder()
         .name("blocks-per-tick")
-        .description("The maximum amount of blocks that can be mined in a tick. Only applies to blocks instantly breakable.")
         .defaultValue(1)
         .range(1, 100)
         .sliderRange(1, 25)
@@ -256,7 +239,6 @@ public class HighwayBuilder extends Module {
 
     public final Setting<List<Block>> blocksToPlace = sgPaving.add(new BlockListSetting.Builder()
         .name("blocks-to-place")
-        .description("Blocks it is allowed to place.")
         .defaultValue(Blocks.OBSIDIAN)
         .filter(block -> Block.isShapeFullCube(block.getDefaultState().getCollisionShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN)))
         .build()
@@ -264,7 +246,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Double> placeRange = sgPaving.add(new DoubleSetting.Builder()
         .name("place-range")
-        .description("The maximum distance at which you can place blocks.")
         .defaultValue(4.5)
         .sliderMax(5.5)
         .build()
@@ -272,7 +253,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Integer> placeDelay = sgPaving.add(new IntSetting.Builder()
         .name("place-delay")
-        .description("The delay between placing blocks.")
         .defaultValue(0)
         .min(0)
         .build()
@@ -280,7 +260,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Integer> placementsPerTick = sgPaving.add(new IntSetting.Builder()
         .name("placements-per-tick")
-        .description("The maximum amount of blocks that can be placed in a tick.")
         .defaultValue(1)
         .min(1)
         .build()
@@ -290,7 +269,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<List<Item>> trashItems = sgInventory.add(new ItemListSetting.Builder()
         .name("trash-items")
-        .description("Items that are considered trash and can be thrown out.")
         .defaultValue(
             Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GOLDEN_SWORD, Items.GLOWSTONE_DUST,
             Items.GLOWSTONE, Items.BLACKSTONE, Items.BASALT, Items.GHAST_TEAR, Items.SOUL_SAND, Items.SOUL_SOIL,
@@ -301,7 +279,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Integer> inventoryDelay = sgInventory.add(new IntSetting.Builder()
         .name("inventory-delay")
-        .description("Delay in ticks on inventory interactions.")
         .defaultValue(3)
         .min(0)
         .build()
@@ -309,28 +286,24 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> ejectUselessShulkers = sgInventory.add(new BoolSetting.Builder()
         .name("eject-useless-shulkers")
-        .description("Whether you should eject useless shulkers. Warning - will throw out any shulkers that don't contain blocks to place, pickaxes, or food. Be careful with your kits.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> searchEnderChest = sgInventory.add(new BoolSetting.Builder()
         .name("search-ender-chest")
-        .description("Searches your ender chest to find items to use. Be careful with this one, especially if you let it search through shulkers.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> searchShulkers = sgInventory.add(new BoolSetting.Builder()
         .name("search-shulkers")
-        .description("Searches through shulkers to find items to use.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Integer> minEmpty = sgInventory.add(new IntSetting.Builder()
         .name("minimum-empty-slots")
-        .description("The minimum amount of empty slots you want left after mining obsidian.")
         .defaultValue(3)
         .sliderRange(0, 9)
         .min(0)
@@ -339,14 +312,12 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> mineEnderChests = sgInventory.add(new BoolSetting.Builder()
         .name("mine-ender-chests")
-        .description("Mines ender chests for obsidian.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<BlockadeType> blockadeType = sgInventory.add(new EnumSetting.Builder<BlockadeType>()
         .name("echest-blockade-type")
-        .description("What blockade type to use (the structure placed when mining echests).")
         .defaultValue(BlockadeType.Full)
         .visible(mineEnderChests::get)
         .build()
@@ -354,7 +325,6 @@ public class HighwayBuilder extends Module {
 
     public final Setting<Integer> saveEchests = sgInventory.add(new IntSetting.Builder()
         .name("save-ender-chests")
-        .description("How many ender chests to ensure are saved. Hitting this number in your inventory will trigger a restock or the module toggling off.")
         .defaultValue(2)
         .range(0, 64)
         .sliderRange(0, 64)
@@ -364,7 +334,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> rebreakEchests = sgInventory.add(new BoolSetting.Builder()
         .name("instantly-rebreak-echests")
-        .description("Whether or not to use the instant rebreak exploit to break echests.")
         .defaultValue(false)
         .visible(mineEnderChests::get)
         .build()
@@ -372,7 +341,6 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Integer> rebreakTimer = sgInventory.add(new IntSetting.Builder()
         .name("rebreak-delay")
-        .description("Delay between rebreak attempts.")
         .defaultValue(0)
         .sliderMax(20)
         .visible(() -> mineEnderChests.get() && rebreakEchests.get())
@@ -383,28 +351,24 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> renderMine = sgRenderDigging.add(new BoolSetting.Builder()
         .name("render-blocks-to-mine")
-        .description("Render blocks to be mined.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> renderMineShape = sgRenderDigging.add(new EnumSetting.Builder<ShapeMode>()
         .name("blocks-to-mine-shape-mode")
-        .description("How the blocks to be mined are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> renderMineSideColor = sgRenderDigging.add(new ColorSetting.Builder()
         .name("blocks-to-mine-side-color")
-        .description("Color of blocks to be mined.")
         .defaultValue(new SettingColor(225, 25, 25, 25))
         .build()
     );
 
     private final Setting<SettingColor> renderMineLineColor = sgRenderDigging.add(new ColorSetting.Builder()
         .name("blocks-to-mine-line-color")
-        .description("Color of blocks to be mined.")
         .defaultValue(new SettingColor(225, 25, 25))
         .build()
     );
@@ -413,28 +377,24 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> renderPlace = sgRenderPaving.add(new BoolSetting.Builder()
         .name("render-blocks-to-place")
-        .description("Render blocks to be placed.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> renderPlaceShape = sgRenderPaving.add(new EnumSetting.Builder<ShapeMode>()
         .name("blocks-to-place-shape-mode")
-        .description("How the blocks to be placed are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> renderPlaceSideColor = sgRenderPaving.add(new ColorSetting.Builder()
         .name("blocks-to-place-side-color")
-        .description("Color of blocks to be placed.")
         .defaultValue(new SettingColor(25, 25, 225, 25))
         .build()
     );
 
     private final Setting<SettingColor> renderPlaceLineColor = sgRenderPaving.add(new ColorSetting.Builder()
         .name("blocks-to-place-line-color")
-        .description("Color of blocks to be placed.")
         .defaultValue(new SettingColor(25, 25, 225))
         .build()
     );
@@ -462,7 +422,7 @@ public class HighwayBuilder extends Module {
     private final MBlockPos posRender3 = new MBlockPos();
 
     public HighwayBuilder() {
-        super(Categories.World, "highway-builder", "Automatically builds highways.");
+        super(Categories.World, "highway-builder");
         runInMainMenu = true;
     }
 
@@ -712,7 +672,7 @@ public class HighwayBuilder extends Module {
     }
 
     private void disconnect(String message, Object... args) {
-        MutableText text = Text.literal(String.format("%s[%s%s%s] %s", Formatting.GRAY, Formatting.BLUE, title, Formatting.GRAY, Formatting.RED) + String.format(message, args)).append("\n");
+        MutableText text = Text.literal(String.format("%s[%s%s%s] %s", Formatting.GRAY, Formatting.BLUE, this.getTitle(), Formatting.GRAY, Formatting.RED) + String.format(message, args)).append("\n");
         text.append(getStatsText());
 
         mc.getNetworkHandler().getConnection().disconnect(text);

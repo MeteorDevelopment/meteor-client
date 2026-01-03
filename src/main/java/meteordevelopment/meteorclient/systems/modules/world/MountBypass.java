@@ -17,7 +17,7 @@ public class MountBypass extends Module {
     private boolean dontCancel;
 
     public MountBypass() {
-        super(Categories.World, "mount-bypass", "Allows you to bypass the IllegalStacks plugin and put chests on entities.");
+        super(Categories.World, "mount-bypass");
     }
 
     @EventHandler

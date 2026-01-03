@@ -22,20 +22,18 @@ public class MessageAura extends Module {
 
     private final Setting<String> message = sgGeneral.add(new StringSetting.Builder()
         .name("message")
-        .description("The specified message sent to the player.")
         .defaultValue("Meteor on Crack!")
         .build()
     );
 
     private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-friends")
-        .description("Will not send any messages to people friended.")
         .defaultValue(false)
         .build()
     );
 
     public MessageAura() {
-        super(Categories.Misc, "message-aura", "Sends a specified message to any player that enters render distance.");
+        super(Categories.Misc, "message-aura");
     }
 
     @EventHandler
