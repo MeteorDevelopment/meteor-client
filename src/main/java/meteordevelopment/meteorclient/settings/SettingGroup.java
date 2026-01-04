@@ -5,11 +5,13 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,6 +20,7 @@ import java.util.List;
 public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setting<?>> {
     public final String name;
     public boolean sectionExpanded;
+    public @Nullable String oldName;
 
     final List<Setting<?>> settings = new ArrayList<>(1);
 
@@ -49,6 +52,11 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
             if (setting.wasChanged()) return true;
         }
         return false;
+    }
+
+    public SettingGroup renamedFrom(String oldName) {
+        this.oldName = Utils.titleToName(oldName);
+        return this;
     }
 
     @Override
