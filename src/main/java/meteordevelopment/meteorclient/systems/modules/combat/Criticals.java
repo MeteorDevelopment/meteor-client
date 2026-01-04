@@ -184,9 +184,9 @@ public class Criticals extends Module {
             packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false, false);
         } else {
             packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false, mc.player.horizontalCollision);
-            ((IPlayerMoveC2SPacket) packet).meteor$setTag(1337);
         }
 
+        ((IPlayerMoveC2SPacket) packet).meteor$setTag(1337);
         mc.player.networkHandler.sendPacket(packet);
     }
 
