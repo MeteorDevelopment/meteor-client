@@ -39,7 +39,7 @@ public class WBlock extends WWidget {
 
     protected BlockState state;
     protected boolean initialized;
-    protected boolean chached;
+    protected boolean cached;
 
     public WBlock(BlockState state) {
         this.state = state;
@@ -71,7 +71,7 @@ public class WBlock extends WWidget {
 
         // Render block
         if (!initialized) {
-            chached = !SimpleBlockRenderer.hasAnimatedTextures(state);
+            cached = !SimpleBlockRenderer.hasAnimatedTextures(state);
         }
 
         if (IMMEDIATE == null) {
@@ -81,7 +81,7 @@ public class WBlock extends WWidget {
             PROJECTION_SCREEN = new ProjectionMatrix2("Block widget screen projection", -100, 100, false);
         }
 
-        if (chached) {
+        if (cached) {
             Texture texture = TEXTURES.computeIfAbsent(state, WBlock::renderToTexture);
             renderer.texture(x, y, width, height, 0, texture);
         } else {
