@@ -34,7 +34,6 @@ import net.minecraft.util.math.BlockPos;
 import java.util.List;
 import java.util.function.Predicate;
 
-// todo map
 public class InfinityMiner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgWhenFull = settings.createGroup("when-full");

@@ -22,7 +22,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.hit.BlockHitResult;
 import org.lwjgl.glfw.GLFW;
 
-// todo map
 public class Excavator extends Module {
     private final IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
