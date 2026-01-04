@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public class Settings implements ISerializable<Settings>, Iterable<SettingGroup> {
     private SettingGroup defaultGroup;
@@ -80,6 +81,10 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         name = Utils.titleToName(name);
         for (SettingGroup sg : this) {
             if (sg.name.equals(name)) return sg;
+        }
+
+        for (SettingGroup sg : this) {
+            if (Objects.equals(sg.oldName, name)) return sg;
         }
 
         return null;
