@@ -25,7 +25,7 @@ import org.lwjgl.glfw.GLFW;
 public class Excavator extends Module {
     private final IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRendering = settings.createGroup("rendering");
+    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("rendering");
 
     // Keybindings
     private final Setting<Keybind> selectionBind = sgGeneral.add(new KeybindSetting.Builder()
@@ -48,19 +48,19 @@ public class Excavator extends Module {
     );
 
     // Rendering
-    private final Setting<ShapeMode> shapeMode = sgRendering.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
-    private final Setting<SettingColor> sideColor = sgRendering.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgVisual.add(new ColorSetting.Builder()
         .name("side-color")
         .defaultValue(new SettingColor(255, 255, 255, 50))
         .build()
     );
 
-    private final Setting<SettingColor> lineColor = sgRendering.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgVisual.add(new ColorSetting.Builder()
         .name("line-color")
         .defaultValue(new SettingColor(255, 255, 255, 255))
         .build()

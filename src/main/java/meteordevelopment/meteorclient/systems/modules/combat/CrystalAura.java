@@ -73,7 +73,7 @@ public class CrystalAura extends Module {
     private final SettingGroup sgFacePlace = settings.createGroup("face-place");
     private final SettingGroup sgBreak = settings.createGroup("break");
     private final SettingGroup sgPause = settings.createGroup("pause");
-    private final SettingGroup sgRender = settings.createGroup("render");
+    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
 
     // General
 
@@ -382,26 +382,26 @@ public class CrystalAura extends Module {
 
     // Render
 
-    public final Setting<SwingMode> swingMode = sgRender.add(new EnumSetting.Builder<SwingMode>()
+    public final Setting<SwingMode> swingMode = sgVisual.add(new EnumSetting.Builder<SwingMode>()
         .name("swing-mode")
         .defaultValue(SwingMode.Both)
         .build()
     );
 
-    private final Setting<RenderMode> renderMode = sgRender.add(new EnumSetting.Builder<RenderMode>()
+    private final Setting<RenderMode> renderMode = sgVisual.add(new EnumSetting.Builder<RenderMode>()
         .name("render-mode")
         .defaultValue(RenderMode.Normal)
         .build()
     );
 
-    private final Setting<Boolean> renderPlace = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> renderPlace = sgVisual.add(new BoolSetting.Builder()
         .name("render-place")
         .defaultValue(true)
         .visible(() -> renderMode.get() == RenderMode.Normal)
         .build()
     );
 
-    private final Setting<Integer> placeRenderTime = sgRender.add(new IntSetting.Builder()
+    private final Setting<Integer> placeRenderTime = sgVisual.add(new IntSetting.Builder()
         .name("place-time")
         .defaultValue(10)
         .min(0)
@@ -410,14 +410,14 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> renderBreak = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> renderBreak = sgVisual.add(new BoolSetting.Builder()
         .name("render-break")
         .defaultValue(false)
         .visible(() -> renderMode.get() == RenderMode.Normal)
         .build()
     );
 
-    private final Setting<Integer> breakRenderTime = sgRender.add(new IntSetting.Builder()
+    private final Setting<Integer> breakRenderTime = sgVisual.add(new IntSetting.Builder()
         .name("break-time")
         .defaultValue(13)
         .min(0)
@@ -426,7 +426,7 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Integer> smoothness = sgRender.add(new IntSetting.Builder()
+    private final Setting<Integer> smoothness = sgVisual.add(new IntSetting.Builder()
         .name("smoothness")
         .defaultValue(10)
         .min(0)
@@ -435,7 +435,7 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Double> height = sgRender.add(new DoubleSetting.Builder()
+    private final Setting<Double> height = sgVisual.add(new DoubleSetting.Builder()
         .name("height")
         .defaultValue(0.7)
         .min(0)
@@ -444,7 +444,7 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Integer> renderTime = sgRender.add(new IntSetting.Builder()
+    private final Setting<Integer> renderTime = sgVisual.add(new IntSetting.Builder()
         .name("render-time")
         .defaultValue(10)
         .min(0)
@@ -453,42 +453,42 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .defaultValue(ShapeMode.Both)
         .visible(() -> renderMode.get() != RenderMode.None)
         .build()
     );
 
-    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgVisual.add(new ColorSetting.Builder()
         .name("side-color")
         .defaultValue(new SettingColor(255, 255, 255, 45))
         .visible(() -> shapeMode.get().sides() && renderMode.get() != RenderMode.None)
         .build()
     );
 
-    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgVisual.add(new ColorSetting.Builder()
         .name("line-color")
         .defaultValue(new SettingColor(255, 255, 255))
         .visible(() -> shapeMode.get().lines() && renderMode.get() != RenderMode.None)
         .build()
     );
 
-    private final Setting<Boolean> renderDamageText = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> renderDamageText = sgVisual.add(new BoolSetting.Builder()
         .name("damage")
         .defaultValue(true)
         .visible(() -> renderMode.get() != RenderMode.None)
         .build()
     );
 
-    private final Setting<SettingColor> damageColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> damageColor = sgVisual.add(new ColorSetting.Builder()
         .name("damage-color")
         .defaultValue(new SettingColor(255, 255, 255))
         .visible(() -> renderMode.get() != RenderMode.None && renderDamageText.get())
         .build()
     );
 
-    private final Setting<Double> damageTextScale = sgRender.add(new DoubleSetting.Builder()
+    private final Setting<Double> damageTextScale = sgVisual.add(new DoubleSetting.Builder()
         .name("damage-scale")
         .defaultValue(1.25)
         .min(1)
