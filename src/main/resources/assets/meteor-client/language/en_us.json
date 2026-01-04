@@ -80,6 +80,14 @@
   "category.misc": "Misc",
 
   "module.base.general": "General",
+  "module.base.bind": "Bind",
+  "module.base.bind.bind": "Bind: ",
+  "module.base.bind.toggle-on-release": "Toggle on bind release: ",
+  "module.base.bind.chat-feedback": "Chat Feedback: ",
+  "module.base.active": "Active: ",
+  "module.base.copy-config": "Copy config",
+  "module.base.paste-config": "Paste config",
+  "module.base.from": "From: ",
 
   "module.air-jump": "Air Jump",
   "module.air-jump.description": "Lets you jump in the air.",
