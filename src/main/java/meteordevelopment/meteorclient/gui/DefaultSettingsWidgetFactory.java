@@ -112,7 +112,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         RemoveInfo removeInfo = null;
 
         for (Setting<?> setting : group) {
-            String settingKey = groupKey + "." + setting.name;
+            String settingKey = baseKey + "." + group.name + "." + setting.name;
             String title = MeteorTranslations.translate(settingKey, () -> Utils.nameToTitle(setting.name));
             if (!Strings.CI.contains(title, filter) && !Strings.CI.contains(setting.name, filter)) continue;
 

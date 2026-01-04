@@ -23,6 +23,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WFavorite;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
 import meteordevelopment.orbit.EventHandler;
@@ -53,7 +54,7 @@ public class ModuleScreen extends WindowScreen {
 
         if (module.addon != null && module.addon != MeteorClient.ADDON) {
             WHorizontalList addon = add(theme.horizontalList()).expandX().widget();
-            addon.add(theme.label("From: ").color(theme.textSecondaryColor())).widget();
+            addon.add(theme.label(MeteorTranslations.translate("module.base.from")).color(theme.textSecondaryColor())).widget();
             addon.add(theme.label(module.addon.name).color(module.addon.color)).widget();
         }
 
@@ -73,12 +74,12 @@ public class ModuleScreen extends WindowScreen {
         }
 
         // Bind
-        WSection section = add(theme.section("Bind", true)).expandX().widget();
+        WSection section = add(theme.section(MeteorTranslations.translate("module.base.bind"), true)).expandX().widget();
 
         // Keybind
         WHorizontalList bind = section.add(theme.horizontalList()).expandX().widget();
 
-        bind.add(theme.label("Bind: "));
+        bind.add(theme.label(MeteorTranslations.translate("module.base.bind.bind")));
         keybind = bind.add(theme.keybind(module.keybind)).expandX().widget();
         keybind.actionOnSet = () -> Modules.get().setModuleToBind(module);
 
@@ -89,14 +90,14 @@ public class ModuleScreen extends WindowScreen {
         // Toggle on bind release
         WHorizontalList tobr = section.add(theme.horizontalList()).widget();
 
-        tobr.add(theme.label("Toggle on bind release: "));
+        tobr.add(theme.label(MeteorTranslations.translate("module.base.bind.toggle-on-release")));
         WCheckbox tobrC = tobr.add(theme.checkbox(module.toggleOnBindRelease)).widget();
         tobrC.action = () -> module.toggleOnBindRelease = tobrC.checked;
 
         // Chat feedback
         WHorizontalList cf = section.add(theme.horizontalList()).widget();
 
-        cf.add(theme.label("Chat Feedback: "));
+        cf.add(theme.label(MeteorTranslations.translate("module.base.bind.chat-feedback")));
         WCheckbox cfC = cf.add(theme.checkbox(module.chatFeedback)).widget();
         cfC.action = () -> module.chatFeedback = cfC.checked;
 
@@ -106,7 +107,7 @@ public class ModuleScreen extends WindowScreen {
         WHorizontalList bottom = add(theme.horizontalList()).expandX().widget();
 
         // Active
-        bottom.add(theme.label("Active: "));
+        bottom.add(theme.label(MeteorTranslations.translate("module.base.active")));
         active = bottom.add(theme.checkbox(module.isActive())).expandCellX().widget();
         active.action = () -> {
             if (module.isActive() != active.checked) module.toggle();
@@ -126,11 +127,11 @@ public class ModuleScreen extends WindowScreen {
                     .show();
             }
         };
-        copy.tooltip = "Copy config";
+        copy.tooltip = MeteorTranslations.translate("module.base.copy-config");
 
         WButton paste = sharing.add(theme.button(GuiRenderer.PASTE)).widget();
         paste.action = this::fromClipboard;
-        paste.tooltip = "Paste config";
+        paste.tooltip = MeteorTranslations.translate("module.base.paste-config");
     }
 
     @Override
