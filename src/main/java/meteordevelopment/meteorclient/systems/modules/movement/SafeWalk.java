@@ -23,7 +23,7 @@ import net.minecraft.world.RaycastContext;
 
 public class SafeWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("render");
+    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
 
     private final Setting<Integer> fallDistance = sgGeneral.add(new IntSetting.Builder()
         .name("minimum-fall-distance")
@@ -61,14 +61,14 @@ public class SafeWalk extends Module {
         .build()
     );
 
-    private final Setting<Boolean> renderEdgeDistance = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> renderEdgeDistance = sgVisual.add(new BoolSetting.Builder()
         .name("render")
         .defaultValue(false)
         .visible(sneak::get)
         .build()
     );
 
-    private final Setting<Boolean> renderPlayerBox = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> renderPlayerBox = sgVisual.add(new BoolSetting.Builder()
         .name("render-player-box")
         .defaultValue(false)
         .visible(() -> sneak.get() && renderEdgeDistance.get())

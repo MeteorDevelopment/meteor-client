@@ -32,7 +32,7 @@ import java.util.List;
 
 public class Scaffold extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("render");
+    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
@@ -134,27 +134,27 @@ public class Scaffold extends Module {
 
     // Render
 
-    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> render = sgVisual.add(new BoolSetting.Builder()
         .name("render")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .defaultValue(ShapeMode.Both)
         .visible(render::get)
         .build()
     );
 
-    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgVisual.add(new ColorSetting.Builder()
         .name("side-color")
         .defaultValue(new SettingColor(197, 137, 232, 10))
         .visible(render::get)
         .build()
     );
 
-    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgVisual.add(new ColorSetting.Builder()
         .name("line-color")
         .defaultValue(new SettingColor(197, 137, 232))
         .visible(render::get)

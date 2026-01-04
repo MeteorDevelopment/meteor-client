@@ -32,7 +32,7 @@ import java.util.List;
 
 public class HoleESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("render");
+    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
 
     // General
 
@@ -80,62 +80,62 @@ public class HoleESP extends Module {
 
     // Render
 
-    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
-    private final Setting<Double> height = sgRender.add(new DoubleSetting.Builder()
+    private final Setting<Double> height = sgVisual.add(new DoubleSetting.Builder()
         .name("height")
         .defaultValue(0.2)
         .min(0)
         .build()
     );
 
-    private final Setting<Boolean> topQuad = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> topQuad = sgVisual.add(new BoolSetting.Builder()
         .name("top-quad")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> bottomQuad = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> bottomQuad = sgVisual.add(new BoolSetting.Builder()
         .name("bottom-quad")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<SettingColor> bedrockColorTop = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> bedrockColorTop = sgVisual.add(new ColorSetting.Builder()
         .name("bedrock-top")
         .defaultValue(new SettingColor(100, 255, 0, 200))
         .build()
     );
 
-    private final Setting<SettingColor> bedrockColorBottom = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> bedrockColorBottom = sgVisual.add(new ColorSetting.Builder()
         .name("bedrock-bottom")
         .defaultValue(new SettingColor(100, 255, 0, 0))
         .build()
     );
 
-    private final Setting<SettingColor> obsidianColorTop = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> obsidianColorTop = sgVisual.add(new ColorSetting.Builder()
         .name("obsidian-top")
         .defaultValue(new SettingColor(255, 0, 0, 200))
         .build()
     );
 
-    private final Setting<SettingColor> obsidianColorBottom = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> obsidianColorBottom = sgVisual.add(new ColorSetting.Builder()
         .name("obsidian-bottom")
         .defaultValue(new SettingColor(255, 0, 0, 0))
         .build()
     );
 
-    private final Setting<SettingColor> mixedColorTop = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> mixedColorTop = sgVisual.add(new ColorSetting.Builder()
         .name("mixed-top")
         .defaultValue(new SettingColor(255, 127, 0, 200))
         .build()
     );
 
-    private final Setting<SettingColor> mixedColorBottom = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> mixedColorBottom = sgVisual.add(new ColorSetting.Builder()
         .name("mixed-bottom")
         .defaultValue(new SettingColor(255, 127, 0, 0))
         .build()

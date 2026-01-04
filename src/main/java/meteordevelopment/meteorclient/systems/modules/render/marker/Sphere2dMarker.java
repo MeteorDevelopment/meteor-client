@@ -33,7 +33,7 @@ public class Sphere2dMarker extends BaseMarker {
     public static final String type = "Sphere-2D";
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgVisual = settings.createGroup("Visual").renamedFrom("Render");
     private final SettingGroup sgKeybinding = settings.createGroup("Keybinding");
 
     private final Setting<BlockPos> center = sgGeneral.add(new BlockPosSetting.Builder()
@@ -65,14 +65,14 @@ public class Sphere2dMarker extends BaseMarker {
 
     // Render
 
-    private final Setting<Boolean> limitRenderRange = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> limitRenderRange = sgVisual.add(new BoolSetting.Builder()
         .name("limit-render-range")
         .description("Whether to limit rendering range (useful in very large circles)")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Integer> renderRange = sgRender.add(new IntSetting.Builder()
+    private final Setting<Integer> renderRange = sgVisual.add(new IntSetting.Builder()
         .name("render-range")
         .description("Rendering range")
         .defaultValue(10)
@@ -82,21 +82,21 @@ public class Sphere2dMarker extends BaseMarker {
         .build()
     );
 
-    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
-    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgVisual.add(new ColorSetting.Builder()
         .name("side-color")
         .description("The color of the sides of the blocks being rendered.")
         .defaultValue(new SettingColor(0, 100, 255, 50))
         .build()
     );
 
-    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgVisual.add(new ColorSetting.Builder()
         .name("line-color")
         .description("The color of the lines of the blocks being rendered.")
         .defaultValue(new SettingColor(0, 100, 255, 255))

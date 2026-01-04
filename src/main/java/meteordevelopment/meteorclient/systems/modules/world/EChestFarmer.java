@@ -33,7 +33,7 @@ import net.minecraft.util.shape.VoxelShape;
 
 public class EChestFarmer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("render");
+    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
 
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("self-toggle")
@@ -60,31 +60,31 @@ public class EChestFarmer extends Module {
 
     // Render
 
-    private final Setting<Boolean> swingHand = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> swingHand = sgVisual.add(new BoolSetting.Builder()
         .name("swing-hand")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> render = sgVisual.add(new BoolSetting.Builder()
         .name("render")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
-    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgVisual.add(new ColorSetting.Builder()
         .name("side-color")
         .defaultValue(new SettingColor(204, 0, 0, 50))
         .build()
     );
 
-    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgVisual.add(new ColorSetting.Builder()
         .name("line-color")
         .defaultValue(new SettingColor(204, 0, 0, 255))
         .build()
