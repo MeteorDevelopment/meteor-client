@@ -20,7 +20,7 @@ import net.minecraft.util.Formatting;
 
 public class CommandsCommand extends Command {
     public CommandsCommand() {
-        super("commands", "List of all commands.", "help");
+        super("commands", "help");
     }
 
     @Override
