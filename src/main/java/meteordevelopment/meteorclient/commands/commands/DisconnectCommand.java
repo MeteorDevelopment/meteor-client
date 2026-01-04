@@ -15,7 +15,7 @@ import net.minecraft.util.Formatting;
 
 public class DisconnectCommand extends Command {
     public DisconnectCommand() {
-        super("disconnect", "Disconnect from the server", "dc");
+        super("disconnect", "dc");
     }
 
     @Override

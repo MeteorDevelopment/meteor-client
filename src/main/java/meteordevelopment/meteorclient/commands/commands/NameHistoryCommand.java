@@ -27,7 +27,7 @@ import java.util.UUID;
 
 public class NameHistoryCommand extends Command {
     public NameHistoryCommand() {
-        super("name-history", "Provides a list of a players previous names from the laby.net api.", "history", "names");
+        super("name-history", "history", "names");
     }
 
     @Override

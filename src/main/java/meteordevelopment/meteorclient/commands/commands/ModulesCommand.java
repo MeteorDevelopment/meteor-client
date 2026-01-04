@@ -18,7 +18,7 @@ import net.minecraft.util.Formatting;
 
 public class ModulesCommand extends Command {
     public ModulesCommand() {
-        super("modules", "Displays a list of all modules.", "features");
+        super("modules", "features");
     }
 
     @Override

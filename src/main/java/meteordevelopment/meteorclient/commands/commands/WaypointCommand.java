@@ -20,7 +20,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class WaypointCommand extends Command {
     public WaypointCommand() {
-        super("waypoint", "Manages waypoints.", "wp");
+        super("waypoint", "wp");
     }
 
     @Override

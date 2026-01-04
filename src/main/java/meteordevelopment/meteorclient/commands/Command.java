@@ -34,20 +34,15 @@ public abstract class Command {
     private final List<String> aliases;
     public final String translationKey;
 
-    // todo remove the description parameter in the next minecraft version update
-    @Deprecated(forRemoval = true)
-    public Command(String name, String description, String... aliases) {
+    public Command(String name, String... aliases) {
         this.name = name;
         this.title = Utils.nameToTitle(name);
         this.aliases = List.of(aliases);
-        this.translationKey = "meteor.command." + name;
+        this.translationKey = "command." + name;
     }
 
     public Command(String name) {
-        this.name = name;
-        this.title = Utils.nameToTitle(name);
-        this.aliases = List.of();
-        this.translationKey = "meteor.command." + name;
+        this(name, new String[0]);
     }
 
     // Helper methods to painlessly infer the CommandSource generic type argument
