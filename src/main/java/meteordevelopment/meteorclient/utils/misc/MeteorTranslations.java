@@ -81,6 +81,7 @@ public class MeteorTranslations {
 
                 // noinspection unchecked
                 Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), Object2ObjectOpenHashMap.class);
+                map.values().removeIf(String::isEmpty);
                 languageMap.putAll(map);
 
                 MeteorClient.LOG.info("Loaded language {} from addon {}", languageCode, addon.name);
