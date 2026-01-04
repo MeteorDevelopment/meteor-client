@@ -976,11 +976,11 @@
   "module.hand-view.off-hand.rotation.description": "The rotation of your off hand.",
   "module.hand-view.arm": "Arm",
   "module.hand-view.arm.scale": "Scale",
-  "module.hand-view.arm.scale.description": "",
+
   "module.hand-view.arm.position": "Position",
-  "module.hand-view.arm.position.description": "",
+
   "module.hand-view.arm.rotation": "Rotation",
-  "module.hand-view.arm.rotation.description": "",
+
 
   "module.instant-rebreak": "Instant Rebreak",
   "module.instant-rebreak.description": "Instantly re-breaks blocks in the same position.",
@@ -1654,7 +1654,7 @@
   "module.flamethrower.general.target-babies": "Target Babies",
   "module.flamethrower.general.target-babies.description": "If checked babies will also be killed.",
   "module.flamethrower.general.tick-interval": "Tick Interval",
-  "module.flamethrower.general.tick-interval.description": "",
+
   "module.flamethrower.general.rotate": "Rotate",
   "module.flamethrower.general.rotate.description": "Automatically faces towards the animal roasted.",
   "module.flamethrower.general.entities": "Entities",
@@ -2004,37 +2004,37 @@
   "module.notebot.general.check-noteblocks-again-delay.description": "How much delay should be between end of tuning and checking again",
   "module.notebot.note-map": "Note Map",
   "module.notebot.note-map.Harp": "Harp",
-  "module.notebot.note-map.Harp.description": "",
+
   "module.notebot.note-map.Basedrum": "Basedrum",
-  "module.notebot.note-map.Basedrum.description": "",
+
   "module.notebot.note-map.Snare": "Snare",
-  "module.notebot.note-map.Snare.description": "",
+
   "module.notebot.note-map.Hat": "Hat",
-  "module.notebot.note-map.Hat.description": "",
+
   "module.notebot.note-map.Bass": "Bass",
-  "module.notebot.note-map.Bass.description": "",
+
   "module.notebot.note-map.Flute": "Flute",
-  "module.notebot.note-map.Flute.description": "",
+
   "module.notebot.note-map.Bell": "Bell",
-  "module.notebot.note-map.Bell.description": "",
+
   "module.notebot.note-map.Guitar": "Guitar",
-  "module.notebot.note-map.Guitar.description": "",
+
   "module.notebot.note-map.Chime": "Chime",
-  "module.notebot.note-map.Chime.description": "",
+
   "module.notebot.note-map.Xylophone": "Xylophone",
-  "module.notebot.note-map.Xylophone.description": "",
+
   "module.notebot.note-map.IronXylophone": "IronXylophone",
-  "module.notebot.note-map.IronXylophone.description": "",
+
   "module.notebot.note-map.CowBell": "CowBell",
-  "module.notebot.note-map.CowBell.description": "",
+
   "module.notebot.note-map.Didgeridoo": "Didgeridoo",
-  "module.notebot.note-map.Didgeridoo.description": "",
+
   "module.notebot.note-map.Bit": "Bit",
-  "module.notebot.note-map.Bit.description": "",
+
   "module.notebot.note-map.Banjo": "Banjo",
-  "module.notebot.note-map.Banjo.description": "",
+
   "module.notebot.note-map.Pling": "Pling",
-  "module.notebot.note-map.Pling.description": "",
+
   "module.notebot.render": "Render",
   "module.notebot.render.render-text": "Render Text",
   "module.notebot.render.render-text.description": "Whether or not to render the text above noteblocks.",
@@ -2657,11 +2657,11 @@
   "module.elytra-fly.general.vertical-speed": "Vertical Speed",
   "module.elytra-fly.general.vertical-speed.description": "How fast you go up and down.",
   "module.elytra-fly.general.acceleration": "Acceleration",
-  "module.elytra-fly.general.acceleration.description": "",
+
   "module.elytra-fly.general.acceleration-step": "Acceleration Step",
-  "module.elytra-fly.general.acceleration-step.description": "",
+
   "module.elytra-fly.general.acceleration-start": "Acceleration Start",
-  "module.elytra-fly.general.acceleration-start.description": "",
+
   "module.elytra-fly.general.stop-in-water": "Stop In Water",
   "module.elytra-fly.general.stop-in-water.description": "Stops flying in water.",
   "module.elytra-fly.general.no-unloaded-chunks": "No Unloaded Chunks",
@@ -3059,7 +3059,7 @@
   "module.speed-mine": "Speed Mine",
   "module.speed-mine.description": "Allows you to quickly mine blocks.",
   "module.speed-mine.general.mode": "Mode",
-  "module.speed-mine.general.mode.description": "",
+
   "module.speed-mine.general.blocks": "Blocks",
   "module.speed-mine.general.blocks.description": "Selected blocks.",
   "module.speed-mine.general.blocks-filter": "Blocks Filter",
