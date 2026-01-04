@@ -86,7 +86,7 @@ public class BetterTooltips extends Module {
     );
 
     private final Setting<Keybind> openContentsKey = sgGeneral.add(new KeybindSetting.Builder()
-        .name("keybind")
+        .name("open-contents-keybind")
         .defaultValue(Keybind.fromButton(GLFW_MOUSE_BUTTON_MIDDLE))
         .visible(openContents::get)
         .build()
