@@ -172,7 +172,7 @@ public class PacketLogger extends Module {
 
     private void logPacket(String direction, Packet<?> packet) {
         if (!logToChat.get() && !logToFile.get()) return;
-        
+
         @SuppressWarnings("unchecked")
         Class<? extends Packet<?>> packetClass = (Class<? extends Packet<?>>) packet.getClass();
 
