@@ -103,8 +103,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private void group(WVerticalList list, SettingGroup group, String filter, List<RemoveInfo> removeInfoList, String baseKey) {
-        String groupKey = group.name.equals("general") ? "module.base.general" : baseKey + "." + group.name;
-        WSection section = list.add(theme.section(MeteorTranslations.translate(groupKey, group.name), group.sectionExpanded)).expandX().widget();
+        WSection section = list.add(theme.section(MeteorTranslations.translate(group.translationKey), group.sectionExpanded)).expandX().widget();
         section.action = () -> group.sectionExpanded = section.isExpanded();
 
         WTable table = section.add(theme.table()).expandX().widget();
