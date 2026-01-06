@@ -397,19 +397,21 @@ public class ESP extends Module {
 
     public Color getEntityTypeColor(Entity entity) {
         if (colorMode.get() == ESPColorMode.DistanceColors) {
-            if (friendOverride.get() && entity instanceof PlayerEntity
-                && Friends.get().isFriend((PlayerEntity) entity)) {
+            if (friendOverride.get() && entity instanceof PlayerEntity player
+                && Friends.get().isFriend(player)) {
                 return Config.get().friendColor.get();
-            } else
-                return EntityUtils.getColorFromDistance(entity);
+            }
+
+            return EntityUtils.getColorFromDistance(entity);
         } else if (colorMode.get() == ESPColorMode.HealthColors) {
-            if (friendOverride.get() && entity instanceof PlayerEntity
-                && Friends.get().isFriend((PlayerEntity) entity)) {
+            if (friendOverride.get() && entity instanceof PlayerEntity player
+                && Friends.get().isFriend(player)) {
                 return Config.get().friendColor.get();
-            } else
-                return EntityUtils.getColorFromHealth(entity, nonLivingEntityColor.get());
-        } else if (entity instanceof PlayerEntity) {
-            return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
+            }
+
+            return EntityUtils.getColorFromHealth(entity, nonLivingEntityColor.get());
+        } else if (entity instanceof PlayerEntity player) {
+            return PlayerUtils.getPlayerColor(player, playersColor.get());
         } else {
             return switch (entity.getType().getSpawnGroup()) {
                 case CREATURE -> animalsColor.get();
