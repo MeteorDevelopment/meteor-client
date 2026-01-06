@@ -30,7 +30,7 @@ import net.minecraft.registry.tag.ItemTags;
 
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSwappingOptions = settings.createGroup("swapping-ptions");
+    private final SettingGroup sgSwappingOptions = settings.createGroup("swapping-options");
     private final SettingGroup sgSwordEnchants = settings.createGroup("sword-enchants");
     private final SettingGroup sgMaceEnchants = settings.createGroup("mace-enchants");
     private final SettingGroup sgOtherEnchants = settings.createGroup("other-enchants");
