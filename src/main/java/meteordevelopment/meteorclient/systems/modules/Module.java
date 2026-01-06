@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
-import meteordevelopment.meteorclient.utils.misc.text.MeteorTranslatableTextComponent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
@@ -152,19 +151,19 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     }
 
     public String getTitle() {
-        return MeteorTranslations.translate("module." + this.name, () -> Utils.nameToTitle(this.name));
+        return MeteorTranslations.translate("module." + this.name);
     }
 
     public MutableText getTitleText() {
-        return MutableText.of(new MeteorTranslatableTextComponent("module." + this.name, Utils.nameToTitle(this.name)));
+        return MeteorClient.translatable("module." + this.name);
     }
 
     public String getDescription() {
-        return MeteorTranslations.translate("module." + this.name + ".description", "");
+        return MeteorTranslations.translate("module." + this.name + ".description");
     }
 
     public MutableText getDescriptionText() {
-        return MutableText.of(new MeteorTranslatableTextComponent("module." + this.name + ".description", ""));
+        return MeteorClient.translatable("module." + this.name + ".description");
     }
 
     @Override

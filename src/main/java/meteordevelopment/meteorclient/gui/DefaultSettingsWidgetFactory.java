@@ -112,7 +112,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
         for (Setting<?> setting : group) {
             String settingKey = baseKey + "." + group.name + "." + setting.name;
-            String title = MeteorTranslations.translate(settingKey, () -> Utils.nameToTitle(setting.name));
+            String title = MeteorTranslations.translate(settingKey);
             if (!Strings.CI.contains(title, filter) && !Strings.CI.contains(setting.name, filter)) continue;
 
             boolean visible = setting.isVisible();
