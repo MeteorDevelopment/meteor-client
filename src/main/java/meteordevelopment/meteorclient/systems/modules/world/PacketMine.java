@@ -35,7 +35,7 @@ import java.util.List;
 
 public class PacketMine extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
@@ -73,37 +73,37 @@ public class PacketMine extends Module {
 
     // Render
 
-    private final Setting<Boolean> render = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
-    private final Setting<SettingColor> readySideColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> readySideColor = sgRender.add(new ColorSetting.Builder()
         .name("ready-side-color")
         .defaultValue(new SettingColor(0, 204, 0, 10))
         .build()
     );
 
-    private final Setting<SettingColor> readyLineColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> readyLineColor = sgRender.add(new ColorSetting.Builder()
         .name("ready-line-color")
         .defaultValue(new SettingColor(0, 204, 0, 255))
         .build()
     );
 
-    private final Setting<SettingColor> sideColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
         .defaultValue(new SettingColor(204, 0, 0, 10))
         .build()
     );
 
-    private final Setting<SettingColor> lineColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
         .defaultValue(new SettingColor(204, 0, 0, 255))
         .build()

@@ -41,7 +41,7 @@ public class BedAura extends Module {
     private final SettingGroup sgTargeting = settings.createGroup("targeting");
     private final SettingGroup sgAutoMove = settings.createGroup("inventory");
     private final SettingGroup sgPause = settings.createGroup("pause");
-    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
@@ -142,31 +142,31 @@ public class BedAura extends Module {
 
     // Render
 
-    private final Setting<Boolean> swing = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
         .name("swing")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> render = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
-    private final Setting<SettingColor> sideColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
         .defaultValue(new SettingColor(15, 255, 211,75))
         .build()
     );
 
-    private final Setting<SettingColor> lineColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
         .defaultValue(new SettingColor(15, 255, 211))
         .build()

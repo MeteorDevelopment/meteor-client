@@ -51,7 +51,7 @@ public class Nametags extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlayers = settings.createGroup("players");
     private final SettingGroup sgItems = settings.createGroup("items");
-    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
@@ -218,40 +218,40 @@ public class Nametags extends Module {
 
     // Render
 
-    private final Setting<SettingColor> background = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> background = sgRender.add(new ColorSetting.Builder()
         .name("background-color")
         .defaultValue(new SettingColor(0, 0, 0, 75))
         .build()
     );
 
-    private final Setting<SettingColor> nameColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> nameColor = sgRender.add(new ColorSetting.Builder()
         .name("name-color")
         .defaultValue(new SettingColor())
         .build()
     );
 
-    private final Setting<SettingColor> pingColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> pingColor = sgRender.add(new ColorSetting.Builder()
         .name("ping-color")
         .defaultValue(new SettingColor(20, 170, 170))
         .visible(displayPing::get)
         .build()
     );
 
-    private final Setting<SettingColor> gamemodeColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> gamemodeColor = sgRender.add(new ColorSetting.Builder()
         .name("gamemode-color")
         .defaultValue(new SettingColor(232, 185, 35))
         .visible(displayGameMode::get)
         .build()
     );
 
-    private final Setting<DistanceColorMode> distanceColorMode = sgVisual.add(new EnumSetting.Builder<DistanceColorMode>()
+    private final Setting<DistanceColorMode> distanceColorMode = sgRender.add(new EnumSetting.Builder<DistanceColorMode>()
         .name("distance-color-mode")
         .defaultValue(DistanceColorMode.Gradient)
         .visible(displayDistance::get)
         .build()
     );
 
-    private final Setting<SettingColor> distanceColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> distanceColor = sgRender.add(new ColorSetting.Builder()
         .name("distance-color")
         .defaultValue(new SettingColor(150, 150, 150))
         .visible(() -> displayDistance.get() && distanceColorMode.get() == DistanceColorMode.Flat)

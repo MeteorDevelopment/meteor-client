@@ -51,7 +51,7 @@ import java.util.*;
 
 public class StashFinder extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     private static final List<Block> DEFAULT_SUPPORT_BLOCK_BLACKLIST = List.of(
         Blocks.OXIDIZED_COPPER,
@@ -105,20 +105,20 @@ public class StashFinder extends Module {
         .build()
     );
 
-    private final Setting<Boolean> renderTracer = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> renderTracer = sgRender.add(new BoolSetting.Builder()
         .name("render-tracer")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<SettingColor> traceColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> traceColor = sgRender.add(new ColorSetting.Builder()
         .name("tracer-color")
         .defaultValue(new SettingColor(255, 215, 0, 255))
         .visible(renderTracer::get)
         .build()
     );
 
-    private final Setting<Integer> traceArrivalDistance = sgVisual.add(new IntSetting.Builder()
+    private final Setting<Integer> traceArrivalDistance = sgRender.add(new IntSetting.Builder()
         .name("tracer-hide-at-distance")
         .defaultValue(16)
         .min(1)
@@ -128,7 +128,7 @@ public class StashFinder extends Module {
         .build()
     );
 
-    private final Setting<Integer> traceMaxDistance = sgVisual.add(new IntSetting.Builder()
+    private final Setting<Integer> traceMaxDistance = sgRender.add(new IntSetting.Builder()
         .name("tracer-max-distance")
         .defaultValue(2000)
         .min(10)
@@ -138,20 +138,20 @@ public class StashFinder extends Module {
         .build()
     );
 
-    private final Setting<Boolean> renderChunkColumn = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> renderChunkColumn = sgRender.add(new BoolSetting.Builder()
         .name("render-chunk-column")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<SettingColor> traceColumnColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> traceColumnColor = sgRender.add(new ColorSetting.Builder()
         .name("chunk-column-color")
         .defaultValue(new SettingColor(255, 215, 0, 100))
         .visible(renderChunkColumn::get)
         .build()
     );
 
-    private final Setting<Keybind> clearTracesBind = sgVisual.add(new KeybindSetting.Builder()
+    private final Setting<Keybind> clearTracesBind = sgRender.add(new KeybindSetting.Builder()
         .name("clear-traces-bind")
         .defaultValue(Keybind.none())
         .build()

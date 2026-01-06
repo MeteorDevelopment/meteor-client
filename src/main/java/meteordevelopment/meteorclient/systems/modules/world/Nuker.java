@@ -47,7 +47,7 @@ import java.util.Set;
 public class Nuker extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgWhitelist = settings.createGroup("whitelist");
-    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
@@ -198,57 +198,57 @@ public class Nuker extends Module {
 
     // Rendering
 
-    private final Setting<Boolean> swing = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
         .name("swing")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> enableRenderBounding = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
         .name("bounding-box")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<ShapeMode> shapeModeBox = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeModeBox = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("nuke-box-mode")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
-    private final Setting<SettingColor> sideColorBox = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColorBox = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
         .defaultValue(new SettingColor(16,106,144, 100))
         .build()
     );
 
-    private final Setting<SettingColor> lineColorBox = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColorBox = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
         .defaultValue(new SettingColor(16,106,144, 255))
         .build()
     );
 
-    private final Setting<Boolean> enableRenderBreaking = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enableRenderBreaking = sgRender.add(new BoolSetting.Builder()
         .name("broken-blocks")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<ShapeMode> shapeModeBreak = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeModeBreak = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("nuke-block-mode")
         .defaultValue(ShapeMode.Both)
         .visible(enableRenderBreaking::get)
         .build()
     );
 
-    private final Setting<SettingColor> sideColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("breaking-side-color")
         .defaultValue(new SettingColor(255, 0, 0, 80))
         .visible(enableRenderBreaking::get)
         .build()
     );
 
-    private final Setting<SettingColor> lineColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("breaking-line-color")
         .defaultValue(new SettingColor(255, 0, 0, 255))
         .visible(enableRenderBreaking::get)
