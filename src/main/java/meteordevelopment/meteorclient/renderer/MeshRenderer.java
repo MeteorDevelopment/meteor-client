@@ -166,7 +166,6 @@ public class MeshRenderer {
                 pass.setPipeline(pipeline);
                 pass.setUniform("MeshData", meshData);
 
-                uniforms.forEach(pass::setUniform);
                 for (var name : uniforms.keySet()) {
                     pass.setUniform(name, uniforms.get(name));
                 }
