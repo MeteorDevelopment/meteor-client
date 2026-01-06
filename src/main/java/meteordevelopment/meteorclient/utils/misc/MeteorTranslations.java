@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.utils.PreInit;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.LanguageDefinition;
 import net.minecraft.client.resource.language.ReorderingUtil;
@@ -30,6 +31,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @SuppressWarnings("unused")
 public class MeteorTranslations {
+    private static final boolean DEBUG_MISSING_ENTRIES = FabricLoader.getInstance().isDevelopmentEnvironment() || Boolean.getBoolean("meteor.lang.debug");
     private static final String EN_US_CODE = "en_us";
     private static final Gson GSON = new Gson();
     private static final Map<String, MeteorLanguage> languages = new Object2ObjectOpenHashMap<>();
@@ -101,6 +103,7 @@ public class MeteorTranslations {
 
     public static String translate(String key, Object... args) {
         MeteorLanguage currentLang = getCurrentLanguage();
+        debug(currentLang, key);
         String translated = currentLang.get(key, getDefaultLanguage().get(key));
 
         try {
@@ -112,6 +115,7 @@ public class MeteorTranslations {
 
     public static String translate(String key, String fallback, Object... args) {
         MeteorLanguage currentLang = getCurrentLanguage();
+        debug(currentLang, key);
         String translated = currentLang.get(key, getDefaultLanguage().get(key, fallback));
 
         try {
@@ -123,12 +127,19 @@ public class MeteorTranslations {
 
     public static String translate(String key, Supplier<String> fallback, Object... args) {
         MeteorLanguage currentLang = getCurrentLanguage();
+        debug(currentLang, key);
         String translated = currentLang.get(key, getDefaultLanguage().get(key, fallback));
 
         try {
             return String.format(translated, args);
         } catch (IllegalFormatException e) {
             return fallback.get();
+        }
+    }
+
+    private static void debug(MeteorLanguage language, String key) {
+        if (DEBUG_MISSING_ENTRIES && !language.hasTranslation(key)) {
+            MeteorClient.LOG.warn("Missing entry for '{}' in lang '{}'.", key, mc.options.language);
         }
     }
 
