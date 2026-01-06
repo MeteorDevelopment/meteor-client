@@ -1,4 +1,6 @@
 {
+  "meteor.lang.translators" : "MeteorDevelopment",
+
   "meteor.key.category": "Meteor Client",
   "meteor.key.open-commands": "Open Commands",
   "meteor.key.open-gui": "Open GUI",
