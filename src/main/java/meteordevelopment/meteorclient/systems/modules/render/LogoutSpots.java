@@ -36,7 +36,7 @@ public class LogoutSpots extends Module {
     private static final Color RED = new Color(225, 25, 25);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
@@ -55,31 +55,31 @@ public class LogoutSpots extends Module {
 
     // Render
 
-    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
-    private final Setting<SettingColor> sideColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
         .defaultValue(new SettingColor(255, 0, 255, 55))
         .build()
     );
 
-    private final Setting<SettingColor> lineColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
         .defaultValue(new SettingColor(255, 0, 255))
         .build()
     );
 
-    private final Setting<SettingColor> nameColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> nameColor = sgRender.add(new ColorSetting.Builder()
         .name("name-color")
         .defaultValue(new SettingColor(255, 255, 255))
         .build()
     );
 
-    private final Setting<SettingColor> nameBackgroundColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> nameBackgroundColor = sgRender.add(new ColorSetting.Builder()
         .name("name-background-color")
         .defaultValue(new SettingColor(0, 0, 0, 75))
         .build()

@@ -45,7 +45,7 @@ import java.util.function.Predicate;
 public class Surround extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgToggles = settings.createGroup("toggles");
-    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
@@ -147,66 +147,66 @@ public class Surround extends Module {
 
     // Render
 
-    private final Setting<Boolean> swing = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
         .name("swing")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> render = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> renderBelow = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> renderBelow = sgRender.add(new BoolSetting.Builder()
         .name("below")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
-    private final Setting<SettingColor> safeSideColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> safeSideColor = sgRender.add(new ColorSetting.Builder()
         .name("safe-side-color")
         .defaultValue(new SettingColor(13, 255, 0, 0))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Lines)
         .build()
     );
 
-    private final Setting<SettingColor> safeLineColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> safeLineColor = sgRender.add(new ColorSetting.Builder()
         .name("safe-line-color")
         .defaultValue(new SettingColor(13, 255, 0, 0))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Sides)
         .build()
     );
 
-    private final Setting<SettingColor> normalSideColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> normalSideColor = sgRender.add(new ColorSetting.Builder()
         .name("normal-side-color")
         .defaultValue(new SettingColor(0, 255, 238, 12))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Lines)
         .build()
     );
 
-    private final Setting<SettingColor> normalLineColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> normalLineColor = sgRender.add(new ColorSetting.Builder()
         .name("normal-line-color")
         .defaultValue(new SettingColor(0, 255, 238, 100))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Sides)
         .build()
     );
 
-    private final Setting<SettingColor> unsafeSideColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> unsafeSideColor = sgRender.add(new ColorSetting.Builder()
         .name("unsafe-side-color")
         .defaultValue(new SettingColor(204, 0, 0, 12))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Lines)
         .build()
     );
 
-    private final Setting<SettingColor> unsafeLineColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> unsafeLineColor = sgRender.add(new ColorSetting.Builder()
         .name("unsafe-line-color")
         .defaultValue(new SettingColor(204, 0, 0, 100))
         .visible(() -> render.get() && shapeMode.get() != ShapeMode.Sides)

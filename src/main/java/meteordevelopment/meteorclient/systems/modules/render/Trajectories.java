@@ -37,7 +37,7 @@ import java.util.List;
 
 public class Trajectories extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgVisual = settings.createGroup("visual").renamedFrom("render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
@@ -82,38 +82,38 @@ public class Trajectories extends Module {
 
     // Render
 
-    private final Setting<Integer> ignoreFirstTicks = sgVisual.add(new IntSetting.Builder()
+    private final Setting<Integer> ignoreFirstTicks = sgRender.add(new IntSetting.Builder()
         .name("ignore-rendering-first-ticks")
         .defaultValue(3)
         .min(0)
         .build()
     );
 
-    private final Setting<ShapeMode> shapeMode = sgVisual.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
-    private final Setting<SettingColor> sideColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
         .defaultValue(new SettingColor(255, 150, 0, 35))
         .build()
     );
 
-    private final Setting<SettingColor> lineColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
         .defaultValue(new SettingColor(255, 150, 0))
         .build()
     );
 
-    private final Setting<Boolean> renderPositionBox = sgVisual.add(new BoolSetting.Builder()
+    private final Setting<Boolean> renderPositionBox = sgRender.add(new BoolSetting.Builder()
         .name("render-position-boxes")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Double> positionBoxSize = sgVisual.add(new DoubleSetting.Builder()
+    private final Setting<Double> positionBoxSize = sgRender.add(new DoubleSetting.Builder()
     	.name("position-box-size")
     	.defaultValue(0.02)
         .sliderRange(0.01, 0.1)
@@ -121,14 +121,14 @@ public class Trajectories extends Module {
     	.build()
     );
 
-    private final Setting<SettingColor> positionSideColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> positionSideColor = sgRender.add(new ColorSetting.Builder()
         .name("position-side-color")
         .defaultValue(new SettingColor(255, 150, 0, 35))
         .visible(renderPositionBox::get)
         .build()
     );
 
-    private final Setting<SettingColor> positionLineColor = sgVisual.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> positionLineColor = sgRender.add(new ColorSetting.Builder()
         .name("position-line-color")
         .defaultValue(new SettingColor(255, 150, 0))
         .visible(renderPositionBox::get)
