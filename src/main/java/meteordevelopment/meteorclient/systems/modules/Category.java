@@ -5,16 +5,19 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 public class Category {
     public final String name;
+    private final String translationKey;
     public final ItemStack icon;
     private final int nameHash;
 
     public Category(String name, ItemStack icon) {
         this.name = name;
+        this.translationKey = "category." + name;
         this.nameHash = name.hashCode();
         this.icon = icon == null ? Items.AIR.getDefaultStack() : icon;
     }
@@ -22,9 +25,13 @@ public class Category {
         this(name, null);
     }
 
+    public String getName() {
+        return MeteorTranslations.translate(this.translationKey);
+    }
+
     @Override
     public String toString() {
-        return name;
+        return this.getName();
     }
 
     @Override
