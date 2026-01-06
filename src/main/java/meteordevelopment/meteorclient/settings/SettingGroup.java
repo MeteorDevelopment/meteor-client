@@ -19,6 +19,7 @@ import java.util.List;
 
 public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setting<?>> {
     public final String name;
+    public final String translationKey;
     public boolean sectionExpanded;
     public @Nullable String oldName;
 
@@ -26,6 +27,7 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
 
     SettingGroup(String name, boolean sectionExpanded) {
         this.name = name;
+        this.translationKey = "setting.group." + Utils.titleToName(name);
         this.sectionExpanded = sectionExpanded;
     }
 
