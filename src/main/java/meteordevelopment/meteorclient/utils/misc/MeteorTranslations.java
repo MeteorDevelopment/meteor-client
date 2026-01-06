@@ -6,6 +6,9 @@
 package meteordevelopment.meteorclient.utils.misc;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.addons.AddonManager;
@@ -23,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Supplier;
@@ -64,10 +68,7 @@ public class MeteorTranslations {
                 else MeteorClient.LOG.info("No language file found for '{}'", languageCode);
             }
             else {
-                // noinspection unchecked
-                Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), Object2ObjectOpenHashMap.class);
-                languageMap.putAll(map);
-
+                loadToMap(new InputStreamReader(stream, StandardCharsets.UTF_8), languageMap);
                 MeteorClient.LOG.info("Loaded language: {}", languageCode);
             }
         } catch (IOException e) {
@@ -81,11 +82,7 @@ public class MeteorTranslations {
             try (InputStream stream = addon.getClass().getResourceAsStream("/assets/" + addon.id + "/language/" + languageCode + ".json")) {
                 if (stream == null) continue;
 
-                // noinspection unchecked
-                Object2ObjectOpenHashMap<String, String> map = GSON.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), Object2ObjectOpenHashMap.class);
-                map.values().removeIf(String::isEmpty);
-                languageMap.putAll(map);
-
+                loadToMap(new InputStreamReader(stream, StandardCharsets.UTF_8), languageMap);
                 MeteorClient.LOG.info("Loaded language {} from addon {}", languageCode, addon.name);
             } catch (IOException e) {
                 MeteorClient.LOG.error("Error loading language {} from addon {}", languageCode, addon.name, e);
@@ -94,6 +91,18 @@ public class MeteorTranslations {
 
         if (!languageMap.isEmpty()) {
             languages.put(languageCode, new MeteorLanguage(definition.rightToLeft(), languageMap));
+        }
+    }
+
+    private static void loadToMap(Reader reader, Map<String, String> map) {
+        JsonObject object = GSON.fromJson(reader, JsonObject.class);
+        for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
+            if (entry.getValue() instanceof JsonPrimitive primitive && primitive.isString()) {
+                String value = primitive.getAsString();
+                if (!value.isEmpty()) map.put(entry.getKey(), value);
+            } else {
+                MeteorClient.LOG.error("Unexpected element '{}' for '{}'.", entry.getValue().toString(), entry.getKey());
+            }
         }
     }
 
