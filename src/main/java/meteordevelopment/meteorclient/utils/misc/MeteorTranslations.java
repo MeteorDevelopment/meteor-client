@@ -104,7 +104,7 @@ public class MeteorTranslations {
     public static String translate(String key, Object... args) {
         MeteorLanguage currentLang = getCurrentLanguage();
         debug(currentLang, key);
-        String translated = currentLang.get(key, getDefaultLanguage().get(key));
+        String translated = currentLang.get(key, () -> getDefaultLanguage().get(key));
 
         try {
             return String.format(translated, args);
@@ -116,7 +116,7 @@ public class MeteorTranslations {
     public static String translate(String key, String fallback, Object... args) {
         MeteorLanguage currentLang = getCurrentLanguage();
         debug(currentLang, key);
-        String translated = currentLang.get(key, getDefaultLanguage().get(key, fallback));
+        String translated = currentLang.get(key, () -> getDefaultLanguage().get(key, fallback));
 
         try {
             return String.format(translated, args);
@@ -128,7 +128,7 @@ public class MeteorTranslations {
     public static String translate(String key, Supplier<String> fallback, Object... args) {
         MeteorLanguage currentLang = getCurrentLanguage();
         debug(currentLang, key);
-        String translated = currentLang.get(key, getDefaultLanguage().get(key, fallback));
+        String translated = currentLang.get(key, () -> getDefaultLanguage().get(key, fallback));
 
         try {
             return String.format(translated, args);
