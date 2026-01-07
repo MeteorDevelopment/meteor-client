@@ -38,11 +38,10 @@ public class ESPBlockDataScreen extends WindowScreen {
     public void initWidgets() {
         Settings settings = new Settings("module.block-esp.data");
         SettingGroup sgGeneral = settings.getDefaultGroup();
-        SettingGroup sgTracer = settings.createGroup("Tracer");
+        SettingGroup sgTracer = settings.createGroup("tracer");
 
         sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
             .name("shape-mode")
-            .description("How the shape is rendered.")
             .defaultValue(ShapeMode.Lines)
             .onModuleActivated(shapeModeSetting -> shapeModeSetting.set(blockData.shapeMode))
             .onChanged(shapeMode -> {
@@ -56,7 +55,6 @@ public class ESPBlockDataScreen extends WindowScreen {
 
         sgGeneral.add(new ColorSetting.Builder()
             .name("line-color")
-            .description("Color of lines.")
             .defaultValue(new SettingColor(0, 255, 200))
             .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.lineColor))
             .onChanged(settingColor -> {
@@ -70,7 +68,6 @@ public class ESPBlockDataScreen extends WindowScreen {
 
         sgGeneral.add(new ColorSetting.Builder()
             .name("side-color")
-            .description("Color of sides.")
             .defaultValue(new SettingColor(0, 255, 200, 25))
             .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.sideColor))
             .onChanged(settingColor -> {
@@ -84,7 +81,6 @@ public class ESPBlockDataScreen extends WindowScreen {
 
         sgTracer.add(new BoolSetting.Builder()
             .name("tracer")
-            .description("If tracer line is allowed to this block.")
             .defaultValue(true)
             .onModuleActivated(booleanSetting -> booleanSetting.set(blockData.tracer))
             .onChanged(aBoolean -> {
@@ -98,7 +94,6 @@ public class ESPBlockDataScreen extends WindowScreen {
 
         sgTracer.add(new ColorSetting.Builder()
             .name("tracer-color")
-            .description("Color of tracer line.")
             .defaultValue(new SettingColor(0, 255, 200, 125))
             .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.tracerColor))
             .onChanged(settingColor -> {

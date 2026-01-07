@@ -28,31 +28,27 @@ public class Proxy implements ISerializable<Proxy> {
     public final Settings settings = new Settings("proxy");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgOptional = settings.createGroup("Optional");
+    private final SettingGroup sgOptional = settings.createGroup("optional");
 
     public Setting<String> name = sgGeneral.add(new StringSetting.Builder()
         .name("name")
-        .description("The name of the proxy.")
         .build()
     );
 
     public Setting<ProxyType> type = sgGeneral.add(new EnumSetting.Builder<ProxyType>()
         .name("type")
-        .description("The type of proxy.")
         .defaultValue(ProxyType.Socks5)
         .build()
     );
 
     public Setting<String> address = sgGeneral.add(new StringSetting.Builder()
         .name("address")
-        .description("The ip address of the proxy.")
         .filter(Utils::ipFilter)
         .build()
     );
 
     public Setting<Integer> port = sgGeneral.add(new IntSetting.Builder()
         .name("port")
-        .description("The port of the proxy.")
         .defaultValue(0)
         .range(0, 65535)
         .sliderMax(65535)
@@ -62,7 +58,6 @@ public class Proxy implements ISerializable<Proxy> {
 
     public Setting<Boolean> enabled = sgGeneral.add(new BoolSetting.Builder()
         .name("enabled")
-        .description("Whether the proxy is enabled.")
         .defaultValue(true)
         .build()
     );
@@ -71,13 +66,11 @@ public class Proxy implements ISerializable<Proxy> {
 
     public Setting<String> username = sgOptional.add(new StringSetting.Builder()
         .name("username")
-        .description("The username of the proxy.")
         .build()
     );
 
     public Setting<String> password = sgOptional.add(new StringSetting.Builder()
         .name("password")
-        .description("The password of the proxy.")
         .visible(() -> type.get().equals(ProxyType.Socks5))
         .build()
     );

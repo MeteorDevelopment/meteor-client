@@ -34,6 +34,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public abstract class GuiTheme implements ISerializable<GuiTheme> {
@@ -50,7 +51,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
 
     public GuiTheme(String name) {
         this.name = name;
-        this.settings = new Settings("theme." + name);
+        this.settings = new Settings("theme." + name.toLowerCase(Locale.ROOT));
     }
 
     public void beforeRender() {

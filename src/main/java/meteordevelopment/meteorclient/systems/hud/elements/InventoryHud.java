@@ -27,12 +27,11 @@ public class InventoryHud extends HudElement {
     private static final Identifier TEXTURE_TRANSPARENT = MeteorClient.identifier("textures/container-transparent.png");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgScale = settings.createGroup("Scale");
-    private final SettingGroup sgBackground = settings.createGroup("Background");
+    private final SettingGroup sgScale = settings.createGroup("scale");
+    private final SettingGroup sgBackground = settings.createGroup("background");
 
     private final Setting<Boolean> containers = sgGeneral.add(new BoolSetting.Builder()
         .name("containers")
-        .description("Shows the contents of a container when holding them.")
         .defaultValue(false)
         .build()
     );
@@ -41,7 +40,6 @@ public class InventoryHud extends HudElement {
 
     public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
         .onChanged(aBoolean -> calculateSize())
         .build()
@@ -49,7 +47,6 @@ public class InventoryHud extends HudElement {
 
     public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
         .onChanged(aDouble -> calculateSize())
@@ -62,7 +59,6 @@ public class InventoryHud extends HudElement {
 
     private final Setting<Background> background = sgBackground.add(new EnumSetting.Builder<Background>()
         .name("background")
-        .description("Background of inventory viewer.")
         .defaultValue(Background.Texture)
         .onChanged(bg -> calculateSize())
         .build()
@@ -70,7 +66,6 @@ public class InventoryHud extends HudElement {
 
     public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color used for the background.")
         .visible(() -> background.get() == Background.Flat)
         .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()

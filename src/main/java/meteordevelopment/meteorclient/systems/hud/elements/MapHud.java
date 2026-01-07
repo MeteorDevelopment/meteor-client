@@ -30,20 +30,18 @@ public class MapHud extends HudElement {
     public static final HudElementInfo<MapHud> INFO = new HudElementInfo<>(Hud.GROUP, "map", "Displays the contents of a map on your Hud.", MapHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgVisual = settings.createGroup("Visual");
+    private final SettingGroup sgVisual = settings.createGroup("visual");
 
     // General
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("How to determine which map to render.")
         .defaultValue(Mode.Simple)
         .build()
     );
 
     private final Setting<Integer> slotIndex = sgGeneral.add(new IntSetting.Builder()
         .name("slot-index")
-        .description("Which slot to grab the map from.")
         .visible(() -> mode.get() == Mode.SlotIndex)
         .defaultValue(0)
         .sliderRange(0, 40)
@@ -52,7 +50,6 @@ public class MapHud extends HudElement {
 
     private final Setting<Integer> mapId = sgGeneral.add(new IntSetting.Builder()
         .name("map-id")
-        .description("Which map id to render from. Must be in your inventory!")
         .visible(() -> mode.get() == Mode.MapId)
         .defaultValue(0)
         .noSlider()
@@ -63,7 +60,6 @@ public class MapHud extends HudElement {
 
     private final Setting<Double> scale = sgVisual.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("How big to render the map.")
         .defaultValue(1)
         .min(0.5)
         .sliderRange(0.5, 3)
@@ -72,14 +68,12 @@ public class MapHud extends HudElement {
 
     private final Setting<Boolean> background = sgVisual.add(new BoolSetting.Builder()
         .name("background")
-        .description("Displays background.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<SettingColor> backgroundColor = sgVisual.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color used for the background.")
         .visible(background::get)
         .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()

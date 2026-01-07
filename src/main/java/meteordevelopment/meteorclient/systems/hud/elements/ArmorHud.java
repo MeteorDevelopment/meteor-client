@@ -22,15 +22,14 @@ public class ArmorHud extends HudElement {
     public static final HudElementInfo<ArmorHud> INFO = new HudElementInfo<>(Hud.GROUP, "armor", "Displays your armor.", ArmorHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgDurability = settings.createGroup("Durability");
-    private final SettingGroup sgScale = settings.createGroup("Scale");
-    private final SettingGroup sgBackground = settings.createGroup("Background");
+    private final SettingGroup sgDurability = settings.createGroup("durability");
+    private final SettingGroup sgScale = settings.createGroup("scale");
+    private final SettingGroup sgBackground = settings.createGroup("background");
 
     // General
 
     private final Setting<Orientation> orientation = sgGeneral.add(new EnumSetting.Builder<Orientation>()
         .name("orientation")
-        .description("How to display armor.")
         .defaultValue(Orientation.Horizontal)
         .onChanged(val -> calculateSize())
         .build()
@@ -38,14 +37,12 @@ public class ArmorHud extends HudElement {
 
     private final Setting<Boolean> flipOrder = sgGeneral.add(new BoolSetting.Builder()
         .name("flip-order")
-        .description("Flips the order of armor items.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> showEmpty = sgGeneral.add(new BoolSetting.Builder()
         .name("show-empty")
-        .description("Renders barrier icons for empty slots.")
         .defaultValue(false)
         .build()
     );
@@ -54,7 +51,6 @@ public class ArmorHud extends HudElement {
 
     private final Setting<Durability> durability = sgDurability.add(new EnumSetting.Builder<Durability>()
         .name("durability")
-        .description("How to display armor durability.")
         .defaultValue(Durability.Bar)
         .onChanged(durability1 -> calculateSize())
         .build()
@@ -62,7 +58,6 @@ public class ArmorHud extends HudElement {
 
     private final Setting<SettingColor> durabilityColor = sgDurability.add(new ColorSetting.Builder()
         .name("durability-color")
-        .description("Color of the text.")
         .visible(() -> durability.get() == Durability.Total || durability.get() == Durability.Percentage)
         .defaultValue(new SettingColor())
         .build()
@@ -70,7 +65,6 @@ public class ArmorHud extends HudElement {
 
     private final Setting<Boolean> durabilityShadow = sgDurability.add(new BoolSetting.Builder()
         .name("durability-shadow")
-        .description("Text shadow.")
         .visible(() -> durability.get() == Durability.Total || durability.get() == Durability.Percentage)
         .defaultValue(true)
         .build()
@@ -80,7 +74,6 @@ public class ArmorHud extends HudElement {
 
     private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
         .onChanged(aBoolean -> calculateSize())
         .build()
@@ -88,7 +81,6 @@ public class ArmorHud extends HudElement {
 
     private final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
         .onChanged(aDouble -> calculateSize())
@@ -101,14 +93,12 @@ public class ArmorHud extends HudElement {
 
     private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
         .name("background")
-        .description("Displays background.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color used for the background.")
         .visible(background::get)
         .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()

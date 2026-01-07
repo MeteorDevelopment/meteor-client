@@ -33,19 +33,17 @@ public class Sphere2dMarker extends BaseMarker {
     public static final String type = "Sphere-2D";
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
-    private final SettingGroup sgKeybinding = settings.createGroup("Keybinding");
+    private final SettingGroup sgRender = settings.createGroup("render");
+    private final SettingGroup sgBind = settings.createGroup("bind");
 
     private final Setting<BlockPos> center = sgGeneral.add(new BlockPosSetting.Builder()
         .name("center")
-        .description("Center of the sphere")
         .onChanged(bp -> dirty = true)
         .build()
     );
 
     private final Setting<Integer> radius = sgGeneral.add(new IntSetting.Builder()
         .name("radius")
-        .description("Radius of the sphere")
         .defaultValue(20)
         .min(1)
         .noSlider()
@@ -55,7 +53,6 @@ public class Sphere2dMarker extends BaseMarker {
 
     private final Setting<Integer> layer = sgGeneral.add(new IntSetting.Builder()
         .name("layer")
-        .description("Which layer to render")
         .defaultValue(0)
         .min(0)
         .noSlider()
@@ -67,14 +64,12 @@ public class Sphere2dMarker extends BaseMarker {
 
     private final Setting<Boolean> limitRenderRange = sgRender.add(new BoolSetting.Builder()
         .name("limit-render-range")
-        .description("Whether to limit rendering range (useful in very large circles)")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> renderRange = sgRender.add(new IntSetting.Builder()
         .name("render-range")
-        .description("Rendering range")
         .defaultValue(10)
         .min(1)
         .sliderRange(1, 20)
@@ -84,21 +79,18 @@ public class Sphere2dMarker extends BaseMarker {
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The color of the sides of the blocks being rendered.")
         .defaultValue(new SettingColor(0, 100, 255, 50))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The color of the lines of the blocks being rendered.")
         .defaultValue(new SettingColor(0, 100, 255, 255))
         .build()
     );
@@ -106,9 +98,8 @@ public class Sphere2dMarker extends BaseMarker {
     // Keybinding
 
     @SuppressWarnings("unused")
-    private final Setting<Keybind> nextLayerKey = sgKeybinding.add(new KeybindSetting.Builder()
+    private final Setting<Keybind> nextLayerKey = sgBind.add(new KeybindSetting.Builder()
         .name("next-layer-keybind")
-        .description("Keybind to increment layer")
         .action(() -> {
             if (isVisible() && layer.get() < radius.get() * 2) layer.set(layer.get() + 1);
         })
@@ -116,9 +107,8 @@ public class Sphere2dMarker extends BaseMarker {
     );
 
     @SuppressWarnings("unused")
-    private final Setting<Keybind> prevLayerKey = sgKeybinding.add(new KeybindSetting.Builder()
+    private final Setting<Keybind> prevLayerKey = sgBind.add(new KeybindSetting.Builder()
         .name("prev-layer-keybind")
-        .description("Keybind to increment layer")
         .action(() -> {
             if (isVisible()) layer.set(layer.get() - 1);
         })

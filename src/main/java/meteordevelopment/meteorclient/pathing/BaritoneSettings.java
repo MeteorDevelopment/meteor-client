@@ -13,7 +13,10 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 
 import java.awt.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,14 +71,14 @@ public class BaritoneSettings implements IPathManager.ISettings {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void createWrappers() {
-        SettingGroup sgBool = settings.createGroup("Checkboxes");
-        SettingGroup sgDouble = settings.createGroup("Numbers");
-        SettingGroup sgInt = settings.createGroup("Whole Numbers");
-        SettingGroup sgString = settings.createGroup("Strings");
-        SettingGroup sgColor = settings.createGroup("Colors");
+        SettingGroup sgBool = settings.createGroup("checkboxes");
+        SettingGroup sgDouble = settings.createGroup("numbers");
+        SettingGroup sgInt = settings.createGroup("whole-numbers");
+        SettingGroup sgString = settings.createGroup("strings");
+        SettingGroup sgColor = settings.createGroup("colors");
 
-        SettingGroup sgBlockLists = settings.createGroup("Block Lists");
-        SettingGroup sgItemLists = settings.createGroup("Item Lists");
+        SettingGroup sgBlockLists = settings.createGroup("block-lists");
+        SettingGroup sgItemLists = settings.createGroup("item-lists");
 
         try {
             Class<? extends baritone.api.Settings> klass = BaritoneAPI.getSettings().getClass();

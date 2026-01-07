@@ -16,6 +16,8 @@ import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.nbt.NbtCompound;
 
+import java.util.Locale;
+
 public abstract class BaseMarker implements ISerializable<BaseMarker> {
     public final Settings settings;
 
@@ -27,26 +29,23 @@ public abstract class BaseMarker implements ISerializable<BaseMarker> {
     private final Setting<Boolean> active;
 
     public BaseMarker(String type) {
-        this.settings = new Settings(type);
+        this.settings = new Settings("marker." + type.toLowerCase(Locale.ROOT));
 
-        this.sgBase = settings.createGroup("Base");
+        this.sgBase = settings.createGroup("base");
 
         this.name = sgBase.add(new StringSetting.Builder()
             .name("name")
-            .description("Custom name for this marker.")
             .build()
         );
         this.name.set(type);
 
         this.description = sgBase.add(new StringSetting.Builder()
             .name("description")
-            .description("Custom description for this marker.")
             .build()
         );
 
         this.dimension = sgBase.add(new EnumSetting.Builder<Dimension>()
             .name("dimension")
-            .description("In which dimension this marker should be visible.")
             .defaultValue(Dimension.Overworld)
             .build()
         );
@@ -54,7 +53,6 @@ public abstract class BaseMarker implements ISerializable<BaseMarker> {
 
         this.active = sgBase.add(new BoolSetting.Builder()
             .name("active")
-            .description("Is this marker visible.")
             .defaultValue(false)
             .build()
         );

@@ -27,7 +27,7 @@ import net.minecraft.nbt.NbtList;
 import java.util.ArrayList;
 
 public class Marker extends Module {
-    private final MarkerFactory factory = new MarkerFactory();
+    public final MarkerFactory factory = new MarkerFactory();
     private final ArrayList<BaseMarker> markers = new ArrayList<>();
 
     public Marker() {

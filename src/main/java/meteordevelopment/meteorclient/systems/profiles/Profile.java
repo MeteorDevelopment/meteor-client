@@ -26,46 +26,40 @@ public class Profile implements ISerializable<Profile> {
     public final Settings settings = new Settings("profile");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSave = settings.createGroup("Save");
+    private final SettingGroup sgSave = settings.createGroup("save");
 
     public Setting<String> name = sgGeneral.add(new StringSetting.Builder()
         .name("name")
-        .description("The name of the profile.")
         .filter(Utils::nameFilter)
         .build()
     );
 
     public Setting<List<String>> loadOnJoin = sgGeneral.add(new StringListSetting.Builder()
         .name("load-on-join")
-        .description("Which servers to set this profile as active when joining.")
         .filter(Utils::ipFilter)
         .build()
     );
 
     public Setting<Boolean> hud = sgSave.add(new BoolSetting.Builder()
         .name("hud")
-        .description("Whether the profile should save hud.")
         .defaultValue(false)
         .build()
     );
 
     public Setting<Boolean> macros = sgSave.add(new BoolSetting.Builder()
         .name("macros")
-        .description("Whether the profile should save macros.")
         .defaultValue(false)
         .build()
     );
 
     public Setting<Boolean> modules = sgSave.add(new BoolSetting.Builder()
         .name("modules")
-        .description("Whether the profile should save modules.")
         .defaultValue(false)
         .build()
     );
 
     public Setting<Boolean> waypoints = sgSave.add(new BoolSetting.Builder()
         .name("waypoints")
-        .description("Whether the profile should save waypoints.")
         .defaultValue(false)
         .build()
     );
