@@ -395,31 +395,27 @@ public class ESP extends Module {
     }
 
     public Color getEntityTypeColor(Entity entity) {
-        if (colorMode.get() == ESPColorMode.Distance) {
-            if (friendOverride.get() && entity instanceof PlayerEntity player
-                && Friends.get().isFriend(player)) {
-                return Config.get().friendColor.get();
+        if (colorMode.get() == ESPColorMode.EntityType) {
+            if (entity instanceof PlayerEntity player) {
+                return PlayerUtils.getPlayerColor(player, playersColor.get());
+            } else {
+                return switch (entity.getType().getSpawnGroup()) {
+                    case CREATURE -> animalsColor.get();
+                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
+                    case MONSTER -> monstersColor.get();
+                    case AMBIENT -> ambientColor.get();
+                    default -> miscColor.get();
+                };
             }
-
-            return EntityUtils.getColorFromDistance(entity);
-        } else if (colorMode.get() == ESPColorMode.Health) {
-            if (friendOverride.get() && entity instanceof PlayerEntity player
-                && Friends.get().isFriend(player)) {
-                return Config.get().friendColor.get();
-            }
-
-            return EntityUtils.getColorFromHealth(entity, nonLivingEntityColor.get());
-        } else if (entity instanceof PlayerEntity player) {
-            return PlayerUtils.getPlayerColor(player, playersColor.get());
-        } else {
-            return switch (entity.getType().getSpawnGroup()) {
-                case CREATURE -> animalsColor.get();
-                case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
-                case MONSTER -> monstersColor.get();
-                case AMBIENT -> ambientColor.get();
-                default -> miscColor.get();
-            };
         }
+
+        if (friendOverride.get() && entity instanceof PlayerEntity player
+            && Friends.get().isFriend(player)) {
+            return Config.get().friendColor.get();
+        }
+
+        if (colorMode.get() == ESPColorMode.Health) return EntityUtils.getColorFromHealth(entity, nonLivingEntityColor.get());
+        else return EntityUtils.getColorFromDistance(entity);
     }
 
     @Override
