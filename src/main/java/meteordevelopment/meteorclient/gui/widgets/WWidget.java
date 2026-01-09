@@ -25,8 +25,8 @@ public abstract class WWidget implements BaseWidget {
     public String tooltip;
 
     public boolean mouseOver;
+    public boolean instantTooltips;
     public boolean focused;
-    protected boolean instantTooltips;
     protected double mouseOverTimer;
 
     public void init() {}

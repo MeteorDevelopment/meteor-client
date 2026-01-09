@@ -54,7 +54,7 @@ public class ServerCommand extends Command {
 
 
     public ServerCommand() {
-        super("server", "Prints server information");
+        super("server");
 
         MeteorClient.EVENT_BUS.subscribe(this);
     }

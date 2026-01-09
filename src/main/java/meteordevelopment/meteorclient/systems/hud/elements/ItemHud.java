@@ -21,21 +21,19 @@ public class ItemHud extends HudElement {
     public static final HudElementInfo<ItemHud> INFO = new HudElementInfo<>(Hud.GROUP, "item", "Displays the item count.", ItemHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgScale = settings.createGroup("Scale");
-    private final SettingGroup sgBackground = settings.createGroup("Background");
+    private final SettingGroup sgScale = settings.createGroup("scale");
+    private final SettingGroup sgBackground = settings.createGroup("background");
 
     // General
 
     private final Setting<Item> item = sgGeneral.add(new ItemSetting.Builder()
         .name("item")
-        .description("Item to display")
         .defaultValue(Items.TOTEM_OF_UNDYING)
         .build()
     );
 
     private final Setting<NoneMode> noneMode = sgGeneral.add(new EnumSetting.Builder<NoneMode>()
         .name("none-mode")
-        .description("How to render the item when you don't have the specified item in your inventory.")
         .defaultValue(NoneMode.HideCount)
         .build()
     );
@@ -44,7 +42,6 @@ public class ItemHud extends HudElement {
 
     public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
         .onChanged(aBoolean -> calculateSize())
         .build()
@@ -52,7 +49,6 @@ public class ItemHud extends HudElement {
 
     public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
         .onChanged(aDouble -> calculateSize())
@@ -65,14 +61,12 @@ public class ItemHud extends HudElement {
 
     public final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
         .name("background")
-        .description("Displays background.")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color used for the background.")
         .visible(background::get)
         .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()

@@ -32,13 +32,12 @@ import java.util.List;
 
 public class HoleESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
         .name("horizontal-radius")
-        .description("Horizontal radius in which to search for holes.")
         .defaultValue(10)
         .min(0)
         .sliderMax(32)
@@ -47,7 +46,6 @@ public class HoleESP extends Module {
 
     private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
         .name("vertical-radius")
-        .description("Vertical radius in which to search for holes.")
         .defaultValue(5)
         .min(0)
         .sliderMax(32)
@@ -56,7 +54,6 @@ public class HoleESP extends Module {
 
     private final Setting<Integer> holeHeight = sgGeneral.add(new IntSetting.Builder()
         .name("min-height")
-        .description("Minimum hole height required to be rendered.")
         .defaultValue(3)
         .min(1)
         .sliderMin(1)
@@ -65,21 +62,18 @@ public class HoleESP extends Module {
 
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
         .name("doubles")
-        .description("Highlights double holes that can be stood across.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> ignoreOwn = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-own")
-        .description("Ignores rendering the hole you are currently standing in.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> webs = sgGeneral.add(new BoolSetting.Builder()
         .name("webs")
-        .description("Whether to show holes that have webs inside of them.")
         .defaultValue(false)
         .build()
     );
@@ -88,14 +82,12 @@ public class HoleESP extends Module {
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<Double> height = sgRender.add(new DoubleSetting.Builder()
         .name("height")
-        .description("The height of rendering.")
         .defaultValue(0.2)
         .min(0)
         .build()
@@ -103,56 +95,48 @@ public class HoleESP extends Module {
 
     private final Setting<Boolean> topQuad = sgRender.add(new BoolSetting.Builder()
         .name("top-quad")
-        .description("Whether to render a quad at the top of the hole.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> bottomQuad = sgRender.add(new BoolSetting.Builder()
         .name("bottom-quad")
-        .description("Whether to render a quad at the bottom of the hole.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<SettingColor> bedrockColorTop = sgRender.add(new ColorSetting.Builder()
         .name("bedrock-top")
-        .description("The top color for holes that are completely bedrock.")
         .defaultValue(new SettingColor(100, 255, 0, 200))
         .build()
     );
 
     private final Setting<SettingColor> bedrockColorBottom = sgRender.add(new ColorSetting.Builder()
         .name("bedrock-bottom")
-        .description("The bottom color for holes that are completely bedrock.")
         .defaultValue(new SettingColor(100, 255, 0, 0))
         .build()
     );
 
     private final Setting<SettingColor> obsidianColorTop = sgRender.add(new ColorSetting.Builder()
         .name("obsidian-top")
-        .description("The top color for holes that are completely obsidian.")
         .defaultValue(new SettingColor(255, 0, 0, 200))
         .build()
     );
 
     private final Setting<SettingColor> obsidianColorBottom = sgRender.add(new ColorSetting.Builder()
         .name("obsidian-bottom")
-        .description("The bottom color for holes that are completely obsidian.")
         .defaultValue(new SettingColor(255, 0, 0, 0))
         .build()
     );
 
     private final Setting<SettingColor> mixedColorTop = sgRender.add(new ColorSetting.Builder()
         .name("mixed-top")
-        .description("The top color for holes that have mixed bedrock and obsidian.")
         .defaultValue(new SettingColor(255, 127, 0, 200))
         .build()
     );
 
     private final Setting<SettingColor> mixedColorBottom = sgRender.add(new ColorSetting.Builder()
         .name("mixed-bottom")
-        .description("The bottom color for holes that have mixed bedrock and obsidian.")
         .defaultValue(new SettingColor(255, 127, 0, 0))
         .build()
     );
@@ -163,7 +147,7 @@ public class HoleESP extends Module {
     private final byte NULL = 0;
 
     public HoleESP() {
-        super(Categories.Render, "hole-esp", "Displays holes that you will take less damage in.");
+        super(Categories.Render, "hole-esp");
     }
 
     @EventHandler

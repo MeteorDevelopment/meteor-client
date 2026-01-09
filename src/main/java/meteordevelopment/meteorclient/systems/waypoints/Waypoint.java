@@ -23,10 +23,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Waypoint implements ISerializable<Waypoint> {
-    public final Settings settings = new Settings();
+    public final Settings settings = new Settings("waypoint");
 
-    private final SettingGroup sgVisual = settings.createGroup("Visual");
-    private final SettingGroup sgPosition = settings.createGroup("Position");
+    private final SettingGroup sgVisual = settings.createGroup("visual");
+    private final SettingGroup sgPosition = settings.createGroup("position");
 
     public enum NearAction {
         Disabled, Hide, Delete
@@ -34,14 +34,12 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public Setting<String> name = sgVisual.add(new StringSetting.Builder()
         .name("name")
-        .description("The name of the waypoint.")
         .defaultValue("Home")
         .build()
     );
 
     public Setting<String> icon = sgVisual.add(new ProvidedStringSetting.Builder()
         .name("icon")
-        .description("The icon of the waypoint.")
         .defaultValue("Square")
         .supplier(() -> Waypoints.BUILTIN_ICONS)
         .onChanged(v -> validateIcon())
@@ -50,49 +48,42 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public Setting<SettingColor> color = sgVisual.add(new ColorSetting.Builder()
         .name("color")
-        .description("The color of the waypoint.")
         .defaultValue(MeteorClient.ADDON.color.toSetting())
         .build()
     );
 
     public Setting<Boolean> visible = sgVisual.add(new BoolSetting.Builder()
         .name("visible")
-        .description("Whether to show the waypoint.")
         .defaultValue(true)
         .build()
     );
 
     public Setting<Integer> maxVisible = sgVisual.add(new IntSetting.Builder()
         .name("max-visible-distance")
-        .description("How far away to render the waypoint.")
         .defaultValue(5000)
         .build()
     );
 
     public Setting<Double> scale = sgVisual.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("The scale of the waypoint.")
         .defaultValue(1.5)
         .build()
     );
 
     public Setting<BlockPos> pos = sgPosition.add(new BlockPosSetting.Builder()
         .name("location")
-        .description("The location of the waypoint.")
         .defaultValue(BlockPos.ORIGIN)
         .build()
     );
 
     public Setting<Dimension> dimension = sgPosition.add(new EnumSetting.Builder<Dimension>()
         .name("dimension")
-        .description("Which dimension the waypoint is in.")
         .defaultValue(Dimension.Overworld)
         .build()
     );
 
     public Setting<Boolean> opposite = sgPosition.add(new BoolSetting.Builder()
         .name("opposite-dimension")
-        .description("Whether to show the waypoint in the opposite dimension.")
         .defaultValue(true)
         .visible(() -> dimension.get() != Dimension.End)
         .build()
@@ -100,14 +91,12 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public Setting<NearAction> actionWhenNear = sgPosition.add(new EnumSetting.Builder<NearAction>()
         .name("action-when-near")
-        .description("Action to be performed when the player is near.")
         .defaultValue(NearAction.Disabled)
         .build()
     );
 
     public Setting<Integer> actionWhenNearDistance = sgPosition.add(new IntSetting.Builder()
         .name("action-when-near-distance")
-        .description("How close (in blocks) the player has to be for the near action to be performed.")
         .defaultValue(8)
         .sliderRange(0, 32)
         .visible(() -> actionWhenNear.get() != NearAction.Disabled)

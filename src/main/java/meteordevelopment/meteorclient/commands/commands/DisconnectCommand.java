@@ -15,13 +15,13 @@ import net.minecraft.util.Formatting;
 
 public class DisconnectCommand extends Command {
     public DisconnectCommand() {
-        super("disconnect", "Disconnect from the server", "dc");
+        super("disconnect", "dc");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal("%s[%sDisconnectCommand%s] Disconnected by user.".formatted(Formatting.GRAY, Formatting.BLUE, Formatting.GRAY))));
+            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(translatable("disconnection_message", Formatting.GRAY, Formatting.BLUE, Formatting.GRAY)));
             return SINGLE_SUCCESS;
         });
 

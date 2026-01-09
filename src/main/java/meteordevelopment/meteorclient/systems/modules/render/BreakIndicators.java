@@ -32,28 +32,24 @@ public class BreakIndicators extends Module {
 
     private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     public final Setting<Boolean> packetMine = sgGeneral.add(new BoolSetting.Builder()
         .name("packet-mine")
-        .description("Whether or not to render blocks being packet mined.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<SettingColor> startColor = sgGeneral.add(new ColorSetting.Builder()
         .name("start-color")
-        .description("The color for the non-broken block.")
         .defaultValue(new SettingColor(25, 252, 25, 150))
         .build()
     );
 
     private final Setting<SettingColor> endColor = sgGeneral.add(new ColorSetting.Builder()
         .name("end-color")
-        .description("The color for the fully-broken block.")
         .defaultValue(new SettingColor(255, 25, 25, 150))
         .build()
     );
@@ -62,7 +58,7 @@ public class BreakIndicators extends Module {
     private final Color cLines = new Color();
 
     public BreakIndicators() {
-        super(Categories.Render, "break-indicators", "Renders the progress of a block being broken.");
+        super(Categories.Render, "break-indicators");
     }
 
     @EventHandler

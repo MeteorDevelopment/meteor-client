@@ -18,14 +18,13 @@ public class HighJump extends Module {
 
     private final Setting<Double> multiplier = sgGeneral.add(new DoubleSetting.Builder()
         .name("jump-multiplier")
-        .description("Jump height multiplier.")
         .defaultValue(1)
         .min(0)
         .build()
     );
 
     public HighJump() {
-        super(Categories.Movement, "high-jump", "Makes you jump higher than normal.");
+        super(Categories.Movement, "high-jump");
     }
 
     @EventHandler

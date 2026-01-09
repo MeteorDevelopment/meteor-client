@@ -27,7 +27,6 @@ public class AutoBreed extends Module {
 
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
-        .description("Entities to breed.")
         .defaultValue(EntityType.HORSE, EntityType.DONKEY, EntityType.COW,
             EntityType.MOOSHROOM, EntityType.SHEEP, EntityType.PIG, EntityType.CHICKEN, EntityType.WOLF,
             EntityType.CAT, EntityType.OCELOT, EntityType.RABBIT, EntityType.LLAMA, EntityType.TURTLE,
@@ -38,7 +37,6 @@ public class AutoBreed extends Module {
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
         .name("range")
-        .description("How far away the animals can be to be bred.")
         .min(0)
         .defaultValue(4.5)
         .build()
@@ -46,14 +44,12 @@ public class AutoBreed extends Module {
 
     private final Setting<Hand> hand = sgGeneral.add(new EnumSetting.Builder<Hand>()
         .name("hand-for-breeding")
-        .description("The hand to use for breeding.")
         .defaultValue(Hand.MAIN_HAND)
         .build()
     );
 
     private final Setting<EntityAge> mobAgeFilter = sgGeneral.add(new EnumSetting.Builder<EntityAge>()
         .name("mob-age-filter")
-        .description("Determines the age of the mobs to target (baby, adult, or both).")
         .defaultValue(EntityAge.Adult)
         .build()
     );
@@ -61,7 +57,7 @@ public class AutoBreed extends Module {
     private final List<Entity> animalsFed = new ArrayList<>();
 
     public AutoBreed() {
-        super(Categories.World, "auto-breed", "Automatically breeds specified animals.");
+        super(Categories.World, "auto-breed");
     }
 
     @Override

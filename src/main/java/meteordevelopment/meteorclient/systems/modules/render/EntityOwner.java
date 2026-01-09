@@ -41,7 +41,6 @@ public class EntityOwner extends Module {
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("The scale of the text.")
         .defaultValue(1)
         .min(0)
         .build()
@@ -51,7 +50,7 @@ public class EntityOwner extends Module {
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
-        super(Categories.Render, "entity-owner", "Displays the name of the player who owns the entity you're looking at.");
+        super(Categories.Render, "entity-owner");
     }
 
     @Override

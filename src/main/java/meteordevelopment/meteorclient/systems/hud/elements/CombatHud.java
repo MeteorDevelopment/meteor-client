@@ -55,16 +55,15 @@ public class CombatHud extends HudElement {
     public static final HudElementInfo<CombatHud> INFO = new HudElementInfo<>(Hud.GROUP, "combat", "Displays information about your combat target.", CombatHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgEnchantments = settings.createGroup("Enchantments");
-    private final SettingGroup sgHealth = settings.createGroup("Health");
-    private final SettingGroup sgDistance = settings.createGroup("Distance");
-    private final SettingGroup sgPing = settings.createGroup("Ping");
-    private final SettingGroup sgScale = settings.createGroup("Scale");
-    private final SettingGroup sgBackground = settings.createGroup("Background");
+    private final SettingGroup sgEnchantments = settings.createGroup("enchantments");
+    private final SettingGroup sgHealth = settings.createGroup("health");
+    private final SettingGroup sgDistance = settings.createGroup("distance");
+    private final SettingGroup sgPing = settings.createGroup("ping");
+    private final SettingGroup sgScale = settings.createGroup("scale");
+    private final SettingGroup sgBackground = settings.createGroup("background");
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
         .name("range")
-        .description("The range to target players.")
         .defaultValue(100)
         .min(1)
         .sliderMax(200)
@@ -75,21 +74,18 @@ public class CombatHud extends HudElement {
 
     private final Setting<SettingColor> healthColor1 = sgHealth.add(new ColorSetting.Builder()
         .name("health-stage-1")
-        .description("The color on the left of the health gradient.")
         .defaultValue(new SettingColor(255, 15, 15))
         .build()
     );
 
     private final Setting<SettingColor> healthColor2 = sgHealth.add(new ColorSetting.Builder()
         .name("health-stage-2")
-        .description("The color in the middle of the health gradient.")
         .defaultValue(new SettingColor(255, 150, 15))
         .build()
     );
 
     private final Setting<SettingColor> healthColor3 = sgHealth.add(new ColorSetting.Builder()
         .name("health-stage-3")
-        .description("The color on the right of the health gradient.")
         .defaultValue(new SettingColor(15, 255, 15))
         .build()
     );
@@ -98,14 +94,12 @@ public class CombatHud extends HudElement {
 
     private final Setting<Set<RegistryKey<Enchantment>>> displayedEnchantments = sgEnchantments.add(new EnchantmentListSetting.Builder()
         .name("displayed-enchantments")
-        .description("The enchantments that are shown on nametags.")
         .vanillaDefaults()
         .build()
     );
 
     private final Setting<SettingColor> enchantmentTextColor = sgEnchantments.add(new ColorSetting.Builder()
         .name("enchantment-color")
-        .description("Color of enchantment text.")
         .defaultValue(new SettingColor(255, 255, 255))
         .build()
     );
@@ -114,14 +108,12 @@ public class CombatHud extends HudElement {
 
     private final Setting<Boolean> displayPing = sgPing.add(new BoolSetting.Builder()
         .name("ping")
-        .description("Shows the player's ping.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<SettingColor> pingColor1 = sgPing.add(new ColorSetting.Builder()
         .name("ping-stage-1")
-        .description("Color of ping text when under 75.")
         .defaultValue(new SettingColor(15, 255, 15))
         .visible(displayPing::get)
         .build()
@@ -129,7 +121,6 @@ public class CombatHud extends HudElement {
 
     private final Setting<SettingColor> pingColor2 = sgPing.add(new ColorSetting.Builder()
         .name("ping-stage-2")
-        .description("Color of ping text when between 75 and 200.")
         .defaultValue(new SettingColor(255, 150, 15))
         .visible(displayPing::get)
         .build()
@@ -137,7 +128,6 @@ public class CombatHud extends HudElement {
 
     private final Setting<SettingColor> pingColor3 = sgPing.add(new ColorSetting.Builder()
         .name("ping-stage-3")
-        .description("Color of ping text when over 200.")
         .defaultValue(new SettingColor(255, 15, 15))
         .visible(displayPing::get)
         .build()
@@ -147,14 +137,12 @@ public class CombatHud extends HudElement {
 
     private final Setting<Boolean> displayDistance = sgDistance.add(new BoolSetting.Builder()
         .name("distance")
-        .description("Shows the distance between you and the player.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<SettingColor> distColor1 = sgDistance.add(new ColorSetting.Builder()
         .name("distance-stage-1")
-        .description("The color when a player is within 10 blocks of you.")
         .defaultValue(new SettingColor(255, 15, 15))
         .visible(displayDistance::get)
         .build()
@@ -162,7 +150,6 @@ public class CombatHud extends HudElement {
 
     private final Setting<SettingColor> distColor2 = sgDistance.add(new ColorSetting.Builder()
         .name("distance-stage-2")
-        .description("The color when a player is within 50 blocks of you.")
         .defaultValue(new SettingColor(255, 150, 15))
         .visible(displayDistance::get)
         .build()
@@ -170,7 +157,6 @@ public class CombatHud extends HudElement {
 
     private final Setting<SettingColor> distColor3 = sgDistance.add(new ColorSetting.Builder()
         .name("distance-stage-3")
-        .description("The color when a player is greater then 50 blocks away from you.")
         .defaultValue(new SettingColor(15, 255, 15))
         .visible(displayDistance::get)
         .build()
@@ -180,7 +166,6 @@ public class CombatHud extends HudElement {
 
     public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
         .onChanged(aBoolean -> calculateSize())
         .build()
@@ -188,7 +173,6 @@ public class CombatHud extends HudElement {
 
     public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
         .onChanged(aDouble -> calculateSize())
@@ -201,14 +185,12 @@ public class CombatHud extends HudElement {
 
     public final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
         .name("background")
-        .description("Displays background.")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color used for the background.")
         .visible(background::get)
         .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()

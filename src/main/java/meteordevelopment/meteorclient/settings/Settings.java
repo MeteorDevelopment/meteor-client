@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.settings;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -15,6 +16,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,6 +25,17 @@ import java.util.List;
 public class Settings implements ISerializable<Settings>, Iterable<SettingGroup> {
     private SettingGroup defaultGroup;
     public final List<SettingGroup> groups = new ArrayList<>(1);
+    /// {@code null} when {@link Settings} is internal, should not be passed to {@link GuiTheme#settings(Settings)}
+    public final @Nullable String baseTranslationKey;
+
+    public Settings(@NotNull String baseTranslationKey) {
+        this.baseTranslationKey = baseTranslationKey;
+    }
+
+    /// @apiNote marks this {@link Settings} as internal, using it in user-facing UIs will throw
+    public Settings() {
+        this.baseTranslationKey = null;
+    }
 
     public void onActivated() {
         for (SettingGroup group : groups) {
@@ -64,6 +77,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
 
     public SettingGroup getGroup(String name) {
+        name = Utils.titleToName(name);
         for (SettingGroup sg : this) {
             if (sg.name.equals(name)) return sg;
         }
@@ -76,7 +90,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
 
     public SettingGroup getDefaultGroup() {
-        if (defaultGroup == null) defaultGroup = createGroup("General");
+        if (defaultGroup == null) defaultGroup = createGroup("general");
         return defaultGroup;
     }
 

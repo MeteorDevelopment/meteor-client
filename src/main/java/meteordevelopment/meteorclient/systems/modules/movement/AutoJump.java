@@ -20,21 +20,18 @@ public class AutoJump extends Module {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("The method of jumping.")
         .defaultValue(Mode.Jump)
         .build()
     );
 
     private final Setting<JumpWhen> jumpIf = sgGeneral.add(new EnumSetting.Builder<JumpWhen>()
         .name("jump-if")
-        .description("Jump if.")
         .defaultValue(JumpWhen.Always)
         .build()
     );
 
     private final Setting<Double> velocityHeight = sgGeneral.add(new DoubleSetting.Builder()
         .name("velocity-height")
-        .description("The distance that velocity mode moves you.")
         .defaultValue(0.25)
         .min(0)
         .sliderMax(2)
@@ -42,7 +39,7 @@ public class AutoJump extends Module {
     );
 
     public AutoJump() {
-        super(Categories.Movement, "auto-jump", "Automatically jumps.");
+        super(Categories.Movement, "auto-jump");
     }
 
     private boolean jump() {

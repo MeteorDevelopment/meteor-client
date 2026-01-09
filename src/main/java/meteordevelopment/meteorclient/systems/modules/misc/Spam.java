@@ -24,14 +24,12 @@ public class Spam extends Module {
 
     private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("messages")
-        .description("Messages to use for spam.")
         .defaultValue(List.of("Meteor on Crack!"))
         .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("The delay between specified messages in ticks.")
         .defaultValue(20)
         .min(0)
         .sliderMax(200)
@@ -40,35 +38,30 @@ public class Spam extends Module {
 
     private final Setting<Boolean> disableOnLeave = sgGeneral.add(new BoolSetting.Builder()
         .name("disable-on-leave")
-        .description("Disables spam when you leave a server.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> disableOnDisconnect = sgGeneral.add(new BoolSetting.Builder()
         .name("disable-on-disconnect")
-        .description("Disables spam when you are disconnected from a server.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> random = sgGeneral.add(new BoolSetting.Builder()
         .name("randomise")
-        .description("Selects a random message from your spam message list.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> autoSplitMessages = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-split-messages")
-        .description("Automatically split up large messages after a certain length")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> splitLength = sgGeneral.add(new IntSetting.Builder()
         .name("split-length")
-        .description("The length after which to split messages in chat")
         .visible(autoSplitMessages::get)
         .defaultValue(256)
         .min(1)
@@ -78,7 +71,6 @@ public class Spam extends Module {
 
     private final Setting<Integer> autoSplitDelay = sgGeneral.add(new IntSetting.Builder()
         .name("split-delay")
-        .description("The delay between split messages in ticks.")
         .visible(autoSplitMessages::get)
         .defaultValue(20)
         .min(0)
@@ -88,14 +80,12 @@ public class Spam extends Module {
 
     private final Setting<Boolean> bypass = sgGeneral.add(new BoolSetting.Builder()
         .name("bypass")
-        .description("Add random text at the end of the message to try to bypass anti spams.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> uppercase = sgGeneral.add(new BoolSetting.Builder()
         .name("include-uppercase-characters")
-        .description("Whether the bypass text should include uppercase characters.")
         .visible(bypass::get)
         .defaultValue(true)
         .build()
@@ -103,7 +93,6 @@ public class Spam extends Module {
 
     private final Setting<Integer> length = sgGeneral.add(new IntSetting.Builder()
         .name("length")
-        .description("Number of characters used to bypass anti spam.")
         .visible(bypass::get)
         .defaultValue(16)
         .sliderRange(1, 256)
@@ -114,7 +103,7 @@ public class Spam extends Module {
     private String text;
 
     public Spam() {
-        super(Categories.Misc, "spam", "Spams specified messages in chat.");
+        super(Categories.Misc, "spam");
     }
 
     @Override

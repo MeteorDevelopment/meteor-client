@@ -26,14 +26,13 @@ public class HoleHud extends HudElement {
     public static final HudElementInfo<HoleHud> INFO = new HudElementInfo<>(Hud.GROUP, "hole", "Displays information about the hole you are standing in.", HoleHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgScale = settings.createGroup("Scale");
-    private final SettingGroup sgBackground = settings.createGroup("Background");
+    private final SettingGroup sgScale = settings.createGroup("scale");
+    private final SettingGroup sgBackground = settings.createGroup("background");
 
     // General
 
     public final Setting<List<Block>> safe = sgGeneral.add(new BlockListSetting.Builder()
         .name("safe-blocks")
-        .description("Which blocks to consider safe.")
         .defaultValue(Blocks.OBSIDIAN, Blocks.BEDROCK, Blocks.CRYING_OBSIDIAN, Blocks.NETHERITE_BLOCK)
         .build()
     );
@@ -42,7 +41,6 @@ public class HoleHud extends HudElement {
 
     public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
         .onChanged(aBoolean -> calculateSize())
         .build()
@@ -50,7 +48,6 @@ public class HoleHud extends HudElement {
 
     public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
         .onChanged(aDouble -> calculateSize())
@@ -63,14 +60,12 @@ public class HoleHud extends HudElement {
 
     public final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
         .name("background")
-        .description("Displays background.")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color used for the background.")
         .visible(background::get)
         .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()

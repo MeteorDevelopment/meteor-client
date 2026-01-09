@@ -29,9 +29,9 @@ import java.util.List;
 import java.util.Set;
 
 public class EntityControl extends Module {
-    private final SettingGroup sgControl = settings.createGroup("Control");
-    private final SettingGroup sgSpeed = settings.createGroup("Speed");
-    private final SettingGroup sgFlight = settings.createGroup("Flight");
+    private final SettingGroup sgControl = settings.createGroup("control");
+    private final SettingGroup sgSpeed = settings.createGroup("speed");
+    private final SettingGroup sgFlight = settings.createGroup("flight");
 
     List<EntityType<?>> list = new ArrayList<>();
     {
@@ -44,7 +44,6 @@ public class EntityControl extends Module {
 
     private final Setting<Set<EntityType<?>>> entities = sgControl.add(new EntityTypeListSetting.Builder()
         .name("entities")
-        .description("Target entities.")
         .filter(entityType -> EntityUtils.isRideable(entityType) && entityType != EntityType.MINECART && entityType != EntityType.LLAMA && entityType != EntityType.TRADER_LLAMA)
         .defaultValue(list.toArray(new EntityType<?>[0]))
         .build()
@@ -52,42 +51,36 @@ public class EntityControl extends Module {
 
     private final Setting<Boolean> spoofSaddle = sgControl.add(new BoolSetting.Builder()
         .name("spoof-saddle*")
-        .description("Lets you control rideable entities without them being saddled. Only works on older server versions.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> maxJump = sgControl.add(new BoolSetting.Builder()
         .name("max-jump")
-        .description("Sets jump power to maximum.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> lockYaw = sgControl.add(new BoolSetting.Builder()
         .name("lock-yaw")
-        .description("Locks the Entity's yaw.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> cancelServerPackets = sgControl.add(new BoolSetting.Builder()
         .name("cancel-server-packets")
-        .description("Cancels incoming vehicle move packets. WILL desync you from the server if you make an invalid movement.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> speed = sgSpeed.add(new BoolSetting.Builder()
         .name("speed")
-        .description("Makes you go faster horizontally when riding entities.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Double> horizontalSpeed = sgSpeed.add(new DoubleSetting.Builder()
         .name("horizontal-speed")
-        .description("Horizontal speed in blocks per second.")
         .defaultValue(10)
         .min(0)
         .sliderMax(50)
@@ -97,7 +90,6 @@ public class EntityControl extends Module {
 
     private final Setting<Boolean> onlyOnGround = sgSpeed.add(new BoolSetting.Builder()
         .name("only-on-ground")
-        .description("Use speed only when standing on a block.")
         .defaultValue(false)
         .visible(speed::get)
         .build()
@@ -105,7 +97,6 @@ public class EntityControl extends Module {
 
     private final Setting<Boolean> inWater = sgSpeed.add(new BoolSetting.Builder()
         .name("in-water")
-        .description("Use speed when in water.")
         .defaultValue(true)
         .visible(speed::get)
         .build()
@@ -113,14 +104,12 @@ public class EntityControl extends Module {
 
     private final Setting<Boolean> flight = sgFlight.add(new BoolSetting.Builder()
         .name("fly")
-        .description("Allows you to fly with entities.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Double> verticalSpeed = sgFlight.add(new DoubleSetting.Builder()
         .name("vertical-speed")
-        .description("Vertical speed in blocks per second.")
         .defaultValue(6)
         .min(0)
         .sliderMax(20)
@@ -130,7 +119,6 @@ public class EntityControl extends Module {
 
     private final Setting<Double> fallSpeed = sgFlight.add(new DoubleSetting.Builder()
         .name("fall-speed")
-        .description("How fast you will fall in blocks per second. Set to a small value to prevent fly kicks.")
         .defaultValue(0)
         .min(0)
         .visible(flight::get)
@@ -139,7 +127,6 @@ public class EntityControl extends Module {
 
     private final Setting<Boolean> antiKick = sgFlight.add(new BoolSetting.Builder()
         .name("anti-fly-kick")
-        .description("Whether to prevent the server from kicking you for flying.")
         .defaultValue(true)
         .visible(flight::get)
         .build()
@@ -147,7 +134,6 @@ public class EntityControl extends Module {
 
     private final Setting<Integer> delay = sgFlight.add(new IntSetting.Builder()
         .name("delay")
-        .description("The amount of delay, in ticks, between flying down a bit and return to original position")
         .defaultValue(40)
         .min(1)
         .sliderMax(80)
@@ -156,7 +142,7 @@ public class EntityControl extends Module {
     );
 
     public EntityControl() {
-        super(Categories.Movement, "entity-control", "Lets you control rideable entities without a saddle.", "entity-speed", "entity-fly", "boat-fly");
+        super(Categories.Movement, "entity-control", "entity-speed", "entity-fly", "boat-fly");
     }
 
     private int delayLeft;

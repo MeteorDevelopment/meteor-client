@@ -22,14 +22,12 @@ public class AntiHunger extends Module {
 
     private final Setting<Boolean> sprint = sgGeneral.add(new BoolSetting.Builder()
         .name("sprint")
-        .description("Spoofs sprinting packets.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> onGround = sgGeneral.add(new BoolSetting.Builder()
         .name("on-ground")
-        .description("Spoofs the onGround flag.")
         .defaultValue(true)
         .build()
     );
@@ -37,7 +35,7 @@ public class AntiHunger extends Module {
     private boolean lastOnGround, ignorePacket;
 
     public AntiHunger() {
-        super(Categories.Player, "anti-hunger", "Reduces (does NOT remove) hunger consumption.");
+        super(Categories.Player, "anti-hunger");
     }
 
     @Override

@@ -40,7 +40,6 @@ public class BlockESP extends Module {
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
-        .description("Blocks to search for.")
         .onChanged(blocks1 -> {
             if (isActive() && Utils.canUpdate()) onActivate();
         })
@@ -49,7 +48,6 @@ public class BlockESP extends Module {
 
     private final Setting<ESPBlockData> defaultBlockConfig = sgGeneral.add(new GenericSetting.Builder<ESPBlockData>()
         .name("default-block-config")
-        .description("Default block config.")
         .defaultValue(
             new ESPBlockData(
                 ShapeMode.Lines,
@@ -64,14 +62,12 @@ public class BlockESP extends Module {
 
     private final Setting<Map<Block, ESPBlockData>> blockConfigs = sgGeneral.add(new BlockDataSetting.Builder<ESPBlockData>()
         .name("block-configs")
-        .description("Config for each block.")
         .defaultData(defaultBlockConfig)
         .build()
     );
 
     private final Setting<Boolean> tracers = sgGeneral.add(new BoolSetting.Builder()
         .name("tracers")
-        .description("Render tracer lines.")
         .defaultValue(false)
         .build()
     );
@@ -85,7 +81,7 @@ public class BlockESP extends Module {
     private DimensionType lastDimension;
 
     public BlockESP() {
-        super(Categories.Render, "block-esp", "Renders specified blocks through walls.", "search");
+        super(Categories.Render, "block-esp", "search");
 
         RainbowColors.register(this::onTickRainbow);
     }

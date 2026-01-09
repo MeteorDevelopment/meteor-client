@@ -20,19 +20,17 @@ public class CuboidMarker extends BaseMarker {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
     private final Setting<BlockPos> pos1 = sgGeneral.add(new BlockPosSetting.Builder()
         .name("pos-1")
-        .description("1st corner of the cuboid")
         .build()
     );
 
     private final Setting<BlockPos> pos2 = sgGeneral.add(new BlockPosSetting.Builder()
         .name("pos-2")
-        .description("2nd corner of the cuboid")
         .build()
     );
 
@@ -40,28 +38,24 @@ public class CuboidMarker extends BaseMarker {
 
     private final Setting<Mode> mode = sgRender.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("What mode to use for this marker.")
         .defaultValue(Mode.Full)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The color of the sides of the blocks being rendered.")
         .defaultValue(new SettingColor(0, 100, 255, 50))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The color of the lines of the blocks being rendered.")
         .defaultValue(new SettingColor(0, 100, 255, 255))
         .build()
     );

@@ -24,14 +24,12 @@ public class Velocity extends Module {
 
     public final Setting<Boolean> knockback = sgGeneral.add(new BoolSetting.Builder()
         .name("knockback")
-        .description("Modifies the amount of knockback you take from attacks.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Double> knockbackHorizontal = sgGeneral.add(new DoubleSetting.Builder()
         .name("knockback-horizontal")
-        .description("How much horizontal knockback you will take.")
         .defaultValue(0)
         .sliderMax(1)
         .visible(knockback::get)
@@ -40,7 +38,6 @@ public class Velocity extends Module {
 
     public final Setting<Double> knockbackVertical = sgGeneral.add(new DoubleSetting.Builder()
         .name("knockback-vertical")
-        .description("How much vertical knockback you will take.")
         .defaultValue(0)
         .sliderMax(1)
         .visible(knockback::get)
@@ -49,14 +46,12 @@ public class Velocity extends Module {
 
     public final Setting<Boolean> explosions = sgGeneral.add(new BoolSetting.Builder()
         .name("explosions")
-        .description("Modifies your knockback from explosions.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Double> explosionsHorizontal = sgGeneral.add(new DoubleSetting.Builder()
         .name("explosions-horizontal")
-        .description("How much velocity you will take from explosions horizontally.")
         .defaultValue(0)
         .sliderMax(1)
         .visible(explosions::get)
@@ -65,7 +60,6 @@ public class Velocity extends Module {
 
     public final Setting<Double> explosionsVertical = sgGeneral.add(new DoubleSetting.Builder()
         .name("explosions-vertical")
-        .description("How much velocity you will take from explosions vertically.")
         .defaultValue(0)
         .sliderMax(1)
         .visible(explosions::get)
@@ -74,14 +68,12 @@ public class Velocity extends Module {
 
     public final Setting<Boolean> liquids = sgGeneral.add(new BoolSetting.Builder()
         .name("liquids")
-        .description("Modifies the amount you are pushed by flowing liquids.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Double> liquidsHorizontal = sgGeneral.add(new DoubleSetting.Builder()
         .name("liquids-horizontal")
-        .description("How much velocity you will take from liquids horizontally.")
         .defaultValue(0)
         .sliderMax(1)
         .visible(liquids::get)
@@ -90,7 +82,6 @@ public class Velocity extends Module {
 
     public final Setting<Double> liquidsVertical = sgGeneral.add(new DoubleSetting.Builder()
         .name("liquids-vertical")
-        .description("How much velocity you will take from liquids vertically.")
         .defaultValue(0)
         .sliderMax(1)
         .visible(liquids::get)
@@ -99,14 +90,12 @@ public class Velocity extends Module {
 
     public final Setting<Boolean> entityPush = sgGeneral.add(new BoolSetting.Builder()
         .name("entity-push")
-        .description("Modifies the amount you are pushed by entities.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Double> entityPushAmount = sgGeneral.add(new DoubleSetting.Builder()
         .name("entity-push-amount")
-        .description("How much you will be pushed.")
         .defaultValue(0)
         .sliderMax(1)
         .visible(entityPush::get)
@@ -115,27 +104,24 @@ public class Velocity extends Module {
 
     public final Setting<Boolean> blocks = sgGeneral.add(new BoolSetting.Builder()
         .name("blocks")
-        .description("Prevents you from being pushed out of blocks.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Boolean> sinking = sgGeneral.add(new BoolSetting.Builder()
         .name("sinking")
-        .description("Prevents you from sinking in liquids.")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<Boolean> fishing = sgGeneral.add(new BoolSetting.Builder()
         .name("fishing")
-        .description("Prevents you from being pulled by fishing rods.")
         .defaultValue(false)
         .build()
     );
 
     public Velocity() {
-        super(Categories.Movement, "velocity", "Prevents you from being moved by external forces.");
+        super(Categories.Movement, "velocity");
     }
 
     @EventHandler

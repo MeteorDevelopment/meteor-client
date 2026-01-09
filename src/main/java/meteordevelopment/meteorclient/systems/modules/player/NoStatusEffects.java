@@ -19,7 +19,6 @@ public class NoStatusEffects extends Module {
 
     private final Setting<List<StatusEffect>> blockedEffects = sgGeneral.add(new StatusEffectListSetting.Builder()
         .name("blocked-effects")
-        .description("Effects to block.")
         .defaultValue(
             LEVITATION.value(),
             JUMP_BOOST.value(),
@@ -30,7 +29,7 @@ public class NoStatusEffects extends Module {
     );
 
     public NoStatusEffects() {
-        super(Categories.Player, "no-status-effects", "Blocks specified status effects.");
+        super(Categories.Player, "no-status-effects");
     }
 
     public boolean shouldBlock(StatusEffect effect) {

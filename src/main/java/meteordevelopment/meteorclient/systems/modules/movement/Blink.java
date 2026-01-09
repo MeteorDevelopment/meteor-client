@@ -28,14 +28,12 @@ public class Blink extends Module {
 
     private final Setting<Boolean> renderOriginal = sgGeneral.add(new BoolSetting.Builder()
         .name("render-original")
-        .description("Renders your player model at the original position.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("pulse-delay")
-        .description("After the duration in ticks has elapsed, send all packets and start blinking again. 0 to disable.")
         .defaultValue(0)
         .min(0)
         .sliderMax(60)
@@ -45,7 +43,6 @@ public class Blink extends Module {
     @SuppressWarnings("unused")
     private final Setting<Keybind> cancelBlink = sgGeneral.add(new KeybindSetting.Builder()
         .name("cancel-blink")
-        .description("Cancels sending packets and sends you back to your original position.")
         .defaultValue(Keybind.none())
         .action(() -> {
             cancelled = true;
@@ -62,7 +59,7 @@ public class Blink extends Module {
     private int timer = 0;
 
     public Blink() {
-        super(Categories.Movement, "blink", "Allows you to essentially teleport while suspending motion updates.");
+        super(Categories.Movement, "blink");
 
         runInMainMenu = true;
     }

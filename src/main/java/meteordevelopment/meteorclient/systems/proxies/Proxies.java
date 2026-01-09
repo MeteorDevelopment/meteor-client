@@ -18,13 +18,12 @@ import java.util.concurrent.*;
 import java.util.regex.Pattern;
 
 public class Proxies extends System<Proxies> implements Iterable<Proxy> {
-    public final Settings settings = new Settings();
-    private final SettingGroup sgRefreshing = settings.createGroup("Refreshing");
-    private final SettingGroup sgCleanup = settings.createGroup("Cleanup");
+    public final Settings settings = new Settings("proxies");
+    private final SettingGroup sgRefreshing = settings.createGroup("refreshing");
+    private final SettingGroup sgCleanup = settings.createGroup("cleanup");
 
     private final Setting<Integer> threads = sgRefreshing.add(new IntSetting.Builder()
         .name("threads")
-        .description("The number of concurrent threads to check proxies with.")
         .defaultValue(8)
         .min(0)
         .sliderRange(0, 32)
@@ -33,7 +32,6 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public final Setting<Integer> timeout = sgRefreshing.add(new IntSetting.Builder()
         .name("timeout")
-        .description("The timeout in milliseconds for checking proxies.")
         .defaultValue(5000)
         .min(0)
         .sliderRange(0, 15000)
@@ -42,7 +40,6 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     private final Setting<Integer> tries = sgRefreshing.add(new IntSetting.Builder()
         .name("retries-on-timeout")
-        .description("How many additional times to check a proxy if the check times out.")
         .defaultValue(1)
         .min(0)
         .sliderRange(0, 5)
@@ -51,21 +48,18 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     private final Setting<Boolean> sort = sgCleanup.add(new BoolSetting.Builder()
         .name("sort-by-latency")
-        .description("Whether to sort the proxy list by latency.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> pruneDead = sgCleanup.add(new BoolSetting.Builder()
         .name("prune-dead")
-        .description("Whether to prune dead proxies.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Integer> pruneLatency = sgCleanup.add(new IntSetting.Builder()
         .name("prune-by-latency")
-        .description("Prune proxies at or above this latency in ms. 0 to disable.")
         .defaultValue(2000)
         .min(0)
         .sliderRange(0, 10000)
@@ -74,7 +68,6 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     private final Setting<Integer> pruneExcess = sgCleanup.add(new IntSetting.Builder()
         .name("prune-to-count")
-        .description("If in excess, prune the number of proxies to this count. 0 to disable. Prioritises by latency.")
         .defaultValue(0)
         .sliderRange(0, 25)
         .build()

@@ -17,13 +17,13 @@ import net.minecraft.command.CommandSource;
 
 public class ReloadCommand extends Command {
     public ReloadCommand() {
-        super("reload", "Reloads many systems.");
+        super("reload");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            warning("Reloading systems, this may take a while.");
+            warning("reloading");
 
             Systems.load();
             Capes.init();

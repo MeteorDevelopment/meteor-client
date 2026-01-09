@@ -22,7 +22,6 @@ public class AirJump extends Module {
 
     private final Setting<Boolean> maintainLevel = sgGeneral.add(new BoolSetting.Builder()
         .name("maintain-level")
-        .description("Maintains your current Y level when holding the jump key.")
         .defaultValue(false)
         .build()
     );
@@ -30,7 +29,7 @@ public class AirJump extends Module {
     private int level;
 
     public AirJump() {
-        super(Categories.Movement, "air-jump", "Lets you jump in the air.");
+        super(Categories.Movement, "air-jump");
     }
 
     @Override

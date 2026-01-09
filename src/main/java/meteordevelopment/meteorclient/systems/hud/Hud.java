@@ -31,20 +31,19 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     public static final HudGroup GROUP = new HudGroup("Meteor");
 
     public boolean active;
-    public Settings settings = new Settings();
+    public Settings settings = new Settings("hud");
 
     public final Map<String, HudElementInfo<?>> infos = new TreeMap<>();
     private final List<HudElement> elements = new ArrayList<>();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgEditor = settings.createGroup("Editor");
-    private final SettingGroup sgKeybind = settings.createGroup("Bind");
+    private final SettingGroup sgEditor = settings.createGroup("editor");
+    private final SettingGroup sgKeybind = settings.createGroup("bind");
 
     // General
 
     private final Setting<Boolean> customFont = sgGeneral.add(new BoolSetting.Builder()
         .name("custom-font")
-        .description("Text will use custom font.")
         .defaultValue(true)
         .onChanged(aBoolean -> {
             for (HudElement element : elements) element.onFontChanged();
@@ -54,14 +53,12 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     private final Setting<Boolean> hideInMenus = sgGeneral.add(new BoolSetting.Builder()
         .name("hide-in-menus")
-        .description("Hides the meteor hud when in inventory screens or game menus.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Double> textScale = sgGeneral.add(new DoubleSetting.Builder()
         .name("text-scale")
-        .description("Scale of text if not overridden by the element.")
         .defaultValue(1)
         .min(0.5)
         .sliderRange(0.5, 3)
@@ -70,7 +67,6 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     public final Setting<List<SettingColor>> textColors = sgGeneral.add(new ColorListSetting.Builder()
         .name("text-colors")
-        .description("Colors used for the Text element.")
         .defaultValue(List.of(new SettingColor(), new SettingColor(175, 175, 175), new SettingColor(25, 225, 25), new SettingColor(225, 25, 25)))
         .build()
     );
@@ -79,7 +75,6 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     public final Setting<Integer> border = sgEditor.add(new IntSetting.Builder()
         .name("border")
-        .description("Space around the edges of the screen.")
         .defaultValue(4)
         .sliderMax(20)
         .build()
@@ -87,7 +82,6 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     public final Setting<Integer> snappingRange = sgEditor.add(new IntSetting.Builder()
         .name("snapping-range")
-        .description("Snapping range in editor.")
         .defaultValue(10)
         .sliderMax(20)
         .build()

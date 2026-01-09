@@ -35,13 +35,12 @@ import java.util.List;
 
 public class PacketMine extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     // General
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("Delay between mining blocks in ticks.")
         .defaultValue(1)
         .min(0)
         .build()
@@ -49,21 +48,18 @@ public class PacketMine extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Sends rotation packets to the server when mining.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-switch")
-        .description("Automatically switches to the best tool when the block is ready to be mined instantly.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> notOnUse = sgGeneral.add(new BoolSetting.Builder()
         .name("not-on-use")
-        .description("Won't auto switch if you're using an item.")
         .defaultValue(true)
         .visible(autoSwitch::get)
         .build()
@@ -71,7 +67,6 @@ public class PacketMine extends Module {
 
     private final Setting<Boolean> obscureBreakingProgress = sgGeneral.add(new BoolSetting.Builder()
         .name("obscure-breaking-progress")
-        .description("Spams abort breaking packets to obscure the block mining progress from other players. Does not hide it perfectly.")
         .defaultValue(false)
         .build()
     );
@@ -80,42 +75,36 @@ public class PacketMine extends Module {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
-        .description("Whether or not to render the block being mined.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
 
     private final Setting<SettingColor> readySideColor = sgRender.add(new ColorSetting.Builder()
         .name("ready-side-color")
-        .description("The color of the sides of the blocks that can be broken.")
         .defaultValue(new SettingColor(0, 204, 0, 10))
         .build()
     );
 
     private final Setting<SettingColor> readyLineColor = sgRender.add(new ColorSetting.Builder()
         .name("ready-line-color")
-        .description("The color of the lines of the blocks that can be broken.")
         .defaultValue(new SettingColor(0, 204, 0, 255))
         .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The color of the sides of the blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 10))
         .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The color of the lines of the blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 255))
         .build()
     );
@@ -126,7 +115,7 @@ public class PacketMine extends Module {
     private boolean swapped, shouldUpdateSlot;
 
     public PacketMine() {
-        super(Categories.World, "packet-mine", "Sends packets to mine blocks without the mining animation.");
+        super(Categories.World, "packet-mine");
     }
 
     @Override

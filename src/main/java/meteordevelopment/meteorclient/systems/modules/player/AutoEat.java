@@ -36,12 +36,11 @@ public class AutoEat extends Module {
 
     // Settings groups
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgThreshold = settings.createGroup("Threshold");
+    private final SettingGroup sgThreshold = settings.createGroup("threshold");
 
     // General
     public final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
         .name("blacklist")
-        .description("Which items to not eat.")
         .defaultValue(
             Items.ENCHANTED_GOLDEN_APPLE,
             Items.GOLDEN_APPLE,
@@ -59,14 +58,12 @@ public class AutoEat extends Module {
 
     private final Setting<Boolean> pauseAuras = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-auras")
-        .description("Pauses all auras when eating.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> pauseBaritone = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-baritone")
-        .description("Pause baritone when eating.")
         .defaultValue(true)
         .build()
     );
@@ -74,14 +71,12 @@ public class AutoEat extends Module {
     // Threshold
     private final Setting<ThresholdMode> thresholdMode = sgThreshold.add(new EnumSetting.Builder<ThresholdMode>()
         .name("threshold-mode")
-        .description("The threshold mode to trigger auto eat.")
         .defaultValue(ThresholdMode.Any)
         .build()
     );
 
     private final Setting<Double> healthThreshold = sgThreshold.add(new DoubleSetting.Builder()
         .name("health-threshold")
-        .description("The level of health you eat at.")
         .defaultValue(10)
         .range(1, 19)
         .sliderRange(1, 19)
@@ -91,7 +86,6 @@ public class AutoEat extends Module {
 
     private final Setting<Integer> hungerThreshold = sgThreshold.add(new IntSetting.Builder()
         .name("hunger-threshold")
-        .description("The level of hunger you eat at.")
         .defaultValue(16)
         .range(1, 19)
         .sliderRange(1, 19)
@@ -107,7 +101,7 @@ public class AutoEat extends Module {
     private boolean wasBaritone = false;
 
     public AutoEat() {
-        super(Categories.Player, "auto-eat", "Automatically eats food.");
+        super(Categories.Player, "auto-eat");
     }
 
     @Override

@@ -31,12 +31,11 @@ import net.minecraft.util.math.Direction;
 
 public class AutoCity extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
 
     private final Setting<Double> targetRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("target-range")
-        .description("The radius in which players get targeted.")
         .defaultValue(5.5)
         .min(0)
         .sliderMax(7)
@@ -45,7 +44,6 @@ public class AutoCity extends Module {
 
     private final Setting<Double> breakRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("break-range")
-        .description("How close a block must be to you to be considered.")
         .defaultValue(4.5)
         .min(0)
         .sliderMax(6)
@@ -54,21 +52,18 @@ public class AutoCity extends Module {
 
     private final Setting<SwitchMode> switchMode = sgGeneral.add(new EnumSetting.Builder<SwitchMode>()
         .name("switch-mode")
-        .description("How to switch to a pickaxe.")
         .defaultValue(SwitchMode.Normal)
         .build()
     );
 
     private final Setting<Boolean> support = sgGeneral.add(new BoolSetting.Builder()
         .name("support")
-        .description("If there is no block below a city block it will place one before mining.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("place-range")
-        .description("How far away to try and place a block.")
         .defaultValue(4.5)
         .min(0)
         .sliderMax(6)
@@ -78,14 +73,12 @@ public class AutoCity extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Automatically rotates you towards the city block.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
         .name("chat-info")
-        .description("Whether the module should send messages in chat.")
         .defaultValue(true)
         .build()
     );
@@ -94,21 +87,18 @@ public class AutoCity extends Module {
 
     private final Setting<Boolean> swingHand = sgRender.add(new BoolSetting.Builder()
         .name("swing-hand")
-        .description("Whether to render your hand swinging.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> renderBlock = sgRender.add(new BoolSetting.Builder()
         .name("render-block")
-        .description("Whether to render the block being broken.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .visible(renderBlock::get)
         .build()
@@ -116,7 +106,6 @@ public class AutoCity extends Module {
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color of the rendering.")
         .defaultValue(new SettingColor(225, 0, 0, 75))
         .visible(() -> renderBlock.get() && shapeMode.get().sides())
         .build()
@@ -124,7 +113,6 @@ public class AutoCity extends Module {
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color of the rendering.")
         .defaultValue(new SettingColor(225, 0, 0, 255))
         .visible(() -> renderBlock.get() && shapeMode.get().lines())
         .build()
@@ -136,7 +124,7 @@ public class AutoCity extends Module {
     private float progress;
 
     public AutoCity() {
-        super(Categories.Combat, "auto-city", "Automatically mine blocks next to someone's feet.");
+        super(Categories.Combat, "auto-city");
     }
 
     @Override

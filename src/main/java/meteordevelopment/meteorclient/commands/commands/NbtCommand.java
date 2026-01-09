@@ -51,7 +51,7 @@ public class NbtCommand extends Command {
         )));
 
     public NbtCommand() {
-        super("nbt", "Modifies NBT data for an item, example: .nbt add {display:{Name:'{\"text\":\"$cRed Name\"}'}}");
+        super("nbt");
     }
 
     @Override

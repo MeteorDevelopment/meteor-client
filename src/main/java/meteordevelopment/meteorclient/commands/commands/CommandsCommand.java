@@ -20,7 +20,7 @@ import net.minecraft.util.Formatting;
 
 public class CommandsCommand extends Command {
     public CommandsCommand() {
-        super("commands", "List of all commands.", "help");
+        super("commands", "help");
     }
 
     @Override
@@ -53,7 +53,7 @@ public class CommandsCommand extends Command {
         }
         tooltip.append(aliases.formatted(Formatting.GRAY)).append("\n\n");
 
-        tooltip.append(Text.literal(command.getDescription()).formatted(Formatting.WHITE));
+        tooltip.append(command.translatable("description")).formatted(Formatting.WHITE);
 
         // Text
         MutableText text = Text.literal(Utils.nameToTitle(command.getName()));

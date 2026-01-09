@@ -19,35 +19,31 @@ public class CompassHud extends HudElement {
     public static final HudElementInfo<CompassHud> INFO = new HudElementInfo<>(Hud.GROUP, "compass", "Displays a compass.", CompassHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgScale = settings.createGroup("Scale");
-    private final SettingGroup sgBackground = settings.createGroup("Background");
+    private final SettingGroup sgScale = settings.createGroup("scale");
+    private final SettingGroup sgBackground = settings.createGroup("background");
 
     // General
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("type")
-        .description("Which type of direction information to show.")
         .defaultValue(Mode.Axis)
         .build()
     );
 
     private final Setting<SettingColor> colorNorth = sgGeneral.add(new ColorSetting.Builder()
         .name("color-north")
-        .description("Color of north.")
         .defaultValue(new SettingColor(225, 45, 45))
         .build()
     );
 
     private final Setting<SettingColor> colorOther = sgGeneral.add(new ColorSetting.Builder()
-        .name("color-north")
-        .description("Color of other directions.")
+        .name("color-other")
         .defaultValue(new SettingColor())
         .build()
     );
 
     private final Setting<Boolean> shadow = sgGeneral.add(new BoolSetting.Builder()
         .name("shadow")
-        .description("Text shadow.")
         .defaultValue(false)
         .build()
     );
@@ -56,7 +52,6 @@ public class CompassHud extends HudElement {
 
     private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Apply custom scales to this hud element.")
         .defaultValue(false)
         .onChanged(aBoolean -> calculateSize())
         .build()
@@ -64,7 +59,6 @@ public class CompassHud extends HudElement {
 
     private final Setting<Double> textScale = sgScale.add(new DoubleSetting.Builder()
         .name("text-scale")
-        .description("Scale to use for the letters.")
         .visible(customScale::get)
         .defaultValue(1)
         .min(0.5)
@@ -74,7 +68,6 @@ public class CompassHud extends HudElement {
 
     private final Setting<Double> compassScale = sgScale.add(new DoubleSetting.Builder()
         .name("compass-scale")
-        .description("Scale of the whole HUD element.")
         .visible(customScale::get)
         .defaultValue(1)
         .min(0.5)
@@ -87,14 +80,12 @@ public class CompassHud extends HudElement {
 
     private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
         .name("background")
-        .description("Displays background.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color used for the background.")
         .visible(background::get)
         .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()

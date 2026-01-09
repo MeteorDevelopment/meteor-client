@@ -33,7 +33,6 @@ public class Flamethrower extends Module {
 
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
         .name("distance")
-        .description("The maximum distance the animal has to be to be roasted.")
         .min(0.0)
         .defaultValue(5.0)
         .build()
@@ -41,21 +40,18 @@ public class Flamethrower extends Module {
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
         .name("anti-break")
-        .description("Prevents flint and steel from being broken.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> putOutFire = sgGeneral.add(new BoolSetting.Builder()
         .name("put-out-fire")
-        .description("Tries to put out the fire when animal is low health, so the items don't burn.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> targetBabies = sgGeneral.add(new BoolSetting.Builder()
         .name("target-babies")
-        .description("If checked babies will also be killed.")
         .defaultValue(false)
         .build()
     );
@@ -68,14 +64,12 @@ public class Flamethrower extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Automatically faces towards the animal roasted.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
-        .description("Entities to cook.")
         .defaultValue(
             EntityType.PIG,
             EntityType.COW,
@@ -91,7 +85,7 @@ public class Flamethrower extends Module {
     private Hand hand;
 
     public Flamethrower() {
-        super(Categories.World, "flamethrower", "Ignites every alive piece of food.");
+        super(Categories.World, "flamethrower");
     }
 
     @Override

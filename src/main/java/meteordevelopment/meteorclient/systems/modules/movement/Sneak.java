@@ -16,13 +16,12 @@ public class Sneak extends Module {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("Which method to sneak.")
         .defaultValue(Mode.Vanilla)
         .build()
     );
 
     public Sneak() {
-        super (Categories.Movement, "sneak", "Sneaks for you");
+        super (Categories.Movement, "sneak");
     }
 
     public boolean doPacket() {

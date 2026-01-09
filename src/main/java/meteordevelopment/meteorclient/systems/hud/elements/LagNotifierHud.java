@@ -18,42 +18,37 @@ public class LagNotifierHud extends HudElement {
     public static final HudElementInfo<LagNotifierHud> INFO = new HudElementInfo<>(Hud.GROUP, "lag-notifier", "Displays if the server is lagging in ticks.", LagNotifierHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgScale = settings.createGroup("Scale");
-    private final SettingGroup sgBackground = settings.createGroup("Background");
+    private final SettingGroup sgScale = settings.createGroup("scale");
+    private final SettingGroup sgBackground = settings.createGroup("background");
 
     // General
 
     private final Setting<Boolean> shadow = sgGeneral.add(new BoolSetting.Builder()
         .name("shadow")
-        .description("Text shadow.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<SettingColor> textColor = sgGeneral.add(new ColorSetting.Builder()
         .name("text-color")
-        .description("A.")
         .defaultValue(new SettingColor())
         .build()
     );
 
     private final Setting<SettingColor> color1 = sgGeneral.add(new ColorSetting.Builder()
         .name("color-1")
-        .description("First color.")
         .defaultValue(new SettingColor(255, 255, 5))
         .build()
     );
 
     private final Setting<SettingColor> color2 = sgGeneral.add(new ColorSetting.Builder()
         .name("color-2")
-        .description("Second color.")
         .defaultValue(new SettingColor(235, 158, 52))
         .build()
     );
 
     private final Setting<SettingColor> color3 = sgGeneral.add(new ColorSetting.Builder()
         .name("color-3")
-        .description("Third color.")
         .defaultValue(new SettingColor(225, 45, 45))
         .build()
     );
@@ -62,14 +57,12 @@ public class LagNotifierHud extends HudElement {
 
     private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(1)
         .min(0.5)
@@ -81,14 +74,12 @@ public class LagNotifierHud extends HudElement {
 
     private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
         .name("background")
-        .description("Displays background.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color used for the background.")
         .visible(background::get)
         .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()

@@ -36,11 +36,10 @@ public class HudElementScreen extends WindowScreen {
 
         this.element = element;
 
-        settings = new Settings();
-        SettingGroup sg = settings.createGroup("Anchors");
+        settings = new Settings("hud.base");
+        SettingGroup sg = settings.createGroup("anchors");
         sg.add(new BoolSetting.Builder()
             .name("auto-anchors")
-            .description("Automatically assigns anchors based on the position.")
             .defaultValue(true)
             .onModuleActivated(booleanSetting -> booleanSetting.set(element.autoAnchors))
             .onChanged(aBoolean -> {
@@ -51,7 +50,6 @@ public class HudElementScreen extends WindowScreen {
         );
         sg.add(new EnumSetting.Builder<XAnchor>()
             .name("x-anchor")
-            .description("Horizontal anchor.")
             .defaultValue(XAnchor.Left)
             .visible(() -> !element.autoAnchors)
             .onModuleActivated(xAnchorSetting -> xAnchorSetting.set(element.box.xAnchor))
@@ -60,7 +58,6 @@ public class HudElementScreen extends WindowScreen {
         );
         sg.add(new EnumSetting.Builder<YAnchor>()
             .name("y-anchor")
-            .description("Vertical anchor.")
             .defaultValue(YAnchor.Top)
             .visible(() -> !element.autoAnchors)
             .onModuleActivated(yAnchorSetting -> yAnchorSetting.set(element.box.yAnchor))

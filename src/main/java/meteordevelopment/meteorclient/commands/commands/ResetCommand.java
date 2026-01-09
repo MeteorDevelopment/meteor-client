@@ -19,7 +19,7 @@ import net.minecraft.command.CommandSource;
 public class ResetCommand extends Command {
 
     public ResetCommand() {
-        super("reset", "Resets specified settings.");
+        super("reset");
     }
 
     @Override

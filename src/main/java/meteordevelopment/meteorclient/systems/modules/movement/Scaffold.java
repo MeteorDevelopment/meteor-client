@@ -32,31 +32,27 @@ import java.util.List;
 
 public class Scaffold extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
-        .description("Selected blocks.")
         .build()
     );
 
     private final Setting<ListMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<ListMode>()
         .name("blocks-filter")
-        .description("How to use the block list setting")
         .defaultValue(ListMode.Blacklist)
         .build()
     );
 
     private final Setting<Boolean> fastTower = sgGeneral.add(new BoolSetting.Builder()
         .name("fast-tower")
-        .description("Whether or not to scaffold upwards faster.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Double> towerSpeed = sgGeneral.add(new DoubleSetting.Builder()
         .name("tower-speed")
-        .description("The speed at which to tower.")
         .defaultValue(0.5)
         .min(0)
         .sliderMax(1)
@@ -66,7 +62,6 @@ public class Scaffold extends Module {
 
     private final Setting<Boolean> whileMoving = sgGeneral.add(new BoolSetting.Builder()
         .name("while-moving")
-        .description("Allows you to tower while moving.")
         .defaultValue(false)
         .visible(fastTower::get)
         .build()
@@ -74,42 +69,36 @@ public class Scaffold extends Module {
 
     private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-click")
-        .description("Only places blocks when holding right click.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> renderSwing = sgGeneral.add(new BoolSetting.Builder()
         .name("swing")
-        .description("Renders your client-side swing.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-switch")
-        .description("Automatically swaps to a block before placing.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Rotates towards the blocks being placed.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
         .name("air-place")
-        .description("Allow air place. This also allows you to modify scaffold radius.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Double> aheadDistance = sgGeneral.add(new DoubleSetting.Builder()
         .name("ahead-distance")
-        .description("How far ahead to place blocks.")
         .defaultValue(0)
         .min(0)
         .sliderMax(1)
@@ -119,7 +108,6 @@ public class Scaffold extends Module {
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("closest-block-range")
-        .description("How far can scaffold place blocks when you are in air.")
         .defaultValue(4)
         .min(0)
         .sliderMax(8)
@@ -129,7 +117,6 @@ public class Scaffold extends Module {
 
     private final Setting<Double> radius = sgGeneral.add(new DoubleSetting.Builder()
         .name("radius")
-        .description("Scaffold radius.")
         .defaultValue(0)
         .min(0)
         .max(6)
@@ -139,7 +126,6 @@ public class Scaffold extends Module {
 
     private final Setting<Integer> blocksPerTick = sgGeneral.add(new IntSetting.Builder()
         .name("blocks-per-tick")
-        .description("How many blocks to place in one tick.")
         .defaultValue(3)
         .min(1)
         .visible(airPlace::get)
@@ -150,14 +136,12 @@ public class Scaffold extends Module {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
-        .description("Whether to render blocks that have been placed.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .visible(render::get)
         .build()
@@ -165,7 +149,6 @@ public class Scaffold extends Module {
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232, 10))
         .visible(render::get)
         .build()
@@ -173,7 +156,6 @@ public class Scaffold extends Module {
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232))
         .visible(render::get)
         .build()
@@ -182,7 +164,7 @@ public class Scaffold extends Module {
     private final BlockPos.Mutable bp = new BlockPos.Mutable();
 
     public Scaffold() {
-        super(Categories.Movement, "scaffold", "Automatically places blocks under you.");
+        super(Categories.Movement, "scaffold");
     }
 
 

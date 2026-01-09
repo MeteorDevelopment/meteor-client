@@ -15,11 +15,13 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
@@ -31,13 +33,11 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public final Category category;
     public final String name;
-    public final String title;
-    public final String description;
     public final String[] aliases;
     public final Color color;
 
     public final MeteorAddon addon;
-    public final Settings settings = new Settings();
+    public final Settings settings;
 
     private boolean active;
 
@@ -50,16 +50,17 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public boolean chatFeedback = true;
     public boolean favorite = false;
 
-    public Module(Category category, String name, String description, String... aliases) {
-        if (name.contains(" ")) MeteorClient.LOG.warn("Module '{}' contains invalid characters in its name making it incompatible with Meteor Client commands.", name);
+    public Module(Category category, String name, String... aliases) {
+        if (name.contains(" ")) {
+            throw new IllegalArgumentException("Module '%s' contains invalid characters in its name.".formatted(name));
+        }
 
         this.mc = MinecraftClient.getInstance();
         this.category = category;
         this.name = name;
-        this.title = Utils.nameToTitle(name);
-        this.description = description;
         this.aliases = aliases;
         this.color = Color.fromHsv(Utils.random(0.0, 360.0), 0.35, 1);
+        this.settings = new Settings("module." + name);
 
         String classname = this.getClass().getName();
         for (MeteorAddon addon : AddonManager.ADDONS) {
@@ -72,8 +73,8 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         this.addon = null;
     }
 
-    public Module(Category category, String name, String desc) {
-        this(category, name, desc, new String[0]);
+    public Module(Category category, String name) {
+        this(category, name, new String[0]);
     }
 
     public WWidget getWidget(GuiTheme theme) {
@@ -117,28 +118,28 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public void sendToggledMsg() {
         if (Config.get().chatFeedback.get() && chatFeedback) {
             ChatUtils.forceNextPrefixClass(getClass());
-            ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+            ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", null /* todo translatable Text */, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
         }
     }
 
     public void info(Text message) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.sendMsg(title, message);
+        ChatUtils.sendMsg(null /* todo translatable Text */, message);
     }
 
     public void info(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(title, message, args);
+        ChatUtils.infoPrefix(null /* todo translatable Text */, message, args);
     }
 
     public void warning(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(title, message, args);
+        ChatUtils.warningPrefix(null /* todo translatable Text */, message, args);
     }
 
     public void error(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(title, message, args);
+        ChatUtils.errorPrefix(null /* todo translatable Text */, message, args);
     }
 
     public boolean isActive() {
@@ -147,6 +148,22 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public String getInfoString() {
         return null;
+    }
+
+    public String getTitle() {
+        return MeteorTranslations.translate("module." + this.name);
+    }
+
+    public MutableText getTitleText() {
+        return MeteorClient.translatable("module." + this.name);
+    }
+
+    public String getDescription() {
+        return MeteorTranslations.translate("module." + this.name + ".description");
+    }
+
+    public MutableText getDescriptionText() {
+        return MeteorClient.translatable("module." + this.name + ".description");
     }
 
     @Override

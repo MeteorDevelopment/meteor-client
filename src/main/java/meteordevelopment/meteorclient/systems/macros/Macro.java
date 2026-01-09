@@ -22,19 +22,17 @@ import java.util.Objects;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Macro implements ISerializable<Macro> {
-    public final Settings settings = new Settings();
+    public final Settings settings = new Settings("macro");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public Setting<String> name = sgGeneral.add(new StringSetting.Builder()
         .name("name")
-        .description("The name of the macro.")
         .build()
     );
 
     public Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("messages")
-        .description("The messages for the macro to send.")
         .onChanged(v -> dirty = true)
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
@@ -42,7 +40,6 @@ public class Macro implements ISerializable<Macro> {
 
     public Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
         .name("keybind")
-        .description("The bind to run the macro.")
         .build()
     );
 

@@ -37,7 +37,7 @@ import java.nio.ByteBuffer;
 
 public class Blur extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgScreens = settings.createGroup("Screens");
+    private final SettingGroup sgScreens = settings.createGroup("screens");
 
     // Strength-Levels from https://github.com/jonaburg/picom/blob/a8445684fe18946604848efb73ace9457b29bf80/src/backend/backend_common.c#L372
     private final IntFloatImmutablePair[] strengths = new IntFloatImmutablePair[]{
@@ -66,7 +66,6 @@ public class Blur extends Module {
     // General
     private final Setting<Integer> strength = sgGeneral.add(new IntSetting.Builder()
         .name("strength")
-        .description("How strong the blur should be.")
         .defaultValue(5)
         .min(1)
         .max(20)
@@ -76,7 +75,6 @@ public class Blur extends Module {
 
     private final Setting<Integer> fadeTime = sgGeneral.add(new IntSetting.Builder()
         .name("fade-time")
-        .description("How long the fade will last in milliseconds.")
         .defaultValue(100)
         .min(0)
         .sliderMax(500)
@@ -87,27 +85,23 @@ public class Blur extends Module {
 
     private final Setting<Boolean> meteor = sgScreens.add(new BoolSetting.Builder()
         .name("meteor")
-        .description("Applies blur to Meteor screens.")
         .defaultValue(true)
         .build());
 
     private final Setting<Boolean> inventories = sgScreens.add(new BoolSetting.Builder()
         .name("inventories")
-        .description("Applies blur to inventory screens.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> chat = sgScreens.add(new BoolSetting.Builder()
         .name("chat")
-        .description("Applies blur when in chat.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> other = sgScreens.add(new BoolSetting.Builder()
         .name("other")
-        .description("Applies blur to all other screen types.")
         .defaultValue(true)
         .build()
     );
@@ -120,7 +114,7 @@ public class Blur extends Module {
     private float previousOffset = -1;
 
     public Blur() {
-        super(Categories.Render, "blur", "Blurs background when in GUI screens.");
+        super(Categories.Render, "blur");
 
         // Initialize fbos for the first time
         for (int i = 0; i < fbos.length; i++) {

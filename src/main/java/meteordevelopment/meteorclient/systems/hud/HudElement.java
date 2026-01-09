@@ -18,7 +18,7 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
     public final HudElementInfo<?> info;
     private boolean active;
 
-    public final Settings settings = new Settings();
+    public final Settings settings;
     public final HudBox box = new HudBox(this);
 
     public boolean autoAnchors = true;
@@ -26,6 +26,7 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
 
     public HudElement(HudElementInfo<?> info) {
         this.info = info;
+        this.settings = new Settings("hud." + info.name);
         this.active = true;
     }
 

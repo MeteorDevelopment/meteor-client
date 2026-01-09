@@ -41,7 +41,7 @@ public class InputCommand extends Command {
     );
 
     public InputCommand() {
-        super("input", "Keyboard input simulation.");
+        super("input");
     }
 
     @Override
@@ -80,9 +80,9 @@ public class InputCommand extends Command {
         }
 
         builder.then(literal("clear").executes(ctx -> {
-            if (activeHandlers.isEmpty()) warning("No active keypress handlers.");
+            if (activeHandlers.isEmpty()) warning("no_handlers");
             else {
-                info("Cleared all keypress handlers.");
+                info("cleared_handlers");
                 activeHandlers.forEach(MeteorClient.EVENT_BUS::unsubscribe);
                 activeHandlers.clear();
             }
@@ -90,12 +90,12 @@ public class InputCommand extends Command {
         }));
 
         builder.then(literal("list").executes(ctx -> {
-            if (activeHandlers.isEmpty()) warning("No active keypress handlers.");
+            if (activeHandlers.isEmpty()) warning("no_handlers");
             else {
-                info("Active keypress handlers: ");
+                info("");
                 for (int i = 0; i < activeHandlers.size(); i++) {
                     KeypressHandler handler = activeHandlers.get(i);
-                    info("(highlight)%d(default) - (highlight)%s %d(default) ticks left out of (highlight)%d(default).", i, I18n.translate(handler.key.getId()), handler.ticks, handler.totalTicks);
+                    info("keypress_handler", i, I18n.translate(handler.key.getId()), handler.ticks, handler.totalTicks);
                 }
             }
             return SINGLE_SUCCESS;
@@ -103,9 +103,9 @@ public class InputCommand extends Command {
 
         builder.then(literal("remove").then(argument("index", IntegerArgumentType.integer(0)).executes(ctx -> {
             int index = IntegerArgumentType.getInteger(ctx, "index");
-            if (index >= activeHandlers.size()) warning("Index out of range.");
+            if (index >= activeHandlers.size()) warning("out_of_range");
             else {
-                info("Removed keypress handler.");
+                info("removed_handler");
                 MeteorClient.EVENT_BUS.unsubscribe(activeHandlers.get(index));
                 activeHandlers.remove(index);
             }

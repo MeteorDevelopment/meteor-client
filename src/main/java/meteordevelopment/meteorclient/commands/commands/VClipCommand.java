@@ -14,7 +14,7 @@ import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 
 public class VClipCommand extends Command {
     public VClipCommand() {
-        super("vclip", "Lets you clip through blocks vertically.");
+        super("vclip");
     }
 
     @Override

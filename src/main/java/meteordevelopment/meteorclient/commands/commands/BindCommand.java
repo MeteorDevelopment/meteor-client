@@ -14,7 +14,7 @@ import net.minecraft.command.CommandSource;
 
 public class BindCommand extends Command {
     public BindCommand() {
-        super("bind", "Binds a specified module to the next pressed key.");
+        super("bind");
     }
 
     @Override

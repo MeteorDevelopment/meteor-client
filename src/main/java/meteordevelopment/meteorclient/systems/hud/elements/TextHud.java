@@ -27,9 +27,9 @@ public class TextHud extends HudElement {
     private static final Color WHITE = new Color();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgShown = settings.createGroup("Shown");
-    private final SettingGroup sgScale = settings.createGroup("Scale");
-    private final SettingGroup sgBackground = settings.createGroup("Background");
+    private final SettingGroup sgShown = settings.createGroup("shown");
+    private final SettingGroup sgScale = settings.createGroup("scale");
+    private final SettingGroup sgBackground = settings.createGroup("background");
 
     private double originalWidth, originalHeight;
     private boolean needsCompile, recalculateSize;
@@ -40,7 +40,6 @@ public class TextHud extends HudElement {
 
     public final Setting<String> text = sgGeneral.add(new StringSetting.Builder()
         .name("text")
-        .description("Text to display with Starscript.")
         .defaultValue(MeteorClient.NAME)
         .onChanged(s -> recompile())
         .wide()
@@ -50,7 +49,6 @@ public class TextHud extends HudElement {
 
     public final Setting<Integer> updateDelay = sgGeneral.add(new IntSetting.Builder()
         .name("update-delay")
-        .description("Update delay in ticks")
         .defaultValue(4)
         .onChanged(integer -> {
             if (timer > integer) timer = integer;
@@ -61,7 +59,6 @@ public class TextHud extends HudElement {
 
     public final Setting<Boolean> shadow = sgGeneral.add(new BoolSetting.Builder()
         .name("shadow")
-        .description("Renders shadow behind text.")
         .defaultValue(true)
         .onChanged(aBoolean -> recalculateSize = true)
         .build()
@@ -69,7 +66,6 @@ public class TextHud extends HudElement {
 
     public final Setting<Integer> border = sgGeneral.add(new IntSetting.Builder()
         .name("border")
-        .description("How much space to add around the text.")
         .defaultValue(0)
         .onChanged(integer -> super.setSize(originalWidth + integer * 2, originalHeight + integer * 2))
         .build()
@@ -79,7 +75,6 @@ public class TextHud extends HudElement {
 
     public final Setting<Shown> shown = sgShown.add(new EnumSetting.Builder<Shown>()
         .name("shown")
-        .description("When this text element is shown.")
         .defaultValue(Shown.Always)
         .onChanged(s -> recompile())
         .build()
@@ -87,7 +82,6 @@ public class TextHud extends HudElement {
 
     public final Setting<String> condition = sgShown.add(new StringSetting.Builder()
         .name("condition")
-        .description("Condition to check when shown is not Always.")
         .visible(() -> shown.get() != Shown.Always)
         .onChanged(s -> recompile())
         .renderer(StarscriptTextBoxRenderer.class)
@@ -98,7 +92,6 @@ public class TextHud extends HudElement {
 
     public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
-        .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
         .onChanged(aBoolean -> recalculateSize = true)
         .build()
@@ -106,7 +99,6 @@ public class TextHud extends HudElement {
 
     public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(1)
         .onChanged(aDouble -> recalculateSize = true)
@@ -119,14 +111,12 @@ public class TextHud extends HudElement {
 
     public final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
         .name("background")
-        .description("Displays background.")
         .defaultValue(false)
         .build()
     );
 
     public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
-        .description("Color used for the background.")
         .visible(background::get)
         .defaultValue(new SettingColor(25, 25, 25, 50))
         .build()

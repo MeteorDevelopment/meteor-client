@@ -14,7 +14,7 @@ import net.minecraft.command.CommandSource;
 
 public class InventoryCommand extends Command {
     public InventoryCommand() {
-        super("inventory", "Allows you to see parts of another player's inventory.", "inv", "invsee");
+        super("inventory", "inv", "invsee");
     }
 
     @Override

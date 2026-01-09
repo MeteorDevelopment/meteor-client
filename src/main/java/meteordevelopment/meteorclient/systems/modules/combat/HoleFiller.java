@@ -39,12 +39,11 @@ import java.util.List;
 
 public class HoleFiller extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSmart = settings.createGroup("Smart");
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgSmart = settings.createGroup("smart");
+    private final SettingGroup sgRender = settings.createGroup("render");
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
-        .description("Which blocks can be used to fill holes.")
         .defaultValue(
             Blocks.OBSIDIAN,
             Blocks.CRYING_OBSIDIAN,
@@ -57,7 +56,6 @@ public class HoleFiller extends Module {
 
     private final Setting<Integer> searchRadius = sgGeneral.add(new IntSetting.Builder()
         .name("search-radius")
-        .description("Horizontal radius in which to search for holes.")
         .defaultValue(5)
         .min(0)
         .sliderMax(6)
@@ -66,7 +64,6 @@ public class HoleFiller extends Module {
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("place-range")
-        .description("How far away from the player you can place a block.")
         .defaultValue(4.5)
         .min(0)
         .sliderMax(6)
@@ -75,7 +72,6 @@ public class HoleFiller extends Module {
 
     private final Setting<Double> placeWallsRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("walls-range")
-        .description("How far away from the player you can place a block behind walls.")
         .defaultValue(4.5)
         .min(0)
         .sliderMax(6)
@@ -84,21 +80,18 @@ public class HoleFiller extends Module {
 
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
         .name("doubles")
-        .description("Fills double holes.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Automatically rotates towards the holes being filled.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
         .name("place-delay")
-        .description("The ticks delay between placement.")
         .defaultValue(1)
         .min(0)
         .build()
@@ -106,7 +99,6 @@ public class HoleFiller extends Module {
 
     private final Setting<Integer> blocksPerTick = sgGeneral.add(new IntSetting.Builder()
         .name("blocks-per-tick")
-        .description("How many blocks to place in one tick.")
         .defaultValue(3)
         .min(1)
         .build()
@@ -116,14 +108,12 @@ public class HoleFiller extends Module {
 
     private final Setting<Boolean> smart = sgSmart.add(new BoolSetting.Builder()
         .name("smart")
-        .description("Take more factors into account before filling a hole.")
         .defaultValue(true)
         .build()
     );
 
     public final Setting<Keybind> forceFill = sgSmart.add(new KeybindSetting.Builder()
         .name("force-fill")
-        .description("Fills all holes around you regardless of target checks.")
         .defaultValue(Keybind.none())
         .visible(smart::get)
         .build()
@@ -131,7 +121,6 @@ public class HoleFiller extends Module {
 
     private final Setting<Boolean> predictMovement = sgSmart.add(new BoolSetting.Builder()
         .name("predict-movement")
-        .description("Predict target movement to account for ping.")
         .defaultValue(true)
         .visible(smart::get)
         .build()
@@ -139,7 +128,6 @@ public class HoleFiller extends Module {
 
     private final Setting<Double> ticksToPredict = sgSmart.add(new DoubleSetting.Builder()
         .name("ticks-to-predict")
-        .description("How many ticks ahead we should predict for.")
         .defaultValue(10)
         .min(1)
         .sliderMax(30)
@@ -149,7 +137,6 @@ public class HoleFiller extends Module {
 
     private final Setting<Boolean> ignoreSafe = sgSmart.add(new BoolSetting.Builder()
         .name("ignore-safe")
-        .description("Ignore players in safe holes.")
         .defaultValue(true)
         .visible(smart::get)
         .build()
@@ -157,7 +144,6 @@ public class HoleFiller extends Module {
 
     private final Setting<Boolean> onlyMoving = sgSmart.add(new BoolSetting.Builder()
         .name("only-moving")
-        .description("Ignore players if they're standing still.")
         .defaultValue(true)
         .visible(smart::get)
         .build()
@@ -165,7 +151,6 @@ public class HoleFiller extends Module {
 
     private final Setting<Double> targetRange = sgSmart.add(new DoubleSetting.Builder()
         .name("target-range")
-        .description("How far away to target players.")
         .defaultValue(7)
         .min(0)
         .sliderMin(1)
@@ -176,7 +161,6 @@ public class HoleFiller extends Module {
 
     private final Setting<Double> feetRange = sgSmart.add(new DoubleSetting.Builder()
         .name("feet-range")
-        .description("How far from a hole a player's feet must be to fill it.")
         .defaultValue(1.5)
         .min(0)
         .sliderMax(4)
@@ -188,21 +172,18 @@ public class HoleFiller extends Module {
 
     private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
         .name("swing")
-        .description("Swing the player's hand when placing.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
-        .description("Renders an overlay where blocks will be placed.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
-        .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .visible(render::get)
         .build()
@@ -210,7 +191,6 @@ public class HoleFiller extends Module {
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232, 10))
         .visible(() -> render.get() && shapeMode.get().sides())
         .build()
@@ -218,7 +198,6 @@ public class HoleFiller extends Module {
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232))
         .visible(() -> render.get() && shapeMode.get().lines())
         .build()
@@ -226,7 +205,6 @@ public class HoleFiller extends Module {
 
     private final Setting<SettingColor> nextSideColor = sgRender.add(new ColorSetting.Builder()
         .name("next-side-color")
-        .description("The side color of the next block to be placed.")
         .defaultValue(new SettingColor(227, 196, 245, 10))
         .visible(() -> render.get() && shapeMode.get().sides())
         .build()
@@ -234,7 +212,6 @@ public class HoleFiller extends Module {
 
     private final Setting<SettingColor> nextLineColor = sgRender.add(new ColorSetting.Builder()
         .name("next-line-color")
-        .description("The line color of the next block to be placed.")
         .defaultValue(new SettingColor(5, 139, 221))
         .visible(() -> render.get() && shapeMode.get().lines())
         .build()
@@ -245,7 +222,7 @@ public class HoleFiller extends Module {
     private int timer;
 
     public HoleFiller() {
-        super(Categories.Combat, "hole-filler", "Fills holes with specified blocks.");
+        super(Categories.Combat, "hole-filler");
     }
 
     @Override

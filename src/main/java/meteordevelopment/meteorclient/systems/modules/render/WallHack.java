@@ -23,7 +23,6 @@ public class WallHack extends Module {
 
     public final Setting<Integer> opacity = sgGeneral.add(new IntSetting.Builder()
         .name("opacity")
-        .description("The opacity for rendered blocks.")
         .defaultValue(0)
         .range(0, 255)
         .sliderMax(255)
@@ -37,7 +36,6 @@ public class WallHack extends Module {
 
     public final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
-        .description("What blocks should be targeted for Wall Hack.")
         .defaultValue()
         .onChanged(onChanged -> {
             if (isActive()) mc.worldRenderer.reload();
@@ -47,13 +45,12 @@ public class WallHack extends Module {
 
     public final Setting<Boolean> occludeChunks = sgGeneral.add(new BoolSetting.Builder()
         .name("occlude-chunks")
-        .description("Whether caves should occlude underground (may look wonky when on).")
         .defaultValue(false)
         .build()
     );
 
     public WallHack() {
-        super(Categories.Render, "wall-hack", "Makes blocks translucent.");
+        super(Categories.Render, "wall-hack");
     }
 
     @Override

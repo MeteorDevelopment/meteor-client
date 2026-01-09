@@ -32,13 +32,11 @@ public class AutoNametag extends Module {
 
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
-        .description("Which entities to nametag.")
         .build()
     );
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
         .name("range")
-        .description("The maximum range an entity can be to be nametagged.")
         .defaultValue(5)
         .min(0)
         .sliderMax(6)
@@ -47,21 +45,18 @@ public class AutoNametag extends Module {
 
     private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
         .name("priority")
-        .description("Priority sort")
         .defaultValue(SortPriority.LowestDistance)
         .build()
     );
 
     private final Setting<Boolean> renametag = sgGeneral.add(new BoolSetting.Builder()
         .name("renametag")
-        .description("Allows already nametagged entities to be renamed.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Automatically faces towards the mob being nametagged.")
         .defaultValue(true)
         .build()
     );
@@ -72,7 +67,7 @@ public class AutoNametag extends Module {
     private boolean offHand;
 
     public AutoNametag() {
-        super(Categories.World, "auto-nametag", "Automatically uses nametags on entities without a nametag. WILL nametag ALL entities in the specified distance.");
+        super(Categories.World, "auto-nametag");
     }
 
     @Override

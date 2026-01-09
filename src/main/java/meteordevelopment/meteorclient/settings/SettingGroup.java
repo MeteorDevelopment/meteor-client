@@ -17,12 +17,14 @@ import java.util.List;
 
 public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setting<?>> {
     public final String name;
+    public final String translationKey;
     public boolean sectionExpanded;
 
     final List<Setting<?>> settings = new ArrayList<>(1);
 
     SettingGroup(String name, boolean sectionExpanded) {
         this.name = name;
+        this.translationKey = "setting.group." + name;
         this.sectionExpanded = sectionExpanded;
     }
 

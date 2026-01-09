@@ -34,13 +34,14 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public static final double TITLE_TEXT_SCALE = 1.25;
 
     public final String name;
-    public final Settings settings = new Settings();
+    public final Settings settings;
 
     public boolean disableHoverColor;
 
@@ -50,6 +51,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
 
     public GuiTheme(String name) {
         this.name = name;
+        this.settings = new Settings("theme." + name.toLowerCase(Locale.ROOT));
     }
 
     public void beforeRender() {
@@ -156,7 +158,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public abstract WAccount account(WidgetScreen screen, Account<?> account);
 
     public WWidget module(Module module) {
-        return module(module, module.title);
+        return module(module, module.getTitle());
     }
     public abstract WWidget module(Module module, String title);
 
@@ -213,6 +215,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
 
     public WWidget settings(Settings settings, String filter) {
+        if (settings.baseTranslationKey == null) throw new IllegalArgumentException("Cannot use internal Settings in a GuiTheme!");
         return settingsFactory.create(this, settings, filter);
     }
     public WWidget settings(Settings settings) {

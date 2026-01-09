@@ -23,20 +23,18 @@ public class AntiAnchor extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Makes you rotate when placing.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> swing = sgGeneral.add(new BoolSetting.Builder()
         .name("swing")
-        .description("Swings your hand when placing.")
         .defaultValue(true)
         .build()
     );
 
     public AntiAnchor() {
-        super(Categories.Combat, "anti-anchor", "Automatically prevents Anchor Aura by placing a slab on your head.");
+        super(Categories.Combat, "anti-anchor");
     }
 
     @EventHandler

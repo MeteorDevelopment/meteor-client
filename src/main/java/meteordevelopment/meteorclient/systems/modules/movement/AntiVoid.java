@@ -20,7 +20,6 @@ public class AntiVoid extends Module {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .description("The method to prevent you from falling into the void.")
         .defaultValue(Mode.Jump)
         .onChanged(a -> onActivate())
         .build()
@@ -29,7 +28,7 @@ public class AntiVoid extends Module {
     private boolean wasFlightEnabled, hasRun;
 
     public AntiVoid() {
-        super(Categories.Movement, "anti-void", "Attempts to prevent you from falling into the void.");
+        super(Categories.Movement, "anti-void");
     }
 
     @Override

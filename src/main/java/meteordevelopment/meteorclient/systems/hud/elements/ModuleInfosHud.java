@@ -21,49 +21,42 @@ public class ModuleInfosHud extends HudElement {
 
     private final Setting<List<Module>> modules = sgGeneral.add(new ModuleListSetting.Builder()
         .name("modules")
-        .description("Which modules to display")
         .defaultValue(KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class, Surround.class)
         .build()
     );
 
     private final Setting<Boolean> additionalInfo = sgGeneral.add(new BoolSetting.Builder()
         .name("additional-info")
-        .description("Shows additional info from the module next to the name in the module info list.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> textShadow = sgGeneral.add(new BoolSetting.Builder()
         .name("text-shadow")
-        .description("Renders shadow behind text.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<SettingColor> moduleColor = sgGeneral.add(new ColorSetting.Builder()
         .name("module-color")
-        .description("Module color.")
         .defaultValue(new SettingColor())
         .build()
     );
 
     private final Setting<SettingColor> onColor = sgGeneral.add(new ColorSetting.Builder()
         .name("on-color")
-        .description("Color when module is on.")
         .defaultValue(new SettingColor(25, 225, 25))
         .build()
     );
 
     private final Setting<SettingColor> offColor = sgGeneral.add(new ColorSetting.Builder()
         .name("off-color")
-        .description("Color when module is off.")
         .defaultValue(new SettingColor(225, 25, 25))
         .build()
     );
 
     private final Setting<Alignment> alignment = sgGeneral.add(new EnumSetting.Builder<Alignment>()
         .name("alignment")
-        .description("Horizontal alignment.")
         .defaultValue(Alignment.Auto)
         .build()
     );
@@ -87,7 +80,7 @@ public class ModuleInfosHud extends HudElement {
 
         int i = 0;
         for (Module module : modules.get()) {
-            double moduleWidth = renderer.textWidth(module.title) + renderer.textWidth(" ");
+            double moduleWidth = renderer.textWidth(module.getTitle()) + renderer.textWidth(" ");
             String text = null;
 
             if (module.isActive()) {
@@ -102,7 +95,7 @@ public class ModuleInfosHud extends HudElement {
             moduleWidth += renderer.textWidth(text);
 
             double x = this.x + alignX(moduleWidth, alignment.get());
-            x = renderer.text(module.title, x, y, moduleColor.get(), textShadow.get());
+            x = renderer.text(module.getTitle(), x, y, moduleColor.get(), textShadow.get());
             renderer.text(text, x + renderer.textWidth(" "), y, module.isActive() ? onColor.get() : offColor.get(), textShadow.get());
             y += renderer.textHeight() + 2;
 

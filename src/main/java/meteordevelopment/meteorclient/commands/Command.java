@@ -12,12 +12,14 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.registry.BuiltinRegistries;
 import net.minecraft.server.command.CommandManager;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
 import java.util.List;
@@ -29,14 +31,18 @@ public abstract class Command {
 
     private final String name;
     private final String title;
-    private final String description;
     private final List<String> aliases;
+    public final String translationKey;
 
-    public Command(String name, String description, String... aliases) {
+    public Command(String name, String... aliases) {
         this.name = name;
         this.title = Utils.nameToTitle(name);
-        this.description = description;
         this.aliases = List.of(aliases);
+        this.translationKey = "command." + name;
+    }
+
+    public Command(String name) {
+        this(name, new String[0]);
     }
 
     // Helper methods to painlessly infer the CommandSource generic type argument
@@ -65,10 +71,6 @@ public abstract class Command {
         return name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     public List<String> getAliases() {
         return aliases;
     }
@@ -90,16 +92,24 @@ public abstract class Command {
 
     public void info(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(title, message, args);
+        ChatUtils.infoPrefix(title, MeteorTranslations.translate(translationKey + ".info." + message, message, args));
     }
 
     public void warning(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(title, message, args);
+        ChatUtils.warningPrefix(title, MeteorTranslations.translate(translationKey + ".warning." + message, message, args));
     }
 
     public void error(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(title, message, args);
+        ChatUtils.errorPrefix(title, MeteorTranslations.translate(translationKey + ".error." + message, message, args));
+    }
+
+    public MutableText translatable(String string, Object... args) {
+        return MeteorClient.translatable(translationKey + "." + string, args);
+    }
+
+    public MutableText translatable(String string, String fallback, Object... args) {
+        return MeteorClient.translatable(translationKey + "." + string, fallback, args);
     }
 }
