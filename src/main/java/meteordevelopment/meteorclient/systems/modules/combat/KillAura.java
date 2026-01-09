@@ -99,6 +99,13 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final Setting<Boolean> attackThroughShields = sgGeneral.add(new BoolSetting.Builder()
+        .name("attack-through-shields")
+        .description("Attacks players even when they are blocking with shields.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-click")
         .description("Only attacks when holding left click.")
@@ -411,7 +418,7 @@ public class KillAura extends Module {
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
-            if (shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
+            if (!attackThroughShields.get() && shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
             if (player instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) return false;
         }
         if (entity instanceof AnimalEntity animal) {
