@@ -36,9 +36,14 @@ public abstract class SodiumDefaultFluidRendererMixin {
     @Unique
     private int xrayAlpha;
 
-    @Inject(method = "render", at = @At("HEAD"))
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void onRender(LevelSlice level, net.minecraft.block.BlockState blockState, FluidState fluidState, BlockPos blockPos, BlockPos offset, TranslucentGeometryCollector collector, ChunkModelBuilder meshBuilder, Material material, ColorProvider<FluidState> colorProvider, Sprite[] sprites, CallbackInfo ci) {
         xrayAlpha = Xray.getAlpha(fluidState.getBlockState(), blockPos);
+
+        // Cancel block rendering when alpha is 0, required for Iris support but unnecessery to check for shaders, we already force be disabled when Xray is enabled
+        if (xrayAlpha == 0) {
+            ci.cancel();
+        }
     }
 
     @Inject(method = "updateQuad", at = @At("TAIL"))
