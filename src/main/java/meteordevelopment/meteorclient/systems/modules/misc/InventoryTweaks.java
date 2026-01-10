@@ -404,19 +404,6 @@ public class InventoryTweaks extends Module {
         for (int i = start; i < end; i++) {
             if (!handler.getSlot(i).hasStack()) continue;
 
-            int sleep;
-            if (initial) {
-                sleep = autoStealInitDelay.get();
-                initial = false;
-            } else sleep = getSleepTime();
-            if (sleep > 0) {
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {
-                    MeteorClient.LOG.error("Error when sleeping the slot mover", e);
-                }
-            }
-
             // Exit if user closes screen or exit world
             if (mc.currentScreen == null || !Utils.canUpdate()) break;
 
@@ -432,6 +419,22 @@ public class InventoryTweaks extends Module {
                 if (dumpFilter.get() == ListMode.Blacklist && dumpItems.get().contains(item))
                     continue;
             }
+
+            int sleep;
+            if (initial) {
+                sleep = autoStealInitDelay.get();
+                initial = false;
+            } else sleep = getSleepTime();
+            if (sleep > 0) {
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    MeteorClient.LOG.error("Error when sleeping the slot mover", e);
+                }
+            }
+
+            // Exit if user closes screen or exit world
+            if (mc.currentScreen == null || !Utils.canUpdate()) break;
 
             if (steal && stealDrop.get()) {
                 if (dropBackwards.get()) {
