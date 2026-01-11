@@ -5,22 +5,32 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.gui.WindowScreen;
+import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -47,54 +57,7 @@ public class KeyboardHud extends HudElement {
         .build()
     );
 
-    private final Setting<String> customKeys = sgGeneral.add(new StringSetting.Builder()
-        .name("custom-keys")
-        .description("Custom keys configuration (KeyName X Y Width Height [flags]...). Flags: cps")
-        .defaultValue("LMB 0 0 40 40 cps, RMB 44 0 40 40 cps")
-        .visible(() -> preset.get() == Preset.AdvancedCustomization)
-        .onChanged(this::onCustomKeysChanged)
-        .build()
-    );
-
-    private final Setting<Keybind> customKey = sgGeneral.add(new KeybindSetting.Builder()
-        .name("custom-key")
-        .description("The key to display.")
-        .defaultValue(Keybind.fromKey(GLFW.GLFW_KEY_SPACE))
-        .visible(() -> preset.get() == Preset.CustomKey)
-        .onChanged(k -> onPresetChanged(preset.get()))
-        .build()
-    );
-
-    private final Setting<Double> customKeyWidth = sgGeneral.add(new DoubleSetting.Builder()
-        .name("key-width")
-        .description("Width of the key.")
-        .defaultValue(60)
-        .min(20)
-        .sliderRange(20, 200)
-        .visible(() -> preset.get() == Preset.CustomKey)
-        .onChanged(v -> onPresetChanged(preset.get()))
-        .build()
-    );
-
-    private final Setting<Double> customKeyHeight = sgGeneral.add(new DoubleSetting.Builder()
-        .name("key-height")
-        .description("Height of the key.")
-        .defaultValue(40)
-        .min(20)
-        .sliderRange(20, 200)
-        .visible(() -> preset.get() == Preset.CustomKey)
-        .onChanged(v -> onPresetChanged(preset.get()))
-        .build()
-    );
-
-    private final Setting<Boolean> customKeyShowCps = sgGeneral.add(new BoolSetting.Builder()
-        .name("show-cps")
-        .description("Show CPS for this key.")
-        .defaultValue(false)
-        .visible(() -> preset.get() == Preset.CustomKey)
-        .onChanged(v -> onPresetChanged(preset.get()))
-        .build()
-    );
+    private final Setting<List<Key>> customKeys = sgGeneral.add(new CustomKeyListSetting());
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
@@ -112,7 +75,7 @@ public class KeyboardHud extends HudElement {
         .defaultValue(1)
         .min(0)
         .sliderRange(0, 10)
-        .visible(() -> preset.get() != Preset.CustomKey && preset.get() != Preset.AdvancedCustomization)
+        .visible(() -> preset.get() != Preset.Custom)
         .onChanged(s -> onPresetChanged(preset.get()))
         .build()
     );
@@ -237,145 +200,11 @@ public class KeyboardHud extends HudElement {
                     keys.add(new Key(mc.options.hotbarKeys[i], i * (w + s), 0, w, h));
                 }
             }
-            case CustomKey -> {
-                Key key = new Key(customKey.get(), 0, 0, customKeyWidth.get(), customKeyHeight.get());
-                key.setShowCps(customKeyShowCps.get());
-                keys.add(key);
-            }
-            case AdvancedCustomization -> {
-                onCustomKeysChanged(customKeys.get());
-                ChatUtils.info("Keyboard HUD Custom Format: Key X Y Weight Height [cps]. Ex: 'LMB 0 0 40 40 cps'.");
+            case Custom -> {
+                keys.addAll(customKeys.get());
             }
         }
         calculateSize();
-    }
-
-    private void onCustomKeysChanged(String config) {
-        if (preset.get() != Preset.AdvancedCustomization)
-            return;
-        keys.clear();
-
-        String[] parts = config.split(",");
-        for (String part : parts) {
-            String[] args = part.trim().split(" ");
-            if (args.length >= 3) {
-                try {
-                    String name = args[0];
-                    double x = Double.parseDouble(args[1]);
-                    double y = Double.parseDouble(args[2]);
-                    double w = args.length > 3 ? Double.parseDouble(args[3]) : 40;
-                    double h = args.length > 4 ? Double.parseDouble(args[4]) : 40;
-
-                    int code = resolveKey(name);
-                    Key key = new Key(name, code, x, y, w, h);
-
-                    if (args.length > 5) {
-                        for (int i = 5; i < args.length; i++) {
-                            if (args[i].equalsIgnoreCase("cps")) {
-                                key.setShowCps(true);
-                            }
-                        }
-                    }
-
-                    keys.add(key);
-                } catch (Exception ignored) {
-                }
-            }
-        }
-        calculateSize();
-    }
-
-    private int resolveKey(String name) {
-        if (name.length() == 1) {
-            int c = name.toUpperCase().charAt(0);
-            if (c >= 'A' && c <= 'Z')
-                return GLFW.GLFW_KEY_A + (c - 'A');
-            if (c >= '0' && c <= '9')
-                return GLFW.GLFW_KEY_0 + (c - '0');
-            return switch (name) {
-                case "[" -> GLFW.GLFW_KEY_LEFT_BRACKET;
-                case "]" -> GLFW.GLFW_KEY_RIGHT_BRACKET;
-                case ";" -> GLFW.GLFW_KEY_SEMICOLON;
-                case "'" -> GLFW.GLFW_KEY_APOSTROPHE;
-                case "\\" -> GLFW.GLFW_KEY_BACKSLASH;
-                case "`" -> GLFW.GLFW_KEY_GRAVE_ACCENT;
-                case "-" -> GLFW.GLFW_KEY_MINUS;
-                case "=" -> GLFW.GLFW_KEY_EQUAL;
-                case "." -> GLFW.GLFW_KEY_PERIOD;
-                case "/" -> GLFW.GLFW_KEY_SLASH;
-                default -> -1;
-            };
-        }
-        return switch (name.toUpperCase()) {
-            case "SPACE" -> GLFW.GLFW_KEY_SPACE;
-            case "LSHIFT" -> GLFW.GLFW_KEY_LEFT_SHIFT;
-            case "RSHIFT" -> GLFW.GLFW_KEY_RIGHT_SHIFT;
-            case "CTRL", "LCTRL" -> GLFW.GLFW_KEY_LEFT_CONTROL;
-            case "RCTRL" -> GLFW.GLFW_KEY_RIGHT_CONTROL;
-            case "ALT", "LALT" -> GLFW.GLFW_KEY_LEFT_ALT;
-            case "RALT" -> GLFW.GLFW_KEY_RIGHT_ALT;
-            case "TAB" -> GLFW.GLFW_KEY_TAB;
-            case "ENTER" -> GLFW.GLFW_KEY_ENTER;
-            case "BACKSPACE" -> GLFW.GLFW_KEY_BACKSPACE;
-            case "ESC" -> GLFW.GLFW_KEY_ESCAPE;
-            case "CAPS" -> GLFW.GLFW_KEY_CAPS_LOCK;
-            case "WIN", "SUPER", "LWIN", "LSUPER" -> GLFW.GLFW_KEY_LEFT_SUPER;
-            case "RWIN", "RSUPER" -> GLFW.GLFW_KEY_RIGHT_SUPER;
-            case "PRINT", "PRTSC" -> GLFW.GLFW_KEY_PRINT_SCREEN;
-            case "SCROLL" -> GLFW.GLFW_KEY_SCROLL_LOCK;
-            case "PAUSE" -> GLFW.GLFW_KEY_PAUSE;
-            case "NUMLOCK" -> GLFW.GLFW_KEY_NUM_LOCK;
-            case "COMMA" -> GLFW.GLFW_KEY_COMMA;
-            case "PERIOD", "DOT" -> GLFW.GLFW_KEY_PERIOD;
-            case "SLASH" -> GLFW.GLFW_KEY_SLASH;
-            case "F1" -> GLFW.GLFW_KEY_F1;
-            case "F2" -> GLFW.GLFW_KEY_F2;
-            case "F3" -> GLFW.GLFW_KEY_F3;
-            case "F4" -> GLFW.GLFW_KEY_F4;
-            case "F5" -> GLFW.GLFW_KEY_F5;
-            case "F6" -> GLFW.GLFW_KEY_F6;
-            case "F7" -> GLFW.GLFW_KEY_F7;
-            case "F8" -> GLFW.GLFW_KEY_F8;
-            case "F9" -> GLFW.GLFW_KEY_F9;
-            case "F10" -> GLFW.GLFW_KEY_F10;
-            case "F11" -> GLFW.GLFW_KEY_F11;
-            case "F12" -> GLFW.GLFW_KEY_F12;
-            case "UP" -> GLFW.GLFW_KEY_UP;
-            case "DOWN" -> GLFW.GLFW_KEY_DOWN;
-            case "LEFT" -> GLFW.GLFW_KEY_LEFT;
-            case "RIGHT" -> GLFW.GLFW_KEY_RIGHT;
-            case "HOME" -> GLFW.GLFW_KEY_HOME;
-            case "END" -> GLFW.GLFW_KEY_END;
-            case "PAGEUP", "PGUP" -> GLFW.GLFW_KEY_PAGE_UP;
-            case "PAGEDOWN", "PGDN" -> GLFW.GLFW_KEY_PAGE_DOWN;
-            case "INSERT", "INS" -> GLFW.GLFW_KEY_INSERT;
-            case "DELETE", "DEL" -> GLFW.GLFW_KEY_DELETE;
-            case "NUM0" -> GLFW.GLFW_KEY_KP_0;
-            case "NUM1" -> GLFW.GLFW_KEY_KP_1;
-            case "NUM2" -> GLFW.GLFW_KEY_KP_2;
-            case "NUM3" -> GLFW.GLFW_KEY_KP_3;
-            case "NUM4" -> GLFW.GLFW_KEY_KP_4;
-            case "NUM5" -> GLFW.GLFW_KEY_KP_5;
-            case "NUM6" -> GLFW.GLFW_KEY_KP_6;
-            case "NUM7" -> GLFW.GLFW_KEY_KP_7;
-            case "NUM8" -> GLFW.GLFW_KEY_KP_8;
-            case "NUM9" -> GLFW.GLFW_KEY_KP_9;
-            case "NUMADD" -> GLFW.GLFW_KEY_KP_ADD;
-            case "NUMSUB" -> GLFW.GLFW_KEY_KP_SUBTRACT;
-            case "NUMMUL" -> GLFW.GLFW_KEY_KP_MULTIPLY;
-            case "NUMDIV" -> GLFW.GLFW_KEY_KP_DIVIDE;
-            case "NUMDOT" -> GLFW.GLFW_KEY_KP_DECIMAL;
-            case "NUMENTER" -> GLFW.GLFW_KEY_KP_ENTER;
-            case "LMB", "MB1" -> GLFW.GLFW_MOUSE_BUTTON_LEFT;
-            case "RMB", "MB2" -> GLFW.GLFW_MOUSE_BUTTON_RIGHT;
-            case "MMB", "MB3" -> GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
-            case "MB4" -> GLFW.GLFW_MOUSE_BUTTON_4;
-            case "MB5" -> GLFW.GLFW_MOUSE_BUTTON_5;
-            case "MB6" -> GLFW.GLFW_MOUSE_BUTTON_6;
-            case "MB7" -> GLFW.GLFW_MOUSE_BUTTON_7;
-            case "MB8" -> GLFW.GLFW_MOUSE_BUTTON_8;
-            default -> -1;
-        };
     }
 
     private void calculateSize() {
@@ -431,7 +260,7 @@ public class KeyboardHud extends HudElement {
     @Override
     public void render(HudRenderer renderer) {
         if (keys.isEmpty()) {
-            if (mc.options != null && preset.get() != Preset.AdvancedCustomization) {
+            if (mc.options != null) {
                 onPresetChanged(preset.get());
             }
             return;
@@ -510,12 +339,11 @@ public class KeyboardHud extends HudElement {
         Clicks,
         Actions,
         Hotbar,
-        CustomKey,
-        AdvancedCustomization
+        Custom
     }
 
-    private static class Key {
-        public String name;
+    public static class Key {
+        public String name = "";
         public KeyBinding binding;
         public Keybind keybind;
         public int code;
@@ -525,6 +353,20 @@ public class KeyboardHud extends HudElement {
         private final RollingCps rollingCps = new RollingCps();
         private boolean wasPressed;
 
+        public Key() {
+            this(Keybind.fromKey(GLFW.GLFW_KEY_SPACE), 0, 0, 60, 40);
+        }
+
+        public Key(NbtCompound compound) {
+            this.keybind = Keybind.none().fromTag(compound.getCompoundOrEmpty("key"));
+            this.name = compound.getString("name", "");
+            this.x = compound.getDouble("x", 0);
+            this.y = compound.getDouble("y", 0);
+            this.width = compound.getDouble("width", 60);
+            this.height = compound.getDouble("height", 60);
+            this.showCps = compound.getBoolean("showCps", false);
+        }
+
         public Key(KeyBinding binding, double x, double y, double width, double height) {
             this(binding, null, x, y, width, height);
         }
@@ -533,16 +375,6 @@ public class KeyboardHud extends HudElement {
             this.binding = binding;
             this.name = name;
             this.code = -1;
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-
-        public Key(String name, int code, double x, double y, double width, double height) {
-            this.name = name;
-            this.code = code;
-            this.binding = null;
             this.x = x;
             this.y = y;
             this.width = width;
@@ -563,8 +395,8 @@ public class KeyboardHud extends HudElement {
         }
 
         public String getName() {
+            if (name != null && !name.isEmpty()) return name;
             if (keybind != null) return keybind.toString();
-            if (name != null) return name;
             if (binding != null) return binding.getBoundKeyLocalizedText().getString().toUpperCase();
             return "?";
         }
@@ -572,6 +404,7 @@ public class KeyboardHud extends HudElement {
         public boolean isPressed() {
             long window = mc.getWindow().getHandle();
             if (keybind != null) {
+                if (!keybind.isSet()) return false;
                 int key = keybind.getValue();
                 boolean isMouse = !keybind.isKey();
                 if (isMouse) return GLFW.glfwGetMouseButton(window, key) == GLFW.GLFW_PRESS;
@@ -602,6 +435,18 @@ public class KeyboardHud extends HudElement {
         public int getCps() {
             return rollingCps.get();
         }
+
+        public NbtCompound serialize() {
+            NbtCompound compound = new NbtCompound();
+            compound.put("key", keybind.toTag());
+            compound.putString("name", name);
+            compound.putDouble("x", x);
+            compound.putDouble("y", y);
+            compound.putDouble("width", width);
+            compound.putDouble("height", height);
+            compound.putBoolean("showCps", showCps);
+            return compound;
+        }
     }
 
     private static class RollingCps {
@@ -616,5 +461,208 @@ public class KeyboardHud extends HudElement {
             clicks.removeIf(val -> val + 1000 < time);
             return clicks.size();
         }
+    }
+
+    public class CustomKeyListSetting extends Setting<List<Key>> {
+        public CustomKeyListSetting() {
+            super("custom-keys", "Configure the custom keys display.", List.of(), k -> onPresetChanged(preset.get()), s -> {}, () -> preset.get() == Preset.Custom);
+        }
+
+        @Override
+        protected void resetImpl() {
+            this.value = new ObjectArrayList<>();
+            this.value.add(new Key());
+        }
+
+        @Override
+        protected List<Key> parseImpl(String str) {
+            return List.of();
+        }
+
+        @Override
+        protected boolean isValueValid(List<Key> value) {
+            return true;
+        }
+
+        @Override
+        protected NbtCompound save(NbtCompound tag) {
+            NbtList valueTag = new NbtList();
+            for (Key key : get()) {
+                valueTag.add(key.serialize());
+            }
+            tag.put("value", valueTag);
+
+            return tag;
+        }
+
+        @Override
+        protected List<Key> load(NbtCompound tag) {
+            get().clear();
+
+            for (NbtElement tagI : tag.getListOrEmpty("value")) {
+                tagI.asCompound().ifPresent(nbtCompound -> get().add(new Key(nbtCompound)));
+            }
+
+            return get();
+        }
+    }
+
+    public static class CustomKeySettingScreen extends WindowScreen {
+        private final CustomKeyListSetting setting;
+        private final Key key;
+        private final WidgetScreen screen;
+
+        public CustomKeySettingScreen(GuiTheme theme, CustomKeyListSetting setting, Key key, WidgetScreen screen) {
+            super(theme, "Select Key");
+            this.setting = setting;
+            this.key = key;
+            this.screen = screen;
+        }
+
+        @Override
+        public void initWidgets() {
+            Settings settings = new Settings();
+            SettingGroup sgGeneral = settings.getDefaultGroup();
+
+            sgGeneral.add(new KeybindSetting.Builder()
+                .name("custom-key")
+                .description("The key to display.")
+                .defaultValue(Keybind.fromKey(GLFW.GLFW_KEY_SPACE))
+                .onChanged(k -> {
+                    this.key.keybind = k;
+                    this.screen.reload();
+                })
+                .onModuleActivated(setting -> setting.set(this.key.keybind))
+                .build()
+            );
+
+            sgGeneral.add(new StringSetting.Builder()
+                .name("custom-label")
+                .description("Replace the Key name with custom text.")
+                .defaultValue("")
+                .onChanged(s -> this.key.name = s)
+                .onModuleActivated(setting -> setting.set(this.key.name))
+                .build()
+            );
+
+            sgGeneral.add(new DoubleSetting.Builder()
+                .name("key-width")
+                .description("Width of the key.")
+                .defaultValue(60)
+                .min(20)
+                .sliderRange(20, 200)
+                .decimalPlaces(1)
+                .onChanged(d -> {
+                    this.key.width = d;
+                    this.setting.onChanged();
+                })
+                .onModuleActivated(setting -> setting.set(this.key.width))
+                .build()
+            );
+
+            sgGeneral.add(new DoubleSetting.Builder()
+                .name("key-height")
+                .description("Height of the key.")
+                .defaultValue(40)
+                .min(20)
+                .sliderRange(20, 200)
+                .decimalPlaces(1)
+                .onChanged(d -> {
+                    this.key.height = d;
+                    this.setting.onChanged();
+                })
+                .onModuleActivated(setting -> setting.set(this.key.height))
+                .build()
+            );
+
+            sgGeneral.add(new DoubleSetting.Builder()
+                .name("key-x")
+                .description("X position offset of the key.")
+                .defaultValue(0)
+                .sliderRange(-200, 200)
+                .decimalPlaces(1)
+                .onChanged(d -> {
+                    this.key.x = d;
+                    this.setting.onChanged();
+                })
+                .onModuleActivated(setting -> setting.set(this.key.x))
+                .build()
+            );
+
+            sgGeneral.add(new DoubleSetting.Builder()
+                .name("key-y")
+                .description("Y position offset of the key.")
+                .defaultValue(0)
+                .sliderRange(-200, 200)
+                .decimalPlaces(1)
+                .onChanged(d -> {
+                    this.key.y = d;
+                    this.setting.onChanged();
+                })
+                .onModuleActivated(setting -> setting.set(this.key.y))
+                .build()
+            );
+
+            sgGeneral.add(new BoolSetting.Builder()
+                .name("show-cps")
+                .description("Show CPS for this key.")
+                .defaultValue(false)
+                .onChanged(b -> this.key.showCps = b)
+                .onModuleActivated(setting -> setting.set(this.key.showCps))
+                .build()
+            );
+
+            settings.onActivated();
+
+            this.add(theme.settings(settings)).expandX();
+        }
+    }
+
+    public static void fillTable(GuiTheme theme, WTable table, CustomKeyListSetting setting) {
+        table.clear();
+
+        for (Iterator<Key> it = setting.get().iterator(); it.hasNext();) {
+            Key key = it.next();
+
+            table.add(theme.label("Key")).expandWidgetX().widget().color(theme.textSecondaryColor());
+            table.add(theme.label(String.format("(%s)", key.keybind))).expandWidgetX();
+
+            WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
+            edit.action = () -> {
+                WidgetScreen screen = (WidgetScreen) mc.currentScreen;
+                mc.setScreen(new CustomKeySettingScreen(theme, setting, key, screen));
+            };
+
+            WMinus delete = table.add(theme.minus()).right().widget();
+            delete.action = () -> {
+                it.remove();
+                setting.onChanged();
+
+                fillTable(theme, table, setting);
+            };
+
+            table.row();
+        }
+
+        if (!setting.get().isEmpty()) {
+            table.add(theme.horizontalSeparator()).expandX();
+            table.row();
+        }
+
+        WButton add = table.add(theme.button("Add")).expandX().widget();
+        add.action = () -> {
+            setting.get().add(new Key());
+            setting.onChanged();
+
+            fillTable(theme, table, setting);
+        };
+
+        WButton reset = table.add(theme.button(GuiRenderer.RESET)).widget();
+        reset.action = () -> {
+            setting.reset();
+
+            fillTable(theme, table, setting);
+        };
+        reset.tooltip = "Reset";
     }
 }
