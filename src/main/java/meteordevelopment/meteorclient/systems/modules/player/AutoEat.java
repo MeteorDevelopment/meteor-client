@@ -244,7 +244,7 @@ public class AutoEat extends Module {
             return true;
         }
 
-        // main inventory move to empty hotbar, abort if none
+        // main inventory: move to empty hotbar, abort if none
         var emptySlot = InvUtils.find(ItemStack::isEmpty, SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END).slot();
         if (emptySlot == -1) return false;
 
@@ -267,9 +267,13 @@ public class AutoEat extends Module {
             && (mc.player.getHungerManager().isNotFull() || food.canAlwaysEat());
     }
 
+    /**
+     * Finds the best slot to eat from, preferring:
+     * hotbar => offhand => main inventory (if allowed).
+     */
     private int findSlot() {
         // prefer best in hotbar
-        int slot = findBestInRange(SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END);
+        int slot = findBestFood(SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END);
         if (slot != -1) return slot;
 
         // if hotbar empty, prefer offhand
@@ -279,24 +283,27 @@ public class AutoEat extends Module {
 
         // if allowed, search main inventory
         if (searchInventory.get()) {
-            return findBestInRange(SlotUtils.MAIN_START, SlotUtils.MAIN_END);
+            return findBestFood(SlotUtils.MAIN_START, SlotUtils.MAIN_END);
         }
 
-        return -1; // nothing found
+        return -1; // nothing found :(
     }
 
-    private int findBestInRange(int start, int end) {
+    private int findBestFood(int start, int end) {
         int best = -1;
         int bestHunger = -1;
 
         for (int i = start; i <= end; i++) {
+            // Skip if item isn't food
             var stack = mc.player.getInventory().getStack(i);
             var food = stack.get(DataComponentTypes.FOOD);
             if (food == null) continue;
 
+            // Skip if item is in blacklist
             Item item = stack.getItem();
             if (blacklist.get().contains(item)) continue;
 
+            // Check if hunger value is better
             int hunger = food.nutrition();
             if (hunger > bestHunger) {
                 bestHunger = hunger;
@@ -306,7 +313,6 @@ public class AutoEat extends Module {
 
         return best;
     }
-
 
     public enum ThresholdMode {
         Health((health, hunger) -> health),
