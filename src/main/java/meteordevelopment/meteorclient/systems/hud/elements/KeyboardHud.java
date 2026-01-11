@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
@@ -65,6 +64,7 @@ public class KeyboardHud extends HudElement {
         .defaultValue(1.5)
         .min(0.5)
         .sliderRange(0.5, 5)
+        .decimalPlaces(1)
         .onChanged(s -> calculateSize())
         .build()
     );
@@ -75,6 +75,7 @@ public class KeyboardHud extends HudElement {
         .defaultValue(1)
         .min(0)
         .sliderRange(0, 10)
+        .decimalPlaces(1)
         .visible(() -> preset.get() != Preset.Custom)
         .onChanged(s -> onPresetChanged(preset.get()))
         .build()
@@ -154,11 +155,6 @@ public class KeyboardHud extends HudElement {
         super(INFO);
         if (mc.options != null)
             onPresetChanged(preset.get());
-    }
-
-    @Override
-    public WWidget getWidget(GuiTheme theme) {
-        return null;
     }
 
     @Override
