@@ -144,6 +144,7 @@ public class KeyboardHud extends HudElement {
     );
 
     private final List<Key> keys = new ArrayList<>();
+    private double minX, minY;
 
     private Color getColor(SettingColor color) {
         Color c = new Color(color);
@@ -208,17 +209,15 @@ public class KeyboardHud extends HudElement {
             setSize(0, 0);
             return;
         }
-
-        double maxX = 0;
-        double maxY = 0;
+        minX = minY = 0;
+        double maxX = 0, maxY = 0;
 
         for (Key key : keys) {
-            maxX = Math.max(maxX, key.x + key.width);
-            maxY = Math.max(maxY, key.y + key.height);
+            minX = Math.min(minX, key.x); minY = Math.min(minY, key.y);
+            maxX = Math.max(maxX, key.x + key.width); maxY = Math.max(maxY, key.y + key.height);
         }
 
-        double s = scale.get();
-        setSize(maxX * s, maxY * s);
+        setSize((maxX - minX) * scale.get(), (maxY - minY) * scale.get());
     }
 
     private String getShortName(String name) {
@@ -272,8 +271,8 @@ public class KeyboardHud extends HudElement {
             boolean pressed = key.isPressed();
             Color color = pressed ? getColor(pressedColor.get()) : getColor(unpressedColor.get());
 
-            double kX = x + key.x * s;
-            double kY = y + key.y * s;
+            double kX = x + (key.x - minX) * s;
+            double kY = y + (key.y - minY) * s;
             double kW = key.width * s;
             double kH = key.height * s;
 
