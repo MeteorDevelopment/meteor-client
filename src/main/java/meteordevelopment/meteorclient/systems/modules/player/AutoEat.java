@@ -244,16 +244,15 @@ public class AutoEat extends Module {
             return true;
         }
 
-        // main: move to empty hotbar, abort if none
-        var hotbarIndex = InvUtils.find(ItemStack::isEmpty, SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END).slot();
-        if (hotbarIndex == -1) return false;
+        // main inventory move to empty hotbar, abort if none
+        var emptySlot = InvUtils.find(ItemStack::isEmpty, SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END).slot();
+        if (emptySlot == -1) return false;
 
-        InvUtils.move().fromMain(slot - SlotUtils.MAIN_START).toHotbar(hotbarIndex);
-        InvUtils.swap(hotbarIndex, false);
-        this.slot = hotbarIndex;
+        InvUtils.move().fromMain(slot - SlotUtils.MAIN_START).toHotbar(emptySlot);
+        InvUtils.swap(emptySlot, false);
+        this.slot = emptySlot;
         return true;
     }
-
 
     public boolean shouldEat() {
         boolean healthLow = mc.player.getHealth() <= healthThreshold.get();
@@ -265,43 +264,49 @@ public class AutoEat extends Module {
         if (food == null) return false;
 
         return thresholdMode.get().test(healthLow, hungerLow)
-            && (mc.player.getHungerManager().isNotFull() ||  food.canAlwaysEat());
+            && (mc.player.getHungerManager().isNotFull() || food.canAlwaysEat());
     }
 
     private int findSlot() {
-        int slot = -1;
+        // prefer best in hotbar
+        int slot = findBestInRange(SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END);
+        if (slot != -1) return slot;
+
+        // if hotbar empty, prefer offhand
+        Item offHandItem = mc.player.getOffHandStack().getItem();
+        FoodComponent offHandFood = offHandItem.getComponents().get(DataComponentTypes.FOOD);
+        if (offHandFood != null && !blacklist.get().contains(offHandItem)) return SlotUtils.OFFHAND;
+
+        // if allowed, search main inventory
+        if (searchInventory.get()) {
+            return findBestInRange(SlotUtils.MAIN_START, SlotUtils.MAIN_END);
+        }
+
+        return -1; // nothing found
+    }
+
+    private int findBestInRange(int start, int end) {
+        int best = -1;
         int bestHunger = -1;
 
-        // search hotbar only, or hotbar + inventory if enabled
-        int end = searchInventory.get() ? SlotUtils.MAIN_END : SlotUtils.HOTBAR_END;
+        for (int i = start; i <= end; i++) {
+            var stack = mc.player.getInventory().getStack(i);
+            var food = stack.get(DataComponentTypes.FOOD);
+            if (food == null) continue;
 
-        for (int i = SlotUtils.HOTBAR_START; i <= end; i++) {
-            // Skip if item isn't food
-            Item item = mc.player.getInventory().getStack(i).getItem();
-            FoodComponent foodComponent = item.getComponents().get(DataComponentTypes.FOOD);
-            if (foodComponent == null) continue;
-
-            // Skip if item is in blacklist
+            Item item = stack.getItem();
             if (blacklist.get().contains(item)) continue;
 
-            // Check if hunger value is better
-            int hunger = foodComponent.nutrition();
+            int hunger = food.nutrition();
             if (hunger > bestHunger) {
-                // Select the current item
-                slot = i;
                 bestHunger = hunger;
+                best = i;
             }
         }
 
-        // Offhand check
-        Item offHandItem = mc.player.getOffHandStack().getItem();
-        FoodComponent offHandFood = offHandItem.getComponents().get(DataComponentTypes.FOOD);
-        if (offHandFood != null && !blacklist.get().contains(offHandItem) && offHandFood.nutrition() > bestHunger) {
-            slot = SlotUtils.OFFHAND;
-        }
-
-        return slot;
+        return best;
     }
+
 
     public enum ThresholdMode {
         Health((health, hunger) -> health),
