@@ -25,6 +25,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.FoodComponent;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 import java.util.List;
@@ -68,6 +69,13 @@ public class AutoEat extends Module {
         .name("pause-baritone")
         .description("Pause baritone when eating.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> searchInventory = sgGeneral.add(new BoolSetting.Builder()
+        .name("search-inventory")
+        .description("Search the full inventory for food, not only the hotbar.")
+        .defaultValue(false)
         .build()
     );
 
@@ -185,7 +193,7 @@ public class AutoEat extends Module {
     }
 
     private void eat() {
-        changeSlot(slot);
+        if (!changeSlot(slot)) return;
         setPressed(true);
         if (!mc.player.isUsingItem()) Utils.rightClick();
 
@@ -218,10 +226,34 @@ public class AutoEat extends Module {
         mc.options.useKey.setPressed(pressed);
     }
 
-    private void changeSlot(int slot) {
-        InvUtils.swap(slot, false);
-        this.slot = slot;
+    /**
+     * Prepares a slot for eating. Uses offhand or hotbar directly.
+     * Moves a main-inventory item to an empty hotbar slot; returns false if none.
+     */
+    private boolean changeSlot(int slot) {
+        // offhand: use directly
+        if (slot == SlotUtils.OFFHAND) {
+            this.slot = SlotUtils.OFFHAND;
+            return true;
+        }
+
+        // hotbar: select
+        if (SlotUtils.isHotbar(slot)) {
+            InvUtils.swap(slot, false);
+            this.slot = slot;
+            return true;
+        }
+
+        // main: move to empty hotbar, abort if none
+        var hotbarIndex = InvUtils.find(ItemStack::isEmpty, SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END).slot();
+        if (hotbarIndex == -1) return false;
+
+        InvUtils.move().fromMain(slot - SlotUtils.MAIN_START).toHotbar(hotbarIndex);
+        InvUtils.swap(hotbarIndex, false);
+        this.slot = hotbarIndex;
+        return true;
     }
+
 
     public boolean shouldEat() {
         boolean healthLow = mc.player.getHealth() <= healthThreshold.get();
@@ -240,24 +272,28 @@ public class AutoEat extends Module {
         int slot = -1;
         int bestHunger = -1;
 
-        for (int i = 0; i < 9; i++) {
+        // search hotbar only, or hotbar + inventory if enabled
+        int end = searchInventory.get() ? SlotUtils.MAIN_END : SlotUtils.HOTBAR_END;
+
+        for (int i = SlotUtils.HOTBAR_START; i <= end; i++) {
             // Skip if item isn't food
             Item item = mc.player.getInventory().getStack(i).getItem();
             FoodComponent foodComponent = item.getComponents().get(DataComponentTypes.FOOD);
             if (foodComponent == null) continue;
 
+            // Skip if item is in blacklist
+            if (blacklist.get().contains(item)) continue;
+
             // Check if hunger value is better
             int hunger = foodComponent.nutrition();
             if (hunger > bestHunger) {
-                // Skip if item is in blacklist
-                if (blacklist.get().contains(item)) continue;
-
                 // Select the current item
                 slot = i;
                 bestHunger = hunger;
             }
         }
 
+        // Offhand check
         Item offHandItem = mc.player.getOffHandStack().getItem();
         FoodComponent offHandFood = offHandItem.getComponents().get(DataComponentTypes.FOOD);
         if (offHandFood != null && !blacklist.get().contains(offHandItem) && offHandFood.nutrition() > bestHunger) {
