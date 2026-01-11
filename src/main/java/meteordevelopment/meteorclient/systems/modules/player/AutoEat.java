@@ -269,17 +269,17 @@ public class AutoEat extends Module {
 
     /**
      * Finds the best slot to eat from, preferring:
-     * hotbar => offhand => main inventory (if allowed).
+     * offhand => hotbar => main inventory (if allowed).
      */
     private int findSlot() {
-        // prefer best in hotbar
-        int slot = findBestFood(SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END);
-        if (slot != -1) return slot;
-
-        // if hotbar empty, prefer offhand
+        // prefer offhand
         Item offHandItem = mc.player.getOffHandStack().getItem();
         FoodComponent offHandFood = offHandItem.getComponents().get(DataComponentTypes.FOOD);
         if (offHandFood != null && !blacklist.get().contains(offHandItem)) return SlotUtils.OFFHAND;
+
+        // if offhand empty, prefer best in hotbar
+        int slot = findBestFood(SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END);
+        if (slot != -1) return slot;
 
         // if allowed, search main inventory
         if (searchInventory.get()) {
