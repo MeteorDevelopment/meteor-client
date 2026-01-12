@@ -31,6 +31,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -312,31 +313,36 @@ public class KeyboardHud extends HudElement {
     private String getShortName(String name) {
         if (name == null)
             return "?";
-        return switch (name.toUpperCase()) {
+        return switch (name.toUpperCase(Locale.ROOT)) {
             case "LEFT SHIFT", "LSHIFT" -> "LSh";
             case "RIGHT SHIFT", "RSHIFT" -> "RSh";
             case "LEFT CONTROL", "LCTRL" -> "LCtrl";
             case "RIGHT CONTROL", "RCTRL" -> "RCtrl";
             case "LEFT ALT", "LALT" -> "LAlt";
             case "RIGHT ALT", "RALT" -> "RAlt";
+            case "LEFT SUPER" -> "LSup";
+            case "RIGHT SUPER" -> "RSup";
+            case "GRAVE ACCENT" -> "`";
             case "COMMA" -> ",";
             case "DOT", "PERIOD" -> ".";
             case "SLASH" -> "/";
+            case "APOSTROPHE" -> "'";
             case "BACKSPACE" -> "BS";
             case "ENTER" -> "Ent";
             case "SCROLL" -> "ScrL";
-            case "PRINT", "PRTSC" -> "PrtS";
+            case "PRINT", "PRTSC", "PRINT SCREEN" -> "PrtS";
             case "PAUSE" -> "Paus";
-            case "PAGEUP", "PGUP" -> "PgUp";
-            case "PAGEDOWN", "PGDN" -> "PgDn";
+            case "PAGEUP", "PAGE UP", "PGUP" -> "PgUp";
+            case "PAGEDOWN", "PAGE DOWN", "PGDN" -> "PgDn";
             case "INSERT", "INS" -> "Ins";
             case "DELETE", "DEL" -> "Del";
             case "HOME" -> "Home";
             case "END" -> "End";
-            case "UP" -> "Up";
-            case "DOWN" -> "Dn";
-            case "LEFT" -> "Lt";
-            case "RIGHT" -> "Rt";
+            case "ARROW UP", "UP" -> "Up";
+            case "ARROW DOWN", "DOWN" -> "Dn";
+            case "ARROW LEFT", "LEFT" -> "Lt";
+            case "ARROW RIGHT", "RIGHT" -> "Rt";
+            case "UNKNOWN" -> "?";
             default -> name;
         };
     }
@@ -482,7 +488,7 @@ public class KeyboardHud extends HudElement {
         public String getName() {
             if (name != null && !name.isEmpty()) return name;
             if (keybind != null) return keybind.toString();
-            if (binding != null) return binding.getBoundKeyLocalizedText().getString().toUpperCase();
+            if (binding != null) return binding.getBoundKeyLocalizedText().getString();
             return "?";
         }
 
