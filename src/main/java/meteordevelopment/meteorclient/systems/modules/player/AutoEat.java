@@ -79,10 +79,17 @@ public class AutoEat extends Module {
         .build()
     );
 
+    private final Setting<Priority> prioritise = sgGeneral.add(new EnumSetting.Builder<Priority>()
+        .name("food-priority")
+        .description("Which aspect of the food to prioritise selecting for.")
+        .defaultValue(Priority.Saturation)
+        .build()
+    );
+
     // Threshold
     private final Setting<ThresholdMode> thresholdMode = sgThreshold.add(new EnumSetting.Builder<ThresholdMode>()
         .name("threshold-mode")
-        .description("The threshold mode to trigger auto eat.")
+        .description("The threshold mode to trigger auto eat.\n'Both' == health AND hunger, 'Any' == health OR hunger")
         .defaultValue(ThresholdMode.Any)
         .build()
     );
@@ -245,10 +252,10 @@ public class AutoEat extends Module {
         }
 
         // main inventory: move to empty hotbar, abort if none
-        var emptySlot = InvUtils.find(ItemStack::isEmpty, SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END).slot();
+        int emptySlot = InvUtils.find(ItemStack::isEmpty, SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END).slot();
         if (emptySlot == -1) return false;
 
-        InvUtils.move().fromMain(slot - SlotUtils.MAIN_START).toHotbar(emptySlot);
+        InvUtils.move().from(slot).toHotbar(emptySlot);
         InvUtils.swap(emptySlot, false);
         this.slot = emptySlot;
         return true;
@@ -257,14 +264,15 @@ public class AutoEat extends Module {
     public boolean shouldEat() {
         boolean healthLow = mc.player.getHealth() <= healthThreshold.get();
         boolean hungerLow = mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
+        if (!thresholdMode.get().test(healthLow, hungerLow)) return false;
+
         slot = findSlot();
         if (slot == -1) return false;
 
         FoodComponent food = mc.player.getInventory().getStack(slot).get(DataComponentTypes.FOOD);
         if (food == null) return false;
 
-        return thresholdMode.get().test(healthLow, hungerLow)
-            && (mc.player.getHungerManager().isNotFull() || food.canAlwaysEat());
+        return (mc.player.getHungerManager().isNotFull() || food.canAlwaysEat());
     }
 
     /**
@@ -291,12 +299,12 @@ public class AutoEat extends Module {
 
     private int findBestFood(int start, int end) {
         int best = -1;
-        int bestHunger = -1;
+        float bestHunger = -1;
 
         for (int i = start; i <= end; i++) {
             // Skip if item isn't food
-            var stack = mc.player.getInventory().getStack(i);
-            var food = stack.get(DataComponentTypes.FOOD);
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            FoodComponent food = stack.get(DataComponentTypes.FOOD);
             if (food == null) continue;
 
             // Skip if item is in blacklist
@@ -304,7 +312,7 @@ public class AutoEat extends Module {
             if (blacklist.get().contains(item)) continue;
 
             // Check if hunger value is better
-            int hunger = food.nutrition();
+            float hunger = prioritise.get().value(food);
             if (hunger > bestHunger) {
                 bestHunger = hunger;
                 best = i;
@@ -328,6 +336,20 @@ public class AutoEat extends Module {
 
         public boolean test(boolean health, boolean hunger) {
             return predicate.test(health, hunger);
+        }
+    }
+
+    public enum Priority {
+        Combined,
+        Hunger,
+        Saturation;
+
+        public float value(FoodComponent food) {
+            return switch (this) {
+                case Combined -> food.nutrition() + food.saturation();
+                case Hunger -> food.nutrition();
+                case Saturation -> food.saturation();
+            };
         }
     }
 }
