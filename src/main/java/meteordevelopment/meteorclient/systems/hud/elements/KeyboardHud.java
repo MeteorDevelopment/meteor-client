@@ -197,6 +197,95 @@ public class KeyboardHud extends HudElement {
                     keys.add(new Key(mc.options.hotbarKeys[i], i * (w + s), 0, w, h));
                 }
             }
+            case Keyboard -> {
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_ESCAPE), 0, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F1), 70, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F2), 109, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F3), 148, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F4), 187, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F5), 241, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F6), 280, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F7), 319, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F8), 358, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F9), 412, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F10), 451, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F11), 490, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F12), 529, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PRINT_SCREEN), 578, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_SCROLL_LOCK), 617, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAUSE), 656, 0, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_GRAVE_ACCENT), 0, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_1), 39, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_2), 78, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_3), 117, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_4), 156, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_5), 195, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_6), 234, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_7), 273, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_8), 312, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_9), 351, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_0), 390, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_MINUS), 429, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_EQUAL), 468, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSPACE), 507, 50, 57, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_INSERT), 578, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_HOME), 617, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_UP), 656, 50, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_TAB), 0, 89, 52, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_Q), 56, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_W), 95, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_E), 134, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_R), 173, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_T), 212, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_Y), 251, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_U), 290, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_I), 329, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_O), 368, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_P), 407, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_BRACKET), 446, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_BRACKET), 485, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSLASH), 524, 89, 40, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_DELETE), 578, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_END), 617, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_DOWN), 656, 89, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_CAPS_LOCK), 0, 128, 62, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_A), 66, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_S), 105, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_D), 144, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F), 183, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_G), 222, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_H), 261, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_J), 300, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_K), 339, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_L), 378, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_SEMICOLON), 417, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_APOSTROPHE), 456, 128, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_ENTER), 495, 128, 69, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SHIFT), 0, 167, 75, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_Z), 79, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_X), 118, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_C), 157, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_V), 196, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_B), 235, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_N), 274, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_M), 313, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_COMMA), 352, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PERIOD), 391, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_SLASH), 430, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SHIFT), 469, 167, 95, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_UP), 617, 167, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_CONTROL), 0, 206, 50, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SUPER), 54, 206, 45, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_ALT), 103, 206, 45, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_SPACE), 152, 206, 200, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_ALT), 356, 206, 45, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SUPER), 405, 206, 45, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_MENU), 454, 206, 50, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_CONTROL), 508, 206, 56, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT), 578, 206, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_DOWN), 617, 206, 35, 35));
+                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT), 656, 206, 35, 35));
+            }
             case Custom -> {
                 keys.addAll(customKeys.get());
             }
@@ -334,6 +423,7 @@ public class KeyboardHud extends HudElement {
         Clicks,
         Actions,
         Hotbar,
+        Keyboard,
         Custom
     }
 
