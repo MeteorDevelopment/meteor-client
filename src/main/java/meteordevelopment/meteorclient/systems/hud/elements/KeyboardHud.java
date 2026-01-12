@@ -6,6 +6,9 @@
 package meteordevelopment.meteorclient.systems.hud.elements;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.WindowScreen;
@@ -20,10 +23,15 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -201,7 +209,7 @@ public class KeyboardHud extends HudElement {
 
     private Color getKeyColor(Key key, SettingColor out) {
         if (colorFade.get()) {
-            boolean pressed = key.isPressed();
+            boolean pressed = key.isPressed;
             float target = pressed ? 1 : 0;
 
             float tickDelta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
@@ -232,24 +240,36 @@ public class KeyboardHud extends HudElement {
                 out.a = MathHelper.lerp(key.delta, pressedColor.get().a, unpressedColor.get().a);
             }
         } else {
-            out.set(key.isPressed() ? pressedColor.get() : unpressedColor.get());
+            out.set(key.isPressed ? pressedColor.get() : unpressedColor.get());
         }
 
         out.a = (int) (out.a * opacity.get());
         return out;
     }
 
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onKey(KeyEvent event) {
+        for (Key key : keys) {
+            if (key.matches(event.input.key(), event.input.scancode(), true)) {
+                key.update(event.action);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onMouseClick(MouseClickEvent event) {
+        for (Key key : keys) {
+            if (key.matches(event.input.button(), -1, false)) {
+                key.update(event.action);
+            }
+        }
+    }
+
     public KeyboardHud() {
         super(INFO);
         if (mc.options != null)
             onPresetChanged(preset.get());
-    }
-
-    @Override
-    public void tick(HudRenderer renderer) {
-        for (Key key : keys) {
-            key.tick();
-        }
+        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     private void onPresetChanged(Preset preset) {
@@ -426,7 +446,16 @@ public class KeyboardHud extends HudElement {
 
         double s = scale.get();
 
+        // because of a meteor bug, the modules search field swallows inputs
+        InputUtil.Key guiKey = ((KeyBindingAccessor) KeyBinds.OPEN_GUI).meteor$getKey();
+
         for (Key key : keys) {
+            if (key.matches(guiKey.getCode(), guiKey.getCode(), guiKey.getCategory() != InputUtil.Type.MOUSE)) {
+                if (key.isPressed != key.isNativelyPressed()) {
+                    key.update(key.isPressed ? KeyAction.Release : KeyAction.Press);
+                }
+            }
+
             Color color = getKeyColor(key, mutableColor);
 
             double kX = x + (key.x - minX) * s;
@@ -513,7 +542,7 @@ public class KeyboardHud extends HudElement {
         public boolean showCps = false;
 
         private final RollingCps rollingCps = new RollingCps();
-        private boolean wasPressed;
+        private boolean isPressed;
         private float delta;
 
         public Key() {
@@ -564,35 +593,42 @@ public class KeyboardHud extends HudElement {
             return "?";
         }
 
-        public boolean isPressed() {
+        public boolean matches(int input, int scancode, boolean key) {
+            if (keybind != null ) {
+                return keybind.isKey() == key && keybind.getValue() == input;
+            } else {
+                InputUtil.Key inputKey = ((KeyBindingAccessor) binding).meteor$getKey();
+                boolean isKey = inputKey.getCategory() != InputUtil.Type.MOUSE;
+                return isKey == key && inputKey.getCategory() == InputUtil.Type.SCANCODE
+                    ? scancode == inputKey.getCode()
+                    : input == inputKey.getCode();
+            }
+        }
+
+        public void update(KeyAction action) {
+            if (action == KeyAction.Press) {
+                isPressed = true;
+                if (showCps) {
+                    rollingCps.add();
+                }
+            } else {
+                isPressed = false;
+            }
+        }
+
+        public boolean isNativelyPressed() {
             long window = mc.getWindow().getHandle();
             if (keybind != null) {
                 if (!keybind.isSet()) return false;
-                int key = keybind.getValue();
-                boolean isMouse = !keybind.isKey();
-                if (isMouse) return GLFW.glfwGetMouseButton(window, key) == GLFW.GLFW_PRESS;
-                return GLFW.glfwGetKey(window, key) == GLFW.GLFW_PRESS;
-            }
-            if (binding != null) {
+                return keybind.isKey()
+                    ? GLFW.glfwGetKey(window, keybind.getValue()) != GLFW.GLFW_RELEASE
+                    : GLFW.glfwGetMouseButton(window, keybind.getValue()) != GLFW.GLFW_RELEASE;
+            } else {
                 int key = ((KeyBindingAccessor) binding).meteor$getKey().getCode();
-                if (key >= 0 && key < 8) {
-                    return GLFW.glfwGetMouseButton(window, key) == GLFW.GLFW_PRESS;
-                }
-                return GLFW.glfwGetKey(window, key) == GLFW.GLFW_PRESS;
+                return key >= 0 && key < 8
+                    ? GLFW.glfwGetMouseButton(window, key) != GLFW.GLFW_RELEASE
+                    : GLFW.glfwGetKey(window, key) != GLFW.GLFW_RELEASE;
             }
-            if (code >= 0) {
-                if (code < 8) return GLFW.glfwGetMouseButton(window, code) == GLFW.GLFW_PRESS;
-                return GLFW.glfwGetKey(window, code) == GLFW.GLFW_PRESS;
-            }
-            return false;
-        }
-
-        public void tick() {
-            boolean pressed = isPressed();
-            if (pressed && !wasPressed && showCps) {
-                rollingCps.add();
-            }
-            wasPressed = pressed;
         }
 
         public int getCps() {
