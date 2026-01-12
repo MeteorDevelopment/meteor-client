@@ -407,6 +407,11 @@ public class KeyboardHud extends HudElement {
         }
 
         SettingColor mutableColor = new SettingColor();
+        pressedColor.get().update();
+        unpressedColor.get().update();
+        textColor.get().update();
+        borderColor.get().update();
+        backgroundColor.get().update();
 
         if (background.get()) {
             renderer.quad(x, y, getWidth(), getHeight(), getColor(backgroundColor.get(), mutableColor));
