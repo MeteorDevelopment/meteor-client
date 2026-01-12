@@ -608,9 +608,9 @@ public class KeyboardHud extends HudElement {
         }
 
         public void update(KeyAction action) {
-            if (action == KeyAction.Press) {
+            if (action != KeyAction.Release) {
                 isPressed = true;
-                if (showCps) {
+                if (showCps && action == KeyAction.Press) {
                     rollingCps.add();
                 }
             } else {
