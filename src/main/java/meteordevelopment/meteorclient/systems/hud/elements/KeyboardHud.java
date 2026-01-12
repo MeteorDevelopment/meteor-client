@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements;
 
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
@@ -649,7 +651,7 @@ public class KeyboardHud extends HudElement {
     }
 
     private static class RollingCps {
-        private final List<Long> clicks = new ArrayList<>();
+        private final LongList clicks = new LongArrayList();
 
         public void add() {
             clicks.add(System.currentTimeMillis());
