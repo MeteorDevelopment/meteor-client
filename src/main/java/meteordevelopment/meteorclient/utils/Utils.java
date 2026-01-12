@@ -463,6 +463,7 @@ public class Utils {
             case GLFW_KEY_ENTER -> "Enter";
             case GLFW_KEY_KP_ENTER -> "Numpad Enter";
             case GLFW_KEY_NUM_LOCK -> "Num Lock";
+            case GLFW_KEY_SCROLL_LOCK -> "Scroll Lock";
             case GLFW_KEY_SPACE -> "Space";
             case GLFW_KEY_F1 -> "F1";
             case GLFW_KEY_F2 -> "F2";
