@@ -527,18 +527,13 @@ public class Notifier extends Module {
             }
 
             if (simpleNotifications.get()) {
-                messageQueue.addLast(Text.literal(
-                    Formatting.GRAY + "["
-                        + Formatting.GREEN + "+"
-                        + Formatting.GRAY + "] "
-                        + name
-                ));
+                messageQueue.addLast(Text.literal("[").formatted(Formatting.GRAY)
+                    .append(Text.literal("+").formatted(Formatting.GREEN))
+                    .append(Text.literal("] ").formatted(Formatting.GRAY))
+                    .append(Text.literal(name).formatted(Formatting.WHITE)));
             } else {
-                messageQueue.addLast(Text.literal(
-                    Formatting.WHITE
-                        + name
-                        + Formatting.GRAY + " joined."
-                ));
+                messageQueue.addLast(Text.literal(name).formatted(Formatting.WHITE)
+                    .append(Text.literal(" joined.").formatted(Formatting.GRAY)));
             }
         }
     }
@@ -559,18 +554,13 @@ public class Notifier extends Module {
             }
 
             if (simpleNotifications.get()) {
-                messageQueue.addLast(Text.literal(
-                    Formatting.GRAY + "["
-                        + Formatting.RED + "-"
-                        + Formatting.GRAY + "] "
-                        + name
-                ));
+                messageQueue.addLast(Text.literal("[").formatted(Formatting.GRAY)
+                    .append(Text.literal("-").formatted(Formatting.RED))
+                    .append(Text.literal("] ").formatted(Formatting.GRAY))
+                    .append(Text.literal(name).formatted(Formatting.WHITE)));
             } else {
-                messageQueue.addLast(Text.literal(
-                    Formatting.WHITE
-                        + name
-                        + Formatting.GRAY + " left."
-                ));
+                messageQueue.addLast(Text.literal(name).formatted(Formatting.WHITE)
+                    .append(Text.literal(" left.").formatted(Formatting.GRAY)));
             }
         }
     }
