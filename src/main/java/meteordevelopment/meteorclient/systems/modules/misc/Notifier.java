@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -331,7 +332,7 @@ public class Notifier extends Module {
     private void onEntityAdded(EntityAddedEvent event) {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Despawn) {
             if (event.entity instanceof PlayerEntity player) {
-                if (visualRangeIgnoreFakes.get() && event.entity instanceof FakePlayerEntity) return;
+                if (visualRangeIgnoreFakes.get() && event.entity instanceof FakePlayerEntity || EntityUtils.getGameMode(player) == null) return;
 
                 String name = player.getName().getString();
                 boolean isFriend = Friends.get().isFriend(player);
@@ -367,6 +368,7 @@ public class Notifier extends Module {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Spawn) {
             if (event.entity instanceof PlayerEntity player) {
                 if (visualRangeIgnoreFakes.get() && event.entity instanceof FakePlayerEntity) return;
+                if (visualRangeIgnoreBots.get() && EntityUtils.getGameMode(player) == null) return;
 
                 String name = player.getName().getString();
                 boolean isFriend = Friends.get().isFriend(player);
