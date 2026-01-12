@@ -22,10 +22,12 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -113,6 +115,24 @@ public class KeyboardHud extends HudElement {
         .build()
     );
 
+    private final Setting<Boolean> colorFade = sgColor.add(new BoolSetting.Builder()
+        .name("color-fade")
+        .description("Whether to fade the key color when pressing/unpressing.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> fadeTime = sgColor.add(new DoubleSetting.Builder()
+        .name("fade-time")
+        .description("How long to fade the color for, in seconds.")
+        .visible(colorFade::get)
+        .defaultValue(0.2d)
+        .min(0.01d)
+        .sliderRange(0.01d, 1d)
+        .decimalPlaces(2)
+        .build()
+    );
+
     private final Setting<SettingColor> textColor = sgColor.add(new ColorSetting.Builder()
         .name("text-color")
         .description("Color of the key name.")
@@ -173,11 +193,50 @@ public class KeyboardHud extends HudElement {
     private final List<Key> keys = new ArrayList<>();
     private double minX, minY;
 
-    private Color getColor(SettingColor color) {
-        color.update();
-        Color c = new Color(color);
-        c.a = (int) (c.a * opacity.get());
-        return c;
+    private Color getColor(SettingColor color, SettingColor out) {
+        out.set(color);
+        out.a = (int) (out.a * opacity.get());
+        return out;
+    }
+
+    private Color getKeyColor(Key key, SettingColor out) {
+        if (colorFade.get()) {
+            boolean pressed = key.isPressed();
+            float target = pressed ? 1 : 0;
+
+            float tickDelta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
+            float frameDelta = (float) (tickDelta / 20 / fadeTime.get()) * (pressed ? 1 : -1);
+            key.delta = Math.clamp(key.delta + frameDelta, 0, 1);
+
+            if (key.delta == target) {
+                out.set(target == 1 ? pressedColor.get() : unpressedColor.get());
+            } else {
+                Color c1 = pressedColor.get();
+                Color c2 = unpressedColor.get();
+
+                float[] hsb1 = new float[3];
+                float[] hsb2 = new float[3];
+
+                java.awt.Color.RGBtoHSB(c1.r, c1.g, c1.b, hsb2);
+                java.awt.Color.RGBtoHSB(c2.r, c2.g, c2.b, hsb1);
+
+                int rgb = java.awt.Color.HSBtoRGB(
+                    MathHelper.lerp(key.delta, hsb1[0], hsb2[0]),
+                    MathHelper.lerp(key.delta, hsb1[1], hsb2[1]),
+                    MathHelper.lerp(key.delta, hsb1[2], hsb2[2])
+                );
+
+                out.r = Color.toRGBAR(rgb);
+                out.g = Color.toRGBAG(rgb);
+                out.b = Color.toRGBAB(rgb);
+                out.a = MathHelper.lerp(key.delta, pressedColor.get().a, unpressedColor.get().a);
+            }
+        } else {
+            out.set(key.isPressed() ? pressedColor.get() : unpressedColor.get());
+        }
+
+        out.a = (int) (out.a * opacity.get());
+        return out;
     }
 
     public KeyboardHud() {
@@ -347,15 +406,16 @@ public class KeyboardHud extends HudElement {
             return;
         }
 
+        SettingColor mutableColor = new SettingColor();
+
         if (background.get()) {
-            renderer.quad(x, y, getWidth(), getHeight(), getColor(backgroundColor.get()));
+            renderer.quad(x, y, getWidth(), getHeight(), getColor(backgroundColor.get(), mutableColor));
         }
 
         double s = scale.get();
 
         for (Key key : keys) {
-            boolean pressed = key.isPressed();
-            Color color = pressed ? getColor(pressedColor.get()) : getColor(unpressedColor.get());
+            Color color = getKeyColor(key, mutableColor);
 
             double kX = x + (key.x - minX) * s;
             double kY = y + (key.y - minY) * s;
@@ -365,7 +425,7 @@ public class KeyboardHud extends HudElement {
             renderer.quad(kX, kY, kW, kH, color);
 
             if (border.get()) {
-                Color bColor = getColor(borderColor.get());
+                Color bColor = getColor(borderColor.get(), mutableColor);
                 double bw = borderWidth.get();
                 renderer.quad(kX, kY, kW, bw, bColor);
                 renderer.quad(kX, kY + kH - bw, kW, bw, bColor);
@@ -374,7 +434,7 @@ public class KeyboardHud extends HudElement {
             }
 
             String text = key.getName();
-            Color txtColor = getColor(textColor.get());
+            Color txtColor = getColor(textColor.get(), mutableColor);
 
             double padding = 2 * s;
             double availableWidth = kW - padding * 2;
@@ -442,6 +502,7 @@ public class KeyboardHud extends HudElement {
 
         private final RollingCps rollingCps = new RollingCps();
         private boolean wasPressed;
+        private float delta;
 
         public Key() {
             this(Keybind.fromKey(GLFW.GLFW_KEY_SPACE), 0, 0, 60, 40);
