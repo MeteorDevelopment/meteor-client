@@ -48,8 +48,7 @@ import java.util.Locale;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class KeyboardHud extends HudElement {
-    public static final HudElementInfo<KeyboardHud> INFO = new HudElementInfo<>(Hud.GROUP, "keyboard",
-            "Displays pressed keys.", KeyboardHud::new);
+    public static final HudElementInfo<KeyboardHud> INFO = new HudElementInfo<>(Hud.GROUP, "keyboard", "Displays pressed keys.", KeyboardHud::new);
 
     public enum Alignment {
         Left,
@@ -92,6 +91,15 @@ public class KeyboardHud extends HudElement {
         .decimalPlaces(1)
         .visible(() -> preset.get() != Preset.Custom)
         .onChanged(s -> onPresetChanged(preset.get()))
+        .build()
+    );
+
+    private final Setting<KeyboardLayout> keyboardLayout = sgGeneral.add(new EnumSetting.Builder<KeyboardLayout>()
+        .name("keyboard-layout")
+        .description("Physical keyboard layout (ANSI or ISO).")
+        .defaultValue(KeyboardLayout.ANSI)
+        .visible(() -> preset.get() == Preset.Keyboard)
+        .onChanged(layout -> onPresetChanged(preset.get()))
         .build()
     );
 
@@ -309,70 +317,198 @@ public class KeyboardHud extends HudElement {
             case Keyboard -> {
                 double u = 35;  // base key unit size
                 double g = s;   // gap between keys (spacing setting)
-                double row0 = 0, row1 = u + 15 + g, row2 = row1 + u + g, row3 = row2 + u + g, row4 = row3 + u + g, row5 = row4 + u + g;
 
-                double targetLen = 14 * (u + g) + u * 0.6;
-                double padding;
-
-                // Row 0: ESC, F1-F12, Print/Scroll/Pause
-                padding = targetLen - (u * 13 + g * 12);
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_ESCAPE), 0, row0, u, u));
-                for (int i = 0; i < 4; i++) keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F1 + i), (u + g) + padding / 2 + i * (u + g), row0, u, u));
-                for (int i = 0; i < 4; i++) keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F5 + i), (u + g) * 5 + padding * 3 / 4 + i * (u + g), row0, u, u));
-                for (int i = 0; i < 4; i++) keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F9 + i), (u + g) * 9 + padding + i * (u + g), row0, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PRINT_SCREEN), (u + g) * 15.5, row0, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_SCROLL_LOCK), (u + g) * 16.5, row0, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAUSE), (u + g) * 17.5, row0, u, u));
-
-                // Row 1: ` 1-0 - = BS, Ins/Home/PgUp
-                int[] row1Keys = {GLFW.GLFW_KEY_GRAVE_ACCENT, GLFW.GLFW_KEY_1, GLFW.GLFW_KEY_2, GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4, GLFW.GLFW_KEY_5, GLFW.GLFW_KEY_6, GLFW.GLFW_KEY_7, GLFW.GLFW_KEY_8, GLFW.GLFW_KEY_9, GLFW.GLFW_KEY_0, GLFW.GLFW_KEY_MINUS, GLFW.GLFW_KEY_EQUAL};
-                for (int i = 0; i < row1Keys.length; i++) keys.add(new Key(Keybind.fromKey(row1Keys[i]), i * (u + g), row1, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSPACE), 13 * (u + g), row1, u * 1.6 + g, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_INSERT), (u + g) * 15.5, row1, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_HOME), (u + g) * 16.5, row1, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_UP), (u + g) * 17.5, row1, u, u));
-
-                // Row 2: Tab QWERTY..., Del/End/PgDn
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_TAB), 0, row2, u * 1.5, u));
-                int[] row2Keys = {GLFW.GLFW_KEY_Q, GLFW.GLFW_KEY_W, GLFW.GLFW_KEY_E, GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_T, GLFW.GLFW_KEY_Y, GLFW.GLFW_KEY_U, GLFW.GLFW_KEY_I, GLFW.GLFW_KEY_O, GLFW.GLFW_KEY_P, GLFW.GLFW_KEY_LEFT_BRACKET, GLFW.GLFW_KEY_RIGHT_BRACKET};
-                for (int i = 0; i < row2Keys.length; i++) keys.add(new Key(Keybind.fromKey(row2Keys[i]), u * 1.5 + g + i * (u + g), row2, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSLASH), u * 1.5 + g + 12 * (u + g), row2, u * 1.1 + g, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_DELETE), (u + g) * 15.5, row2, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_END), (u + g) * 16.5, row2, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_DOWN), (u + g) * 17.5, row2, u, u));
-
-                // Row 3: Caps ASDF..., Enter
-                padding = targetLen - (u * 11 + g * 12);
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_CAPS_LOCK), 0, row3, padding * (1.75 / 3.75), u));
-                int[] row3Keys = {GLFW.GLFW_KEY_A, GLFW.GLFW_KEY_S, GLFW.GLFW_KEY_D, GLFW.GLFW_KEY_F, GLFW.GLFW_KEY_G, GLFW.GLFW_KEY_H, GLFW.GLFW_KEY_J, GLFW.GLFW_KEY_K, GLFW.GLFW_KEY_L, GLFW.GLFW_KEY_SEMICOLON, GLFW.GLFW_KEY_APOSTROPHE};
-                for (int i = 0; i < row3Keys.length; i++) keys.add(new Key(Keybind.fromKey(row3Keys[i]), padding * (1.75 / 3.75) + g + i * (u + g), row3, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_ENTER), padding * (1.75 / 3.75) + g + 11 * (u + g), row3, padding * (2 / 3.75), u));
-
-                // Row 4: LShift ZXCV..., RShift, Up
-                padding = targetLen - (u * 10 + g * 11);
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SHIFT), 0, row4, padding * (2.1 / 4.8), u));
-                int[] row4Keys = {GLFW.GLFW_KEY_Z, GLFW.GLFW_KEY_X, GLFW.GLFW_KEY_C, GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_B, GLFW.GLFW_KEY_N, GLFW.GLFW_KEY_M, GLFW.GLFW_KEY_COMMA, GLFW.GLFW_KEY_PERIOD, GLFW.GLFW_KEY_SLASH};
-                for (int i = 0; i < row4Keys.length; i++) keys.add(new Key(Keybind.fromKey(row4Keys[i]), padding * (2.1 / 4.8) + g + i * (u + g), row4, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SHIFT), padding * (2.1 / 4.8) + g + 10 * (u + g), row4, padding * (2.7 / 4.8), u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_UP), (u + g) * 16.5, row4, u, u));
-
-                // Row 5: Ctrl/Win/Alt/Space/Alt/Win/Menu/Ctrl, Arrows
-                padding = targetLen - (g * 7);
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_CONTROL), 0, row5, padding * (1.4 / 14.9), u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SUPER), padding * (1.4 / 14.9) + g, row5, padding * (1.25 / 14.9), u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_ALT), padding * (2.65 / 14.9) + g * 2, row5, padding * (1.25 / 14.9), u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_SPACE), padding * (3.9 / 14.9) + g * 3, row5, padding * (5.6 / 14.9), u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_ALT), padding * (9.5 / 14.9) + g * 4, row5, padding * (1.25 / 14.9), u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SUPER), padding * (10.75 / 14.9) + g * 5, row5, padding * (1.25 / 14.9), u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_MENU), padding * (12 / 14.9) + g * 6, row5, padding * (1.4 / 14.9), u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_CONTROL), padding * (13.4 / 14.9) + g * 7, row5, padding * (1.5 / 14.9), u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT), (u + g) * 15.5, row5, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_DOWN), (u + g) * 16.5, row5, u, u));
-                keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT), (u + g) * 17.5, row5, u, u));
+                if (keyboardLayout.get() == KeyboardLayout.ANSI) {
+                    buildAnsiLayout(u, g);
+                } else {
+                    buildIsoLayout(u, g);
+                }
             }
             case Custom -> keys.addAll(customKeys.get());
         }
         calculateSize();
+    }
+
+    private void buildAnsiLayout(double u, double g) {
+        double row0 = 0, row1 = u + 15 + g, row2 = row1 + u + g, row3 = row2 + u + g, row4 = row3 + u + g, row5 = row4 + u + g;
+        double targetLen = 14 * (u + g) + u * 0.6;
+        double padding;
+
+        // Row 0: ESC, F1-F12, Print/Scroll/Pause
+        padding = targetLen - (u * 13 + g * 12);
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_ESCAPE), 0, row0, u, u));
+        for (int i = 0; i < 4; i++)
+            keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F1 + i), (u + g) + padding / 2 + i * (u + g), row0, u, u));
+        for (int i = 0; i < 4; i++)
+            keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F5 + i), (u + g) * 5 + padding * 3 / 4 + i * (u + g), row0, u, u));
+        for (int i = 0; i < 4; i++)
+            keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F9 + i), (u + g) * 9 + padding + i * (u + g), row0, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PRINT_SCREEN), (u + g) * 15.5, row0, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_SCROLL_LOCK), (u + g) * 16.5, row0, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAUSE), (u + g) * 17.5, row0, u, u));
+
+        // Row 1: ` 1-0 - = BS, Ins/Home/PgUp
+        int[] row1Keys = {GLFW.GLFW_KEY_GRAVE_ACCENT, GLFW.GLFW_KEY_1, GLFW.GLFW_KEY_2, GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4, GLFW.GLFW_KEY_5, GLFW.GLFW_KEY_6, GLFW.GLFW_KEY_7, GLFW.GLFW_KEY_8, GLFW.GLFW_KEY_9, GLFW.GLFW_KEY_0, GLFW.GLFW_KEY_MINUS, GLFW.GLFW_KEY_EQUAL};
+        for (int i = 0; i < row1Keys.length; i++)
+            keys.add(new Key(Keybind.fromKey(row1Keys[i]), i * (u + g), row1, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSPACE), 13 * (u + g), row1, u * 1.6 + g, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_INSERT), (u + g) * 15.5, row1, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_HOME), (u + g) * 16.5, row1, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_UP), (u + g) * 17.5, row1, u, u));
+
+        // Row 2: Tab QWERTY..., Del/End/PgDn
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_TAB), 0, row2, u * 1.5, u));
+        int[] row2Keys = {GLFW.GLFW_KEY_Q, GLFW.GLFW_KEY_W, GLFW.GLFW_KEY_E, GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_T, GLFW.GLFW_KEY_Y, GLFW.GLFW_KEY_U, GLFW.GLFW_KEY_I, GLFW.GLFW_KEY_O, GLFW.GLFW_KEY_P, GLFW.GLFW_KEY_LEFT_BRACKET, GLFW.GLFW_KEY_RIGHT_BRACKET};
+        for (int i = 0; i < row2Keys.length; i++)
+            keys.add(new Key(Keybind.fromKey(row2Keys[i]), u * 1.5 + g + i * (u + g), row2, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSLASH), u * 1.5 + g + 12 * (u + g), row2, u * 1.1 + g, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_DELETE), (u + g) * 15.5, row2, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_END), (u + g) * 16.5, row2, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_DOWN), (u + g) * 17.5, row2, u, u));
+
+        // Row 3: Caps ASDF..., Enter
+        padding = targetLen - (u * 11 + g * 12);
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_CAPS_LOCK), 0, row3, padding * (1.75 / 3.75), u));
+        int[] row3Keys = {GLFW.GLFW_KEY_A, GLFW.GLFW_KEY_S, GLFW.GLFW_KEY_D, GLFW.GLFW_KEY_F, GLFW.GLFW_KEY_G, GLFW.GLFW_KEY_H, GLFW.GLFW_KEY_J, GLFW.GLFW_KEY_K, GLFW.GLFW_KEY_L, GLFW.GLFW_KEY_SEMICOLON, GLFW.GLFW_KEY_APOSTROPHE};
+        for (int i = 0; i < row3Keys.length; i++)
+            keys.add(new Key(Keybind.fromKey(row3Keys[i]), padding * (1.75 / 3.75) + g + i * (u + g), row3, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_ENTER), padding * (1.75 / 3.75) + g + 11 * (u + g), row3, padding * (2 / 3.75), u));
+
+        // Row 4: LShift ZXCV..., RShift, Up
+        padding = targetLen - (u * 10 + g * 11);
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SHIFT), 0, row4, padding * (2.1 / 4.8), u));
+        int[] row4Keys = {GLFW.GLFW_KEY_Z, GLFW.GLFW_KEY_X, GLFW.GLFW_KEY_C, GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_B, GLFW.GLFW_KEY_N, GLFW.GLFW_KEY_M, GLFW.GLFW_KEY_COMMA, GLFW.GLFW_KEY_PERIOD, GLFW.GLFW_KEY_SLASH};
+        for (int i = 0; i < row4Keys.length; i++)
+            keys.add(new Key(Keybind.fromKey(row4Keys[i]), padding * (2.1 / 4.8) + g + i * (u + g), row4, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SHIFT), padding * (2.1 / 4.8) + g + 10 * (u + g), row4, padding * (2.7 / 4.8), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_UP), (u + g) * 16.5, row4, u, u));
+
+        // Row 5: Ctrl/Win/Alt/Space/Alt/Win/Menu/Ctrl, Arrows
+        padding = targetLen - (g * 7);
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_CONTROL), 0, row5, padding * (1.4 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SUPER), padding * (1.4 / 14.9) + g, row5, padding * (1.25 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_ALT), padding * (2.65 / 14.9) + g * 2, row5, padding * (1.25 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_SPACE), padding * (3.9 / 14.9) + g * 3, row5, padding * (5.6 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_ALT), padding * (9.5 / 14.9) + g * 4, row5, padding * (1.25 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SUPER), padding * (10.75 / 14.9) + g * 5, row5, padding * (1.25 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_MENU), padding * (12 / 14.9) + g * 6, row5, padding * (1.4 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_CONTROL), padding * (13.4 / 14.9) + g * 7, row5, padding * (1.5 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT), (u + g) * 15.5, row5, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_DOWN), (u + g) * 16.5, row5, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT), (u + g) * 17.5, row5, u, u));
+    }
+
+    private void buildIsoLayout(double u, double g) {
+        double row0 = 0, row1 = u + 15 + g, row2 = row1 + u + g, row3 = row2 + u + g, row4 = row3 + u + g, row5 = row4 + u + g;
+        double targetLen = 14 * (u + g) + u * 0.6;
+        double padding;
+
+        // Row 0: ESC, F1-F12, Print/Scroll/Pause
+        padding = targetLen - (u * 13 + g * 12);
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_ESCAPE), 0, row0, u, u));
+        for (int i = 0; i < 4; i++)
+            keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F1 + i), (u + g) + padding / 2 + i * (u + g), row0, u, u));
+        for (int i = 0; i < 4; i++)
+            keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F5 + i), (u + g) * 5 + padding * 3 / 4 + i * (u + g), row0, u, u));
+        for (int i = 0; i < 4; i++)
+            keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F9 + i), (u + g) * 9 + padding + i * (u + g), row0, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PRINT_SCREEN), (u + g) * 15.5, row0, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_SCROLL_LOCK), (u + g) * 16.5, row0, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAUSE), (u + g) * 17.5, row0, u, u));
+
+        // Row 1: ` 1-0 - = BS, Ins/Home/PgUp
+        int[] row1Keys = {GLFW.GLFW_KEY_GRAVE_ACCENT, GLFW.GLFW_KEY_1, GLFW.GLFW_KEY_2, GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4, GLFW.GLFW_KEY_5, GLFW.GLFW_KEY_6, GLFW.GLFW_KEY_7, GLFW.GLFW_KEY_8, GLFW.GLFW_KEY_9, GLFW.GLFW_KEY_0, GLFW.GLFW_KEY_MINUS, GLFW.GLFW_KEY_EQUAL};
+        for (int i = 0; i < row1Keys.length; i++)
+            keys.add(new Key(Keybind.fromKey(row1Keys[i]), i * (u + g), row1, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSPACE), 13 * (u + g), row1, u * 1.6 + g, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_INSERT), (u + g) * 15.5, row1, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_HOME), (u + g) * 16.5, row1, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_UP), (u + g) * 17.5, row1, u, u));
+
+        // Row 2: Tab QWERTY... brackets
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_TAB), 0, row2, u * 1.5, u));
+        int[] row2Keys = {GLFW.GLFW_KEY_Q, GLFW.GLFW_KEY_W, GLFW.GLFW_KEY_E, GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_T, GLFW.GLFW_KEY_Y, GLFW.GLFW_KEY_U, GLFW.GLFW_KEY_I, GLFW.GLFW_KEY_O, GLFW.GLFW_KEY_P, GLFW.GLFW_KEY_LEFT_BRACKET, GLFW.GLFW_KEY_RIGHT_BRACKET};
+        for (int i = 0; i < row2Keys.length; i++)
+            keys.add(new Key(Keybind.fromKey(row2Keys[i]), u * 1.5 + g + i * (u + g), row2, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_DELETE), (u + g) * 15.5, row2, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_END), (u + g) * 16.5, row2, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_PAGE_DOWN), (u + g) * 17.5, row2, u, u));
+
+        // Row 3: Caps ASDF..., UK # key
+        padding = targetLen - (u * 11 + g * 12);
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_CAPS_LOCK), 0, row3, padding * (1.75 / 3.75), u));
+        int[] row3Keys = {GLFW.GLFW_KEY_A, GLFW.GLFW_KEY_S, GLFW.GLFW_KEY_D, GLFW.GLFW_KEY_F, GLFW.GLFW_KEY_G, GLFW.GLFW_KEY_H, GLFW.GLFW_KEY_J, GLFW.GLFW_KEY_K, GLFW.GLFW_KEY_L, GLFW.GLFW_KEY_SEMICOLON, GLFW.GLFW_KEY_APOSTROPHE};
+        for (int i = 0; i < row3Keys.length; i++)
+            keys.add(new Key(Keybind.fromKey(row3Keys[i]), padding * (1.75 / 3.75) + g + i * (u + g), row3, u, u));
+        // ISO key (backslash on UK)
+        double backslashKeyX = padding * (1.75 / 3.75) + g + 11 * (u + g);  // After ' key
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_BACKSLASH), backslashKeyX, row3, u, u));
+
+        // ISO Enter - reverse-L shape spanning rows 2-3
+        // Top bar starts after ] bracket on row 2 and extends to targetLen
+        double topBarStartX = u * 1.5 + g + 12 * (u + g);
+
+        // Stem should be right-aligned: it ends at targetLen
+        double enterStemWidth = u * 1.25;
+        double enterStemX = targetLen - enterStemWidth;  // Right-aligned
+
+        // Verify there's proper gap between ISO key and Enter stem
+        double gapBetweenIsoAndEnter = enterStemX - (backslashKeyX + u);
+        // If gap is too small, adjust stem to start after ISO key with minimum gap
+        if (gapBetweenIsoAndEnter < g * 0.5) {
+            enterStemX = backslashKeyX + u + g;
+            enterStemWidth = targetLen - enterStemX;
+        }
+
+        IsoEnterKey isoEnter = new IsoEnterKey(
+            Keybind.fromKey(GLFW.GLFW_KEY_ENTER),
+            enterStemX, row2,  // Start at row 2
+            enterStemWidth, u * 2 + g,  // Height spans 2 rows + gap
+            topBarStartX  // Top bar starts after ] bracket
+        );
+        keys.add(isoEnter);
+
+        // Row 4: LShift, ISO \| key, ZXCV..., RShift, Up
+        // ISO: Only Left Shift is shorter (to accommodate extra key), Right Shift stays same size as ANSI
+
+        // Right Shift: Use ANSI's padding calculation to get EXACT same width as ANSI
+        double ansiPadding = targetLen - (u * 10 + g * 11);  // Same as ANSI
+        double rShiftWidth = ansiPadding * (2.7 / 4.8);  // Exact same calculation as ANSI
+
+        // Left Shift: Calculate to fill remaining space (gets shorter due to extra ISO key)
+        // Total space = targetLen - (ISO key + 10 letters + RShift + 12 gaps)
+        double lShiftWidth = targetLen - (u + g + 10 * (u + g) + g + rShiftWidth);
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SHIFT), 0, row4, lShiftWidth, u));
+
+        // ISO \| key next to Left Shift
+        double isoKeyX = lShiftWidth + g;
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_WORLD_2), isoKeyX, row4, u, u));
+
+        // Letter keys Z through /
+        int[] row4Keys = {GLFW.GLFW_KEY_Z, GLFW.GLFW_KEY_X, GLFW.GLFW_KEY_C, GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_B, GLFW.GLFW_KEY_N, GLFW.GLFW_KEY_M, GLFW.GLFW_KEY_COMMA, GLFW.GLFW_KEY_PERIOD, GLFW.GLFW_KEY_SLASH};
+        for (int i = 0; i < row4Keys.length; i++)
+            keys.add(new Key(Keybind.fromKey(row4Keys[i]), isoKeyX + u + g + i * (u + g), row4, u, u));
+
+        // Right Shift: Same size as ANSI
+        double rShiftX = isoKeyX + u + g + 10 * (u + g);  // After last letter key
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SHIFT), rShiftX, row4, rShiftWidth, u));
+
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_UP), (u + g) * 16.5, row4, u, u));
+
+        // Row 5: Ctrl/Win/Alt/Space/AltGr/Win/Menu/Ctrl, Arrows
+        padding = targetLen - (g * 7);
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_CONTROL), 0, row5, padding * (1.4 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_SUPER), padding * (1.4 / 14.9) + g, row5, padding * (1.25 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT_ALT), padding * (2.65 / 14.9) + g * 2, row5, padding * (1.25 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_SPACE), padding * (3.9 / 14.9) + g * 3, row5, padding * (5.6 / 14.9), u));
+        // AltGr (Right Alt) on ISO keyboards
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_ALT), "AltGr", padding * (9.5 / 14.9) + g * 4, row5, padding * (1.25 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_SUPER), padding * (10.75 / 14.9) + g * 5, row5, padding * (1.25 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_MENU), padding * (12 / 14.9) + g * 6, row5, padding * (1.4 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT_CONTROL), padding * (13.4 / 14.9) + g * 7, row5, padding * (1.5 / 14.9), u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_LEFT), (u + g) * 15.5, row5, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_DOWN), (u + g) * 16.5, row5, u, u));
+        keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT), (u + g) * 17.5, row5, u, u));
     }
 
     private void calculateSize() {
@@ -421,6 +557,8 @@ public class KeyboardHud extends HudElement {
             case "ARROW DOWN", "DOWN" -> "Dn";
             case "ARROW LEFT", "LEFT" -> "Lt";
             case "ARROW RIGHT", "RIGHT" -> "Rt";
+            case "WORLD 1" -> "#";
+            case "WORLD 2" -> "\\";
             case "UNKNOWN" -> "?";
             default -> name;
         };
@@ -456,6 +594,11 @@ public class KeyboardHud extends HudElement {
                 if (key.isPressed != key.isNativelyPressed()) {
                     key.update(key.isPressed ? KeyAction.Release : KeyAction.Press);
                 }
+            }
+
+            if (key instanceof IsoEnterKey isoEnter) {
+                isoEnter.render(this, renderer, s, mutableColor);
+                continue;
             }
 
             Color color = getKeyColor(key, mutableColor);
@@ -512,8 +655,7 @@ public class KeyboardHud extends HudElement {
         }
     }
 
-    private void drawTextLine(HudRenderer renderer, String text, double textWidth, double x, double y, double w, double textScale,
-            Color color) {
+    private void drawTextLine(HudRenderer renderer, String text, double textWidth, double x, double y, double w, double textScale, Color color) {
         double s = scale.get();
         double padding = 2 * s;
 
@@ -533,6 +675,11 @@ public class KeyboardHud extends HudElement {
         Hotbar,
         Keyboard,
         Custom
+    }
+
+    public enum KeyboardLayout {
+        ANSI,
+        ISO
     }
 
     public static class Key {
@@ -583,6 +730,15 @@ public class KeyboardHud extends HudElement {
             this.height = height;
         }
 
+        public Key(Keybind keybind, String name, double x, double y, double width, double height) {
+            this.keybind = keybind;
+            this.name = name;
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+        }
+
         public Key setShowCps(boolean show) {
             this.showCps = show;
             return this;
@@ -596,7 +752,7 @@ public class KeyboardHud extends HudElement {
         }
 
         public boolean matches(int input, int scancode, boolean key) {
-            if (keybind != null ) {
+            if (keybind != null) {
                 return keybind.isKey() == key && keybind.getValue() == input;
             } else {
                 InputUtil.Key inputKey = ((KeyBindingAccessor) binding).meteor$getKey();
@@ -647,6 +803,75 @@ public class KeyboardHud extends HudElement {
             compound.putDouble("height", height);
             compound.putBoolean("showCps", showCps);
             return compound;
+        }
+    }
+
+    public static class IsoEnterKey extends Key {
+        private final double topBarStartX;
+
+        public IsoEnterKey(Keybind keybind, double x, double y, double width, double height, double topBarStartX) {
+            super(keybind, x, y, width, height);
+            this.topBarStartX = topBarStartX;
+        }
+
+        // Renders L-shaped Enter key as 3 NON-overlapping quads to avoid transparency artifacts
+        public void render(KeyboardHud hud, HudRenderer renderer, double s, SettingColor mutableColor) {
+            double kX = hud.x + (x - hud.minX) * s;
+            double kY = hud.y + (y - hud.minY) * s;
+            double kW = width * s;
+            double kH = height * s;
+            double u = 35 * s;
+
+            Color color = hud.getKeyColor(this, mutableColor);
+
+            // Calculate positions
+            double stemRight = kX + kW;
+            double topBarX = hud.x + (topBarStartX - hud.minX) * s;
+            double topBarLeftWidth = stemRight - topBarX - kW;
+            if (topBarLeftWidth > 0) {
+                renderer.quad(topBarX, kY, topBarLeftWidth, u, color);
+            }
+            renderer.quad(kX, kY, kW, u, color);
+            renderer.quad(kX, kY + u, kW, kH - u, color);
+
+
+            // Border
+            if (hud.border.get()) {
+                Color bColor = hud.getColor(hud.borderColor.get(), mutableColor);
+                double bw = hud.borderWidth.get();
+                double fullTopBarWidth = topBarLeftWidth + kW;  // Total width of top bar
+
+                // Top bar borders
+                renderer.quad(topBarX, kY, fullTopBarWidth, bw, bColor);  // Top edge
+                renderer.quad(topBarX, kY, bw, u, bColor);  // Left edge
+                renderer.quad(topBarX + fullTopBarWidth - bw, kY, bw, kH, bColor);  // Right edge (full height)
+
+                // Stem borders
+                renderer.quad(kX, kY + kH - bw, kW, bw, bColor);  // Bottom edge
+                renderer.quad(kX, kY + u, bw, kH - u, bColor);  // Left edge (from u downward)
+
+                // Bottom of top bar (connecting piece between top bar and stem)
+                if (topBarLeftWidth > 0) {
+                    renderer.quad(topBarX, kY + u - bw, topBarLeftWidth, bw, bColor);
+                }
+            }
+
+            // Text centered in stem
+            String text = getName();
+            Color txtColor = hud.getColor(hud.textColor.get(), mutableColor);
+
+            double padding = 2 * s;
+            double availableWidth = kW - padding * 2;
+            double availableHeight = kH - padding * 2;
+            double tH = renderer.textHeight();
+            double tW = renderer.textWidth(text);
+
+            double widthScale = tW > availableWidth ? availableWidth / tW : 1.0;
+            double heightScale = tH > availableHeight * 0.6 ? (availableHeight * 0.6) / tH : 1.0;
+            double textScale = Math.min(widthScale, heightScale);
+
+            double yText = kY + (kH - tH * textScale) / 2;
+            hud.drawTextLine(renderer, text, tW, kX, yText, kW, textScale, txtColor);
         }
     }
 
