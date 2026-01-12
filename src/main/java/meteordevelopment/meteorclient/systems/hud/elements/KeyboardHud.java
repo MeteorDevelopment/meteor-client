@@ -47,6 +47,7 @@ public class KeyboardHud extends HudElement {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColor = settings.createGroup("Color");
+    private final SettingGroup sgBorder = settings.createGroup("Border");
     private final SettingGroup sgBackground = settings.createGroup("Background");
 
     private final Setting<Preset> preset = sgGeneral.add(new EnumSetting.Builder<Preset>()
@@ -119,6 +120,31 @@ public class KeyboardHud extends HudElement {
         .build()
     );
 
+    private final Setting<Boolean> border = sgBorder.add(new BoolSetting.Builder()
+        .name("border")
+        .description("Draw a border around keys.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<SettingColor> borderColor = sgBorder.add(new ColorSetting.Builder()
+        .name("border-color")
+        .description("Color of the key border.")
+        .visible(border::get)
+        .defaultValue(new SettingColor(255, 255, 255, 200))
+        .build()
+    );
+
+    private final Setting<Double> borderWidth = sgBorder.add(new DoubleSetting.Builder()
+        .name("border-width")
+        .description("Width of the key border.")
+        .visible(border::get)
+        .defaultValue(1.0)
+        .min(0.5)
+        .sliderRange(0.5, 5)
+        .build()
+    );
+
     private final Setting<Double> opacity = sgColor.add(new DoubleSetting.Builder()
         .name("opacity")
         .description("Opacity of the whole element.")
@@ -148,6 +174,7 @@ public class KeyboardHud extends HudElement {
     private double minX, minY;
 
     private Color getColor(SettingColor color) {
+        color.update();
         Color c = new Color(color);
         c.a = (int) (c.a * opacity.get());
         return c;
@@ -336,6 +363,15 @@ public class KeyboardHud extends HudElement {
             double kH = key.height * s;
 
             renderer.quad(kX, kY, kW, kH, color);
+
+            if (border.get()) {
+                Color bColor = getColor(borderColor.get());
+                double bw = borderWidth.get();
+                renderer.quad(kX, kY, kW, bw, bColor);
+                renderer.quad(kX, kY + kH - bw, kW, bw, bColor);
+                renderer.quad(kX, kY, bw, kH, bColor);
+                renderer.quad(kX + kW - bw, kY, bw, kH, bColor);
+            }
 
             String text = key.getName();
             Color txtColor = getColor(textColor.get());
