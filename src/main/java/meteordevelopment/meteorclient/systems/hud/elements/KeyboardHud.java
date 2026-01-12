@@ -153,7 +153,7 @@ public class KeyboardHud extends HudElement {
     private final Setting<Boolean> border = sgBorder.add(new BoolSetting.Builder()
         .name("border")
         .description("Draw a border around keys.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
