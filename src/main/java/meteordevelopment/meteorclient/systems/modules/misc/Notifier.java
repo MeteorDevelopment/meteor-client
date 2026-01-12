@@ -332,7 +332,7 @@ public class Notifier extends Module {
     private void onEntityAdded(EntityAddedEvent event) {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Despawn) {
             if (event.entity instanceof PlayerEntity player) {
-                if (visualRangeIgnoreFakes.get() && event.entity instanceof FakePlayerEntity || EntityUtils.getGameMode(player) == null) return;
+                if (visualRangeIgnoreFakes.get() && (event.entity instanceof FakePlayerEntity || EntityUtils.getGameMode(player) == null)) return;
 
                 String name = player.getName().getString();
                 boolean isFriend = Friends.get().isFriend(player);
@@ -367,8 +367,7 @@ public class Notifier extends Module {
     private void onEntityRemoved(EntityRemovedEvent event) {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Spawn) {
             if (event.entity instanceof PlayerEntity player) {
-                if (visualRangeIgnoreFakes.get() && event.entity instanceof FakePlayerEntity) return;
-                if (visualRangeIgnoreBots.get() && EntityUtils.getGameMode(player) == null) return;
+                if (visualRangeIgnoreFakes.get() && (event.entity instanceof FakePlayerEntity || EntityUtils.getGameMode(player) == null)) return;
 
                 String name = player.getName().getString();
                 boolean isFriend = Friends.get().isFriend(player);
