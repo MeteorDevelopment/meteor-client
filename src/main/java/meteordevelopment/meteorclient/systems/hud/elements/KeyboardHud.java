@@ -199,6 +199,7 @@ public class KeyboardHud extends HudElement {
                 }
             }
             case Keyboard -> {
+                // spacing? i aint see no damn spacing
                 keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_ESCAPE), 0, 0, 35, 35));
                 keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F1), 70, 0, 35, 35));
                 keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_F2), 109, 0, 35, 35));
@@ -287,9 +288,7 @@ public class KeyboardHud extends HudElement {
                 keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_DOWN), 617, 206, 35, 35));
                 keys.add(new Key(Keybind.fromKey(GLFW.GLFW_KEY_RIGHT), 656, 206, 35, 35));
             }
-            case Custom -> {
-                keys.addAll(customKeys.get());
-            }
+            case Custom -> keys.addAll(customKeys.get());
         }
         calculateSize();
     }
@@ -310,9 +309,7 @@ public class KeyboardHud extends HudElement {
         setSize((maxX - minX) * scale.get(), (maxY - minY) * scale.get());
     }
 
-    private String getShortName(String name) {
-        if (name == null)
-            return "?";
+    private static String getShortName(String name) {
         return switch (name.toUpperCase(Locale.ROOT)) {
             case "LEFT SHIFT", "LSHIFT" -> "LSh";
             case "RIGHT SHIFT", "RSHIFT" -> "RSh";
@@ -373,8 +370,7 @@ public class KeyboardHud extends HudElement {
 
             renderer.quad(kX, kY, kW, kH, color);
 
-            String text = getShortName(key.getName());
-            String cpsText = key.showCps ? key.getCps() + " CPS" : "";
+            String text = key.getName();
             Color txtColor = getColor(textColor.get());
 
             double padding = 2 * s;
@@ -382,19 +378,20 @@ public class KeyboardHud extends HudElement {
             double availableHeight = kH - padding * 2;
             double tH = renderer.textHeight();
 
-            if (cpsText.isEmpty()) {
+            if (!key.showCps) {
                 double tW = renderer.textWidth(text);
                 double widthScale = tW > availableWidth ? availableWidth / tW : 1.0;
                 double heightScale = tH > availableHeight * 0.6 ? (availableHeight * 0.6) / tH : 1.0;
                 double textScale = Math.min(widthScale, heightScale);
                 double yText = kY + (kH - tH * textScale) / 2;
-                drawTextLine(renderer, text, kX, yText, kW, textScale, txtColor);
+                drawTextLine(renderer, text, tW, kX, yText, kW, textScale, txtColor);
             } else {
                 double topW = renderer.textWidth(text);
                 double topWidthScale = topW > availableWidth ? availableWidth / topW : 1.0;
                 double topHeightScale = tH > availableHeight * 0.4 ? (availableHeight * 0.4) / tH : 1.0;
                 double topScale = Math.min(topWidthScale, topHeightScale);
 
+                String cpsText = key.getCps() + " CPS";
                 double botW = renderer.textWidth(cpsText);
                 double botWidthScale = botW > availableWidth ? availableWidth / botW : 1.0;
                 double botHeightScale = tH > availableHeight * 0.4 ? (availableHeight * 0.4) / tH : 1.0;
@@ -403,23 +400,22 @@ public class KeyboardHud extends HudElement {
                 double totalHeight = (tH * topScale) + (tH * botScale);
                 double startY = kY + (kH - totalHeight) / 2;
 
-                drawTextLine(renderer, text, kX, startY, kW, topScale, txtColor);
-                drawTextLine(renderer, cpsText, kX, startY + tH * topScale, kW, botScale, txtColor);
+                drawTextLine(renderer, text, topW, kX, startY, kW, topScale, txtColor);
+                drawTextLine(renderer, cpsText, botW, kX, startY + tH * topScale, kW, botScale, txtColor);
             }
         }
     }
 
-    private void drawTextLine(HudRenderer renderer, String text, double x, double y, double w, double textScale,
+    private void drawTextLine(HudRenderer renderer, String text, double textWidth, double x, double y, double w, double textScale,
             Color color) {
-        double tW = renderer.textWidth(text);
         double s = scale.get();
         double padding = 2 * s;
 
-        double xText = x + (w - tW * textScale) / 2;
+        double xText = x + (w - textWidth * textScale) / 2;
         if (alignment.get() == Alignment.Left)
             xText = x + padding;
         else if (alignment.get() == Alignment.Right)
-            xText = x + w - padding - tW * textScale;
+            xText = x + w - padding - textWidth * textScale;
 
         renderer.text(text, xText, y, color, false, textScale);
     }
@@ -487,8 +483,8 @@ public class KeyboardHud extends HudElement {
 
         public String getName() {
             if (name != null && !name.isEmpty()) return name;
-            if (keybind != null) return keybind.toString();
-            if (binding != null) return binding.getBoundKeyLocalizedText().getString();
+            if (keybind != null) return getShortName(keybind.toString());
+            if (binding != null) return getShortName(binding.getBoundKeyLocalizedText().getString());
             return "?";
         }
 
