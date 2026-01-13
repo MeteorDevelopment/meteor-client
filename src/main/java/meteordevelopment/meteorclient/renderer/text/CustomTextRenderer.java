@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.renderer.text;
 import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
+import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
@@ -38,7 +39,7 @@ public class CustomTextRenderer implements TextRenderer {
 
         fonts = new Font[5];
         for (int i = 0; i < fonts.length; i++) {
-            fonts[i] = new Font(buffer, (int) Math.round(27 * ((i * 0.5) + 1)));
+            fonts[i] = new Font(fontFace, buffer, (int) Math.round(27 * ((i * 0.5) + 1)));
         }
     }
 
@@ -125,11 +126,13 @@ public class CustomTextRenderer implements TextRenderer {
         if (!scaleOnly) {
             mesh.end();
 
+            Texture fontAtlas = font.getTexture();
+
             MeshRenderer.begin()
                 .attachments(MinecraftClient.getInstance().getFramebuffer())
                 .pipeline(MeteorRenderPipelines.UI_TEXT)
                 .mesh(mesh)
-                .sampler("u_Texture", font.texture.getGlTextureView(), font.texture.getSampler())
+                .sampler("u_Texture", fontAtlas.getGlTextureView(), fontAtlas.getSampler())
                 .end();
         }
 
@@ -139,7 +142,7 @@ public class CustomTextRenderer implements TextRenderer {
 
     public void destroy() {
         for (Font font : this.fonts) {
-            font.texture.close();
+            font.close();
         }
     }
 }
