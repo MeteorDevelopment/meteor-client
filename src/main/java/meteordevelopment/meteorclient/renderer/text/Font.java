@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
+import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
 import it.unimi.dsi.fastutil.ints.*;
@@ -12,10 +14,13 @@ import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.client.texture.GlTexture;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.*;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -28,19 +33,27 @@ public class Font {
     private final float scale;
     private final float ascent;
     private final Int2ObjectOpenHashMap<CharData> charMap = new Int2ObjectOpenHashMap<>();
-    private final Int2IntMap pending = new Int2IntOpenHashMap();
-    private @Nullable STBTTFontinfo fontInfo;
-    private @Nullable ByteBuffer fontBuffer;
+    private final STBTTPackContext packContext;
+    private final ByteBuffer fontAtlasBuffer;
+    private @Nullable ByteBuffer fileBuffer;
 
-    public Font(FontFace fontFace, ByteBuffer buffer, int height) {
+    public Font(FontFace fontFace, @NotNull ByteBuffer buffer, int height) {
         this.fontFace = fontFace;
-        this.fontBuffer = buffer;
+        this.fileBuffer = buffer;
         this.height = height;
 
-        // Initialize font
-        STBTTFontinfo fontInfo = this.getOrCreateFontInfo();
+        // allocate data
+        STBTTFontinfo fontInfo = STBTTFontinfo.create();
+        STBTruetype.stbtt_InitFont(fontInfo, buffer);
+
         texture = new Texture(size, size, TextureFormat.RED8, FilterMode.LINEAR, FilterMode.LINEAR);
         scale = STBTruetype.stbtt_ScaleForPixelHeight(fontInfo, height);
+
+        // initialize font info & zero out texture
+        fontAtlasBuffer = BufferUtils.createByteBuffer(size * size);
+
+        packContext = STBTTPackContext.create();
+        STBTruetype.stbtt_PackBegin(packContext, fontAtlasBuffer, size, size, 0 ,1);
 
         // Get font vertical ascent
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -54,9 +67,23 @@ public class Font {
         this(fontFace, readFont(fontFace), height);
     }
 
-    private void renderAndUploadAtlas() {
+    private void upload() {
+        GlStateManager._bindTexture(((GlTexture) this.texture.getGlTexture()).getGlId());
+        GlStateManager._pixelStore(GlConst.GL_UNPACK_ROW_LENGTH, size);
+        GlStateManager._pixelStore(GlConst.GL_UNPACK_SKIP_PIXELS, 0);
+        GlStateManager._pixelStore(GlConst.GL_UNPACK_SKIP_ROWS, 0);
+        GlStateManager._pixelStore(GlConst.GL_UNPACK_ALIGNMENT, 1);
+        GlStateManager._texSubImage2D(GlConst.GL_TEXTURE_2D, 0, 0, 0, size, size, GlConst.GL_RED, GlConst.GL_UNSIGNED_BYTE, MemoryUtil.memAddress0(this.fontAtlasBuffer));
+    }
+
+    // currently unused, but useful in the future hopefully
+    private void regenerateAtlas() {
+        if (this.fileBuffer == null) {
+            this.fileBuffer = readFont(this.fontFace);
+        }
+
         // Allocate buffers
-        int chars = charMap.size() + pending.size();
+        int chars = charMap.size();
 
         STBTTPackRange.Buffer packRange = STBTTPackRange.create(1);
         STBTTPackedchar.Buffer packedCharBuffer = STBTTPackedchar.create(chars);
@@ -65,24 +92,17 @@ public class Font {
         IntBuffer charBuffer = BufferUtils.createIntBuffer(chars);
         for (int c : charMap.keySet()) charBuffer.put(c);
         charMap.clear();
-        for (int c : pending.keySet()) charBuffer.put(c);
-        pending.clear();
         charBuffer.flip();
 
         packRange.put(STBTTPackRange.create().set(height, 0, charBuffer, chars, packedCharBuffer, (byte) 0, (byte) 0));
         packRange.flip();
 
         // create and initialise packing context
-        ByteBuffer bitmap = BufferUtils.createByteBuffer(size * size);
-
-        STBTTPackContext packContext = STBTTPackContext.create();
-        STBTruetype.stbtt_PackBegin(packContext, bitmap, size, size, 0 ,1);
 
         // pack and upload
-        STBTruetype.stbtt_PackFontRanges(packContext, this.fontBuffer, 0, packRange);
-        STBTruetype.stbtt_PackEnd(packContext);
+        STBTruetype.stbtt_PackFontRanges(packContext, this.fileBuffer, 0, packRange);
 
-        texture.upload(bitmap);
+        this.upload();
 
         // update char data
         for (int i = 0; i < chars; i++) {
@@ -106,23 +126,7 @@ public class Font {
         }
 
         // clear
-        this.fontInfo = null;
-        this.fontBuffer = null;
-    }
-
-    private STBTTFontinfo getOrCreateFontInfo() {
-        if (this.fontInfo != null) {
-            return this.fontInfo;
-        }
-
-        if (this.fontBuffer == null) {
-            this.fontBuffer = readFont(this.fontFace);
-        }
-
-        STBTTFontinfo fontInfo = STBTTFontinfo.create();
-        STBTruetype.stbtt_InitFont(fontInfo, fontBuffer);
-
-        return this.fontInfo = fontInfo;
+        this.fileBuffer = null;
     }
 
     private static ByteBuffer readFont(FontFace fontFace) {
@@ -130,15 +134,43 @@ public class Font {
         return BufferUtils.createByteBuffer(data.length).put(data).flip();
     }
 
-    private int addCharacter(int codepoint) {
-        return pending.computeIfAbsent(codepoint, c -> {
-            STBTTFontinfo fontInfo = this.getOrCreateFontInfo();
-
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                IntBuffer advance = stack.mallocInt(1);
-                STBTruetype.stbtt_GetCodepointHMetrics(fontInfo, c, advance, null);
-                return advance.get();
+    private CharData getCharData(int codepoint) {
+        return charMap.computeIfAbsent(codepoint, c -> {
+            if (this.fileBuffer == null) {
+                this.fileBuffer = readFont(this.fontFace);
             }
+
+            // allocate buffers
+            STBTTPackRange.Buffer packRange = STBTTPackRange.create(1);
+            STBTTPackedchar.Buffer packedCharBuffer = STBTTPackedchar.create(1);
+
+            IntBuffer charBuffer = BufferUtils.createIntBuffer(1);
+            charBuffer.put(codepoint);
+            charBuffer.flip();
+
+            packRange.put(STBTTPackRange.create().set(height, 0, charBuffer, 1, packedCharBuffer, (byte) 0, (byte) 0));
+            packRange.flip();
+
+            // pack and upload
+            STBTruetype.stbtt_PackFontRanges(packContext, this.fileBuffer, 0, packRange);
+
+            // update char data
+            STBTTPackedchar packedChar = packedCharBuffer.get(0);
+
+            float ipw = 1f / size; // pixel width and height
+            float iph = 1f / size;
+
+            return new CharData(
+                packedChar.xoff(),
+                packedChar.yoff(),
+                packedChar.xoff2(),
+                packedChar.yoff2(),
+                packedChar.x0() * ipw,
+                packedChar.y0() * iph,
+                packedChar.x1() * ipw,
+                packedChar.y1() * iph,
+                packedChar.xadvance()
+            );
         });
     }
 
@@ -147,13 +179,8 @@ public class Font {
 
         for (int i = 0; i < length; i++) {
             int cp = string.charAt(i);
-            @Nullable CharData c = charMap.get(cp);
-            if (c != null) {
-                width += c.xAdvance;
-            } else {
-                int advance = addCharacter(cp);
-                width += advance * this.scale;
-            }
+            CharData c = this.getCharData(cp);
+            width += c.xAdvance();
         }
 
         return width;
@@ -171,28 +198,25 @@ public class Font {
 
         for (int i = 0; i < length; i++) {
             int cp = string.charAt(i);
-            @Nullable CharData c = charMap.get(cp);
-            if (c != null) {
-                mesh.quad(
-                    mesh.vec2(x + c.x0 * scale, y + c.y0 * scale).vec2(c.u0, c.v0).color(color).next(),
-                    mesh.vec2(x + c.x0 * scale, y + c.y1 * scale).vec2(c.u0, c.v1).color(color).next(),
-                    mesh.vec2(x + c.x1 * scale, y + c.y1 * scale).vec2(c.u1, c.v1).color(color).next(),
-                    mesh.vec2(x + c.x1 * scale, y + c.y0 * scale).vec2(c.u1, c.v0).color(color).next()
-                );
+            CharData c = this.getCharData(cp);
+            mesh.quad(
+                mesh.vec2(x + c.x0() * scale, y + c.y0() * scale).vec2(c.u0(), c.v0()).color(color).next(),
+                mesh.vec2(x + c.x0() * scale, y + c.y1() * scale).vec2(c.u0(), c.v1()).color(color).next(),
+                mesh.vec2(x + c.x1() * scale, y + c.y1() * scale).vec2(c.u1(), c.v1()).color(color).next(),
+                mesh.vec2(x + c.x1() * scale, y + c.y0() * scale).vec2(c.u1(), c.v0()).color(color).next()
+            );
 
-                x += c.xAdvance * scale;
-            } else {
-                int advance = addCharacter(cp);
-                x += advance * this.scale * scale;
-            }
+            x += c.xAdvance() * scale;
         }
 
         return x;
     }
 
     public Texture getTexture() {
-        if (fontInfo != null) {
-            renderAndUploadAtlas();
+        // flush updates
+        if (this.fileBuffer != null) {
+            this.upload();
+            this.fileBuffer = null;
         }
 
         return this.texture;
@@ -200,6 +224,7 @@ public class Font {
 
     public void close() {
         this.texture.close();
+        STBTruetype.stbtt_PackEnd(this.packContext);
     }
 
     private record CharData(float x0, float y0, float x1, float y1, float u0, float v0, float u1, float v1, float xAdvance) {}
