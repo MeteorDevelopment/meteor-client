@@ -22,6 +22,7 @@ import org.lwjgl.stb.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -36,10 +37,12 @@ public class Font {
     private final STBTTPackContext packContext;
     private final ByteBuffer fontAtlasBuffer;
     private @Nullable ByteBuffer fileBuffer;
+    private WeakReference<ByteBuffer> fileBufferRef;
 
     public Font(FontFace fontFace, @NotNull ByteBuffer buffer, int height) {
         this.fontFace = fontFace;
         this.fileBuffer = buffer;
+        this.fileBufferRef = new WeakReference<>(buffer);
         this.height = height;
 
         // allocate data
@@ -76,11 +79,23 @@ public class Font {
         GlStateManager._texSubImage2D(GlConst.GL_TEXTURE_2D, 0, 0, 0, size, size, GlConst.GL_RED, GlConst.GL_UNSIGNED_BYTE, MemoryUtil.memAddress0(this.fontAtlasBuffer));
     }
 
+    private ByteBuffer getFileBuffer() {
+        if (this.fileBuffer == null) {
+            if (this.fileBufferRef.get() == null) {
+                ByteBuffer buffer = readFont(this.fontFace);
+                this.fileBufferRef = new WeakReference<>(buffer);
+                return this.fileBuffer = buffer;
+            } else {
+                return this.fileBuffer = this.fileBufferRef.get();
+            }
+        } else {
+            return this.fileBuffer;
+        }
+    }
+
     // currently unused, but useful in the future hopefully
     private void regenerateAtlas() {
-        if (this.fileBuffer == null) {
-            this.fileBuffer = readFont(this.fontFace);
-        }
+        ByteBuffer fileBuffer = this.getFileBuffer();
 
         // Allocate buffers
         int chars = charMap.size();
@@ -100,7 +115,7 @@ public class Font {
         // create and initialise packing context
 
         // pack and upload
-        STBTruetype.stbtt_PackFontRanges(packContext, this.fileBuffer, 0, packRange);
+        STBTruetype.stbtt_PackFontRanges(packContext, fileBuffer, 0, packRange);
 
         this.upload();
 
@@ -136,9 +151,7 @@ public class Font {
 
     private CharData getCharData(int codepoint) {
         return charMap.computeIfAbsent(codepoint, c -> {
-            if (this.fileBuffer == null) {
-                this.fileBuffer = readFont(this.fontFace);
-            }
+            ByteBuffer fileBuffer = this.getFileBuffer();
 
             // allocate buffers
             STBTTPackRange.Buffer packRange = STBTTPackRange.create(1);
@@ -152,7 +165,7 @@ public class Font {
             packRange.flip();
 
             // pack and upload
-            STBTruetype.stbtt_PackFontRanges(packContext, this.fileBuffer, 0, packRange);
+            STBTruetype.stbtt_PackFontRanges(packContext, fileBuffer, 0, packRange);
 
             // update char data
             STBTTPackedchar packedChar = packedCharBuffer.get(0);
