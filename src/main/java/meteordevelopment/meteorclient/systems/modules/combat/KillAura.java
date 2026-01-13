@@ -93,9 +93,13 @@ public class KillAura extends Module {
 
     private final Setting<ShieldMode> shieldMode = sgGeneral.add(new EnumSetting.Builder<ShieldMode>()
         .name("shield-mode")
-        .description("Will try and use an axe to break target shields.")
-        .defaultValue(ShieldMode.Break)
-        .visible(autoSwitch::get)
+        .description("""
+            What to do when your target is blocking with a shield:
+            - Ignore:   Don't attack them if they are blocking
+            - Break:    Swap to an axe to disable the shield (Only if Auto Switch is enabled)
+            - None:     Attack them as normal
+        """)
+        .defaultValue(ShieldMode.None)
         .build()
     );
 
