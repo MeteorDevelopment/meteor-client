@@ -30,7 +30,6 @@ import java.util.Set;
 public class NoInteract extends Module {
     private final SettingGroup sgBlocks = settings.createGroup("Blocks");
     private final SettingGroup sgEntities = settings.createGroup("Entities");
-
     // Blocks
 
     private final Setting<List<Block>> blockMine = sgBlocks.add(new BlockListSetting.Builder()
