@@ -27,9 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.lwjgl.BufferUtils;
 
-import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -85,11 +83,13 @@ public class HudRenderer {
                 FontHolder fontHolder = it.next();
 
                 if (fontHolder.visited) {
+                    Texture fontAtlas = fontHolder.font.getTexture();
+
                     MeshRenderer.begin()
                         .attachments(mc.getFramebuffer())
                         .pipeline(MeteorRenderPipelines.UI_TEXT)
                         .mesh(fontHolder.getMesh())
-                        .sampler("u_Texture", fontHolder.font.texture.getGlTextureView(), fontHolder.font.texture.getSampler())
+                        .sampler("u_Texture", fontAtlas.getGlTextureView(), fontAtlas.getSampler())
                         .end();
                 }
                 else {
@@ -298,10 +298,7 @@ public class HudRenderer {
     }
 
     private static FontHolder loadFont(int height) {
-        byte[] data = Utils.readBytes(Fonts.RENDERER.fontFace.toStream());
-        ByteBuffer buffer = BufferUtils.createByteBuffer(data.length).put(data).flip();
-
-        return new FontHolder(new Font(buffer, height));
+        return new FontHolder(new Font(Fonts.RENDERER.fontFace, height));
     }
 
     private static class FontHolder {
@@ -321,7 +318,7 @@ public class HudRenderer {
         }
 
         public void destroy() {
-            font.texture.close();
+            font.close();
         }
     }
 }
