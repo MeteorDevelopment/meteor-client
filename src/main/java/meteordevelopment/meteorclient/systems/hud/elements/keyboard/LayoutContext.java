@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.hud.elements.keyboard;
 
 import meteordevelopment.meteorclient.systems.hud.elements.keyboard.KeyboardHud.Key;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import net.minecraft.client.option.KeyBinding;
 
 final class LayoutContext {
     final double keyUnit;
@@ -29,6 +30,17 @@ final class LayoutContext {
      */
     double ux(double units) {
         return units * step;
+    }
+
+    /**
+     * Converts rows to pixels in the Y direction (vertical).
+     * Does not include function row gap - use for simple layouts.
+     *
+     * @param rows number of key rows
+     * @return pixel position
+     */
+    double y(double rows) {
+        return rows * step;
     }
 
     /**
@@ -79,5 +91,34 @@ final class LayoutContext {
     Key keyNamed(Keybind kb, String name, double x, double y, KeyDimensions w) {
         return new Key(kb, name, x, y, px(w), px(KeyDimensions.STANDARD));
     }
-}
 
+    // Overloaded methods for KeyBinding support
+
+    /**
+     * Creates a standard 1u*1u key at the given position.
+     */
+    Key key(KeyBinding kb, double x, double y) {
+        return key(kb, x, y, KeyDimensions.STANDARD, KeyDimensions.STANDARD);
+    }
+
+    /**
+     * Creates a key with the given width and standard height.
+     */
+    Key key(KeyBinding kb, double x, double y, KeyDimensions w) {
+        return key(kb, x, y, w, KeyDimensions.STANDARD);
+    }
+
+    /**
+     * Creates a key with the given width and height.
+     */
+    Key key(KeyBinding kb, double x, double y, KeyDimensions w, KeyDimensions h) {
+        return new Key(kb, x, y, px(w), px(h));
+    }
+
+    /**
+     * Creates a named key with the given width and standard height.
+     */
+    Key key(KeyBinding kb, String name, double x, double y) {
+        return new Key(kb, name, x, y, px(KeyDimensions.STANDARD), px(KeyDimensions.STANDARD));
+    }
+}

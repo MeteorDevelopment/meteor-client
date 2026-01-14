@@ -287,42 +287,38 @@ public class KeyboardHud extends HudElement {
             return;
 
         keys.clear();
-        double w = 40;
-        double h = 40;
-        double s = spacing.get() * 2;
+        double u = 35;  // base key unit size
+        double g = spacing.get() * 2;  // gap between keys (spacing setting)
+        LayoutContext l = new LayoutContext(u, g, 15);
 
         switch (preset) {
             case Movement -> {
-                keys.add(new Key(mc.options.forwardKey, w + s, 0, w, h));
-                keys.add(new Key(mc.options.leftKey, 0, h + s, w, h));
-                keys.add(new Key(mc.options.backKey, w + s, h + s, w, h));
-                keys.add(new Key(mc.options.rightKey, (w + s) * 2, h + s, w, h));
-                keys.add(new Key(mc.options.sneakKey, 0, (h + s) * 2, w, h));
-                keys.add(new Key(mc.options.jumpKey, w + s, (h + s) * 2, (w * 2) + s, h));
+                keys.add(l.key(mc.options.forwardKey, l.ux(1), 0));
+                keys.add(l.key(mc.options.leftKey, 0, l.y(1)));
+                keys.add(l.key(mc.options.backKey, l.ux(1), l.y(1)));
+                keys.add(l.key(mc.options.rightKey, l.ux(2), l.y(1)));
+                keys.add(l.key(mc.options.sneakKey, 0, l.y(2)));
+                keys.add(l.key(mc.options.jumpKey, l.ux(1), l.y(2), KeyDimensions.UNIT_2U));
             }
             case Clicks -> {
-                keys.add(new Key(mc.options.attackKey, "LMB", 0, 0, w, h).setShowCps(showCps.get()));
-                keys.add(new Key(mc.options.useKey, "RMB", w + s, 0, w, h).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.attackKey, "LMB", 0, 0).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.useKey, "RMB", l.ux(1), 0).setShowCps(showCps.get()));
             }
             case Actions -> {
-                keys.add(new Key(mc.options.dropKey, 0, 0, w, h));
-                keys.add(new Key(mc.options.swapHandsKey, w + s, 0, w, h));
-                keys.add(new Key(mc.options.inventoryKey, (w + s) * 2, 0, w, h));
+                keys.add(l.key(mc.options.dropKey, 0, 0));
+                keys.add(l.key(mc.options.swapHandsKey, l.ux(1), 0));
+                keys.add(l.key(mc.options.inventoryKey, l.ux(2), 0));
             }
             case Hotbar -> {
                 for (int i = 0; i < 9; i++) {
-                    keys.add(new Key(mc.options.hotbarKeys[i], i * (w + s), 0, w, h));
+                    keys.add(l.key(mc.options.hotbarKeys[i], l.ux(i), 0));
                 }
             }
             case Keyboard -> {
-                double u = 35;  // base key unit size
-                double g = s;   // gap between keys (spacing setting)
-                LayoutContext lCtx = new LayoutContext(u, g, 15);
-
                 if (keyboardLayout.get() == KeyboardLayout.ANSI) {
-                    buildAnsiLayout(lCtx);
+                    buildAnsiLayout(l);
                 } else {
-                    buildIsoLayout(lCtx);
+                    buildIsoLayout(l);
                 }
             }
             case Custom -> keys.addAll(customKeys.get());
