@@ -186,10 +186,11 @@ public class Font {
     public double getWidth(String string, int length) {
         double width = 0;
 
-        for (int i = 0; i < length; i++) {
-            int cp = string.charAt(i);
+        for (int i = 0; i < length;) {
+            int cp = string.codePointAt(i);
             CharData c = this.getCharData(cp);
             width += c.xAdvance();
+            i += Character.charCount(cp);
         }
 
         return width;
@@ -205,8 +206,8 @@ public class Font {
         int length = string.length();
         mesh.ensureCapacity(length * 4, length * 6);
 
-        for (int i = 0; i < length; i++) {
-            int cp = string.charAt(i);
+        for (int i = 0; i < length;) {
+            int cp = string.codePointAt(i);
             CharData c = this.getCharData(cp);
             mesh.quad(
                 mesh.vec2(x + c.x0() * scale, y + c.y0() * scale).vec2(c.u0(), c.v0()).color(color).next(),
@@ -216,6 +217,7 @@ public class Font {
             );
 
             x += c.xAdvance() * scale;
+            i += Character.charCount(cp);
         }
 
         return x;
