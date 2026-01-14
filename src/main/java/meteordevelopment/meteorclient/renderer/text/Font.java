@@ -93,6 +93,11 @@ public class Font {
         }
     }
 
+    private static ByteBuffer readFont(FontFace fontFace) {
+        byte[] data = Utils.readBytes(fontFace.toStream());
+        return BufferUtils.createByteBuffer(data.length).put(data).flip();
+    }
+
     // currently unused, but useful in the future hopefully
     private void regenerateAtlas() {
         ByteBuffer fileBuffer = this.getFileBuffer();
@@ -144,11 +149,6 @@ public class Font {
         this.fileBuffer = null;
     }
 
-    private static ByteBuffer readFont(FontFace fontFace) {
-        byte[] data = Utils.readBytes(fontFace.toStream());
-        return BufferUtils.createByteBuffer(data.length).put(data).flip();
-    }
-
     private CharData getCharData(int codepoint) {
         return charMap.computeIfAbsent(codepoint, c -> {
             ByteBuffer fileBuffer = this.getFileBuffer();
@@ -157,11 +157,7 @@ public class Font {
             STBTTPackRange.Buffer packRange = STBTTPackRange.create(1);
             STBTTPackedchar.Buffer packedCharBuffer = STBTTPackedchar.create(1);
 
-            IntBuffer charBuffer = BufferUtils.createIntBuffer(1);
-            charBuffer.put(codepoint);
-            charBuffer.flip();
-
-            packRange.put(STBTTPackRange.create().set(height, 0, charBuffer, 1, packedCharBuffer, (byte) 0, (byte) 0));
+            packRange.put(STBTTPackRange.create().set(height, codepoint, null, 1, packedCharBuffer, (byte) 0, (byte) 0));
             packRange.flip();
 
             // pack and upload
