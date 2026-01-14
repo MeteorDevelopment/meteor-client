@@ -1054,7 +1054,14 @@ public class KeyboardHud extends HudElement {
 
         WButton add = table.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
-            setting.get().add(new Key());
+            Key newKey = new Key();
+            // Position new key to the right of existing keys to avoid overlap
+            if (!setting.get().isEmpty()) {
+                Key lastKey = setting.get().get(setting.get().size() - 1);
+                newKey.x = lastKey.x + lastKey.width + 10;
+                newKey.y = lastKey.y;
+            }
+            setting.get().add(newKey);
             setting.onChanged();
 
             fillTable(theme, table, setting);
