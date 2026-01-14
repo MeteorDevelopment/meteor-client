@@ -671,7 +671,10 @@ public class KeyboardHud extends HudElement {
         private float delta;
 
         public Key() {
-            this(Keybind.fromKey(GLFW.GLFW_KEY_SPACE), 0, 0, 60, 40);
+            this.keybind = Keybind.fromKey(GLFW.GLFW_KEY_SPACE);
+            this.code = -1;
+            this.width = 60;
+            this.height = 40;
         }
 
         public Key(NbtCompound compound) {
@@ -684,11 +687,7 @@ public class KeyboardHud extends HudElement {
             this.showCps = compound.getBoolean("showCps", false);
         }
 
-        public Key(KeyBinding binding, double x, double y, double width, double height) {
-            this(binding, null, x, y, width, height);
-        }
-
-        public Key(KeyBinding binding, String name, double x, double y, double width, double height) {
+        Key(KeyBinding binding, String name, double x, double y, double width, double height) {
             this.binding = binding;
             this.name = name;
             this.code = -1;
@@ -698,17 +697,10 @@ public class KeyboardHud extends HudElement {
             this.height = height;
         }
 
-        public Key(Keybind keybind, double x, double y, double width, double height) {
-            this.keybind = keybind;
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-
-        public Key(Keybind keybind, String name, double x, double y, double width, double height) {
+        Key(Keybind keybind, String name, double x, double y, double width, double height) {
             this.keybind = keybind;
             this.name = name;
+            this.code = -1;
             this.x = x;
             this.y = y;
             this.width = width;
@@ -786,7 +778,7 @@ public class KeyboardHud extends HudElement {
         private final double topBarStartX;
 
         public IsoEnterKey(Keybind keybind, double x, double y, double width, double height, double topBarStartX) {
-            super(keybind, x, y, width, height);
+            super(keybind, null, x, y, width, height);
             this.topBarStartX = topBarStartX;
         }
 

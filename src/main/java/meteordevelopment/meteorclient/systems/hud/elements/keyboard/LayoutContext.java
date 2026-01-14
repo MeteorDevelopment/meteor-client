@@ -64,55 +64,47 @@ final class LayoutContext {
         return d.toPixels(keyUnit, keyGap);
     }
 
+    // Core key creation methods - Keybind versions
+
     /**
      * Creates a standard 1u*1u key at the given position.
      */
     Key key(Keybind kb, double x, double y) {
-        return key(kb, x, y, KeyDimensions.STANDARD, KeyDimensions.STANDARD);
+        return new Key(kb, null, x, y, px(KeyDimensions.STANDARD), px(KeyDimensions.STANDARD));
     }
 
     /**
      * Creates a key with the given width and standard height.
      */
     Key key(Keybind kb, double x, double y, KeyDimensions w) {
-        return key(kb, x, y, w, KeyDimensions.STANDARD);
+        return new Key(kb, null, x, y, px(w), px(KeyDimensions.STANDARD));
     }
 
     /**
      * Creates a key with the given width and height.
      */
     Key key(Keybind kb, double x, double y, KeyDimensions w, KeyDimensions h) {
-        return new Key(kb, x, y, px(w), px(h));
+        return new Key(kb, null, x, y, px(w), px(h));
     }
 
-    /**
-     * Creates a named key with the given width and standard height.
-     */
     Key keyNamed(Keybind kb, String name, double x, double y, KeyDimensions w) {
         return new Key(kb, name, x, y, px(w), px(KeyDimensions.STANDARD));
     }
 
-    // Overloaded methods for KeyBinding support
+    // Core key creation methods - KeyBinding versions
 
     /**
      * Creates a standard 1u*1u key at the given position.
      */
     Key key(KeyBinding kb, double x, double y) {
-        return key(kb, x, y, KeyDimensions.STANDARD, KeyDimensions.STANDARD);
+        return new Key(kb, null, x, y, px(KeyDimensions.STANDARD), px(KeyDimensions.STANDARD));
     }
 
     /**
      * Creates a key with the given width and standard height.
      */
     Key key(KeyBinding kb, double x, double y, KeyDimensions w) {
-        return key(kb, x, y, w, KeyDimensions.STANDARD);
-    }
-
-    /**
-     * Creates a key with the given width and height.
-     */
-    Key key(KeyBinding kb, double x, double y, KeyDimensions w, KeyDimensions h) {
-        return new Key(kb, x, y, px(w), px(h));
+        return new Key(kb, null, x, y, px(w), px(KeyDimensions.STANDARD));
     }
 
     /**
