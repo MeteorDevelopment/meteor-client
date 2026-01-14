@@ -1049,7 +1049,7 @@ public class KeyboardHud extends HudElement {
             Key newKey = new Key();
             // Position new key to the right of existing keys to avoid overlap
             if (!setting.get().isEmpty()) {
-                Key lastKey = setting.get().get(setting.get().size() - 1);
+                Key lastKey = setting.get().getLast();
                 newKey.x = lastKey.x + lastKey.width + 10;
                 newKey.y = lastKey.y;
             }
