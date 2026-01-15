@@ -5,8 +5,7 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
-import com.mojang.blaze3d.opengl.GlConst;
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
 import it.unimi.dsi.fastutil.ints.*;
@@ -14,7 +13,7 @@ import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.texture.GlTexture;
+import net.minecraft.client.texture.NativeImage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
@@ -35,7 +34,7 @@ public class Font {
     private final float ascent;
     private final Int2ObjectOpenHashMap<CharData> charMap = new Int2ObjectOpenHashMap<>();
     private final STBTTPackContext packContext;
-    private final ByteBuffer fontAtlasBuffer;
+    private final NativeImage fontAtlas;
     private @Nullable ByteBuffer fileBuffer;
     private WeakReference<ByteBuffer> fileBufferRef;
 
@@ -53,10 +52,10 @@ public class Font {
         scale = STBTruetype.stbtt_ScaleForPixelHeight(fontInfo, height);
 
         // initialize font info & zero out texture
-        fontAtlasBuffer = BufferUtils.createByteBuffer(size * size);
+        fontAtlas = new NativeImage(NativeImage.Format.LUMINANCE, size, size, false);
 
         packContext = STBTTPackContext.create();
-        STBTruetype.stbtt_PackBegin(packContext, fontAtlasBuffer, size, size, 0 ,1);
+        STBTruetype.nstbtt_PackBegin(packContext.address(), fontAtlas.imageId(), size, size, 0, 1, MemoryUtil.NULL);
 
         // Get font vertical ascent
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -71,12 +70,7 @@ public class Font {
     }
 
     private void upload() {
-        GlStateManager._bindTexture(((GlTexture) this.texture.getGlTexture()).getGlId());
-        GlStateManager._pixelStore(GlConst.GL_UNPACK_ROW_LENGTH, size);
-        GlStateManager._pixelStore(GlConst.GL_UNPACK_SKIP_PIXELS, 0);
-        GlStateManager._pixelStore(GlConst.GL_UNPACK_SKIP_ROWS, 0);
-        GlStateManager._pixelStore(GlConst.GL_UNPACK_ALIGNMENT, 1);
-        GlStateManager._texSubImage2D(GlConst.GL_TEXTURE_2D, 0, 0, 0, size, size, GlConst.GL_RED, GlConst.GL_UNSIGNED_BYTE, MemoryUtil.memAddress0(this.fontAtlasBuffer));
+        RenderSystem.getDevice().createCommandEncoder().writeToTexture(this.texture.getGlTexture(), this.fontAtlas);
     }
 
     private ByteBuffer getFileBuffer() {
@@ -235,6 +229,7 @@ public class Font {
 
     public void close() {
         this.texture.close();
+        this.fontAtlas.close();
         STBTruetype.stbtt_PackEnd(this.packContext);
     }
 
