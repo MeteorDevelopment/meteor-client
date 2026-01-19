@@ -20,6 +20,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -30,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = DefaultFluidRenderer.class, remap = false)
 public abstract class SodiumDefaultFluidRendererMixin {
+    @Final
     @Shadow
     private int[] quadColors;
 
@@ -40,7 +42,7 @@ public abstract class SodiumDefaultFluidRendererMixin {
     private void onRender(LevelSlice level, net.minecraft.block.BlockState blockState, FluidState fluidState, BlockPos blockPos, BlockPos offset, TranslucentGeometryCollector collector, ChunkModelBuilder meshBuilder, Material material, ColorProvider<FluidState> colorProvider, Sprite[] sprites, CallbackInfo ci) {
         xrayAlpha = Xray.getAlpha(fluidState.getBlockState(), blockPos);
 
-        // Cancel block rendering when alpha is 0, required for Iris support but unnecessery to check for shaders, we already force be disabled when Xray is enabled
+        // Cancel block rendering when alpha is 0, required for Iris support but unnecessary to check for shaders, we already force be disabled when Xray is enabled
         if (xrayAlpha == 0) {
             ci.cancel();
         }

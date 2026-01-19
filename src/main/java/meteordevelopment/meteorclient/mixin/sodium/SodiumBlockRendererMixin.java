@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.mixin.sodium;
 
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
-import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderer;
 import net.caffeinemc.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
 import net.caffeinemc.mods.sodium.client.render.chunk.terrain.material.Material;
@@ -30,7 +29,7 @@ public class SodiumBlockRendererMixin {
     private void onRenderModel(BlockStateModel model, BlockState state, BlockPos pos, BlockPos origin, CallbackInfo info) {
         xrayAlpha = Xray.getAlpha(state, pos);
 
-        // Cancel block rendering when alpha is 0, required for Iris support but unnecessery to check for shaders, we already force be disabled when Xray is enabled
+        // Cancel block rendering when alpha is 0, required for Iris support but unnecessary to check for shaders, we already force be disabled when Xray is enabled
         if (xrayAlpha == 0) {
             info.cancel();
         }
@@ -41,11 +40,7 @@ public class SodiumBlockRendererMixin {
         if (xrayAlpha != -1) {
             for (int i = 0; i < 4; i++) {
                 int color = quad.baseColor(i);
-                int r = ColorABGR.unpackRed(color);
-                int g = ColorABGR.unpackGreen(color);
-                int b = ColorABGR.unpackBlue(color);
-
-                quad.setColor(i, ColorABGR.pack(r, g, b, xrayAlpha));
+                quad.setColor(i, ((xrayAlpha & 0xFF) << 24) | (color & 0x00FFFFFF));
             }
         }
     }
