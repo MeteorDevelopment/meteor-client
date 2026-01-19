@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
+import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
@@ -497,8 +498,12 @@ public class HighwayBuilder extends Module {
 
         if (blocksPerTick.get() > 1 && rotation.get().mine) warning("With rotations enabled, you can break at most 1 block per tick.");
         if (placementsPerTick.get() > 1 && rotation.get().place) warning("With rotations enabled, you can place at most 1 block per tick.");
-
+        //all modules that may cause error now print errors
         if (Modules.get().get(InstantRebreak.class).isActive()) warning("It's recommended to disable the Instant Rebreak module and instead use the 'instantly-rebreak-echests' setting to avoid errors.");
+        if (Modules.get().get(SpeedMine.class).isActive()) warning("It's recommended to disable the Speedmine module and instead use the 'fast-break' setting to avoid errors.");
+        if (Modules.get().get(Speed.class).isActive() && dir.diagonal) warning("It's recommended to disable the Speed module to avoid missalignment on diagonals.");
+        if (Modules.get().get(Timer.class).isActive() && dir.diagonal) warning("It's recommended to disable the Timer module to avoid missalignment on diagonals.");
+        if (Modules.get().get(NoGhostBlocks.class).isActive()) warning("It's recommended to disable the NoGhostBlocks module to avoid errors.");
     }
 
     @Override
