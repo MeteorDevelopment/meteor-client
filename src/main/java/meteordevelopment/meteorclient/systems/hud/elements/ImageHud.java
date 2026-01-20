@@ -165,8 +165,7 @@ public class ImageHud extends HudElement {
                     tex.getHeight()
                 );
             }
-
-            mc.getTextureManager().registerTexture(imageId, (AbstractTexture) tex);
+            if (image.imageId().equals(imageId)) mc.getTextureManager().registerTexture(imageId, (AbstractTexture) tex);
             calculateSize();
         } catch (IOException e) {
             LOG.error("Failed to load texture", e);
@@ -184,9 +183,13 @@ public class ImageHud extends HudElement {
     }
 
     private void destroyTexture() {
+        //if (image != DEFAULT_IMAGE) mc.getTextureManager().destroyTexture(image.imageId());
+        // FIXME The commented line can destroy all the textures in case there's more than one ImageHud instance with the same image identifier
         image = DEFAULT_IMAGE;
         calculateSize();
     }
+
+
 }
 
 
