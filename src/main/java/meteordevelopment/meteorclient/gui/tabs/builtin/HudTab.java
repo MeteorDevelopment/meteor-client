@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
+import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
@@ -37,6 +38,7 @@ public class HudTab extends Tab {
     }
 
     public static class HudScreen extends WindowTabScreen {
+        private WContainer settingsContainer;
         private final Hud hud;
 
         public HudScreen(GuiTheme theme, Tab tab) {
@@ -48,7 +50,8 @@ public class HudTab extends Tab {
 
         @Override
         public void initWidgets() {
-            add(theme.settings(hud.settings)).expandX();
+            settingsContainer = add(theme.verticalList()).expandX().widget();
+            settingsContainer.add(theme.settings(hud.settings)).expandX().widget();
 
             add(theme.horizontalSeparator()).expandX();
 
@@ -75,6 +78,11 @@ public class HudTab extends Tab {
         @Override
         protected void onRenderBefore(DrawContext drawContext, float delta) {
             HudEditorScreen.renderElements(drawContext);
+        }
+
+        @Override
+        public void tick() {
+            hud.settings.tick(settingsContainer, theme);
         }
 
         @Override

@@ -22,6 +22,8 @@ import java.util.List;
 
 public class Settings implements ISerializable<Settings>, Iterable<SettingGroup> {
     private SettingGroup defaultGroup;
+    private boolean invalidated;
+
     public final List<SettingGroup> groups = new ArrayList<>(1);
 
     public void onActivated() {
@@ -61,6 +63,8 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
                 setting.reset();
             }
         }
+
+        invalidated = true;
     }
 
     public SettingGroup getGroup(String name) {
@@ -125,12 +129,17 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
                 boolean visible = setting.isVisible();
 
                 if (visible != setting.lastWasVisible) {
-                    settings.clear();
-                    settings.add(theme.settings(this)).expandX();
+                    invalidated = true;
                 }
 
                 setting.lastWasVisible = visible;
             }
+        }
+
+        if (invalidated) {
+            settings.clear();
+            settings.add(theme.settings(this)).expandX();
+            invalidated = false;
         }
     }
 
