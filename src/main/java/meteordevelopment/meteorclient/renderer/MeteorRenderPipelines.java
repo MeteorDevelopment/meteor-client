@@ -123,6 +123,20 @@ public abstract class MeteorRenderPipelines {
         .build()
     );
 
+    public static final RenderPipeline UI_TEXTURE_ANIM = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
+        .withLocation(MeteorClient.identifier("pipeline/ui_textured_3d"))
+        .withVertexFormat(MeteorVertexFormats.POS2_TEXTURE_COLOR, VertexFormat.DrawMode.TRIANGLES)
+        .withVertexShader(MeteorClient.identifier("shaders/pos_tex_color.vert"))
+        .withFragmentShader(MeteorClient.identifier("shaders/pos_tex_color_3d.frag"))
+        .withUniform("AnimationData",UniformType.UNIFORM_BUFFER)
+        .withSampler("u_Texture")
+        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+        .withDepthWrite(false)
+        .withBlend(BlendFunction.TRANSLUCENT)
+        .withCull(true)
+        .build()
+    );
+
     public static final RenderPipeline UI_TEXT = add(new ExtendedRenderPipelineBuilder(MESH_UNIFORMS)
         .withLocation(MeteorClient.identifier("pipeline/ui_text"))
         .withVertexFormat(MeteorVertexFormats.POS2_TEXTURE_COLOR, VertexFormat.DrawMode.TRIANGLES)

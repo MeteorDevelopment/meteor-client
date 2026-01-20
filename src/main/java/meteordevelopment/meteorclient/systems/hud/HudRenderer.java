@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.hud;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.mojang.blaze3d.buffers.GpuBuffer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -133,6 +134,12 @@ public class HudRenderer {
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
         Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTextureView(), mc.getTextureManager().getTexture(id).getSampler());
+    }
+
+    public void animatedTexture(Identifier id, double x, double y, double width, double height, Color color, GpuBuffer animationBuffer) {
+        Renderer2D.TEXTURE.begin();
+        Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
+        Renderer2D.TEXTURE.renderAnim(mc.getTextureManager().getTexture(id).getGlTextureView(), mc.getTextureManager().getTexture(id).getSampler(), animationBuffer);
     }
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {

@@ -1,6 +1,7 @@
 accessWidener	v2	named
 
 accessible   class   net/minecraft/client/texture/PlayerSkinProvider$FileCache
+accessible   method  net/minecraft/client/texture/GlTexture <init> (ILjava/lang/String;Lcom/mojang/blaze3d/textures/TextureFormat;IIIII)V
 accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explosion
 accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
 accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler

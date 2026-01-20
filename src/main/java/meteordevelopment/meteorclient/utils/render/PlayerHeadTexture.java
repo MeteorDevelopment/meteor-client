@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.renderer.Texture;
+import meteordevelopment.meteorclient.renderer.texture.Texture;
 import meteordevelopment.meteorclient.utils.network.Http;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;

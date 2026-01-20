@@ -19,7 +19,7 @@ import meteordevelopment.meteorclient.gui.widgets.*;
 import meteordevelopment.meteorclient.gui.widgets.containers.*;
 import meteordevelopment.meteorclient.gui.widgets.input.*;
 import meteordevelopment.meteorclient.gui.widgets.pressable.*;
-import meteordevelopment.meteorclient.renderer.Texture;
+import meteordevelopment.meteorclient.renderer.texture.Texture;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.accounts.Account;

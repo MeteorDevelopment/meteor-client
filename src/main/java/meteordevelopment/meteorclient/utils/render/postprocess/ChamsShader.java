@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
-import meteordevelopment.meteorclient.renderer.Texture;
+import meteordevelopment.meteorclient.renderer.texture.Texture;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.utils.PostInit;

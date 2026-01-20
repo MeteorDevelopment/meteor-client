@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.gui.widgets;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import meteordevelopment.meteorclient.renderer.Texture;
+import meteordevelopment.meteorclient.renderer.texture.Texture;
 
 public class WTexture extends WWidget {
     private final double width, height;

@@ -9,7 +9,7 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.renderer.MeshBuilder;
-import meteordevelopment.meteorclient.renderer.Texture;
+import meteordevelopment.meteorclient.renderer.texture.Texture;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.*;
