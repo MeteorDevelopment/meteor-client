@@ -82,6 +82,8 @@ public class HudTab extends Tab {
 
         @Override
         public void tick() {
+            super.tick();
+
             hud.settings.tick(settingsContainer, theme);
         }
 
