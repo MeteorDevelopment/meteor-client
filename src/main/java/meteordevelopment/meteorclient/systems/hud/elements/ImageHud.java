@@ -188,8 +188,6 @@ public class ImageHud extends HudElement {
         image = DEFAULT_IMAGE;
         calculateSize();
     }
-
-
 }
 
 
