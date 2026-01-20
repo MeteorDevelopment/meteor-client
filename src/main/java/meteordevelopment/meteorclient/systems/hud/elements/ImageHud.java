@@ -171,22 +171,6 @@ public class ImageHud extends HudElement {
         } catch (IOException e) {
             LOG.error("Failed to load texture", e);
         }
-        /*
-        AnimatedTexture gifTex = AnimatedTexture.readResource(parsed, false, FilterMode.LINEAR);
-        if (gifTex == null) return;
-        width = gifTex.getWidth();
-        height = gifTex.getHeight();
-        delays = gifTex.getDelays();
-        totalDurationMs = calculateTotalDurationMs(delays);
-        imageId = Identifier.of(MOD_ID, "animated_texture_" + name);
-        mc.getTextureManager().registerTexture(imageId, gifTex);
-        isAnimated = true;
-        animBuffer = RenderSystem.getDevice().createBuffer(() -> "anim_buffer_" + name,
-            GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE | GpuBuffer.USAGE_COPY_DST,
-            BufferUtils.createByteBuffer(4));
-        mappedView = RenderSystem.getDevice().createCommandEncoder().mapBuffer(animBuffer,false,true);
-        calculateSize();
-         */
     }
 
     private void markDirty() {
@@ -200,19 +184,9 @@ public class ImageHud extends HudElement {
     }
 
     private void destroyTexture() {
-        //if (image != DEFAULT_IMAGE) mc.getTextureManager().destroyTexture(image.imageId());
         image = DEFAULT_IMAGE;
         calculateSize();
     }
-
-
 }
-    // https://static.wixstatic.com/media/e6f56d_a2b47380e8504300bfb2844e4a8a5159~mv2.gif
-    // https://i.redd.it/c2312ilfgmcg1.gif
-    // https://i.redd.it/ykq6fxoefwcg1.gif
-    // https://meteorclient.com/icon.png
-    // https://i.redd.it/2oi7cqxfgmcg1.gif
-    // https://i.redd.it/c2312ilfgmcg1.gif
-    // https://i.redd.it/g48boe7ggmcg1.gif
 
 
