@@ -13,6 +13,5 @@ in vec4 v_Color;
 
 void main() {
     int layer = int(u_Anim);
-    //vec4 tex = texture(u_Texture, vec3(v_TexCoord, layer));
     color = texture(u_Texture, vec3(v_TexCoord, layer)) * v_Color;
 }
