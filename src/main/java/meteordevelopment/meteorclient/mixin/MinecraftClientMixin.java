@@ -12,6 +12,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.entity.player.DoAttackEvent;
 import meteordevelopment.meteorclient.events.entity.player.DoItemUseEvent;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -116,9 +117,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         Profilers.get().pop();
     }
 
-    @Inject(method = "doAttack", at = @At("HEAD"))
+    @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void onAttack(CallbackInfoReturnable<Boolean> cir) {
         CPSUtils.onAttack();
+        if (MeteorClient.EVENT_BUS.post(DoAttackEvent.get()).isCancelled()) cir.cancel();
     }
 
     @Inject(method = "doItemUse", at = @At("HEAD"))

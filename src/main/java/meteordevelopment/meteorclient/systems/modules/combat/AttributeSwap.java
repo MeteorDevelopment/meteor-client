@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
+import meteordevelopment.meteorclient.events.entity.player.DoAttackEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -27,6 +28,7 @@ import net.minecraft.item.MaceItem;
 import net.minecraft.item.TridentItem;
 import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.util.hit.HitResult;
 
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -47,8 +49,15 @@ public class AttributeSwap extends Module {
         .name("target-slot")
         .description("Hotbar slot to swap to (1-9).")
         .defaultValue(1)
-        .min(1)
-        .sliderRange(1, 9)
+        .range(1, 9)
+        .visible(() -> mode.get() == Mode.Simple)
+        .build()
+    );
+
+    private final Setting<Boolean> swapOnMiss = sgGeneral.add(new BoolSetting.Builder()
+        .name("swap-on-miss")
+        .description("Whether to swap on a missed attack. Useful for quickly lunging with spears.")
+        .defaultValue(false)
         .visible(() -> mode.get() == Mode.Simple)
         .build()
     );
@@ -276,21 +285,31 @@ public class AttributeSwap extends Module {
     }
 
     @EventHandler
-    private void onAttack(AttackEntityEvent event) {
-        if (!canSwapByWeapon()) return;
+    private void onAttack(DoAttackEvent event) {
+        if (!canSwapByWeapon() || mode.get() == Mode.Smart || !swapOnMiss.get()) return;
+        if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) return;
+
+        doSwap(targetSlot.get() - 1);
+    }
+
+    @EventHandler
+    private void onAttackEntity(AttackEntityEvent event) {
+        if (!canSwapByWeapon() || (mode.get() == Mode.Simple && swapOnMiss.get())) return;
         performSwap(event.entity);
     }
 
     private void performSwap(Entity target) {
         if (awaitingBack) return;
 
-        int slotIndex;
-
         if (mode.get() == Mode.Simple) {
-            slotIndex = targetSlot.get() - 1;
+            doSwap(targetSlot.get() - 1);
         } else {
-            slotIndex = getSmartSlot(target);
+            doSwap(getSmartSlot(target));
         }
+    }
+
+    private void doSwap(int slotIndex) {
+        if (awaitingBack) return;
 
         if (slotIndex < 0 || slotIndex > 8) return;
         if (slotIndex == mc.player.getInventory().getSelectedSlot()) return;

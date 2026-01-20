@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
+import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -92,9 +93,13 @@ public class KillAura extends Module {
 
     private final Setting<ShieldMode> shieldMode = sgGeneral.add(new EnumSetting.Builder<ShieldMode>()
         .name("shield-mode")
-        .description("Will try and use an axe to break target shields.")
-        .defaultValue(ShieldMode.Break)
-        .visible(autoSwitch::get)
+        .description("""
+            What to do when your target is blocking with a shield:
+            - Ignore:   Don't attack them if they are blocking
+            - Break:    Swap to an axe to disable the shield (Only if Auto Switch is enabled)
+            - None:     Attack them as normal
+        """)
+        .defaultValue(ShieldMode.None)
         .build()
     );
 
@@ -411,6 +416,7 @@ public class KillAura extends Module {
             if (player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
             if (shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
+            if (player instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) return false;
         }
         if (entity instanceof AnimalEntity animal) {
             return switch (mobAgeFilter.get()) {
