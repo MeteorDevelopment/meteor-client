@@ -211,6 +211,14 @@ public class Utils {
         return mc.getWindow().getFramebufferHeight();
     }
 
+    public static int getGuiWidth() {
+        return mc.getWindow().getScaledWidth();
+    }
+
+    public static int getGuiHeight() {
+        return mc.getWindow().getScaledHeight();
+    }
+
     public static void unscaledProjection() {
         float width = mc.getWindow().getFramebufferWidth();
         float height = mc.getWindow().getFramebufferHeight();
