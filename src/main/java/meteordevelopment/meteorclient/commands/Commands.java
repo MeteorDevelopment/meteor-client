@@ -36,6 +36,7 @@ public class Commands {
         add(new DamageCommand());
         add(new DropCommand());
         add(new EnchantCommand());
+        add(new EnchantOptimizeCommand());
         add(new FakePlayerCommand());
         add(new FriendsCommand());
         add(new CommandsCommand());
