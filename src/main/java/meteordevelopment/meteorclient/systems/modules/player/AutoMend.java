@@ -39,6 +39,13 @@ public class AutoMend extends Module {
         .build()
     );
 
+    private final Setting<Boolean> blacklistArmorWearableItems = sgGeneral.add(new BoolSetting.Builder()
+        .name("blacklist-armor")
+        .description("Don't mend armor (and elytra).")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> autoDisable = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-disable")
         .description("Automatically disables when there are no more items to repair.")
@@ -96,6 +103,18 @@ public class AutoMend extends Module {
         for (int i = 0; i < mc.player.getInventory().getMainStacks().size(); i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
             if (blacklist.get().contains(itemStack.getItem())) continue;
+            if (blacklistArmorWearableItems.get()) {
+                int[] armorSlots = {36, 37, 38, 39};
+                boolean isArmor = false;
+
+                for (int slot : armorSlots) {
+                    if (itemStack.getItem() == mc.player.getInventory().getStack(slot).getItem()) {
+                        isArmor = true;
+                        break;
+                    }
+                }
+                if (isArmor) continue;
+            }
 
             if (Utils.hasEnchantments(itemStack, Enchantments.MENDING) && itemStack.getDamage() > 0) {
                 return i;
