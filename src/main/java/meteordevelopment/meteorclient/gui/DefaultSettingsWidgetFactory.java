@@ -203,10 +203,10 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private <T extends Enum<?>> void enumW(WTable table, EnumSetting<T> setting) {
-        WDropdown<T> dropdown = table.add(theme.dropdown(setting.get())).expandCellX().widget();
-        dropdown.action = () -> setting.set(dropdown.get());
+        WDropdown<String> dropdown = table.add(theme.dropdown(setting.getSuggestions().toArray(new String[0]), setting.getDropdownValue())).expandCellX().widget();
+        dropdown.action = () -> setting.set(setting.fromDropdown(dropdown.get()));
 
-        reset(table, setting, () -> dropdown.set(setting.get()));
+        reset(table, setting, () -> dropdown.set(setting.getDropdownValue()));
     }
 
     private void providedStringW(WTable table, ProvidedStringSetting setting) {
