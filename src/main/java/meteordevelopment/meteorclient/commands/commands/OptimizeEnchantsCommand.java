@@ -27,10 +27,9 @@ import net.minecraft.util.Formatting;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnchantOptimizeCommand extends Command {
-
-    public EnchantOptimizeCommand() {
-        super("enchant-optimize", "Calculates the optimal order to apply enchantments for minimum XP cost.", "eopt");
+public class OptimizeEnchantsCommand extends Command {
+    public OptimizeEnchantsCommand() {
+        super("optimize-enchant", "Calculates the optimal order to apply enchantments for minimum XP cost.", "eopt");
     }
 
     @Override
