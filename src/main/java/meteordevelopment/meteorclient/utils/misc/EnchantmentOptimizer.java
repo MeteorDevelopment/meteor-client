@@ -16,6 +16,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @NullMarked
 public class EnchantmentOptimizer {
@@ -41,7 +42,7 @@ public class EnchantmentOptimizer {
              where bl = itemStack3.contains(DataComponentTypes.STORED_ENCHANTMENTS)
              Since we're optimizing book-based enchanting, we divide by 2 to match in-game behavior
             */
-            enchantmentWeights[id] = anvilCost / 2;
+            enchantmentWeights[id] = Math.max(1, anvilCost / 2);
 
             id++;
         }
@@ -54,19 +55,19 @@ public class EnchantmentOptimizer {
         memoCache.clear();
 
         // Create enchantment objects
-        List<ItemObject> enchantObjs = new ArrayList<>();
-        for (EnchantmentEntry e : enchants) {
-            int id = enchantmentIds.getOrDefault(e.enchantment(), -1);
-            if (id == -1) {
-                throw new IllegalArgumentException("Unknown enchantment: " + e.enchantment().getKey().orElseThrow().getValue());
-            }
-            int value = e.level() * enchantmentWeights[id];
-            IntList ids = new IntArrayList();
-            ids.add(id);
-            ItemObject obj = new ItemObject(ItemType.BOOK, value, ids);
-            obj.combination = new Combination(e.enchantment(), e.level());
-            enchantObjs.add(obj);
-        }
+        List<ItemObject> enchantObjs = enchants.stream()
+            .map(e -> {
+                int id = enchantmentIds.getOrDefault(e.enchantment(), -1);
+                if (id == -1) {
+                    throw new IllegalArgumentException("Unknown enchantment: " + e.enchantment().getKey().orElseThrow().getValue());
+                }
+                int value = e.level() * enchantmentWeights[id];
+                IntList ids = IntLists.singleton(id);
+                ItemObject obj = new ItemObject(ItemType.BOOK, value, ids);
+                obj.combination = new Combination(e.enchantment(), e.level());
+                return obj;
+            })
+            .collect(Collectors.toCollection(ArrayList::new));
 
         // Find most expensive enchant
         int mostExpensiveIdx = findMostExpensive(enchantObjs);
@@ -75,8 +76,7 @@ public class EnchantmentOptimizer {
         ItemObject baseItem;
         if (item == null) { // Book-only mode
             ItemObject expensive = enchantObjs.get(mostExpensiveIdx);
-            IntList ids = new IntArrayList();
-            ids.add(expensive.enchantIds.getInt(0));
+            IntList ids = IntLists.singleton(expensive.enchantIds.getInt(0));
             baseItem = new ItemObject(ItemType.ENCHANTED_BOOK, expensive.value, ids);
             baseItem.combination = expensive.combination;
             enchantObjs.remove(mostExpensiveIdx);
@@ -132,24 +132,14 @@ public class EnchantmentOptimizer {
 
     private Int2ObjectMap<ItemObject> cheapestItemsFromList(List<ItemObject> items) {
         ResultKey key = ResultKey.fromItems(items);
-        if (memoCache.containsKey(key)) {
-            return memoCache.get(key);
-        }
+        Int2ObjectMap<ItemObject> cached = memoCache.get(key);
+        if (cached != null) return cached;
 
         Int2ObjectMap<ItemObject> result = switch (items.size()) {
-            case 1 -> {
-                Int2ObjectMap<ItemObject> map = new Int2ObjectOpenHashMap<>();
-                map.put(items.getFirst().priorWork, items.getFirst());
-                yield map;
-            }
+            case 1 -> Int2ObjectMaps.singleton(items.getFirst().priorWork, items.getFirst());
             case 2 -> {
                 ItemObject cheapest = cheapestItemFromItems(items.getFirst(), items.get(1));
-                if (cheapest == null) {
-                    throw new IllegalStateException("Both merge attempts were too expensive");
-                }
-                Int2ObjectMap<ItemObject> map = new Int2ObjectOpenHashMap<>();
-                map.put(cheapest.priorWork, cheapest);
-                yield map;
+                yield Int2ObjectMaps.singleton(cheapest.priorWork, cheapest);
             }
             default -> cheapestItemsFromListN(items, items.size() / 2);
         };
@@ -158,7 +148,7 @@ public class EnchantmentOptimizer {
         return result;
     }
 
-    private @Nullable ItemObject cheapestItemFromItems(ItemObject left, ItemObject right) {
+    private ItemObject cheapestItemFromItems(ItemObject left, ItemObject right) {
         if (left.type == ItemType.ITEM) return new MergeEnchants(left, right);
         if (right.type == ItemType.ITEM) return new MergeEnchants(right, left);
 
@@ -177,15 +167,15 @@ public class EnchantmentOptimizer {
             // Ignore too expensive merges
         }
 
+        if (normal == null && reversed == null) {
+            throw new IllegalStateException("Both merge attempts were too expensive");
+        }
+
         if (normal == null) return reversed;
         if (reversed == null) return normal;
 
-        ItemObject result = compareCheapest(normal, reversed);
-        if (result == null) {
-            // This should never happen - both items are merges of the same two items, so same priorWork
-            throw new IllegalStateException("Merge comparison returned null unexpectedly");
-        }
-        return result;
+        // Both merges succeeded - they have same priorWork, so compareCheapest cannot return null
+        return compareCheapest(normal, reversed);
     }
 
     private Int2ObjectMap<ItemObject> cheapestItemsFromListN(List<ItemObject> items, int maxSubcount) {
@@ -193,37 +183,27 @@ public class EnchantmentOptimizer {
 
         for (int subcount = 1; subcount <= maxSubcount; subcount++) {
             for (List<ItemObject> leftItems : combinations(items, subcount)) {
-                List<ItemObject> rightItems = items.stream()
-                    .filter(item -> !leftItems.contains(item))
-                    .toList();
+                List<ItemObject> rightItems = new ArrayList<>(items);
+                rightItems.removeAll(leftItems);
 
                 Int2ObjectMap<ItemObject> leftWork2Item = cheapestItemsFromList(leftItems);
                 Int2ObjectMap<ItemObject> rightWork2Item = cheapestItemsFromList(rightItems);
                 Int2ObjectMap<ItemObject> newWork2Item = cheapestItemsFromDictionaries(leftWork2Item, rightWork2Item);
 
-                newWork2Item.int2ObjectEntrySet().forEach(entry -> {
-                    int work = entry.getIntKey();
-                    ItemObject newItem = entry.getValue();
-
-                    if (cheapestWork2Item.containsKey(work)) {
-                        ItemObject result = compareCheapest(cheapestWork2Item.get(work), newItem);
-                        if (result == null) {
-                            throw new IllegalStateException("Compared items have different priorWork values");
-                        }
-                        cheapestWork2Item.put(work, result);
-                    } else {
-                        cheapestWork2Item.put(work, newItem);
-                    }
-                });
+                for (Int2ObjectMap.Entry<ItemObject> entry : newWork2Item.int2ObjectEntrySet()) {
+                    cheapestWork2Item.merge(entry.getIntKey(), entry.getValue(), this::compareCheapest);
+                }
             }
         }
         return cheapestWork2Item;
     }
 
-    private @Nullable ItemObject compareCheapest(ItemObject item1, ItemObject item2) {
+    private ItemObject compareCheapest(ItemObject item1, ItemObject item2) {
         // This method assumes both items have the same priorWork (enforced by callers using work-indexed maps)
-        // If they somehow differ, we can't meaningfully compare them, so return null
-        if (item1.priorWork != item2.priorWork) return null;
+        // If they somehow differ, we can't meaningfully compare them
+        if (item1.priorWork != item2.priorWork) {
+            throw new IllegalStateException("Items must have same priorWork: " + item1.priorWork + " vs " + item2.priorWork);
+        }
 
         // Prefer lower value (fewer enchantment levels)
         if (item1.value != item2.value) return item1.value < item2.value ? item1 : item2;
@@ -241,20 +221,9 @@ public class EnchantmentOptimizer {
                 try {
                     Int2ObjectMap<ItemObject> newWork2Item = cheapestItemsFromList(List.of(leftItem, rightItem));
 
-                    newWork2Item.int2ObjectEntrySet().forEach(entry -> {
-                        int work = entry.getIntKey();
-                        ItemObject newItem = entry.getValue();
-
-                        if (cheapest.containsKey(work)) {
-                            ItemObject result = compareCheapest(cheapest.get(work), newItem);
-                            if (result == null) {
-                                throw new IllegalStateException("Compared items have different priorWork values");
-                            }
-                            cheapest.put(work, result);
-                        } else {
-                            cheapest.put(work, newItem);
-                        }
-                    });
+                    for (Int2ObjectMap.Entry<ItemObject> entry : newWork2Item.int2ObjectEntrySet()) {
+                        cheapest.merge(entry.getIntKey(), entry.getValue(), this::compareCheapest);
+                    }
                 } catch (MergeLevelsTooExpensiveException ignored) {
                     // Ignore too expensive merges
                 }
@@ -309,7 +278,7 @@ public class EnchantmentOptimizer {
             T head = set.get(i);
             List<List<T>> tailCombs = combinations(set.subList(i + 1, set.size()), k - 1);
             for (List<T> tail : tailCombs) {
-                List<T> combination = new ArrayList<>();
+                List<T> combination = new ArrayList<>(tail.size() + 1);
                 combination.add(head);
                 combination.addAll(tail);
                 combs.add(combination);
@@ -447,13 +416,17 @@ public class EnchantmentOptimizer {
             if (c != 0) return c;
             c = Integer.compare(priorWork, o.priorWork);
             if (c != 0) return c;
-            // Compare int lists element by element
-            int minSize = Math.min(sortedEnchants.size(), o.sortedEnchants.size());
-            for (int i = 0; i < minSize; i++) {
-                int cmp = Integer.compare(sortedEnchants.getInt(i), o.sortedEnchants.getInt(i));
-                if (cmp != 0) return cmp;
+
+            // Compare sizes first
+            c = Integer.compare(sortedEnchants.size(), o.sortedEnchants.size());
+            if (c != 0) return c;
+
+            // Then element by element
+            for (int i = 0; i < sortedEnchants.size(); i++) {
+                c = Integer.compare(sortedEnchants.getInt(i), o.sortedEnchants.getInt(i));
+                if (c != 0) return c;
             }
-            return Integer.compare(sortedEnchants.size(), o.sortedEnchants.size());
+            return 0;
         }
     }
 
