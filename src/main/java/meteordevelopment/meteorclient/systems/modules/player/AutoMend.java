@@ -56,7 +56,7 @@ public class AutoMend extends Module {
     public void onActivate() {
         didMove = false;
 
-        if (getSlot() == -1) {
+        if (autoDisable.get() && getSlot() == -1) {
             info("No mending items to repair found in inventory, disabling");
             toggle();
         }
