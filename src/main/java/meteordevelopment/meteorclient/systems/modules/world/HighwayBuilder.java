@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
+import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -503,6 +504,7 @@ public class HighwayBuilder extends Module {
         if (Modules.get().get(SpeedMine.class).isActive()) warning("It's recommended to disable the Speedmine module and instead use the 'fast-break' setting to avoid errors.");
         if (Modules.get().get(Speed.class).isActive() && dir.diagonal) warning("It's recommended to disable the Speed module to avoid misalignment on diagonals.");
         if (Modules.get().get(Timer.class).isActive() && dir.diagonal) warning("It's recommended to disable the Timer module to avoid misalignment on diagonals.");
+        if (!Modules.get().get(Velocity.class).isActive()) warning("It's recommended to enable the Velocity module to avoid misalignment.");
         //it could be tested to print different warnings depending on the amount of blocks being broken per tick but that would need much testing and wouldn't be reliable
         if (Modules.get().get(NoGhostBlocks.class).isActive()) warning("It's recommended to disable the NoGhostBlocks module to avoid packet kicks and wrong statistics.");
     }
