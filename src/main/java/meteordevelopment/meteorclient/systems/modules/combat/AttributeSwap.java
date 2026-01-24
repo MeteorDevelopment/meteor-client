@@ -115,17 +115,17 @@ public class AttributeSwap extends Module {
         .build()
     );
 
-    private final Setting<Boolean> otherSwapping = sgSwappingOptions.add(new BoolSetting.Builder()
-        .name("other-swapping")
-        .description("Enables smart swapping for other enchantments like Impaling.")
+    private final Setting<Boolean> spearSwapping = sgSwappingOptions.add(new BoolSetting.Builder()
+        .name("spear-swapping")
+        .description("Enables smart swapping for spear enchantments.")
         .defaultValue(true)
         .visible(() -> mode.get() == Mode.Smart)
         .build()
     );
 
-    private final Setting<Boolean> spearSwapping = sgSwappingOptions.add(new BoolSetting.Builder()
-        .name("spear-swapping")
-        .description("Enables smart swapping for spear enchantments.")
+    private final Setting<Boolean> otherSwapping = sgSwappingOptions.add(new BoolSetting.Builder()
+        .name("other-swapping")
+        .description("Enables smart swapping for other enchantments like Impaling.")
         .defaultValue(true)
         .visible(() -> mode.get() == Mode.Smart)
         .build()
@@ -321,12 +321,13 @@ public class AttributeSwap extends Module {
 
     @EventHandler
     private void onAttack(DoAttackEvent event) {
-        if (mode.get() == Mode.Smart && spearSwapping.get()) {
+        if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK || !canSwapByWeapon()) return;
 
+        if (mode.get() == Mode.Smart && spearSwapping.get()) {
             if (spearHitbox.get()) {
-                Entity target = getTargetEntity(7);
+                Entity target = getTargetEntity();
                 if (target != null) {
-                    if (mc.player.distanceTo(target) <= 3.5) return;
+                    if (mc.player.distanceTo(target) <= mc.player.getEntityInteractionRange() + 0.5) return;
                     int spearSlot = getSmartSpearSlot(false);
                     if (spearSlot != -1) {
                         doSwap(spearSlot);
@@ -334,6 +335,7 @@ public class AttributeSwap extends Module {
                     }
                 }
             }
+
             // lunge spear for travelling (or when enemy isn't in spear range)
             if (enchantLunge.get()) {
                 int lungeSlot = getSmartSpearSlot(true);
@@ -344,9 +346,7 @@ public class AttributeSwap extends Module {
             }
         }
 
-        if (!canSwapByWeapon() || mode.get() == Mode.Smart || !swapOnMiss.get()) return;
-        if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) return;
-
+        if (mode.get() == Mode.Smart || !swapOnMiss.get()) return;
         doSwap(targetSlot.get() - 1);
     }
 
@@ -452,10 +452,12 @@ public class AttributeSwap extends Module {
 
             return i;
         }
+
         return -1;
     }
 
-    private Entity getTargetEntity(double maxDistance) {
+    private Entity getTargetEntity() {
+        double maxDistance = 7;
         Vec3d start = mc.player.getCameraPosVec(1.0f);
         Vec3d look = mc.player.getRotationVec(1.0f);
         Vec3d end = start.add(look.multiply(maxDistance));
