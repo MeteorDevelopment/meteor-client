@@ -79,9 +79,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     public ClientPlayerInteractionManager interactionManager;
 
     @Shadow
-    private int itemUseCooldown;
-
-    @Shadow
     @Nullable
     public ClientPlayerEntity player;
 
@@ -175,15 +172,14 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private void onDoItemUseHand(CallbackInfo ci, @Local ItemStack itemStack) {
         FastUse fastUse = Modules.get().get(FastUse.class);
         if (fastUse.isActive()) {
-            itemUseCooldown = fastUse.getItemUseCooldown(itemStack);
+            ((MinecraftClientAccessor)(Object)this).meteor$setItemUseCooldown(fastUse.getItemUseCooldown(itemStack));
         }
         
-        // FastPlace support
+        // FastPlace support - 修复：简化逻辑，直接设置延迟
         FastPlace fastPlace = Modules.get().get(FastPlace.class);
         if (fastPlace.isActive() && itemStack.getItem() instanceof net.minecraft.item.BlockItem) {
-            if (fastPlace.shouldFastPlace(itemStack)) {
-                itemUseCooldown = fastPlace.getCooldown();
-            }
+            // 简化逻辑：对所有方块启用快放，设置最小延迟
+            ((MinecraftClientAccessor)(Object)this).meteor$setItemUseCooldown(1);
         }
     }
 

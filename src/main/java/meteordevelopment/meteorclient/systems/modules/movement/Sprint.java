@@ -1,77 +1,57 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
-import org.lwjgl.glfw.GLFW;
-
-import java.util.Random;
 
 public class Sprint extends Module {
     public static Sprint instance;
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> unsprintOnHit = sgGeneral.add(new BoolSetting.Builder()
-        .name("unsprint-on-hit")
-        .description("攻击时自动停冲（W-Tap）")
-        .defaultValue(true)
-        .build());
-
+    // 只需要这个设置：暂停多久。Grim 推荐 4-6，太短会被 Simulation 检测。
     private final Setting<Integer> hitUnSprintTicks = sgGeneral.add(new IntSetting.Builder()
-        .name("hit-unsprint-ticks")
-        .description("攻击后停冲持续的 tick 数")
-        .defaultValue(1).min(1).max(10).sliderMax(5).build());
+        .name("hit-unsprint-ticks").defaultValue(5).min(3).max(15).build());
 
-    // 新增设置：方向检查开关
-    private final Setting<Boolean> onlyForward = sgGeneral.add(new BoolSetting.Builder()
-        .name("only-forward")
-        .description("仅在按住前进键时触发 W-Tap（风筝敌人时不停冲）")
-        .defaultValue(true)
-        .build());
+    private final Setting<Boolean> stopOnHurt = sgGeneral.add(new BoolSetting.Builder()
+        .name("stop-on-hurt").defaultValue(true).build());
 
     public Sprint() {
-        super(Categories.Movement, "sprint", "终极自动冲刺 • 智能W-Tap版");
+        super(Categories.Movement, "sprint", "GrimAC 纯净版");
         instance = this;
     }
 
-    private final Random random = new Random();
-    private int stopSprintTicks = 0;
-    
-    // 外部联动
-    private boolean externalRequest = false;
-    private Runnable externalCallback = null;
-    public static int critReserve = 0;
+    private int pauseTicks = 0;
 
     @Override
     public void onActivate() {
         instance = this;
-        stopSprintTicks = 0;
-        externalRequest = false;
-        externalCallback = null;
+        pauseTicks = 0;
     }
 
     @Override
     public void onDeactivate() {
-        if (mc.player != null && mc.player.isSprinting()) {
-            mc.player.setSprinting(false);
-        }
+        instance = null;
     }
 
-    public static void requestCritUnsprint(Runnable callback) {
-        if (instance != null && instance.isActive()) {
-            instance.externalRequest = true;
-            instance.externalCallback = callback;
-        } else {
-            callback.run();
+    /**
+     * 唯一的对外接口：暂停疾跑
+     */
+    public void pause() {
+        pause(hitUnSprintTicks.get());
+    }
+    
+    /**
+     * 带参数的暂停方法，用于GrimAC兼容
+     */
+    public void pause(int ticks) {
+        this.pauseTicks = ticks;
+        if (mc.player != null) {
+            mc.player.setSprinting(false);
+            // 关键：同时解除按键绑定状态，防止原生逻辑干扰
+            if (mc.options != null) mc.options.sprintKey.setPressed(false);
         }
     }
 
@@ -79,86 +59,45 @@ public class Sprint extends Module {
     private void onPreTick(TickEvent.Pre event) {
         if (mc.player == null || mc.world == null) return;
 
-        if (externalRequest && externalCallback != null) {
-            // TBot 请求的必暴，无论是否按W都执行（因为 TBot 判定过需要暴击）
-            if (mc.player.isSprinting()) {
-                mc.player.setSprinting(false);
-                mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
-            }
-            externalCallback.run();
-            externalRequest = false;
-            externalCallback = null;
-            stopSprintTicks = hitUnSprintTicks.get(); 
+        // 1. 处于暂停期，强行按死
+        if (pauseTicks > 0) {
+            pauseTicks--;
+            mc.player.setSprinting(false);
+            if (mc.options != null) mc.options.sprintKey.setPressed(false);
             return;
         }
 
-        if (stopSprintTicks > 0) {
-            stopSprintTicks--;
-            if (mc.player.isSprinting()) {
-                mc.player.setSprinting(false);
-            }
-            return;
+        // 2. 被打时暂停 (拟人)
+        if (stopOnHurt.get() && mc.player.hurtTime > 8) {
+             mc.player.setSprinting(false);
+             if (mc.options != null) mc.options.sprintKey.setPressed(false);
+             return;
         }
 
-        if (mc.player.isTouchingWater() && !mc.player.isSubmergedInWater()) {
-             return; 
-        }
-
+        // 3. 正常疾跑逻辑
         if (shouldSprint()) {
-            if (!mc.player.isSprinting()) {
-                mc.player.setSprinting(true);
-                mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));
+            mc.player.setSprinting(true);
+            if (mc.options != null) mc.options.sprintKey.setPressed(true);
+        } else {
+            mc.player.setSprinting(false);
+            if (mc.options != null && !mc.options.sprintKey.isDefault()) {
+                mc.options.sprintKey.setPressed(false);
             }
         }
     }
 
     private boolean shouldSprint() {
         return !mc.player.isSneaking() 
-            && PlayerUtils.isMoving() 
+            && mc.options.forwardKey.isPressed() 
+            && !mc.player.horizontalCollision 
             && mc.player.getHungerManager().getFoodLevel() > 6
-            && !mc.player.horizontalCollision
-            && mc.player.forwardSpeed > 0;
+            && !mc.player.isTouchingWater();
     }
+    
+    // 删除了 onSendPacket 监听，防止逻辑双重触发
 
-    @EventHandler
-    private void onSendPacket(PacketEvent.Send event) {
-        if (!unsprintOnHit.get() || stopSprintTicks > 0) return;
-        
-        if (event.packet instanceof PlayerInteractEntityC2SPacket packet) {
-            packet.handle(new PlayerInteractEntityC2SPacket.Handler() {
-                @Override public void interact(Hand hand) {}
-                @Override public void interactAt(Hand hand, Vec3d pos) {}
-                @Override public void attack() {
-                    // 水面检查
-                    if (mc.player.isTouchingWater() && !mc.player.isSubmergedInWater()) return;
-                    
-                    // ==================== 智能方向检查优化 (已修复报错) ====================
-                    if (onlyForward.get()) {
-                        // 修复：改用 mc.options 检测按键，而不是 mc.player.input
-                        if (mc.options == null || !mc.options.forwardKey.isPressed()) {
-                            return;
-                        }
-                    }
-                    
-                    stopSprintTicks = hitUnSprintTicks.get();
-                }
-            });
-        }
-    }
-
-    @EventHandler
-    private void onPostTick(TickEvent.Post event) {
-        if (mc.player == null) return;
-        boolean rPressed = GLFW.glfwGetKey(mc.getWindow().getHandle(), GLFW.GLFW_KEY_R) == GLFW.GLFW_PRESS;
-        if (rPressed && critReserve == 0) {
-            critReserve = 1;
-        } else if (!rPressed && critReserve > 0) {
-            critReserve = 0;
-        }
-    }
-
-    // Mixin 兼容
     public boolean rageSprint() { return false; }
-    public boolean unsprintInWater() { return false; }
-    public boolean stopSprinting() { return false; }
+    public boolean unsprintInWater() { return mc.player != null && mc.player.isTouchingWater() && !mc.player.isSubmergedInWater(); }
+    public boolean stopSprinting() { return pauseTicks > 0; }
+    public void onAttackTriggered() { pause(); }
 }

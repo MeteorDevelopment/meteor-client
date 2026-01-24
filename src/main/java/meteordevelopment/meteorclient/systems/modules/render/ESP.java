@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import java.util.HashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -149,7 +150,7 @@ public class ESP extends Module {
         .name("fill-opacity")
         .description("The opacity of the shape fill.")
         .visible(() -> shapeMode.get() != ShapeMode.Lines && mode.get() != Mode.Glow)
-        .defaultValue(0.3)
+        .defaultValue(0.1)
         .range(0, 1)
         .sliderMax(1)
         .build()
@@ -260,16 +261,24 @@ public class ESP extends Module {
     // Reusable health color to prevent `new Color()` spam
     private final Color mutableHealthColor = new Color();
     
-    private final Color RED = new Color(255, 55, 55);
-    private final Color AMBER = new Color(255, 170, 0);
-    private final Color PURPLE = new Color(255, 0, 255);
+    // 调色板优化：更鲜艳、更清爽、对比度更高
+    private final Color CRITICAL_HP = new Color(0, 0, 0);       // ≤5 HP (纯黑/发黑)
+    private final Color LOW_HP = new Color(255, 40, 40);        // <10 HP (鲜艳红)
+    private final Color MEDIUM_HP = new Color(255, 215, 0);     // 渐变过渡用 (金黄)
+    private final Color HIGH_HP = new Color(0, 255, 127);       // >20 HP (春绿)
 
     private final Vector3d pos1 = new Vector3d();
     private final Vector3d pos2 = new Vector3d();
     private final Vector3d pos = new Vector3d();
 
     private int count;
-    private double currentFlickerFactor = 1.0; // Pre-calculated flicker factor
+    
+    private double cachedFadeDistance = 0;
+    private long lastFadeDistanceUpdate = 0;
+    
+    private final HashMap<Long, Integer> cachedHealthMap = new HashMap<>();
+    private long lastHealthCacheUpdate = 0;
+    private static final long HEALTH_CACHE_INTERVAL = 1000;
 
     public ESP() {
         super(Categories.Render, "esp", "Renders entities through walls.");
@@ -282,9 +291,6 @@ public class ESP extends Module {
         if (mode.get() == Mode._2D) return;
 
         count = 0;
-        
-        // 优化：预计算闪烁因子，避免每帧每实体计算 Math.sin
-        updateFlickerFactor();
 
         Entity target = null;
         if (highlightTarget.get() && targetHitbox.get() && mc.crosshairTarget instanceof EntityHitResult hr) {
@@ -339,7 +345,6 @@ public class ESP extends Module {
 
         Renderer2D.COLOR.begin();
         count = 0;
-        updateFlickerFactor(); // 优化：预计算闪烁
 
         // 缓存 target 状态
         Entity target = null;
@@ -416,18 +421,6 @@ public class ESP extends Module {
         return false;
     }
 
-    // Utils
-    
-    // 优化：预计算闪烁因子
-    private void updateFlickerFactor() {
-        if (healthColors.get() && hpFlicker.get() && mc.world != null) {
-            double t = (mc.world.getTime() % flickerPeriod.get()) / (double) flickerPeriod.get();
-            currentFlickerFactor = 0.5 + 0.5 * Math.sin(t * 6.283185307179586);
-        } else {
-            currentFlickerFactor = 1.0;
-        }
-    }
-
     public boolean shouldSkip(Entity entity) {
         // 优化：先进行廉价的检查
         if (entity == mc.player && ignoreSelf.get()) return true;
@@ -439,9 +432,9 @@ public class ESP extends Module {
         // 类型检查 (Set 查找比上面的贵一点)
         if (!entities.get().contains(entity.getType())) return true;
         
-        // HP 检查 (最贵，涉及到记分板查找)
+        // HP 检查 (最贵，涉及到记分板查找) - 使用缓存
         if (hpGate.get() && entity instanceof PlayerEntity p) {
-            double hpVal = getGateHp(p);
+            double hpVal = getCachedGateHp(p);
             if (hpVal >= hpThreshold.get()) return true;
         }
         
@@ -471,33 +464,55 @@ public class ESP extends Module {
 
     private double getFadeAlpha(Entity entity) {
         double dist = PlayerUtils.squaredDistanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ() + entity.getWidth() / 2);
-        double fadeDist = Math.pow(fadeDistance.get(), 2);
+        
+        // 优化：预计算fadeDistance的平方，避免每实体计算Math.pow
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastFadeDistanceUpdate > 100) { // 100ms缓存更新
+            cachedFadeDistance = Math.pow(fadeDistance.get(), 2);
+            lastFadeDistanceUpdate = currentTime;
+        }
+        
         double alpha = 1;
-        if (dist <= fadeDist * fadeDist) alpha = (float) (Math.sqrt(dist) / fadeDist);
+        if (dist <= cachedFadeDistance * cachedFadeDistance) {
+            // 优化：只对需要淡入效果的实体计算sqrt
+            alpha = Math.sqrt(dist) / fadeDistance.get();
+        }
         if (alpha <= 0.075) alpha = 0;
         return alpha;
     }
 
     public Color getEntityTypeColor(Entity entity) {
         if (entity instanceof PlayerEntity p && healthColors.get()) {
-            double hpVal = getGateHp(p);
+            double hpVal = getCachedGateHp(p);
             
-            // 优化：直接修改 mutableHealthColor 而不是返回 new Color
-            if (hpVal < 10) {
-                int r = (int) MathHelper.clamp(RED.r * currentFlickerFactor, 0, 255);
-                int g = (int) MathHelper.clamp(RED.g * currentFlickerFactor, 0, 255);
-                int b = (int) MathHelper.clamp(RED.b * currentFlickerFactor, 0, 255);
-                return mutableHealthColor.set(r, g, b, 255);
-            } else if (hpVal <= 20 && hpGradient.get()) {
-                double t = (hpVal - 10.0) / 10.0;
-                int r = (int) MathHelper.clamp(MathHelper.lerp(t, RED.r, PURPLE.r), 0, 255);
-                int g = (int) MathHelper.clamp(MathHelper.lerp(t, RED.g, PURPLE.g), 0, 255);
-                int b = (int) MathHelper.clamp(MathHelper.lerp(t, RED.b, PURPLE.b), 0, 255);
-                return mutableHealthColor.set(r, g, b, 255);
+            // 逻辑更新：更加清爽的颜色分层
+            if (hpVal <= 5) {
+                // 极低血量：黑色 (视觉冲击力强，符合“发黑”要求)
+                return mutableHealthColor.set(CRITICAL_HP);
+            } else if (hpVal <= 10) {
+                // 低血量：鲜艳红
+                if (hpGradient.get()) {
+                    // 5-10 之间可以稍微从黑红渐变到纯红，或者保持纯红
+                    // 为了保持清爽，这里使用纯红过渡
+                    return mutableHealthColor.set(LOW_HP);
+                }
+                return mutableHealthColor.set(LOW_HP);
             } else if (hpVal <= 20) {
-                return AMBER;
+                // 中等血量：红 -> 金黄 -> 鲜绿
+                if (hpGradient.get()) {
+                    // 10-20 进行渐变，这样看起来颜色更丰富清爽
+                    // 使用 LOW_HP 和 HIGH_HP 插值会经过中间的浑浊色，
+                    // 所以我们分段插值效果最好，但为了代码性能简洁，
+                    // 这里直接线性插值 LOW 到 HIGH (因为新颜色饱和度高，中间色会是黄色系的，不会浑浊)
+                    double t = (hpVal - 10.0) / 10.0;
+                    int r = (int) MathHelper.clamp(MathHelper.lerp(t, LOW_HP.r, HIGH_HP.r), 0, 255);
+                    int g = (int) MathHelper.clamp(MathHelper.lerp(t, LOW_HP.g, HIGH_HP.g), 0, 255);
+                    int b = (int) MathHelper.clamp(MathHelper.lerp(t, LOW_HP.b, HIGH_HP.b), 0, 255);
+                    return mutableHealthColor.set(r, g, b, 255);
+                }
+                return MEDIUM_HP;
             } else {
-                return PURPLE;
+                return HIGH_HP;
             }
         } else if (distance.get()) {
             if (friendOverride.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
@@ -520,6 +535,43 @@ public class ESP extends Module {
         Integer tab = getTrueTabHealth(p);
         if (tab != null) return tab;
         return p.getHealth() + p.getAbsorptionAmount();
+    }
+    
+    // 新增：带缓存的健康值获取
+    private double getCachedGateHp(PlayerEntity p) {
+        long currentTime = System.currentTimeMillis();
+        
+        // 检查是否需要更新缓存
+        if (currentTime - lastHealthCacheUpdate > HEALTH_CACHE_INTERVAL) {
+            updateHealthCache();
+        }
+        
+        // 尝试从缓存获取
+        long playerId = p.getUuid().getMostSignificantBits();
+        Integer cachedHp = cachedHealthMap.get(playerId);
+        if (cachedHp != null) {
+            return cachedHp;
+        }
+        
+        // 缓存中没有，实时计算
+        double hp = getGateHp(p);
+        cachedHealthMap.put(playerId, (int) hp);
+        return hp;
+    }
+    
+    // 更新健康值缓存
+    private void updateHealthCache() {
+        if (mc.world == null) return;
+        
+        cachedHealthMap.clear();
+        for (PlayerEntity player : mc.world.getPlayers()) {
+            if (player != null) {
+                double hp = getGateHp(player);
+                long playerId = player.getUuid().getMostSignificantBits();
+                cachedHealthMap.put(playerId, (int) hp);
+            }
+        }
+        lastHealthCacheUpdate = System.currentTimeMillis();
     }
 
     private Integer getTrueTabHealth(PlayerEntity player) {

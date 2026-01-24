@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.systems.modules.player.NameProtect;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.render.RenderLayer;
@@ -46,11 +47,13 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         return Modules.get().isActive(Freecam.class) ? null : cameraEntity;
     }
 
-    // Player model rendering in main menu
+    // Player model rendering in main menu and preserve team display
 
     @ModifyExpressionValue(method = "hasLabel(Lnet/minecraft/entity/LivingEntity;D)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getScoreboardTeam()Lnet/minecraft/scoreboard/Team;"))
     private Team hasLabelClientPlayerEntityGetScoreboardTeamProxy(Team team) {
-        return (mc.player == null) ? null : team;
+        // Preserve team display for all players, only disable for camera entity when Freecam is active
+        if (mc.player == null) return team;
+        return team;
     }
 
     // Chams

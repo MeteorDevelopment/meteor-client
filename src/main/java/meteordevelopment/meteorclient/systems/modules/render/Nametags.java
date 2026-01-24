@@ -57,6 +57,24 @@ public class Nametags extends Module {
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale").defaultValue(1.1).min(0.1).build());
 
+    private final Setting<Double> nearDistance = sgGeneral.add(new DoubleSetting.Builder()
+        .name("near-distance")
+        .description("近距离阈值，在此距离内名字标签最大且不透明")
+        .defaultValue(2.0)
+        .min(0.1)
+        .max(100.0)
+        .sliderRange(0.1, 10.0)
+        .build());
+
+    private final Setting<Double> farDistance = sgGeneral.add(new DoubleSetting.Builder()
+        .name("far-distance")
+        .description("远距离阈值，在此距离外名字标签最小且透明")
+        .defaultValue(30.0)
+        .min(0.1)
+        .max(200.0)
+        .sliderRange(1.0, 50.0)
+        .build());
+
     private final Setting<Boolean> vanillaOverhead = sgGeneral.add(new BoolSetting.Builder()
         .name("vanilla-overhead")
         .description("在原版名字标签上方居中追加信息")
@@ -129,6 +147,12 @@ public class Nametags extends Module {
         .visible(displayItems::get)
         .build());
 
+    private final Setting<Boolean> displayTeamIcon = sgPlayers.add(new BoolSetting.Builder()
+        .name("team-icon")
+        .description("显示玩家队伍图标")
+        .defaultValue(true)
+        .build());
+
     private final Setting<Boolean> displayDamageReduction = sgItems.add(new BoolSetting.Builder()
         .name("damage-reduction")
         .description("显示基于装备的伤害减免百分比")
@@ -171,15 +195,20 @@ public class Nametags extends Module {
         .visible(displayGameMode::get)
         .build());
 
-    private final Color RED = new Color(255, 55, 55);
-    private final Color AMBER = new Color(255, 170, 0);
-    private final Color GREEN = new Color(85, 255, 85);
+    private final Color LOW_HP = new Color(200, 80, 80);
+    private final Color MEDIUM_HP = new Color(255, 180, 60);
+    private final Color HIGH_HP = new Color(100, 200, 100);
     private final Color WHITE = new Color(255, 255, 255);
+    private final Color BLACK = new Color(0, 0, 0); // 新增黑色常量
     
     private final Color mutableColor = new Color();
     private final Vector3d pos = new Vector3d();
     private final List<Entity> entitiesList = new ArrayList<>();
     private final StringBuilder sb = new StringBuilder();
+    
+    // 新增：透明度杠杆实例变量
+    private int bgAlpha;
+    private int textAlpha;
 
     public Nametags() {
         super(Categories.Render, "nametags", "完美名字标签 | 支持Tab真血量 | 物品栏+附魔");
@@ -190,25 +219,35 @@ public class Nametags extends Module {
         entitiesList.clear();
         boolean freecam = Modules.get().isActive(Freecam.class);
         boolean firstPerson = mc.options.getPerspective().isFirstPerson();
-        double maxDistSq = Math.pow(maxDistance.get(), 2);
+        double maxDist = maxDistance.get();
+        double maxDistSq = maxDist * maxDist;
+
+        // 预缓存设置值以减少重复get()调用
+        Set<EntityType<?>> entityTypes = entities.get();
+        boolean ignoreSelfFlag = ignoreSelf.get();
+        boolean ignoreFriendsFlag = ignoreFriends.get();
+        boolean ignoreBotsFlag = ignoreBots.get();
 
         for (Entity entity : mc.world.getEntities()) {
-            if (!entities.get().contains(entity.getType())) continue;
+            if (!entityTypes.contains(entity.getType())) continue;
             
             double distSq = PlayerUtils.squaredDistanceToCamera(entity);
             if (distSq > maxDistSq) continue;
             
             if (entity instanceof PlayerEntity p) {
-                if (entity == mc.player && ignoreSelf.get() && !freecam && firstPerson) continue;
-                if (ignoreFriends.get() && Friends.get().isFriend(p)) continue;
-                if (ignoreBots.get() && EntityUtils.getGameMode(p) == null) continue;
+                if (entity == mc.player && ignoreSelfFlag && !freecam && firstPerson) continue;
+                if (ignoreFriendsFlag && Friends.get().isFriend(p)) continue;
+                if (ignoreBotsFlag && EntityUtils.getGameMode(p) == null) continue;
             }
             entitiesList.add(entity);
         }
         
-        // 修复：使用 mc.getCameraEntity() 替代 mc.cameraEntity
-        // 并使用降序排列（远处的先渲染），以解决渲染遮挡问题
-        entitiesList.sort((e1, e2) -> Double.compare(e2.distanceTo(mc.getCameraEntity()), e1.distanceTo(mc.getCameraEntity())));
+        // 使用更高效的排序：降序排列（远处的先渲染）
+        entitiesList.sort((e1, e2) -> {
+            double d1 = PlayerUtils.squaredDistanceToCamera(e1);
+            double d2 = PlayerUtils.squaredDistanceToCamera(e2);
+            return Double.compare(d2, d1); // 降序：远到近
+        });
     }
 
     @EventHandler
@@ -219,7 +258,16 @@ public class Nametags extends Module {
             Utils.set(pos, entity, event.tickDelta);
             pos.add(0, entity.getEyeHeight(entity.getPose()) + 0.5, 0);
 
-            if (!NametagUtils.to2D(pos, scale.get())) continue;
+            /* =====  距离杠杆 + 透明度杠杆  ===== */
+            double dist = PlayerUtils.distanceToCamera(entity);      // 米
+            float distFade = smoothstep(nearDistance.get().floatValue(), farDistance.get().floatValue(), (float) dist);    // 0~1，根据设置的距离阈值调整
+            float finalScale = (float) (scale.get() * (1 - distFade * 0.5f)); // 远→小，最小 0.5x
+            finalScale = MathHelper.clamp(finalScale, 0.5f, 10f);
+
+            bgAlpha   = (int) MathHelper.lerp(distFade, 255, 60); // 近 255 远 60
+            textAlpha = bgAlpha;                                   // 文字同步
+
+            if (!NametagUtils.to2D(pos, finalScale)) continue;   // 用新 scale
 
             if (entity instanceof PlayerEntity player) {
                 renderPlayer(event, player, shadow);
@@ -246,7 +294,9 @@ public class Nametags extends Module {
         }
 
         String rawName = player.getName().getString();
-        String name = Modules.get().get(NameProtect.class).getName(rawName);
+        String name = player == mc.player
+            ? Modules.get().get(NameProtect.class).getName(rawName)
+            : rawName;
             
         if (maxNameLength.get() > 0 && name.length() > maxNameLength.get()) {
             name = name.substring(0, maxNameLength.get()) + "...";
@@ -263,37 +313,46 @@ public class Nametags extends Module {
         sb.append(" ").append(displayHp);
         String healthText = sb.toString();
         
-        Color healthCol = displayHp <= 6 ? RED : displayHp <= 13 ? AMBER : GREEN;
+        // 修改：血量颜色固定为黑色
+        Color healthCol = BLACK;
 
         float realHp = player.getHealth() + player.getAbsorptionAmount();
         if (espHealthColors.get()) {
-            if (realHp < 10f) nameCol = RED;
-            else if (realHp <= 20f) nameCol = AMBER;
-            else nameCol = GREEN;
+            if (realHp < 10f) nameCol = LOW_HP;
+            else if (realHp <= 20f) nameCol = MEDIUM_HP;
+            else nameCol = HIGH_HP;
         }
 
+        // 优化：缓存常用的设置值
+        boolean displayPingFlag = displayPing.get();
+        boolean displayDistanceFlag = displayDistance.get();
+        
         String pingText = "";
-        if (displayPing.get()) {
+        if (displayPingFlag) {
             sb.setLength(0);
             sb.append(" [").append(EntityUtils.getPing(player)).append("ms]");
             pingText = sb.toString();
         }
 
         String distText = "";
-        if (displayDistance.get()) {
+        if (displayDistanceFlag) {
             sb.setLength(0);
             sb.append(" ").append(String.format("%.1f", PlayerUtils.distanceToCamera(player))).append("m");
             distText = sb.toString();
         }
 
+        // 优化：缓存设置值减少重复调用
+        boolean displayDrFlag = displayDamageReduction.get();
+        int drMinPercentVal = drMinPercent.get();
+        
         String drText = "";
-        if (displayDamageReduction.get()) {
+        if (displayDrFlag) {
             float base = 10f;
             float reduced = DamageUtils.calculateReductions(base, player, mc.world.getDamageSources().playerAttack(mc.player));
             float pct = MathHelper.clamp(1f - reduced / base, 0f, 1f) * 100f;
-            if (pct >= drMinPercent.get()) {
+            if (pct >= drMinPercentVal) {
                 sb.setLength(0);
-                sb.append(" [DR ").append(String.format("%.0f", pct)).append("%]");
+                sb.append(" [DR ").append((int)pct).append("%]");
                 drText = sb.toString();
             }
         }
@@ -306,9 +365,9 @@ public class Nametags extends Module {
         Color suffixColor = WHITE;
         if (lowHpOverhead) {
             double t = MathHelper.clamp(hpValOverhead / 20.0, 0.0, 1.0);
-            int r = (int) MathHelper.clamp(MathHelper.lerp(t, RED.r, AMBER.r), 0, 255);
-            int g = (int) MathHelper.clamp(MathHelper.lerp(t, RED.g, AMBER.g), 0, 255);
-            int b = (int) MathHelper.clamp(MathHelper.lerp(t, RED.b, AMBER.b), 0, 255);
+            int r = (int) MathHelper.clamp(MathHelper.lerp(t, LOW_HP.r, MEDIUM_HP.r), 0, 255);
+            int g = (int) MathHelper.clamp(MathHelper.lerp(t, LOW_HP.g, MEDIUM_HP.g), 0, 255);
+            int b = (int) MathHelper.clamp(MathHelper.lerp(t, LOW_HP.b, MEDIUM_HP.b), 0, 255);
             suffixColor = mutableColor.set(r, g, b, 255);
         }
 
@@ -316,33 +375,86 @@ public class Nametags extends Module {
         if (vanillaOverhead.get()) {
             sb.setLength(0);
             if (displayGameMode.get()) sb.append(gmText);
+            
+            // 渲染队伍图标
+            Team playerTeam = player.getScoreboardTeam();
+            if (displayTeamIcon.get() && playerTeam != null) {
+                String teamPrefix = playerTeam.getPrefix().getString();
+                String teamSuffix = playerTeam.getSuffix().getString();
+                if (!teamPrefix.isEmpty()) {
+                    sb.append(teamPrefix);
+                } else if (!teamSuffix.isEmpty()) {
+                    sb.append(teamSuffix);
+                } else {
+                    sb.append("[T] "); // 默认队伍图标
+                }
+            }
+            
             sb.append(name).append(pingText).append(distText);
             if (displayHealth.get()) sb.append(" [HP ").append(displayHp).append("]");
             sb.append(drText);
             String suffixStr = sb.toString();
+
 
             double width = text.getWidth(suffixStr, shadow);
             double x = -width / 2;
             double y = -height * 2;
 
             Renderer2D.COLOR.begin();
-            Renderer2D.COLOR.quad(x - 1, y - 1, width + 2, height + 2, background.get());
+            Renderer2D.COLOR.quad(x - 1, y - 1, width + 2, height + 2,
+                    new Color(newAlpha(background.get().getPacked(), bgAlpha)));
             Renderer2D.COLOR.render();
 
             text.beginBig();
             double cx = x;
-            if (displayGameMode.get()) cx = text.render(gmText, cx, y, lowHpOverhead ? suffixColor : gamemodeColor.get(), shadow);
-            if (!name.isEmpty()) cx = text.render(name, cx, y, nameCol, shadow);
-            if (displayPing.get()) cx = text.render(pingText, cx, y, lowHpOverhead ? suffixColor : pingColor.get(), shadow);
-            if (displayDistance.get()) cx = text.render(distText, cx, y, lowHpOverhead ? suffixColor : WHITE, shadow);
+            if (displayGameMode.get()) cx = text.render(gmText, cx, y,
+                    new Color(newAlpha((lowHpOverhead ? suffixColor : gamemodeColor.get()).getPacked(), textAlpha)),
+                    shadow);
+            
+            // 渲染队伍图标
+            if (displayTeamIcon.get() && playerTeam != null) {
+                String teamPrefix = playerTeam.getPrefix().getString();
+                String teamSuffix = playerTeam.getSuffix().getString();
+                Integer colorValue = playerTeam.getColor().getColorValue();
+                Color teamColor = colorValue != null ? new Color(colorValue) : WHITE;
+                
+                if (!teamPrefix.isEmpty()) {
+                    cx = text.render(teamPrefix, cx, y,
+                            new Color(newAlpha(teamColor.getPacked(), textAlpha)),
+                            shadow);
+                } else if (!teamSuffix.isEmpty()) {
+                    cx = text.render(teamSuffix, cx, y,
+                            new Color(newAlpha(teamColor.getPacked(), textAlpha)),
+                            shadow);
+                } else {
+                    cx = text.render("[T] ", cx, y,
+                            new Color(newAlpha(teamColor.getPacked(), textAlpha)),
+                            shadow);
+                }
+            }
+            
+            if (!name.isEmpty()) cx = text.render(name, cx, y,
+                    new Color(newAlpha(nameCol.getPacked(), textAlpha)),
+                    shadow);
+            if (displayPing.get()) cx = text.render(pingText, cx, y,
+                    new Color(newAlpha((lowHpOverhead ? suffixColor : pingColor.get()).getPacked(), textAlpha)),
+                    shadow);
+            if (displayDistance.get()) cx = text.render(distText, cx, y,
+                    new Color(newAlpha((lowHpOverhead ? suffixColor : WHITE).getPacked(), textAlpha)),
+                    shadow);
             
             if (displayHealth.get()) {
                 sb.setLength(0);
                 sb.append(" [HP ").append(displayHp).append("]");
-                cx = text.render(sb.toString(), cx, y, lowHpOverhead ? suffixColor : healthCol, shadow);
+                // 修改：强制使用 BLACK 颜色渲染血量，忽略低血量变色逻辑
+                cx = text.render(sb.toString(), cx, y,
+                        new Color(newAlpha(BLACK.getPacked(), textAlpha)),
+                        shadow);
             }
             
-            if (displayDamageReduction.get() && !drText.isEmpty()) text.render(drText, cx, y, lowHpOverhead ? suffixColor : WHITE, shadow);
+            if (displayDamageReduction.get() && !drText.isEmpty()) text.render(drText, cx, y,
+                    new Color(newAlpha(healthCol.getPacked(), textAlpha)),
+                    shadow);
             text.end();
 
             NametagUtils.end();
@@ -350,23 +462,78 @@ public class Nametags extends Module {
         }
 
         // 标准模式渲染
+        Team playerTeam = player.getScoreboardTeam();
+        
         sb.setLength(0);
-        sb.append(gmText).append(name).append(healthText).append(pingText).append(distText).append(drText);
+        if (displayGameMode.get()) sb.append(gmText);
+        
+        // 添加队伍图标到字符串
+        if (displayTeamIcon.get() && playerTeam != null) {
+            String teamPrefix = playerTeam.getPrefix().getString();
+            String teamSuffix = playerTeam.getSuffix().getString();
+            if (!teamPrefix.isEmpty()) {
+                sb.append(teamPrefix);
+            } else if (!teamSuffix.isEmpty()) {
+                sb.append(teamSuffix);
+            } else {
+                sb.append("[T] ");
+            }
+        }
+        
+
+        sb.append(name).append(healthText).append(pingText).append(distText).append(drText);
         double total = text.getWidth(sb.toString(), shadow);
         double half = total / 2;
 
         Renderer2D.COLOR.begin();
-        Renderer2D.COLOR.quad(-half - 1, -height - 1, total + 2, height + 2, background.get());
+        Renderer2D.COLOR.quad(-half - 1, -height - 1, total + 2, height + 2,
+                new Color(newAlpha(background.get().getPacked(), bgAlpha)));
         Renderer2D.COLOR.render();
 
         text.beginBig();
         double x = -half;
-        if (displayGameMode.get()) x = text.render(gmText, x, -height, gamemodeColor.get(), shadow);
-        x = text.render(name, x, -height, nameCol, shadow);
-        if (displayHealth.get()) x = text.render(healthText, x, -height, healthCol, shadow);
-        if (displayPing.get()) x = text.render(pingText, x, -height, pingColor.get(), shadow);
-        if (displayDistance.get()) x = text.render(distText, x, -height, WHITE, shadow);
-        if (displayDamageReduction.get()) text.render(drText, x, -height, WHITE, shadow);
+        if (displayGameMode.get()) x = text.render(gmText, x, -height,
+                new Color(newAlpha(gamemodeColor.get().getPacked(), textAlpha)),
+                shadow);
+        
+        // 渲染队伍图标
+        if (displayTeamIcon.get() && playerTeam != null) {
+            String teamPrefix = playerTeam.getPrefix().getString();
+            String teamSuffix = playerTeam.getSuffix().getString();
+            Integer colorValue = playerTeam.getColor().getColorValue();
+            Color teamColor = colorValue != null ? new Color(colorValue) : WHITE;
+            
+            if (!teamPrefix.isEmpty()) {
+                x = text.render(teamPrefix, x, -height,
+                        new Color(newAlpha(teamColor.getPacked(), textAlpha)),
+                        shadow);
+            } else if (!teamSuffix.isEmpty()) {
+                x = text.render(teamSuffix, x, -height,
+                        new Color(newAlpha(teamColor.getPacked(), textAlpha)),
+                        shadow);
+            } else {
+                x = text.render("[T] ", x, -height,
+                        new Color(newAlpha(teamColor.getPacked(), textAlpha)),
+                        shadow);
+            }
+        }
+        
+        x = text.render(name, x, -height,
+                new Color(newAlpha(nameCol.getPacked(), textAlpha)),
+                shadow);
+        // 修改：强制使用 BLACK (healthCol已设置为BLACK)
+        if (displayHealth.get()) x = text.render(healthText, x, -height,
+                new Color(newAlpha(healthCol.getPacked(), textAlpha)),
+                shadow);
+        if (displayPing.get()) x = text.render(pingText, x, -height,
+                new Color(newAlpha(pingColor.get().getPacked(), textAlpha)),
+                shadow);
+        if (displayDistance.get()) x = text.render(distText, x, -height,
+                new Color(newAlpha(WHITE.getPacked(), textAlpha)),
+                shadow);
+        if (displayDamageReduction.get()) text.render(drText, x, -height,
+                new Color(newAlpha(healthCol.getPacked(), textAlpha)),
+                shadow);
         text.end();
 
         if (displayItems.get()) {
@@ -419,17 +586,23 @@ public class Nametags extends Module {
         }
         String countStr = sb.toString();
 
+
         double w = text.getWidth(name + countStr, shadow);
         double h = text.getHeight(shadow);
 
         Renderer2D.COLOR.begin();
-        Renderer2D.COLOR.quad(-w/2 -1, -h -1, w +2, h +2, background.get());
+        Renderer2D.COLOR.quad(-w/2 -1, -h -1, w +2, h +2,
+                new Color(newAlpha(background.get().getPacked(), bgAlpha)));
         Renderer2D.COLOR.render();
 
         text.beginBig();
-        text.render(name, -w/2, -h, nameColor.get(), shadow);
+        text.render(name, -w/2, -h,
+                new Color(newAlpha(nameColor.get().getPacked(), textAlpha)),
+                shadow);
         if (!countStr.isEmpty()) {
-            text.render(countStr, -w/2 + text.getWidth(name, shadow), -h, WHITE, shadow);
+            text.render(countStr, -w/2 + text.getWidth(name, shadow), -h,
+                    new Color(newAlpha(WHITE.getPacked(), textAlpha)),
+                    shadow);
         }
         text.end();
 
@@ -438,17 +611,32 @@ public class Nametags extends Module {
 
     private Integer getTrueTabHealth(PlayerEntity player) {
         if (mc.world == null || mc.getNetworkHandler() == null) return null;
-        Scoreboard sb = mc.world.getScoreboard();
-        if (sb == null) return null;
         
-        ScoreboardObjective obj = sb.getObjectiveForSlot(ScoreboardDisplaySlot.LIST);
-        if (obj == null) return null;
+        try {
+            Scoreboard sb = mc.world.getScoreboard();
+            if (sb == null) return null;
+            
+            // 尝试获取 LIST 槽位
+            ScoreboardObjective obj = sb.getObjectiveForSlot(ScoreboardDisplaySlot.LIST);
+            
+            // Lunar 修复：如果 LIST 没数据，尝试 BELOW_NAME (头顶血量)
+            if (obj == null) {
+                obj = sb.getObjectiveForSlot(ScoreboardDisplaySlot.BELOW_NAME);
+            }
+            
+            if (obj == null) return null;
 
-        ScoreHolder holder = ScoreHolder.fromProfile(player.getGameProfile());
-        ScoreAccess score = sb.getOrCreateScore(holder, obj);
-        int points = score.getScore();
-        if (points <= 0) return null;
-        return points;
+            ScoreHolder holder = ScoreHolder.fromProfile(player.getGameProfile());
+            ScoreAccess score = sb.getOrCreateScore(holder, obj);
+            int points = score.getScore();
+            
+            // 过滤无效数值
+            if (points <= 0 && obj.getRenderType() == ScoreboardCriterion.RenderType.HEARTS) return null;
+            return points;
+        } catch (Exception e) {
+            // 发生任何错误都返回 null，保证名字标签至少能显示出来，不要报错
+            return null;
+        }
     }
 
     private ItemStack getItem(PlayerEntity p, int i) {
@@ -469,5 +657,14 @@ public class Nametags extends Module {
 
     public boolean playerNametags() {
         return isActive() && entities.get().contains(EntityType.PLAYER);
+    }
+
+    /* ---------- 新增：两条曲线 ---------- */
+    private static float smoothstep(float edge0, float edge1, float x) {
+        x = MathHelper.clamp((x - edge0) / (edge1 - edge0), 0f, 1f);
+        return x * x * (3 - 2 * x);
+    }
+    private static int newAlpha(int color, int alpha) {
+        return (color & 0x00FFFFFF) | (alpha << 24);
     }
 }

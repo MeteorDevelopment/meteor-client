@@ -9,6 +9,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
+import meteordevelopment.meteorclient.events.entity.player.PlayerDamageEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.HighJump;
 import meteordevelopment.meteorclient.systems.modules.movement.Sprint;
@@ -24,17 +25,22 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.Vec3d;
+
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -44,6 +50,16 @@ public abstract class LivingEntityMixin extends Entity {
         super(type, world);
     }
 
+    // 添加一个变量来记录之前的速度，用于检测击退
+    @Unique
+    private Vec3d previousVelocity = Vec3d.ZERO;
+    
+    // 添加变量来保存DamageSource和amount
+    @Unique
+    private DamageSource lastDamageSource = null;
+    @Unique
+    private float lastDamageAmount = 0f;
+
     @ModifyReturnValue(method = "canWalkOnFluid", at = @At("RETURN"))
     private boolean onCanWalkOnFluid(boolean original, FluidState fluidState) {
         if ((Object) this != mc.player) return original;
@@ -51,6 +67,18 @@ public abstract class LivingEntityMixin extends Entity {
 
         return event.walkOnFluid;
     }
+
+    // 客户端伤害检测方法：监听handleStatus事件（status=2是伤害动画）
+    @Inject(method = "handleStatus", at = @At("HEAD"))
+    private void onHandleStatus(byte status, CallbackInfo ci) {
+        if (status == 2 && (Object) this == mc.player && mc.world != null) {
+            System.out.println("[调试] handleStatus检测到伤害动画: status=" + status + ", 发布PlayerDamageEvent");
+            MeteorClient.EVENT_BUS.post(new PlayerDamageEvent(1.0f, mc.world.getDamageSources().generic(), 1.0f, null));
+        }
+    }
+
+    // Note: damage method injection removed due to signature changes in MC 1.21
+    // handleStatus method above is sufficient for damage detection
 
     @Inject(method = "spawnItemParticles", at = @At("HEAD"), cancellable = true)
     private void spawnItemParticles(ItemStack stack, int count, CallbackInfo info) {

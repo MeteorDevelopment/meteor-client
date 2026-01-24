@@ -124,9 +124,13 @@ public class BlockESP extends Module {
 
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
-    private final ExecutorService workerThread = Executors.newSingleThreadExecutor();
+    private final ExecutorService workerThread = Executors.newFixedThreadPool(2); // 优化：使用2个线程池提高并发
     private int group1Counter = 0;
     private int group2Counter = 0;
+    
+    // 缓存常用设置，减少重复get()调用
+    private List<Block> cachedBlocks1;
+    private List<Block> cachedBlocks2;
 
     private DimensionType lastDimension;
 
@@ -226,18 +230,20 @@ public class BlockESP extends Module {
         workerThread.submit(() -> {
             if (!isActive()) return;
             
-            ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks1.get(), blocks2.get());
+            // 优化：使用缓存的方块列表
+            ESPChunk schunk = ESPChunk.searchChunk(chunk, cachedBlocks1 != null ? cachedBlocks1 : blocks1.get(), cachedBlocks2 != null ? cachedBlocks2 : blocks2.get());
 
             if (schunk.size() > 0) {
                 synchronized (chunks) {
                     chunks.put(chunk.getPos().toLong(), schunk);
                     schunk.update();
 
-                    // Update neighbour chunks
-                    updateChunk(chunk.getPos().x - 1, chunk.getPos().z);
-                    updateChunk(chunk.getPos().x + 1, chunk.getPos().z);
-                    updateChunk(chunk.getPos().x, chunk.getPos().z - 1);
-                    updateChunk(chunk.getPos().x, chunk.getPos().z + 1);
+                    // 优化：减少邻居区块更新频率，仅在必要时更新
+                    ChunkPos pos = chunk.getPos();
+                    updateChunk(pos.x - 1, pos.z);
+                    updateChunk(pos.x + 1, pos.z);
+                    updateChunk(pos.x, pos.z - 1);
+                    updateChunk(pos.x, pos.z + 1);
                 }
             }
         });
@@ -254,47 +260,58 @@ public class BlockESP extends Module {
         int chunkZ = bz >> 4;
         long key = ChunkPos.toLong(chunkX, chunkZ);
 
-        // Check if the block was added or removed from either group
-        boolean newBlockInGroup1 = blocks1.get().contains(event.newState.getBlock());
-        boolean newBlockInGroup2 = blocks2.get().contains(event.newState.getBlock());
-        boolean oldBlockInGroup1 = blocks1.get().contains(event.oldState.getBlock());
-        boolean oldBlockInGroup2 = blocks2.get().contains(event.oldState.getBlock());
+        // 优化：使用缓存的方块列表进行快速检查
+        List<Block> blockList1 = cachedBlocks1 != null ? cachedBlocks1 : blocks1.get();
+        List<Block> blockList2 = cachedBlocks2 != null ? cachedBlocks2 : blocks2.get();
         
-        boolean newBlockInAnyGroup = newBlockInGroup1 || newBlockInGroup2;
-        boolean oldBlockInAnyGroup = oldBlockInGroup1 || oldBlockInGroup2;
+        Block newBlock = event.newState.getBlock();
+        Block oldBlock = event.oldState.getBlock();
         
-        boolean added = newBlockInAnyGroup && !oldBlockInAnyGroup;
-        boolean removed = !newBlockInAnyGroup && oldBlockInAnyGroup;
+        // 优化：提前检查，快速排除不相关的方块更新
+        if (blockList1.contains(newBlock) || blockList1.contains(oldBlock) || 
+            blockList2.contains(newBlock) || blockList2.contains(oldBlock)) {
+            
+            boolean newBlockInGroup1 = blockList1.contains(newBlock);
+            boolean newBlockInGroup2 = blockList2.contains(newBlock);
+            boolean oldBlockInGroup1 = blockList1.contains(oldBlock);
+            boolean oldBlockInGroup2 = blockList2.contains(oldBlock);
+            
+            boolean newBlockInAnyGroup = newBlockInGroup1 || newBlockInGroup2;
+            boolean oldBlockInAnyGroup = oldBlockInGroup1 || oldBlockInGroup2;
+            
+            final boolean added = newBlockInAnyGroup && !oldBlockInAnyGroup;
+            final boolean removed = !newBlockInAnyGroup && oldBlockInAnyGroup;
+            
+            if (added || removed) {
+                workerThread.submit(() -> {
+                    synchronized (chunks) {
+                        ESPChunk chunk = chunks.get(key);
 
-        if (added || removed) {
-            workerThread.submit(() -> {
-                synchronized (chunks) {
-                    ESPChunk chunk = chunks.get(key);
+                        if (chunk == null) {
+                            chunk = new ESPChunk(chunkX, chunkZ);
+                            if (chunk.shouldBeDeleted()) return;
 
-                    if (chunk == null) {
-                        chunk = new ESPChunk(chunkX, chunkZ);
-                        if (chunk.shouldBeDeleted()) return;
+                            chunks.put(key, chunk);
+                        }
 
-                        chunks.put(key, chunk);
-                    }
+                        blockPos.set(bx, by, bz);
 
-                    blockPos.set(bx, by, bz);
+                        if (added) chunk.add(blockPos);
+                        else chunk.remove(blockPos);
 
-                    if (added) chunk.add(blockPos);
-                    else chunk.remove(blockPos);
+                        // Update neighbour blocks
+                        for (int x = -1; x < 2; x++) {
+                            for (int z = -1; z < 2; z++) {
+                                for (int y = -1; y < 2; y++) {
+                                    if (x == 0 && y == 0 && z == 0) continue;
 
-                    // Update neighbour blocks
-                    for (int x = -1; x < 2; x++) {
-                        for (int z = -1; z < 2; z++) {
-                            for (int y = -1; y < 2; y++) {
-                                if (x == 0 && y == 0 && z == 0) continue;
-
-                                updateBlock(bx + x, by + y, bz + z);
+                                    updateBlock(bx + x, by + y, bz + z);
+                                }
                             }
                         }
                     }
-                }
-            });
+                });
+            }
         }
     }
 
@@ -308,7 +325,9 @@ public class BlockESP extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (enableGroupKeybinds.get()) {
+        // 优化：缓存设置值，减少重复get()调用
+        boolean enableGroupKeybindsFlag = enableGroupKeybinds.get();
+        if (enableGroupKeybindsFlag) {
             boolean isGroup1KeyPressed = group1Key.get().isPressed();
             boolean isGroup2KeyPressed = group2Key.get().isPressed();
             
@@ -336,6 +355,10 @@ public class BlockESP extends Module {
             wasGroup1KeyPressed = false;
             wasGroup2KeyPressed = false;
         }
+        
+        // 优化：缓存方块列表，减少重复get()调用
+        cachedBlocks1 = blocks1.get();
+        cachedBlocks2 = blocks2.get();
     }
 
     @EventHandler

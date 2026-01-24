@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import meteordevelopment.meteorclient.events.render.ApplyTransformationEvent;
 import meteordevelopment.meteorclient.events.render.RenderItemEntityEvent;
 import meteordevelopment.meteorclient.mixin.ItemRenderStateAccessor;
 import meteordevelopment.meteorclient.mixin.LayerRenderStateAccessor;
@@ -26,31 +25,33 @@ import org.joml.Vector3f;
 
 import java.util.List;
 
-public class ItemPhysics extends Module {
+public class ItemScaler extends Module {
     private static final float PIXEL_SIZE = 1f / 16f;
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    // 设置：自定义缩放倍率
-    private final Setting<Double> customScale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("custom-scale")
-        .description("Scale factor for the specific items in the list.")
-        .defaultValue(1.5) // 默认放大1.5倍
+    // 缩放设置
+    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("物品缩放倍数")
+        .defaultValue(2.0) // 默认放大2倍
         .min(0.1)
+        .max(5.0)
         .sliderMax(5.0)
         .build()
     );
 
-    // 设置：需要缩放的物品列表
-    private final Setting<List<Item>> customScaleItems = sgGeneral.add(new ItemListSetting.Builder()
-        .name("custom-scale-items")
-        .description("List of items to apply the custom scale to.")
+    // 物品列表设置
+    private final Setting<List<Item>> targetItems = sgGeneral.add(new ItemListSetting.Builder()
+        .name("target-items")
+        .description("要放大的物品列表")
         .defaultValue(
-            // 默认包含：金苹果、附魔金苹果、金锭(黄金)、钻石、玩家头颅(金头)、其他头颅
             Items.GOLDEN_APPLE,
             Items.ENCHANTED_GOLDEN_APPLE,
             Items.GOLD_INGOT,
             Items.DIAMOND,
+            Items.EMERALD,
+            Items.NETHERITE_INGOT,
             Items.PLAYER_HEAD,
             Items.CREEPER_HEAD,
             Items.ZOMBIE_HEAD,
@@ -62,41 +63,40 @@ public class ItemPhysics extends Module {
         .build()
     );
 
-    private final Setting<Boolean> smooth3D = sgGeneral.add(new BoolSetting.Builder()
-        .name("smooth-3d")
-        .description("Keep smooth 3D item rendering.")
-        .defaultValue(true)
-        .build()
-    );
-
-    public ItemPhysics() {
-        super(Categories.Render, "item-physics", "3D item rendering with custom scaling.");
+    public ItemScaler() {
+        super(Categories.Render, "item-scaler", "放大指定物品的模型大小");
     }
 
     @EventHandler
     private void onRenderItemEntity(RenderItemEntityEvent event) {
+        // 检查物品是否在目标列表中
+        Item item = event.itemEntity.getStack().getItem();
+        if (!targetItems.get().contains(item)) return;
+
+        // 应用缩放
+        double s = scale.get();
+        if (s == 1.0) return; // 如果是1倍缩放就跳过
+
+        // 取消原始渲染
         event.cancel();
 
-        if (event.renderState.itemRenderState.isEmpty())
-            return;
+        // 自定义渲染逻辑
+        if (event.renderState.itemRenderState.isEmpty()) return;
 
         MatrixStack matrices = event.matrixStack;
 
+        // 渲染每一层
         for (int i = 0; i < ((ItemRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayerCount(); i++) {
             ItemRenderState.LayerRenderState layer = ((ItemRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayers()[i];
             ModelInfo info = getInfo(layer.getQuads());
 
             matrices.push();
-            applyTransformation(matrices, ((LayerRenderStateAccessor) layer).meteor$getTransform());
-            matrices.translate(0, info.offsetY, 0);
-
-            // Apply custom scaling if item is in the list
-            if (customScaleItems.get().contains(event.itemEntity.getStack().getItem())) {
-                float s = customScale.get().floatValue();
-                if (s != 1.0f) {
-                    matrices.scale(s, s, s);
-                }
-            }
+            // 简化变换 - 取消随机旋转和物理效果
+            matrices.translate(0, 0, 0);
+            matrices.scale((float) s, (float) s, (float) s);
+            
+            // 应用固定的渲染位置
+            translate(matrices, info, 0, 0, 0);
 
             renderSimpleLayer(event, info);
 
@@ -105,41 +105,35 @@ public class ItemPhysics extends Module {
     }
 
     private void renderSimpleLayer(RenderItemEntityEvent event, ModelInfo info) {
-        // Keep original rendering logic but remove physics effects
-        for (int j = 0; j < event.renderState.renderedAmount; j++) {
-            if (j > 0) {
-                // Apply proper stacking without random physics
-                translate(event.matrixStack, info, 0, PIXEL_SIZE / 2f, 0);
-            }
-            
-            event.renderState.itemRenderState.render(
-                event.matrixStack, 
-                event.renderCommandQueue, 
-                event.light, 
-                OverlayTexture.DEFAULT_UV, 
-                event.renderState.outlineColor
-            );
-        }
+        // 完全禁用物理效果，简化渲染
+        // 取消随机堆叠效果
+        // 使用固定的Y轴偏移
+        translate(event.matrixStack, info, 0, 0, 0);
+        
+        event.renderState.itemRenderState.render(
+            event.matrixStack, 
+            event.renderCommandQueue, 
+            event.light, 
+            OverlayTexture.DEFAULT_UV, 
+            event.renderState.outlineColor
+        );
     }
 
     private void translate(MatrixStack matrices, ModelInfo info, float x, float y, float z) {
-        if (info.flat) {
-            float temp = y;
-            y = z;
-            z = -temp;
-        }
-        matrices.translate(x, y, z);
+        // 完全禁用物理效果
+        matrices.translate(x, 0, z);
     }
 
     private void applyTransformation(MatrixStack matrices, Transformation transform) {
-        // Simple transformation without physics effects
-        transform = new Transformation(
+        // 创建一个没有物理效果的转换
+        // 移除所有Y轴上的物理效果
+        Transformation cleanTransform = new Transformation(
             transform.rotation(),
             new Vector3f(transform.translation().x(), 0, transform.translation().z()),
             transform.scale()
         );
 
-        transform.apply(false, matrices.peek());
+        cleanTransform.apply(false, matrices.peek());
     }
 
     private ModelInfo getInfo(List<BakedQuad> quads) {

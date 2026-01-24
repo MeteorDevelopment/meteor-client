@@ -12,6 +12,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.util.DefaultSkinHelper;
 import net.minecraft.entity.player.SkinTextures;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,8 +26,24 @@ public abstract class PlayerListEntryMixin {
 
     @Inject(method = "getSkinTextures", at = @At("HEAD"), cancellable = true)
     private void onGetTexture(CallbackInfoReturnable<SkinTextures> info) {
-        if (Modules.get().get(NameProtect.class).shouldProtectSkin(getProfile().name())) {
-            info.setReturnValue(DefaultSkinHelper.getSkinTextures(getProfile()));
+        NameProtect nameProtect = Modules.get().get(NameProtect.class);
+        
+        if (nameProtect.nickAll()) {
+            // For nick-all, give everyone default skin except yourself if nickOthers is enabled
+            if (!nameProtect.nickOthers() || !getProfile().name().equals(MinecraftClient.getInstance().getSession().getUsername())) {
+                info.setReturnValue(DefaultSkinHelper.getSkinTextures(getProfile()));
+            }
+        } else if (getProfile().name().equals(MinecraftClient.getInstance().getSession().getUsername())) {
+            // Only apply skin protection to self if nickOthers is false
+            if (nameProtect.skinProtect() && !nameProtect.nickOthers()) {
+                info.setReturnValue(DefaultSkinHelper.getSkinTextures(getProfile()));
+            }
+        } else {
+            // Apply skin protection to other players if nickOthers is true
+            if (nameProtect.skinProtect() && nameProtect.nickOthers()) {
+                info.setReturnValue(DefaultSkinHelper.getSkinTextures(getProfile()));
+            }
         }
     }
+
 }

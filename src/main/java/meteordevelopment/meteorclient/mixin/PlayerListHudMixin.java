@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.player.NameProtect;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTab;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -39,8 +40,22 @@ public abstract class PlayerListHudMixin {
     @Inject(method = "getPlayerName", at = @At("HEAD"), cancellable = true)
     public void getPlayerName(PlayerListEntry playerListEntry, CallbackInfoReturnable<Text> info) {
         BetterTab betterTab = Modules.get().get(BetterTab.class);
+        NameProtect nameProtect = Modules.get().get(NameProtect.class);
 
-        if (betterTab.isActive()) info.setReturnValue(betterTab.getPlayerName(playerListEntry));
+        if (betterTab.isActive()) {
+            // Use BetterTab's getPlayerName method which already handles NameProtect and team colors
+            Text playerName = betterTab.getPlayerName(playerListEntry);
+            info.setReturnValue(playerName);
+        } else {
+            // For regular tab list, only apply name protection if name changes
+            String originalName = playerListEntry.getProfile().name();
+            String protectedName = nameProtect.getName(originalName);
+            
+            if (!originalName.equals(protectedName)) {
+                info.setReturnValue(Text.literal(protectedName));
+            }
+            // If name didn't change, let the original method handle it (keeps team colors)
+        }
     }
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"), index = 0)
@@ -77,7 +92,7 @@ public abstract class PlayerListHudMixin {
             int latency = MathHelper.clamp(entry.getLatency(), 0, 9999);
             int color = latency < 150 ? 0xFF00E970 :
                         latency < 300 ? 0xFFE7D020 : 0xFFD74238;
-            String text = latency + "ms";
+            String text = String.valueOf(latency);
             context.drawTextWithShadow(textRenderer, text, x + width - textRenderer.getWidth(text), y, color);
             ci.cancel();
         }

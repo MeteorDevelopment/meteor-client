@@ -181,13 +181,22 @@ public class StorageESP extends Module {
         .build()
     );
 
-    private final Color lineColor = new Color(0, 0, 0, 0);
-    private final Color sideColor = new Color(0, 0, 0, 0);
+    private Color lineColor = new Color(0, 0, 0, 0);
+    private Color sideColor = new Color(0, 0, 0, 0);
     
     private int count;
 
     private final MeshBuilder mesh;
     private final MeshBuilderVertexConsumerProvider vertexConsumerProvider;
+    
+    // 优化：缓存常用设置，减少重复get()调用
+    private List<BlockEntityType<?>> cachedStorageBlocks;
+    private boolean cachedHideOpened;
+    private int cachedFillOpacity;
+    private double cachedFadeDistance;
+    private boolean cachedTracers;
+    private ShapeMode cachedShapeMode;
+    private boolean cachedChestMinecarts;
 
     public StorageESP() {
         super(Categories.Render, "storage-esp", "Renders all specified storage blocks and minecarts.");
@@ -197,14 +206,21 @@ public class StorageESP extends Module {
     }
     
     private boolean getBlockEntityColor(BlockEntity blockEntity) {
-        if (!storageBlocks.get().contains(blockEntity.getType())) return false;
+        // 优化：快速检查方块类型是否在存储列表中
+        if (!cachedStorageBlocks.contains(blockEntity.getType())) return false;
 
-        if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
-        else if (blockEntity instanceof EnderChestBlockEntity) lineColor.set(enderChest.get());
-        else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
-        else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
-        else if (blockEntity instanceof TrappedChestBlockEntity) lineColor.set(trappedChest.get());
-        else if (blockEntity instanceof AbstractFurnaceBlockEntity 
+        // 优化：使用 instanceof 进行快速类型检查
+        if (blockEntity instanceof ChestBlockEntity) {
+            lineColor.set(chest.get());
+        } else if (blockEntity instanceof EnderChestBlockEntity) {
+            lineColor.set(enderChest.get());
+        } else if (blockEntity instanceof ShulkerBoxBlockEntity) {
+            lineColor.set(shulker.get());
+        } else if (blockEntity instanceof BarrelBlockEntity) {
+            lineColor.set(barrel.get());
+        } else if (blockEntity instanceof TrappedChestBlockEntity) {
+            lineColor.set(trappedChest.get());
+        } else if (blockEntity instanceof AbstractFurnaceBlockEntity 
               || blockEntity instanceof DispenserBlockEntity 
               || blockEntity instanceof HopperBlockEntity
               || blockEntity instanceof BrewingStandBlockEntity 
@@ -213,7 +229,9 @@ public class StorageESP extends Module {
               || blockEntity instanceof DecoratedPotBlockEntity) {
             lineColor.set(other.get());
         } 
-        else return false;
+        else {
+            return false;
+        }
 
         return true;
     }
@@ -252,13 +270,23 @@ public class StorageESP extends Module {
     private void onRender(Render3DEvent event) {
         count = 0;
         
-        // 修复崩溃：不要在这里调用 mesh.begin()，在循环内部判断 count==0 时调用
+        // 优化：缓存常用设置，减少重复get()调用
+        cachedStorageBlocks = storageBlocks.get();
+        cachedHideOpened = hideOpened.get();
+        cachedFillOpacity = fillOpacity.get();
+        cachedFadeDistance = fadeDistance.get();
+        cachedTracers = tracers.get();
+        cachedShapeMode = shapeMode.get();
+        cachedChestMinecarts = chestMinecarts.get();
+        
         boolean isShader = mode.get() == Mode.Shader;
+        double fadeDistSq = cachedFadeDistance * cachedFadeDistance;
+        int alphaThreshold = (int)(0.075 * 255); // 预计算透明度阈值
 
         // 1. 渲染方块实体 (箱子、桶等)
         for (BlockEntity blockEntity : Utils.blockEntities()) {
             boolean interacted = interactedBlocks.contains(blockEntity.getPos());
-            if (interacted && hideOpened.get()) continue;
+            if (interacted && cachedHideOpened) continue;
 
             if (!getBlockEntityColor(blockEntity)) continue;
 
@@ -266,15 +294,25 @@ public class StorageESP extends Module {
                 lineColor.set(openedColor.get());
             }
 
-            if (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) {
+            if (cachedShapeMode == ShapeMode.Sides || cachedShapeMode == ShapeMode.Both) {
                 sideColor.set(lineColor);
-                sideColor.a = fillOpacity.get();
+                sideColor.a = cachedFillOpacity;
             }
 
-            double dist = PlayerUtils.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
-            double alphaFactor = getAlphaFactor(dist);
-
-            if (alphaFactor <= 0.0) continue;
+            // 优化：预计算位置和使用更高效的距离计算
+            double blockX = blockEntity.getPos().getX() + 0.5;
+            double blockY = blockEntity.getPos().getY() + 0.5;
+            double blockZ = blockEntity.getPos().getZ() + 0.5;
+            double dist = PlayerUtils.squaredDistanceTo(blockX, blockY, blockZ);
+            
+            // 优化：更高效的透明度计算
+            double alphaFactor;
+            if (dist > fadeDistSq) {
+                alphaFactor = 1.0;
+            } else {
+                alphaFactor = dist / fadeDistSq;
+                if (alphaFactor < 0.075) continue; // 早期退出
+            }
 
             // 懒加载开启 Mesh
             if (count == 0 && isShader) {
@@ -283,12 +321,12 @@ public class StorageESP extends Module {
 
             int prevLineA = lineColor.a;
             int prevSideA = sideColor.a;
-            lineColor.a *= alphaFactor;
-            sideColor.a *= alphaFactor;
+            lineColor.a = (int)(lineColor.a * alphaFactor);
+            sideColor.a = (int)(sideColor.a * alphaFactor);
 
-            if (tracers.get()) {
+            if (cachedTracers) {
                 event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, 
-                    blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5, lineColor);
+                    blockX, blockY, blockZ, lineColor);
             }
 
             if (mode.get() == Mode.Box) {
@@ -304,20 +342,27 @@ public class StorageESP extends Module {
         }
 
         // 2. 渲染箱子矿车
-        if (chestMinecarts.get() && mc.world != null) {
+        if (cachedChestMinecarts && mc.world != null) {
             for (Entity entity : mc.world.getEntities()) {
                 if (entity instanceof ChestMinecartEntity minecart) {
                     lineColor.set(chest.get());
 
-                    if (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) {
+                    if (cachedShapeMode == ShapeMode.Sides || cachedShapeMode == ShapeMode.Both) {
                         sideColor.set(lineColor);
-                        sideColor.a = fillOpacity.get();
+                        sideColor.a = cachedFillOpacity;
                     }
 
+                    // 优化：直接计算距离，避免重复调用
                     double dist = PlayerUtils.squaredDistanceTo(minecart.getX(), minecart.getY(), minecart.getZ());
-                    double alphaFactor = getAlphaFactor(dist);
-
-                    if (alphaFactor <= 0.0) continue;
+                    
+                    // 优化：相同的透明度计算优化
+                    double alphaFactor;
+                    if (dist > fadeDistSq) {
+                        alphaFactor = 1.0;
+                    } else {
+                        alphaFactor = dist / fadeDistSq;
+                        if (alphaFactor < 0.075) continue; // 早期退出
+                    }
 
                     // 懒加载开启 Mesh (如果之前方块实体循环没开过)
                     if (count == 0 && isShader) {
@@ -326,10 +371,10 @@ public class StorageESP extends Module {
 
                     int prevLineA = lineColor.a;
                     int prevSideA = sideColor.a;
-                    lineColor.a *= alphaFactor;
-                    sideColor.a *= alphaFactor;
+                    lineColor.a = (int)(lineColor.a * alphaFactor);
+                    sideColor.a = (int)(sideColor.a * alphaFactor);
 
-                    if (tracers.get()) {
+                    if (cachedTracers) {
                         event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, 
                             minecart.getX(), minecart.getY(), minecart.getZ(), lineColor);
                     }
@@ -340,11 +385,8 @@ public class StorageESP extends Module {
                     double z = MathHelper.lerp(event.tickDelta, minecart.lastRenderZ, minecart.getZ()) - minecart.getZ();
                     
                     Box box = minecart.getBoundingBox();
-                    event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
+                    event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, cachedShapeMode, 0);
 
-                    // Shader 模式下，目前仅绘制简单的 Box 轮廓作为回退，因为Shader主要针对BlockEntity
-                    // 如果需要在 Shader 模式下也显示高亮，这里使用 Box 渲染是一个权衡
-                    
                     lineColor.a = prevLineA;
                     sideColor.a = prevSideA;
 
@@ -364,15 +406,6 @@ public class StorageESP extends Module {
         }
     }
     
-    private double getAlphaFactor(double distSq) {
-        double fadeDist = fadeDistance.get();
-        double fadeDistSq = fadeDist * fadeDist;
-        if (distSq > fadeDistSq) return 1.0;
-        
-        double a = distSq / fadeDistSq;
-        return a < 0.075 ? 0.0 : a;
-    }
-
     private void renderBox(Render3DEvent event, BlockEntity blockEntity) {
         double x1 = blockEntity.getPos().getX();
         double y1 = blockEntity.getPos().getY();
@@ -403,7 +436,7 @@ public class StorageESP extends Module {
             if (Dir.isNot(excludeDir, Dir.SOUTH)) z2 -= a;
         }
 
-        event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode.get(), excludeDir);
+        event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, cachedShapeMode, excludeDir);
     }
 
     private void renderShader(Render3DEvent event, BlockEntity blockEntity) {

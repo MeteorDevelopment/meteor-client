@@ -11,6 +11,8 @@ import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.player.NameProtect;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.network.PlayerListEntry;
@@ -87,8 +89,15 @@ public class BetterTab extends Module {
         Text name;
         Color color = null;
 
-        name = playerListEntry.getDisplayName();
-        if (name == null) name = Text.literal(playerListEntry.getProfile().name());
+        // 首先尝试使用 NameProtect 的 getDisplayName 方法来保持队伍颜色
+        NameProtect nameProtect = Modules.get().get(NameProtect.class);
+        name = nameProtect.getDisplayName(playerListEntry);
+        
+        // 如果 NameProtect 没有返回名字（没有需要修改的情况），使用默认逻辑
+        if (name == null) {
+            name = playerListEntry.getDisplayName();
+            if (name == null) name = Text.literal(playerListEntry.getProfile().name());
+        }
 
         if (playerListEntry.getProfile().id().toString().equals(mc.player.getGameProfile().id().toString()) && self.get()) {
             color = selfColor.get();
@@ -113,7 +122,7 @@ public class BetterTab extends Module {
             String gmText = "?";
             if (gm != null) {
                 gmText = switch (gm) {
-                    case SPECTATOR -> "Sp";
+                    case SPECTATOR -> "T";
                     case SURVIVAL -> "S";
                     case CREATIVE -> "C";
                     case ADVENTURE -> "A";
@@ -121,7 +130,7 @@ public class BetterTab extends Module {
             }
             MutableText text = Text.literal("");
             text.append(name);
-            text.append(" [" + gmText + "]");
+            text.append(" " + gmText);
             name = text;
         }
 

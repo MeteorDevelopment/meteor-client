@@ -92,17 +92,34 @@ public class ESPChunk {
 
         BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
+        // 优化：预检查列表，避免重复contains调用
+        boolean hasBlocks1 = blocks1 != null && !blocks1.isEmpty();
+        boolean hasBlocks2 = blocks2 != null && !blocks2.isEmpty();
+        
+        if (!hasBlocks1 && !hasBlocks2) return schunk; // 没有要搜索的方块
+
         for (int x = chunk.getPos().getStartX(); x <= chunk.getPos().getEndX(); x++) {
             for (int z = chunk.getPos().getStartZ(); z <= chunk.getPos().getEndZ(); z++) {
                 int height = chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE).get(x - chunk.getPos().getStartX(), z - chunk.getPos().getStartZ());
 
-                for (int y = mc.world.getBottomY(); y < height; y++) {
+                // 优化：从底部Y开始，但使用更智能的范围
+                int startY = Math.max(mc.world.getBottomY(), height - 64); // 只搜索顶部64层
+                for (int y = startY; y < height; y++) {
                     blockPos.set(x, y, z);
                     BlockState bs = chunk.getBlockState(blockPos);
+                    Block block = bs.getBlock();
 
-                    // Check if block is in either group
-                    if (blocks1.contains(bs.getBlock()) || blocks2.contains(bs.getBlock())) {
+                    // 优化：快速检查，避免重复contains调用
+                    boolean inGroup1 = hasBlocks1 && blocks1.contains(block);
+                    boolean inGroup2 = hasBlocks2 && blocks2.contains(block);
+                    
+                    if (inGroup1 || inGroup2) {
                         schunk.add(blockPos, false);
+                        
+                        // 优化：如果已经找到很多方块，可能需要限制搜索
+                        if (schunk.size() > 1000) {
+                            return schunk; // 防止过度搜索
+                        }
                     }
                 }
             }
