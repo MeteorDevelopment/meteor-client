@@ -82,6 +82,8 @@ public class Profile implements ISerializable<Profile> {
         if (macros.get()) Macros.get().load(folder);
         if (modules.get()) Modules.get().load(folder);
         if (waypoints.get()) Waypoints.get().load(folder);
+
+        Profiles.get().setActiveProfile(this);
     }
 
     public void save() {
