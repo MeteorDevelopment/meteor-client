@@ -54,19 +54,38 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
         }
     }
 
-    @Override
-    public boolean login() {
-        if (auth == null) return false;
-        applyLoginEnvironment(SERVICE);
-
-        try {
-            setSession(new Session(auth.getCurrentProfile().name(), auth.getCurrentProfile().id(), auth.getAccessToken(), Optional.empty(), Optional.empty()));
-            return true;
-        } catch (Exception e) {
-            MeteorClient.LOG.error("Failed to login with TheAltening.");
-            return false;
+@Override
+public boolean login() {
+    try {
+        // Make sure we have an auth instance
+        if (auth == null) auth = getAuth();
+        if (!auth.isLoggedIn()) {
+            auth.logIn();
         }
+
+        // Use the default Mojang environment (from Account.login)
+        // instead of rewiring everything to TheAltening
+        super.login();
+
+        // Install the TheAltening session into the client
+        setSession(new Session(
+            auth.getCurrentProfile().name(),
+            auth.getCurrentProfile().id(),
+            auth.getAccessToken(),
+            Optional.empty(),
+            Optional.empty()
+        ));
+
+        return true;
+    } catch (InvalidCredentialsException e) {
+        MeteorClient.LOG.error("Invalid TheAltening credentials.", e);
+        return false;
+    } catch (Exception e) {
+        MeteorClient.LOG.error("Failed to login with TheAltening.", e);
+        return false;
     }
+}
+
 
     private WaybackAuthLib getAuth() {
         WaybackAuthLib auth = new WaybackAuthLib(ENVIRONMENT.servicesHost());
