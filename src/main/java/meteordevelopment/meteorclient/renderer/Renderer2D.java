@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import meteordevelopment.meteorclient.gui.renderer.packer.TextureRegion;
 import meteordevelopment.meteorclient.utils.PreInit;
@@ -74,6 +76,32 @@ public class Renderer2D {
             .pipeline(textured ? MeteorRenderPipelines.UI_TEXTURED : MeteorRenderPipelines.UI_COLORED)
             .mesh(triangles)
             .sampler(samplerName, samplerView, sampler)
+            .end();
+    }
+
+    public void renderAnim(GpuTextureView textureView, GpuSampler sampler, GpuBuffer animationData) {
+        if (!textured)
+            throw new IllegalStateException("Tried to render with a texture with a non-textured Renderer2D");
+
+        renderAnim("u_Texture", textureView, sampler, animationData.slice());
+    }
+
+    public void renderAnim(String samplerName, GpuTextureView samplerView, GpuSampler sampler, GpuBufferSlice animationDataSlice) {
+        if (lines.isBuilding()) lines.end();
+        if (triangles.isBuilding()) triangles.end();
+
+        MeshRenderer.begin()
+            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .pipeline(MeteorRenderPipelines.UI_COLORED_LINES)
+            .mesh(lines)
+            .end();
+
+        MeshRenderer.begin()
+            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .pipeline(textured ? MeteorRenderPipelines.UI_TEXTURE_ANIM : MeteorRenderPipelines.UI_COLORED)
+            .mesh(triangles)
+            .sampler(samplerName, samplerView, sampler)
+            .uniform("AnimationData", animationDataSlice)
             .end();
     }
 

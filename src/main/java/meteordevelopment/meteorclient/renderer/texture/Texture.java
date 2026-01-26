@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.renderer;
+package meteordevelopment.meteorclient.renderer.texture;
 
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -13,6 +13,7 @@ import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
@@ -22,11 +23,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-public class Texture extends AbstractTexture {
+public class Texture extends AbstractTexture implements ITextureGetter {
     public Texture(int width, int height, TextureFormat format, FilterMode min, FilterMode mag) {
         glTexture = RenderSystem.getDevice().createTexture("", 15, format, width, height, 1, 1);
         sampler = RenderSystem.getSamplerCache().get(AddressMode.REPEAT, AddressMode.REPEAT, min, mag, false);
-
         glTextureView = RenderSystem.getDevice().createTextureView(glTexture);
     }
 
@@ -65,30 +65,37 @@ public class Texture extends AbstractTexture {
         return new NativeImage(imageFormat, getWidth(), getHeight(), false);
     }
 
-    public static Texture readResource(String path, boolean flipY, FilterMode filter) {
+    public static ITextureGetter readResource(String path, boolean flipY, FilterMode filter) {
         try (var in = Texture.class.getResourceAsStream(path)) {
             if (in == null) return null;
 
             var data = TextureUtil.readResource(in).rewind();
 
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                IntBuffer width = stack.mallocInt(1);
-                IntBuffer height = stack.mallocInt(1);
-                IntBuffer comp = stack.mallocInt(1);
-
-                STBImage.stbi_set_flip_vertically_on_load(flipY);
-                ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 4);
-
-                var texture = new Texture(width.get(0), height.get(0), TextureFormat.RGBA8, filter, filter);
-                texture.upload(image);
-
-                STBImage.stbi_image_free(image);
-                STBImage.stbi_set_flip_vertically_on_load(false);
-
-                return texture;
-            }
+            return readBuffer(data, flipY, filter);
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    @NonNull
+    public static Texture readBuffer(ByteBuffer buffer, boolean flipY, FilterMode filter) throws IOException {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer width = stack.mallocInt(1);
+            IntBuffer height = stack.mallocInt(1);
+            IntBuffer comp = stack.mallocInt(1);
+
+            if (!STBImage.stbi_info_from_memory(buffer, width, height, comp)) throw new IOException("Failed to read image data with STBI");
+
+            STBImage.stbi_set_flip_vertically_on_load(flipY);
+            ByteBuffer image = STBImage.stbi_load_from_memory(buffer, width, height, comp, 4);
+
+            var texture = new Texture(width.get(0), height.get(0), TextureFormat.RGBA8, filter, filter);
+            texture.upload(image);
+
+            STBImage.stbi_image_free(image);
+            STBImage.stbi_set_flip_vertically_on_load(false);
+
+            return texture;
         }
     }
 }
