@@ -128,6 +128,8 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
 
     public void tick(WContainer settings, GuiTheme theme) {
+        if (settings == null) return;
+
         for (SettingGroup group : groups) {
             for (Setting<?> setting : group) {
                 boolean visible = setting.isVisible();
