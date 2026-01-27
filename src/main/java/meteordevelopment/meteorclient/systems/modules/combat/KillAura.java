@@ -173,10 +173,17 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<EntityAge> mobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAge>()
-        .name("mob-age-filter")
-        .description("Determines the age of the mobs to target (baby, adult, or both).")
+    private final Setting<EntityAge> passiveMobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAge>()
+        .name("passive-mob-age-filter")
+        .description("Determines the age of passive mobs to target (animals, villagers).")
         .defaultValue(EntityAge.Adult)
+        .build()
+    );
+
+    private final Setting<EntityAge> hostileMobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAge>()
+        .name("hostile-mob-age-filter")
+        .description("Determines the age of hostile mobs to target (zombies, piglins, hoglins, zoglins).")
+        .defaultValue(EntityAge.Both)
         .build()
     );
 
@@ -422,12 +429,20 @@ public class KillAura extends Module {
             if (shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
             if (player instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) return false;
         }
-        // those are the entities with baby variants 
-        if (entity instanceof AnimalEntity || entity instanceof ZombieEntity
-            || entity instanceof VillagerEntity || entity instanceof PiglinEntity
+        // Passive mobs with baby variants (animals, villagers)
+        if (entity instanceof AnimalEntity || entity instanceof VillagerEntity) {
+            LivingEntity livingEntity = (LivingEntity) entity;
+            return switch (passiveMobAgeFilter.get()) {
+                case Baby -> livingEntity.isBaby();
+                case Adult -> !livingEntity.isBaby();
+                case Both -> true;
+            };
+        }
+        // Hostile mobs with baby variants (zombies, piglins, hoglins, zoglins)
+        if (entity instanceof ZombieEntity || entity instanceof PiglinEntity
             || entity instanceof HoglinEntity || entity instanceof ZoglinEntity) {
             LivingEntity livingEntity = (LivingEntity) entity;
-            return switch (mobAgeFilter.get()) {
+            return switch (hostileMobAgeFilter.get()) {
                 case Baby -> livingEntity.isBaby();
                 case Adult -> !livingEntity.isBaby();
                 case Both -> true;
