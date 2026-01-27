@@ -29,9 +29,13 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
 import net.minecraft.entity.mob.EndermanEntity;
+import net.minecraft.entity.mob.HoglinEntity;
 import net.minecraft.entity.mob.PiglinEntity;
+import net.minecraft.entity.mob.ZoglinEntity;
+import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -418,10 +422,14 @@ public class KillAura extends Module {
             if (shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
             if (player instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) return false;
         }
-        if (entity instanceof AnimalEntity animal) {
+        // those are the entities with baby variants 
+        if (entity instanceof AnimalEntity || entity instanceof ZombieEntity
+            || entity instanceof VillagerEntity || entity instanceof PiglinEntity
+            || entity instanceof HoglinEntity || entity instanceof ZoglinEntity) {
+            LivingEntity livingEntity = (LivingEntity) entity;
             return switch (mobAgeFilter.get()) {
-                case Baby -> animal.isBaby();
-                case Adult -> !animal.isBaby();
+                case Baby -> livingEntity.isBaby();
+                case Adult -> !livingEntity.isBaby();
                 case Both -> true;
             };
         }
