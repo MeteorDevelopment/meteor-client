@@ -124,22 +124,22 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public void info(Text message) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.sendMsg(null /* todo translatable Text */, message);
+        ChatUtils.sendMsg(this.getTranslationKey(), message);
     }
 
     public void info(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(null /* todo translatable Text */, message, args);
+        ChatUtils.infoPrefix(this.getTranslationKey(), message, args);
     }
 
     public void warning(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(null /* todo translatable Text */, message, args);
+        ChatUtils.warningPrefix(this.getTranslationKey(), message, args);
     }
 
     public void error(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(null /* todo translatable Text */, message, args);
+        ChatUtils.errorPrefix(this.getTranslationKey(), message, args);
     }
 
     public boolean isActive() {
@@ -150,20 +150,24 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         return null;
     }
 
+    public String getTranslationKey() {
+        return "module." + this.name;
+    }
+
     public String getTitle() {
-        return MeteorTranslations.translate("module." + this.name);
+        return MeteorTranslations.translate(this.getTranslationKey());
     }
 
     public MutableText getTitleText() {
-        return MeteorClient.translatable("module." + this.name);
+        return MeteorClient.translatable(this.getTranslationKey());
     }
 
     public String getDescription() {
-        return MeteorTranslations.translate("module." + this.name + ".description");
+        return MeteorTranslations.translate(this.getTranslationKey() + ".description");
     }
 
     public MutableText getDescriptionText() {
-        return MeteorClient.translatable("module." + this.name + ".description");
+        return MeteorClient.translatable(this.getTranslationKey() + ".description");
     }
 
     @Override

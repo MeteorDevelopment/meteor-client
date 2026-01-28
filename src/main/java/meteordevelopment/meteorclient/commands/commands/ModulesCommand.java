@@ -29,7 +29,7 @@ public class ModulesCommand extends Command {
             Modules.loopCategories().forEach(category -> {
                 MutableText categoryMessage = Text.literal("");
                 Modules.get().getGroup(category).forEach(module -> categoryMessage.append(getModuleText(module)));
-                ChatUtils.sendMsg(category.getName(), categoryMessage); // todo
+                ChatUtils.sendMsg(category.translationKey, categoryMessage);
             });
 
             return SINGLE_SUCCESS;

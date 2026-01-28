@@ -11,7 +11,7 @@ import net.minecraft.item.Items;
 
 public class Category {
     public final String name;
-    private final String translationKey;
+    public final String translationKey;
     public final ItemStack icon;
     private final int nameHash;
 

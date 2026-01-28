@@ -140,22 +140,22 @@ public class ChatUtils {
         sendMsg(id, null, null, color, message, args);
     }
 
-    public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, Formatting messageColor, String messageContent, Object... args) {
+    public static void sendMsg(int id, @Nullable String prefixKey, @Nullable Formatting prefixColor, Formatting messageColor, String messageContent, Object... args) {
         MutableText message = formatMsg(String.format(messageContent, args), messageColor);
-        sendMsg(id, prefixTitle, prefixColor, message);
+        sendMsg(id, prefixKey, prefixColor, message);
     }
 
-    public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, String messageContent, Formatting messageColor) {
+    public static void sendMsg(int id, @Nullable String prefixKey, @Nullable Formatting prefixColor, String messageContent, Formatting messageColor) {
         MutableText message = formatMsg(messageContent, messageColor);
-        sendMsg(id, prefixTitle, prefixColor, message);
+        sendMsg(id, prefixKey, prefixColor, message);
     }
 
-    public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, Text msg) {
+    public static void sendMsg(int id, @Nullable String prefixKey, @Nullable Formatting prefixColor, Text msg) {
         if (mc.world == null) return;
 
         MutableText message = Text.empty();
         message.append(getPrefix());
-        if (prefixTitle != null) message.append(getCustomPrefix(prefixTitle, prefixColor));
+        if (prefixKey != null) message.append(getCustomPrefix(prefixKey, prefixColor));
         message.append(msg);
 
         if (!Config.get().deleteChatFeedback.get()) id = 0;
@@ -164,13 +164,13 @@ public class ChatUtils {
         mc.execute(() -> ((IChatHud) mc.inGameHud.getChatHud()).meteor$add(message, finalId));
     }
 
-    private static MutableText getCustomPrefix(String prefixTitle, Formatting prefixColor) {
+    private static MutableText getCustomPrefix(String prefixKey, Formatting prefixColor) {
         MutableText prefix = Text.empty();
         prefix.setStyle(prefix.getStyle().withFormatting(Formatting.GRAY));
 
         prefix.append("[");
 
-        MutableText moduleTitle = Text.literal(prefixTitle);
+        MutableText moduleTitle = MeteorClient.translatable(prefixKey);
         moduleTitle.setStyle(moduleTitle.getStyle().withFormatting(prefixColor));
         prefix.append(moduleTitle);
 
