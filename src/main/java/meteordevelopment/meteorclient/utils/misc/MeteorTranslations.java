@@ -110,25 +110,29 @@ public class MeteorTranslations {
         languages.keySet().removeIf(languageCode -> !languageCode.equals(EN_US_CODE) && !languageCode.equals(currentLanguageCode));
     }
 
-    public static String translate(String key, Object... args) {
+    public static String translate(String key) {
         MeteorLanguage currentLang = getCurrentLanguage();
         debug(currentLang, key);
-        String translated = currentLang.get(key, () -> getDefaultLanguage().get(key));
+        return currentLang.get(key, () -> getDefaultLanguage().get(key));
+    }
 
+    public static String translate(String key, Object... args) {
         try {
-            return String.format(translated, args);
+            return String.format(translate(key), args);
         } catch (IllegalFormatException e) {
             return key;
         }
     }
 
-    public static String translate(String key, String fallback, Object... args) {
+    public static String translate(String key, String fallback) {
         MeteorLanguage currentLang = getCurrentLanguage();
         debug(currentLang, key);
-        String translated = currentLang.get(key, () -> getDefaultLanguage().get(key, fallback));
+        return currentLang.get(key, () -> getDefaultLanguage().get(key, fallback));
+    }
 
+    public static String translate(String key, String fallback, Object... args) {
         try {
-            return String.format(translated, args);
+            return String.format(translate(key, fallback), args);
         } catch (IllegalFormatException e) {
             return fallback;
         }
