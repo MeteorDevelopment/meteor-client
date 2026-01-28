@@ -5,6 +5,15 @@
   "meteor.key.open-commands": "Open Commands",
   "meteor.key.open-gui": "Open GUI",
 
+  "tab.config": "Config",
+  "tab.friends": "Friends",
+  "tab.gui": "GUI",
+  "tab.hud": "HUD",
+  "tab.macros": "Macros",
+  "tab.modules": "Modules",
+  "tab.pathing": "Pathing",
+  "tab.profiles": "Profiles",
+
   "command.bind.description": "Binds a specified module to the next pressed key.",
   "command.binds.description": "List of all bound modules.",
   "command.commands.description": "List of all commands.",

@@ -24,7 +24,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class MacrosTab extends Tab {
     public MacrosTab() {
-        super("Macros");
+        super("macros");
     }
 
     @Override

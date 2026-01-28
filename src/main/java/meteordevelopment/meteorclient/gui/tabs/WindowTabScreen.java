@@ -16,7 +16,7 @@ public abstract class WindowTabScreen extends TabScreen {
     public WindowTabScreen(GuiTheme theme, Tab tab) {
         super(theme, tab);
 
-        window = super.add(theme.window(tab.name)).center().widget();
+        window = super.add(theme.window(tab.getTitle())).center().widget();
     }
 
     @Override

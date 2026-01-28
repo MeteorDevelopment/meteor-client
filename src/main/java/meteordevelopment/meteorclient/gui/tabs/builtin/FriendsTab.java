@@ -24,7 +24,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FriendsTab extends Tab {
     public FriendsTab() {
-        super("Friends");
+        super("friends");
     }
 
     @Override

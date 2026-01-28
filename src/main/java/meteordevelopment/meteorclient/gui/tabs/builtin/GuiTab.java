@@ -21,7 +21,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class GuiTab extends Tab {
     public GuiTab() {
-        super("GUI");
+        super("gui");
     }
 
     @Override

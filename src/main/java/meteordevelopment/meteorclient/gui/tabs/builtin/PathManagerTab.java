@@ -15,7 +15,7 @@ import net.minecraft.client.gui.screen.Screen;
 
 public class PathManagerTab extends Tab {
     public PathManagerTab() {
-        super(PathManagers.get().getName());
+        super("pathing");
     }
 
     @Override

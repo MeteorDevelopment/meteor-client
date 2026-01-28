@@ -59,7 +59,7 @@ public class ProfilesTab extends Tab {
     }
 
     public ProfilesTab() {
-        super("Profiles");
+        super("profiles");
     }
 
     @Override
