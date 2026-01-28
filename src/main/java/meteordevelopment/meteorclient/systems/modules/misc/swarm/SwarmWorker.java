@@ -23,7 +23,7 @@ public class SwarmWorker extends Thread {
             socket = new Socket(ip, port);
         } catch (Exception e) {
             socket = null;
-            ChatUtils.warningPrefix("Swarm", "Server not found at %s on port %s.", ip, port);
+            ChatUtils.warningPrefix("module.swarm", "Server not found at %s on port %s.", ip, port);
             e.printStackTrace();
         }
 
@@ -32,7 +32,7 @@ public class SwarmWorker extends Thread {
 
     @Override
     public void run() {
-        ChatUtils.infoPrefix("Swarm", "Connected to Swarm host on at %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort());
+        ChatUtils.infoPrefix("module.swarm", "Connected to Swarm host on at %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort());
 
         try {
             DataInputStream in = new DataInputStream(socket.getInputStream());
@@ -42,12 +42,12 @@ public class SwarmWorker extends Thread {
                 String read = in.readUTF();
 
                 if (read.startsWith("swarm")) {
-                    ChatUtils.infoPrefix("Swarm", "Received command: (highlight)%s", read);
+                    ChatUtils.infoPrefix("module.swarm", "Received command: (highlight)%s", read);
 
                     try {
                         Commands.dispatch(read);
                     } catch (Exception e) {
-                        ChatUtils.error("Error fetching command.");
+                        ChatUtils.errorPrefix("module.swarm", "Error fetching command.");
                         e.printStackTrace();
                     }
                 }
@@ -55,7 +55,7 @@ public class SwarmWorker extends Thread {
 
             in.close();
         } catch (IOException e) {
-            ChatUtils.errorPrefix("Swarm", "Error in connection to host.");
+            ChatUtils.errorPrefix("module.swarm", "Error in connection to host.");
             e.printStackTrace();
             disconnect();
         }
@@ -70,7 +70,7 @@ public class SwarmWorker extends Thread {
 
         PathManagers.get().stop();
 
-        ChatUtils.infoPrefix("Swarm", "Disconnected from host.");
+        ChatUtils.infoPrefix("module.swarm", "Disconnected from host.");
 
         interrupt();
     }

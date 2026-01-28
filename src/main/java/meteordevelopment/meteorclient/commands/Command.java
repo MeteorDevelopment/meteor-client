@@ -11,7 +11,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
@@ -30,13 +29,11 @@ public abstract class Command {
     protected static final MinecraftClient mc = MeteorClient.mc;
 
     private final String name;
-    private final String title;
     private final List<String> aliases;
     public final String translationKey;
 
     public Command(String name, String... aliases) {
         this.name = name;
-        this.title = Utils.nameToTitle(name);
         this.aliases = List.of(aliases);
         this.translationKey = "command." + name;
     }
@@ -87,22 +84,22 @@ public abstract class Command {
 
     public void info(Text message) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.sendMsg(title, message);
+        ChatUtils.sendMsg(translationKey, message);
     }
 
     public void info(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(title, MeteorTranslations.translate(translationKey + ".info." + message, message, args));
+        ChatUtils.infoPrefix(translationKey, MeteorTranslations.translate(translationKey + ".info." + message, message, args)); // todo Textify body
     }
 
     public void warning(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(title, MeteorTranslations.translate(translationKey + ".warning." + message, message, args));
+        ChatUtils.warningPrefix(translationKey, MeteorTranslations.translate(translationKey + ".warning." + message, message, args)); // todo Textify body
     }
 
     public void error(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(title, MeteorTranslations.translate(translationKey + ".error." + message, message, args));
+        ChatUtils.errorPrefix(translationKey, MeteorTranslations.translate(translationKey + ".error." + message, message, args)); // todo Textify body
     }
 
     public MutableText translatable(String string, Object... args) {

@@ -4037,5 +4037,7 @@
   "module.bow-aimbot.general.nametagged": "Nametagged",
   "module.bow-aimbot.general.nametagged.description": "Whether or not to attack mobs with a name tag.",
   "module.bow-aimbot.general.pause-on-combat": "Pause On Combat",
-  "module.bow-aimbot.general.pause-on-combat.description": "Freezes Baritone temporarily until you released the bow."
+  "module.bow-aimbot.general.pause-on-combat.description": "Freezes Baritone temporarily until you released the bow.",
+
+  "starscript.title": "Starscript"
 }
