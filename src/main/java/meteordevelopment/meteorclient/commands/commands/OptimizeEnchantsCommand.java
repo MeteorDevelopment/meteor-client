@@ -131,14 +131,14 @@ public class OptimizeEnchantsCommand extends Command {
             // Display header
             String itemName = item != null ? item.getName().getString() : "Book";
             ChatUtils.info("=== Enchantment Optimization for %s ===", itemName);
-            info("Total Cost: (highlight)%d levels(default) (%d XP)", result.totalLevels(), result.totalXp());
+            ChatUtils.info("Total Cost: (highlight)%d levels(default) (%d XP)", result.totalLevels(), result.totalXp());
 
             if (result.instructions().isEmpty()) {
-                info("No combinations needed - single enchantment only.");
+                ChatUtils.info("No combinations needed - single enchantment only.");
                 return;
             }
 
-            info("Steps:");
+            ChatUtils.info("Steps:");
 
             // Display steps
             for (int i = 0; i < result.instructions().size(); i++) {
@@ -152,7 +152,7 @@ public class OptimizeEnchantsCommand extends Command {
 
                 ChatUtils.sendMsg(stepText);
 
-                info("     Cost: (highlight)%d levels(default) (%d XP), Prior Work Penalty: %d",
+                ChatUtils.info("     Cost: (highlight)%d levels(default) (%d XP), Prior Work Penalty: %d",
                     instr.levels(),
                     instr.xp(),
                     instr.priorWorkPenalty()
@@ -165,17 +165,31 @@ public class OptimizeEnchantsCommand extends Command {
     }
 
     private Text formatItem(EnchantmentOptimizer.Combination comb) {
-        if (comb.item != null) {
-            return comb.item.getName();
-        }
+        String baseName = comb.baseItem != null
+            ? comb.baseItem.getName().getString()
+            : "Book";
 
+        List<String> enchantments = new ArrayList<>();
+        collectEnchantments(comb, enchantments);
+
+        if (enchantments.isEmpty()) return Text.literal(baseName);
+
+        // Format: "ItemName (ench1, ench2, ench3)"
+        return Text.literal(baseName + " (" + String.join(", ", enchantments) + ")");
+    }
+
+    private void collectEnchantments(EnchantmentOptimizer.Combination comb, List<String> out) {
+        // Leaf node - single enchantment
         if (comb.enchantment != null) {
-            String enchName = comb.enchantment.value().description().getString();
-            String level = romanNumeral(comb.level);
-            return Text.literal(enchName + " " + level + " Book");
+            out.add(comb.enchantment.value().description().getString() + " " + romanNumeral(comb.level));
+            return;
         }
 
-        return Text.literal("Combined Item");
+        // Merged node - collect from both children
+        if (comb.left != null && comb.right != null) {
+            collectEnchantments(comb.left, out);
+            collectEnchantments(comb.right, out);
+        }
     }
 
     private String romanNumeral(int num) {

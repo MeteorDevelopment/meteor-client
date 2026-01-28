@@ -342,7 +342,8 @@ public class EnchantmentOptimizer {
         public int mergeCost;                                       // Only valid for merged nodes
         public int priorWork;
         public int value;                                           // Total value (sum of all books)
-        public @Nullable Item item;                                 // For base item
+        public @Nullable Item item;                                 // For base item (only set on leaf item nodes)
+        public @Nullable Item baseItem;                             // The base item for this combination tree (null = book)
         public @Nullable RegistryEntry<Enchantment> enchantment;    // For enchanted book
         public int level;
 
@@ -350,6 +351,7 @@ public class EnchantmentOptimizer {
             this.left = null;
             this.right = null;
             this.item = null;
+            this.baseItem = null;
             this.enchantment = null;
             this.value = 0;
             this.priorWork = 0;
@@ -360,6 +362,7 @@ public class EnchantmentOptimizer {
             this.left = null;
             this.right = null;
             this.item = null;
+            this.baseItem = null;  // Books have no base item
             this.enchantment = enchantment;
             this.level = level;
             this.value = value;
@@ -371,6 +374,7 @@ public class EnchantmentOptimizer {
             this.left = null;
             this.right = null;
             this.item = item;
+            this.baseItem = item;  // Store the base item
             this.enchantment = null;
             this.value = 0;
             this.priorWork = 0;
@@ -383,6 +387,7 @@ public class EnchantmentOptimizer {
             this.mergeCost = mergeCost;
             this.priorWork = priorWork;
             this.value = value;
+            this.baseItem = left.baseItem != null ? left.baseItem : right.baseItem;  // Propagate base item
             this.item = null;
             this.enchantment = null;
         }
