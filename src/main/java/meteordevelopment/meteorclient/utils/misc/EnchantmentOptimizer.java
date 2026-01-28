@@ -64,7 +64,7 @@ public class EnchantmentOptimizer {
                 int value = e.level() * enchantmentWeights[id];
                 IntList ids = IntLists.singleton(id);
                 ItemObject obj = new ItemObject(ItemType.BOOK, value, ids);
-                obj.combination = new Combination(e.enchantment(), e.level());
+                obj.combination = new Combination(e.enchantment(), e.level(), value);
                 return obj;
             })
             .collect(Collectors.toCollection(ArrayList::new));
@@ -236,10 +236,15 @@ public class EnchantmentOptimizer {
         Int2ObjectMap<ItemObject> result = new Int2ObjectOpenHashMap<>();
         int cheapestValue = Integer.MAX_VALUE;
 
-        for (Int2ObjectMap.Entry<ItemObject> entry : work2Item.int2ObjectEntrySet()) {
-            if (entry.getValue().value < cheapestValue) {
-                result.put(entry.getIntKey(), entry.getValue());
-                cheapestValue = entry.getValue().value;
+        // Must iterate in sorted order by priorWork (key)
+        int[] sortedKeys = work2Item.keySet().toIntArray();
+        IntArrays.quickSort(sortedKeys);
+
+        for (int priorWork : sortedKeys) {
+            ItemObject item = work2Item.get(priorWork);
+            if (item.value < cheapestValue) {
+                result.put(priorWork, item);
+                cheapestValue = item.value;
             }
         }
         return result;
@@ -252,6 +257,7 @@ public class EnchantmentOptimizer {
     }
 
     private void extractInstructions(Combination comb, List<Instruction> instructions) {
+        // Recursively extract child instructions first
         if (comb.left != null && comb.left.left != null) extractInstructions(comb.left, instructions);
         if (comb.right != null && comb.right.left != null) extractInstructions(comb.right, instructions);
 
@@ -333,9 +339,9 @@ public class EnchantmentOptimizer {
     public static class Combination {
         public @Nullable Combination left;
         public @Nullable Combination right;
-        public int mergeCost;
+        public int mergeCost;                                       // Only valid for merged nodes
         public int priorWork;
-        public int value;
+        public int value;                                           // Total value (sum of all books)
         public @Nullable Item item;                                 // For base item
         public @Nullable RegistryEntry<Enchantment> enchantment;    // For enchanted book
         public int level;
@@ -345,23 +351,32 @@ public class EnchantmentOptimizer {
             this.right = null;
             this.item = null;
             this.enchantment = null;
+            this.value = 0;
+            this.priorWork = 0;
         }
 
-        Combination(RegistryEntry<Enchantment> enchantment, int level) {
+        // For leaf book nodes
+        Combination(RegistryEntry<Enchantment> enchantment, int level, int value) {
             this.left = null;
             this.right = null;
             this.item = null;
             this.enchantment = enchantment;
             this.level = level;
+            this.value = value;
+            this.priorWork = 0;
         }
 
+        // For base item nodes
         Combination(Item item) {
             this.left = null;
             this.right = null;
             this.item = item;
             this.enchantment = null;
+            this.value = 0;
+            this.priorWork = 0;
         }
 
+        // For merged nodes
         Combination(Combination left, Combination right, int mergeCost, int priorWork, int value) {
             this.left = left;
             this.right = right;
