@@ -94,32 +94,56 @@ public class ChatUtils {
 
     // Default
 
-    public static void info(String message, Object... args) {
-        sendMsg(Formatting.GRAY, message, args);
+    public static void info(String messageKey, Object... args) {
+        sendMsg(Formatting.GRAY, messageKey, args);
     }
 
-    public static void infoPrefix(String prefix, String message, Object... args) {
-        sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.GRAY, message, args);
+    public static void infoRaw(String message, Object... args) {
+        sendMsgRaw(Formatting.GRAY, message, args);
+    }
+
+    public static void infoPrefix(String prefix, String messageKey, Object... args) {
+        sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.GRAY, messageKey, args);
+    }
+
+    public static void infoPrefixRaw(String prefix, String message, Object... args) {
+        sendMsgRaw(0, prefix, Formatting.LIGHT_PURPLE, Formatting.GRAY, message, args);
     }
 
     // Warning
 
-    public static void warning(String message, Object... args) {
-        sendMsg(Formatting.YELLOW, message, args);
+    public static void warning(String messageKey, Object... args) {
+        sendMsg(Formatting.YELLOW, messageKey, args);
     }
 
-    public static void warningPrefix(String prefix, String message, Object... args) {
-        sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.YELLOW, message, args);
+    public static void warningRaw(String message, Object... args) {
+        sendMsgRaw(Formatting.YELLOW, message, args);
+    }
+
+    public static void warningPrefix(String prefix, String messageKey, Object... args) {
+        sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.YELLOW, messageKey, args);
+    }
+
+    public static void warningPrefixRaw(String prefix, String message, Object... args) {
+        sendMsgRaw(0, prefix, Formatting.LIGHT_PURPLE, Formatting.YELLOW, message, args);
     }
 
     // Error
 
-    public static void error(String message, Object... args) {
-        sendMsg(Formatting.RED, message, args);
+    public static void error(String messageKey, Object... args) {
+        sendMsg(Formatting.RED, messageKey, args);
     }
 
-    public static void errorPrefix(String prefix, String message, Object... args) {
-        sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.RED, message, args);
+    public static void errorRaw(String message, Object... args) {
+        sendMsgRaw(Formatting.RED, message, args);
+    }
+
+    public static void errorPrefix(String prefix, String messageKey, Object... args) {
+        sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.RED, messageKey, args);
+    }
+
+    public static void errorPrefixRaw(String prefix, String message, Object... args) {
+        sendMsgRaw(0, prefix, Formatting.LIGHT_PURPLE, Formatting.RED, message, args);
     }
 
     // Misc
@@ -132,16 +156,29 @@ public class ChatUtils {
         sendMsg(0, prefix, Formatting.LIGHT_PURPLE, message);
     }
 
-    public static void sendMsg(Formatting color, String message, Object... args) {
-        sendMsg(0, null, null, color, message, args);
+    public static void sendMsg(Formatting color, String messageKey, Object... args) {
+        sendMsg(0, null, null, color, messageKey, args);
     }
 
-    public static void sendMsg(int id, Formatting color, String message, Object... args) {
-        sendMsg(id, null, null, color, message, args);
+    public static void sendMsgRaw(Formatting color, String message, Object... args) {
+        sendMsgRaw(0, null, null, color, message, args);
     }
 
-    public static void sendMsg(int id, @Nullable String prefixKey, @Nullable Formatting prefixColor, Formatting messageColor, String messageContent, Object... args) {
+    public static void sendMsg(int id, Formatting color, String messageKey, Object... args) {
+        sendMsg(id, null, null, color, messageKey, args);
+    }
+
+    public static void sendMsgRaw(int id, Formatting color, String message, Object... args) {
+        sendMsgRaw(id, null, null, color, message, args);
+    }
+
+    public static void sendMsgRaw(int id, @Nullable String prefixKey, @Nullable Formatting prefixColor, Formatting messageColor, String messageContent, Object... args) {
         MutableText message = formatMsg(String.format(messageContent, args), messageColor);
+        sendMsg(id, prefixKey, prefixColor, message);
+    }
+
+    public static void sendMsg(int id, @Nullable String prefixKey, @Nullable Formatting prefixColor, Formatting messageColor, String messageContentKey, Object... args) {
+        MutableText message = MeteorClient.translatable(messageContentKey, args).setStyle(Style.EMPTY.withFormatting(messageColor));
         sendMsg(id, prefixKey, prefixColor, message);
     }
 

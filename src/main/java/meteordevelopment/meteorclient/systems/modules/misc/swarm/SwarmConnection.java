@@ -22,7 +22,7 @@ public class SwarmConnection extends Thread {
 
     @Override
     public void run() {
-        ChatUtils.infoPrefix("module.swarm", "New worker connected on %s.", getIp(socket.getInetAddress().getHostAddress()));
+        ChatUtils.infoPrefixRaw("module.swarm", "New worker connected on %s.", getIp(socket.getInetAddress().getHostAddress()));
 
         try {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -33,7 +33,7 @@ public class SwarmConnection extends Thread {
                         out.writeUTF(messageToSend);
                         out.flush();
                     } catch (Exception e) {
-                        ChatUtils.errorPrefix("module.swarm", "Encountered error when sending command.");
+                        ChatUtils.errorPrefixRaw("module.swarm", "Encountered error when sending command.");
                         e.printStackTrace();
                     }
 
@@ -43,7 +43,7 @@ public class SwarmConnection extends Thread {
 
             out.close();
         } catch (IOException e) {
-            ChatUtils.infoPrefix("module.swarm", "Error creating a connection with %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort());
+            ChatUtils.infoPrefixRaw("module.swarm", "Error creating a connection with %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort());
             e.printStackTrace();
         }
     }
@@ -55,7 +55,7 @@ public class SwarmConnection extends Thread {
             e.printStackTrace();
         }
 
-        ChatUtils.infoPrefix("module.swarm", "Worker disconnected on ip: %s.", socket.getInetAddress().getHostAddress());
+        ChatUtils.infoPrefixRaw("module.swarm", "Worker disconnected on ip: %s.", socket.getInetAddress().getHostAddress());
 
         interrupt();
     }

@@ -73,7 +73,7 @@ public abstract class BookScreenMixin extends Screen {
                     long size = MemoryUtil.memLengthUTF8(encoded, true);
 
                     if (size > available) {
-                        ChatUtils.error("Could not copy to clipboard: Out of memory.");
+                        ChatUtils.errorRaw("Could not copy to clipboard: Out of memory.");
                     } else {
                         GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), encoded);
                     }

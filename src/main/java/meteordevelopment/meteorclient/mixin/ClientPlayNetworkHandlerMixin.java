@@ -41,7 +41,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -151,7 +150,7 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
             try {
                 Commands.dispatch(message.substring(Config.get().prefix.get().length()));
             } catch (CommandSyntaxException e) {
-                ChatUtils.error(e.getMessage());
+                ChatUtils.errorRaw(e.getMessage());
             }
 
             client.inGameHud.getChatHud().addToMessageHistory(message);

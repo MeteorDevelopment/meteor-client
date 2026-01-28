@@ -21,7 +21,7 @@ public class SwarmHost extends Thread {
             socket = new ServerSocket(port);
         } catch (IOException e) {
             socket = null;
-            ChatUtils.errorPrefix("module.swarm", "Couldn't start a server on port %s.", port);
+            ChatUtils.errorPrefixRaw("module.swarm", "Couldn't start a server on port %s.", port);
             e.printStackTrace();
         }
 
@@ -30,14 +30,14 @@ public class SwarmHost extends Thread {
 
     @Override
     public void run() {
-        ChatUtils.infoPrefix("module.swarm", "Listening for incoming connections on port %s.", socket.getLocalPort());
+        ChatUtils.infoPrefixRaw("module.swarm", "Listening for incoming connections on port %s.", socket.getLocalPort());
 
         while (!isInterrupted()) {
             try {
                 Socket connection = socket.accept();
                 assignConnectionToSubServer(connection);
             } catch (IOException e) {
-                ChatUtils.errorPrefix("module.swarm", "Error making a connection to worker.");
+                ChatUtils.errorPrefixRaw("module.swarm", "Error making a connection to worker.");
                 e.printStackTrace();
             }
         }
@@ -63,7 +63,7 @@ public class SwarmHost extends Thread {
             e.printStackTrace();
         }
 
-        ChatUtils.infoPrefix("module.swarm", "Server closed on port %s.", socket.getLocalPort());
+        ChatUtils.infoPrefixRaw("module.swarm", "Server closed on port %s.", socket.getLocalPort());
 
         interrupt();
     }

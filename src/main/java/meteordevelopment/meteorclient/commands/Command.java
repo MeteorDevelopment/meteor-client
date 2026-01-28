@@ -87,19 +87,34 @@ public abstract class Command {
         ChatUtils.sendMsg(translationKey, message);
     }
 
-    public void info(String message, Object... args) {
+    public void info(String messageKey, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(translationKey, MeteorTranslations.translate(translationKey + ".info." + message, message, args)); // todo Textify body
+        ChatUtils.infoPrefix(translationKey, translationKey + ".info." + messageKey, args);
     }
 
-    public void warning(String message, Object... args) {
+    public void infoRaw(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(translationKey, MeteorTranslations.translate(translationKey + ".warning." + message, message, args)); // todo Textify body
+        ChatUtils.infoPrefixRaw(translationKey, message, args);
     }
 
-    public void error(String message, Object... args) {
+    public void warning(String messageKey, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(translationKey, MeteorTranslations.translate(translationKey + ".error." + message, message, args)); // todo Textify body
+        ChatUtils.warningPrefix(translationKey, translationKey + ".warning." + messageKey, args);
+    }
+
+    public void warningRaw(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
+        ChatUtils.warningPrefixRaw(translationKey, message, args);
+    }
+
+    public void error(String messageKey, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
+        ChatUtils.errorPrefix(translationKey, translationKey + ".error." + messageKey, args);
+    }
+
+    public void errorRaw(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
+        ChatUtils.errorPrefixRaw(translationKey, message, args);
     }
 
     public MutableText translatable(String string, Object... args) {

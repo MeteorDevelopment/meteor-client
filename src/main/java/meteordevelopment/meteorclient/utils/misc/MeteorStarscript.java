@@ -243,12 +243,12 @@ public class MeteorStarscript {
         String caller = getCallerName();
 
         if (caller != null) {
-            if (i != -1) ChatUtils.errorPrefix("starscript.title", "%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller);
-            else ChatUtils.errorPrefix("starscript.title", "%d '%c': %s (from %s)", error.character, error.ch, error.message, caller);
+            if (i != -1) ChatUtils.errorPrefixRaw("starscript.title", "%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller);
+            else ChatUtils.errorPrefixRaw("starscript.title", "%d '%c': %s (from %s)", error.character, error.ch, error.message, caller);
         }
         else {
-            if (i != -1) ChatUtils.errorPrefix("starscript.title", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
-            else ChatUtils.errorPrefix("starscript.title", "%d '%c': %s", error.character, error.ch, error.message);
+            if (i != -1) ChatUtils.errorPrefixRaw("starscript.title", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
+            else ChatUtils.errorPrefixRaw("starscript.title", "%d '%c': %s", error.character, error.ch, error.message);
         }
     }
 
@@ -259,8 +259,8 @@ public class MeteorStarscript {
     public static void printChatError(StarscriptError e) {
         String caller = getCallerName();
 
-        if (caller != null) ChatUtils.errorPrefix("starscript.title", "%s (from %s)", e.getMessage(), caller);
-        else ChatUtils.errorPrefix("starscript.title", "%s", e.getMessage());
+        if (caller != null) ChatUtils.errorPrefixRaw("starscript.title", "%s (from %s)", e.getMessage(), caller);
+        else ChatUtils.errorPrefixRaw("starscript.title", "%s", e.getMessage());
     }
 
     private static String getCallerName() {

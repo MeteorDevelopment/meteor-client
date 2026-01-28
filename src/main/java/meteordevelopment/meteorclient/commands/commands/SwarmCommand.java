@@ -111,11 +111,11 @@ public class SwarmCommand extends Command {
             if (swarm.isActive()) {
                 if (swarm.isHost()) {
                     if (swarm.host.getConnectionCount() > 0) {
-                        ChatUtils.info("--- Swarm Connections (highlight)(%s/%s)(default) ---", swarm.host.getConnectionCount(), swarm.host.getConnections().length);
+                        ChatUtils.infoRaw("--- Swarm Connections (highlight)(%s/%s)(default) ---", swarm.host.getConnectionCount(), swarm.host.getConnections().length);
 
                         for (int i = 0; i < swarm.host.getConnections().length; i++) {
                             SwarmConnection connection = swarm.host.getConnections()[i];
-                            if (connection != null) ChatUtils.info("(highlight)Worker %s(default): %s.", i, connection.getConnection());
+                            if (connection != null) ChatUtils.infoRaw("(highlight)Worker %s(default): %s.", i, connection.getConnection());
                         }
                     }
                     else {

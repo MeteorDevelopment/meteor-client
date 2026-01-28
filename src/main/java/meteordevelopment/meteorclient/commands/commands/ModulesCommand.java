@@ -24,7 +24,7 @@ public class ModulesCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.info("--- Modules ((highlight)%d(default)) ---", Modules.get().getCount());
+            ChatUtils.infoRaw("--- Modules ((highlight)%d(default)) ---", Modules.get().getCount());
 
             Modules.loopCategories().forEach(category -> {
                 MutableText categoryMessage = Text.literal("");
