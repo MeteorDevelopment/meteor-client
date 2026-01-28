@@ -6,15 +6,16 @@
 package meteordevelopment.meteorclient.gui.tabs;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import net.minecraft.client.gui.screen.Screen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class Tab {
-    public final String name;
+    private final String translationKey;
 
     public Tab(String name) {
-        this.name = name;
+        this.translationKey = "tab." + name;
     }
 
     public void openScreen(GuiTheme theme) {
@@ -26,4 +27,8 @@ public abstract class Tab {
     public abstract TabScreen createScreen(GuiTheme theme);
 
     public abstract boolean isScreen(Screen screen);
+
+    public String getTitle() {
+        return MeteorTranslations.translate(this.translationKey);
+    }
 }

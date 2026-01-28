@@ -44,7 +44,7 @@ public abstract class WTopBar extends WHorizontalList {
         protected void onCalculateSize() {
             double pad = pad();
 
-            width = pad + theme.textWidth(tab.name) + pad;
+            width = pad + theme.textWidth(tab.getTitle()) + pad;
             height = pad + theme.textHeight() + pad;
         }
 
@@ -67,7 +67,7 @@ public abstract class WTopBar extends WHorizontalList {
             Color color = getButtonColor(pressed || (mc.currentScreen instanceof TabScreen && ((TabScreen) mc.currentScreen).tab == tab), mouseOver);
 
             renderer.quad(x, y, width, height, color);
-            renderer.text(tab.name, x + pad, y + pad, getNameColor(), false);
+            renderer.text(tab.getTitle(), x + pad, y + pad, getNameColor(), false);
         }
     }
 }
