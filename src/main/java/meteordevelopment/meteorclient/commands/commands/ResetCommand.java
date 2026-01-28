@@ -33,13 +33,13 @@ public class ResetCommand extends Command {
             }))
             .then(literal("all").executes(context -> {
                 Modules.get().getAll().forEach(module -> module.settings.forEach(group -> group.forEach(Setting::reset)));
-                ChatUtils.infoPrefix("tab.modules", "Reset all module settings");
+                ChatUtils.infoPrefixRaw("tab.modules", "Reset all module settings");
                 return SINGLE_SUCCESS;
             }))
         ).then(literal("gui").executes(context -> {
             GuiThemes.get().clearWindowConfigs();
             GuiThemes.get().settings.reset();
-            ChatUtils.info("Reset all GUI settings.");
+            ChatUtils.infoRaw("Reset all GUI settings.");
             return SINGLE_SUCCESS;
         })).then(literal("bind")
             .then(argument("module", ModuleArgumentType.create()).executes(context -> {
@@ -52,12 +52,12 @@ public class ResetCommand extends Command {
             }))
             .then(literal("all").executes(context -> {
                 Modules.get().getAll().forEach(module -> module.keybind.reset());
-                ChatUtils.infoPrefix("tab.modules", "Reset all binds.");
+                ChatUtils.infoPrefixRaw("tab.modules", "Reset all binds.");
                 return SINGLE_SUCCESS;
             }))
         ).then(literal("hud").executes(context -> {
             Hud.get().resetToDefaultElements();
-            ChatUtils.infoPrefix("tab.hud", "Reset all elements.");
+            ChatUtils.infoPrefixRaw("tab.hud", "Reset all elements.");
             return SINGLE_SUCCESS;
         }));
     }

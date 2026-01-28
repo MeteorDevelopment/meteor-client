@@ -118,7 +118,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public void sendToggledMsg() {
         if (Config.get().chatFeedback.get() && chatFeedback) {
             ChatUtils.forceNextPrefixClass(getClass());
-            ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", null /* todo translatable Text */, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+            ChatUtils.sendMsgRaw(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", null /* todo translatable Text */, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
         }
     }
 
@@ -127,19 +127,34 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         ChatUtils.sendMsg(this.getTranslationKey(), message);
     }
 
-    public void info(String message, Object... args) {
+    public void info(String messageKey, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(this.getTranslationKey(), message, args);
+        ChatUtils.infoPrefix(this.getTranslationKey(), messageKey, args);
     }
 
-    public void warning(String message, Object... args) {
+    public void infoRaw(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(this.getTranslationKey(), message, args);
+        ChatUtils.infoPrefixRaw(this.getTranslationKey(), message, args);
     }
 
-    public void error(String message, Object... args) {
+    public void warning(String messageKey, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(this.getTranslationKey(), message, args);
+        ChatUtils.warningPrefix(this.getTranslationKey(), messageKey, args);
+    }
+
+    public void warningRaw(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
+        ChatUtils.warningPrefixRaw(this.getTranslationKey(), message, args);
+    }
+
+    public void error(String messageKey, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
+        ChatUtils.errorPrefix(this.getTranslationKey(), messageKey, args);
+    }
+
+    public void errorRaw(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
+        ChatUtils.errorPrefixRaw(this.getTranslationKey(), message, args);
     }
 
     public boolean isActive() {
