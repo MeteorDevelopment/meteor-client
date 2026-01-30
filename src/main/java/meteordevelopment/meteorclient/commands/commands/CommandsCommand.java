@@ -26,7 +26,7 @@ public class CommandsCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.infoRaw("--- Commands ((highlight)%d(default)) ---", Commands.COMMANDS.size());
+            ChatUtils.info(translationKey + ".info.commands", Commands.COMMANDS.size());
 
             MutableText commands = Text.literal("");
             Commands.COMMANDS.forEach(command -> commands.append(getCommandText(command)));
@@ -40,7 +40,7 @@ public class CommandsCommand extends Command {
         // Hover tooltip
         MutableText tooltip = Text.literal("");
 
-        tooltip.append(Text.literal(Utils.nameToTitle(command.getName())).formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
+        tooltip.append(command.getTitle().formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
 
         MutableText aliases = Text.literal(Config.get().prefix.get() + command.getName());
         if (!command.getAliases().isEmpty()) {
@@ -56,7 +56,7 @@ public class CommandsCommand extends Command {
         tooltip.append(command.translatable("description")).formatted(Formatting.WHITE);
 
         // Text
-        MutableText text = Text.literal(Utils.nameToTitle(command.getName()));
+        MutableText text = command.getTitle();
         if (command != Commands.COMMANDS.getLast())
             text.append(Text.literal(", ").formatted(Formatting.GRAY));
         text.setStyle(text

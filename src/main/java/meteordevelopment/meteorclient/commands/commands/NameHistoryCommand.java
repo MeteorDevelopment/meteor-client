@@ -60,20 +60,20 @@ public class NameHistoryCommand extends Command {
                         )
                     )
                     .withHoverEvent(new HoverEvent.ShowText(
-                        Text.literal("View on laby.net")
+                        Text.literal("View on laby.net") // todo map
                             .formatted(Formatting.YELLOW)
                             .formatted(Formatting.ITALIC)
                     ))
                 );
 
-                info(initial.append(Text.literal(" Username History:").formatted(Formatting.GRAY)));
+                info(initial.append(Text.literal(" Username History:").formatted(Formatting.GRAY))); // todo map
 
                 for (Name entry : history.username_history) {
                     MutableText nameText = Text.literal(entry.name);
                     nameText.formatted(Formatting.AQUA);
 
                     if (entry.changed_at != null && entry.changed_at.getTime() != 0) {
-                        MutableText changed = Text.literal("Changed at: ");
+                        MutableText changed = Text.literal("Changed at: "); // todo map
                         changed.formatted(Formatting.GRAY);
 
                         DateFormat formatter = new SimpleDateFormat("hh:mm:ss, dd/MM/yyyy");

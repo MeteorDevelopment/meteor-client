@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
@@ -18,7 +19,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 
 public class DamageCommand extends Command {
-    private final static SimpleCommandExceptionType INVULNERABLE = new SimpleCommandExceptionType(Text.literal("You are invulnerable."));
+    private final static SimpleCommandExceptionType INVULNERABLE = new SimpleCommandExceptionType(MeteorClient.translatable("command.damage.exception.invulnerable"));
 
     public DamageCommand() {
         super("damage", "dmg");

@@ -11,7 +11,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
@@ -123,5 +122,9 @@ public abstract class Command {
 
     public MutableText translatable(String string, String fallback, Object... args) {
         return MeteorClient.translatable(translationKey + "." + string, fallback, args);
+    }
+
+    public MutableText getTitle() {
+        return MeteorClient.translatable(translationKey);
     }
 }

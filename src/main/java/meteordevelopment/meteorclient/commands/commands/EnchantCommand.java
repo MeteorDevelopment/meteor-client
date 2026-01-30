@@ -24,8 +24,8 @@ import net.minecraft.registry.entry.RegistryEntry;
 import java.util.function.ToIntFunction;
 
 public class EnchantCommand extends Command {
-    private static final SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.enchant.exception.not_in_creative"));
-    private static final SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.enchant.exception.not_holding_item"));
+    private static final SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(MeteorClient.translatable("command.enchant.exception.not_in_creative"));
+    private static final SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(MeteorClient.translatable("command.enchant.exception.not_holding_item"));
 
     public EnchantCommand() {
         super("enchant");

@@ -63,7 +63,7 @@ public class FakePlayerCommand extends Command {
 
         builder.then(literal("list")
             .executes(context -> {
-                info("--- Fake Players ((highlight)%s(default)) ---", FakePlayerManager.count());
+                info("fake_players", FakePlayerManager.count());
                 FakePlayerManager.forEach(fp -> info("(highlight)%s".formatted(fp.getName().getString())));
                 return SINGLE_SUCCESS;
             })

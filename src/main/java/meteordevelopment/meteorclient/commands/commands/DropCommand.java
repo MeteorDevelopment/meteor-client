@@ -22,8 +22,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 public class DropCommand extends Command {
-    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.drop.exception.not_spectator"));
-    private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.drop.exception.no_such_item"));
+    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(MeteorClient.translatable("command.drop.exception.not_spectator"));
+    private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(MeteorClient.translatable("command.drop.exception.no_such_item"));
 
     public DropCommand() {
         super("drop");
