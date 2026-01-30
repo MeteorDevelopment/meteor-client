@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.resource.language.I18n;
@@ -92,10 +93,10 @@ public class InputCommand extends Command {
         builder.then(literal("list").executes(ctx -> {
             if (activeHandlers.isEmpty()) warning("no_handlers");
             else {
-                info("");
+                info("active_handlers");
                 for (int i = 0; i < activeHandlers.size(); i++) {
                     KeypressHandler handler = activeHandlers.get(i);
-                    info("keypress_handler", i, I18n.translate(handler.key.getId()), handler.ticks, handler.totalTicks);
+                    info("keypress_handler", ChatUtils.highlight(i), ChatUtils.highlight(I18n.translate(handler.key.getId())), ChatUtils.highlight(handler.ticks), ChatUtils.highlight(handler.totalTicks));
                 }
             }
             return SINGLE_SUCCESS;

@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.FakePlayer;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 public class FakePlayerCommand extends Command {
@@ -63,7 +64,7 @@ public class FakePlayerCommand extends Command {
 
         builder.then(literal("list")
             .executes(context -> {
-                info("fake_players", FakePlayerManager.count());
+                info("fake_players", ChatUtils.highlight(FakePlayerManager.count()));
                 FakePlayerManager.forEach(fp -> info("(highlight)%s".formatted(fp.getName().getString())));
                 return SINGLE_SUCCESS;
             })

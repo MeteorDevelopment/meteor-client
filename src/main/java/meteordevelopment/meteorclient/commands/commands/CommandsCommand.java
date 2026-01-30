@@ -9,7 +9,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.ClickEvent;
@@ -26,7 +25,7 @@ public class CommandsCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.info(translationKey + ".info.commands", Commands.COMMANDS.size());
+            ChatUtils.info(translationKey + ".info.commands", ChatUtils.highlight(Commands.COMMANDS.size()));
 
             MutableText commands = Text.literal("");
             Commands.COMMANDS.forEach(command -> commands.append(getCommandText(command)));

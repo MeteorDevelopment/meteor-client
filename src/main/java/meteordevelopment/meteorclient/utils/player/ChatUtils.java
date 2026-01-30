@@ -173,7 +173,7 @@ public class ChatUtils {
     }
 
     public static void sendMsgRaw(int id, @Nullable String prefixKey, @Nullable Formatting prefixColor, Formatting messageColor, String messageContent, Object... args) {
-        MutableText message = formatMsg(String.format(messageContent, args), messageColor);
+        MutableText message = formatMsg(String.format(messageContent, args), Style.EMPTY.withFormatting(messageColor));
         sendMsg(id, prefixKey, prefixColor, message);
     }
 
@@ -183,7 +183,7 @@ public class ChatUtils {
     }
 
     public static void sendMsg(int id, @Nullable String prefixKey, @Nullable Formatting prefixColor, String messageContent, Formatting messageColor) {
-        MutableText message = formatMsg(messageContent, messageColor);
+        MutableText message = formatMsg(messageContent, Style.EMPTY.withFormatting(messageColor));
         sendMsg(id, prefixKey, prefixColor, message);
     }
 
@@ -253,10 +253,10 @@ public class ChatUtils {
         return PREFIX;
     }
 
-    private static MutableText formatMsg(String message, Formatting defaultColor) {
+    public static MutableText formatMsg(String message, Style defaultStyle) {
         StringReader reader = new StringReader(message);
         MutableText text = Text.empty();
-        Style style = Style.EMPTY.withFormatting(defaultColor);
+        Style style = defaultStyle;
         StringBuilder result = new StringBuilder();
         boolean formatting = false;
         while (reader.canRead()) {
@@ -272,7 +272,7 @@ public class ChatUtils {
                 if (formatting && c == ')') {
                     switch (result.toString()) {
                         case "(default)" -> {
-                            style = style.withFormatting(defaultColor);
+                            style = defaultStyle;
                             result.setLength(0);
                         }
                         case "(highlight)" -> {
@@ -298,9 +298,13 @@ public class ChatUtils {
         return text;
     }
 
+    public static MutableText highlight(Object object) {
+        return Text.literal(String.valueOf(object)).formatted(Formatting.WHITE);
+    }
+
     public static MutableText formatCoords(Vec3d pos) {
         String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
-        MutableText coordsText = formatMsg(coordsString, Formatting.GRAY);
+        MutableText coordsText = formatMsg(coordsString, Style.EMPTY.withFormatting(Formatting.GRAY));
 
         if (BaritoneUtils.IS_AVAILABLE) {
             Style style = coordsText.getStyle().withFormatting(Formatting.BOLD)
