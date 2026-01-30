@@ -30,9 +30,9 @@ public class FriendsCommand extends Command {
                     Friend friend = new Friend(profile.name(), profile.id());
 
                     if (Friends.get().add(friend)) {
-                        ChatUtils.sendMsgRaw(friend.hashCode(), Formatting.GRAY, "Added (highlight)%s (default)to friends.".formatted(friend.getName()));
+                        ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, translationKey + ".info.added", friend.getName());
                     }
-                    else error("Already friends with that player.");
+                    else error("already_friends");
 
                     return SINGLE_SUCCESS;
                 })
@@ -44,14 +44,14 @@ public class FriendsCommand extends Command {
                 .executes(context -> {
                     Friend friend = FriendArgumentType.get(context);
                     if (friend == null) {
-                        error("Not friends with that player.");
+                        error("not_friends");
                         return SINGLE_SUCCESS;
                     }
 
                     if (Friends.get().remove(friend)) {
-                        ChatUtils.sendMsgRaw(friend.hashCode(), Formatting.GRAY, "Removed (highlight)%s (default)from friends.".formatted(friend.getName()));
+                        ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, translationKey + ".info.removed", friend.getName());
                     }
-                    else error("Failed to remove that friend.");
+                    else error("failed");
 
                     return SINGLE_SUCCESS;
                 })
@@ -59,7 +59,7 @@ public class FriendsCommand extends Command {
         );
 
         builder.then(literal("list").executes(context -> {
-                info("--- Friends ((highlight)%s(default)) ---", Friends.get().count());
+                info("friends", Friends.get().count());
                 Friends.get().forEach(friend -> ChatUtils.infoRaw("(highlight)%s".formatted(friend.getName())));
                 return SINGLE_SUCCESS;
             })

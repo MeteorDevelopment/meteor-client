@@ -19,8 +19,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 
 public class GiveCommand extends Command {
-    private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.give.exception.not_in_creative"));
-    private final static SimpleCommandExceptionType NO_SPACE = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.give.exception.no_space"));
+    private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(MeteorClient.translatable("command.give.exception.not_in_creative"));
+    private final static SimpleCommandExceptionType NO_SPACE = new SimpleCommandExceptionType(MeteorClient.translatable("command.give.exception.no_space"));
 
     public GiveCommand() {
         super("give");
