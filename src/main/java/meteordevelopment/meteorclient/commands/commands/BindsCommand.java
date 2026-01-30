@@ -31,7 +31,7 @@ public class BindsCommand extends Command {
                 .filter(module -> module.keybind.isSet())
                 .toList();
 
-            ChatUtils.info(translationKey + ".info.bound_modules", modules.size());
+            ChatUtils.info(translationKey + ".info.bound_modules", ChatUtils.highlight(modules.size()));
 
             for (Module module : modules) {
                 HoverEvent hoverEvent = new HoverEvent.ShowText(getTooltip(module));

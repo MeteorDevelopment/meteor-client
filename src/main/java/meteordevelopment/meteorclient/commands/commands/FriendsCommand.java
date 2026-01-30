@@ -59,7 +59,7 @@ public class FriendsCommand extends Command {
         );
 
         builder.then(literal("list").executes(context -> {
-                info("friends", Friends.get().count());
+                info("friends", ChatUtils.highlight(Friends.get().count()));
                 Friends.get().forEach(friend -> ChatUtils.infoRaw("(highlight)%s".formatted(friend.getName())));
                 return SINGLE_SUCCESS;
             })
