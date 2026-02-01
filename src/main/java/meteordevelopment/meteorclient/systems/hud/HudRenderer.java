@@ -27,8 +27,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.lwjgl.BufferUtils;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -298,10 +298,12 @@ public class HudRenderer {
     }
 
     private static FontHolder loadFont(int height) {
-        byte[] data = Utils.readBytes(Fonts.RENDERER.fontFace.toStream());
-        ByteBuffer buffer = BufferUtils.createByteBuffer(data.length).put(data).flip();
-
-        return new FontHolder(new Font(buffer, height));
+        try {
+            ByteBuffer buffer = Fonts.RENDERER.fontFace.readToDirectByteBuffer();
+            return new FontHolder(new Font(buffer, height));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load font: " + Fonts.RENDERER.fontFace, e);
+        }
     }
 
     private static class FontHolder {
