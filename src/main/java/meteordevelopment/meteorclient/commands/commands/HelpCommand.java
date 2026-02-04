@@ -10,7 +10,6 @@ import com.mojang.brigadier.tree.CommandNode;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.commands.arguments.CommandArgumentType;
-import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.MutableText;
@@ -39,21 +38,15 @@ public class HelpCommand extends Command {
 
     private void showHelp(Command cmd) {
         MutableText msg = Text.literal("");
-
         msg.append(Text.literal("Help for ").formatted(Formatting.GRAY).append(Text.literal(cmd.getName()).formatted(Formatting.YELLOW)));
+        msg.append(Text.literal("\n ")).append(Text.literal("Description: ").formatted(Formatting.GRAY).append(Text.literal(cmd.getDescription()).formatted(Formatting.WHITE)));
 
-        msg.append(Text.literal("\n")).append(Text.literal("Description: ").formatted(Formatting.GRAY).append(Text.literal(cmd.getDescription()).formatted(Formatting.WHITE)));
-
-        msg.append(Text.literal("\n")).append(Text.literal("Aliases: ").formatted(Formatting.GRAY));
-
-        if (cmd.getAliases().isEmpty()) {
-            msg.append(Text.literal("None").formatted(Formatting.DARK_GRAY));
-        } else {
+        if (!cmd.getAliases().isEmpty()) {
+            msg.append(Text.literal("\n ")).append(Text.literal("Aliases: ").formatted(Formatting.GRAY));
             msg.append(Text.literal(String.join(", ", cmd.getAliases())).formatted(Formatting.AQUA));
         }
 
         msg.append(getUsageText(cmd));
-
         ChatUtils.sendMsg(msg);
     }
 
@@ -67,19 +60,15 @@ public class HelpCommand extends Command {
         if (node != null) {
             Map<CommandNode<CommandSource>, String> usages = Commands.DISPATCHER.getSmartUsage(node, source);
 
-            boolean first = true;
             for (String usage : usages.values()) {
-                if (!first) usagesText.append(Text.literal("\n"));
-                first = false;
-
-                usagesText.append(Text.literal(Config.get().prefix.get()).formatted(Formatting.DARK_GRAY).append(Text.literal(usage).formatted(Formatting.GREEN)));
+                usagesText.append(Text.literal("\n " + cmd + " ").formatted(Formatting.GREEN)).append(Text.literal(usage).formatted(Formatting.GREEN));
             }
         }
 
         if (usagesText.getString().isEmpty()) {
-            usagesText.append(Text.literal(cmd.toString()).formatted(Formatting.GREEN));
+            usagesText.append(Text.literal("\n " + cmd).formatted(Formatting.GREEN));
         }
 
-        return Text.literal("\nUsage:\n").formatted(Formatting.GRAY).append(usagesText);
+        return Text.literal("\n Usage:").formatted(Formatting.GRAY).append(usagesText);
     }
 }
