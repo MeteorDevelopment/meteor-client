@@ -145,12 +145,12 @@ public class ServerCommand extends Command {
         info("protocol_version", server.protocolVersion);
         info("difficulty",
             mc.world.getDifficulty().getTranslatableName(),
-            new LocalDifficulty(
+            String.format("%.2f", new LocalDifficulty(
                 mc.world.getDifficulty(),
                 mc.world.getTimeOfDay(),
                 mc.world.getChunk(mc.player.getBlockPos()).getInhabitedTime(),
                 DimensionType.MOON_SIZES[mc.world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL, mc.player.getBlockPos()).getIndex()] // lol
-            ).getLocalDifficulty()
+            ).getLocalDifficulty())
         );
         info("day", mc.world.getTimeOfDay() / 24000L);
         info(formatPerms());

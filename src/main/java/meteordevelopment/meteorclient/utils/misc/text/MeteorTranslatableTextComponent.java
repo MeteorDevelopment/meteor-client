@@ -117,9 +117,8 @@ public class MeteorTranslatableTextComponent implements TextContent {
 
     private static final StringVisitable LITERAL_PERCENT_SIGN = StringVisitable.plain("%");
     private static final StringVisitable NULL_ARGUMENT = StringVisitable.plain("null");
-    // %, optional position argument (\d$), string format (s) || percent literal (%|$) || number format ([-+.]? \d* [df])
-    @SuppressWarnings("RegExpRedundantEscape") // then why does it IllegalArgumentException when i remove it dipshit
-    private static final Pattern ARG_FORMAT = Pattern.compile("%(?:(\\d+)\\$)?([s%]|$|[-+\\.]?\\d*[df])");
+    // %, optional position argument (\d$), string format (s) || percent literal (%|$)
+    private static final Pattern ARG_FORMAT = Pattern.compile("%(?:(\\d+)\\$)?([s%]|$)");
 
     private void forEachPart(String translation, Consumer<StringVisitable> partsConsumer) {
         Matcher matcher = ARG_FORMAT.matcher(translation);
@@ -158,24 +157,8 @@ public class MeteorTranslatableTextComponent implements TextContent {
                             : argument == null ? NULL_ARGUMENT : StringVisitable.plain(argument.toString());
 
                         partsConsumer.accept(visitableArgument);
-                    } else if (argument instanceof StringVisitable) {
-                        if (argument instanceof MutableText mutableText && mutableText.getSiblings().isEmpty() && mutableText.getContent() instanceof PlainTextContent content) {
-                            try { // attempt to use formatting
-                                String format = "%" + string;
-                                partsConsumer.accept(StringVisitable.styled(String.format(format, content.string()), mutableText.getStyle()));
-                            } catch (IllegalFormatException e) {
-                                throw new TranslationException(new TranslatableTextContent(this.key, this.fallback, this.args), index);
-                            }
-                        } else { // cant use format strings on non-constant/complex arguments
-                            throw new TranslationException(new TranslatableTextContent(this.key, this.fallback, this.args), "Cant use complex format string with Text");
-                        }
-                    } else { // attempt to use formatting
-                        try {
-                            String format = "%" + string;
-                            partsConsumer.accept(StringVisitable.plain(String.format(format, argument)));
-                        } catch (IllegalFormatException e) {
-                            throw new TranslationException(new TranslatableTextContent(this.key, this.fallback, this.args), index);
-                        }
+                    } else {
+                        throw new TranslationException(new TranslatableTextContent(this.key, this.fallback, this.args), "Unsupported format: '" + string2 + "'");
                     }
                 }
 
