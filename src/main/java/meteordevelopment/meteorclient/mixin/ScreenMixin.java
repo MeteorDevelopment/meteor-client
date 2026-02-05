@@ -38,11 +38,12 @@ public abstract class ScreenMixin {
             info.cancel();
     }
 
-    @Inject(method = "handleClickEvent", at = @At(value = "HEAD"))
+    @Inject(method = "handleClickEvent", at = @At(value = "HEAD"), cancellable = true)
     private static void onHandleClickEvent(ClickEvent clickEvent, MinecraftClient client, Screen screenAfterRun, CallbackInfo ci) {
         if (!(clickEvent instanceof RunnableClickEvent runnableClickEvent)) return;
 
         runnableClickEvent.runnable.run();
+        ci.cancel();
     }
 
     @Inject(method = "handleBasicClickEvent", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", remap = false))
