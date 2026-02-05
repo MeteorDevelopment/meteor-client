@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class MeteorTranslatableTextComponent implements TextContent {
+public class MeteorTranslatableTextContent implements TextContent {
     private static final boolean DEBUG_MISSING_ENTRIES = FabricLoader.getInstance().isDevelopmentEnvironment() || Boolean.getBoolean("meteor.lang.debug");
     private final String key;
     @Nullable
@@ -32,7 +32,7 @@ public class MeteorTranslatableTextComponent implements TextContent {
     private String cachedLanguage;
     private List<StringVisitable> translations = ImmutableList.of();
 
-    public MeteorTranslatableTextComponent(String key, @Nullable String fallback, Object... args) {
+    public MeteorTranslatableTextContent(String key, @Nullable String fallback, Object... args) {
         this.key = key;
         this.fallback = fallback;
         this.args = args;
@@ -47,7 +47,7 @@ public class MeteorTranslatableTextComponent implements TextContent {
         this.styledArgs = hasStyledArgs;
     }
 
-    public MeteorTranslatableTextComponent(String key, Object... args) {
+    public MeteorTranslatableTextContent(String key, Object... args) {
         this(key, null, args);
     }
 
@@ -105,7 +105,7 @@ public class MeteorTranslatableTextComponent implements TextContent {
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
-        if (!(o instanceof MeteorTranslatableTextComponent component)) return false;
+        if (!(o instanceof MeteorTranslatableTextContent component)) return false;
         return Objects.equals(this.key, component.key) && Objects.equals(this.fallback, component.fallback) && Arrays.equals(this.args, component.args);
     }
 
