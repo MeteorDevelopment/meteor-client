@@ -51,6 +51,13 @@ public class MeteorTranslatableTextContent implements TextContent {
         this(key, null, args);
     }
 
+    public MeteorTranslatableTextContent(String key, @Nullable String fallback, Object[] args, boolean styledArgs) {
+        this.key = key;
+        this.fallback = fallback;
+        this.args = args;
+        this.styledArgs = styledArgs;
+    }
+
     private void updateTranslations() {
         if (!mc.options.language.equals(this.cachedLanguage)) {
             cachedLanguage = mc.options.language;

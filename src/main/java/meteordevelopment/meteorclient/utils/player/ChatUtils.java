@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.player;
 
 import com.mojang.brigadier.StringReader;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.mixininterface.IChatHud;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -42,6 +43,10 @@ public class ChatUtils {
             .append("] ");
     }
 
+    /**
+     * @deprecated use {@link GuiTheme#getChatPrefix()}
+     */
+    @Deprecated
     public static Text getMeteorPrefix() {
         return PREFIX;
     }
@@ -71,6 +76,10 @@ public class ChatUtils {
 
     public static void forceNextPrefixClass(Class<?> klass) {
         forcedPrefixClassName = klass.getName();
+    }
+
+    public static List<Pair<String, Supplier<Text>>> getCustomPrefixes() {
+        return customPrefixes;
     }
 
     // Player
