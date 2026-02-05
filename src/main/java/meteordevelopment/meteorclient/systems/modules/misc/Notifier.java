@@ -190,17 +190,17 @@ public class Notifier extends Module {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Despawn) {
             if (event.entity instanceof PlayerEntity) {
                 if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
-                    ChatUtils.sendMsgRaw(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getName().getString());
+                    ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, this.getTranslationKey() + ".info.entered_visual_range", event.entity.getName().getString());
 
                     if (visualMakeSound.get())
                         mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
                 }
             } else {
-                MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
-                text.append(Text.literal(" has spawned at ").formatted(Formatting.GRAY));
-                text.append(formatCoords(event.entity.getEntityPos()));
-                text.append(Text.literal(".").formatted(Formatting.GRAY));
-                info(text);
+                info(
+                    "spawned",
+                    Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE),
+                    formatCoords(event.entity.getEntityPos())
+                );
             }
         }
 
@@ -214,17 +214,17 @@ public class Notifier extends Module {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Spawn) {
             if (event.entity instanceof PlayerEntity) {
                 if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
-                    ChatUtils.sendMsgRaw(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getName().getString());
+                    ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, this.getTranslationKey() + ".info.left_visual_range", event.entity.getName().getString());
 
                     if (visualMakeSound.get())
                         mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
                 }
             } else {
-                MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
-                text.append(Text.literal(" has despawned at ").formatted(Formatting.GRAY));
-                text.append(formatCoords(event.entity.getEntityPos()));
-                text.append(Text.literal(".").formatted(Formatting.GRAY));
-                info(text);
+                info(
+                    "despawned",
+                    Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE),
+                    formatCoords(event.entity.getEntityPos())
+                );
             }
         }
 
@@ -236,7 +236,13 @@ public class Notifier extends Module {
                 if (pearl.getOwner() != null && pearl.getOwner() instanceof PlayerEntity p) {
                     double d = pearlStartPosMap.get(i).distanceTo(e.getEntityPos());
                     if ((!Friends.get().isFriend(p) || !pearlIgnoreFriends.get()) && (!p.equals(mc.player) || !pearlIgnoreOwn.get())) {
-                        info("(highlight)%s's(default) pearl landed at %d, %d, %d (highlight)(%.1fm away, travelled %.1fm)(default).", pearl.getOwner().getName().getString(), pearl.getBlockPos().getX(), pearl.getBlockPos().getY(), pearl.getBlockPos().getZ(), pearl.distanceTo(mc.player), d);
+                        info(
+                            "pearl_landed",
+                            Text.literal(pearl.getOwner().getName().getString()).formatted(Formatting.WHITE),
+                            ChatUtils.formatCoords(pearl.getEntityPos()),
+                            String.format("%.1f", pearl.distanceTo(mc.player)),
+                            String.format("%.1f", d)
+                        );
                     }
                 }
                 pearlStartPosMap.remove(i);
