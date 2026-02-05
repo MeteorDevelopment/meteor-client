@@ -34,7 +34,7 @@ public class CrackedAccount extends Account<CrackedAccount> {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof CrackedAccount)) return false;
-        return ((CrackedAccount) o).getUsername().equals(this.getUsername());
+        if (!(o instanceof CrackedAccount account)) return false;
+        return account.getUsername().equals(this.getUsername());
     }
 }

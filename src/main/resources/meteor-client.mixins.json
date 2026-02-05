@@ -16,6 +16,7 @@
     "AbstractSignEditScreenAccessor",
     "AbstractSignEditScreenMixin",
     "ArmorFeatureRendererMixin",
+    "ArmorStandEntityRendererMixin",
     "AttackRangeComponentMixin",
     "BannerBlockEntityRendererMixin",
     "BeaconBlockEntityRendererMixin",

@@ -60,11 +60,12 @@ public class TargetUtils {
     public static PlayerEntity getPlayerTarget(double range, SortPriority priority) {
         if (!Utils.canUpdate()) return null;
         return (PlayerEntity) get(entity -> {
-            if (!(entity instanceof PlayerEntity) || entity == mc.player) return false;
-            if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
+            if (!(entity instanceof PlayerEntity player) || entity == mc.player) return false;
+            if (player.isDead() || player.getHealth() <= 0) return false;
             if (!PlayerUtils.isWithin(entity, range)) return false;
-            if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
-            return EntityUtils.getGameMode((PlayerEntity) entity) == GameMode.SURVIVAL || entity instanceof FakePlayerEntity;
+            if (!Friends.get().shouldAttack(player)) return false;
+            if (entity instanceof FakePlayerEntity fakePlayer) return !fakePlayer.noHit;
+            return EntityUtils.getGameMode(player) == GameMode.SURVIVAL;
         }, priority);
     }
 
