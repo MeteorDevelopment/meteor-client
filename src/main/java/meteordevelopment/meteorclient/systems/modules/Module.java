@@ -118,7 +118,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public void sendToggledMsg() {
         if (Config.get().chatFeedback.get() && chatFeedback) {
             ChatUtils.forceNextPrefixClass(getClass());
-            ChatUtils.sendMsgRaw(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", null /* todo translatable Text */, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+            ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "module.base.toggled", this.getTitleText(), isActive() ? Text.literal("on").formatted(Formatting.GREEN) : Text.literal("off").formatted(Formatting.RED));
         }
     }
 
@@ -129,7 +129,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public void info(String messageKey, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(this.getTranslationKey(), messageKey, args);
+        ChatUtils.infoPrefix(this.getTranslationKey(), this.getTranslationKey() + ".info." + messageKey, args);
     }
 
     public void infoRaw(String message, Object... args) {
@@ -139,7 +139,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public void warning(String messageKey, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(this.getTranslationKey(), messageKey, args);
+        ChatUtils.warningPrefix(this.getTranslationKey(), this.getTranslationKey() + ".warning." + messageKey, args);
     }
 
     public void warningRaw(String message, Object... args) {
@@ -149,7 +149,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public void error(String messageKey, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(this.getTranslationKey(), messageKey, args);
+        ChatUtils.errorPrefix(this.getTranslationKey(), this.getTranslationKey() + ".error." + messageKey, args);
     }
 
     public void errorRaw(String message, Object... args) {

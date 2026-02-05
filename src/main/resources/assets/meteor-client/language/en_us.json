@@ -835,6 +835,7 @@
   "module.base.copy-config": "Copy config",
   "module.base.paste-config": "Paste config",
   "module.base.from": "From: ",
+  "module.base.toggled": "Toggled %1$s %2$s.",
 
   "module.air-jump": "Air Jump",
   "module.air-jump.description": "Lets you jump in the air.",
@@ -1075,6 +1076,11 @@
   "module.notifier.joins/leaves.notification-delay.description": "How long to wait in ticks before posting the next join/leave notification in your chat.",
   "module.notifier.joins/leaves.simple-notifications": "Simple Notifications",
   "module.notifier.joins/leaves.simple-notifications.description": "Display join/leave notifications without a prefix, to reduce chat clutter.",
+  "module.notifier.info.despawned": "%1$s has despawned at %2$.",
+  "module.notifier.info.spawned": "%1$s has spawned at %2$.",
+  "module.notifier.info.entered_visual_range": "%s has entered your visual range!",
+  "module.notifier.info.left_visual_range": "%s has left your visual range!",
+  "module.notifier.info.pearl_landed": "%1$s's pearl landed at %2$s (%3$sm away, travelled %4$sm).",
 
   "module.item-physics": "Item Physics",
   "module.item-physics.description": "Applies physics to items on the ground.",
@@ -1357,6 +1363,8 @@
   "module.book-bot.general.append-count.description": "Whether to append the number of the book to the title.",
   "module.book-bot.general.word-wrap": "Word Wrap",
   "module.book-bot.general.word-wrap.description": "Prevents words from being cut in the middle of lines.",
+  "module.book-bot.error.file_empty": "The bookbot file is empty!",
+  "module.book-bot.click_to_edit_file": "Click here to edit it.",
 
   "module.auto-gap": "Auto Gap",
   "module.auto-gap.description": "Automatically eats Gaps or E-Gaps.",
@@ -3520,6 +3528,7 @@
   "module.waypoints.death-position.max-death-positions.description": "The amount of death positions to save, 0 to disable",
   "module.waypoints.death-position.chat": "Chat",
   "module.waypoints.death-position.chat.description": "Send a chat message with your position once you die",
+  "module.waypoints.info.death": "Died at %1$s on %2$s.",
 
   "module.auto-web": "Auto Web",
   "module.auto-web.description": "Automatically places webs on other players.",
@@ -3947,6 +3956,7 @@
   "module.anchor-aura.render.side-color.description": "The side color for positions to be placed.",
   "module.anchor-aura.render.line-color": "Line Color",
   "module.anchor-aura.render.line-color.description": "The line color for positions to be placed.",
+  "module.anchor-aura.error.wrong_dimension": "You can't blow up respawn anchors in this dimension, disabling.",
 
   "module.anti-void": "Anti Void",
   "module.anti-void.description": "Attempts to prevent you from falling into the void.",
