@@ -198,7 +198,7 @@ public class NotebotCommand extends Command {
         }
 
         if (noteLevel == -1) {
-            error("bruteforce", soundPacket.getSound().value(), pitch);
+            error("bruteforce", soundPacket.getSound().value(), String.format("%.3f", pitch));
             return null;
         }
 
