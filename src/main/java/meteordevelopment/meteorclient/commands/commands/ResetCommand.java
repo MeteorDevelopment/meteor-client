@@ -28,36 +28,38 @@ public class ResetCommand extends Command {
             .then(argument("module", ModuleArgumentType.create()).executes(context -> {
                 Module module = context.getArgument("module", Module.class);
                 module.settings.forEach(group -> group.forEach(Setting::reset));
-                module.info("Reset all settings.");
+                ChatUtils.forceNextPrefixClass(module.getClass());
+                ChatUtils.infoPrefix(module.getTranslationKey(), "command.reset.info.module");
                 return SINGLE_SUCCESS;
             }))
             .then(literal("all").executes(context -> {
                 Modules.get().getAll().forEach(module -> module.settings.forEach(group -> group.forEach(Setting::reset)));
-                ChatUtils.infoPrefixRaw("tab.modules", "Reset all module settings");
+                ChatUtils.infoPrefix("tab.modules", "command.reset.info.modules");
                 return SINGLE_SUCCESS;
             }))
         ).then(literal("gui").executes(context -> {
             GuiThemes.get().clearWindowConfigs();
             GuiThemes.get().settings.reset();
-            ChatUtils.infoRaw("Reset all GUI settings.");
+            ChatUtils.info("command.reset.info.gui");
             return SINGLE_SUCCESS;
         })).then(literal("bind")
             .then(argument("module", ModuleArgumentType.create()).executes(context -> {
                 Module module = context.getArgument("module", Module.class);
 
                 module.keybind.reset();
-                module.info("Reset bind.");
+                ChatUtils.forceNextPrefixClass(module.getClass());
+                ChatUtils.infoPrefix(module.getTranslationKey(), "command.reset.info.bind");
 
                 return SINGLE_SUCCESS;
             }))
             .then(literal("all").executes(context -> {
                 Modules.get().getAll().forEach(module -> module.keybind.reset());
-                ChatUtils.infoPrefixRaw("tab.modules", "Reset all binds.");
+                ChatUtils.infoPrefix("tab.modules", "command.reset.info.binds");
                 return SINGLE_SUCCESS;
             }))
         ).then(literal("hud").executes(context -> {
             Hud.get().resetToDefaultElements();
-            ChatUtils.infoPrefixRaw("tab.hud", "Reset all elements.");
+            ChatUtils.infoPrefix("tab.hud", "command.reset.info.hud");
             return SINGLE_SUCCESS;
         }));
     }

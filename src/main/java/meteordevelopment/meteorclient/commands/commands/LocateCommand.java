@@ -30,6 +30,7 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -79,7 +80,7 @@ public class LocateCommand extends Command {
             if (stack.getItem() != Items.FILLED_MAP
                 || stack.get(DataComponentTypes.ITEM_NAME) == null
                 || !stack.get(DataComponentTypes.ITEM_NAME).getString().equals(Text.translatable("filled_map.buried_treasure").getString())) {
-                error("no_buried_treasure_map");
+                error("no_buried_treasure_map", Text.translatable("filled_map.buried_treasure").formatted(Formatting.WHITE));
                 return SINGLE_SUCCESS;
             }
 
@@ -106,7 +107,7 @@ public class LocateCommand extends Command {
             if (stack.getItem() != Items.FILLED_MAP
                 || stack.get(DataComponentTypes.ITEM_NAME) == null
                 || !stack.get(DataComponentTypes.ITEM_NAME).getString().equals(Text.translatable("filled_map.mansion").getString())) {
-                error("no_woodland_explorer_map");
+                error("no_woodland_explorer_map", Text.translatable("filled_map.mansion").formatted(Formatting.WHITE));
                 return SINGLE_SUCCESS;
             }
 
@@ -156,14 +157,14 @@ public class LocateCommand extends Command {
             if (BaritoneUtils.IS_AVAILABLE) {
                 Vec3d coords = findByBlockList(monumentBlocks);
                 if (coords == null) {
-                    error("no_monument_found");
+                    error("no_monument_found", Text.translatable("filled_map.monument").formatted(Formatting.WHITE));
                     return SINGLE_SUCCESS;
                 }
                 info("monument", ChatUtils.formatCoords(coords));
                 return SINGLE_SUCCESS;
             }
 
-            error("ocean_explorer_no_baritone");
+            error("ocean_explorer_no_baritone", Text.translatable("filled_map.monument").formatted(Formatting.WHITE));
             return SINGLE_SUCCESS;
         }));
 
@@ -181,7 +182,7 @@ public class LocateCommand extends Command {
             } else if (BaritoneUtils.IS_AVAILABLE) {
                 Vec3d coords = findByBlockList(strongholdBlocks);
                 if (coords == null) {
-                    error("no_stronghold_found");
+                    error("no_stronghold_found", Text.translatable("item.minecraft.ender_eye").formatted(Formatting.WHITE));
                     return SINGLE_SUCCESS;
                 }
                 info("stronghold", ChatUtils.formatCoords(coords));
@@ -243,17 +244,17 @@ public class LocateCommand extends Command {
         builder.then(literal("lodestone").executes(s -> {
             ItemStack stack = mc.player.getInventory().getSelectedStack();
             if (stack.getItem() != Items.COMPASS) {
-                error("no_lodestone_compass");
+                error("no_lodestone_compass", Text.translatable("item.minecraft.lodestone_compass").formatted(Formatting.WHITE));
                 return SINGLE_SUCCESS;
             }
             ComponentMap components = stack.getComponents();
             if (components == null) {
-                error("no_lodestone_compass_data");
+                error("no_lodestone_compass_data", Text.translatable("item.minecraft.lodestone_compass").formatted(Formatting.WHITE));
                 return SINGLE_SUCCESS;
             }
             LodestoneTrackerComponent lodestoneTrackerComponent = components.get(DataComponentTypes.LODESTONE_TRACKER);
             if (lodestoneTrackerComponent == null) {
-                error("no_lodestone_compass_data");
+                error("no_lodestone_compass_data", Text.translatable("item.minecraft.lodestone_compass").formatted(Formatting.WHITE));
                 return SINGLE_SUCCESS;
             }
 

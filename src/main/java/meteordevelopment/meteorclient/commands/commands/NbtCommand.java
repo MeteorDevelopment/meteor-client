@@ -10,6 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.DataResult;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.ComponentMapArgumentType;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
@@ -42,12 +43,12 @@ public class NbtCommand extends Command {
         error -> Text.stringifiedTranslatable("arguments.item.malformed", error)
     );
     private final Text copyButton = Text.literal("NBT").setStyle(Style.EMPTY
-        .withFormatting(Formatting.UNDERLINE)
+        .withFormatting(Formatting.UNDERLINE, Formatting.WHITE)
         .withClickEvent(new MeteorClickEvent(
             this.toString("copy")
         ))
         .withHoverEvent(new HoverEvent.ShowText(
-            Text.literal("Copy the NBT data to your clipboard.")
+            MeteorClient.translatable(translationKey + ".info.copy_tooltip")
         )));
 
     public NbtCommand() {
@@ -169,23 +170,20 @@ public class NbtCommand extends Command {
             DataCommandObject dataCommandObject = new EntityDataObject(mc.player);
             NbtPathArgumentType.NbtPath handPath = NbtPathArgumentType.NbtPath.parse("SelectedItem");
 
-            MutableText text = Text.empty().append(copyButton);
+            Text nbtText = Text.literal("{}").formatted(Formatting.WHITE);
             String nbt = "{}";
 
             try {
                 List<NbtElement> nbtElement = handPath.get(dataCommandObject.getNbt());
                 if (!nbtElement.isEmpty()) {
-                    text.append(" ").append(NbtHelper.toPrettyPrintedText(nbtElement.getFirst()));
+                    nbtText = Text.empty().append(NbtHelper.toPrettyPrintedText(nbtElement.getFirst())).formatted(Formatting.WHITE);
                     nbt = nbtElement.getFirst().toString();
                 }
-            } catch (CommandSyntaxException e) {
-                text.append("{}");
-            }
+            } catch (CommandSyntaxException ignored) {}
 
             mc.keyboard.setClipboard(nbt);
 
-            text.append(" data copied!");
-            info(text);
+            info("copy", copyButton, nbtText);
 
             return SINGLE_SUCCESS;
         }));
@@ -197,7 +195,7 @@ public class NbtCommand extends Command {
                 int count = IntegerArgumentType.getInteger(context, "count");
                 stack.setCount(count);
                 setStack(stack);
-                info("Set mainhand stack count to %s.", count);
+                info("count", count);
             }
 
             return SINGLE_SUCCESS;
@@ -210,12 +208,12 @@ public class NbtCommand extends Command {
 
     private boolean validBasic(ItemStack stack) {
         if (!mc.player.getAbilities().creativeMode) {
-            error("Creative mode only.");
+            error("not_creative");
             return false;
         }
 
         if (stack == ItemStack.EMPTY) {
-            error("You must hold an item in your main hand.");
+            error("no_item");
             return false;
         }
         return true;

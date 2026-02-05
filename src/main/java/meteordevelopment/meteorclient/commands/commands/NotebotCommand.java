@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 public class NotebotCommand extends Command {
-    private static final SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(Text.literal("Invalid song."));
-    private static final DynamicCommandExceptionType INVALID_PATH = new DynamicCommandExceptionType(object -> Text.literal("'%s' is not a valid path.".formatted(object)));
+    private static final SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(MeteorClient.translatable("command.notebot.error.invalid_song"));
+    private static final DynamicCommandExceptionType INVALID_PATH = new DynamicCommandExceptionType(object -> MeteorClient.translatable("command.notebot.error.invalid_path", object));
 
     int ticks = -1;
     private final Map<Integer, List<Note>> song = new HashMap<>(); // tick -> notes
@@ -111,13 +111,13 @@ public class NotebotCommand extends Command {
             ticks = -1;
             song.clear();
             MeteorClient.EVENT_BUS.subscribe(this);
-            info("Recording started");
+            info("recording_started");
             return SINGLE_SUCCESS;
         })));
 
         builder.then(literal("record").then(literal("cancel").executes(ctx -> {
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            info("Recording cancelled");
+            info("recording_cancelled");
             return SINGLE_SUCCESS;
         })));
 
@@ -176,9 +176,9 @@ public class NotebotCommand extends Command {
             }
 
             file.close();
-            info("Song saved.");
+            info("song_saved");
         } catch (IOException e) {
-            info("Couldn't create the file.");
+            error("cant_create_file");
             MeteorClient.EVENT_BUS.unsubscribe(this);
         }
 
@@ -198,13 +198,13 @@ public class NotebotCommand extends Command {
         }
 
         if (noteLevel == -1) {
-            error("Error while bruteforcing a note level! Sound: " + soundPacket.getSound().value() + " Pitch: " + pitch);
+            error("bruteforce", soundPacket.getSound().value(), pitch);
             return null;
         }
 
         NoteBlockInstrument instrument = getInstrumentFromSound(soundPacket.getSound().value());
         if (instrument == null) {
-            error("Can't find the instrument from sound! Sound: " + soundPacket.getSound().value());
+            error("instrument", soundPacket.getSound().value());
             return null;
         }
 
