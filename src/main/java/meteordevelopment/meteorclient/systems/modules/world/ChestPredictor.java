@@ -360,7 +360,6 @@ public class ChestPredictor extends Module {
             }
 
             for (Map<BlockPos, BlockState> blockMap : pieceData.variants) {
-                // chestPos refers to the chunk pos that is used to seed the loot table
                 BlockPos.Mutable chestPos = new BlockPos.Mutable();
                 if (!matchesWorld(pos, blockMap, chestPos)) {
                     continue;
@@ -413,6 +412,7 @@ public class ChestPredictor extends Module {
             BlockState worldBlockState = chunk.getBlockState(worldPos);
             BlockState expectedBlockState = posEntry.getValue();
 
+            // it is safe to compare block states by identity
             if (worldBlockState == expectedBlockState) {
                 if (expectedBlockState.isOf(Blocks.CHEST)) {
                     chestPos.set(worldPos);
@@ -620,13 +620,16 @@ public class ChestPredictor extends Module {
             String path = "data/%s/%s".formatted(fileIdentifier.getNamespace(), fileIdentifier.getPath());
             try (InputStream is = Files.newInputStream(modContainer.findPath(path).orElseThrow())) {
                 String string = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                MemorySegment stringInternal = GLOBAL_ARENA.allocateFrom(string);
-                MemorySegment ltc = LootTableContext.allocate(GLOBAL_ARENA);
-                if (Cubiomes.init_loot_table(stringInternal, ltc, Cubiomes.MC_NEWEST()) != 0) {
-                    LOGGER.error("Could not initialize loot table {}", lootTable.getValue());
-                    return null;
+                // use temporary arena so that the loot table string is deallocated
+                try (Arena tempArena = Arena.ofConfined()) {
+                    MemorySegment stringInternal = tempArena.allocateFrom(string);
+                    MemorySegment ltc = LootTableContext.allocate(GLOBAL_ARENA);
+                    if (Cubiomes.init_loot_table(stringInternal.reinterpret(GLOBAL_ARENA, null), ltc, Cubiomes.MC_NEWEST()) != 0) {
+                        LOGGER.error("Could not initialize loot table {}", lootTable.getValue());
+                        return null;
+                    }
+                    return ltc;
                 }
-                return ltc;
             } catch (IOException | NoSuchElementException e) {
                 LOGGER.error("Error while loading loot table %s".formatted(lootTable.getValue()), e);
                 return null;
