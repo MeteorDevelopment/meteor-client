@@ -32,3 +32,10 @@ accessible   class   net/minecraft/client/gui/DrawContext$ScissorStack
 accessible   field   net/minecraft/client/render/RenderSetup outputTarget Lnet/minecraft/client/render/OutputTarget;
 
 accessible   method   net/minecraft/entity/projectile/ProjectileEntity deflectsAgainstWorldBorder ()Z
+
+# Chest Predictor
+accessible field net/minecraft/structure/IglooGenerator BOTTOM_TEMPLATE Lnet/minecraft/util/Identifier;
+accessible field net/minecraft/structure/IglooGenerator OFFSETS Ljava/util/Map;
+accessible field net/minecraft/world/gen/structure/RuinedPortalStructure COMMON_PORTAL_STRUCTURE_IDS [Ljava/lang/String;
+accessible field net/minecraft/world/gen/structure/RuinedPortalStructure RARE_PORTAL_STRUCTURE_IDS [Ljava/lang/String;
+accessible field net/minecraft/structure/StructureTemplateManager STRUCTURE_NBT_RESOURCE_FINDER Lnet/minecraft/resource/ResourceFinder;

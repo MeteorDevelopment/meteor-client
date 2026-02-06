@@ -100,6 +100,7 @@ dependencies {
     jij(libs.netty.handler.proxy) { isTransitive = false }
     jij(libs.netty.codec.socks) { isTransitive = false }
     jij(libs.waybackauthlib)
+    jij(libs.cubiomes)
 }
 
 sourceSets {
@@ -190,8 +191,8 @@ tasks {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
 
         if (System.getenv("CI")?.toBoolean() == true) {
             withSourcesJar()

@@ -45,6 +45,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         factories.put(IntSetting.class, (table, setting) -> intW(table, (IntSetting) setting));
         factories.put(DoubleSetting.class, (table, setting) -> doubleW(table, (DoubleSetting) setting));
         factories.put(StringSetting.class, (table, setting) -> stringW(table, (StringSetting) setting));
+        factories.put(SeedSetting.class, (table, setting) -> seedW(table, (SeedSetting) setting));
         factories.put(EnumSetting.class, (table, setting) -> enumW(table, (EnumSetting<? extends Enum<?>>) setting));
         factories.put(ProvidedStringSetting.class, (table, setting) -> providedStringW(table, (ProvidedStringSetting) setting));
         factories.put(GenericSetting.class, (table, setting) -> genericW(table, (GenericSetting<?>) setting));
@@ -195,6 +196,15 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         textBox.action = () -> setting.set(textBox.get());
 
         reset(table, setting, () -> textBox.set(setting.get()));
+    }
+
+    private void seedW(WTable table, SeedSetting setting) {
+        Cell<WTextBox> cell = table.add(theme.textBox(String.valueOf(setting.get()), "Seed"));
+
+        WTextBox textBox = cell.expandX().widget();
+        textBox.action = () -> setting.parse(textBox.get());
+
+        reset(table, setting, () -> textBox.set(String.valueOf(setting.get())));
     }
 
     private void stringListW(WTable table, StringListSetting setting) {

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient;
 
+import dev.xpple.cubiomes.CubiomesInit;
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
@@ -82,6 +83,9 @@ public class MeteorClient implements ClientModInitializer {
             INSTANCE = this;
             return;
         }
+
+        // Needs to be loaded early
+        CubiomesInit.load();
 
         // Global minecraft client accessor
         mc = MinecraftClient.getInstance();

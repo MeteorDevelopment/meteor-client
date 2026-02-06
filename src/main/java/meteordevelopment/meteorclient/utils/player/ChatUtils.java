@@ -265,17 +265,25 @@ public class ChatUtils {
         String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
         MutableText coordsText = formatMsg(coordsString, Formatting.GRAY);
 
+        Style style;
         if (BaritoneUtils.IS_AVAILABLE) {
-            Style style = coordsText.getStyle().withFormatting(Formatting.BOLD)
+            style = coordsText.getStyle().withFormatting(Formatting.BOLD)
                 .withHoverEvent(new HoverEvent.ShowText(
                     Text.literal("Set as Baritone goal")
                 ))
                 .withClickEvent(new MeteorClickEvent(
                     String.format("%sgoto %d %d %d", BaritoneUtils.getPrefix(), (int) pos.x, (int) pos.y, (int) pos.z)
                 ));
-
-            coordsText.setStyle(style);
+        } else {
+            style = coordsText.getStyle().withFormatting(Formatting.BOLD)
+                .withHoverEvent(new HoverEvent.ShowText(
+                    Text.translatable("chat.copy.click")
+                ))
+                .withClickEvent(new ClickEvent.CopyToClipboard(
+                    "%d %d %d".formatted((int) pos.x, (int) pos.y, (int) pos.z)
+                ));
         }
+        coordsText.setStyle(style);
 
         return coordsText;
     }
