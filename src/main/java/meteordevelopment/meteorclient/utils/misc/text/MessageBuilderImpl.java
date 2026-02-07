@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.MessageFormatter;
 import meteordevelopment.meteorclient.mixininterface.IChatHud;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -37,11 +38,14 @@ public class MessageBuilderImpl implements MessageBuilder {
     private final MessageFormatter formatter = this.theme.messageFormatter();
 
     private int id = 0;
-    private MessageKind kind;
-    private @Nullable Class<?> topLevelPrefix;
+    private @Nullable MessageKind kind;
+    private @Nullable Object source;
     private @Nullable Text messagePrefix;
-    private @Nullable MutableText messageBody;
+    private @Nullable MutableText messageBodyText;
+    private @Nullable String messageBody;
     private Object[] args;
+
+    private @Nullable String translationContext;
 
     private boolean hasStyledArgs = false;
     private boolean closed = false;
@@ -63,9 +67,16 @@ public class MessageBuilderImpl implements MessageBuilder {
     }
 
     @Override
-    public MessageBuilder overrideClientPrefix(Class<?> holder) {
+    public MessageBuilder setTranslationContext(String translationContext) {
         assertOpen();
-        this.topLevelPrefix = holder;
+        this.translationContext = translationContext;
+        return this;
+    }
+
+    @Override
+    public MessageBuilder setSource(Object source) {
+        assertOpen();
+        this.source = source;
         return this;
     }
 
@@ -93,7 +104,7 @@ public class MessageBuilderImpl implements MessageBuilder {
     @Override
     public MessageBuilder body(MutableText body) {
         assertOpen();
-        this.messageBody = body;
+        this.messageBodyText = body;
         return this;
     }
 
@@ -101,17 +112,8 @@ public class MessageBuilderImpl implements MessageBuilder {
     public MessageBuilder body(String body, Object... args) {
         assertOpen();
         processArgs(args);
-        this.messageBody = Text.literal(String.format(body, args));
-        return this;
-    }
-
-    @Override
-    public MessageBuilder content(String translationKey, Object... args) {
-        assertOpen();
-        processArgs(args);
-        this.messageBody = MutableText.of(new MeteorTranslatableTextContent(
-            translationKey, null, args, this.hasStyledArgs
-        ));
+        this.messageBody = body;
+        this.args = args;
         return this;
     }
 
@@ -119,8 +121,10 @@ public class MessageBuilderImpl implements MessageBuilder {
 
     @Override
     public Text build() {
+        assertOpen();
         closed = true;
-        if (this.messageBody == null) {
+
+        if (this.messageBody == null || this.messageBodyText == null) {
             throw new IllegalArgumentException("Message body cannot be empty!");
         } else if (this.kind == null) {
             throw new IllegalArgumentException("Message cannot have a kind!");
@@ -133,7 +137,8 @@ public class MessageBuilderImpl implements MessageBuilder {
             message.append(this.formatter.formatPrefix(this.messagePrefix));
         }
 
-        message.append(this.formatter.formatMessage(this.messageBody, this.kind));
+        MutableText bodyText = this.messageBodyText != null ? this.messageBodyText : this.createMessageBody(this.messageBody, this.kind);
+        message.append(this.formatter.formatMessage(bodyText, this.kind));
 
         return message;
     }
@@ -197,8 +202,8 @@ public class MessageBuilderImpl implements MessageBuilder {
         }
 
         String className = null;
-        if (topLevelPrefix != null) {
-            className = topLevelPrefix.getName();
+        if (source != null) {
+            className = source.getClass().getName();
         } else {
             boolean foundClass = false;
             for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
@@ -227,6 +232,25 @@ public class MessageBuilderImpl implements MessageBuilder {
         }
 
         return this.theme.getChatPrefix();
+    }
+
+    private MutableText createMessageBody(String messageBody, MessageKind kind) {
+        MeteorTranslations.MeteorLanguage language = MeteorTranslations.getCurrentLanguage();
+
+        if (language.hasTranslation(messageBody)) {
+            return MutableText.of(new MeteorTranslatableTextContent(
+                messageBody, null, this.args, this.hasStyledArgs
+            ));
+        } else if (this.translationContext != null && kind != MessageKind.Passthrough) {
+            String computedTranslationKey = this.translationContext + "." + kind.key + "." + messageBody;
+            if (language.hasTranslation(computedTranslationKey)) {
+                return MutableText.of(new MeteorTranslatableTextContent(
+                    computedTranslationKey, null, this.args, this.hasStyledArgs
+                ));
+            }
+        }
+
+        return Text.literal(messageBody);
     }
 
     private void assertOpen() {

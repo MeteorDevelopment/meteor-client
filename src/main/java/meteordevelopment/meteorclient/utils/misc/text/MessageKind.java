@@ -6,8 +6,14 @@
 package meteordevelopment.meteorclient.utils.misc.text;
 
 public enum MessageKind {
-    Passthrough,
-    Info,
-    Warning,
-    Error
+    Passthrough(null),
+    Info("info"),
+    Warning("warning"),
+    Error("error");
+
+    public String key;
+
+    MessageKind(String key) {
+        this.key = key;
+    }
 }
