@@ -10,9 +10,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public interface MessageBuilder {
+    static MessageBuilder create() {
+        return new MessageBuilderImpl();
+    }
+
     MessageBuilder setId(int id);
     MessageBuilder setKind(MessageKind kind);
-    MessageBuilder overrideClientPrefix(Class<?> holder);
+    MessageBuilder setTranslationContext(String translationContext);
+    MessageBuilder setSource(Object source);
 
     MessageBuilder prefix(MutableText prefix);
     MessageBuilder prefix(String prefix);
@@ -20,7 +25,6 @@ public interface MessageBuilder {
 
     MessageBuilder body(MutableText body);
     MessageBuilder body(String body, Object... args);
-    MessageBuilder content(String translationKey, Object... args);
 
     Text build();
     void send();
