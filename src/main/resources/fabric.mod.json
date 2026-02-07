@@ -58,6 +58,7 @@
     "feather": "*",
     "origins": "*",
     "sodium": "<0.7.0",
-    "morechathistory": "*"
+    "morechathistory": "*",
+    "lithium": "<0.21.3"
   }
 }

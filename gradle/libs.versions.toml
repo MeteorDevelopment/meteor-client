@@ -15,7 +15,7 @@ baritone = "1.21.10-SNAPSHOT"
 # Sodium (https://github.com/CaffeineMC/sodium-fabric)
 sodium = "mc1.21.11-0.8.0-fabric"
 # Lithium (https://github.com/CaffeineMC/lithium-fabric)
-lithium = "mc1.21.11-0.21.1-fabric"
+lithium = "mc1.21.11-0.21.3-fabric"
 # Iris (https://github.com/IrisShaders/Iris)
 iris = "1.10.2+1.21.11-fabric"
 # ModMenu (https://github.com/TerraformersMC/ModMenu)
