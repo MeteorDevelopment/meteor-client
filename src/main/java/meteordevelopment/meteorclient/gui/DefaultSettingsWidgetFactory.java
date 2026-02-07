@@ -41,36 +41,36 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     public DefaultSettingsWidgetFactory(GuiTheme theme) {
         super(theme);
 
-        factories.put(BoolSetting.class, (table, setting) -> boolW(table, (BoolSetting) setting));
-        factories.put(IntSetting.class, (table, setting) -> intW(table, (IntSetting) setting));
-        factories.put(DoubleSetting.class, (table, setting) -> doubleW(table, (DoubleSetting) setting));
-        factories.put(StringSetting.class, (table, setting) -> stringW(table, (StringSetting) setting));
-        factories.put(EnumSetting.class, (table, setting) -> enumW(table, (EnumSetting<? extends Enum<?>>) setting));
-        factories.put(ProvidedStringSetting.class, (table, setting) -> providedStringW(table, (ProvidedStringSetting) setting));
-        factories.put(GenericSetting.class, (table, setting) -> genericW(table, (GenericSetting<?>) setting));
-        factories.put(ColorSetting.class, (table, setting) -> colorW(table, (ColorSetting) setting));
-        factories.put(KeybindSetting.class, (table, setting) -> keybindW(table, (KeybindSetting) setting));
-        factories.put(BlockSetting.class, (table, setting) -> blockW(table, (BlockSetting) setting));
-        factories.put(BlockListSetting.class, (table, setting) -> blockListW(table, (BlockListSetting) setting));
-        factories.put(ItemSetting.class, (table, setting) -> itemW(table, (ItemSetting) setting));
-        factories.put(ItemListSetting.class, (table, setting) -> itemListW(table, (ItemListSetting) setting));
-        factories.put(EntityTypeListSetting.class, (table, setting) -> entityTypeListW(table, (EntityTypeListSetting) setting));
-        factories.put(EnchantmentListSetting.class, (table, setting) -> enchantmentListW(table, (EnchantmentListSetting) setting));
-        factories.put(ModuleListSetting.class, (table, setting) -> moduleListW(table, (ModuleListSetting) setting));
-        factories.put(PacketListSetting.class, (table, setting) -> packetListW(table, (PacketListSetting) setting));
-        factories.put(ParticleTypeListSetting.class, (table, setting) -> particleTypeListW(table, (ParticleTypeListSetting) setting));
-        factories.put(SoundEventListSetting.class, (table, setting) -> soundEventListW(table, (SoundEventListSetting) setting));
-        factories.put(StatusEffectAmplifierMapSetting.class, (table, setting) -> statusEffectAmplifierMapW(table, (StatusEffectAmplifierMapSetting) setting));
-        factories.put(StatusEffectListSetting.class, (table, setting) -> statusEffectListW(table, (StatusEffectListSetting) setting));
-        factories.put(StorageBlockListSetting.class, (table, setting) -> storageBlockListW(table, (StorageBlockListSetting) setting));
-        factories.put(ScreenHandlerListSetting.class, (table, setting) -> screenHandlerListW(table, (ScreenHandlerListSetting) setting));
-        factories.put(BlockDataSetting.class, (table, setting) -> blockDataW(table, (BlockDataSetting<?>) setting));
-        factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
-        factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
-        factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
-        factories.put(ColorListSetting.class, (table, setting) -> colorListW(table, (ColorListSetting) setting));
-        factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
-        factories.put(Vector3dSetting.class, (table, setting) -> vector3dW(table, (Vector3dSetting) setting));
+        factories.put(BoolSetting.class, (container, setting) -> boolW(container, (BoolSetting) setting));
+        factories.put(IntSetting.class, (container, setting) -> intW(container, (IntSetting) setting));
+        factories.put(DoubleSetting.class, (container, setting) -> doubleW(container, (DoubleSetting) setting));
+        factories.put(StringSetting.class, (container, setting) -> stringW(container, (StringSetting) setting));
+        factories.put(EnumSetting.class, (container, setting) -> enumW(container, (EnumSetting<? extends Enum<?>>) setting));
+        factories.put(ProvidedStringSetting.class, (container, setting) -> providedStringW(container, (ProvidedStringSetting) setting));
+        factories.put(GenericSetting.class, (container, setting) -> genericW(container, (GenericSetting<?>) setting));
+        factories.put(ColorSetting.class, (container, setting) -> colorW(container, (ColorSetting) setting));
+        factories.put(KeybindSetting.class, (container, setting) -> keybindW(container, (KeybindSetting) setting));
+        factories.put(BlockSetting.class, (container, setting) -> blockW(container, (BlockSetting) setting));
+        factories.put(BlockListSetting.class, (container, setting) -> blockListW(container, (BlockListSetting) setting));
+        factories.put(ItemSetting.class, (container, setting) -> itemW(container, (ItemSetting) setting));
+        factories.put(ItemListSetting.class, (container, setting) -> itemListW(container, (ItemListSetting) setting));
+        factories.put(EntityTypeListSetting.class, (container, setting) -> entityTypeListW(container, (EntityTypeListSetting) setting));
+        factories.put(EnchantmentListSetting.class, (container, setting) -> enchantmentListW(container, (EnchantmentListSetting) setting));
+        factories.put(ModuleListSetting.class, (container, setting) -> moduleListW(container, (ModuleListSetting) setting));
+        factories.put(PacketListSetting.class, (container, setting) -> packetListW(container, (PacketListSetting) setting));
+        factories.put(ParticleTypeListSetting.class, (container, setting) -> particleTypeListW(container, (ParticleTypeListSetting) setting));
+        factories.put(SoundEventListSetting.class, (container, setting) -> soundEventListW(container, (SoundEventListSetting) setting));
+        factories.put(StatusEffectAmplifierMapSetting.class, (container, setting) -> statusEffectAmplifierMapW(container, (StatusEffectAmplifierMapSetting) setting));
+        factories.put(StatusEffectListSetting.class, (container, setting) -> statusEffectListW(container, (StatusEffectListSetting) setting));
+        factories.put(StorageBlockListSetting.class, (container, setting) -> storageBlockListW(container, (StorageBlockListSetting) setting));
+        factories.put(ScreenHandlerListSetting.class, (container, setting) -> screenHandlerListW(container, (ScreenHandlerListSetting) setting));
+        factories.put(BlockDataSetting.class, (container, setting) -> blockDataW(container, (BlockDataSetting<?>) setting));
+        factories.put(PotionSetting.class, (container, setting) -> potionW(container, (PotionSetting) setting));
+        factories.put(StringListSetting.class, (container, setting) -> stringListW(container, (StringListSetting) setting));
+        factories.put(BlockPosSetting.class, (container, setting) -> blockPosW(container, (BlockPosSetting) setting));
+        factories.put(ColorListSetting.class, (container, setting) -> colorListW(container, (ColorListSetting) setting));
+        factories.put(FontFaceSetting.class, (container, setting) -> fontW(container, (FontFaceSetting) setting));
+        factories.put(Vector3dSetting.class, (container, setting) -> vector3dW(container, (Vector3dSetting) setting));
     }
 
     @Override
@@ -155,26 +155,26 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
     // Settings
 
-    private void boolW(WTable table, BoolSetting setting) {
-        WCheckbox checkbox = table.add(theme.checkbox(setting.get())).expandCellX().widget();
+    private void boolW(WContainer container, BoolSetting setting) {
+        WCheckbox checkbox = container.add(theme.checkbox(setting.get())).expandCellX().widget();
         checkbox.action = () -> setting.set(checkbox.checked);
 
-        reset(table, setting, () -> checkbox.checked = setting.get());
+        reset(container, setting, () -> checkbox.checked = setting.get());
     }
 
-    private void intW(WTable table, IntSetting setting) {
-        WIntEdit edit = table.add(theme.intEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.noSlider)).expandX().widget();
+    private void intW(WContainer container, IntSetting setting) {
+        WIntEdit edit = container.add(theme.intEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.noSlider)).expandX().widget();
 
         edit.action = () -> {
             if (!setting.set(edit.get())) edit.set(setting.get());
         };
 
-        reset(table, setting, () -> edit.set(setting.get()));
+        reset(container, setting, () -> edit.set(setting.get()));
     }
 
-    private void doubleW(WTable table, DoubleSetting setting) {
+    private void doubleW(WContainer container, DoubleSetting setting) {
         WDoubleEdit edit = theme.doubleEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.decimalPlaces, setting.noSlider);
-        table.add(edit).expandX();
+        container.add(edit).expandX();
 
         Runnable action = () -> {
             if (!setting.set(edit.get())) edit.set(setting.get());
@@ -183,59 +183,59 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         if (setting.onSliderRelease) edit.actionOnRelease = action;
         else edit.action = action;
 
-        reset(table, setting, () -> edit.set(setting.get()));
+        reset(container, setting, () -> edit.set(setting.get()));
     }
 
-    private void stringW(WTable table, StringSetting setting) {
+    private void stringW(WContainer container, StringSetting setting) {
         CharFilter filter = setting.filter == null ? (text, c) -> true : setting.filter;
-        Cell<WTextBox> cell = table.add(theme.textBox(setting.get(), setting.placeholder, filter, setting.renderer));
+        Cell<WTextBox> cell = container.add(theme.textBox(setting.get(), setting.placeholder, filter, setting.renderer));
         if (setting.wide) cell.minWidth(Utils.getWindowWidth() - Utils.getWindowWidth() / 4.0);
 
         WTextBox textBox = cell.expandX().widget();
         textBox.action = () -> setting.set(textBox.get());
 
-        reset(table, setting, () -> textBox.set(setting.get()));
+        reset(container, setting, () -> textBox.set(setting.get()));
     }
 
-    private void stringListW(WTable table, StringListSetting setting) {
-        WTable wtable = table.add(theme.table()).expandX().widget();
-        StringListSetting.fillTable(theme, wtable, setting);
+    private void stringListW(WContainer container, StringListSetting setting) {
+        WTable wcontainer = container.add(theme.table()).expandX().widget();
+        StringListSetting.fillTable(theme, wcontainer, setting);
     }
 
-    private <T extends Enum<?>> void enumW(WTable table, EnumSetting<T> setting) {
-        WDropdown<T> dropdown = table.add(theme.dropdown(setting.get())).expandCellX().widget();
+    private <T extends Enum<?>> void enumW(WContainer container, EnumSetting<T> setting) {
+        WDropdown<T> dropdown = container.add(theme.dropdown(setting.get())).expandCellX().widget();
         dropdown.action = () -> setting.set(dropdown.get());
 
-        reset(table, setting, () -> dropdown.set(setting.get()));
+        reset(container, setting, () -> dropdown.set(setting.get()));
     }
 
-    private void providedStringW(WTable table, ProvidedStringSetting setting) {
-        WDropdown<String> dropdown = table.add(theme.dropdown(setting.supplier.get(), setting.get())).expandCellX().widget();
+    private void providedStringW(WContainer container, ProvidedStringSetting setting) {
+        WDropdown<String> dropdown = container.add(theme.dropdown(setting.supplier.get(), setting.get())).expandCellX().widget();
         dropdown.action = () -> setting.set(dropdown.get());
 
-        reset(table, setting, () -> dropdown.set(setting.get()));
+        reset(container, setting, () -> dropdown.set(setting.get()));
     }
 
-    private void genericW(WTable table, GenericSetting<?> setting) {
-        WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
+    private void genericW(WContainer container, GenericSetting<?> setting) {
+        WButton edit = container.add(theme.button(GuiRenderer.EDIT)).widget();
         edit.action = () -> mc.setScreen(setting.createScreen(theme));
 
-        reset(table, setting, null);
+        reset(container, setting, null);
     }
 
-    private void colorW(WTable table, ColorSetting setting) {
-        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+    private void colorW(WContainer container, ColorSetting setting) {
+        WHorizontalList list = container.add(theme.horizontalList()).expandX().widget();
 
         WQuad quad = list.add(theme.quad(setting.get())).widget();
 
         WButton edit = list.add(theme.button(GuiRenderer.EDIT)).widget();
         edit.action = () -> mc.setScreen(new ColorSettingScreen(theme, setting));
 
-        reset(table, setting, () -> quad.color = setting.get());
+        reset(container, setting, () -> quad.color = setting.get());
     }
 
-    private void keybindW(WTable table, KeybindSetting setting) {
-        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+    private void keybindW(WContainer container, KeybindSetting setting) {
+        WHorizontalList list = container.add(theme.horizontalList()).expandX().widget();
 
         WKeybind keybind = list.add(theme.keybind(setting.get(), setting.getDefaultValue())).expandX().widget();
         keybind.action = setting::onChanged;
@@ -246,8 +246,8 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         reset.tooltip = "Reset";
     }
 
-    private void blockW(WTable table, BlockSetting setting) {
-        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+    private void blockW(WContainer container, BlockSetting setting) {
+        WHorizontalList list = container.add(theme.horizontalList()).expandX().widget();
 
         WItem item = list.add(theme.item(setting.get().asItem().getDefaultStack())).widget();
 
@@ -259,25 +259,25 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
             mc.setScreen(screen);
         };
 
-        reset(table, setting, () -> item.set(setting.get().asItem().getDefaultStack()));
+        reset(container, setting, () -> item.set(setting.get().asItem().getDefaultStack()));
     }
 
-    private void blockPosW(WTable table, BlockPosSetting setting) {
-        WBlockPosEdit edit = table.add(theme.blockPosEdit(setting.get())).expandX().widget();
+    private void blockPosW(WContainer container, BlockPosSetting setting) {
+        WBlockPosEdit edit = container.add(theme.blockPosEdit(setting.get())).expandX().widget();
 
         edit.actionOnRelease = () -> {
             if (!setting.set(edit.get())) edit.set(setting.get());
         };
 
-        reset(table, setting, () -> edit.set(setting.get()));
+        reset(container, setting, () -> edit.set(setting.get()));
     }
 
-    private void blockListW(WTable table, BlockListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new BlockListSettingScreen(theme, setting)));
+    private void blockListW(WContainer container, BlockListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new BlockListSettingScreen(theme, setting)));
     }
 
-    private void itemW(WTable table, ItemSetting setting) {
-        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+    private void itemW(WContainer container, ItemSetting setting) {
+        WHorizontalList list = container.add(theme.horizontalList()).expandX().widget();
 
         WItem item = list.add(theme.item(setting.get().asItem().getDefaultStack())).widget();
 
@@ -289,62 +289,62 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
             mc.setScreen(screen);
         };
 
-        reset(table, setting, () -> item.set(setting.get().getDefaultStack()));
+        reset(container, setting, () -> item.set(setting.get().getDefaultStack()));
     }
 
-    private void itemListW(WTable table, ItemListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new ItemListSettingScreen(theme, setting)));
+    private void itemListW(WContainer container, ItemListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new ItemListSettingScreen(theme, setting)));
     }
 
-    private void entityTypeListW(WTable table, EntityTypeListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new EntityTypeListSettingScreen(theme, setting)));
+    private void entityTypeListW(WContainer container, EntityTypeListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new EntityTypeListSettingScreen(theme, setting)));
     }
 
-    private void enchantmentListW(WTable table, EnchantmentListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new EnchantmentListSettingScreen(theme, setting)));
+    private void enchantmentListW(WContainer container, EnchantmentListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new EnchantmentListSettingScreen(theme, setting)));
     }
 
-    private void moduleListW(WTable table, ModuleListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new ModuleListSettingScreen(theme, setting)));
+    private void moduleListW(WContainer container, ModuleListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new ModuleListSettingScreen(theme, setting)));
     }
 
-    private void packetListW(WTable table, PacketListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new PacketBoolSettingScreen(theme, setting)));
+    private void packetListW(WContainer container, PacketListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new PacketBoolSettingScreen(theme, setting)));
     }
 
-    private void particleTypeListW(WTable table, ParticleTypeListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new ParticleTypeListSettingScreen(theme, setting)));
+    private void particleTypeListW(WContainer container, ParticleTypeListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new ParticleTypeListSettingScreen(theme, setting)));
     }
 
-    private void soundEventListW(WTable table, SoundEventListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new SoundEventListSettingScreen(theme, setting)));
+    private void soundEventListW(WContainer container, SoundEventListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new SoundEventListSettingScreen(theme, setting)));
     }
 
-    private void statusEffectAmplifierMapW(WTable table, StatusEffectAmplifierMapSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new StatusEffectAmplifierMapSettingScreen(theme, setting)));
+    private void statusEffectAmplifierMapW(WContainer container, StatusEffectAmplifierMapSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new StatusEffectAmplifierMapSettingScreen(theme, setting)));
     }
 
-    private void statusEffectListW(WTable table, StatusEffectListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new StatusEffectListSettingScreen(theme, setting)));
+    private void statusEffectListW(WContainer container, StatusEffectListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new StatusEffectListSettingScreen(theme, setting)));
     }
 
-    private void storageBlockListW(WTable table, StorageBlockListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new StorageBlockListSettingScreen(theme, setting)));
+    private void storageBlockListW(WContainer container, StorageBlockListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new StorageBlockListSettingScreen(theme, setting)));
     }
 
-    private void screenHandlerListW(WTable table, ScreenHandlerListSetting setting) {
-        selectW(table, setting, () -> mc.setScreen(new ScreenHandlerSettingScreen(theme, setting)));
+    private void screenHandlerListW(WContainer container, ScreenHandlerListSetting setting) {
+        selectW(container, setting, () -> mc.setScreen(new ScreenHandlerSettingScreen(theme, setting)));
     }
 
-    private void blockDataW(WTable table, BlockDataSetting<?> setting) {
-        WButton button = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
+    private void blockDataW(WContainer container, BlockDataSetting<?> setting) {
+        WButton button = container.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
         button.action = () -> mc.setScreen(new BlockDataSettingScreen<>(theme, setting));
 
-        reset(table, setting, null);
+        reset(container, setting, null);
     }
 
-    private void potionW(WTable table, PotionSetting setting) {
-        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+    private void potionW(WContainer container, PotionSetting setting) {
+        WHorizontalList list = container.add(theme.horizontalList()).expandX().widget();
         WItemWithLabel item = list.add(theme.itemWithLabel(setting.get().potion, I18n.translate(setting.get().potion.getItem().getTranslationKey()))).widget();
 
         WButton button = list.add(theme.button("Select")).expandCellX().widget();
@@ -358,8 +358,8 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         reset(list, setting, () -> item.set(setting.get().potion));
     }
 
-    private void fontW(WTable table, FontFaceSetting setting) {
-        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+    private void fontW(WContainer container, FontFaceSetting setting) {
+        WHorizontalList list = container.add(theme.horizontalList()).expandX().widget();
         WLabel label = list.add(theme.label(setting.get().info.family())).widget();
 
         WButton button = list.add(theme.button("Select")).expandCellX().widget();
@@ -373,8 +373,8 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         reset(list, setting, () -> label.set(Fonts.DEFAULT_FONT.info.family()));
     }
 
-    private void colorListW(WTable table, ColorListSetting setting) {
-        WTable tab = table.add(theme.table()).expandX().widget();
+    private void colorListW(WContainer container, ColorListSetting setting) {
+        WTable tab = container.add(theme.table()).expandX().widget();
         WTable t = tab.add(theme.table()).expandX().widget();
         tab.row();
 
@@ -431,14 +431,14 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         }
     }
 
-    private void vector3dW(WTable table, Vector3dSetting setting) {
-        WTable internal = table.add(theme.table()).expandX().widget();
+    private void vector3dW(WContainer container, Vector3dSetting setting) {
+        WTable internal = container.add(theme.table()).expandX().widget();
 
         WDoubleEdit x = addVectorComponent(internal, "X", setting.get().x, val -> setting.get().x = val, setting);
         WDoubleEdit y = addVectorComponent(internal, "Y", setting.get().y, val -> setting.get().y = val, setting);
         WDoubleEdit z = addVectorComponent(internal, "Z", setting.get().z, val -> setting.get().z = val, setting);
 
-        reset(table, setting, () -> {
+        reset(container, setting, () -> {
             x.set(setting.get().x);
             y.set(setting.get().y);
             z.set(setting.get().z);
