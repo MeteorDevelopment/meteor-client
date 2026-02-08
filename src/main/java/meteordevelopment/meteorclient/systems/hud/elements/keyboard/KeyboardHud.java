@@ -105,9 +105,9 @@ public class KeyboardHud extends HudElement {
 
     private final Setting<Boolean> showCps = sgGeneral.add(new BoolSetting.Builder()
         .name("Show CPS")
-        .description("Shows CPS on mouse buttons in Clicks preset.")
-        .defaultValue(true)
-        .visible(() -> preset.get() == Preset.Clicks)
+        .description("Shows clicks per second on keys.")
+        .defaultValue(false)
+        .visible(() -> preset.get() != Preset.Custom)
         .onChanged(b -> onPresetChanged(preset.get()))
         .build()
     );
@@ -293,25 +293,25 @@ public class KeyboardHud extends HudElement {
 
         switch (preset) {
             case Movement -> {
-                keys.add(l.key(mc.options.forwardKey, l.ux(1), 0));
-                keys.add(l.key(mc.options.leftKey, 0, l.y(1)));
-                keys.add(l.key(mc.options.backKey, l.ux(1), l.y(1)));
-                keys.add(l.key(mc.options.rightKey, l.ux(2), l.y(1)));
-                keys.add(l.key(mc.options.sneakKey, 0, l.y(2)));
-                keys.add(l.key(mc.options.jumpKey, l.ux(1), l.y(2), KeyDimensions.UNIT_2U));
+                keys.add(l.key(mc.options.forwardKey, l.ux(1), 0).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.leftKey, 0, l.y(1)).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.backKey, l.ux(1), l.y(1)).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.rightKey, l.ux(2), l.y(1)).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.sneakKey, 0, l.y(2)).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.jumpKey, l.ux(1), l.y(2), KeyDimensions.UNIT_2U).setShowCps(showCps.get()));
             }
             case Clicks -> {
                 keys.add(l.key(mc.options.attackKey, "LMB", 0, 0).setShowCps(showCps.get()));
                 keys.add(l.key(mc.options.useKey, "RMB", l.ux(1), 0).setShowCps(showCps.get()));
             }
             case Actions -> {
-                keys.add(l.key(mc.options.dropKey, 0, 0));
-                keys.add(l.key(mc.options.swapHandsKey, l.ux(1), 0));
-                keys.add(l.key(mc.options.inventoryKey, l.ux(2), 0));
+                keys.add(l.key(mc.options.dropKey, 0, 0).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.swapHandsKey, l.ux(1), 0).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.inventoryKey, l.ux(2), 0).setShowCps(showCps.get()));
             }
             case Hotbar -> {
                 for (int i = 0; i < 9; i++) {
-                    keys.add(l.key(mc.options.hotbarKeys[i], l.ux(i), 0));
+                    keys.add(l.key(mc.options.hotbarKeys[i], l.ux(i), 0).setShowCps(showCps.get()));
                 }
             }
             case Keyboard -> {
@@ -320,6 +320,7 @@ public class KeyboardHud extends HudElement {
                 } else {
                     buildIsoLayout(l);
                 }
+                for (Key key : keys) key.setShowCps(showCps.get());
             }
             case Custom -> keys.addAll(customKeys.get());
         }
@@ -601,7 +602,7 @@ public class KeyboardHud extends HudElement {
             Color txtColor = getColor(textColor.get(), mutableColor);
 
             double padding = 2 * s;
-            double availableWidth = kW - padding * 1;
+            double availableWidth = kW - padding * 2;
 
             if (!key.showCps) {
                 double textScale = Math.min(1.0, availableWidth / renderer.textWidth(text, 1.0));
