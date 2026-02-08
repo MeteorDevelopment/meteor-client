@@ -38,20 +38,19 @@ public abstract class ScreenMixin {
             info.cancel();
     }
 
-    @Inject(method = "handleClickEvent", at = @At(value = "HEAD"))
-    private static void onHandleClickEvent(ClickEvent clickEvent, MinecraftClient client, Screen screenAfterRun, CallbackInfo ci) {
-        if (!(clickEvent instanceof RunnableClickEvent runnableClickEvent)) return;
-
-        runnableClickEvent.runnable.run();
-    }
-
-    @Inject(method = "handleBasicClickEvent", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", remap = false))
+    @Inject(method = "handleBasicClickEvent", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", remap = false), cancellable = true)
     private static void onHandleBasicClickEvent(ClickEvent clickEvent, MinecraftClient client, Screen screen, CallbackInfo ci) {
-        if (clickEvent instanceof MeteorClickEvent meteorClickEvent && meteorClickEvent.value.startsWith(Config.get().prefix.get())) {
+        if (clickEvent instanceof RunnableClickEvent runnableClickEvent) {
+            runnableClickEvent.runnable.run();
+            ci.cancel();
+        }
+        else if (clickEvent instanceof MeteorClickEvent meteorClickEvent && meteorClickEvent.value.startsWith(Config.get().prefix.get())) {
             try {
                 Commands.dispatch(meteorClickEvent.value.substring(Config.get().prefix.get().length()));
             } catch (CommandSyntaxException e) {
                 MeteorClient.LOG.error("Failed to run command", e);
+            } finally {
+                ci.cancel();
             }
         }
     }

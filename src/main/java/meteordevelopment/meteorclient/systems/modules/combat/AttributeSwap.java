@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
+import meteordevelopment.meteorclient.events.entity.player.DoAttackEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -27,12 +28,16 @@ import net.minecraft.item.MaceItem;
 import net.minecraft.item.TridentItem;
 import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSwappingOptions = settings.createGroup("Swapping Options");
     private final SettingGroup sgSwordEnchants = settings.createGroup("Sword Enchants");
     private final SettingGroup sgMaceEnchants = settings.createGroup("Mace Enchants");
+    private final SettingGroup sgSpearEnchants = settings.createGroup("Spear Enchants");
     private final SettingGroup sgOtherEnchants = settings.createGroup("Other Enchants");
     private final SettingGroup sgWeapon = settings.createGroup("Weapon Options");
 
@@ -47,8 +52,15 @@ public class AttributeSwap extends Module {
         .name("target-slot")
         .description("Hotbar slot to swap to (1-9).")
         .defaultValue(1)
-        .min(1)
-        .sliderRange(1, 9)
+        .range(1, 9)
+        .visible(() -> mode.get() == Mode.Simple)
+        .build()
+    );
+
+    private final Setting<Boolean> swapOnMiss = sgGeneral.add(new BoolSetting.Builder()
+        .name("swap-on-miss")
+        .description("Whether to swap on a missed attack. Useful for quickly lunging with spears.")
+        .defaultValue(false)
         .visible(() -> mode.get() == Mode.Simple)
         .build()
     );
@@ -98,6 +110,14 @@ public class AttributeSwap extends Module {
     private final Setting<Boolean> maceSwapping = sgSwappingOptions.add(new BoolSetting.Builder()
         .name("mace-swapping")
         .description("Enables smart swapping for mace enchantments.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart)
+        .build()
+    );
+
+    private final Setting<Boolean> spearSwapping = sgSwappingOptions.add(new BoolSetting.Builder()
+        .name("spear-swapping")
+        .description("Enables smart swapping for spear enchantments.")
         .defaultValue(true)
         .visible(() -> mode.get() == Mode.Smart)
         .build()
@@ -199,6 +219,30 @@ public class AttributeSwap extends Module {
         .build()
     );
 
+    private final Setting<Boolean> enchantLunge = sgSpearEnchants.add(new BoolSetting.Builder()
+        .name("lunge")
+        .description("Swaps to a spear with Lunge for traveling.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart && spearSwapping.get())
+        .build()
+    );
+
+    private final Setting<Boolean> spearHitbox = sgSpearEnchants.add(new BoolSetting.Builder()
+        .name("hitbox")
+        .description("Swaps to a spear for extended reach when target is far.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart && spearSwapping.get())
+        .build()
+    );
+
+    private final Setting<Boolean> excludeLungeFromHitbox = sgSpearEnchants.add(new BoolSetting.Builder()
+        .name("exclude-lunge-from-hitbox")
+        .description("Don't use lunge-enchanted spears for hitbox extension.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart && spearSwapping.get() && spearHitbox.get())
+        .build()
+    );
+
     private final Setting<Boolean> onlyOnWeapon = sgWeapon.add(new BoolSetting.Builder()
         .name("only-on-weapon")
         .description("Only swaps when holding a selected weapon in hand.")
@@ -276,21 +320,54 @@ public class AttributeSwap extends Module {
     }
 
     @EventHandler
-    private void onAttack(AttackEntityEvent event) {
-        if (!canSwapByWeapon()) return;
+    private void onAttack(DoAttackEvent event) {
+        if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK || !canSwapByWeapon()) return;
+
+        if (mode.get() == Mode.Smart && spearSwapping.get()) {
+            if (spearHitbox.get()) {
+                Entity target = getTargetEntity();
+                if (target != null) {
+                    if (mc.player.distanceTo(target) <= mc.player.getEntityInteractionRange() + 0.5) return;
+                    int spearSlot = getSmartSpearSlot(false);
+                    if (spearSlot != -1) {
+                        doSwap(spearSlot);
+                        return;
+                    }
+                }
+            }
+
+            // lunge spear for travelling (or when enemy isn't in spear range)
+            if (enchantLunge.get()) {
+                int lungeSlot = getSmartSpearSlot(true);
+                if (lungeSlot != -1) {
+                    doSwap(lungeSlot);
+                    return;
+                }
+            }
+        }
+
+        if (mode.get() == Mode.Smart || !swapOnMiss.get()) return;
+        doSwap(targetSlot.get() - 1);
+    }
+
+    @EventHandler
+    private void onAttackEntity(AttackEntityEvent event) {
+        if (!canSwapByWeapon() || (mode.get() == Mode.Simple && swapOnMiss.get())) return;
         performSwap(event.entity);
     }
 
     private void performSwap(Entity target) {
         if (awaitingBack) return;
 
-        int slotIndex;
-
         if (mode.get() == Mode.Simple) {
-            slotIndex = targetSlot.get() - 1;
+            doSwap(targetSlot.get() - 1);
         } else {
-            slotIndex = getSmartSlot(target);
+            doSwap(getSmartSlot(target));
         }
+    }
+
+    private void doSwap(int slotIndex) {
+        if (awaitingBack) return;
 
         if (slotIndex < 0 || slotIndex > 8) return;
         if (slotIndex == mc.player.getInventory().getSelectedSlot()) return;
@@ -361,6 +438,49 @@ public class AttributeSwap extends Module {
         }
 
         return bestSlot;
+    }
+
+    private int getSmartSpearSlot(boolean requireLunge) {
+        for (int i = 0; i < 9; i++) {
+            if (i == mc.player.getInventory().getSelectedSlot()) continue;
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (!stack.isIn(ItemTags.SPEARS)) continue;
+
+            boolean hasLunge = Utils.getEnchantmentLevel(stack, Enchantments.LUNGE) > 0;
+            if (requireLunge && !hasLunge) continue;
+            if (!requireLunge && excludeLungeFromHitbox.get() && hasLunge) continue;
+
+            return i;
+        }
+
+        return -1;
+    }
+
+    private Entity getTargetEntity() {
+        double maxDistance = 7;
+        Vec3d start = mc.player.getCameraPosVec(1.0f);
+        Vec3d look = mc.player.getRotationVec(1.0f);
+        Vec3d end = start.add(look.multiply(maxDistance));
+
+        Box box = mc.player.getBoundingBox().stretch(look.multiply(maxDistance)).expand(1.0);
+
+        Entity target = null;
+        double closestDistance = maxDistance * maxDistance;
+
+        for (Entity entity : mc.world.getOtherEntities(mc.player, box, e -> !e.isSpectator() && e.canHit())) {
+            // expanding entity's hitbox by 0.15 to simulate spear's actual hitbox margin
+            Box expandedBox = entity.getBoundingBox().expand(0.150);
+
+            if (expandedBox.raycast(start, end).isPresent()) {
+                double distSq = start.squaredDistanceTo(entity.getX(), entity.getY(), entity.getZ());
+                if (distSq < closestDistance) {
+                    closestDistance = distSq;
+                    target = entity;
+                }
+            }
+        }
+
+        return target;
     }
 
     private double getItemScore(ItemStack stack, boolean isFalling, boolean durability, boolean isLiving, boolean isPlayer, boolean isOnFire, boolean hasFireResistance, boolean isUndead, boolean isArthropod, boolean isAquatic, double armor, float health) {

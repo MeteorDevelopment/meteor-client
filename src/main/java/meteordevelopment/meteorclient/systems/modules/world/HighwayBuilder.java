@@ -19,6 +19,8 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
+import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
+import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
@@ -450,7 +452,7 @@ public class HighwayBuilder extends Module {
     public Vec3d start;
     public int blocksBroken, blocksPlaced;
     private final MBlockPos lastBreakingPos = new MBlockPos();
-    private boolean displayInfo;
+    private boolean displayInfo, warned;
     private boolean suspended = true, inventory = true;
     private int placeTimer, breakTimer, count, syncId;
     private final RestockTask restockTask = new RestockTask(this);
@@ -499,6 +501,12 @@ public class HighwayBuilder extends Module {
         if (placementsPerTick.get() > 1 && rotation.get().place) warning("With rotations enabled, you can place at most 1 block per tick.");
 
         if (Modules.get().get(InstantRebreak.class).isActive()) warning("It's recommended to disable the Instant Rebreak module and instead use the 'instantly-rebreak-echests' setting to avoid errors.");
+        if (Modules.get().get(Speed.class).isActive() && dir.diagonal) warning("It's recommended to disable the Speed module to avoid misalignment on diagonals.");
+        if (!Modules.get().get(Velocity.class).isActive()) warning("It's recommended to enable the Velocity module to avoid misalignment (entity pushing, liquid movement).");
+        if (!warned && Modules.get().get(NoGhostBlocks.class).isActive()) {
+            info("The No Ghost Blocks module is useful to prevent desyncs on laggy servers. However, it will also slow Highway Builder down, and comes with the risks of incorrect statistics and packet kicks.");
+            warned = true;
+        }
     }
 
     @Override

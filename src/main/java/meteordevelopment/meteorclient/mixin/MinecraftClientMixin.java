@@ -12,6 +12,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.entity.player.DoAttackEvent;
 import meteordevelopment.meteorclient.events.entity.player.DoItemUseEvent;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -23,6 +24,7 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.player.Multitask;
@@ -89,6 +91,9 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Mutable
     private Framebuffer framebuffer;
 
+    @Shadow
+    protected abstract void handleBlockBreaking(boolean breaking);
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
@@ -116,9 +121,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         Profilers.get().pop();
     }
 
-    @Inject(method = "doAttack", at = @At("HEAD"))
+    @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void onAttack(CallbackInfoReturnable<Boolean> cir) {
         CPSUtils.onAttack();
+        if (MeteorClient.EVENT_BUS.post(DoAttackEvent.get()).isCancelled()) cir.cancel();
     }
 
     @Inject(method = "doItemUse", at = @At("HEAD"))
@@ -275,6 +281,31 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         if (!esp.isGlow() || esp.shouldSkip(entity)) return original;
 
         return esp.getColor(entity) != null || original;
+    }
+
+
+    // faster inputs
+
+    @Unique
+    private boolean isBreaking = false;
+
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;handleInputEvents()V"))
+    private boolean wrapHandleInputEvents(MinecraftClient instance) {
+        return !Modules.get().get(InventoryTweaks.class).frameInput();
+    }
+
+    @WrapWithCondition(method = "handleInputEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;handleBlockBreaking(Z)V"))
+    private boolean wrapHandleBlockBreaking(MinecraftClient instance, boolean breaking) {
+        isBreaking = breaking;
+        return !Modules.get().get(InventoryTweaks.class).frameInput();
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;handleInputEvents()V", shift = At.Shift.AFTER))
+    private void afterHandleInputEvents(CallbackInfo ci) {
+        if (!Modules.get().get(InventoryTweaks.class).frameInput()) return;
+
+        handleBlockBreaking(isBreaking);
+        isBreaking = false;
     }
 
     // Interface
