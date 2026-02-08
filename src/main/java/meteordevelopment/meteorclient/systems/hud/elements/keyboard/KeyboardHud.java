@@ -602,7 +602,7 @@ public class KeyboardHud extends HudElement {
             Color txtColor = getColor(textColor.get(), mutableColor);
 
             double padding = 2 * s;
-            double availableWidth = kW - padding * 2;
+            double availableWidth = kW - padding;
 
             if (!key.showCps) {
                 double textScale = Math.min(1.0, availableWidth / renderer.textWidth(text, 1.0));
