@@ -601,35 +601,28 @@ public class KeyboardHud extends HudElement {
             Color txtColor = getColor(textColor.get(), mutableColor);
 
             double padding = 2 * s;
-            double availableWidth = kW - padding * 2;
-            double availableHeight = kH - padding * 2;
-            double tH = renderer.textHeight();
+            double availableWidth = kW - padding * 1;
 
             if (!key.showCps) {
-                double textWidth = renderer.textWidth(text);
-                double widthScale = textWidth > availableWidth ? availableWidth / textWidth : 1.0;
-                double heightScale = tH > availableHeight * 0.6 ? (availableHeight * 0.6) / tH : 1.0;
-                double textScale = Math.min(widthScale, heightScale);
-
-                double yText = kY + (kH - tH * textScale) / 2;
+                double textScale = Math.min(1.0, availableWidth / renderer.textWidth(text, 1.0));
+                double textWidth = renderer.textWidth(text, textScale);
+                double yText = kY + (kH - renderer.textHeight(false, textScale)) / 2;
                 drawTextLine(renderer, text, textWidth, kX, yText, kW, textScale, txtColor);
             } else {
-                double topWidth = renderer.textWidth(text);
-                double topWidthScale = topWidth > availableWidth ? availableWidth / topWidth : 1.0;
-                double topHeightScale = tH > availableHeight * 0.4 ? (availableHeight * 0.4) / tH : 1.0;
-                double topScale = Math.min(topWidthScale, topHeightScale);
+                double topScale = Math.min(1.0, availableWidth / renderer.textWidth(text, 1.0));
+                double topWidth = renderer.textWidth(text, topScale);
+                double topHeight = renderer.textHeight(false, topScale);
 
                 String cpsText = key.getCps() + " CPS";
-                double botWidth = renderer.textWidth(cpsText);
-                double botWidthScale = botWidth > availableWidth ? availableWidth / botWidth : 1.0;
-                double botHeightScale = tH > availableHeight * 0.4 ? (availableHeight * 0.4) / tH : 1.0;
-                double botScale = Math.min(botWidthScale, botHeightScale);
+                double botScale = Math.min(1.0, availableWidth / renderer.textWidth(cpsText, 1.0));
+                double botWidth = renderer.textWidth(cpsText, botScale);
+                double botHeight = renderer.textHeight(false, botScale);
 
-                double totalHeight = (tH * topScale) + (tH * botScale);
+                double totalHeight = topHeight + botHeight;
                 double startY = kY + (kH - totalHeight) / 2;
 
                 drawTextLine(renderer, text, topWidth, kX, startY, kW, topScale, txtColor);
-                drawTextLine(renderer, cpsText, botWidth, kX, startY + tH * topScale, kW, botScale, txtColor);
+                drawTextLine(renderer, cpsText, botWidth, kX, startY + topHeight, kW, botScale, txtColor);
             }
         }
     }
@@ -638,11 +631,11 @@ public class KeyboardHud extends HudElement {
         double s = scale.get();
         double padding = 2 * s;
 
-        double xText = x + (w - textWidth * textScale) / 2;
+        double xText = x + (w - textWidth) / 2;
         if (alignment.get() == Alignment.Left)
             xText = x + padding;
         else if (alignment.get() == Alignment.Right)
-            xText = x + w - padding - textWidth * textScale;
+            xText = x + w - padding - textWidth;
 
         renderer.text(text, xText, y, color, false, textScale);
     }
