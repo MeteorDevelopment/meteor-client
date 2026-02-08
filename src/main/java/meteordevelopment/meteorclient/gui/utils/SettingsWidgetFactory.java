@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.gui.utils;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.Settings;
 
@@ -25,7 +25,7 @@ public abstract class SettingsWidgetFactory {
         this.theme = theme;
     }
 
-    /** {@code SettingsWidgetFactory.registerCustomFactory(SomeSetting.class, (theme) -> (table, setting) -> {//create widget})} */
+    /** {@code SettingsWidgetFactory.registerCustomFactory(SomeSetting.class, (theme) -> (container, setting) -> {//create widget})} */
     public static void registerCustomFactory(Class<?> settingClass, Function<GuiTheme, Factory> factoryFunction) {
         customFactories.put(settingClass, factoryFunction);
     }
@@ -43,6 +43,6 @@ public abstract class SettingsWidgetFactory {
 
     @FunctionalInterface
     public interface Factory {
-        void create(WTable table, Setting<?> setting);
+        void create(WContainer container, Setting<?> setting);
     }
 }
