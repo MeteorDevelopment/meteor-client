@@ -144,9 +144,9 @@ public class KeyboardHud extends HudElement {
         .name("fade-time")
         .description("How long to fade the color for, in seconds.")
         .visible(colorFade::get)
-        .defaultValue(0.2d)
-        .min(0.01d)
-        .sliderRange(0.01d, 1d)
+        .defaultValue(0.1)
+        .min(0.01)
+        .sliderRange(0.01, 0.5)
         .decimalPlaces(2)
         .build()
     );
@@ -323,6 +323,7 @@ public class KeyboardHud extends HudElement {
             }
             case Custom -> keys.addAll(customKeys.get());
         }
+
         calculateSize();
     }
 
@@ -490,6 +491,7 @@ public class KeyboardHud extends HudElement {
             setSize(0, 0);
             return;
         }
+
         minX = minY = 0;
         double maxX = 0, maxY = 0;
 
@@ -604,29 +606,30 @@ public class KeyboardHud extends HudElement {
             double tH = renderer.textHeight();
 
             if (!key.showCps) {
-                double tW = renderer.textWidth(text);
-                double widthScale = tW > availableWidth ? availableWidth / tW : 1.0;
+                double textWidth = renderer.textWidth(text);
+                double widthScale = textWidth > availableWidth ? availableWidth / textWidth : 1.0;
                 double heightScale = tH > availableHeight * 0.6 ? (availableHeight * 0.6) / tH : 1.0;
                 double textScale = Math.min(widthScale, heightScale);
+
                 double yText = kY + (kH - tH * textScale) / 2;
-                drawTextLine(renderer, text, tW, kX, yText, kW, textScale, txtColor);
+                drawTextLine(renderer, text, textWidth, kX, yText, kW, textScale, txtColor);
             } else {
-                double topW = renderer.textWidth(text);
-                double topWidthScale = topW > availableWidth ? availableWidth / topW : 1.0;
+                double topWidth = renderer.textWidth(text);
+                double topWidthScale = topWidth > availableWidth ? availableWidth / topWidth : 1.0;
                 double topHeightScale = tH > availableHeight * 0.4 ? (availableHeight * 0.4) / tH : 1.0;
                 double topScale = Math.min(topWidthScale, topHeightScale);
 
                 String cpsText = key.getCps() + " CPS";
-                double botW = renderer.textWidth(cpsText);
-                double botWidthScale = botW > availableWidth ? availableWidth / botW : 1.0;
+                double botWidth = renderer.textWidth(cpsText);
+                double botWidthScale = botWidth > availableWidth ? availableWidth / botWidth : 1.0;
                 double botHeightScale = tH > availableHeight * 0.4 ? (availableHeight * 0.4) / tH : 1.0;
                 double botScale = Math.min(botWidthScale, botHeightScale);
 
                 double totalHeight = (tH * topScale) + (tH * botScale);
                 double startY = kY + (kH - totalHeight) / 2;
 
-                drawTextLine(renderer, text, topW, kX, startY, kW, topScale, txtColor);
-                drawTextLine(renderer, cpsText, botW, kX, startY + tH * topScale, kW, botScale, txtColor);
+                drawTextLine(renderer, text, topWidth, kX, startY, kW, topScale, txtColor);
+                drawTextLine(renderer, cpsText, botWidth, kX, startY + tH * topScale, kW, botScale, txtColor);
             }
         }
     }
@@ -662,7 +665,6 @@ public class KeyboardHud extends HudElement {
         public String name = "";
         public KeyBinding binding;
         public Keybind keybind;
-        public int code;
         public double x, y, width, height;
         public boolean showCps = false;
 
@@ -672,7 +674,6 @@ public class KeyboardHud extends HudElement {
 
         public Key() {
             this.keybind = Keybind.fromKey(GLFW.GLFW_KEY_SPACE);
-            this.code = -1;
             this.width = 60;
             this.height = 40;
         }
@@ -690,7 +691,6 @@ public class KeyboardHud extends HudElement {
         Key(KeyBinding binding, String name, double x, double y, double width, double height) {
             this.binding = binding;
             this.name = name;
-            this.code = -1;
             this.x = x;
             this.y = y;
             this.width = width;
@@ -700,7 +700,6 @@ public class KeyboardHud extends HudElement {
         Key(Keybind keybind, String name, double x, double y, double width, double height) {
             this.keybind = keybind;
             this.name = name;
-            this.code = -1;
             this.x = x;
             this.y = y;
             this.width = width;
