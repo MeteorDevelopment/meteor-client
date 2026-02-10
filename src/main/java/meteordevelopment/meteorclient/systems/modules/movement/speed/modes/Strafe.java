@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement.speed.modes;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -66,10 +67,10 @@ public class Strafe extends SpeedMode {
         ((IVec3d) event.movement).meteor$setXZ(change.x, change.y);
     }
 
-    private Vector2d transformStrafe(double speed) {
-        float forward = Math.signum(mc.player.input.getMovementInput().y);
-        float side = Math.signum(mc.player.input.getMovementInput().x);
-        float yaw = mc.player.getLerpedYaw(mc.getRenderTickCounter().getTickProgress(true));
+    public static Vector2d transformStrafe(double speed) {
+        float forward = Math.signum(MeteorClient.mc.player.input.getMovementInput().y);
+        float side = Math.signum(MeteorClient.mc.player.input.getMovementInput().x);
+        float yaw = MeteorClient.mc.player.getLerpedYaw(MeteorClient.mc.getRenderTickCounter().getTickProgress(true));
 
         if (forward == 0.0f && side == 0.0f) return new Vector2d();
 
