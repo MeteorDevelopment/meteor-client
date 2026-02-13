@@ -251,17 +251,17 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void blockW(WTable table, BlockSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
 
-        WItem item = list.add(theme.item(setting.get().asItem().getDefaultStack())).widget();
+        WBlock block = list.add(theme.block(setting.get().getDefaultState())).widget();
 
         WButton select = list.add(theme.button("Select")).widget();
         select.action = () -> {
             BlockSettingScreen screen = new BlockSettingScreen(theme, setting);
-            screen.onClosed(() -> item.set(setting.get().asItem().getDefaultStack()));
+            screen.onClosed(() -> block.setState(setting.get().getDefaultState()));
 
             mc.setScreen(screen);
         };
 
-        reset(table, setting, () -> item.set(setting.get().asItem().getDefaultStack()));
+        reset(table, setting, () -> block.setState(setting.get().getDefaultState()));
     }
 
     private void blockPosW(WTable table, BlockPosSetting setting) {
