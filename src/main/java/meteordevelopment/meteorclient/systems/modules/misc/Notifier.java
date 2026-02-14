@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.PlayerListEntry;
@@ -32,15 +32,12 @@ import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.collection.ArrayListDeque;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.*;
-
-import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class Notifier extends Module {
     private final SettingGroup sgTotemPops = settings.createGroup("totem-pops");
@@ -175,7 +172,7 @@ public class Notifier extends Module {
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
     private final Map<Integer, Vec3d> pearlStartPosMap = new HashMap<>();
-    private final ArrayListDeque<Text> messageQueue = new ArrayListDeque<>();
+    private final ArrayListDeque<MessageBuilder> messageQueue = new ArrayListDeque<>();
 
     private final Random random = new Random();
 
@@ -190,17 +187,17 @@ public class Notifier extends Module {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Despawn) {
             if (event.entity instanceof PlayerEntity) {
                 if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
-                    ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, this.getTranslationKey() + ".info.entered_visual_range", event.entity.getName().getString());
+                    this.info("entered_visual_range", event.entity).setId(event.entity.getId() + 100).send();
 
                     if (visualMakeSound.get())
                         mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
                 }
             } else {
-                info(
+                this.info(
                     "spawned",
-                    Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE),
-                    formatCoords(event.entity.getEntityPos())
-                );
+                    MessageBuilder.highlight(event.entity.getType()),
+                    event.entity.getEntityPos()
+                ).send();
             }
         }
 
@@ -214,17 +211,17 @@ public class Notifier extends Module {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Spawn) {
             if (event.entity instanceof PlayerEntity) {
                 if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
-                    ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, this.getTranslationKey() + ".info.left_visual_range", event.entity.getName().getString());
+                    this.info("left_visual_range", event.entity).setId(event.entity.getId() + 100).send();
 
                     if (visualMakeSound.get())
                         mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
                 }
             } else {
-                info(
+                this.info(
                     "despawned",
-                    Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE),
-                    formatCoords(event.entity.getEntityPos())
-                );
+                    MessageBuilder.highlight(event.entity.getType()),
+                    event.entity.getEntityPos()
+                ).send();
             }
         }
 
@@ -236,13 +233,13 @@ public class Notifier extends Module {
                 if (pearl.getOwner() != null && pearl.getOwner() instanceof PlayerEntity p) {
                     double d = pearlStartPosMap.get(i).distanceTo(e.getEntityPos());
                     if ((!Friends.get().isFriend(p) || !pearlIgnoreFriends.get()) && (!p.equals(mc.player) || !pearlIgnoreOwn.get())) {
-                        info(
+                        this.info(
                             "pearl_landed",
-                            Text.literal(pearl.getOwner().getName().getString()).formatted(Formatting.WHITE),
-                            ChatUtils.formatCoords(pearl.getEntityPos()),
-                            String.format("%.1f", pearl.distanceTo(mc.player)),
-                            String.format("%.1f", d)
-                        );
+                            MessageBuilder.highlight(pearl.getOwner()),
+                            pearl.getEntityPos(),
+                            pearl.distanceTo(mc.player),
+                            d
+                        ).send();
                     }
                 }
                 pearlStartPosMap.remove(i);
@@ -308,7 +305,11 @@ public class Notifier extends Module {
                     double distance = PlayerUtils.distanceTo(entity);
                     if (totemsDistanceCheck.get() && distance > totemsDistance.get()) return;
 
-                    ChatUtils.sendMsgRaw(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+                    if (pops == 1) {
+                        this.info("popped_singular", MessageBuilder.highlight(entity)).setId(getChatId(entity)).send();
+                    } else {
+                        this.info("popped_multiple", MessageBuilder.highlight(entity), MessageBuilder.highlight(pops)).setId(getChatId(entity)).send();
+                    }
                 }
             }
             default -> {}
@@ -322,9 +323,9 @@ public class Notifier extends Module {
             while (timer >= notificationDelay.get() && !messageQueue.isEmpty()) {
                 timer = 0;
                 if (simpleNotifications.get()) {
-                    mc.player.sendMessage(messageQueue.removeFirst(), false);
+                    mc.player.sendMessage(messageQueue.removeFirst().build(), false); // todo maybe remove client prefix?
                 } else {
-                    ChatUtils.sendMsg(messageQueue.removeFirst());
+                    messageQueue.removeFirst().send();
                 }
             }
         }
@@ -337,7 +338,12 @@ public class Notifier extends Module {
                 if (player.deathTime > 0 || player.getHealth() <= 0) {
                     int pops = totemPopMap.removeInt(player.getUuid());
 
-                    ChatUtils.sendMsgRaw(getChatId(player), Formatting.GRAY, "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+                    if (pops == 1) {
+                        this.info("died_after_popping_singular", MessageBuilder.highlight(player)).setId(getChatId(player)).send();
+                    } else {
+                        this.info("died_after_popping_multiple", MessageBuilder.highlight(player), MessageBuilder.highlight(pops)).setId(getChatId(player)).send();
+                    }
+
                     chatIdMap.removeInt(player.getUuid());
                 }
             }
@@ -353,18 +359,13 @@ public class Notifier extends Module {
             if (entry.profile() == null) continue;
 
             if (simpleNotifications.get()) {
-                messageQueue.addLast(Text.literal(
-                    Formatting.GRAY + "["
-                        + Formatting.GREEN + "+"
-                        + Formatting.GRAY + "] "
-                        + entry.profile().name()
-                ));
+                messageQueue.addLast(this.info(
+                    "[%s] %s",
+                    Text.literal("+").formatted(Formatting.GREEN),
+                    MessageBuilder.highlight(entry.profile().name())
+                ).removePrefix());
             } else {
-                messageQueue.addLast(Text.literal(
-                    Formatting.WHITE
-                        + entry.profile().name()
-                        + Formatting.GRAY + " joined."
-                ));
+                messageQueue.addLast(this.info("joined", MessageBuilder.highlight(entry.profile().name())));
             }
         }
     }
@@ -377,18 +378,13 @@ public class Notifier extends Module {
             if (toRemove == null) continue;
 
             if (simpleNotifications.get()) {
-                messageQueue.addLast(Text.literal(
-                    Formatting.GRAY + "["
-                        + Formatting.RED + "-"
-                        + Formatting.GRAY + "] "
-                        + toRemove.getProfile().name()
-                ));
+                messageQueue.addLast(this.info(
+                    "[%s] %s",
+                    Text.literal("-").formatted(Formatting.GREEN),
+                    MessageBuilder.highlight(toRemove.getProfile().name())
+                ).removePrefix());
             } else {
-                messageQueue.addLast(Text.literal(
-                    Formatting.WHITE
-                        + toRemove.getProfile().name()
-                        + Formatting.GRAY + " left."
-                ));
+                messageQueue.addLast(this.info("left", MessageBuilder.highlight(toRemove.getProfile().name())));
             }
         }
     }

@@ -5,7 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc.swarm;
 
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class SwarmConnection extends Thread {
 
     @Override
     public void run() {
-        ChatUtils.infoPrefixRaw("module.swarm", "New worker connected on %s.", getIp(socket.getInetAddress().getHostAddress()));
+        MessageBuilder.info("New worker connected on %s.", getIp(socket.getInetAddress().getHostAddress())).prefix(MeteorClient.translatable("module.swarm")).send();
 
         try {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -33,7 +34,7 @@ public class SwarmConnection extends Thread {
                         out.writeUTF(messageToSend);
                         out.flush();
                     } catch (Exception e) {
-                        ChatUtils.errorPrefixRaw("module.swarm", "Encountered error when sending command.");
+                        MessageBuilder.error("Encountered error when sending command.").prefix(MeteorClient.translatable("module.swarm")).send();
                         e.printStackTrace();
                     }
 
@@ -43,7 +44,7 @@ public class SwarmConnection extends Thread {
 
             out.close();
         } catch (IOException e) {
-            ChatUtils.infoPrefixRaw("module.swarm", "Error creating a connection with %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort());
+            MessageBuilder.info("Error creating a connection with %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort()).prefix(MeteorClient.translatable("module.swarm")).send();
             e.printStackTrace();
         }
     }
@@ -55,7 +56,7 @@ public class SwarmConnection extends Thread {
             e.printStackTrace();
         }
 
-        ChatUtils.infoPrefixRaw("module.swarm", "Worker disconnected on ip: %s.", socket.getInetAddress().getHostAddress());
+        MessageBuilder.info("Worker disconnected on ip: %s.", socket.getInetAddress().getHostAddress()).prefix(MeteorClient.translatable("module.swarm")).send();
 
         interrupt();
     }

@@ -30,8 +30,6 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
@@ -40,8 +38,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class WaypointsModule extends Module {
     private static final Color GRAY = new Color(200, 200, 200);
@@ -171,7 +167,7 @@ public class WaypointsModule extends Module {
     public void addDeath(Vec3d deathPos) {
         String time = dateFormat.format(new Date());
         if (dpChat.get()) {
-            info("death", formatCoords(deathPos), time);
+            info("death", deathPos, time);
         }
 
         // Create waypoint

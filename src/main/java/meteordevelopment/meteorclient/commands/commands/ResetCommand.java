@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import net.minecraft.command.CommandSource;
 
 public class ResetCommand extends Command {
@@ -28,38 +28,36 @@ public class ResetCommand extends Command {
             .then(argument("module", ModuleArgumentType.create()).executes(context -> {
                 Module module = context.getArgument("module", Module.class);
                 module.settings.forEach(group -> group.forEach(Setting::reset));
-                ChatUtils.forceNextPrefixClass(module.getClass());
-                ChatUtils.infoPrefix(module.getTranslationKey(), "command.reset.info.module");
+                module.info("command.reset.info.module").send();
                 return SINGLE_SUCCESS;
             }))
             .then(literal("all").executes(context -> {
                 Modules.get().getAll().forEach(module -> module.settings.forEach(group -> group.forEach(Setting::reset)));
-                ChatUtils.infoPrefix("tab.modules", "command.reset.info.modules");
+                this.info("modules").prefix(MeteorTranslations.translate("tab.modules")).send(); // todo maybe auto-translate prefix too?
                 return SINGLE_SUCCESS;
             }))
         ).then(literal("gui").executes(context -> {
             GuiThemes.get().clearWindowConfigs();
             GuiThemes.get().settings.reset();
-            ChatUtils.info("command.reset.info.gui");
+            this.info("gui").send();
             return SINGLE_SUCCESS;
         })).then(literal("bind")
             .then(argument("module", ModuleArgumentType.create()).executes(context -> {
                 Module module = context.getArgument("module", Module.class);
 
                 module.keybind.reset();
-                ChatUtils.forceNextPrefixClass(module.getClass());
-                ChatUtils.infoPrefix(module.getTranslationKey(), "command.reset.info.bind");
+                module.info("command.reset.info.bind").send();
 
                 return SINGLE_SUCCESS;
             }))
             .then(literal("all").executes(context -> {
                 Modules.get().getAll().forEach(module -> module.keybind.reset());
-                ChatUtils.infoPrefix("tab.modules", "command.reset.info.binds");
+                this.info("binds").prefix(MeteorTranslations.translate("tab.modules")).send();
                 return SINGLE_SUCCESS;
             }))
         ).then(literal("hud").executes(context -> {
             Hud.get().resetToDefaultElements();
-            ChatUtils.infoPrefix("tab.hud", "command.reset.info.hud");
+            this.info("hud").prefix(MeteorTranslations.translate("tab.hud")).send();
             return SINGLE_SUCCESS;
         }));
     }

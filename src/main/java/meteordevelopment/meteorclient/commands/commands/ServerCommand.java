@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ServerAddress;
@@ -25,7 +25,6 @@ import net.minecraft.command.permission.PermissionPredicate;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
-import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -87,7 +86,7 @@ public class ServerCommand extends Command {
             if (tps > 17.0f) color = Formatting.GREEN;
             else if (tps > 12.0f) color = Formatting.YELLOW;
             else color = Formatting.RED;
-            info("tps", Text.literal(String.format("%.2f", tps)).formatted(color));
+            this.info("tps", Text.literal(String.format("%.2f", tps)).formatted(color)).send();
             return SINGLE_SUCCESS;
         }));
     }
@@ -96,8 +95,8 @@ public class ServerCommand extends Command {
         if (mc.isIntegratedServerRunning()) {
             IntegratedServer server = mc.getServer();
 
-            info("singleplayer");
-            if (server != null) info("version", server.getVersion());
+            this.info("singleplayer").send();
+            if (server != null) this.info("version", server.getVersion()).send();
 
             return;
         }
@@ -105,7 +104,7 @@ public class ServerCommand extends Command {
         ServerInfo server = mc.getCurrentServerEntry();
 
         if (server == null) {
-            error("cant_obtain_info");
+            this.error("cant_obtain_info").send();
             return;
         }
 
@@ -136,14 +135,14 @@ public class ServerCommand extends Command {
             );
             ipText.append(ipv4Text);
         }
-        info("ip", ipText);
+        this.info("ip", ipText).send();
 
-        info("port", ServerAddress.parse(server.address).getPort());
-        info("type", mc.getNetworkHandler().getBrand() != null ? mc.getNetworkHandler().getBrand() : MeteorClient.translatable("command.server.info.unknown"));
-        info("motd", server.label != null ? server.label.getString() : MeteorClient.translatable("command.server.info.unknown"));
-        info("version", server.version.getString());
-        info("protocol_version", server.protocolVersion);
-        info("difficulty",
+        this.info("port", ServerAddress.parse(server.address).getPort()).send();
+        this.info("type", mc.getNetworkHandler().getBrand() != null ? mc.getNetworkHandler().getBrand() : MeteorClient.translatable("command.server.info.unknown")).send();
+        this.info("motd", server.label != null ? server.label.getString() : MeteorClient.translatable("command.server.info.unknown")).send();
+        this.info("version", server.version.getString()).send();
+        this.info("protocol_version", server.protocolVersion).send();
+        this.info("difficulty",
             mc.world.getDifficulty().getTranslatableName(),
             String.format("%.2f", new LocalDifficulty(
                 mc.world.getDifficulty(),
@@ -151,9 +150,9 @@ public class ServerCommand extends Command {
                 mc.world.getChunk(mc.player.getBlockPos()).getInhabitedTime(),
                 DimensionType.MOON_SIZES[mc.world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL, mc.player.getBlockPos()).getIndex()] // lol
             ).getLocalDifficulty())
-        );
-        info("day", mc.world.getTimeOfDay() / 24000L);
-        info(formatPerms());
+        ).send();
+        this.info("day", mc.world.getTimeOfDay() / 24000L).send();
+        this.info(formatPerms()).send();
     }
 
     public String formatPerms() {
@@ -177,9 +176,9 @@ public class ServerCommand extends Command {
         }
 
         if (!plugins.isEmpty()) {
-            info("plugins", plugins.size(), Texts.join(pluginTexts, Texts.DEFAULT_SEPARATOR_TEXT));
+            this.info("plugins", plugins.size(), Texts.join(pluginTexts, Texts.DEFAULT_SEPARATOR_TEXT)).send();
         } else {
-            error("no_plugins");
+            this.error("no_plugins").send();
         }
 
         tick = false;
@@ -236,7 +235,7 @@ public class ServerCommand extends Command {
                 Suggestions matches = packet.getSuggestions();
 
                 if (matches.isEmpty()) {
-                    error("plugins");
+                    this.error("plugins").send();
                     return;
                 }
 
@@ -248,7 +247,7 @@ public class ServerCommand extends Command {
                 printPlugins();
             }
         } catch (Exception e) {
-            error("plugins");
+            this.error("plugins").send();
         }
     }
 
@@ -260,6 +259,6 @@ public class ServerCommand extends Command {
             return Text.literal(name).formatted(Formatting.RED);
         }
 
-        return ChatUtils.highlight(name);
+        return MessageBuilder.highlight(name);
     }
 }

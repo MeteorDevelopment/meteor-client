@@ -9,7 +9,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
@@ -31,7 +31,7 @@ public class BindsCommand extends Command {
                 .filter(module -> module.keybind.isSet())
                 .toList();
 
-            ChatUtils.info(translationKey + ".info.bound_modules", ChatUtils.highlight(modules.size()));
+            this.info("bound_modules", MessageBuilder.highlight(modules.size())).send();
 
             for (Module module : modules) {
                 HoverEvent hoverEvent = new HoverEvent.ShowText(getTooltip(module));
@@ -47,7 +47,7 @@ public class BindsCommand extends Command {
                 key.setStyle(key.getStyle().withHoverEvent(hoverEvent));
                 text.append(key.formatted(Formatting.GRAY));
 
-                ChatUtils.sendMsg(text);
+                this.info(text).send();
             }
 
             return SINGLE_SUCCESS;

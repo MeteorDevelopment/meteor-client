@@ -9,6 +9,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.ClickEvent;
@@ -25,11 +26,11 @@ public class CommandsCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.info(translationKey + ".info.commands", ChatUtils.highlight(Commands.COMMANDS.size()));
+            this.info("commands", MessageBuilder.highlight(Commands.COMMANDS.size())).send();
 
-            MutableText commands = Text.literal("");
+            MutableText commands = Text.empty();
             Commands.COMMANDS.forEach(command -> commands.append(getCommandText(command)));
-            ChatUtils.sendMsg(commands);
+            this.info(commands).send();
 
             return SINGLE_SUCCESS;
         });
@@ -37,7 +38,7 @@ public class CommandsCommand extends Command {
 
     private MutableText getCommandText(Command command) {
         // Hover tooltip
-        MutableText tooltip = Text.literal("");
+        MutableText tooltip = Text.empty();
 
         tooltip.append(command.getTitle().formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
 
