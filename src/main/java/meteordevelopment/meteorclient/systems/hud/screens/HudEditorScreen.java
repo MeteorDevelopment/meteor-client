@@ -64,7 +64,12 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public void initWidgets() {}
+    public void initWidgets() {
+        add(theme.label("Right-click to add new elements!"))
+            .centerX()
+            .top()
+            .marginTop(50);
+    }
 
     @Override
     public boolean mouseClicked(Click click, boolean doubled) {
