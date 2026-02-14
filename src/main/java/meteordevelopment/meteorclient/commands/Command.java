@@ -11,7 +11,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
+import meteordevelopment.meteorclient.utils.misc.text.MessageKind;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
@@ -81,39 +82,24 @@ public abstract class Command {
         return base.toString();
     }
 
-    public void info(Text message) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.sendMsg(translationKey, message);
+    public MessageBuilder info(Text message) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.translationKey)
+            .body(message).setKind(MessageKind.Info);
     }
 
-    public void info(String messageKey, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(translationKey, translationKey + ".info." + messageKey, args);
+    public MessageBuilder info(String message, Object... args) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.translationKey)
+            .body(message, args).setKind(MessageKind.Info);
     }
 
-    public void infoRaw(String message, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefixRaw(translationKey, message, args);
+    public MessageBuilder warning(String message, Object... args) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.translationKey)
+            .body(message, args).setKind(MessageKind.Warning);
     }
 
-    public void warning(String messageKey, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(translationKey, translationKey + ".warning." + messageKey, args);
-    }
-
-    public void warningRaw(String message, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefixRaw(translationKey, message, args);
-    }
-
-    public void error(String messageKey, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(translationKey, translationKey + ".error." + messageKey, args);
-    }
-
-    public void errorRaw(String message, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefixRaw(translationKey, message, args);
+    public MessageBuilder error(String message, Object... args) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.translationKey)
+            .body(message, args).setKind(MessageKind.Error);
     }
 
     public MutableText translatable(String string, Object... args) {

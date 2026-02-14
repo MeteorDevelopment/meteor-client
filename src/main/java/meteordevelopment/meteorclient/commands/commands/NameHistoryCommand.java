@@ -44,7 +44,7 @@ public class NameHistoryCommand extends Command {
                 if (history == null) {
                     return;
                 } else if (history.username_history == null || history.username_history.length == 0) {
-                    error("error_fetching_name");
+                    this.error("error_fetching_name").send();
                 }
 
                 String name = lookUpTarget.getProfile().name();
@@ -66,7 +66,7 @@ public class NameHistoryCommand extends Command {
                     ))
                 );
 
-                info(initial.append(Text.literal(" Username History:").formatted(Formatting.GRAY))); // todo map
+                this.info(initial.append(Text.literal(" Username History:").formatted(Formatting.GRAY))).send(); // todo map
 
                 for (Name entry : history.username_history) {
                     MutableText nameText = Text.literal(entry.name);
@@ -90,7 +90,7 @@ public class NameHistoryCommand extends Command {
                         nameText.append(text);
                     }
 
-                    ChatUtils.sendMsg(nameText);
+                    this.info(nameText).send();
                 }
             });
 

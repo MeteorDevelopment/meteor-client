@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.ModuleArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 public class BindCommand extends Command {
@@ -25,8 +24,7 @@ public class BindCommand extends Command {
             Modules.get().setModuleToBind(module);
             Modules.get().awaitKeyRelease();
 
-            ChatUtils.forceNextPrefixClass(module.getClass());
-            ChatUtils.infoPrefix(module.getTranslationKey(), this.translationKey + ".info.press_key");
+            this.info("press_key").prefix(module.getTitleText()).send();
 
             return SINGLE_SUCCESS;
         }));

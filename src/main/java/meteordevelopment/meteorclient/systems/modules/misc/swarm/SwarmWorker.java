@@ -5,9 +5,10 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc.swarm;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.pathing.PathManagers;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import net.minecraft.block.Block;
 
 import java.io.DataInputStream;
@@ -23,7 +24,7 @@ public class SwarmWorker extends Thread {
             socket = new Socket(ip, port);
         } catch (Exception e) {
             socket = null;
-            ChatUtils.warningPrefixRaw("module.swarm", "Server not found at %s on port %s.", ip, port);
+            MessageBuilder.warning("Server not found at %s on port %s.", ip, port).prefix(MeteorClient.translatable("module.swarm")).send();
             e.printStackTrace();
         }
 
@@ -32,7 +33,7 @@ public class SwarmWorker extends Thread {
 
     @Override
     public void run() {
-        ChatUtils.infoPrefixRaw("module.swarm", "Connected to Swarm host on at %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort());
+        MessageBuilder.info("Connected to Swarm host on at %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort()).prefix(MeteorClient.translatable("module.swarm")).send();
 
         try {
             DataInputStream in = new DataInputStream(socket.getInputStream());
@@ -42,12 +43,12 @@ public class SwarmWorker extends Thread {
                 String read = in.readUTF();
 
                 if (read.startsWith("swarm")) {
-                    ChatUtils.infoPrefixRaw("module.swarm", "Received command: (highlight)%s", read);
+                    MessageBuilder.info("Received command: %s", MessageBuilder.highlight(read)).prefix(MeteorClient.translatable("module.swarm")).send();
 
                     try {
                         Commands.dispatch(read);
                     } catch (Exception e) {
-                        ChatUtils.errorPrefixRaw("module.swarm", "Error fetching command.");
+                        MessageBuilder.error("Error fetching command.").prefix(MeteorClient.translatable("module.swarm")).send();
                         e.printStackTrace();
                     }
                 }
@@ -55,7 +56,7 @@ public class SwarmWorker extends Thread {
 
             in.close();
         } catch (IOException e) {
-            ChatUtils.errorPrefixRaw("module.swarm", "Error in connection to host.");
+            MessageBuilder.error("Error in connection to host.").prefix(MeteorClient.translatable("module.swarm")).send();
             e.printStackTrace();
             disconnect();
         }
@@ -70,7 +71,7 @@ public class SwarmWorker extends Thread {
 
         PathManagers.get().stop();
 
-        ChatUtils.infoPrefixRaw("module.swarm", "Disconnected from host.");
+        MessageBuilder.info("Disconnected from host.").prefix(MeteorClient.translatable("module.swarm")).send();
 
         interrupt();
     }

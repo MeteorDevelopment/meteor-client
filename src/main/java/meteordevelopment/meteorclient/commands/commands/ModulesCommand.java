@@ -6,10 +6,11 @@
 package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
@@ -24,12 +25,12 @@ public class ModulesCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.infoRaw("--- Modules ((highlight)%d(default)) ---", Modules.get().getCount());
+            this.info("--- Modules (%s) ---", MessageBuilder.highlight(Modules.get().getCount())).send();
 
             Modules.loopCategories().forEach(category -> {
-                MutableText categoryMessage = Text.literal("");
+                MutableText categoryMessage = Text.empty();
                 Modules.get().getGroup(category).forEach(module -> categoryMessage.append(getModuleText(module)));
-                ChatUtils.sendMsg(category.translationKey, categoryMessage);
+                this.info(categoryMessage).prefix(MeteorClient.translatable(category.translationKey)).send();
             });
 
             return SINGLE_SUCCESS;
@@ -38,7 +39,7 @@ public class ModulesCommand extends Command {
 
     private MutableText getModuleText(Module module) {
         // Hover tooltip
-        MutableText tooltip = Text.literal("");
+        MutableText tooltip = Text.empty();
 
         tooltip.append(module.getTitleText().formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
         tooltip.append(Text.literal(module.name).formatted(Formatting.GRAY)).append("\n\n");
