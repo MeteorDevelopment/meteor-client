@@ -5,9 +5,11 @@
 
 package meteordevelopment.meteorclient.gui.themes.meteor;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.MessageFormatter;
 import meteordevelopment.meteorclient.pathing.NopPathManager;
 import meteordevelopment.meteorclient.pathing.PathManagers;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.text.MessageKind;
 import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import net.minecraft.entity.Entity;
@@ -22,6 +24,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
 import java.text.DecimalFormat;
+import java.util.Optional;
 
 public class MeteorMessageFormatter implements MessageFormatter {
     private final DecimalFormat decimalFormat = new DecimalFormat("0.0##");
@@ -63,8 +66,8 @@ public class MeteorMessageFormatter implements MessageFormatter {
     }
 
     @Override
-    public Text formatHighlight(MutableText text) {
-        return text.formatted(Formatting.WHITE);
+    public Text formatHighlight(Text text) {
+        return Text.empty().formatted(Formatting.WHITE).append(text);
     }
 
     @Override
@@ -81,12 +84,27 @@ public class MeteorMessageFormatter implements MessageFormatter {
     }
 
     @Override
-    public Text formatMessage(MutableText message, MessageKind messageKind) {
+    public Text formatToggleFeedback(Text clientPrefix, Text featurePrefix, Module module, boolean enabled) {
+        Text feedback = MeteorClient.translatable(
+            "module.base.toggled",
+            module.getTitleText(),
+            enabled ? Text.literal("on").formatted(Formatting.GREEN) : Text.literal("off").formatted(Formatting.RED)
+        );
+
+        return this.formatMessage(clientPrefix, Optional.of(featurePrefix), feedback, MessageKind.Passthrough);
+    }
+
+    @Override
+    public Text formatMessage(Text clientPrefix, Optional<Text> featurePrefix, Text message, MessageKind messageKind) {
+        MutableText formattedMessage = Text.empty().append(clientPrefix);
+        featurePrefix.ifPresent(formattedMessage::append);
+        formattedMessage.append(message);
+
         return switch (messageKind) {
-            case Passthrough -> message;
-            case Info -> message.formatted(Formatting.GRAY);
-            case Warning -> message.formatted(Formatting.YELLOW);
-            case Error -> message.formatted(Formatting.RED);
+            case Passthrough -> formattedMessage;
+            case Info -> formattedMessage.formatted(Formatting.GRAY);
+            case Warning -> formattedMessage.formatted(Formatting.YELLOW);
+            case Error -> formattedMessage.formatted(Formatting.RED);
         };
     }
 }

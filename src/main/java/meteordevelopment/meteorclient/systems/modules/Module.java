@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -16,6 +17,8 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
+import meteordevelopment.meteorclient.utils.misc.text.MessageKind;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
@@ -23,7 +26,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -117,44 +119,34 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public void sendToggledMsg() {
         if (Config.get().chatFeedback.get() && chatFeedback) {
-            ChatUtils.forceNextPrefixClass(getClass());
-            ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "module.base.toggled", this.getTitleText(), isActive() ? Text.literal("on").formatted(Formatting.GREEN) : Text.literal("off").formatted(Formatting.RED));
+            GuiTheme theme = GuiThemes.get();
+            ChatUtils.sendMsg(this.hashCode(), theme.messageFormatter().formatToggleFeedback(
+                theme.messageFormatter().formatPrefix(ChatUtils.getPrefix(this, theme)),
+                theme.messageFormatter().formatPrefix(this.getTitleText()),
+                this,
+                this.isActive()
+            ));
         }
     }
 
-    public void info(Text message) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.sendMsg(this.getTranslationKey(), message);
+    public MessageBuilder info(Text message) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
+            .body(message).setKind(MessageKind.Info);
     }
 
-    public void info(String messageKey, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(this.getTranslationKey(), this.getTranslationKey() + ".info." + messageKey, args);
+    public MessageBuilder info(String message, Object... args) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
+            .body(message, args).setKind(MessageKind.Info);
     }
 
-    public void infoRaw(String message, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefixRaw(this.getTranslationKey(), message, args);
+    public MessageBuilder warning(String message, Object... args) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
+            .body(message, args).setKind(MessageKind.Warning);
     }
 
-    public void warning(String messageKey, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(this.getTranslationKey(), this.getTranslationKey() + ".warning." + messageKey, args);
-    }
-
-    public void warningRaw(String message, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefixRaw(this.getTranslationKey(), message, args);
-    }
-
-    public void error(String messageKey, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(this.getTranslationKey(), this.getTranslationKey() + ".error." + messageKey, args);
-    }
-
-    public void errorRaw(String message, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefixRaw(this.getTranslationKey(), message, args);
+    public MessageBuilder error(String message, Object... args) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
+            .body(message, args).setKind(MessageKind.Error);
     }
 
     public boolean isActive() {
