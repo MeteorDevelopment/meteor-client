@@ -5,8 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc.swarm;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -21,7 +22,7 @@ public class SwarmHost extends Thread {
             socket = new ServerSocket(port);
         } catch (IOException e) {
             socket = null;
-            ChatUtils.errorPrefix("Swarm", "Couldn't start a server on port %s.", port);
+            MessageBuilder.error("Couldn't start a server on port %s.", port).prefix(MeteorClient.translatable("module.swarm")).send();
             e.printStackTrace();
         }
 
@@ -30,14 +31,14 @@ public class SwarmHost extends Thread {
 
     @Override
     public void run() {
-        ChatUtils.infoPrefix("Swarm", "Listening for incoming connections on port %s.", socket.getLocalPort());
+        MessageBuilder.info("Listening for incoming connections on port %s.", socket.getLocalPort()).prefix(MeteorClient.translatable("module.swarm")).send();
 
         while (!isInterrupted()) {
             try {
                 Socket connection = socket.accept();
                 assignConnectionToSubServer(connection);
             } catch (IOException e) {
-                ChatUtils.errorPrefix("Swarm", "Error making a connection to worker.");
+                MessageBuilder.error("Error making a connection to worker.").prefix(MeteorClient.translatable("module.swarm")).send();
                 e.printStackTrace();
             }
         }
@@ -63,7 +64,7 @@ public class SwarmHost extends Thread {
             e.printStackTrace();
         }
 
-        ChatUtils.infoPrefix("Swarm", "Server closed on port %s.", socket.getLocalPort());
+        MessageBuilder.info("Server closed on port %s.", socket.getLocalPort()).prefix(MeteorClient.translatable("module.swarm")).send();
 
         interrupt();
     }

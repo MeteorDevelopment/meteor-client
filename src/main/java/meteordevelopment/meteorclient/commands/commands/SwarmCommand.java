@@ -22,6 +22,7 @@ import meteordevelopment.meteorclient.systems.modules.misc.swarm.Swarm;
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.SwarmConnection;
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.SwarmWorker;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
@@ -69,11 +70,11 @@ public class SwarmCommand extends Command {
 
                                     pendingConnection = new ObjectIntImmutablePair<>(ip, port);
 
-                                    info("Are you sure you want to connect to '%s:%s'?", ip, port);
-                                    info(Text.literal("Click here to confirm").setStyle(Style.EMPTY
+                                    this.info("Are you sure you want to connect to '%s:%s'?", ip, port).send();
+                                    this.info(Text.literal("Click here to confirm").setStyle(Style.EMPTY
                                         .withFormatting(Formatting.UNDERLINE, Formatting.GREEN)
                                         .withClickEvent(new MeteorClickEvent(".swarm join confirm"))
-                                    ));
+                                    )).send();
 
                                     return SINGLE_SUCCESS;
                                 })
@@ -81,7 +82,7 @@ public class SwarmCommand extends Command {
                 )
                 .then(literal("confirm").executes(ctx -> {
                     if (pendingConnection == null) {
-                        error("No pending swarm connections.");
+                        this.error("No pending swarm connections.").send();
                         return SINGLE_SUCCESS;
                     }
 
@@ -95,9 +96,9 @@ public class SwarmCommand extends Command {
                     pendingConnection = null;
 
                     try {
-                        info("Connected to (highlight)%s.", swarm.worker.getConnection());
+                        this.info("Connected to %s.", MessageBuilder.highlight(swarm.worker.getConnection())).send();
                     } catch (NullPointerException e) {
-                        error("Error connecting to swarm host.");
+                        this.error("Error connecting to swarm host.").send();
                         swarm.close();
                         swarm.toggle();
                     }
@@ -111,19 +112,22 @@ public class SwarmCommand extends Command {
             if (swarm.isActive()) {
                 if (swarm.isHost()) {
                     if (swarm.host.getConnectionCount() > 0) {
-                        ChatUtils.info("--- Swarm Connections (highlight)(%s/%s)(default) ---", swarm.host.getConnectionCount(), swarm.host.getConnections().length);
+
+                        this.info("--- Swarm Connections (%s/%s) ---", MessageBuilder.highlight(swarm.host.getConnectionCount()), MessageBuilder.highlight(swarm.host.getConnections().length)).send();
 
                         for (int i = 0; i < swarm.host.getConnections().length; i++) {
                             SwarmConnection connection = swarm.host.getConnections()[i];
-                            if (connection != null) ChatUtils.info("(highlight)Worker %s(default): %s.", i, connection.getConnection());
+                            if (connection != null) {
+                                this.info("%s: %s.", MessageBuilder.highlight("Worker " + i), connection.getConnection()).send();
+                            }
                         }
                     }
                     else {
-                        warning("No active connections");
+                        this.warning("No active connections").send();
                     }
                 }
                 else if (swarm.isWorker()) {
-                    info("Connected to (highlight)%s", swarm.worker.getConnection());
+                    this.info("Connected to %s.", MessageBuilder.highlight(swarm.worker.getConnection())).send();
                 }
             }
             else {
@@ -140,7 +144,7 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput() + " " + mc.player.getName().getString());
                 }
                 else if (swarm.isWorker()) {
-                    error("The follow host command must be used by the host.");
+                    this.error("The follow host command must be used by the host.").send();
                 }
             }
             else {

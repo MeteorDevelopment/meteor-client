@@ -23,7 +23,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class HudTab extends Tab {
     public HudTab() {
-        super("HUD");
+        super("hud");
     }
 
     @Override

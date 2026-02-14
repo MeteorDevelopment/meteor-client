@@ -23,7 +23,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import meteordevelopment.meteorclient.utils.misc.text.TextVisitor;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
@@ -296,7 +295,7 @@ public class BetterChat extends Module {
             MutableText sendButton = getSendButton(message);
             warningMessage.append(sendButton);
 
-            ChatUtils.sendMsg(warningMessage);
+            this.info(warningMessage).send();
 
             event.cancel();
             return;

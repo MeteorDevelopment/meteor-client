@@ -12,10 +12,11 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.command.CommandSource;
+import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,9 +81,9 @@ public class InputCommand extends Command {
         }
 
         builder.then(literal("clear").executes(ctx -> {
-            if (activeHandlers.isEmpty()) warning("no_handlers");
+            if (activeHandlers.isEmpty()) this.warning("no_handlers").send();
             else {
-                info("cleared_handlers");
+                this.info("cleared_handlers").send();
                 activeHandlers.forEach(MeteorClient.EVENT_BUS::unsubscribe);
                 activeHandlers.clear();
             }
@@ -90,12 +91,18 @@ public class InputCommand extends Command {
         }));
 
         builder.then(literal("list").executes(ctx -> {
-            if (activeHandlers.isEmpty()) warning("no_handlers");
+            if (activeHandlers.isEmpty()) this.warning("no_handlers").send();
             else {
-                info("");
+                this.info("active_handlers").send();
                 for (int i = 0; i < activeHandlers.size(); i++) {
                     KeypressHandler handler = activeHandlers.get(i);
-                    info("keypress_handler", i, I18n.translate(handler.key.getId()), handler.ticks, handler.totalTicks);
+                    this.info(
+                        "keypress_handler",
+                        MessageBuilder.highlight(i),
+                        MessageBuilder.highlight(Text.translatable(handler.key.getId())),
+                        MessageBuilder.highlight(handler.ticks),
+                        MessageBuilder.highlight(handler.key.getId())
+                    ).send();
                 }
             }
             return SINGLE_SUCCESS;
@@ -103,9 +110,9 @@ public class InputCommand extends Command {
 
         builder.then(literal("remove").then(argument("index", IntegerArgumentType.integer(0)).executes(ctx -> {
             int index = IntegerArgumentType.getInteger(ctx, "index");
-            if (index >= activeHandlers.size()) warning("out_of_range");
+            if (index >= activeHandlers.size()) this.warning("out_of_range").send();
             else {
-                info("removed_handler");
+                this.info("removed_handler").send();
                 MeteorClient.EVENT_BUS.unsubscribe(activeHandlers.get(index));
                 activeHandlers.remove(index);
             }

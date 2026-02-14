@@ -21,7 +21,7 @@ public class DisconnectCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(translatable("disconnection_message", Formatting.GRAY, Formatting.BLUE, Formatting.GRAY)));
+            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(translatable("disconnection_message", this.getTitle().formatted(Formatting.BLUE)).formatted(Formatting.GRAY)));
             return SINGLE_SUCCESS;
         });
 

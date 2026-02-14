@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ServerAddress;
@@ -25,10 +26,7 @@ import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.attribute.EnvironmentAttributes;
@@ -88,7 +86,7 @@ public class ServerCommand extends Command {
             if (tps > 17.0f) color = Formatting.GREEN;
             else if (tps > 12.0f) color = Formatting.YELLOW;
             else color = Formatting.RED;
-            info("Current TPS: %s%.2f(default).", color, tps);
+            this.info("tps", Text.literal(String.format("%.2f", tps)).formatted(color)).send();
             return SINGLE_SUCCESS;
         }));
     }
@@ -97,8 +95,8 @@ public class ServerCommand extends Command {
         if (mc.isIntegratedServerRunning()) {
             IntegratedServer server = mc.getServer();
 
-            info("Singleplayer");
-            if (server != null) info("Version: %s", server.getVersion());
+            this.info("singleplayer").send();
+            if (server != null) this.info("version", server.getVersion()).send();
 
             return;
         }
@@ -106,7 +104,7 @@ public class ServerCommand extends Command {
         ServerInfo server = mc.getCurrentServerEntry();
 
         if (server == null) {
-            info("Couldn't obtain any server information.");
+            this.error("cant_obtain_info").send();
             return;
         }
 
@@ -121,53 +119,50 @@ public class ServerCommand extends Command {
             ipText = Text.literal(Formatting.GRAY + server.address);
             ipText.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent.CopyToClipboard(server.address))
-                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
+                .withHoverEvent(new HoverEvent.ShowText(MeteorClient.translatable("command.server.info.copy")))
             );
         }
         else {
             ipText = Text.literal(Formatting.GRAY + server.address);
             ipText.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent.CopyToClipboard(server.address))
-                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
+                .withHoverEvent(new HoverEvent.ShowText(MeteorClient.translatable("command.server.info.copy")))
             );
             MutableText ipv4Text = Text.literal(String.format("%s (%s)", Formatting.GRAY, ipv4));
             ipv4Text.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent.CopyToClipboard(ipv4))
-                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
+                .withHoverEvent(new HoverEvent.ShowText(MeteorClient.translatable("command.server.info.copy")))
             );
             ipText.append(ipv4Text);
         }
-        info(
-            Text.literal(String.format("%sIP: ", Formatting.GRAY))
-            .append(ipText)
-        );
+        this.info("ip", ipText).send();
 
-        info("Port: %d", ServerAddress.parse(server.address).getPort());
-        info("Type: %s", mc.getNetworkHandler().getBrand() != null ? mc.getNetworkHandler().getBrand() : "unknown");
-        info("Motd: %s", server.label != null ? server.label.getString() : "unknown");
-        info("Version: %s", server.version.getString());
-        info("Protocol version: %d", server.protocolVersion);
-        info("Difficulty: %s (Local: %.2f)",
-            mc.world.getDifficulty().getTranslatableName().getString(),
-            new LocalDifficulty(
+        this.info("port", ServerAddress.parse(server.address).getPort()).send();
+        this.info("type", mc.getNetworkHandler().getBrand() != null ? mc.getNetworkHandler().getBrand() : MeteorClient.translatable("command.server.info.unknown")).send();
+        this.info("motd", server.label != null ? server.label.getString() : MeteorClient.translatable("command.server.info.unknown")).send();
+        this.info("version", server.version.getString()).send();
+        this.info("protocol_version", server.protocolVersion).send();
+        this.info("difficulty",
+            mc.world.getDifficulty().getTranslatableName(),
+            String.format("%.2f", new LocalDifficulty(
                 mc.world.getDifficulty(),
                 mc.world.getTimeOfDay(),
                 mc.world.getChunk(mc.player.getBlockPos()).getInhabitedTime(),
                 DimensionType.MOON_SIZES[mc.world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL, mc.player.getBlockPos()).getIndex()] // lol
-            ).getLocalDifficulty()
-        );
-        info("Day: %d", mc.world.getTimeOfDay() / 24000L);
-        info("Permission level: %s", formatPerms());
+            ).getLocalDifficulty())
+        ).send();
+        this.info("day", mc.world.getTimeOfDay() / 24000L).send();
+        this.info(formatPerms()).send();
     }
 
     public String formatPerms() {
         PermissionPredicate permissions = mc.player.getPermissions();
 
-        if (permissions.hasPermission(DefaultPermissions.OWNERS)) return "4 (Owner)";
-        else if (permissions.hasPermission(DefaultPermissions.ADMINS)) return "3 (Admin)";
-        else if (permissions.hasPermission(DefaultPermissions.GAMEMASTERS)) return "2 (Gamemaster)";
-        else if (permissions.hasPermission(DefaultPermissions.MODERATORS)) return "1 (Moderator)";
-        else return "0 (No Perms)";
+        if (permissions.hasPermission(DefaultPermissions.OWNERS)) return "permission_owner";
+        else if (permissions.hasPermission(DefaultPermissions.ADMINS)) return "permission_admin";
+        else if (permissions.hasPermission(DefaultPermissions.GAMEMASTERS)) return "permission_gamemaster";
+        else if (permissions.hasPermission(DefaultPermissions.MODERATORS)) return "permission_moderator";
+        else return "permission_player";
     }
 
 
@@ -175,12 +170,15 @@ public class ServerCommand extends Command {
 
     private void printPlugins() {
         plugins.sort(String.CASE_INSENSITIVE_ORDER);
-        plugins.replaceAll(this::formatName);
+        List<Text> pluginTexts = new ArrayList<>();
+        for (String plugin : plugins) {
+            pluginTexts.add(formatName(plugin));
+        }
 
         if (!plugins.isEmpty()) {
-            info("Plugins (%d): %s ", plugins.size(), String.join(", ", plugins));
+            this.info("plugins", plugins.size(), Texts.join(pluginTexts, Texts.DEFAULT_SEPARATOR_TEXT)).send();
         } else {
-            error("No plugins found.");
+            this.error("no_plugins").send();
         }
 
         tick = false;
@@ -237,7 +235,7 @@ public class ServerCommand extends Command {
                 Suggestions matches = packet.getSuggestions();
 
                 if (matches.isEmpty()) {
-                    error("An error occurred while trying to find plugins.");
+                    this.error("plugins").send();
                     return;
                 }
 
@@ -249,18 +247,18 @@ public class ServerCommand extends Command {
                 printPlugins();
             }
         } catch (Exception e) {
-            error("An error occurred while trying to find plugins.");
+            this.error("plugins").send();
         }
     }
 
-    private String formatName(String name) {
+    private Text formatName(String name) {
         if (ANTICHEAT_LIST.contains(name.toLowerCase())) {
-            return String.format("%s%s(default)", Formatting.RED, name);
+            return Text.literal(name).formatted(Formatting.RED);
         }
         else if (Strings.CI.contains(name, "exploit") || Strings.CI.contains(name, "cheat") || Strings.CI.contains(name, "illegal")) {
-            return String.format("%s%s(default)", Formatting.RED, name);
+            return Text.literal(name).formatted(Formatting.RED);
         }
 
-        return String.format("(highlight)%s(default)", name);
+        return MessageBuilder.highlight(name);
     }
 }

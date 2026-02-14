@@ -23,7 +23,9 @@ public class BindCommand extends Command {
             Module module = context.getArgument("module", Module.class);
             Modules.get().setModuleToBind(module);
             Modules.get().awaitKeyRelease();
-            module.info("Press a key to bind the module to.");
+
+            this.info("press_key").prefix(module.getTitleText()).send();
+
             return SINGLE_SUCCESS;
         }));
     }

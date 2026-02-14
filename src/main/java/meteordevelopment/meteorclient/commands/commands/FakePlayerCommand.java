@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.FakePlayer;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import net.minecraft.command.CommandSource;
 
 public class FakePlayerCommand extends Command {
@@ -42,12 +43,12 @@ public class FakePlayerCommand extends Command {
                 .executes(context -> {
                     FakePlayerEntity fp = FakePlayerArgumentType.get(context);
                     if (fp == null || !FakePlayerManager.contains(fp)) {
-                        error("not_found");
+                        this.error("not_found").send();
                         return SINGLE_SUCCESS;
                     }
 
                     FakePlayerManager.remove(fp);
-                    info("removed", fp.getName().getString());
+                    this.info("removed", MessageBuilder.highlight(fp)).send();
 
                     return SINGLE_SUCCESS;
                 })
@@ -63,8 +64,8 @@ public class FakePlayerCommand extends Command {
 
         builder.then(literal("list")
             .executes(context -> {
-                info("--- Fake Players ((highlight)%s(default)) ---", FakePlayerManager.count());
-                FakePlayerManager.forEach(fp -> info("(highlight)%s".formatted(fp.getName().getString())));
+                this.info("fake_players", MessageBuilder.highlight(FakePlayerManager.count())).send();
+                FakePlayerManager.forEach(fp -> this.info(MessageBuilder.highlight(fp)).send());
                 return SINGLE_SUCCESS;
             })
         );

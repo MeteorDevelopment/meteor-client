@@ -251,7 +251,7 @@ public class AnchorAura extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (mc.world.getRegistryKey() == World.NETHER) {
-            error("You can't blow up respawn anchors in this dimension, disabling.");
+            error("wrong_dimension");
             toggle();
             return;
         }

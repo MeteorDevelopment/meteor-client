@@ -12,9 +12,8 @@ import meteordevelopment.meteorclient.commands.arguments.FriendArgumentType;
 import meteordevelopment.meteorclient.commands.arguments.PlayerListEntryArgumentType;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import net.minecraft.command.CommandSource;
-import net.minecraft.util.Formatting;
 
 public class FriendsCommand extends Command {
     public FriendsCommand() {
@@ -30,9 +29,9 @@ public class FriendsCommand extends Command {
                     Friend friend = new Friend(profile.name(), profile.id());
 
                     if (Friends.get().add(friend)) {
-                        ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, "Added (highlight)%s (default)to friends.".formatted(friend.getName()));
+                        this.info("added", friend.getName()).setId(friend.hashCode()).send();
                     }
-                    else error("Already friends with that player.");
+                    else error("already_friends");
 
                     return SINGLE_SUCCESS;
                 })
@@ -44,14 +43,14 @@ public class FriendsCommand extends Command {
                 .executes(context -> {
                     Friend friend = FriendArgumentType.get(context);
                     if (friend == null) {
-                        error("Not friends with that player.");
+                        this.error("not_friends").send();
                         return SINGLE_SUCCESS;
                     }
 
                     if (Friends.get().remove(friend)) {
-                        ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, "Removed (highlight)%s (default)from friends.".formatted(friend.getName()));
+                        this.info("removed", friend.getName()).setId(friend.hashCode()).send();
                     }
-                    else error("Failed to remove that friend.");
+                    else this.error("failed").send();
 
                     return SINGLE_SUCCESS;
                 })
@@ -59,10 +58,9 @@ public class FriendsCommand extends Command {
         );
 
         builder.then(literal("list").executes(context -> {
-                info("--- Friends ((highlight)%s(default)) ---", Friends.get().count());
-                Friends.get().forEach(friend -> ChatUtils.info("(highlight)%s".formatted(friend.getName())));
-                return SINGLE_SUCCESS;
-            })
-        );
+            this.info("friends", MessageBuilder.highlight(Friends.get().count())).send();
+            Friends.get().forEach(friend -> this.info(MessageBuilder.highlight(friend.getName())).send());
+            return SINGLE_SUCCESS;
+        }));
     }
 }

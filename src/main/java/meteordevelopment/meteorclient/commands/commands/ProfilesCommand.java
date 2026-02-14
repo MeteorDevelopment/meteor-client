@@ -10,6 +10,8 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.ProfileArgumentType;
 import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 public class ProfilesCommand extends Command {
@@ -25,7 +27,7 @@ public class ProfilesCommand extends Command {
 
             if (profile != null) {
                 profile.load();
-                info("loaded", profile.name.get());
+                this.info("loaded", MessageBuilder.highlight(profile.name.get())).send();
             }
 
             return SINGLE_SUCCESS;
@@ -36,7 +38,7 @@ public class ProfilesCommand extends Command {
 
             if (profile != null) {
                 profile.save();
-                info("saved", profile.name.get());
+                this.info("saved", MessageBuilder.highlight(profile.name.get())).send();
             }
 
             return SINGLE_SUCCESS;
@@ -47,7 +49,7 @@ public class ProfilesCommand extends Command {
 
             if (profile != null) {
                 Profiles.get().remove(profile);
-                info("deleted", profile.name.get());
+                this.info("deleted", MessageBuilder.highlight(profile.name.get())).send();
             }
 
             return SINGLE_SUCCESS;

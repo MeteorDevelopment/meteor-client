@@ -27,7 +27,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
-import meteordevelopment.meteorclient.utils.misc.text.MeteorTranslatableTextComponent;
+import meteordevelopment.meteorclient.utils.misc.text.MeteorTranslatableTextContent;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
@@ -201,10 +201,10 @@ public class MeteorClient implements ClientModInitializer {
     }
 
     public static MutableText translatable(String key, Object... args) {
-        return MutableText.of(new MeteorTranslatableTextComponent(key, args));
+        return MutableText.of(new MeteorTranslatableTextContent(key, args));
     }
 
     public static MutableText translatable(String key, String fallback, Object... args) {
-        return MutableText.of(new MeteorTranslatableTextComponent(key, fallback, args));
+        return MutableText.of(new MeteorTranslatableTextContent(key, fallback, args));
     }
 }

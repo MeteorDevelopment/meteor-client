@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.screens.EditBookTitleAndAuthorScreen;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -73,7 +73,7 @@ public abstract class BookScreenMixin extends Screen {
                     long size = MemoryUtil.memLengthUTF8(encoded, true);
 
                     if (size > available) {
-                        ChatUtils.error("Could not copy to clipboard: Out of memory.");
+                        MessageBuilder.error("Could not copy to clipboard: Out of memory.").send();
                     } else {
                         GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), encoded);
                     }

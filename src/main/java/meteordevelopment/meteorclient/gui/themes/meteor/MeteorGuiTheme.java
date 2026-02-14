@@ -5,8 +5,10 @@
 
 package meteordevelopment.meteorclient.gui.themes.meteor;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.DefaultSettingsWidgetFactory;
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.MessageFormatter;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 import meteordevelopment.meteorclient.gui.themes.meteor.widgets.*;
@@ -31,6 +33,9 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.util.MacWindowUtil;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -160,6 +165,9 @@ public class MeteorGuiTheme extends GuiTheme {
     private final Setting<SettingColor> starscriptNumbers = color(sgStarscript, "starscript-numbers", new SettingColor(104, 141, 187));
     private final Setting<SettingColor> starscriptKeywords = color(sgStarscript, "starscript-keywords", new SettingColor(204, 120, 50));
     private final Setting<SettingColor> starscriptAccessedObjects = color(sgStarscript, "starscript-accessed-objects", new SettingColor(152, 118, 170));
+
+    private final MessageFormatter messageFormatter = new MeteorMessageFormatter();
+    private final Text chatPrefix = Text.literal(MeteorClient.NAME).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(MeteorClient.ADDON.color.getPacked())));
 
     public MeteorGuiTheme() {
         super("Meteor");
@@ -359,6 +367,16 @@ public class MeteorGuiTheme extends GuiTheme {
     @Override
     public TextRenderer textRenderer() {
         return TextRenderer.get();
+    }
+
+    @Override
+    public MessageFormatter messageFormatter() {
+        return this.messageFormatter;
+    }
+
+    @Override
+    public Text getChatPrefix() {
+        return this.chatPrefix;
     }
 
     @Override

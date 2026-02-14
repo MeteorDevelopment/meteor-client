@@ -32,8 +32,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class SaveMapCommand extends Command {
-    private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.save-map.exception.map_not_found"));
-    private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(MeteorClient.translatable("meteor.command.save-map.exception.oops"));
+    private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(MeteorClient.translatable("command.save-map.exception.map_not_found"));
+    private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(MeteorClient.translatable("command.save-map.exception.oops"));
 
     private final PointerBuffer filters;
 

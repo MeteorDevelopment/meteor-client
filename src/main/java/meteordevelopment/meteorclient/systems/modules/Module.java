@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -16,6 +17,8 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
+import meteordevelopment.meteorclient.utils.misc.text.MessageKind;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
@@ -23,7 +26,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -117,29 +119,34 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public void sendToggledMsg() {
         if (Config.get().chatFeedback.get() && chatFeedback) {
-            ChatUtils.forceNextPrefixClass(getClass());
-            ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", null /* todo translatable Text */, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+            GuiTheme theme = GuiThemes.get();
+            ChatUtils.sendMsg(this.hashCode(), theme.messageFormatter().formatToggleFeedback(
+                theme.messageFormatter().formatPrefix(ChatUtils.getPrefix(this, theme)),
+                theme.messageFormatter().formatPrefix(this.getTitleText()),
+                this,
+                this.isActive()
+            ));
         }
     }
 
-    public void info(Text message) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.sendMsg(null /* todo translatable Text */, message);
+    public MessageBuilder info(Text message) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
+            .body(message).setKind(MessageKind.Info);
     }
 
-    public void info(String message, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.infoPrefix(null /* todo translatable Text */, message, args);
+    public MessageBuilder info(String message, Object... args) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
+            .body(message, args).setKind(MessageKind.Info);
     }
 
-    public void warning(String message, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warningPrefix(null /* todo translatable Text */, message, args);
+    public MessageBuilder warning(String message, Object... args) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
+            .body(message, args).setKind(MessageKind.Warning);
     }
 
-    public void error(String message, Object... args) {
-        ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.errorPrefix(null /* todo translatable Text */, message, args);
+    public MessageBuilder error(String message, Object... args) {
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
+            .body(message, args).setKind(MessageKind.Error);
     }
 
     public boolean isActive() {
@@ -150,20 +157,24 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         return null;
     }
 
+    public String getTranslationKey() {
+        return "module." + this.name;
+    }
+
     public String getTitle() {
-        return MeteorTranslations.translate("module." + this.name);
+        return MeteorTranslations.translate(this.getTranslationKey());
     }
 
     public MutableText getTitleText() {
-        return MeteorClient.translatable("module." + this.name);
+        return MeteorClient.translatable(this.getTranslationKey());
     }
 
     public String getDescription() {
-        return MeteorTranslations.translate("module." + this.name + ".description");
+        return MeteorTranslations.translate(this.getTranslationKey() + ".description");
     }
 
     public MutableText getDescriptionText() {
-        return MeteorClient.translatable("module." + this.name + ".description");
+        return MeteorClient.translatable(this.getTranslationKey() + ".description");
     }
 
     @Override

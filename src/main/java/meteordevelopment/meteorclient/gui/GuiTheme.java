@@ -31,6 +31,8 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.HashMap;
@@ -278,6 +280,10 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     // Other
 
     public abstract TextRenderer textRenderer();
+
+    public abstract MessageFormatter messageFormatter();
+
+    public abstract Text getChatPrefix();
 
     public abstract double scale(double value);
 

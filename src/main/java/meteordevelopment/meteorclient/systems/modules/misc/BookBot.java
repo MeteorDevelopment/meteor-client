@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.mixin.TextHandlerAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -218,15 +219,10 @@ public class BookBot extends Module {
 
             // Handle the file being empty
             if (file.length() == 0) {
-                MutableText message = Text.literal("");
-                message.append(Text.literal("The bookbot file is empty! ").formatted(Formatting.RED));
-                message.append(Text.literal("Click here to edit it.")
-                    .setStyle(Style.EMPTY
-                        .withFormatting(Formatting.UNDERLINE, Formatting.RED)
-                        .withClickEvent(new ClickEvent.OpenFile(file.getAbsolutePath()))
-                    )
-                );
-                info(message);
+                error("file_empty", MeteorClient.translatable(this.getTranslationKey() + ".click_to_edit_file").setStyle(Style.EMPTY
+                    .withFormatting(Formatting.UNDERLINE, Formatting.RED)
+                    .withClickEvent(new ClickEvent.OpenFile(file.getAbsolutePath()))
+                ));
                 toggle();
                 return;
             }

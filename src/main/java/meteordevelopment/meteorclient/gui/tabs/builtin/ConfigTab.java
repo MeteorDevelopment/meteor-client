@@ -17,7 +17,7 @@ import net.minecraft.client.gui.screen.Screen;
 
 public class ConfigTab extends Tab {
     public ConfigTab() {
-        super("Config");
+        super("config");
     }
 
     @Override
