@@ -10,7 +10,6 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -21,12 +20,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.concurrent.Future;
 
-public class Sphere2dMarker extends AbstractSphereMarker {
-    public static final String type = "Sphere-2D";
+public class CylinderMarker extends AbstractSphereMarker {
+    public static final String type = "Cylinder";
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
-    private final SettingGroup sgKeybinding = settings.createGroup("Keybinding");
 
     private final Setting<BlockPos> center = sgGeneral.add(new BlockPosSetting.Builder()
         .name("center")
@@ -45,12 +43,12 @@ public class Sphere2dMarker extends AbstractSphereMarker {
         .build()
     );
 
-    private final Setting<Integer> layer = sgGeneral.add(new IntSetting.Builder()
-        .name("layer")
-        .description("Which layer to render")
-        .defaultValue(0)
-        .min(0)
-        .noSlider()
+    private final Setting<Integer> height = sgGeneral.add(new IntSetting.Builder()
+        .name("height")
+        .description("The height of the cylinder")
+        .defaultValue(10)
+        .min(1)
+        .sliderRange(1, 20)
         .onChanged(l -> dirty = true)
         .build()
     );
@@ -103,33 +101,11 @@ public class Sphere2dMarker extends AbstractSphereMarker {
         .build()
     );
 
-    // Keybinding
-
-    @SuppressWarnings("unused")
-    private final Setting<Keybind> nextLayerKey = sgKeybinding.add(new KeybindSetting.Builder()
-        .name("next-layer-keybind")
-        .description("Keybind to increment layer")
-        .action(() -> {
-            if (isVisible() && layer.get() < radius.get() * 2) layer.set(layer.get() + 1);
-        })
-        .build()
-    );
-
-    @SuppressWarnings("unused")
-    private final Setting<Keybind> prevLayerKey = sgKeybinding.add(new KeybindSetting.Builder()
-        .name("prev-layer-keybind")
-        .description("Keybind to increment layer")
-        .action(() -> {
-            if (isVisible()) layer.set(layer.get() - 1);
-        })
-        .build()
-    );
-
     private volatile List<RenderBlock> blocks = List.of();
     private volatile @Nullable Future<?> task = null;
     private boolean dirty = true;
 
-    public Sphere2dMarker() {
+    public CylinderMarker() {
         super(type);
     }
 
@@ -139,7 +115,7 @@ public class Sphere2dMarker extends AbstractSphereMarker {
 
         for (RenderBlock block : blocks) {
             if (!limitRenderRange.get() || PlayerUtils.isWithin(block.x, block.y, block.z, renderRange.get())) {
-                event.renderer.box(block.x, block.y, block.z, block.x + 1, block.y + 1, block.z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), block.excludeDir);
+                event.renderer.box(block.x, block.y, block.z, block.x + 1, block.y + height.get(), block.z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), block.excludeDir);
             }
         }
     }
@@ -159,8 +135,8 @@ public class Sphere2dMarker extends AbstractSphereMarker {
 
         Runnable action = () -> {
             blocks = switch (mode.get()) {
-                case Full -> filledCircle(center.get(), radius.get(), layer.get());
-                case Hollow -> hollowCircle(center.get(), radius.get(), layer.get());
+                case Full -> filledCircle(center.get(), radius.get());
+                case Hollow -> hollowCircle(center.get(), radius.get());
             };
             task = null;
         };
@@ -171,33 +147,29 @@ public class Sphere2dMarker extends AbstractSphereMarker {
         }
     }
 
-    private static List<RenderBlock> hollowCircle(BlockPos center, int r, int layer) {
-        int dY = -r + layer;
-
+    private static List<RenderBlock> hollowCircle(BlockPos center, int r) {
         ObjectOpenHashSet<RenderBlock> renderBlocks = new ObjectOpenHashSet<>();
 
-        computeCircle(renderBlocks, center, dY, r);
+        computeCircle(renderBlocks, center, 0, r);
         cullInnerFaces(renderBlocks);
 
         return new ObjectArrayList<>(renderBlocks);
     }
 
-    private static List<RenderBlock> filledCircle(BlockPos center, int r, int layer) {
+    private static List<RenderBlock> filledCircle(BlockPos center, int r) {
         ObjectOpenHashSet<RenderBlock> renderBlocks = new ObjectOpenHashSet<>();
 
         int rSq = r * r;
-        int dY = -r + layer;
-        int dYSq = dY * dY;
 
         for (int dX = 0; dX <= r; dX++) {
             int dXSq = dX * dX;
             for (int dZ = 0; dZ <= r; dZ++) {
                 int dZSq = dZ * dZ;
-                if (dXSq + dYSq + dZSq <= rSq) {
-                    renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY() + dY, center.getZ() + dZ));
-                    renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY() + dY, center.getZ() + dZ));
-                    renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY() + dY, center.getZ() - dZ));
-                    renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY() + dY, center.getZ() - dZ));
+                if (dXSq + dZSq <= rSq) {
+                    renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY(), center.getZ() + dZ));
+                    renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY(), center.getZ() + dZ));
+                    renderBlocks.add(new RenderBlock(center.getX() + dX, center.getY(), center.getZ() - dZ));
+                    renderBlocks.add(new RenderBlock(center.getX() - dX, center.getY(), center.getZ() - dZ));
                 }
             }
         }
