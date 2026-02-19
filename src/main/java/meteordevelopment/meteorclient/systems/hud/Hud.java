@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.hud.elements.*;
+import meteordevelopment.meteorclient.systems.hud.elements.keyboard.KeyboardHud;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
@@ -131,6 +132,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         register(CombatHud.INFO);
         register(MapHud.INFO);
         register(ImageHud.INFO);
+        register(KeyboardHud.INFO);
 
         // Default config
         if (isFirstInit) resetToDefaultElements();
@@ -306,6 +308,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
             if (info != null) {
                 HudElement element = info.create();
                 element.fromTag(c);
+                element.settings.registerColorSettings(null);
                 elements.add(element);
             }
         }
