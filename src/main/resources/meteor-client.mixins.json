@@ -50,6 +50,7 @@
     "ChatHudLineMixin",
     "ChatHudLineVisibleMixin",
     "ChatHudMixin",
+    "ChatHudUnfocusedMixin",
     "ChatInputSuggestorMixin",
     "ChatScreenMixin",
     "ChunkAccessor",
