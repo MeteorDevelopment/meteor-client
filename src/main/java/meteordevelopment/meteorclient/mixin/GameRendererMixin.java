@@ -116,11 +116,10 @@ public abstract class GameRendererMixin {
 
         Profilers.get().push(MeteorClient.MOD_ID + "_render");
 
-        // Create renderer and event
+        // Create renderers
 
         if (renderer == null) renderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES, MeteorRenderPipelines.WORLD_COLORED);
         if (depthRenderer == null) depthRenderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH, MeteorRenderPipelines.WORLD_COLORED_DEPTH);
-        Render3DEvent event = Render3DEvent.get(matrixStack, renderer, depthRenderer, tickDelta, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
 
         // Update model view matrix
 
@@ -133,7 +132,6 @@ public abstract class GameRendererMixin {
 
         Matrix4f inverseBob = new Matrix4f(matrices.peek().getPositionMatrix()).invert();
         RenderSystem.getModelViewStack().mul(inverseBob);
-        matrices.pop();
 
         // Call utility classes (apply bob correction when Iris shaders are active)
 
@@ -141,13 +139,16 @@ public abstract class GameRendererMixin {
         RenderUtils.updateScreenCenter(projection, correctedPosition);
         NametagUtils.onRender(position);
 
-        // Render
+        // use our matrices with bob transform, not vanilla's matrixStack which is identity when Iris is active
+        Render3DEvent event = Render3DEvent.get(matrices, renderer, depthRenderer, tickDelta, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
 
         renderer.begin();
         depthRenderer.begin();
         MeteorClient.EVENT_BUS.post(event);
-        renderer.render(matrixStack);
-        depthRenderer.render(matrixStack);
+        renderer.render(matrices);
+        depthRenderer.render(matrices);
+
+        matrices.pop();
 
         // Revert model view matrix
 
