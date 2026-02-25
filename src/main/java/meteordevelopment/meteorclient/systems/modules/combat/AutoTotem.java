@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.entity.Entity;
@@ -121,6 +122,11 @@ public class AutoTotem extends Module {
     @Override
     public String getInfoString() {
         return String.valueOf(totems);
+    }
+
+    @Override
+    public Color getInfoStringColor() {
+        return (totems == 0) ?  Color.RED : null;
     }
 
     public enum Mode {
