@@ -76,6 +76,15 @@ public class BlockESP extends Module {
         .build()
     );
 
+    private final Setting<Double> tracerThickness = sgGeneral.add(new DoubleSetting.Builder()
+        .name("tracer-thickness")
+        .description("Tracer line thickness.")
+        .defaultValue(2.0)
+        .min(0)
+        .max(10.0)
+        .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
@@ -122,6 +131,10 @@ public class BlockESP extends Module {
     ESPBlockData getBlockData(Block block) {
         ESPBlockData blockData = blockConfigs.get().get(block);
         return blockData == null ? defaultBlockConfig.get() : blockData;
+    }
+
+    double getTracerThickness() {
+        return tracerThickness.get();
     }
 
     private void updateChunk(int x, int z) {
