@@ -133,22 +133,29 @@ public abstract class GameRendererMixin {
         Matrix4f inverseBob = new Matrix4f(matrices.peek().getPositionMatrix()).invert();
         RenderSystem.getModelViewStack().mul(inverseBob);
 
+        // Matrices without bob transform (for tracers, etc.)
+        MatrixStack matricesNoBob = new MatrixStack();
+        matricesNoBob.push();
+        tiltViewWhenHurt(matricesNoBob, camera.getLastTickProgress());
+        Matrix4f inverseTilt = new Matrix4f(matricesNoBob.peek().getPositionMatrix()).invert();
+
         // Call utility classes (apply bob correction when Iris shaders are active)
 
         Matrix4f correctedPosition = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(position).mul(inverseBob) : position;
-        RenderUtils.updateScreenCenter(projection, correctedPosition);
+        Matrix4f correctedPositionNoBob = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(position).mul(inverseTilt) : position;
+        RenderUtils.updateScreenCenter(projection, correctedPositionNoBob);
         NametagUtils.onRender(position);
 
         // use our matrices with bob transform, not vanilla's matrixStack which is identity when Iris is active
-        Render3DEvent event = Render3DEvent.get(matrices, renderer, depthRenderer, tickDelta, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
+        Render3DEvent event = Render3DEvent.get(matrices, matricesNoBob, renderer, depthRenderer, tickDelta, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
 
         renderer.begin();
         depthRenderer.begin();
         MeteorClient.EVENT_BUS.post(event);
         renderer.render(matrices);
         depthRenderer.render(matrices);
-
         matrices.pop();
+        matricesNoBob.pop();
 
         // Revert model view matrix
 
