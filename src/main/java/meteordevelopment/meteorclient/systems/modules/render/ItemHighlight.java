@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import meteordevelopment.meteorclient.settings.ColorSetting;
+import meteordevelopment.meteorclient.settings.ColorListSetting;
 import meteordevelopment.meteorclient.settings.ItemListSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -26,19 +26,28 @@ public class ItemHighlight extends Module {
         .build()
     );
 
-    private final Setting<SettingColor> color = sgGeneral.add(new ColorSetting.Builder()
-        .name("color")
-        .description("The color to highlight the items with.")
-        .defaultValue(new SettingColor(225, 25, 255, 50))
+    public final Setting<List<SettingColor>> colors = sgGeneral.add(new ColorListSetting.Builder()
+        .name("colors")
+        .description("Colors used for each individual item.")
+        .defaultValue(List.of(new SettingColor(225,25,255,50)))
         .build()
     );
+
+    public int index;
 
     public ItemHighlight() {
         super(Categories.Render, "item-highlight", "Highlights selected items when in guis");
     }
 
-    public int getColor(ItemStack stack) {
-        if (stack != null && items.get().contains(stack.getItem()) && isActive()) return color.get().getPacked();
+    public int getColor(ItemStack stack)
+    {
+        if (isActive() && stack != null && colors.get().size() == items.get().size())
+        {
+            index = items.get().indexOf(stack.getItem());
+
+            if (index != -1)
+                return colors.get().get(index).getPacked();
+        }
         return -1;
     }
 }
