@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.player.ToolSaver;
 import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -36,13 +37,6 @@ public class Flamethrower extends Module {
         .description("The maximum distance the animal has to be to be roasted.")
         .min(0.0)
         .defaultValue(5.0)
-        .build()
-    );
-
-    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-break")
-        .description("Prevents flint and steel from being broken.")
-        .defaultValue(false)
         .build()
     );
 
@@ -111,7 +105,7 @@ public class Flamethrower extends Module {
             if (!targetBabies.get() && entity instanceof LivingEntity livingEntity && livingEntity.isBaby()) continue;
 
             FindItemResult item = InvUtils.findInHotbar(itemStack -> (itemStack.isOf(Items.FLINT_AND_STEEL) || itemStack.isOf(Items.FIRE_CHARGE)) &&
-                (!itemStack.isDamageable() || !antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
+                ToolSaver.canUse(itemStack));
             if (!InvUtils.swap(item.slot(), true)) return;
 
             this.hand = item.getHand();

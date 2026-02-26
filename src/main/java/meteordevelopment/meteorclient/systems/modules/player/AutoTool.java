@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
@@ -51,6 +52,13 @@ public class AutoTool extends Module {
         .build()
     );
 
+    private final Setting<Boolean> silkTouchForGlass = sgGeneral.add(new BoolSetting.Builder()
+        .name("silk-touch-for-glass")
+        .description("Prefer to mine glass with silk touch")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> fortuneForOresCrops = sgGeneral.add(new BoolSetting.Builder()
         .name("fortune-for-ores-and-crops")
         .description("Mines Ores and crops only with the Fortune enchantment.")
@@ -58,27 +66,42 @@ public class AutoTool extends Module {
         .build()
     );
 
-    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-break")
-        .description("Stops you from breaking your tool.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Integer> breakDurability = sgGeneral.add(new IntSetting.Builder()
-        .name("anti-break-percentage")
-        .description("The durability percentage to stop using a tool.")
-        .defaultValue(10)
-        .range(1, 100)
-        .sliderRange(1, 100)
-        .visible(antiBreak::get)
-        .build()
-    );
-
     private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
         .name("switch-back")
         .description("Switches your hand to whatever was selected when releasing your attack key.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> switchAway = sgGeneral.add(new BoolSetting.Builder()
+        .name("switch-away")
+        .description("Switch to hand when no correct tool is found")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> invSwap = sgGeneral.add(new BoolSetting.Builder()
+        .name("swap-from-inventory")
+        .description("Search tools in the entire inventory")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> invSwapSlot = sgGeneral.add(new IntSetting.Builder()
+        .name("swap-slot")
+        .description("Slot to swap tools from inventory into")
+        .defaultValue(8)
+        .range(0, 8)
+        .noSlider()
+        .visible(invSwap::get)
+        .build()
+    );
+
+    private final Setting<Boolean> invSwapReturn = sgGeneral.add(new BoolSetting.Builder()
+        .name("return-swapped-tool-back")
+        .description("Swap the tool back into the inventory")
+        .defaultValue(false)
+        .visible(invSwap::get)
         .build()
     );
 
@@ -118,6 +141,7 @@ public class AutoTool extends Module {
     private boolean shouldSwitch;
     private int ticks;
     private int bestSlot;
+    private int toolWasIn;
 
     public AutoTool() {
         super(Categories.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
@@ -126,6 +150,12 @@ public class AutoTool extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (Modules.get().isActive(InfinityMiner.class)) return;
+
+        if (invSwapReturn.get() && !mc.options.attackKey.isPressed() && wasPressed && toolWasIn != -1) {
+            InvUtils.quickSwap().fromId(invSwapSlot.get()).to(toolWasIn);
+            toolWasIn = -1;
+            return;
+        }
 
         if (switchBack.get() && !mc.options.attackKey.isPressed() && wasPressed && InvUtils.previousSlot != -1) {
             InvUtils.swapBack();
@@ -158,13 +188,17 @@ public class AutoTool extends Module {
         double bestScore = -1;
         bestSlot = -1;
 
-        for (int i = 0; i < 9; i++) {
+        int max = invSwap.get() ? SlotUtils.MAIN_END : 9;
+
+        for (int i = 0; i < max; i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
 
             if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
             if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(itemStack.getItem())) continue;
 
-            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
+            EnchantPreference pref = isGlass(blockState.getBlock()) && silkTouchForGlass.get() ? EnchantPreference.SilkTouch : prefer.get();
+
+            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), pref, ToolSaver::canUse);
             if (score < 0) continue;
 
             if (score > bestScore) {
@@ -173,31 +207,46 @@ public class AutoTool extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        if (bestSlot == -1 && ToolSaver.isTool(mc.player.getMainHandStack()) && switchAway.get()) {
+            for (int i = 0; i < 9; i++) {
+                if (!ToolSaver.isTool(mc.player.getInventory().getStack(i))) {
+                    bestSlot = i;
+                    bestScore = 0;
+                    break;
+                }
+            }
+        }
+
+        int returnToolTo = toolWasIn;
+
+        if (bestSlot > 8) {
+            toolWasIn = bestSlot;
+            bestSlot = invSwapSlot.get();
+        }
+
+        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack -> ToolSaver.canUse(itemStack) || ToolSaver.canUse(currentStack) || !isTool(currentStack))))) {
             ticks = switchDelay.get();
+
+            if (invSwapReturn.get() && returnToolTo > 8) InvUtils.quickSwap().fromId(invSwapSlot.get()).to(returnToolTo);
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
             else shouldSwitch = true;
+
+            if (toolWasIn > 8) {
+                if (bestSlot == invSwapSlot.get()) InvUtils.quickSwap().fromId(invSwapSlot.get()).to(toolWasIn);
+                else toolWasIn = -1;
+            }
         }
 
-        // Anti break
-        currentStack = mc.player.getMainHandStack();
-
-        if (shouldStopUsing(currentStack) && isTool(currentStack)) {
-            mc.options.attackKey.setPressed(false);
-            event.cancel();
-        }
-    }
-
-    private boolean shouldStopUsing(ItemStack itemStack) {
-        return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
+
         if (!itemStack.isSuitableFor(state) &&
             !(itemStack.isIn(ItemTags.SWORDS) && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock)) &&
-            !(itemStack.getItem() instanceof ShearsItem && state.getBlock() instanceof LeavesBlock || state.isIn(BlockTags.WOOL)))
+            !(itemStack.getItem() instanceof ShearsItem && state.getBlock() instanceof LeavesBlock || state.isIn(BlockTags.WOOL)) &&
+            !(isGlass(state.getBlock()) && enchantPreference == EnchantPreference.SilkTouch && Utils.getEnchantmentLevel(itemStack, Enchantments.SILK_TOUCH) > 0))
             return -1;
 
         if (silkTouchEnderChest
@@ -226,6 +275,10 @@ public class AutoTool extends Module {
             score += 9000 + (itemStack.get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
 
         return score;
+    }
+
+    private static boolean isGlass(Block b) {
+        return b == Blocks.GLASS || b == Blocks.GLASS_PANE || b instanceof StainedGlassBlock || b instanceof StainedGlassPaneBlock || b instanceof TintedGlassBlock;
     }
 
     public static boolean isTool(Item item) {
