@@ -182,6 +182,18 @@ public class InvUtils {
         return ACTION;
     }
 
+    /**
+     * Moves a specific number of items between inventory slots.
+     * Useful for moving partial stacks.
+     *
+     * @param count The maximum number of items to move
+     * @return An Action object configured for moving the specified number of items
+     */
+    public static Action move(int count) {
+        ACTION.count = count;
+        return move();
+    }
+
     public static Action click() {
         ACTION.type = SlotActionType.PICKUP;
         return ACTION;
@@ -214,7 +226,8 @@ public class InvUtils {
     }
 
     public static void dropHand() {
-        if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, ScreenHandler.EMPTY_SPACE_SLOT_INDEX, 0, SlotActionType.PICKUP, mc.player);
+        if (!mc.player.currentScreenHandler.getCursorStack().isEmpty())
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, ScreenHandler.EMPTY_SPACE_SLOT_INDEX, 0, SlotActionType.PICKUP, mc.player);
     }
 
     public static class Action {
@@ -223,6 +236,8 @@ public class InvUtils {
         private int from = -1;
         private int to = -1;
         private int data = 0;
+        // Default to moving all items
+        private int count = Integer.MAX_VALUE;
 
         private boolean isRecursive = false;
 
@@ -339,8 +354,13 @@ public class InvUtils {
             }
 
             if (type != null && from != -1 && to != -1) {
-                click(from);
-                if (two) click(to);
+                if (type == SlotActionType.PICKUP && two && count < Integer.MAX_VALUE) {
+                    // Use partial stack movement when count is specified
+                    movePartialStack();
+                } else {
+                    click(from);
+                    if (two) click(to);
+                }
             }
 
             SlotActionType preType = type;
@@ -348,11 +368,7 @@ public class InvUtils {
             int preFrom = from;
             int preTo = to;
 
-            type = null;
-            two = false;
-            from = -1;
-            to = -1;
-            data = 0;
+            resetActionState();
 
             if (!isRecursive && hadEmptyCursor && preType == SlotActionType.PICKUP && preTwo && (preFrom != -1 && preTo != -1) && !mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
                 isRecursive = true;
@@ -361,8 +377,54 @@ public class InvUtils {
             }
         }
 
+        private void resetActionState() {
+            type = null;
+            two = false;
+            from = -1;
+            to = -1;
+            data = 0;
+            count = Integer.MAX_VALUE;
+        }
+
+        /**
+         * Performs a click action on a specified slot ID in the current screen handler.
+         * Uses the current action type and data values for the click operation.
+         *
+         * @param id The ID of the slot to click on
+         */
         private void click(int id) {
             mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, id, data, type, mc.player);
+        }
+
+        /**
+         * Moves a specific number of items from one slot to another.
+         */
+        private void movePartialStack() {
+            // Pick up the entire stack from the source slot
+            click(from);
+
+            // Get the stack we just picked up
+            ItemStack cursorStack = mc.player.currentScreenHandler.getCursorStack();
+            if (cursorStack.isEmpty()) return;
+
+            // Calculate how many items we can actually move (min of what we have and what we want)
+            int itemsToMove = Math.min(cursorStack.getCount(), count);
+
+            // Use right-click to place items one by one
+            int originalData = data;
+            data = 1; // 1 = right-click which places one item at a time
+
+            for (int i = 0; i < itemsToMove; i++) {
+                click(to);
+            }
+
+            // Restore original data value
+            data = originalData;
+
+            // Put back any remaining items to the original slot
+            if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+                click(from);
+            }
         }
     }
 }
