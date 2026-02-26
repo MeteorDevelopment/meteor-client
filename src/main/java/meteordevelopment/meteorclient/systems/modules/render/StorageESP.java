@@ -34,6 +34,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
@@ -343,7 +344,7 @@ public class StorageESP extends Module {
 
     private void renderShader(Render3DEvent event, BlockEntity blockEntity) {
         vertexConsumerProvider.setColor(lineColor);
-        SimpleBlockRenderer.renderWithBlockEntity(blockEntity, event.tickDelta, vertexConsumerProvider);
+        SimpleBlockRenderer.renderFlat(mc.world, blockEntity.getPos(), blockEntity.getCachedState(), blockEntity, new MatrixStack(), event.tickDelta, vertexConsumerProvider);
     }
 
     @Override

@@ -7,12 +7,11 @@ package meteordevelopment.meteorclient.gui.screens.settings;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
-import meteordevelopment.meteorclient.gui.widgets.WItemWithLabel;
+import meteordevelopment.meteorclient.gui.widgets.WBlockWithLabel;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.BlockSetting;
-import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
@@ -53,7 +52,7 @@ public class BlockSettingScreen extends WindowScreen {
             if (setting.filter != null && !setting.filter.test(block)) continue;
             if (skipValue(block)) continue;
 
-            WItemWithLabel item = theme.itemWithLabel(block.asItem().getDefaultStack(), Names.get(block));
+            WBlockWithLabel item = theme.blockWithLabel(block.getDefaultState());
             if (!filterText.isEmpty() && !Strings.CI.contains(item.getLabelText(), filterText)) continue;
             table.add(item);
 
