@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" width="300" alt="8B Client Logo">
+</p>
+
 # 8B Client
 
 Just a basehunting client.
@@ -11,7 +15,7 @@ Just a basehunting client.
 - Built on Meteor Client
 
 ## Installation
-1. Install [Fabric](https://fabricmc.net/) for Minecraft
+1. Install [Fabric](https://fabricmc.net/) for Minecraft 1.21.1
 2. Install [Meteor Client](https://meteorclient.com/)
 3. Download the latest 8B Client release
 4. Drop the jar into your mods folder
