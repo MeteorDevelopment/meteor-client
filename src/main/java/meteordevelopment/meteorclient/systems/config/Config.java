@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.IconChanger;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -68,6 +69,15 @@ public class Config extends System<Config> {
         .name("title-screen-splashes")
         .description("Show Meteor splash texts on title screen")
         .defaultValue(true)
+        .build()
+    );
+
+    @SuppressWarnings("unused")
+    public final Setting<IconChanger.WindowIcons> customWindowIcon = sgVisual.add(new EnumSetting.Builder<IconChanger.WindowIcons>()
+        .name("custom-window-icon")
+        .description("The icon to use for the window.")
+        .defaultValue(IconChanger.WindowIcons.Default)
+        .onChanged(IconChanger::setIcon)
         .build()
     );
 
