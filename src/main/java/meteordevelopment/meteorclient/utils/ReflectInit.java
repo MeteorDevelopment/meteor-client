@@ -5,10 +5,11 @@
 
 package meteordevelopment.meteorclient.utils;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.MethodInfo;
+import io.github.classgraph.ScanResult;
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
-import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -17,7 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ReflectInit {
-    private static final List<Reflections> reflections = new ArrayList<>();
+    private static final List<String> packages = new ArrayList<>();
 
     private ReflectInit() {
     }
@@ -35,20 +36,37 @@ public class ReflectInit {
     private static void add(MeteorAddon addon) {
         String pkg = addon.getPackage();
         if (pkg == null || pkg.isBlank()) return;
-        reflections.add(new Reflections(pkg, Scanners.MethodsAnnotated));
+        packages.add(pkg);
     }
 
     public static void init(Class<? extends Annotation> annotation) {
-        for (Reflections reflection : reflections) {
-            Set<Method> initTasks = reflection.getMethodsAnnotatedWith(annotation);
-            if (initTasks == null) return;
+        Set<Method> allInitTasks = new HashSet<>();
 
-            Map<Class<?>, List<Method>> byClass = initTasks.stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
-            Set<Method> left = new HashSet<>(initTasks);
+        for (String pkg : packages) {
+            try (ScanResult scanResult = new ClassGraph()
+                .acceptPackages(pkg)
+                .enableMethodInfo()
+                .enableAnnotationInfo()
+                .scan()) {
 
-            for (Method m; (m = left.stream().findAny().orElse(null)) != null; ) {
-                reflectInit(m, annotation, left, byClass);
+                Set<Method> initTasks = scanResult.getClassesWithMethodAnnotation(annotation)
+                    .stream()
+                    .flatMap(classInfo -> classInfo.getMethodInfo().stream())
+                    .filter(methodInfo -> methodInfo.hasAnnotation(annotation))
+                    .map(MethodInfo::loadClassAndGetMethod)
+                    .collect(Collectors.toSet());
+
+                allInitTasks.addAll(initTasks);
             }
+        }
+
+        if (allInitTasks.isEmpty()) return;
+
+        Map<Class<?>, List<Method>> byClass = allInitTasks.stream().collect(Collectors.groupingBy(Method::getDeclaringClass));
+        Set<Method> left = new HashSet<>(allInitTasks);
+
+        for (Method m; (m = left.stream().findAny().orElse(null)) != null; ) {
+            reflectInit(m, annotation, left, byClass);
         }
     }
 
