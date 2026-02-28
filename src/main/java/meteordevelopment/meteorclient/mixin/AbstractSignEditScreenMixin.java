@@ -34,7 +34,10 @@ public abstract class AbstractSignEditScreenMixin {
         if (message.getContent() instanceof TranslatableTextContent content) {
             String key = content.getKey();
 
-            if (key.contains("meteor-client")) modified = MutableText.of(new PlainTextContent.Literal(key));
+            if (key.contains("meteor-client")) {
+                String fallback = content.getFallback();
+                modified = MutableText.of(new PlainTextContent.Literal(fallback != null ? fallback : key));
+            }
         }
 
         modified.setStyle(message.getStyle());
