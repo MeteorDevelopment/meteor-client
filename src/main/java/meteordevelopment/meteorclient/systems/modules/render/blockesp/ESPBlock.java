@@ -127,6 +127,8 @@ public class ESPBlock {
 
         if (neighbourState.getBlock() != state.getBlock()) return false;
 
+        if (!blockEsp.shouldRender(neighbourState)) return false;
+
         VoxelShape cube = VoxelShapes.fullCube();
         VoxelShape shape = state.getOutlineShape(mc.world, blockPos);
         VoxelShape neighbourShape = neighbourState.getOutlineShape(mc.world, blockPos);
@@ -165,7 +167,8 @@ public class ESPBlock {
 
     private boolean isNeighbourDiagonal(double x, double y, double z) {
         blockPos.set(this.x + x, this.y + y, this.z + z);
-        return state.getBlock() == mc.world.getBlockState(blockPos).getBlock();
+        BlockState neighbourState = mc.world.getBlockState(blockPos);
+        return state.getBlock() == neighbourState.getBlock() && blockEsp.shouldRender(neighbourState);
     }
 
     public void render(Render3DEvent event) {
