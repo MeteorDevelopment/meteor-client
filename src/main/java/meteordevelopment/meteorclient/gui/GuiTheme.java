@@ -27,10 +27,12 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.Names;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.HashMap;
@@ -281,6 +283,10 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public abstract boolean categoryIcons();
 
     public abstract boolean hideHUD();
+
+    public Text prefix() {
+        return ChatUtils.getMeteorPrefix();
+    }
 
     public double textWidth(String text, int length, boolean title) {
         return scale(textRenderer().getWidth(text, length, false) * (title ? TITLE_TEXT_SCALE : 1));
