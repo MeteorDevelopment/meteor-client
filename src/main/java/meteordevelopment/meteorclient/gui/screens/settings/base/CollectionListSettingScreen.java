@@ -9,8 +9,10 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -20,11 +22,16 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public abstract class CollectionListSettingScreen<T> extends WindowScreen {
+    private final boolean syncWidths = Config.get().syncListSettingWidths.get();
     protected final Setting<?> setting;
     protected final Collection<T> collection;
     private final Iterable<T> registry;
 
+    private Iterable<T> leftContent;
+    private Iterable<T> rightContent;
+
     private WTable table;
+    private WTextBox filter;
     private String filterText = "";
 
     public CollectionListSettingScreen(GuiTheme theme, String title, Setting<?> setting, Collection<T> collection, Iterable<T> registry) {
@@ -37,50 +44,78 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
 
     @Override
     public void initWidgets() {
-        // Filter
-        WTextBox filter = add(theme.textBox("")).minWidth(400).expandX().widget();
-        filter.setFocused(true);
-        filter.action = () -> {
-            filterText = filter.get().trim();
-
-            table.clear();
-            initTable();
-        };
-
-        table = add(theme.table()).expandX().widget();
-
-        initTable();
-    }
-
-    private void initTable() {
-        // Left (all)
-        WTable left = abc(registry, true, t -> {
+        // Initialize table contents
+        WTable left = initList(registry, true, t -> {
             addValue(t);
 
             T v = getAdditionalValue(t);
             if (v != null) addValue(v);
         });
 
-        if (Config.get().syncListSettingWidths.get() || !left.cells.isEmpty()) {
-            table.add(theme.verticalSeparator()).expandWidgetY();
-        }
-
-        // Right (selected)
-        WTable right = abc(collection, false, t -> {
+        WTable right = initList(collection, false, t -> {
             removeValue(t);
 
             T v = getAdditionalValue(t);
             if (v != null) removeValue(v);
         });
 
+        // Create header
+        WHorizontalList header = add(theme.horizontalList()).expandX().widget();
+
+        // Add All
+        if (!left.cells.isEmpty()) {
+            WButton addAll = header.add(theme.button("»")).expandWidgetX().widget();
+            addAll.action = () -> {
+                leftContent.forEach(collection::add);
+                invalidateTable();
+            };
+        }
+
+        // Filter
+        if (filter == null) {
+            filter = header.add(theme.textBox(filterText)).minWidth(400).expandX().widget();
+            filter.setFocused(true);
+            filter.action = () -> {
+                filterText = filter.get().trim();
+                invalidateTable();
+            };
+        } else {
+            // keep cursor position
+            header.add(filter).minWidth(400).expandX();
+        }
+
+        // Remove All
+        if (!right.cells.isEmpty()) {
+            WButton removeAll = header.add(theme.button("«")).expandWidgetX().widget();
+            removeAll.action = () -> {
+                if (filterText.isEmpty()) collection.clear();
+                else rightContent.forEach(collection::remove); // todo potential O(n^2) on List setting types
+                invalidateTable();
+            };
+        }
+
+        table = add(theme.table()).expandX().widget();
+
+        // Format & add lists
+        table = add(theme.table()).expandX().widget();
+
+        if (syncWidths || !left.cells.isEmpty()) {
+            addList(left);
+        }
+
+        if (syncWidths || (!left.cells.isEmpty() && !right.cells.isEmpty())) {
+            table.add(theme.verticalSeparator()).expandWidgetY();
+        }
+
+        if (syncWidths || !right.cells.isEmpty()) {
+            addList(right);
+        }
+
         postWidgets(left, right);
     }
 
-    private WTable abc(Iterable<T> iterable, boolean isLeft, Consumer<T> buttonAction) {
-        // Create
-        Cell<WTable> cell = this.table.add(theme.table()).top();
-        if (Config.get().syncListSettingWidths.get()) cell.group("sync-width");
-        WTable table = cell.widget();
+    private WTable initList(Iterable<T> iterable, boolean isLeft, Consumer<T> buttonAction) {
+        WTable table = theme.table();
 
         // Sort
         Predicate<T> predicate = isLeft
@@ -88,6 +123,9 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
             : this::includeValue;
 
         Iterable<T> sorted = SortingHelper.sort(iterable, predicate, this::getValueNames, filterText);
+
+        if (isLeft) leftContent = sorted;
+        else rightContent = sorted;
 
         sorted.forEach(t -> {
             table.add(getValueWidget(t));
@@ -98,14 +136,18 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
             table.row();
         });
 
-        if (!table.cells.isEmpty()) cell.expandX();
-
         return table;
     }
 
+    private void addList(WTable listTable) {
+        Cell<WTable> cell = this.table.add(listTable).top();
+        if (syncWidths) cell.group("sync-width");
+        if (!table.cells.isEmpty()) cell.expandX();
+    }
+
     protected void invalidateTable() {
-        table.clear();
-        initTable();
+        this.clear();
+        initWidgets();
     }
 
     protected void addValue(T value) {
