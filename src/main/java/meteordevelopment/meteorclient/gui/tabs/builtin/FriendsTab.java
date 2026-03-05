@@ -21,21 +21,16 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+
 import net.minecraft.client.gui.screen.Screen;
-import meteordevelopment.meteorclient.gui.widgets.WAccount;
-import net.minecraft.client.gui.widget.TextIconButtonWidget;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FriendsTab extends Tab {
 
-    private static final Logger log = LoggerFactory.getLogger(FriendsTab.class);
 
     public FriendsTab() {
         super("Friends");
