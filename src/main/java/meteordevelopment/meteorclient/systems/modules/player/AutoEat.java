@@ -177,6 +177,11 @@ public class AutoEat extends Module {
 
     private void startEating() {
         prevSlot = mc.player.getInventory().getSelectedSlot();
+
+        if (mc.player.age < 20) {
+            return;
+        }
+
         eat();
 
         // Pause auras
