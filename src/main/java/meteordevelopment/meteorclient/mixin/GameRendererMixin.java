@@ -9,8 +9,8 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
-import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.events.render.GetFovEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
@@ -80,6 +80,9 @@ public abstract class GameRendererMixin {
     @Unique
     private final MatrixStack matrices = new MatrixStack();
 
+    @Unique
+    private final MatrixStack matricesNoBob = new MatrixStack();
+
     @Shadow
     protected abstract void bobView(MatrixStack matrices, float tickDelta);
 
@@ -111,16 +114,15 @@ public abstract class GameRendererMixin {
     }
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
-    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 1) Matrix4f position, @Local(ordinal = 0) float tickDelta, @Local MatrixStack matrixStack) {
+    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 1) Matrix4f position) {
         if (!Utils.canUpdate()) return;
 
         Profilers.get().push(MeteorClient.MOD_ID + "_render");
 
-        // Create renderer and event
+        // Create renderers
 
         if (renderer == null) renderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES, MeteorRenderPipelines.WORLD_COLORED);
         if (depthRenderer == null) depthRenderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH, MeteorRenderPipelines.WORLD_COLORED_DEPTH);
-        Render3DEvent event = Render3DEvent.get(matrixStack, renderer, depthRenderer, tickDelta, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
 
         // Update model view matrix
 
@@ -133,21 +135,38 @@ public abstract class GameRendererMixin {
 
         Matrix4f inverseBob = new Matrix4f(matrices.peek().getPositionMatrix()).invert();
         RenderSystem.getModelViewStack().mul(inverseBob);
-        matrices.pop();
+
+        // Matrices without bob transform (for tracers, etc.)
+
+        matricesNoBob.push();
+        tiltViewWhenHurt(matricesNoBob, camera.getLastTickProgress());
+        Matrix4f inverseTilt = new Matrix4f(matricesNoBob.peek().getPositionMatrix()).invert();
 
         // Call utility classes (apply bob correction when Iris shaders are active)
 
-        Matrix4f correctedPosition = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(position).mul(inverseBob) : position;
-        RenderUtils.updateScreenCenter(projection, correctedPosition);
+        Matrix4f correctedPositionNoBob = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(position).mul(inverseTilt) : position;
+        RenderUtils.updateScreenCenter(projection, correctedPositionNoBob);
         NametagUtils.onRender(position);
 
-        // Render
+        // use our matrices with bob transform, not vanilla's matrixStack which is identity when Iris is active
+        Render3DEvent event = Render3DEvent.get(
+            matrices,
+            matricesNoBob,
+            renderer,
+            depthRenderer,
+            tickCounter.getTickProgress(true),
+            camera.getCameraPos().x,
+            camera.getCameraPos().y,
+            camera.getCameraPos().z
+        );
 
         renderer.begin();
         depthRenderer.begin();
         MeteorClient.EVENT_BUS.post(event);
-        renderer.render(matrixStack);
-        depthRenderer.render(matrixStack);
+        renderer.render(matrices);
+        depthRenderer.render(matrices);
+        matrices.pop();
+        matricesNoBob.pop();
 
         // Revert model view matrix
 
