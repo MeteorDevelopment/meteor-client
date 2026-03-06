@@ -481,7 +481,6 @@ public class HighwayBuilder extends Module {
     /* todo
         - separate digging and paving more effectively
         - separate walking forwards from the current state to speed up actions
-        - scan one block behind you to ensure the highway is still valid
         - do something about god damn lava flowing in
      */
 
