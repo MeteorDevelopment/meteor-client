@@ -25,6 +25,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.List;
+import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
@@ -171,6 +172,10 @@ public class GuiRenderer {
         if (!scissorStack.isEmpty()) beginRender();
 
         scissorPool.free(scissor);
+    }
+
+    public Optional<Scissor> getScissor() {
+        return scissorStack.isEmpty() ? Optional.empty() : Optional.of(scissorStack.top());
     }
 
     public boolean renderTooltip(DrawContext drawContext, double mouseX, double mouseY, double delta) {
