@@ -112,9 +112,9 @@ public abstract class WDropdown<T> extends WPressable {
         animProgress = MathHelper.clamp(animProgress, 0, 1);
 
         WView view = getView();
-        boolean rootInView = view == null || view.isWidgetInView(root);
+        boolean buttonInView = view == null || view.isWidgetInView(this);
 
-        if (!render && animProgress > 0 && rootInView) {
+        if (!render && animProgress > 0 && buttonInView) {
             renderer.absolutePost(() -> {
                 renderer.scissorStart(x, y + height, width, root.height * animProgress);
                 root.render(renderer, mouseX, mouseY, delta);
