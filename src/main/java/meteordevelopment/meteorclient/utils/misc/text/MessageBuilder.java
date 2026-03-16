@@ -70,22 +70,14 @@ public interface MessageBuilder {
     MessageBuilder setSource(Object source);
 
     /**
-     * Sets the prefix to show in front of the message. This can optionally be styled, but should not contain any
-     * decorations such as brackets as those will be added by the formatter.
-     *
-     * @return this builder
-     * @throws IllegalStateException if this builder is already closed.
-     */
-    MessageBuilder prefix(Text prefix);
-
-    /**
      * Sets the prefix to show in front of the message. This should not contain any decorations such as brackets as
      * those will be added by the formatter.
+     * todo explain formatting
      *
      * @return this builder
      * @throws IllegalStateException if this builder is already closed.
      */
-    MessageBuilder prefix(String prefix);
+    MessageBuilder prefix(Object source);
 
     /**
      * Sets the prefix to show in front of the message. This should not contain any decorations such as brackets as

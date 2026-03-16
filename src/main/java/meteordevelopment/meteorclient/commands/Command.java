@@ -83,20 +83,20 @@ public abstract class Command {
     }
 
     public MessageBuilder info(Text message) {
-        return MessageBuilder.create().setSource(this).setTranslationContext(this.translationKey)
+        return MessageBuilder.create().setSource(this).setTranslationContext(this.translationKey).prefix(this)
             .body(message).setKind(MessageKind.Info);
     }
 
     public MessageBuilder info(String message, Object... args) {
-        return MessageBuilder.info(message, args).setSource(this).setTranslationContext(this.translationKey);
+        return MessageBuilder.info(message, args).setSource(this).setTranslationContext(this.translationKey).prefix(this);
     }
 
     public MessageBuilder warning(String message, Object... args) {
-        return MessageBuilder.warning(message, args).setSource(this).setTranslationContext(this.translationKey);
+        return MessageBuilder.warning(message, args).setSource(this).setTranslationContext(this.translationKey).prefix(this);
     }
 
     public MessageBuilder error(String message, Object... args) {
-        return MessageBuilder.error(message, args).setSource(this).setTranslationContext(this.translationKey);
+        return MessageBuilder.error(message, args).setSource(this).setTranslationContext(this.translationKey).prefix(this);
     }
 
     public MutableText translatable(String string, Object... args) {

@@ -79,16 +79,16 @@ public class MeteorMessageFormatter implements MessageFormatter {
     public Text formatPrefix(Text prefix) {
         return Text.empty().formatted(Formatting.GRAY)
             .append("[")
-            .append(prefix)
+            .append(Text.empty().append(prefix).formatted(Formatting.LIGHT_PURPLE))
             .append("] ");
     }
 
     @Override
     public Text formatToggleFeedback(Text clientPrefix, Text featurePrefix, Module module, boolean enabled) {
         Text feedback = MeteorClient.translatable(
-            "module.base.toggled",
-            module.getTitleText(),
-            enabled ? Text.literal("on").formatted(Formatting.GREEN) : Text.literal("off").formatted(Formatting.RED)
+            "module.base.toggled", module,
+            enabled ? MeteorClient.translatable("module.base.toggled.on").formatted(Formatting.GREEN)
+                : MeteorClient.translatable("module.base.toggled.off").formatted(Formatting.RED)
         );
 
         return this.formatMessage(clientPrefix, Optional.of(featurePrefix), feedback, MessageKind.Passthrough);
