@@ -410,7 +410,7 @@ public class StashFinder extends Module {
             .append(Text.literal("]").formatted(Formatting.GRAY))
             .append(Text.literal(".").formatted(Formatting.GRAY));
 
-        ChatUtils.sendMsg(message);
+        this.info(message).send();
     }
 
     @EventHandler

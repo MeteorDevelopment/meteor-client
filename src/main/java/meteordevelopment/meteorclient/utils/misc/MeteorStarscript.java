@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.meteorclient.utils.world.TickRate;
@@ -243,12 +243,12 @@ public class MeteorStarscript {
         String caller = getCallerName();
 
         if (caller != null) {
-            if (i != -1) ChatUtils.errorPrefixRaw("starscript.title", "%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller);
-            else ChatUtils.errorPrefixRaw("starscript.title", "%d '%c': %s (from %s)", error.character, error.ch, error.message, caller);
+            if (i != 1) MessageBuilder.error("%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller).prefix("starscript.title").send();
+            else MessageBuilder.error("%d '%c': %s (from %s)", error.character, error.ch, error.message, caller).prefix("starscript.title").send();
         }
         else {
-            if (i != -1) ChatUtils.errorPrefixRaw("starscript.title", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
-            else ChatUtils.errorPrefixRaw("starscript.title", "%d '%c': %s", error.character, error.ch, error.message);
+            if (i != 1) MessageBuilder.error("%d, %d '%c': %s", i, error.character, error.ch, error.message).prefix("starscript.title").send();
+            else MessageBuilder.error("%d '%c': %s", error.character, error.ch, error.message).prefix("starscript.title").send();
         }
     }
 
@@ -259,8 +259,8 @@ public class MeteorStarscript {
     public static void printChatError(StarscriptError e) {
         String caller = getCallerName();
 
-        if (caller != null) ChatUtils.errorPrefixRaw("starscript.title", "%s (from %s)", e.getMessage(), caller);
-        else ChatUtils.errorPrefixRaw("starscript.title", "%s", e.getMessage());
+        if (caller != null) MessageBuilder.error("%s (from %s)", e.getMessage(), caller).prefix("starscript.title").send();
+        else MessageBuilder.error(e.getMessage()).prefix("starscript.title").send();
     }
 
     private static String getCallerName() {

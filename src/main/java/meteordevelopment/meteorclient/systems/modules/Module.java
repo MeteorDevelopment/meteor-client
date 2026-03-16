@@ -135,18 +135,15 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     }
 
     public MessageBuilder info(String message, Object... args) {
-        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
-            .body(message, args).setKind(MessageKind.Info);
+        return MessageBuilder.info(message, args).setSource(this).setTranslationContext(this.getTranslationKey());
     }
 
     public MessageBuilder warning(String message, Object... args) {
-        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
-            .body(message, args).setKind(MessageKind.Warning);
+        return MessageBuilder.warning(message, args).setSource(this).setTranslationContext(this.getTranslationKey());
     }
 
     public MessageBuilder error(String message, Object... args) {
-        return MessageBuilder.create().setSource(this).setTranslationContext(this.getTranslationKey())
-            .body(message, args).setKind(MessageKind.Error);
+        return MessageBuilder.error(message, args).setSource(this).setTranslationContext(this.getTranslationKey());
     }
 
     public boolean isActive() {

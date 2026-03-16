@@ -88,18 +88,15 @@ public abstract class Command {
     }
 
     public MessageBuilder info(String message, Object... args) {
-        return MessageBuilder.create().setSource(this).setTranslationContext(this.translationKey)
-            .body(message, args).setKind(MessageKind.Info);
+        return MessageBuilder.info(message, args).setSource(this).setTranslationContext(this.translationKey);
     }
 
     public MessageBuilder warning(String message, Object... args) {
-        return MessageBuilder.create().setSource(this).setTranslationContext(this.translationKey)
-            .body(message, args).setKind(MessageKind.Warning);
+        return MessageBuilder.warning(message, args).setSource(this).setTranslationContext(this.translationKey);
     }
 
     public MessageBuilder error(String message, Object... args) {
-        return MessageBuilder.create().setSource(this).setTranslationContext(this.translationKey)
-            .body(message, args).setKind(MessageKind.Error);
+        return MessageBuilder.error(message, args).setSource(this).setTranslationContext(this.translationKey);
     }
 
     public MutableText translatable(String string, Object... args) {

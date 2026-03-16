@@ -476,9 +476,8 @@ public class HighwayBuilder extends Module {
         }
     }
 
-    @Override
-    public void error(String message, Object... args) {
-        super.error(message, args);
+    private void errorLate(String message, Object... args) {
+        super.error(message, args).send();
         toggle();
 
         if (disconnectOnToggle.get()) {
@@ -487,7 +486,7 @@ public class HighwayBuilder extends Module {
     }
 
     private void errorEarly(String message, Object... args) {
-        super.error(message, args);
+        super.error(message, args).send();
 
         displayInfo = false;
         toggle();
@@ -1170,7 +1169,7 @@ public class HighwayBuilder extends Module {
                 }
 
                 if (emptySlots == 0) {
-                    b.error("No empty slots.");
+                    b.errorLate("No empty slots.");
                     return;
                 }
 
@@ -1255,7 +1254,7 @@ public class HighwayBuilder extends Module {
                     // Mine ender chest
                     int slot = findAndMoveBestToolToHotbar(b, blockState, true);
                     if (slot == -1) {
-                        b.error("Cannot find pickaxe without silk touch to mine ender chests.");
+                        b.errorLate("Cannot find pickaxe without silk touch to mine ender chests.");
                         return;
                     }
 
@@ -1398,7 +1397,7 @@ public class HighwayBuilder extends Module {
 
                     if (restockOccurred) {
                         b.setState(ThrowOutTrash, Forward);
-                    } else b.error("Unable to perform restock for '" + b.restockTask.item() + "'.");
+                    } else b.errorLate("Unable to perform restock for '" + b.restockTask.item() + "'.");
 
                     return;
                 }
@@ -1409,7 +1408,7 @@ public class HighwayBuilder extends Module {
                 }
 
                 if (restockSlots <= 0) {
-                    b.error("No empty slots for restocking items.");
+                    b.errorLate("No empty slots for restocking items.");
                     return;
                 }
 
@@ -1433,7 +1432,7 @@ public class HighwayBuilder extends Module {
             protected void tick(HighwayBuilder b) {
                 // this should only tick if there's a valid slot we can restock from
                 if (slot == -1) {
-                    b.error("Invalid restocking action.");
+                    b.errorLate("Invalid restocking action.");
                     return;
                 }
 
@@ -1566,7 +1565,7 @@ public class HighwayBuilder extends Module {
 
                     // the only valid blocks should be air, a shulker box, or an ender chest
                     // if there is another type of block, assume something has gone wrong and error out (e.g. lava flowed in)
-                    default -> b.error("Invalid block at container restocking position?");
+                    default -> b.errorLate("Invalid block at container restocking position?");
                 }
             }
 
@@ -1999,7 +1998,7 @@ public class HighwayBuilder extends Module {
             if (slotsWithBlocks > 0) return slotWithLeastBlocks;
 
             // No space found in hotbar
-            b.error("No empty space in hotbar.");
+            b.errorLate("No empty space in hotbar.");
             return -1;
         }
 
@@ -2076,7 +2075,7 @@ public class HighwayBuilder extends Module {
                         b.restockTask.setPickaxes();
                     }
                     else {
-                        b.error("Found less than the minimum amount of pickaxes required: " + count + "/" + (b.savePickaxes.get() + 1));
+                        b.errorLate("Found less than the minimum amount of pickaxes required: " + count + "/" + (b.savePickaxes.get() + 1));
                     }
 
                     return -1;
@@ -2111,7 +2110,7 @@ public class HighwayBuilder extends Module {
                     b.restockTask.setMaterials();
                 }
                 else {
-                    b.error("Out of blocks to place.");
+                    b.errorLate("Out of blocks to place.");
                 }
 
                 return -1;

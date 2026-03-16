@@ -95,6 +95,13 @@ public class MessageBuilderImpl implements MessageBuilder {
     }
 
     @Override
+    public MessageBuilder withoutPrefix() {
+        assertOpen();
+        this.messagePrefix = null;
+        return this;
+    }
+
+    @Override
     public MessageBuilder body(Text body) {
         assertOpen();
         this.messageBodyText = body;

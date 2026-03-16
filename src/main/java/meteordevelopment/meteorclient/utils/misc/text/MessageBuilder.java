@@ -11,8 +11,23 @@ import net.minecraft.util.Formatting;
 import java.util.function.Supplier;
 
 public interface MessageBuilder {
+    /**
+     * @return A new empty {@link MessageBuilder}.
+     */
     static MessageBuilder create() {
         return new MessageBuilderImpl();
+    }
+
+    static MessageBuilder info(String body, Object... args) {
+        return create().setKind(MessageKind.Info).body(body, args);
+    }
+
+    static MessageBuilder warning(String body, Object... args) {
+        return create().setKind(MessageKind.Warning).body(body, args);
+    }
+
+    static MessageBuilder error(String body, Object... args) {
+        return create().setKind(MessageKind.Error).body(body, args);
     }
 
     static Text highlight(Object argument) {
@@ -80,6 +95,14 @@ public interface MessageBuilder {
      * @throws IllegalStateException if this builder is already closed.
      */
     MessageBuilder prefix(String prefix, Formatting prefixColor);
+
+    /**
+     * Removes the prefix that would be shown in front of the message.
+     *
+     * @return this builder
+     * @throws IllegalStateException if this builder is already closed.
+     */
+    MessageBuilder withoutPrefix();
 
     /**
      * Sets the message body.
