@@ -836,6 +836,8 @@
   "module.base.paste-config": "Paste config",
   "module.base.from": "From: ",
   "module.base.toggled": "Toggled %1$s %2$s.",
+  "module.base.toggled.on": "on",
+  "module.base.toggled.off": "off",
 
   "module.air-jump": "Air Jump",
   "module.air-jump.description": "Lets you jump in the air.",

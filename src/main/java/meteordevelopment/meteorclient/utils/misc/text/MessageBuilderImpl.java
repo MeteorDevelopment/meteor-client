@@ -5,10 +5,12 @@
 
 package meteordevelopment.meteorclient.utils.misc.text;
 
+import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.MessageFormatter;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.block.Block;
@@ -74,16 +76,15 @@ public class MessageBuilderImpl implements MessageBuilder {
     }
 
     @Override
-    public MessageBuilder prefix(Text prefix) {
+    public MessageBuilder prefix(Object source) {
         assertOpen();
-        this.messagePrefix = prefix;
-        return this;
-    }
-
-    @Override
-    public MessageBuilder prefix(String prefix) {
-        assertOpen();
-        this.messagePrefix = Text.literal(prefix);
+        this.messagePrefix = switch (source) {
+            case Module m -> m.getTitleText();
+            case Command c -> c.getTitle();
+            case Text t -> t;
+            case String s -> createPrefix(s);
+            default -> Text.literal(String.valueOf(source));
+        };
         return this;
     }
 
@@ -172,6 +173,10 @@ public class MessageBuilderImpl implements MessageBuilder {
             case Float f -> formatter.formatDecimal(f);
             case Double d -> formatter.formatDecimal(d);
 
+            // accept meteor constructs as parameters
+            case Module m -> m.getTitleText();
+            case Command c -> c.getTitle();
+
             // accept common objects as parameters
             case StatusEffect statusEffect -> stripStyle(statusEffect.getName());
             case Item item -> stripStyle(item.getName());
@@ -213,6 +218,16 @@ public class MessageBuilderImpl implements MessageBuilder {
             return Text.literal(messageBody);
         } else {
             return MutableText.of(new RichPlainTextContent(messageBody, this.args));
+        }
+    }
+
+    private MutableText createPrefix(String prefix) {
+        MeteorTranslations.MeteorLanguage language = MeteorTranslations.getCurrentLanguage();
+
+        if (language.hasTranslation(prefix)) {
+            return MutableText.of(new MeteorTranslatableTextContent(prefix));
+        } else {
+            return Text.literal(prefix);
         }
     }
 
