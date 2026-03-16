@@ -363,7 +363,7 @@ public class Notifier extends Module {
                     "[%s] %s",
                     Text.literal("+").formatted(Formatting.GREEN),
                     MessageBuilder.highlight(entry.profile().name())
-                ).removePrefix());
+                ).withoutPrefix());
             } else {
                 messageQueue.addLast(this.info("joined", MessageBuilder.highlight(entry.profile().name())));
             }
@@ -382,7 +382,7 @@ public class Notifier extends Module {
                     "[%s] %s",
                     Text.literal("-").formatted(Formatting.GREEN),
                     MessageBuilder.highlight(toRemove.getProfile().name())
-                ).removePrefix());
+                ).withoutPrefix());
             } else {
                 messageQueue.addLast(this.info("left", MessageBuilder.highlight(toRemove.getProfile().name())));
             }
