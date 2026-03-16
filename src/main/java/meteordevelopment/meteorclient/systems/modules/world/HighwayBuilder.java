@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
@@ -25,6 +26,7 @@ import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
 import meteordevelopment.meteorclient.utils.misc.MBlockPos;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -455,10 +457,10 @@ public class HighwayBuilder extends Module {
 
         restockTask.complete();
 
-        if (blocksPerTick.get() > 1 && rotation.get().mine) warning("With rotations enabled, you can break at most 1 block per tick.");
-        if (placementsPerTick.get() > 1 && rotation.get().place) warning("With rotations enabled, you can place at most 1 block per tick.");
+        if (blocksPerTick.get() > 1 && rotation.get().mine) warning("rotations_breaking_blocks_per_tick").send();
+        if (placementsPerTick.get() > 1 && rotation.get().place) warning("rotations_placement_blocks_per_tick").send();
 
-        if (Modules.get().get(InstantRebreak.class).isActive()) warning("It's recommended to disable the Instant Rebreak module and instead use the 'instantly-rebreak-echests' setting to avoid errors.");
+        if (Modules.get().get(InstantRebreak.class).isActive()) warning("instant_rebreak").send();
     }
 
     @Override
@@ -470,9 +472,9 @@ public class HighwayBuilder extends Module {
         mc.options.useKey.setPressed(false);
 
         if (displayInfo) {
-            info("Distance: (highlight)%.0f", PlayerUtils.distanceTo(start));
-            info("Blocks broken: (highlight)%d", blocksBroken);
-            info("Blocks placed: (highlight)%d", blocksPlaced);
+            info("distance", MessageBuilder.highlight(PlayerUtils.distanceTo(start))).send();
+            info("blocks_broken", MessageBuilder.highlight(blocksBroken)).send();
+            info("blocks_placed", MessageBuilder.highlight(blocksPlaced)).send();
         }
     }
 
@@ -508,7 +510,7 @@ public class HighwayBuilder extends Module {
         }
 
         if (width.get() < 3 && dir.diagonal) {
-            errorEarly("Diagonal highways with width less than 3 are not supported.");
+            errorEarly("diagonal_too_small");
             return;
         }
 
@@ -678,10 +680,10 @@ public class HighwayBuilder extends Module {
     }
 
     public MutableText getStatsText() {
-        MutableText text = Text.literal(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player == null ? 0.0f : PlayerUtils.distanceTo(start)));
-        text.append(String.format("%sBlocks broken: %s%d\n", Formatting.GRAY, Formatting.WHITE, blocksBroken));
-        text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
-
+        MutableText text = Text.empty();
+        text.append(MessageBuilder.highlight(MeteorClient.translatable(this.getTranslationKey() + ".info.distance", mc.player == null ? 0.0f : PlayerUtils.distanceTo(start))));
+        text.append(MessageBuilder.highlight(MeteorClient.translatable(this.getTranslationKey() + ".info.blocks_broken", blocksBroken)));
+        text.append(MessageBuilder.highlight(MeteorClient.translatable(this.getTranslationKey() + ".info.blocks_placed", blocksPlaced)));
         return text;
     }
 
@@ -1169,7 +1171,7 @@ public class HighwayBuilder extends Module {
                 }
 
                 if (emptySlots == 0) {
-                    b.errorLate("No empty slots.");
+                    b.errorLate("no_empty_slots");
                     return;
                 }
 
@@ -1254,7 +1256,7 @@ public class HighwayBuilder extends Module {
                     // Mine ender chest
                     int slot = findAndMoveBestToolToHotbar(b, blockState, true);
                     if (slot == -1) {
-                        b.errorLate("Cannot find pickaxe without silk touch to mine ender chests.");
+                        b.errorLate("no_valid_pickaxe");
                         return;
                     }
 
@@ -1397,7 +1399,7 @@ public class HighwayBuilder extends Module {
 
                     if (restockOccurred) {
                         b.setState(ThrowOutTrash, Forward);
-                    } else b.errorLate("Unable to perform restock for '" + b.restockTask.item() + "'.");
+                    } else b.errorLate("unable_to_restock", MessageBuilder.highlight(b.restockTask.item()));
 
                     return;
                 }
@@ -1408,7 +1410,7 @@ public class HighwayBuilder extends Module {
                 }
 
                 if (restockSlots <= 0) {
-                    b.errorLate("No empty slots for restocking items.");
+                    b.errorLate("no_restock_slots");
                     return;
                 }
 
@@ -1432,7 +1434,7 @@ public class HighwayBuilder extends Module {
             protected void tick(HighwayBuilder b) {
                 // this should only tick if there's a valid slot we can restock from
                 if (slot == -1) {
-                    b.errorLate("Invalid restocking action.");
+                    b.errorLate("invalid_restock");
                     return;
                 }
 
@@ -1565,7 +1567,7 @@ public class HighwayBuilder extends Module {
 
                     // the only valid blocks should be air, a shulker box, or an ender chest
                     // if there is another type of block, assume something has gone wrong and error out (e.g. lava flowed in)
-                    default -> b.errorLate("Invalid block at container restocking position?");
+                    default -> b.errorLate("invalid_container_block");
                 }
             }
 
@@ -1697,7 +1699,7 @@ public class HighwayBuilder extends Module {
             protected void start(HighwayBuilder b) {
                 if (!InvUtils.find(Items.BOW).found() || (!InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found() && !b.mc.player.getAbilities().creativeMode)) {
                     b.destroyCrystalTraps.set(false);
-                    b.warning("No bow found to destroy crystal traps with. Toggling the setting off.");
+                    b.warning("no_bow").send();
                     b.setState(Forward);
                 }
 
@@ -1726,7 +1728,7 @@ public class HighwayBuilder extends Module {
                     int slot = findAndMoveToHotbar(b, itemStack -> itemStack.getItem() instanceof BowItem);
                     if (slot == -1) {
                         b.destroyCrystalTraps.set(false);
-                        b.warning("No bow found to destroy crystal traps with. Toggling the setting off.");
+                        b.warning("no_bow").send();
                         b.setState(Forward);
                         b.mc.interactionManager.stopUsingItem(b.mc.player);
                         b.drawingBow = false;
@@ -1764,7 +1766,7 @@ public class HighwayBuilder extends Module {
 
                 if (shots >= 3) {
                     b.ignoreCrystals.add(target);
-                    b.warning("Detected potential hangup on a crystal. Adding it to ignore list and continuing forward.");
+                    b.warning("crystal_hangup").send();
                     b.setState(Forward);
                     b.mc.interactionManager.stopUsingItem(b.mc.player);
                     b.drawingBow = false;
@@ -1998,7 +2000,7 @@ public class HighwayBuilder extends Module {
             if (slotsWithBlocks > 0) return slotWithLeastBlocks;
 
             // No space found in hotbar
-            b.errorLate("No empty space in hotbar.");
+            b.errorLate("no_hotbar_slots");
             return -1;
         }
 
@@ -2075,7 +2077,7 @@ public class HighwayBuilder extends Module {
                         b.restockTask.setPickaxes();
                     }
                     else {
-                        b.errorLate("Found less than the minimum amount of pickaxes required: " + count + "/" + (b.savePickaxes.get() + 1));
+                        b.errorLate("not_enough_pickaxes", count, b.savePickaxes.get() + 1);
                     }
 
                     return -1;
@@ -2110,7 +2112,7 @@ public class HighwayBuilder extends Module {
                     b.restockTask.setMaterials();
                 }
                 else {
-                    b.errorLate("Out of blocks to place.");
+                    b.errorLate("out_of_blocks");
                 }
 
                 return -1;
@@ -2846,7 +2848,7 @@ public class HighwayBuilder extends Module {
             }
 
             setState(State.Restock);
-            b.info("Starting new restock task for " + item());
+            b.info("starting_restock", MessageBuilder.highlight(MeteorClient.translatable(b.getTranslationKey() + ".restock." + item()))).send();
         }
 
         public void complete() {
@@ -2860,10 +2862,10 @@ public class HighwayBuilder extends Module {
         }
 
         public String item() {
-            if (materials) return "building materials";
+            if (materials) return "materials";
             if (pickaxes) return "pickaxes";
             if (food) return "food";
-            return "unknown";
+            return "other";
         }
     }
 }

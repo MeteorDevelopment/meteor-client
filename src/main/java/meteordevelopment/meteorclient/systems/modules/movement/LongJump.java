@@ -127,7 +127,7 @@ public class LongJump extends Module {
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
         if (event.packet instanceof PlayerPositionLookS2CPacket && disableOnRubberband.get()) {
-            info("Rubberband detected! Disabling...");
+            info("rubberband").send();
             toggle();
         }
     }
@@ -158,7 +158,7 @@ public class LongJump extends Module {
                 if (jumping && (mc.player.getY() - (int) mc.player.getY() < 0.01)) {
                     jumping = false;
                     toggle();
-                    info("Disabling after jump.");
+                    info("disabling").send();
                 }
 
                 if (onlyOnGround.get() && !mc.player.isOnGround() && stage == 0) return;
@@ -227,7 +227,7 @@ public class LongJump extends Module {
                 if (autoDisable.get() && jumped) {
                     jumped = false;
                     toggle();
-                    info("Disabling after jump.");
+                    info("disabling").send();
                 }
                 airTicks = 0;
                 groundTicks += 1;

@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -106,7 +107,7 @@ public class MiddleClickExtra extends Module {
 
             if (!Friends.get().isFriend(player)) {
                 Friends.get().add(new Friend(player));
-                info("Added %s to friends", player.getName().getString());
+                info("added_friend", MessageBuilder.highlight(player)).send();
                 if (message.get()) {
                     String messageNotify = friendMessage.get().replace("%player", player.getName().getString());
                     ChatUtils.sendPlayerMsg(messageNotify);
@@ -114,7 +115,7 @@ public class MiddleClickExtra extends Module {
 
             } else {
                 Friends.get().remove(Friends.get().get(player));
-                info("Removed %s from friends", player.getName().getString());
+                info("removed_friend", MessageBuilder.highlight(player)).send();
             }
 
             return;
@@ -122,7 +123,7 @@ public class MiddleClickExtra extends Module {
 
         FindItemResult result = InvUtils.find(mode.get().item);
         if (!result.found() || !result.isHotbar() && !quickSwap.get()) {
-            if (notify.get()) warning("Unable to find specified item.");
+            if (notify.get()) warning("unable_to_find_item").send();
             return;
         }
 

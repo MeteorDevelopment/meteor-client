@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.notebot.NotebotUtils;
 import meteordevelopment.meteorclient.utils.notebot.decoder.SongDecoder;
 import meteordevelopment.meteorclient.utils.notebot.decoder.SongDecoders;
@@ -390,7 +391,7 @@ public class Notebot extends Module {
             waitTicks--;
             if (waitTicks == 0) {
                 waitTicks = -1;
-                info("Checking noteblocks again...");
+                info("checking").send();
 
                 setupTuneHitsMap();
                 stage = Stage.Tune;
@@ -399,14 +400,14 @@ public class Notebot extends Module {
         else if (stage == Stage.SetUp) {
             scanForNoteblocks();
             if (scannedNoteblocks.isEmpty()) {
-                error("Can't find any nearby noteblock!");
+                error("cant_find_noteblocks").send();
                 stop();
                 return;
             }
 
             setupNoteblocksMap();
             if (noteBlockPositions.isEmpty()) {
-                error("Can't find any valid noteblock to play song.");
+                error("cant_find_valid_noteblocks").send();
                 stop();
                 return;
             }
@@ -428,7 +429,7 @@ public class Notebot extends Module {
             if (song.getNotesMap().containsKey(currentTick)) {
                 if (playingMode == PlayingMode.Preview) onTickPreview();
                 else if (mc.player.getAbilities().creativeMode) {
-                    error("You need to be in survival mode.");
+                    error("not_in_survival_mode").send();
                     stop();
                     return;
                 }
@@ -507,9 +508,9 @@ public class Notebot extends Module {
 
         if (!uniqueNotesToUse.isEmpty()) {
             for (Note note : uniqueNotesToUse) {
-                warning("Missing note: "+note.getInstrument()+", "+note.getNoteLevel());
+                warning("missing_note", note.getInstrument(), note.getNoteLevel()).send();
             }
-            warning(uniqueNotesToUse.size()+" missing notes!");
+            warning("missing_notes", uniqueNotesToUse.size()).send();
         }
     }
 
@@ -540,13 +541,13 @@ public class Notebot extends Module {
         WTable table = theme.table();
 
         // Open Song GUI
-        WButton openSongGUI = table.add(theme.button("Open Song GUI")).expandX().minWidth(100).widget();
+        WButton openSongGUI = table.add(theme.button(MeteorTranslations.translate(this.getTranslationKey() + ".gui.open_gui"))).expandX().minWidth(100).widget();
         openSongGUI.action = () -> mc.setScreen(theme.notebotSongs());
 
         table.row();
 
         // Align Center
-        WButton alignCenter = table.add(theme.button("Align Center")).expandX().minWidth(100).widget();
+        WButton alignCenter = table.add(theme.button(MeteorTranslations.translate(this.getTranslationKey() + ".gui.align_center"))).expandX().minWidth(100).widget();
         alignCenter.action = () -> {
             if (mc.player == null) return;
             Vec3d pos = Vec3d.ofBottomCenter(mc.player.getBlockPos());
@@ -559,15 +560,15 @@ public class Notebot extends Module {
         status = table.add(theme.label(getStatus())).expandCellX().widget();
 
         // Pause
-        WButton pause = table.add(theme.button(isPlaying ? "Pause" : "Resume")).right().widget();
+        WButton pause = table.add(theme.button(MeteorTranslations.translate(this.getTranslationKey() + (isPlaying ? ".gui.pause" : ".gui.resume")))).right().widget();
         pause.action = () -> {
             pause();
-            pause.set(isPlaying ? "Pause" : "Resume");
+            pause.set(MeteorTranslations.translate(this.getTranslationKey() + (isPlaying ? ".gui.pause" : ".gui.resume")));
             updateStatus();
         };
 
         // Stop
-        WButton stop = table.add(theme.button("Stop")).right().widget();
+        WButton stop = table.add(theme.button(MeteorTranslations.translate(this.getTranslationKey() + ".gui.stop"))).right().widget();
         stop.action = this::stop;
 
         return table;
@@ -579,12 +580,12 @@ public class Notebot extends Module {
      * @return A status
      */
     public String getStatus() {
-        if (!this.isActive()) return "Module disabled.";
-        if (song == null) return "No song loaded.";
-        if (isPlaying) return String.format("Playing song. %d/%d", currentTick, song.getLastTick());
-        if (stage == Stage.Playing) return "Ready to play.";
-        if (stage == Stage.SetUp || stage == Stage.Tune || stage == Stage.WaitingToCheckNoteblocks) return "Setting up the noteblocks.";
-        else return String.format("Stage: %s.", stage.toString());
+        if (!this.isActive()) return MeteorTranslations.translate(this.getTranslationKey() + ".gui.status.disabled");
+        if (song == null) return MeteorTranslations.translate(this.getTranslationKey() + ".gui.status.no_song_loaded");
+        if (isPlaying) return MeteorTranslations.translate(this.getTranslationKey() + ".gui.status.playing_song", currentTick, song.getLastTick());
+        if (stage == Stage.Playing) return MeteorTranslations.translate(this.getTranslationKey() + ".gui.status.ready");
+        if (stage == Stage.SetUp || stage == Stage.Tune || stage == Stage.WaitingToCheckNoteblocks) return MeteorTranslations.translate(this.getTranslationKey() + ".gui.status.setup");
+        else return MeteorTranslations.translate(this.getTranslationKey() + ".gui.status.other", stage.toString());
     }
 
     /**
@@ -593,28 +594,28 @@ public class Notebot extends Module {
     public void play() {
         if (mc.player == null) return;
         if (mc.player.getAbilities().creativeMode && playingMode != PlayingMode.Preview) {
-            error("You need to be in survival mode.");
+            error("not_in_survival_mode").send();
         } else if (stage == Stage.Playing) {
             isPlaying = true;
-            info("Playing.");
+            info("playing").send();
         } else {
-            error("No song loaded.");
+            error("no_song_loaded").send();
         }
     }
 
     public void pause() {
         enable();
         if (isPlaying) {
-            info("Pausing.");
+            info("pausing").send();
             isPlaying = false;
         } else {
-            info("Resuming.");
+            info("resuming").send();
             isPlaying = true;
         }
     }
 
     public void stop() {
-        info("Stopping.");
+        info("stopping").send();
         disableNotebot();
         updateStatus();
     }
@@ -687,16 +688,16 @@ public class Notebot extends Module {
      */
     public boolean loadFileToMap(File file, Runnable callback) {
         if (!file.exists() || !file.isFile()) {
-            error("File not found");
+            error("file_not_found").send();
             return false;
         }
 
         if (!SongDecoders.hasDecoder(file)) {
-            error("File is in wrong format. Decoder not found.");
+            error("file_wrong_format").send();
             return false;
         }
 
-        info("Loading song \"%s\".", FilenameUtils.getBaseName(file.getName()));
+        info("loading", FilenameUtils.getBaseName(file.getName())).send();
 
         // Start loading song
         loadingSongFuture = CompletableFuture.supplyAsync(() -> {
@@ -714,7 +715,7 @@ public class Notebot extends Module {
             if (ex == null) {
                 // Song is null only when it times out
                 if (song == null) {
-                    error("Loading song '" + FilenameUtils.getBaseName(file.getName()) + "' timed out.");
+                    error("loading_timed_out", FilenameUtils.getBaseName(file.getName())).send();
                     onSongEnd();
                     return;
                 }
@@ -723,13 +724,13 @@ public class Notebot extends Module {
                 long time2 = System.currentTimeMillis();
                 long diff = time2 - time1;
 
-                info("Song '" + FilenameUtils.getBaseName(file.getName()) + "' has been loaded to the memory! Took "+diff+"ms");
+                info("loaded", FilenameUtils.getBaseName(file.getName()), diff).send();
                 callback.run();
             } else {
                 if (ex instanceof CancellationException) {
-                    error("Loading song '" + FilenameUtils.getBaseName(file.getName()) + "' was cancelled.");
+                    error("loading_cancelled", FilenameUtils.getBaseName(file.getName())).send();
                 } else {
-                    error("An error occurred while loading song '" + FilenameUtils.getBaseName(file.getName()) + "'. See the logs for more details");
+                    error("loading_errored", FilenameUtils.getBaseName(file.getName())).send();
                     MeteorClient.LOG.error("An error occurred while loading song '{}'", FilenameUtils.getBaseName(file.getName()), ex);
                     onSongEnd();
                 }
@@ -789,10 +790,10 @@ public class Notebot extends Module {
                 waitTicks = checkNoteblocksAgainDelay.get();
                 stage = Stage.WaitingToCheckNoteblocks;
 
-                info("Delaying check for noteblocks");
+                info("delaying_check").send();
             } else {
                 stage = Stage.Playing;
-                info("Loading done.");
+                info("loading_done").send();
                 play();
             }
             return;

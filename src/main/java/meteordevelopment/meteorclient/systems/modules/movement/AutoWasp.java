@@ -92,10 +92,10 @@ public class AutoWasp extends Module {
             }, SortPriority.LowestDistance);
 
             if (target == null) {
-                error("No valid targets.");
+                error("no_valid_targets").send();
                 toggle();
                 return;
-            } else info(target.getName().getString() + " set as target.");
+            } else info("set_target", target.getName().getString()).send();
         }
 
         jumpTimer = 0;
@@ -110,7 +110,7 @@ public class AutoWasp extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (target.isRemoved()) {
-            warning("Lost target!");
+            warning("lost_target").send();
 
             switch (action.get()) {
                 case CHOOSE_NEW_TARGET -> onActivate();
