@@ -388,7 +388,7 @@ public class Surround extends Module {
             Entity entity = mc.world.getEntityById(packet.playerId());
             if (entity == mc.player && toggleOnDeath.get()) {
                 toggle();
-                info("Toggled off because you died.");
+                info("died").send();
             }
         }
     }

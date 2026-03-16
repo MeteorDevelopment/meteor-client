@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
@@ -135,7 +136,7 @@ public class ChestSwap extends Module {
     @Override
     public void sendToggledMsg() {
         if (stayOn.get()) super.sendToggledMsg();
-        else if (Config.get().chatFeedback.get() && chatFeedback) info("Triggered (highlight)%s(default).", this.getTitle());
+        else if (Config.get().chatFeedback.get() && chatFeedback) info("triggered", MessageBuilder.highlight(this.getTitleText()));
     }
 
     public enum Chestplate {

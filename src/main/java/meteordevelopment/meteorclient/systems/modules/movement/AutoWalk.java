@@ -107,7 +107,7 @@ public class AutoWalk extends Module {
             }
         } else {
             if (PathManagers.get() instanceof NopPathManager) {
-                info("Smart mode requires Baritone");
+                info("smart_mode_unavailable").send();
                 toggle();
             }
         }

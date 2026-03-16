@@ -11,6 +11,7 @@ import baritone.api.Settings;
 import baritone.api.pathing.goals.GoalBlock;
 import baritone.api.process.ICustomGoalProcess;
 import baritone.api.process.IMineProcess;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -121,14 +122,14 @@ public class InfinityMiner extends Module {
         if (isFull()) {
             if (walkHome.get()) {
                 if (isBaritoneNotWalking()) {
-                    info("Walking home.");
+                    info("walking_home").send();
                     baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(homePos));
                 }
                 else if (mc.player.getBlockPos().equals(homePos) && logOut.get()) logOut();
             }
             else if (logOut.get()) logOut();
             else {
-                info("Inventory full, stopping process.");
+                info("inventory_full").send();
                 toggle();
             }
 
@@ -136,20 +137,20 @@ public class InfinityMiner extends Module {
         }
 
         if (!findPickaxe()) {
-            error("Could not find a usable mending pickaxe.");
+            error("no_mending_pickaxe").send();
             toggle();
             return;
         }
 
         if (!checkThresholds()) {
-            error("Start mining value can't be lower than start repairing value.");
+            error("invalid_thresholds").send();
             toggle();
             return;
         }
 
         if (repairing) {
             if (!needsRepair()) {
-                warning("Finished repairing, going back to mining.");
+                info("finished_repairing").send();
                 repairing = false;
                 baritoneSettings.mineScanDroppedItems.value = true;
                 mineTargetBlocks();
@@ -160,7 +161,7 @@ public class InfinityMiner extends Module {
         }
         else {
             if (needsRepair()) {
-                warning("Pickaxe needs repair, beginning repair process");
+                info("beginning_repairing").send();
                 repairing = true;
                 baritoneSettings.mineScanDroppedItems.value = false;
                 mineRepairBlocks();
@@ -209,7 +210,8 @@ public class InfinityMiner extends Module {
 
     private void logOut() {
         toggle();
-        mc.player.networkHandler.sendPacket(new DisconnectS2CPacket(Text.literal("[Infinity Miner] Inventory is full.")));
+        Text message = Text.literal("[").append(this.getTitleText()).append("] ").append(MeteorClient.translatable(this.getTranslationKey() + ".disconnect.full_inventory"));
+        mc.player.networkHandler.sendPacket(new DisconnectS2CPacket(message));
     }
 
     private boolean isBaritoneNotMining() {

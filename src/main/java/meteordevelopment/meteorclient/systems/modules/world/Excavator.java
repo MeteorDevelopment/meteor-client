@@ -109,13 +109,13 @@ public class Excavator extends Module {
             start = BetterBlockPos.from(result.getBlockPos());
             status = Status.SEL_END;
             if (logSelection.get()) {
-                info("Start corner set: (%d, %d, %d)".formatted(start.getX(), start.getY(), start.getZ()));
+                info("start_corner", start.getX(), start.getY(), start.getZ()).send();
             }
         } else if (status == Status.SEL_END) {
             end = BetterBlockPos.from(result.getBlockPos());
             status = Status.WORKING;
             if (logSelection.get()) {
-                info("End corner set: (%d, %d, %d)".formatted(end.getX(), end.getY(), end.getZ()));
+                info("end_corner", end.getX(), end.getY(), end.getZ()).send();
             }
             baritone.getSelectionManager().addSelection(start, end);
             baritone.getBuilderProcess().clearArea(start, end);

@@ -37,6 +37,7 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
@@ -250,11 +251,11 @@ public class Modules extends System<Modules> {
 
         if (moduleToBind.keybind.canBindTo(isKey, value, modifiers)) {
             moduleToBind.keybind.set(isKey, value, modifiers);
-            moduleToBind.info("Bound to (highlight)%s(default).", moduleToBind.keybind);
+            moduleToBind.info("module.base.bound", MessageBuilder.highlight(moduleToBind.keybind)).send();
         }
         else if (value == GLFW.GLFW_KEY_ESCAPE) {
             moduleToBind.keybind.set(Keybind.none());
-            moduleToBind.info("Removed bind.");
+            moduleToBind.info("module.base.unbound").send();
         }
         else return false;
 

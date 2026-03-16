@@ -167,7 +167,7 @@ public class WaypointsModule extends Module {
     public void addDeath(Vec3d deathPos) {
         String time = dateFormat.format(new Date());
         if (dpChat.get()) {
-            info("death", deathPos, time);
+            info("death", deathPos, time).send();
         }
 
         // Create waypoint

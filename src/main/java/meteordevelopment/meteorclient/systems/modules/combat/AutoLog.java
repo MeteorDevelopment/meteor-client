@@ -153,7 +153,7 @@ public class AutoLog extends Module {
 
         pops++;
         if (totemPops.get() > 0 && pops >= totemPops.get()) {
-            disconnect("Popped " + pops + " totems.");
+            disconnect(MeteorClient.translatable(this.getTranslationKey() + ".reason.popped", pops));
             if (toggleOff.get()) this.toggle();
         }
     }
@@ -166,7 +166,7 @@ public class AutoLog extends Module {
             return;
         }
         if (playerHealth <= health.get()) {
-            disconnect("Health was lower than " + health.get() + ".");
+            disconnect(MeteorClient.translatable(this.getTranslationKey() + ".reason.health", health.get()));
             if (smartToggle.get()) {
                 if (isActive()) this.toggle();
                 enableHealthListener();
@@ -175,7 +175,7 @@ public class AutoLog extends Module {
         }
 
         if (smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()) {
-            disconnect("Health was going to be lower than " + health.get() + ".");
+            disconnect(MeteorClient.translatable(this.getTranslationKey() + ".reason.health_predict", health.get()));
             if (toggleOff.get()) this.toggle();
             return;
         }
@@ -186,14 +186,14 @@ public class AutoLog extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity player && player.getUuid() != mc.player.getUuid()) {
                 if (onlyTrusted.get() && player != mc.player && !Friends.get().isFriend(player)) {
-                    disconnect(Text.literal("Non-trusted player '" + Formatting.RED + player.getName().getString() + Formatting.WHITE + "' appeared in your render distance."));
+                    disconnect(MeteorClient.translatable(this.getTranslationKey() + ".reason.non_trusted_player", Text.literal(player.getGameProfile().name()).formatted(Formatting.RED)));
                     if (toggleOff.get()) this.toggle();
                     return;
                 }
 
                 if (instantDeath.get() && PlayerUtils.isWithin(entity, 8) && DamageUtils.getAttackDamage(player, mc.player)
                     > playerHealth + mc.player.getAbsorptionAmount()) {
-                    disconnect("Anti-32k measures.");
+                    disconnect(MeteorClient.translatable(this.getTranslationKey() + ".reason.anti_32k"));
                     if (toggleOff.get()) this.toggle();
                     return;
                 }
@@ -217,14 +217,14 @@ public class AutoLog extends Module {
             }
 
             if (useTotalCount.get() && totalEntities >= combinedEntityThreshold.get()) {
-                disconnect("Total number of selected entities within range exceeded the limit.");
+                disconnect(MeteorClient.translatable(this.getTranslationKey() + ".reason.combined_entity_threshold"));
                 if (toggleOff.get()) this.toggle();
             }
             else if (!useTotalCount.get()) {
                 // Check if the count of each entity type exceeds the specified limit
                 for (Object2IntMap.Entry<EntityType<?>> entry : entityCounts.object2IntEntrySet()) {
                     if (entry.getIntValue() >= individualEntityThreshold.get()) {
-                        disconnect("Number of " + entry.getKey().getName().getString() + " within range exceeded the limit.");
+                        disconnect(MeteorClient.translatable(this.getTranslationKey() + ".reason.single_entity_threshold", entry.getKey().getName().getString()));
                         if (toggleOff.get()) this.toggle();
                         return;
                     }
@@ -233,17 +233,13 @@ public class AutoLog extends Module {
         }
     }
 
-    private void disconnect(String reason) {
-        disconnect(Text.literal(reason));
-    }
-
     private void disconnect(Text reason) {
-        MutableText text = Text.literal("[AutoLog] ");
+        MutableText text = Text.literal("[").append(this.getTitleText()).append("] ");
         text.append(reason);
 
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
         if (autoReconnect.isActive() && toggleAutoReconnect.get()) {
-            text.append(Text.literal("\n\nINFO - AutoReconnect was disabled").withColor(Colors.GRAY));
+            text.append(Text.literal("\n\n").append(this.getTranslationKey() + ".reason.header").withColor(Colors.GRAY));
             autoReconnect.toggle();
         }
 
@@ -258,7 +254,7 @@ public class AutoLog extends Module {
             else if (Utils.canUpdate()
                 && !mc.player.isDead()
                 && mc.player.getHealth() > health.get()) {
-                info("Player health greater than minimum, re-enabling module.");
+                info("re-enable").send();
                 toggle();
                 disableHealthListener();
             }

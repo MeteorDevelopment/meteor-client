@@ -429,19 +429,19 @@ public class Freecam extends Module {
             Entity entity = mc.world.getEntityById(packet.playerId());
             if (entity == mc.player && toggleOnDeath.get()) {
                 toggle();
-                info("Toggled off because you died.");
+                info("toggled_on_death").send();
             }
         }
         else if (event.packet instanceof HealthUpdateS2CPacket packet) {
             if (mc.player.getHealth() - packet.getHealth() > 0 && toggleOnDamage.get()) {
                 toggle();
-                info("Toggled off because you took damage.");
+                info("toggled_on_damage").send();
             }
         }
         else if (event.packet instanceof PlayerRespawnS2CPacket) {
             if (isActive()) {
                 toggle();
-                info("Toggled off because you changed dimensions.");
+                info("toggled_on_dimension_change").send();
             }
         }
     }

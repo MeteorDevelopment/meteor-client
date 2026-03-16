@@ -62,7 +62,7 @@ public class AutoMend extends Module {
 
         if (slot == -1) {
             if (autoDisable.get()) {
-                info("Repaired all items, disabling");
+                info("repaired_all").send();
 
                 if (didMove) {
                     int emptySlot = getEmptySlot();

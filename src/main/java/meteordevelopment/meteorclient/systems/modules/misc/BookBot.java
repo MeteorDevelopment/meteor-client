@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.mixin.TextHandlerAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.misc.MeteorTranslations;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -157,7 +156,7 @@ public class BookBot extends Module {
     @Override
     public void onActivate() {
         if ((file == null || !file.exists()) && mode.get() == Mode.File) {
-            info("No file selected, please select a file in the GUI.");
+            info("no_file_selected").send();
             toggle();
             return;
         }
@@ -212,7 +211,7 @@ public class BookBot extends Module {
         } else if (mode.get() == Mode.File) {
             // Ignore if somehow the file got deleted
             if ((file == null || !file.exists()) && mode.get() == Mode.File) {
-                info("No file selected, please select a file in the GUI.");
+                info("no_file_selected").send();
                 toggle();
                 return;
             }
@@ -222,7 +221,7 @@ public class BookBot extends Module {
                 error("file_empty", MeteorClient.translatable(this.getTranslationKey() + ".click_to_edit_file").setStyle(Style.EMPTY
                     .withFormatting(Formatting.UNDERLINE, Formatting.RED)
                     .withClickEvent(new ClickEvent.OpenFile(file.getAbsolutePath()))
-                ));
+                )).send();
                 toggle();
                 return;
             }
@@ -241,7 +240,7 @@ public class BookBot extends Module {
                 // Write the file string to a book
                 writeBook(file.toString().chars().iterator());
             } catch (IOException ignored) {
-                error("Failed to read the file.");
+                error("failed_to_read_file").send();
             }
         }
     }

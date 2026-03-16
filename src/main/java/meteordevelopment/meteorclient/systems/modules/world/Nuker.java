@@ -17,8 +17,8 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.misc.text.MessageBuilder;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -507,10 +507,10 @@ public class Nuker extends Module {
 
         if (list.contains(targetBlock)) {
             list.remove(targetBlock);
-            info("Removed " + Names.get(targetBlock) + " from " + modeName);
+            info("removed_block", MessageBuilder.highlight(targetBlock), MessageBuilder.highlight(modeName)).send();
         } else {
             list.add(targetBlock);
-            info("Added " + Names.get(targetBlock) + " to " + modeName);
+            info("added_block", MessageBuilder.highlight(targetBlock), MessageBuilder.highlight(modeName)).send();
         }
     }
 

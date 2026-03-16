@@ -106,19 +106,19 @@ public class Burrow extends Module {
     @Override
     public void onActivate() {
         if (!mc.world.getBlockState(mc.player.getBlockPos()).isReplaceable()) {
-            error("Already burrowed, disabling.");
+            error("already_burrowed").send();
             toggle();
             return;
         }
 
         if (!PlayerUtils.isInHole(false) && onlyInHole.get()) {
-            error("Not in a hole, disabling.");
+            error("not_in_hole").send();
             toggle();
             return;
         }
 
         if (!checkHead()) {
-            error("Not enough headroom to burrow, disabling.");
+            error("not_enough_headroom").send();
             toggle();
             return;
         }
@@ -126,7 +126,7 @@ public class Burrow extends Module {
         FindItemResult result = getItem();
 
         if (!result.isHotbar() && !result.isOffhand()) {
-            error("No burrow block found, disabling.");
+            error("no_burrow_blocks").send();
             toggle();
             return;
         }
@@ -141,7 +141,7 @@ public class Burrow extends Module {
             if (instant.get()) shouldBurrow = true;
             else mc.player.jump();
         } else {
-            info("Waiting for manual jump.");
+            info("waiting_for_jump").send();
         }
     }
 
