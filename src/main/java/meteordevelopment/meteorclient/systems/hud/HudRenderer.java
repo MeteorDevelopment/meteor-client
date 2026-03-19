@@ -64,8 +64,6 @@ public class HudRenderer {
     }
 
     public void begin(DrawContext drawContext) {
-        ((IGameRenderer) mc.gameRenderer).meteor$flushGuiState();
-
         Renderer2D.COLOR.begin();
 
         this.drawContext = drawContext;
