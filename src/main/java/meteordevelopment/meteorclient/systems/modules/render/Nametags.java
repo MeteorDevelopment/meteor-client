@@ -128,8 +128,8 @@ public class Nametags extends Module {
     );
 
     private final Setting<Boolean> displayPrefix = sgPlayers.add(new BoolSetting.Builder()
-        .name("prefix/suffix")
-        .description("Shows the player's prefix/suffix.")
+        .name("use-display-name")
+        .description("Uses the players server display name instead of their account name.")
         .defaultValue(false)
         .build()
     );
@@ -422,7 +422,7 @@ public class Nametags extends Module {
         else {
             if (displayPrefix.get()) name = player.getDisplayName().getString();
             else name = player.getName().getString();
-        };
+        }
 
         // Health
         float absorption = player.getAbsorptionAmount();
