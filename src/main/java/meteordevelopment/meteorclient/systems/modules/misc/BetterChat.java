@@ -18,6 +18,8 @@ import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
 import meteordevelopment.meteorclient.mixininterface.IChatHudLine;
 import meteordevelopment.meteorclient.mixininterface.IChatHudLineVisible;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -34,6 +36,7 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
@@ -41,6 +44,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -101,6 +105,21 @@ public class BetterChat extends Module {
         .name("keep-history")
         .description("Prevents the chat history from being cleared when disconnecting.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> friendHighlight = sgGeneral.add(new BoolSetting.Builder()
+        .name("friend-highlight")
+        .description("Highlights the names of your friends in chat.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<SettingColor> friendHighlightColor = sgGeneral.add(new ColorSetting.Builder()
+        .name("friend-highlight-color")
+        .description("The color used to highlight friend names in chat.")
+        .defaultValue(new SettingColor(0, 255, 180))
+        .visible(friendHighlight::get)
         .build()
     );
 
@@ -300,6 +319,11 @@ public class BetterChat extends Module {
             message = Text.empty().append(timestamp).append(message);
         }
 
+        if (friendHighlight.get()) {
+            Text highlighted = applyFriendHighlight(message);
+            if (highlighted != null) message = highlighted;
+        }
+
         event.setMessage(message);
     }
 
@@ -326,6 +350,42 @@ public class BetterChat extends Module {
         }
 
         event.message = message;
+    }
+
+    // Friend Highlight
+
+    private Text applyFriendHighlight(Text message) {
+        String messageString = message.getString();
+        Matcher matcher = usernameRegex.matcher(messageString);
+        if (!matcher.matches()) return null;
+
+        String username = matcher.group(1);
+        if (Friends.get().get(username) == null) return null;
+
+        TextColor friendColor = friendHighlightColor.get().toTextColor();
+
+        // Try to preserve rich text (hover events, colors, etc.) via TextVisitor.
+        // On cracked servers, player_chat packets use TranslatableText which can cause
+        // a NoSuchElementException due to a mismatch between collectSiblings and visit().
+        // In that case, skip the highlight and leave the message untouched.
+        try {
+            MutableText result = Text.empty();
+            TextVisitor.visit(message, (text, style, string) -> {
+                int idx = string.indexOf(username);
+                if (idx >= 0) {
+                    if (idx > 0) result.append(Text.literal(string.substring(0, idx)).setStyle(style));
+                    result.append(Text.literal(username).setStyle(style.withColor(friendColor)));
+                    int after = idx + username.length();
+                    if (after < string.length()) result.append(Text.literal(string.substring(after)).setStyle(style));
+                } else {
+                    result.append(text.copyContentOnly().setStyle(style));
+                }
+                return Optional.empty();
+            }, Style.EMPTY);
+            return result;
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 
     // Anti Spam
