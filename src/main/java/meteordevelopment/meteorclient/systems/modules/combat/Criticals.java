@@ -108,7 +108,7 @@ public class Criticals extends Module {
                         sendPacket(0.0000008);
                         sendPacket(0);
                     }
-                    case Bypass -> {
+                    case OldNCP -> {
                         sendPacket(0.11);
                         sendPacket(0.1100013579);
                         sendPacket(0.0000013579);
@@ -199,7 +199,7 @@ public class Criticals extends Module {
         None,
         Packet,
         UpdatedNCP,
-        Bypass,
+        OldNCP,
         Jump,
         MiniJump
     }
