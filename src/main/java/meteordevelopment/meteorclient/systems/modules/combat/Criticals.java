@@ -178,14 +178,7 @@ public class Criticals extends Module {
         double y = mc.player.getY();
         double z = mc.player.getZ();
 
-        PlayerMoveC2SPacket packet;
-        
-        if (mode.get() == Mode.UpdatedNCP) {
-            packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false, false);
-        } else {
-            packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false, mc.player.horizontalCollision);
-        }
-
+        PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false, false);
         ((IPlayerMoveC2SPacket) packet).meteor$setTag(1337);
         mc.player.networkHandler.sendPacket(packet);
     }
