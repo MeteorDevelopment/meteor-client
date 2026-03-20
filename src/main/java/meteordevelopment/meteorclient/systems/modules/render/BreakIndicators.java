@@ -48,6 +48,7 @@ public class BreakIndicators extends Module {
         .name("start-side-color")
         .description("The side color for the non-broken block.")
         .defaultValue(new SettingColor(25, 252, 25, 150))
+        .visible(() -> shapeMode.get().sides())
         .build()
     );
 
@@ -55,6 +56,7 @@ public class BreakIndicators extends Module {
         .name("start-line-color")
         .description("The line color for the non-broken block.")
         .defaultValue(new SettingColor(25, 252, 25, 150))
+        .visible(() -> shapeMode.get().lines())
         .build()
     );
 
@@ -62,6 +64,7 @@ public class BreakIndicators extends Module {
         .name("end-side-color")
         .description("The side color for the fully-broken block.")
         .defaultValue(new SettingColor(255, 25, 25, 150))
+        .visible(() -> shapeMode.get().sides())
         .build()
     );
 
@@ -69,6 +72,7 @@ public class BreakIndicators extends Module {
         .name("end-line-color")
         .description("The line color for the fully-broken block.")
         .defaultValue(new SettingColor(255, 25, 25, 150))
+        .visible(() -> shapeMode.get().lines())
         .build()
     );
 
