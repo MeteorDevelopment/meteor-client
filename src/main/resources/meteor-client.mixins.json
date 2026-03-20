@@ -129,6 +129,7 @@
     "LivingEntityAccessor",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
+    "LocatorBarMixin",
     "MapRendererMixin",
     "MapTextureManagerAccessor",
     "MessageHandlerMixin",
