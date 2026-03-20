@@ -44,6 +44,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -361,24 +362,30 @@ public class BetterChat extends Module {
         String username = matcher.group(1);
         if (Friends.get().get(username) == null) return null;
 
-        SettingColor c = friendHighlightColor.get();
-        TextColor friendColor = TextColor.fromRgb((c.r << 16) | (c.g << 8) | c.b);
+        TextColor friendColor = friendHighlightColor.get().toTextColor();
 
-        MutableText result = Text.empty();
-        TextVisitor.visit(message, (text, style, string) -> {
-            int idx = string.indexOf(username);
-            if (idx >= 0) {
-                if (idx > 0) result.append(Text.literal(string.substring(0, idx)).setStyle(style));
-                result.append(Text.literal(username).setStyle(style.withColor(friendColor)));
-                int after = idx + username.length();
-                if (after < string.length()) result.append(Text.literal(string.substring(after)).setStyle(style));
-            } else {
-                result.append(text.copyContentOnly().setStyle(style));
-            }
-            return Optional.empty();
-        }, Style.EMPTY);
-
-        return result;
+        // Try to preserve rich text (hover events, colors, etc.) via TextVisitor.
+        // On cracked servers, player_chat packets use TranslatableText which can cause
+        // a NoSuchElementException due to a mismatch between collectSiblings and visit().
+        // In that case, skip the highlight and leave the message untouched.
+        try {
+            MutableText result = Text.empty();
+            TextVisitor.visit(message, (text, style, string) -> {
+                int idx = string.indexOf(username);
+                if (idx >= 0) {
+                    if (idx > 0) result.append(Text.literal(string.substring(0, idx)).setStyle(style));
+                    result.append(Text.literal(username).setStyle(style.withColor(friendColor)));
+                    int after = idx + username.length();
+                    if (after < string.length()) result.append(Text.literal(string.substring(after)).setStyle(style));
+                } else {
+                    result.append(text.copyContentOnly().setStyle(style));
+                }
+                return Optional.empty();
+            }, Style.EMPTY);
+            return result;
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 
     // Anti Spam
