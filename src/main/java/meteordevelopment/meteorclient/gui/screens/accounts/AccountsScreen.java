@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.accounts.Account;
+import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
@@ -60,7 +61,7 @@ public class AccountsScreen extends WindowScreen {
             Accounts.get().add(account);
 
             if (account.login()) {
-                account.getCache().loadHead(parent::reload);
+                if (account.getType() != AccountType.Cracked) account.getCache().loadHead(parent::reload);
                 Accounts.get().save();
             }
 
