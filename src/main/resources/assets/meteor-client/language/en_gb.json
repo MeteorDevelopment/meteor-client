@@ -688,6 +688,12 @@
   "setting.group.anchors": "Anchors",
   "setting.group.tracer": "Tracer",
   "setting.group.base": "Base",
+  "setting.group.strings": "Strings",
+  "setting.group.whole-numbers": "Whole Numbers",
+  "setting.group.numbers": "Numbers",
+  "setting.group.checkboxes": "Checkboxes",
+  "setting.group.block-lists": "Block Lists",
+  "setting.group.item-lists": "Item Lists",
 
   "module.base.bind": "Bind",
   "module.base.bind.bind": "Bind: ",
