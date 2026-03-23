@@ -4,27 +4,22 @@
  */
 
 import * as fs from "fs"
-import * as readline from "readline"
+import * as path from "path"
+import {fileURLToPath} from "url"
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export async function getMcVersion() {
-    let lines = readline.createInterface({
-        input: fs.createReadStream("../../gradle.properties"),
-        crlfDelay: Infinity
-    })
+    const filePath = path.resolve(__dirname, "../../gradle/libs.versions.toml")
 
-    let mcVersion = ""
-
-    for await (const line of lines) {
-        if (line.startsWith("minecraft_version")) {
-            mcVersion = line.substring(line.indexOf("=") + 1)
-            break
-        }
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`File not found: ${filePath}`)
     }
 
-    if (mcVersion === "") {
-        console.log("Failed to read minecraft_version")
-        process.exit(1)
-    }
+    const content = await fs.promises.readFile(filePath, "utf-8")
 
-    return mcVersion
+    const match = content.match(/^\s*minecraft\s*=\s*["']([^"']+)["']\s*$/m)
+    if (match) return match[1].trim()
+
+    throw new Error(`Failed to find minecraft version in ${filePath}`)
 }

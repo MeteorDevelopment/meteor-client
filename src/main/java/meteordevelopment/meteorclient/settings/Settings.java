@@ -22,6 +22,8 @@ import java.util.List;
 
 public class Settings implements ISerializable<Settings>, Iterable<SettingGroup> {
     private SettingGroup defaultGroup;
+    private boolean invalidate;
+
     public final List<SettingGroup> groups = new ArrayList<>(1);
 
     public void onActivated() {
@@ -61,6 +63,12 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
                 setting.reset();
             }
         }
+
+        invalidate();
+    }
+
+    public void invalidate() {
+        invalidate = true;
     }
 
     public SettingGroup getGroup(String name) {
@@ -120,17 +128,24 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
 
     public void tick(WContainer settings, GuiTheme theme) {
+        if (settings == null) return;
+
         for (SettingGroup group : groups) {
             for (Setting<?> setting : group) {
                 boolean visible = setting.isVisible();
 
                 if (visible != setting.lastWasVisible) {
-                    settings.clear();
-                    settings.add(theme.settings(this)).expandX();
+                    invalidate();
                 }
 
                 setting.lastWasVisible = visible;
             }
+        }
+
+        if (invalidate) {
+            settings.clear();
+            settings.add(theme.settings(this)).expandX();
+            invalidate = false;
         }
     }
 

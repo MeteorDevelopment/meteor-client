@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.gui.renderer;
 
+import it.unimi.dsi.fastutil.Stack;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.operations.TextOperation;
@@ -22,9 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
@@ -49,12 +49,12 @@ public class GuiRenderer {
     private final Renderer2D rTex = new Renderer2D(true);
 
     private final Pool<Scissor> scissorPool = new Pool<>(Scissor::new);
-    private final Stack<Scissor> scissorStack = new Stack<>();
+    private final Stack<Scissor> scissorStack = new ObjectArrayList<>();
 
     private final Pool<TextOperation> textPool = new Pool<>(TextOperation::new);
-    private final List<TextOperation> texts = new ArrayList<>();
+    private final List<TextOperation> texts = new ObjectArrayList<>();
 
-    private final List<Runnable> postTasks = new ArrayList<>();
+    private final List<Runnable> postTasks = new ObjectArrayList<>();
 
     public String tooltip, lastTooltip;
     public WWidget tooltipWidget;
@@ -118,7 +118,7 @@ public class GuiRenderer {
         rTex.end();
 
         r.render();
-        rTex.render("u_Texture", TEXTURE.getGlTextureView());
+        rTex.render("u_Texture", TEXTURE.getGlTextureView(), TEXTURE.getSampler());
 
         // Normal text
         theme.textRenderer().begin(theme.scale(1));
@@ -141,7 +141,7 @@ public class GuiRenderer {
 
     public void scissorStart(double x, double y, double width, double height) {
         if (!scissorStack.isEmpty()) {
-            Scissor parent = scissorStack.peek();
+            Scissor parent = scissorStack.top();
 
             if (x < parent.x) x = parent.x;
             else if (x + width > parent.x + parent.width) width -= (x + width) - (parent.x + parent.width);
@@ -185,7 +185,13 @@ public class GuiRenderer {
                 tooltipWidget.init();
             }
 
-            tooltipWidget.move(-tooltipWidget.x + mouseX + 12, -tooltipWidget.y + mouseY + 12);
+            double deltaX = -tooltipWidget.x + mouseX + 12;
+            double deltaY = -tooltipWidget.y + mouseY + 12;
+
+            if (mouseX + 12 + tooltipWidget.width > getWindowWidth()) deltaX = -tooltipWidget.x + getWindowWidth() - tooltipWidget.width;
+            if (mouseY + 12 + tooltipWidget.height > getWindowHeight()) deltaY = -tooltipWidget.y + getWindowHeight() - tooltipWidget.height;
+
+            tooltipWidget.move(deltaX, deltaY);
 
             setAlpha(tooltipAnimProgress);
 
@@ -248,12 +254,12 @@ public class GuiRenderer {
             rTex.texQuad(x, y, width, height, rotation, 0, 0, 1, 1, WHITE);
             rTex.end();
 
-            rTex.render(texture.getGlTextureView());
+            rTex.render(texture.getGlTextureView(), texture.getSampler());
         });
     }
 
     public void post(Runnable task) {
-        scissorStack.peek().postTasks.add(task);
+        scissorStack.top().postTasks.add(task);
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {

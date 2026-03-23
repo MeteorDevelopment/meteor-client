@@ -23,7 +23,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -89,7 +89,7 @@ public class ServerSpoof extends Module {
 
             if (blockChannels.get()) {
                 for (String channel : channels.get()) {
-                    if (StringUtils.containsIgnoreCase(id.toString(), channel)) {
+                    if (Strings.CI.contains(id.toString(), channel)) {
                         event.cancel();
                         return;
                     }
@@ -99,8 +99,7 @@ public class ServerSpoof extends Module {
             if (spoofBrand.get() && id.equals(BrandCustomPayload.ID.id())) {
                 CustomPayloadC2SPacket spoofedPacket = new CustomPayloadC2SPacket(new BrandCustomPayload(brand.get()));
 
-                // PacketEvent.Send doesn't trigger if we send the packet like this
-                event.connection.send(spoofedPacket, null, true);
+                event.sendSilently(spoofedPacket);
                 event.cancel();
             }
         }

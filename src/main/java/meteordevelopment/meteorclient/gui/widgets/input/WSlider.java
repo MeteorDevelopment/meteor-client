@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.gui.widgets.input;
 
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import net.minecraft.client.gui.Click;
 import net.minecraft.util.math.MathHelper;
 
 public abstract class WSlider extends WWidget {
@@ -42,16 +43,17 @@ public abstract class WSlider extends WWidget {
     }
 
     @Override
-    public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
-        if (mouseOver && !used) {
+    public boolean onMouseClicked(Click click, boolean doubled) {
+        if (mouseOver && !doubled) {
             valueAtDragStart = value;
             double handleSize = handleSize();
 
-            double valueWidth = mouseX - (x + handleSize / 2);
+            double valueWidth = click.x() - (x + handleSize / 2);
             set((valueWidth / (width - handleSize)) * (max - min) + min);
             if (action != null) action.run();
 
             dragging = true;
+            setFocused(true);
             return true;
         }
 
@@ -104,13 +106,14 @@ public abstract class WSlider extends WWidget {
     }
 
     @Override
-    public boolean onMouseReleased(double mouseX, double mouseY, int button) {
+    public boolean onMouseReleased(Click click) {
         if (dragging) {
             if (value != valueAtDragStart && actionOnRelease != null) {
                 actionOnRelease.run();
             }
 
             dragging = false;
+            setFocused(false);
             return true;
         }
 
@@ -120,7 +123,7 @@ public abstract class WSlider extends WWidget {
 	@Override
 	public boolean onMouseScrolled(double amount) {
 		// when user starts to scroll over regular handle
-		// remember it's position and check only this "ghost"
+		// remember its position and check only this "ghost"
 		// position to allow scroll (until it leaves ghost area)
 		if (!scrollHandleMouseOver && handleMouseOver) {
 			scrollHandleX = x;

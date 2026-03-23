@@ -6,10 +6,11 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.events.entity.player.DoItemUseEvent;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -26,7 +27,7 @@ public class GhostHand extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
+    private void onTick(DoItemUseEvent event) {
         if (!mc.options.useKey.isPressed() || mc.player.isSneaking()) return;
 
         if (mc.world.getBlockState(BlockPos.ofFloored(mc.player.raycast(mc.player.getBlockInteractionRange(), mc.getRenderTickCounter().getTickProgress(true), false).getPos())).hasBlockEntity()) return;
@@ -44,8 +45,14 @@ public class GhostHand extends Module {
             posList.add(pos);
 
             if (mc.world.getBlockState(pos).hasBlockEntity()) {
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
-                return;
+                for (Hand hand : Hand.values()) {
+                    ActionResult result = mc.interactionManager.interactBlock(mc.player, hand, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
+                    if (result instanceof ActionResult.Success || result instanceof ActionResult.Fail) {
+                        mc.player.swingHand(hand);
+                        event.cancel();
+                        return;
+                    }
+                }
             }
         }
     }

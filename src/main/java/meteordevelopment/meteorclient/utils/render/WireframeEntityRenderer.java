@@ -7,15 +7,16 @@ package meteordevelopment.meteorclient.utils.render;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.mixininterface.IMultiPhase;
-import meteordevelopment.meteorclient.mixininterface.IMultiPhaseParameters;
+import meteordevelopment.meteorclient.mixin.RenderLayerAccessor;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.client.render.OutputTarget;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
+import net.minecraft.client.render.command.RenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
@@ -29,6 +30,18 @@ public class WireframeEntityRenderer {
     private static final MatrixStack matrices = new MatrixStack();
 
     private static Renderer3D renderer;
+
+    private static final OrderedRenderCommandQueueImpl renderCommandQueue = new OrderedRenderCommandQueueImpl();
+
+    private static final RenderDispatcher renderDispatcher = new RenderDispatcher(
+        renderCommandQueue,
+        mc.getBlockRenderManager(),
+        MyVertexConsumerProvider.INSTANCE,
+        mc.getAtlasManager(),
+        NoopOutlineVertexConsumerProvider.INSTANCE,
+        NoopImmediateVertexConsumerProvider.INSTANCE,
+        mc.textRenderer
+    );
 
     private static Color sideColor;
     private static Color lineColor;
@@ -64,18 +77,24 @@ public class WireframeEntityRenderer {
 
         matrices.push();
         matrices.scale((float) scale, (float) scale, (float) scale);
-        renderer.render(state, matrices, MyVertexConsumerProvider.INSTANCE, 15);
+        renderer.render(state, matrices, renderCommandQueue, mc.gameRenderer.getEntityRenderStates().cameraRenderState);
         matrices.pop();
+
+        renderDispatcher.render();
+        renderCommandQueue.onNextFrame();
     }
 
-    private static class MyVertexConsumerProvider implements VertexConsumerProvider {
+    private static class MyVertexConsumerProvider extends VertexConsumerProvider.Immediate {
         public static final MyVertexConsumerProvider INSTANCE = new MyVertexConsumerProvider();
         private final Object2ObjectOpenHashMap<RenderLayer, MyVertexConsumer> buffers = new Object2ObjectOpenHashMap<>();
 
+        protected MyVertexConsumerProvider() {
+            super(null, null);
+        }
+
         @Override
         public VertexConsumer getBuffer(RenderLayer layer) {
-            //noinspection ConstantValue
-            if (layer instanceof IMultiPhase phase && ((IMultiPhaseParameters) (Object) phase.meteor$getParameters()).meteor$getTarget() == RenderPhase.ITEM_ENTITY_TARGET) {
+            if (((RenderLayerAccessor) layer).getRenderSetup().outputTarget == OutputTarget.ITEM_ENTITY_TARGET) {
                 return NoopVertexConsumer.INSTANCE;
             }
 
@@ -87,6 +106,16 @@ public class WireframeEntityRenderer {
             }
 
             return vertexConsumer;
+        }
+
+        @Override
+        public void draw() {
+            throw new RuntimeException();
+        }
+
+        @Override
+        public void draw(RenderLayer layer) {
+            throw new RuntimeException();
         }
     }
 
@@ -128,36 +157,7 @@ public class WireframeEntityRenderer {
         }
 
         @Override
-        public VertexConsumer texture(float u, float v) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer overlay(int u, int v) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer light(int u, int v) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer normal(float x, float y, float z) {
-            return this;
-        }
-    }
-
-    private static class NoopVertexConsumer implements VertexConsumer {
-        private static final NoopVertexConsumer INSTANCE = new NoopVertexConsumer();
-
-        @Override
-        public VertexConsumer vertex(float x, float y, float z) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer color(int red, int green, int blue, int alpha) {
+        public VertexConsumer color(int argb) {
             return this;
         }
 
@@ -178,6 +178,11 @@ public class WireframeEntityRenderer {
 
         @Override
         public VertexConsumer normal(float x, float y, float z) {
+            return this;
+        }
+
+        @Override
+        public VertexConsumer lineWidth(float width) {
             return this;
         }
     }

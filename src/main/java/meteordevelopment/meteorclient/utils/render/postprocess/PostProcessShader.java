@@ -3,14 +3,13 @@ package meteordevelopment.meteorclient.utils.render.postprocess;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.renderer.FullScreenRenderer;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import net.minecraft.client.gl.DynamicUniformStorage;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.render.OutlineVertexConsumerProvider;
-import net.minecraft.entity.Entity;
 
 import java.nio.ByteBuffer;
 
@@ -18,44 +17,47 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public abstract class PostProcessShader {
-    public OutlineVertexConsumerProvider vertexConsumerProvider;
-    public Framebuffer framebuffer;
-    protected RenderPipeline pipeline;
+    protected final RenderPipeline pipeline;
+    public final Framebuffer framebuffer;
 
-    public void init(RenderPipeline pipeline) {
-        vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());
-        framebuffer = new SimpleFramebuffer(MeteorClient.NAME + " PostProcessShader", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), true);
+    protected PostProcessShader(RenderPipeline pipeline) {
         this.pipeline = pipeline;
+        this.framebuffer = new SimpleFramebuffer(MeteorClient.NAME + " PostProcessShader " + this.getClass().getSimpleName(), mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), true);
     }
 
     protected abstract boolean shouldDraw();
-    public abstract boolean shouldDraw(Entity entity);
 
     protected void preDraw() {}
     protected void postDraw() {}
 
     protected abstract void setupPass(MeshRenderer renderer);
 
-    public boolean beginRender() {
-        return shouldDraw();
+    public void clearTexture() {
+        if (this.shouldDraw()) {
+            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorAttachment(), 0);
+        }
     }
 
-    public void endRender(Runnable draw) {
+    public void submitVertices(Runnable draw) {
         if (!shouldDraw()) return;
 
         preDraw();
         draw.run();
         postDraw();
+    }
+
+    public void render() {
+        if (!shouldDraw()) return;
 
         var renderer = MeshRenderer.begin()
             .attachments(mc.getFramebuffer())
             .pipeline(pipeline)
-            .mesh(FullScreenRenderer.mesh)
+            .fullscreen()
             .uniform("PostData", UNIFORM_STORAGE.write(new UniformData(
                 (float) mc.getWindow().getFramebufferWidth(), (float) mc.getWindow().getFramebufferHeight(),
                 (float) glfwGetTime()
             )))
-            .sampler("u_Texture", framebuffer.getColorAttachmentView());
+            .sampler("u_Texture", framebuffer.getColorAttachmentView(), RenderSystem.getSamplerCache().get(FilterMode.NEAREST));
 
         setupPass(renderer);
 

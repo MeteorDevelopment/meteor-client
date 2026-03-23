@@ -166,7 +166,7 @@ public class Capes {
                         TO_REGISTER.add(this);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    MeteorClient.LOG.error("Failed to download cape '{}'", name, e);
                 }
             });
         }

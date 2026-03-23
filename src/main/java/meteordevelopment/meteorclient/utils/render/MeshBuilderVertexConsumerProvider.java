@@ -19,7 +19,42 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
 
     @Override
     public VertexConsumer getBuffer(RenderLayer layer) {
-        return vertexConsumer;
+        return new W(vertexConsumer); // new instance each call to fix duplicate delegates
+    }
+
+    private record W(MeshBuilderVertexConsumer d) implements VertexConsumer {
+        public VertexConsumer vertex(float x, float y, float z) {
+            d.vertex(x, y, z);
+            return this;
+        }
+
+        public VertexConsumer color(int r, int g, int b, int a) {
+            return this;
+        }
+
+        public VertexConsumer color(int c) {
+            return this;
+        }
+
+        public VertexConsumer texture(float u, float v) {
+            return this;
+        }
+
+        public VertexConsumer overlay(int u, int v) {
+            return this;
+        }
+
+        public VertexConsumer light(int u, int v) {
+            return this;
+        }
+
+        public VertexConsumer normal(float x, float y, float z) {
+            return this;
+        }
+
+        public VertexConsumer lineWidth(float w) {
+            return this;
+        }
     }
 
     public void setColor(Color color) {
@@ -81,6 +116,11 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
         }
 
         @Override
+        public VertexConsumer color(int argb) {
+            return this;
+        }
+
+        @Override
         public VertexConsumer texture(float u, float v) {
             return this;
         }
@@ -98,6 +138,11 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
         @Override
         public VertexConsumer normal(float x, float y, float z) {
             return null;
+        }
+
+        @Override
+        public VertexConsumer lineWidth(float width) {
+            return this;
         }
 
         public void fixedColor(int red, int green, int blue, int alpha) {

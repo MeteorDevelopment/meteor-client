@@ -17,7 +17,12 @@ import java.util.UUID;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FakePlayerEntity extends OtherClientPlayerEntity {
-    public boolean doNotPush, hideWhenInsideCamera, noHit;
+    /** Disables entity push with this fake player */
+    public boolean doNotPush;
+    /** Stops rendering the fake player when you are inside it */
+    public boolean hideWhenInsideCamera;
+    /** Prevents you from interacting with the fake player; will also prevent TargetUtils selecting it as a target */
+    public boolean noHit;
 
     public FakePlayerEntity(PlayerEntity player, String name, float health, boolean copyInv) {
         super(mc.world, new GameProfile(UUID.randomUUID(), name));
@@ -31,15 +36,8 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
         bodyYaw = player.bodyYaw;
         lastBodyYaw = bodyYaw;
 
-        Byte playerModel = player.getDataTracker().get(PlayerEntity.PLAYER_MODEL_PARTS);
-        dataTracker.set(PlayerEntity.PLAYER_MODEL_PARTS, playerModel);
-
         getAttributes().setFrom(player.getAttributes());
         setPose(player.getPose());
-
-        capeX = getX();
-        capeY = getY();
-        capeZ = getZ();
 
         if (health <= 20) {
             setHealth(health);

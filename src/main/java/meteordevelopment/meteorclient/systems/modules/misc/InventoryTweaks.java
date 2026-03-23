@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -67,6 +67,21 @@ public class InventoryTweaks extends Module {
             mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
             invOpened = false;
         })
+        .build()
+    );
+
+    private final Setting<Boolean> uncapBundleScrolling = sgGeneral.add(new BoolSetting.Builder()
+        .name("uncap-bundle-scrolling")
+        .description("Whether to uncap the bundle scrolling feature to let you select any item.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> frameInput = sgGeneral.add(new BoolSetting.Builder()
+        .name("frame-input-handling")
+        .description("Changes input handling to work every frame instead of every tick. A very minor effect but may\n" +
+            "make inputs feel smoother, especially in laggy environments. Will flag anticheats that check packet order (Grim).")
+        .defaultValue(false)
         .build()
     );
 
@@ -281,16 +296,16 @@ public class InventoryTweaks extends Module {
     private void onKey(KeyEvent event) {
         if (event.action != KeyAction.Press) return;
 
-        if (sortingKey.get().matches(true, event.key, event.modifiers)) {
+        if (sortingKey.get().matches(event.input)) {
             if (sort()) event.cancel();
         }
     }
 
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseClick(MouseClickEvent event) {
         if (event.action != KeyAction.Press) return;
 
-        if (sortingKey.get().matches(false, event.button, 0)) {
+        if (sortingKey.get().matches(event.input)) {
             if (sort()) event.cancel();
         }
     }
@@ -397,19 +412,6 @@ public class InventoryTweaks extends Module {
         for (int i = start; i < end; i++) {
             if (!handler.getSlot(i).hasStack()) continue;
 
-            int sleep;
-            if (initial) {
-                sleep = autoStealInitDelay.get();
-                initial = false;
-            } else sleep = getSleepTime();
-            if (sleep > 0) {
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {
-                    MeteorClient.LOG.error("Error when sleeping the slot mover", e);
-                }
-            }
-
             // Exit if user closes screen or exit world
             if (mc.currentScreen == null || !Utils.canUpdate()) break;
 
@@ -425,6 +427,22 @@ public class InventoryTweaks extends Module {
                 if (dumpFilter.get() == ListMode.Blacklist && dumpItems.get().contains(item))
                     continue;
             }
+
+            int sleep;
+            if (initial) {
+                sleep = autoStealInitDelay.get();
+                initial = false;
+            } else sleep = getSleepTime();
+            if (sleep > 0) {
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    MeteorClient.LOG.error("Error when sleeping the slot mover", e);
+                }
+            }
+
+            // Exit if user closes screen or exit world
+            if (mc.currentScreen == null || !Utils.canUpdate()) break;
 
             if (steal && stealDrop.get()) {
                 if (dropBackwards.get()) {
@@ -450,6 +468,14 @@ public class InventoryTweaks extends Module {
 
     public boolean mouseDragItemMove() {
         return isActive() && mouseDragItemMove.get();
+    }
+
+    public boolean uncapBundleScrolling() {
+        return isActive() && uncapBundleScrolling.get();
+    }
+
+    public boolean frameInput() {
+        return isActive() && frameInput.get();
     }
 
     public boolean canSteal(ScreenHandler handler) {

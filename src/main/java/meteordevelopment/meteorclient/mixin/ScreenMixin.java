@@ -18,9 +18,8 @@ import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Style;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,31 +38,29 @@ public abstract class ScreenMixin {
             info.cancel();
     }
 
-    @Inject(method = "handleTextClick", at = @At(value = "HEAD"), cancellable = true)
-    private void onInvalidClickEvent(@Nullable Style style, CallbackInfoReturnable<Boolean> cir) {
-        if (style == null || !(style.getClickEvent() instanceof RunnableClickEvent runnableClickEvent)) return;
-
-        runnableClickEvent.runnable.run();
-        cir.setReturnValue(true);
-    }
-
-    @Inject(method = "handleBasicClickEvent", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", remap = false))
+    @Inject(method = "handleBasicClickEvent", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", remap = false), cancellable = true)
     private static void onHandleBasicClickEvent(ClickEvent clickEvent, MinecraftClient client, Screen screen, CallbackInfo ci) {
-        if (clickEvent instanceof MeteorClickEvent meteorClickEvent && meteorClickEvent.value.startsWith(Config.get().prefix.get())) {
+        if (clickEvent instanceof RunnableClickEvent runnableClickEvent) {
+            runnableClickEvent.runnable.run();
+            ci.cancel();
+        }
+        else if (clickEvent instanceof MeteorClickEvent meteorClickEvent && meteorClickEvent.value.startsWith(Config.get().prefix.get())) {
             try {
                 Commands.dispatch(meteorClickEvent.value.substring(Config.get().prefix.get().length()));
             } catch (CommandSyntaxException e) {
                 MeteorClient.LOG.error("Failed to run command", e);
+            } finally {
+                ci.cancel();
             }
         }
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void onKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+    private void onKeyPressed(KeyInput input, CallbackInfoReturnable<Boolean> cir) {
         if ((Object) (this) instanceof ChatScreen) return;
         GUIMove guiMove = Modules.get().get(GUIMove.class);
         List<Integer> arrows = List.of(GLFW_KEY_RIGHT, GLFW_KEY_LEFT, GLFW_KEY_DOWN,  GLFW_KEY_UP);
-        if ((guiMove.disableArrows() && arrows.contains(keyCode)) || (guiMove.disableSpace() && keyCode == GLFW_KEY_SPACE)) {
+        if ((guiMove.disableArrows() && arrows.contains(input.key())) || (guiMove.disableSpace() && input.key() == GLFW_KEY_SPACE)) {
             cir.setReturnValue(true);
         }
     }

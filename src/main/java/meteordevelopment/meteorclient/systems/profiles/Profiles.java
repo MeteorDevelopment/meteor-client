@@ -91,6 +91,24 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
     @Override
     public Profiles fromTag(NbtCompound tag) {
         profiles = NbtUtils.listFromTag(tag.getListOrEmpty("profiles"), Profile::new);
+
+        for (File file : FOLDER.listFiles()) {
+            if (file.isDirectory() && get(file.getName()) == null) {
+                Profile p = new Profile();
+                p.name.set(file.getName());
+
+                boolean add = false;
+                for (File f : file.listFiles()) {
+                    if (f.getName().equals("hud.nbt")) p.hud.set(add = true);
+                    else if (f.getName().equals("macros.nbt")) p.macros.set(add = true);
+                    else if (f.getName().equals("modules.nbt")) p.modules.set(add = true);
+                    else if (f.getName().endsWith(".nbt")) p.waypoints.set(add = true);
+                }
+
+                if (add) add(p);
+            }
+        }
+
         return this;
     }
 }

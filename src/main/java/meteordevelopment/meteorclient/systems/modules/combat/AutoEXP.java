@@ -39,6 +39,13 @@ public class AutoEXP extends Module {
         .build()
     );
 
+    private final Setting<Boolean> onlyGround = sgGeneral.add(new BoolSetting.Builder()
+        .name("only-on-ground")
+        .description("Only throw when the player is on the ground.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Integer> slot = sgGeneral.add(new IntSetting.Builder()
         .name("exp-slot")
         .description("The slot to replenish exp into.")
@@ -80,6 +87,10 @@ public class AutoEXP extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (onlyGround.get() && !mc.player.isOnGround()) {
+            return;
+        }
+
         if (repairingI == -1) {
             if (mode.get() != Mode.Hands) {
                 for (EquipmentSlot slot : AttributeModifierSlot.ARMOR) {

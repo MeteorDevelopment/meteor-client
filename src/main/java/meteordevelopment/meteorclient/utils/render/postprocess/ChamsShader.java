@@ -13,6 +13,7 @@ import com.mojang.blaze3d.textures.TextureFormat;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
+import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
@@ -39,6 +40,7 @@ public class ChamsShader extends EntityShader {
     private static Chams chams;
 
     public ChamsShader() {
+        super(MeteorRenderPipelines.POST_IMAGE);
         MeteorClient.EVENT_BUS.subscribe(ChamsShader.class);
     }
 
@@ -75,7 +77,7 @@ public class ChamsShader extends EntityShader {
             }
         }
         catch (IOException e) {
-            e.printStackTrace();
+            MeteorClient.LOG.error("Error loading the chams shader", e);
         }
     }
 
@@ -93,7 +95,7 @@ public class ChamsShader extends EntityShader {
         )));
 
         if (chams.isShader() && chams.shader.get() == Chams.Shader.Image && IMAGE_TEX != null) {
-            renderer.sampler("u_TextureI", IMAGE_TEX.getGlTextureView());
+            renderer.sampler("u_TextureI", IMAGE_TEX.getGlTextureView(), IMAGE_TEX.getSampler());
         }
     }
 

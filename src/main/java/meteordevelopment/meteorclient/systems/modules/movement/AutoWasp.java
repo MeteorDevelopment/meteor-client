@@ -93,9 +93,9 @@ public class AutoWasp extends Module {
     public void onActivate() {
         if (target == null || target.isRemoved()) {
             target = (PlayerEntity) TargetUtils.get(entity -> {
-                if (!(entity instanceof PlayerEntity) || entity == mc.player) return false;
-                if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
-                return !onlyFriends.get() || Friends.get().get((PlayerEntity) entity) != null;
+                if (!(entity instanceof PlayerEntity player) || entity == mc.player) return false;
+                if (player.isDead() || player.getHealth() <= 0) return false;
+                return !onlyFriends.get() || Friends.get().get(player) != null;
             }, SortPriority.LowestDistance);
 
             if (target == null) {
@@ -162,7 +162,7 @@ public class AutoWasp extends Module {
 
         double xVel = 0, yVel = 0, zVel = 0;
 
-        Vec3d targetPos = target.getPos().add(offset.get().x, offset.get().y, offset.get().z);
+        Vec3d targetPos = target.getEntityPos().add(offset.get().x, offset.get().y, offset.get().z);
 
         if (predictMovement.get()) targetPos.add(PlayerEntity.adjustMovementForCollisions(target, target.getVelocity(),
             target.getBoundingBox(), mc.world, mc.world.getEntityCollisions(target, target.getBoundingBox().stretch(target.getVelocity()))));

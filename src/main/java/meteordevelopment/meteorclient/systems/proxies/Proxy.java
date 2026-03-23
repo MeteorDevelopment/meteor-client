@@ -160,7 +160,7 @@ public class Proxy implements ISerializable<Proxy> {
         // SOCKS4a
         else {
             byte[] addr = address.get().getBytes();
-            bb = ByteBuffer.allocate(9 + u.length + addr.length)
+            bb = ByteBuffer.allocate(10 + u.length + addr.length)
                 .put((byte) 4)
                 .put((byte) 1)
                 .putShort(port.get().shortValue())

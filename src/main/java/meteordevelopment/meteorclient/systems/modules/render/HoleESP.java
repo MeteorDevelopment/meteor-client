@@ -168,7 +168,7 @@ public class HoleESP extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (Hole hole : holes) holePool.free(hole);
+        holePool.freeAll(holes);
         holes.clear();
 
         // Probe for holes
@@ -230,7 +230,7 @@ public class HoleESP extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        for (HoleESP.Hole hole : holes) hole.render(event.renderer, shapeMode.get(), height.get(), topQuad.get(), bottomQuad.get());
+        for (Hole hole : holes) hole.render(event.renderer, shapeMode.get(), height.get(), topQuad.get(), bottomQuad.get());
     }
 
     private static class Hole {

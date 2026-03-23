@@ -28,13 +28,13 @@ public class CrackedAccount extends Account<CrackedAccount> {
         super.login();
 
         cache.loadHead();
-        setSession(new Session(name, Uuids.getOfflinePlayerUuid(name), "", Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
+        setSession(new Session(name, Uuids.getOfflinePlayerUuid(name), "", Optional.empty(), Optional.empty()));
         return true;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof CrackedAccount)) return false;
-        return ((CrackedAccount) o).getUsername().equals(this.getUsername());
+        if (!(o instanceof CrackedAccount account)) return false;
+        return account.getUsername().equals(this.getUsername());
     }
 }

@@ -48,6 +48,10 @@ public class InputCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         for (Pair<KeyBinding, String> keyBinding : holdKeys) {
             builder.then(literal(keyBinding.getSecond())
+                .executes(context -> {
+                    activeHandlers.add(new KeypressHandler(keyBinding.getFirst(), 1));
+                    return SINGLE_SUCCESS;
+                })
                 .then(argument("ticks", IntegerArgumentType.integer(1))
                     .executes(context -> {
                         activeHandlers.add(new KeypressHandler(keyBinding.getFirst(), context.getArgument("ticks", Integer.class)));
@@ -67,7 +71,7 @@ public class InputCommand extends Command {
         }
 
         for (KeyBinding keyBinding : mc.options.hotbarKeys) {
-            builder.then(literal(keyBinding.getTranslationKey().substring(4))
+            builder.then(literal(keyBinding.getId().substring(4))
                 .executes(context -> {
                     press(keyBinding);
                     return SINGLE_SUCCESS;
@@ -91,7 +95,7 @@ public class InputCommand extends Command {
                 info("Active keypress handlers: ");
                 for (int i = 0; i < activeHandlers.size(); i++) {
                     KeypressHandler handler = activeHandlers.get(i);
-                    info("(highlight)%d(default) - (highlight)%s %d(default) ticks left out of (highlight)%d(default).", i, I18n.translate(handler.key.getTranslationKey()), handler.ticks, handler.totalTicks);
+                    info("(highlight)%d(default) - (highlight)%s %d(default) ticks left out of (highlight)%d(default).", i, I18n.translate(handler.key.getId()), handler.ticks, handler.totalTicks);
                 }
             }
             return SINGLE_SUCCESS;
@@ -129,8 +133,11 @@ public class InputCommand extends Command {
 
         @EventHandler
         private void onTick(TickEvent.Post event) {
-            if (ticks-- > 0) key.setPressed(true);
-            else {
+            if (ticks == totalTicks) press(key);
+
+            if (ticks-- > 0) {
+                key.setPressed(true);
+            } else {
                 key.setPressed(false);
                 MeteorClient.EVENT_BUS.unsubscribe(this);
                 activeHandlers.remove(this);

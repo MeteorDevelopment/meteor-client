@@ -9,6 +9,7 @@ import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.pathing.PathManagers;
@@ -27,8 +28,6 @@ import net.minecraft.entity.EyeOfEnderEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -39,10 +38,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class LocateCommand extends Command {
-    private Vec3d firstStart;
-    private Vec3d firstEnd;
-    private Vec3d secondStart;
-    private Vec3d secondEnd;
+    private Vec3d firstStart, firstEnd;
+    private Vec3d secondStart, secondEnd;
 
     private final List<Block> netherFortressBlocks = List.of(
         Blocks.NETHER_BRICKS,
@@ -319,9 +316,12 @@ public class LocateCommand extends Command {
         if (event.packet instanceof EntitySpawnS2CPacket packet && packet.getEntityType() == EntityType.EYE_OF_ENDER) {
             firstPosition(packet.getX(), packet.getY(), packet.getZ());
         }
+    }
 
-        if (event.packet instanceof PlaySoundS2CPacket packet && packet.getSound().value() == SoundEvents.ENTITY_ENDER_EYE_DEATH) {
-            lastPosition(packet.getX(), packet.getY(), packet.getZ());
+    @EventHandler
+    private void onRemoveEntity(EntityRemovedEvent event) {
+        if (event.entity instanceof EyeOfEnderEntity eye) {
+            lastPosition(eye.getX(), eye.getY(), eye.getZ());
         }
     }
 

@@ -24,7 +24,7 @@ public class CompassHud extends HudElement {
 
     // General
 
-    private final Setting<CompassHud.Mode> mode = sgGeneral.add(new EnumSetting.Builder<CompassHud.Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("type")
         .description("Which type of direction information to show.")
         .defaultValue(Mode.Axis)
@@ -39,7 +39,7 @@ public class CompassHud extends HudElement {
     );
 
     private final Setting<SettingColor> colorOther = sgGeneral.add(new ColorSetting.Builder()
-        .name("color-north")
+        .name("color-other")
         .description("Color of other directions.")
         .defaultValue(new SettingColor())
         .build()

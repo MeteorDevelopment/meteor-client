@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -103,7 +104,11 @@ public class Criticals extends Module {
                         sendPacket(0.0625);
                         sendPacket(0);
                     }
-                    case Bypass -> {
+                    case UpdatedNCP -> {
+                        sendPacket(0.0000008);
+                        sendPacket(0);
+                    }
+                    case OldNCP -> {
                         sendPacket(0.11);
                         sendPacket(0.1100013579);
                         sendPacket(0.0000013579);
@@ -151,14 +156,17 @@ public class Criticals extends Module {
             }
 
             if (sendTimer <= 0) {
-                sendPackets = false;
-
-                if (attackPacket == null || swingPacket == null) return;
+                if (attackPacket == null || swingPacket == null) {
+                    sendPackets = false;
+                    return;
+                }
                 mc.getNetworkHandler().sendPacket(attackPacket);
                 mc.getNetworkHandler().sendPacket(swingPacket);
 
                 attackPacket = null;
                 swingPacket = null;
+
+                sendPackets = false;
             } else {
                 sendTimer--;
             }
@@ -170,13 +178,15 @@ public class Criticals extends Module {
         double y = mc.player.getY();
         double z = mc.player.getZ();
 
-        PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false, mc.player.horizontalCollision);
+        PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false, false);
         ((IPlayerMoveC2SPacket) packet).meteor$setTag(1337);
-
         mc.player.networkHandler.sendPacket(packet);
     }
 
     private boolean skipCrit() {
+        if (EntityUtils.isInCobweb(mc.player) && (mode.get() == Mode.Jump || mode.get() == Mode.MiniJump))
+            return true;
+
         return !mc.player.isOnGround() || mc.player.isSubmergedInWater() || mc.player.isInLava() || mc.player.isClimbing();
     }
 
@@ -188,7 +198,8 @@ public class Criticals extends Module {
     public enum Mode {
         None,
         Packet,
-        Bypass,
+        UpdatedNCP,
+        OldNCP,
         Jump,
         MiniJump
     }

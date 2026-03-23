@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
-import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -92,22 +92,22 @@ public class BowAimbot extends Module {
     }
 
     @EventHandler
-    private void onRender(Render3DEvent event) {
+    private void onTick(TickEvent.Pre event) {
         if (!PlayerUtils.isAlive() || !itemInHand()) return;
         if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
 
         target = TargetUtils.get(entity -> {
-            if (entity == mc.player || entity == mc.cameraEntity) return false;
-            if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+            if (entity == mc.player || entity == mc.getCameraEntity()) return false;
+            if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!entities.get().contains(entity.getType())) return false;
             if (!nametagged.get() && entity.hasCustomName()) return false;
             if (!PlayerUtils.canSeeEntity(entity)) return false;
-            if (entity instanceof PlayerEntity) {
-                if (((PlayerEntity) entity).isCreative()) return false;
-                if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
+            if (entity instanceof PlayerEntity player) {
+                if (player.isCreative()) return false;
+                if (!Friends.get().shouldAttack(player)) return false;
             }
-            return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
+            return !(entity instanceof AnimalEntity animal) || babies.get() || !animal.isBaby();
         }, priority.get());
 
         if (target == null) {
@@ -123,7 +123,8 @@ public class BowAimbot extends Module {
                 PathManagers.get().pause();
                 wasPathing = true;
             }
-            aim(event.tickDelta);
+
+            aim();
         }
     }
 
@@ -131,12 +132,12 @@ public class BowAimbot extends Module {
         return InvUtils.testInMainHand(Items.BOW, Items.CROSSBOW);
     }
 
-    private void aim(float tickDelta) {
+    private void aim() {
         // Velocity based on bow charge.
         float velocity = BowItem.getPullProgress(mc.player.getItemUseTime());
 
         // Positions
-        Vec3d pos = target.getLerpedPos(tickDelta);
+        Vec3d pos = target.getEntityPos();
 
         double relativeX = pos.x - mc.player.getX();
         double relativeY = pos.y + (target.getHeight() / 2) - mc.player.getEyeY();

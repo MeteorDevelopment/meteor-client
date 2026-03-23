@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.util.math.Vec3d;
 
 public class Velocity extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -151,12 +152,12 @@ public class Velocity extends Module {
     private void onPacketReceive(PacketEvent.Receive event) {
         if (knockback.get() && event.packet instanceof EntityVelocityUpdateS2CPacket packet
             && packet.getEntityId() == mc.player.getId()) {
-            double velX = (packet.getVelocityX() - mc.player.getVelocity().x) * knockbackHorizontal.get();
-            double velY = (packet.getVelocityY() - mc.player.getVelocity().y) * knockbackVertical.get();
-            double velZ = (packet.getVelocityZ() - mc.player.getVelocity().z) * knockbackHorizontal.get();
-            ((EntityVelocityUpdateS2CPacketAccessor) packet).meteor$setX((int) (velX * 8000 + mc.player.getVelocity().x * 8000));
-            ((EntityVelocityUpdateS2CPacketAccessor) packet).meteor$setY((int) (velY * 8000 + mc.player.getVelocity().y * 8000));
-            ((EntityVelocityUpdateS2CPacketAccessor) packet).meteor$setZ((int) (velZ * 8000 + mc.player.getVelocity().z * 8000));
+            double velX = (packet.getVelocity().getX() - mc.player.getVelocity().x) * knockbackHorizontal.get();
+            double velY = (packet.getVelocity().getY() - mc.player.getVelocity().y) * knockbackVertical.get();
+            double velZ = (packet.getVelocity().getZ() - mc.player.getVelocity().z) * knockbackHorizontal.get();
+            ((EntityVelocityUpdateS2CPacketAccessor) packet).meteor$setVelocity(
+                new Vec3d(velX + mc.player.getVelocity().x, velY + mc.player.getVelocity().y, velZ + mc.player.getVelocity().z)
+            );
         }
     }
 

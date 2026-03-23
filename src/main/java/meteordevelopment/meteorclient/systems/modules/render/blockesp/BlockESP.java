@@ -17,15 +17,14 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.dimension.DimensionType;
 
 import java.util.Iterator;
 import java.util.List;
@@ -83,7 +82,7 @@ public class BlockESP extends Module {
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
     private final ExecutorService workerThread = Executors.newSingleThreadExecutor();
 
-    private Dimension lastDimension;
+    private DimensionType lastDimension;
 
     public BlockESP() {
         super(Categories.Render, "block-esp", "Renders specified blocks through walls.", "search");
@@ -102,7 +101,7 @@ public class BlockESP extends Module {
             searchChunk(chunk);
         }
 
-        lastDimension = PlayerUtils.getDimension();
+        lastDimension = mc.world.getDimension();
     }
 
     @Override
@@ -227,10 +226,9 @@ public class BlockESP extends Module {
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        Dimension dimension = PlayerUtils.getDimension();
+        DimensionType dimension = mc.world.getDimension();
 
         if (lastDimension != dimension) onActivate();
-
         lastDimension = dimension;
     }
 

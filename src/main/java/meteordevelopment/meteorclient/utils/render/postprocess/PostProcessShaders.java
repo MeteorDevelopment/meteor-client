@@ -1,7 +1,9 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
-import net.minecraft.client.render.VertexConsumerProvider;
+import meteordevelopment.orbit.EventHandler;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -10,8 +12,6 @@ public class PostProcessShaders {
     public static EntityShader ENTITY_OUTLINE;
     public static PostProcessShader STORAGE_OUTLINE;
 
-    public static boolean rendering;
-
     private PostProcessShaders() {}
 
     @PreInit
@@ -19,17 +19,25 @@ public class PostProcessShaders {
         CHAMS = new ChamsShader();
         ENTITY_OUTLINE = new EntityOutlineShader();
         STORAGE_OUTLINE = new StorageOutlineShader();
+
+        MeteorClient.EVENT_BUS.subscribe(PostProcessShaders.class);
     }
 
     public static void beginRender() {
-        CHAMS.beginRender();
-        ENTITY_OUTLINE.beginRender();
-        STORAGE_OUTLINE.beginRender();
+        CHAMS.clearTexture();
+        ENTITY_OUTLINE.clearTexture();
+        STORAGE_OUTLINE.clearTexture();
     }
 
-    public static void endRender() {
-        CHAMS.endRender();
-        ENTITY_OUTLINE.endRender();
+    public static void submitEntityVertices() {
+        CHAMS.submitVertices();
+        ENTITY_OUTLINE.submitVertices();
+    }
+
+    @EventHandler
+    private static void onRender(Render2DEvent event) {
+        CHAMS.render();
+        ENTITY_OUTLINE.render();
     }
 
     public static void onResized(int width, int height) {
@@ -38,9 +46,5 @@ public class PostProcessShaders {
         CHAMS.onResized(width, height);
         ENTITY_OUTLINE.onResized(width, height);
         STORAGE_OUTLINE.onResized(width, height);
-    }
-
-    public static boolean isCustom(VertexConsumerProvider vcp) {
-        return vcp == CHAMS.vertexConsumerProvider || vcp == ENTITY_OUTLINE.vertexConsumerProvider;
     }
 }

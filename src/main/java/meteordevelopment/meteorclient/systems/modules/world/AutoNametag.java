@@ -22,6 +22,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.EntityHitResult;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -126,7 +127,10 @@ public class AutoNametag extends Module {
     }
 
     private void interact() {
-        mc.interactionManager.interactEntity(mc.player, target, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
+        Hand hand = offHand ? Hand.OFF_HAND : Hand.MAIN_HAND;
+        EntityHitResult location = new EntityHitResult(target, target.getBoundingBox().getCenter());
+        mc.interactionManager.interactEntityAtLocation(mc.player, target, location, hand);
+        mc.interactionManager.interactEntity(mc.player, target, hand);
         InvUtils.swapBack();
 
         entityCooldowns.put(target, 20);

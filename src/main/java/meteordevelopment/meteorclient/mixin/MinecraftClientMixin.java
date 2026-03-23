@@ -12,6 +12,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.entity.player.DoAttackEvent;
+import meteordevelopment.meteorclient.events.entity.player.DoItemUseEvent;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
@@ -22,6 +24,7 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.player.Multitask;
@@ -44,7 +47,6 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.resource.ReloadableResourceManagerImpl;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profilers;
 import org.jetbrains.annotations.Nullable;
@@ -86,12 +88,11 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow
     @Final
-    private ReloadableResourceManagerImpl resourceManager;
-
-    @Shadow
-    @Final
     @Mutable
     private Framebuffer framebuffer;
+
+    @Shadow
+    protected abstract void handleBlockBreaking(boolean breaking);
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
@@ -120,9 +121,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         Profilers.get().pop();
     }
 
-    @Inject(method = "doAttack", at = @At("HEAD"))
+    @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void onAttack(CallbackInfoReturnable<Boolean> cir) {
         CPSUtils.onAttack();
+        if (MeteorClient.EVENT_BUS.post(DoAttackEvent.get()).isCancelled()) cir.cancel();
     }
 
     @Inject(method = "doItemUse", at = @At("HEAD"))
@@ -130,8 +132,8 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         doItemUseCalled = true;
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;Z)V", at = @At("HEAD"))
-    private void onDisconnect(Screen screen, boolean transferring, CallbackInfo info) {
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;ZZ)V", at = @At("HEAD"))
+    private void onDisconnect(Screen screen, boolean transferring, boolean stopSound, CallbackInfo info) {
         if (world != null) {
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
         }
@@ -180,6 +182,11 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         if (fastUse.isActive()) {
             itemUseCooldown = fastUse.getItemUseCooldown(itemStack);
         }
+    }
+
+    @Inject(method = "doItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Hand;values()[Lnet/minecraft/util/Hand;"), cancellable = true)
+    private void onDoItemUseBeforeHands(CallbackInfo ci) {
+        if (MeteorClient.EVENT_BUS.post(DoItemUseEvent.get()).isCancelled()) ci.cancel();
     }
 
     @ModifyExpressionValue(method = "doItemUse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))
@@ -260,6 +267,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private void handleInputEventsInjectStopUsingItem(CallbackInfo info) {
         if (Modules.get().get(Multitask.class).attackingEntities() && player.isUsingItem()) {
             if (!options.useKey.isPressed() && HB$stopUsingItem()) interactionManager.stopUsingItem(player);
+            //noinspection StatementWithEmptyBody
             while (options.useKey.wasPressed());
         }
     }
@@ -273,6 +281,31 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         if (!esp.isGlow() || esp.shouldSkip(entity)) return original;
 
         return esp.getColor(entity) != null || original;
+    }
+
+
+    // faster inputs
+
+    @Unique
+    private boolean isBreaking = false;
+
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;handleInputEvents()V"))
+    private boolean wrapHandleInputEvents(MinecraftClient instance) {
+        return !Modules.get().get(InventoryTweaks.class).frameInput();
+    }
+
+    @WrapWithCondition(method = "handleInputEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;handleBlockBreaking(Z)V"))
+    private boolean wrapHandleBlockBreaking(MinecraftClient instance, boolean breaking) {
+        isBreaking = breaking;
+        return !Modules.get().get(InventoryTweaks.class).frameInput();
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;handleInputEvents()V", shift = At.Shift.AFTER))
+    private void afterHandleInputEvents(CallbackInfo ci) {
+        if (!Modules.get().get(InventoryTweaks.class).frameInput()) return;
+
+        handleBlockBreaking(isBreaking);
+        isBreaking = false;
     }
 
     // Interface

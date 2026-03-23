@@ -23,7 +23,7 @@ import net.minecraft.text.Text;
 import java.util.List;
 
 public abstract class Command {
-    protected static final CommandRegistryAccess REGISTRY_ACCESS = CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup());
+    protected static CommandRegistryAccess REGISTRY_ACCESS = CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup());
     protected static final int SINGLE_SUCCESS = com.mojang.brigadier.Command.SINGLE_SUCCESS;
     protected static final MinecraftClient mc = MeteorClient.mc;
 
