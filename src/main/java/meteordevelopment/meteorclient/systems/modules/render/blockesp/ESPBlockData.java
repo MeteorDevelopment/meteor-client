@@ -1,8 +1,3 @@
-/*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
- * Copyright (c) Meteor Development.
- */
-
 package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -13,27 +8,17 @@ import meteordevelopment.meteorclient.settings.GenericSetting;
 import meteordevelopment.meteorclient.settings.IBlockData;
 import meteordevelopment.meteorclient.settings.IGeneric;
 import meteordevelopment.meteorclient.utils.misc.IChangeable;
-import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NbtCompound;
 
 public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlockData<ESPBlockData> {
     public ShapeMode shapeMode;
-    public SettingColor lineColor;
-    public SettingColor sideColor;
-
     public boolean tracer;
-    public SettingColor tracerColor;
+    public boolean changed;
 
-    private boolean changed;
-
-    public ESPBlockData(ShapeMode shapeMode, SettingColor lineColor, SettingColor sideColor, boolean tracer, SettingColor tracerColor) {
+    public ESPBlockData(ShapeMode shapeMode, boolean tracer) {
         this.shapeMode = shapeMode;
-        this.lineColor = lineColor;
-        this.sideColor = sideColor;
-
         this.tracer = tracer;
-        this.tracerColor = tracerColor;
     }
 
     @Override
@@ -55,42 +40,24 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
         changed = true;
     }
 
-    public void tickRainbow() {
-        lineColor.update();
-        sideColor.update();
-        tracerColor.update();
-    }
-
     @Override
     public ESPBlockData set(ESPBlockData value) {
         shapeMode = value.shapeMode;
-        lineColor.set(value.lineColor);
-        sideColor.set(value.sideColor);
-
         tracer = value.tracer;
-        tracerColor.set(value.tracerColor);
-
         changed = value.changed;
-
         return this;
     }
 
     @Override
     public ESPBlockData copy() {
-        return new ESPBlockData(shapeMode, new SettingColor(lineColor), new SettingColor(sideColor), tracer, new SettingColor(tracerColor));
+        return new ESPBlockData(shapeMode, tracer);
     }
 
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
-
         tag.putString("shapeMode", shapeMode.name());
-        tag.put("lineColor", lineColor.toTag());
-        tag.put("sideColor", sideColor.toTag());
-
         tag.putBoolean("tracer", tracer);
-        tag.put("tracerColor", tracerColor.toTag());
-
         tag.putBoolean("changed", changed);
 
         return tag;
@@ -99,12 +66,7 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
     @Override
     public ESPBlockData fromTag(NbtCompound tag) {
         shapeMode = ShapeMode.valueOf(tag.getString("shapeMode", ""));
-        lineColor.fromTag(tag.getCompoundOrEmpty("lineColor"));
-        sideColor.fromTag(tag.getCompoundOrEmpty("sideColor"));
-
         tracer = tag.getBoolean("tracer", false);
-        tracerColor.fromTag(tag.getCompoundOrEmpty("tracerColor"));
-
         changed = tag.getBoolean("changed", false);
 
         return this;

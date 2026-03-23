@@ -54,34 +54,6 @@ public class ESPBlockDataScreen extends WindowScreen {
             .build()
         );
 
-        sgGeneral.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("Color of lines.")
-            .defaultValue(new SettingColor(0, 255, 200))
-            .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.lineColor))
-            .onChanged(settingColor -> {
-                if (!blockData.lineColor.equals(settingColor)) {
-                    blockData.lineColor.set(settingColor);
-                    onChanged();
-                }
-            })
-            .build()
-        );
-
-        sgGeneral.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("Color of sides.")
-            .defaultValue(new SettingColor(0, 255, 200, 25))
-            .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.sideColor))
-            .onChanged(settingColor -> {
-                if (!blockData.sideColor.equals(settingColor)) {
-                    blockData.sideColor.set(settingColor);
-                    onChanged();
-                }
-            })
-            .build()
-        );
-
         sgTracer.add(new BoolSetting.Builder()
             .name("tracer")
             .description("If tracer line is allowed to this block.")
@@ -90,20 +62,6 @@ public class ESPBlockDataScreen extends WindowScreen {
             .onChanged(aBoolean -> {
                 if (blockData.tracer != aBoolean) {
                     blockData.tracer = aBoolean;
-                    onChanged();
-                }
-            })
-            .build()
-        );
-
-        sgTracer.add(new ColorSetting.Builder()
-            .name("tracer-color")
-            .description("Color of tracer line.")
-            .defaultValue(new SettingColor(0, 255, 200, 125))
-            .onModuleActivated(settingColorSetting -> settingColorSetting.get().set(blockData.tracerColor))
-            .onChanged(settingColor -> {
-                if (!blockData.tracerColor.equals(settingColor)) {
-                    blockData.tracerColor.set(settingColor);
                     onChanged();
                 }
             })

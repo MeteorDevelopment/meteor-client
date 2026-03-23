@@ -32,6 +32,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
+import net.minecraft.block.MapColor;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.util.math.BlockPos;
@@ -105,48 +106,6 @@ public class StorageESP extends Module {
         .build()
     );
 
-    private final Setting<SettingColor> chest = sgGeneral.add(new ColorSetting.Builder()
-        .name("chest")
-        .description("The color of chests.")
-        .defaultValue(new SettingColor(255, 160, 0, 255))
-        .build()
-    );
-
-    private final Setting<SettingColor> trappedChest = sgGeneral.add(new ColorSetting.Builder()
-        .name("trapped-chest")
-        .description("The color of trapped chests.")
-        .defaultValue(new SettingColor(255, 0, 0, 255))
-        .build()
-    );
-
-    private final Setting<SettingColor> barrel = sgGeneral.add(new ColorSetting.Builder()
-        .name("barrel")
-        .description("The color of barrels.")
-        .defaultValue(new SettingColor(255, 160, 0, 255))
-        .build()
-    );
-
-    private final Setting<SettingColor> shulker = sgGeneral.add(new ColorSetting.Builder()
-        .name("shulker")
-        .description("The color of Shulker Boxes.")
-        .defaultValue(new SettingColor(255, 160, 0, 255))
-        .build()
-    );
-
-    private final Setting<SettingColor> enderChest = sgGeneral.add(new ColorSetting.Builder()
-        .name("ender-chest")
-        .description("The color of Ender Chests.")
-        .defaultValue(new SettingColor(120, 0, 255, 255))
-        .build()
-    );
-
-    private final Setting<SettingColor> other = sgGeneral.add(new ColorSetting.Builder()
-        .name("other")
-        .description("The color of furnaces, dispensers, droppers and hoppers.")
-        .defaultValue(new SettingColor(140, 140, 140, 255))
-        .build()
-    );
-
     private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
         .name("fade-distance")
         .description("The distance at which the color will fade.")
@@ -191,20 +150,14 @@ public class StorageESP extends Module {
 
         if (!storageBlocks.get().contains(blockEntity.getType())) return;
 
-        if (blockEntity instanceof TrappedChestBlockEntity) lineColor.set(trappedChest.get()); // Must come before ChestBlockEntity as it is the superclass of TrappedChestBlockEntity
-        else if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
-        else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
-        else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
-        else if (blockEntity instanceof EnderChestBlockEntity) lineColor.set(enderChest.get());
-        else if (blockEntity instanceof AbstractFurnaceBlockEntity || blockEntity instanceof BrewingStandBlockEntity || blockEntity instanceof ChiseledBookshelfBlockEntity || blockEntity instanceof CrafterBlockEntity || blockEntity instanceof DispenserBlockEntity || blockEntity instanceof DecoratedPotBlockEntity || blockEntity instanceof HopperBlockEntity) lineColor.set(other.get());
-        else return;
-
-        render = true;
+        Color c = new Color(blockEntity.getCachedState().getBlock().getDefaultMapColor().getRenderColor(MapColor.Brightness.NORMAL));
+        lineColor.set(c);
 
         if (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) {
-            sideColor.set(lineColor);
+            sideColor.set(c);
             sideColor.a = fillOpacity.get();
         }
+        render = true;
     }
 
     @Override

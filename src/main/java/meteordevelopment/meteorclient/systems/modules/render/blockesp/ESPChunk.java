@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.MapColor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.Heightmap;
@@ -36,6 +37,10 @@ public class ESPChunk {
 
     public void add(BlockPos blockPos, boolean update) {
         ESPBlock block = new ESPBlock(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+
+        BlockState state = mc.world.getBlockState(blockPos);
+
+        block.color = state.getBlock().getDefaultMapColor().getRenderColor(MapColor.Brightness.NORMAL);
 
         if (blocks == null) blocks = new Long2ObjectOpenHashMap<>(64);
         blocks.put(ESPBlock.getKey(blockPos), block);

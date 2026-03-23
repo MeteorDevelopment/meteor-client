@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
+import net.minecraft.util.Colors;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
@@ -53,10 +54,7 @@ public class BlockESP extends Module {
         .defaultValue(
             new ESPBlockData(
                 ShapeMode.Lines,
-                new SettingColor(0, 255, 200),
-                new SettingColor(0, 255, 200, 25),
-                true,
-                new SettingColor(0, 255, 200, 125)
+                true
             )
         )
         .build()
@@ -86,8 +84,6 @@ public class BlockESP extends Module {
 
     public BlockESP() {
         super(Categories.Render, "block-esp", "Renders specified blocks through walls.", "search");
-
-        RainbowColors.register(this::onTickRainbow);
     }
 
     @Override
@@ -110,13 +106,6 @@ public class BlockESP extends Module {
             chunks.clear();
             groups.clear();
         }
-    }
-
-    private void onTickRainbow() {
-        if (!isActive()) return;
-
-        defaultBlockConfig.get().tickRainbow();
-        for (ESPBlockData blockData : blockConfigs.get().values()) blockData.tickRainbow();
     }
 
     ESPBlockData getBlockData(Block block) {

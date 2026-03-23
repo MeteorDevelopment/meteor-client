@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.UnorderedArrayList;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.block.Block;
 
 import java.util.ArrayDeque;
@@ -141,8 +142,12 @@ public class ESPGroup {
     public void render(Render3DEvent event) {
         ESPBlockData blockData = blockEsp.getBlockData(block);
 
-        if (blockData.tracer) {
-            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, sumX / blocks.size() + 0.5, sumY / blocks.size() + 0.5, sumZ / blocks.size() + 0.5, blockData.tracerColor);
+        if (blockData.tracer && !blocks.isEmpty()) {
+            ESPBlock b = blocks.getFirst();
+
+            int c = b.color;
+
+            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, sumX / blocks.size() + 0.5, sumY / blocks.size() + 0.5, sumZ / blocks.size() + 0.5, new Color(c));
         }
     }
 }

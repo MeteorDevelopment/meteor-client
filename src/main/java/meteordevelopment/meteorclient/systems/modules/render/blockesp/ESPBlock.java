@@ -47,7 +47,7 @@ public class ESPBlock {
     public final int x, y, z;
     private BlockState state;
     public int neighbours;
-
+    public int color;
     public ESPGroup group;
 
     public boolean loaded = true;
@@ -190,8 +190,15 @@ public class ESPBlock {
         ESPBlockData blockData = blockEsp.getBlockData(state.getBlock());
 
         ShapeMode shapeMode = blockData.shapeMode;
-        Color lineColor = blockData.lineColor;
-        Color sideColor = blockData.sideColor;
+        int c = this.color;
+
+        Color lineColor = new Color(c);
+        Color sideColor = new Color(
+            (c >> 16) & 255,
+            (c >> 8) & 255,
+            c & 255,
+            50
+        );
 
         if (neighbours == 0) {
             event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode, 0);
