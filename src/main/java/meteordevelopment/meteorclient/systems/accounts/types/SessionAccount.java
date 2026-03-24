@@ -66,7 +66,6 @@ public class SessionAccount extends Account<SessionAccount> implements TokenAcco
         if (accessToken == null || accessToken.isBlank()) return false;
 
         super.login();
-        cache.loadHead();
 
         setSession(new Session(cache.username, UndashedUuid.fromStringLenient(cache.uuid), accessToken, Optional.empty(), Optional.empty()));
         return true;
