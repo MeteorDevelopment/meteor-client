@@ -22,7 +22,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
-import meteordevelopment.meteorclient.utils.misc.text.TextVisitor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gl.RenderPipelines;
@@ -271,14 +270,11 @@ public class BetterChat extends Module {
             String messageString = message.getString();
             if (antiClearRegex.matcher(messageString).find()) {
                 MutableText newMessage = Text.empty();
-                TextVisitor.visit(message, (text, style, string) -> {
+                message.visit((style, string) -> {
                     Matcher antiClearMatcher = antiClearRegex.matcher(string);
-                    if (antiClearMatcher.find()) {
-                        // assume literal text content
-                        newMessage.append(Text.literal(antiClearMatcher.replaceAll("\n\n")).setStyle(style));
-                    } else {
-                        newMessage.append(text.copyContentOnly().setStyle(style));
-                    }
+                    newMessage.append(Text.literal(
+                        antiClearMatcher.find() ? antiClearMatcher.replaceAll("\n\n") : string
+                    ).setStyle(style));
 
                     return Optional.empty();
                 }, Style.EMPTY);
