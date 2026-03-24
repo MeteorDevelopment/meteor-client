@@ -62,11 +62,15 @@ public class FriendsTab extends Tab {
 
                 if (Friends.get().add(friend)) {
                     nameW.set("");
-                    reload();
+                    initTable(table);
+                    nameW.setFocused(true);
 
                     MeteorExecutor.execute(() -> {
                         friend.updateInfo();
-                        mc.execute(this::reload);
+                        mc.execute(() -> {
+                            initTable(table);
+                            nameW.setFocused(true);
+                        });
                     });
                 }
             };
@@ -93,7 +97,7 @@ public class FriendsTab extends Tab {
                 WMinus remove = table.add(theme.minus()).expandCellX().right().widget();
                 remove.action = () -> {
                     Friends.get().remove(friend);
-                    reload();
+                    initTable(table);
                 };
 
                 table.row();
