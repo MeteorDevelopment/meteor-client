@@ -18,11 +18,14 @@ import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
 import meteordevelopment.meteorclient.mixininterface.IChatHudLine;
 import meteordevelopment.meteorclient.mixininterface.IChatHudLineVisible;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
@@ -89,6 +92,21 @@ public class BetterChat extends Module {
         .build()
     );
 
+    private final Setting<Boolean> friendHighlight = sgGeneral.add(new BoolSetting.Builder()
+        .name("friend-highlight")
+        .description("Highlights friends' names in chat messages.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<SettingColor> friendHighlightColor = sgGeneral.add(new ColorSetting.Builder()
+        .name("friend-highlight-color")
+        .description("The color used to highlight friends' names.")
+        .defaultValue(new SettingColor(0, 255, 180))
+        .visible(friendHighlight::get)
+        .build()
+    );
+
     private final Setting<Boolean> coordsProtection = sgGeneral.add(new BoolSetting.Builder()
         .name("coords-protection")
         .description("Prevents you from sending messages in chat that may contain coordinates.")
@@ -143,7 +161,6 @@ public class BetterChat extends Module {
         .onChanged(strings -> compileFilterRegexList())
         .build()
     );
-
 
     // Longer chat
 
@@ -296,6 +313,10 @@ public class BetterChat extends Module {
             message = Text.empty().append(timestamp).append(message);
         }
 
+        if (friendHighlight.get()) {
+            message = applyFriendHighlight(message);
+        }
+
         event.setMessage(message);
     }
 
@@ -405,7 +426,6 @@ public class BetterChat extends Module {
 
     public ChatHudLine.Visible line;
 
-
     /** Registers a custom player head to render based on a message prefix */
     public static void registerCustomHead(String prefix, Identifier texture) {
         CUSTOM_HEAD_ENTRIES.add(new CustomHeadEntry(prefix, texture));
@@ -420,7 +440,6 @@ public class BetterChat extends Module {
         if (isActive() && playerHeads.get()) return width + 10;
         return width;
     }
-
 
     public void beforeDrawMessage(DrawContext context, int y, int color) {
         if (!isActive() || !playerHeads.get() || line == null) return;
@@ -483,6 +502,58 @@ public class BetterChat extends Module {
         }
 
         return sender;
+    }
+
+    // Friend Highlight
+
+    private Text applyFriendHighlight(Text message) {
+        // Quick check: does the plain string contain any friend name at all?
+        String plain = message.getString();
+        boolean hasFriend = false;
+        for (var friend : Friends.get()) {
+            if (plain.contains(friend.getName())) {
+                hasFriend = true;
+                break;
+            }
+        }
+        if (!hasFriend) return message;
+
+        // Rebuild the text component by component, replacing friend names with colored spans
+        MutableText result = Text.empty();
+        message.visit((style, string) -> {
+            String remaining = string;
+            while (!remaining.isEmpty()) {
+                int earliestIndex = -1;
+                String earliestName = null;
+
+                for (var friend : Friends.get()) {
+                    String name = friend.getName();
+                    int idx = remaining.indexOf(name);
+                    if (idx != -1 && (earliestIndex == -1 || idx < earliestIndex)) {
+                        earliestIndex = idx;
+                        earliestName = name;
+                    }
+                }
+
+                if (earliestName == null) {
+                    result.append(Text.literal(remaining).setStyle(style));
+                    break;
+                }
+
+                if (earliestIndex > 0) {
+                    result.append(Text.literal(remaining.substring(0, earliestIndex)).setStyle(style));
+                }
+
+                result.append(Text.literal(earliestName).setStyle(
+                    style.withColor(friendHighlightColor.get().getPacked())
+                ));
+
+                remaining = remaining.substring(earliestIndex + earliestName.length());
+            }
+            return Optional.empty();
+        }, Style.EMPTY);
+
+        return result;
     }
 
     // Timestamps
