@@ -149,6 +149,10 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         return null;
     }
 
+    public Color getInfoStringColor() {
+        return null;
+    }
+
     @Override
     public NbtCompound toTag() {
         if (!serialize) return null;
