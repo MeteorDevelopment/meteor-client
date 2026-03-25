@@ -28,7 +28,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.IllegalFormatException;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -172,7 +175,7 @@ public class MeteorTranslations {
      * @return what percentage of the current language has been localised compared to the default language
      */
     public static double percentLocalised() {
-        // Right now there aren't enough differences between the english dialects to justify each having their own
+        // Right now there aren't enough differences between the English dialects to justify each having their own
         // translation. Maybe that will change in the future.
         if (isEnglish()) return 100;
 

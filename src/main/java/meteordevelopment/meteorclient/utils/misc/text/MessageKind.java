@@ -11,7 +11,7 @@ public enum MessageKind {
     Warning("warning"),
     Error("error");
 
-    public String key;
+    public final String key;
 
     MessageKind(String key) {
         this.key = key;

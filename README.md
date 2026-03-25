@@ -35,6 +35,9 @@ We will review and help with all reasonable pull requests as long as the guideli
 - Favour readability over compactness.
 - If you need help, check out the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) for a reference.
 
+## Translations
+- Read our [translation specification](https://github.com/MeteorDevelopment/meteor-client/blob/master/TRANSLATION_SPEC.md)
+
 ## Bugs and Suggestions
 Bug reports and suggestions should be made in this repo's [issue tracker](https://github.com/MeteorDevelopment/meteor-client/issues) using the templates provided.  
 Please provide as much information as you can to best help us understand your issue and give a better chance of it being resolved.
