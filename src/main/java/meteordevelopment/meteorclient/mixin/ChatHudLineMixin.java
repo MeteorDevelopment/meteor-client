@@ -7,16 +7,16 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.mixininterface.IChatHudLine;
-import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.text.Text;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(value = ChatHudLine.class)
+@Mixin(value = GuiMessage.class)
 public abstract class ChatHudLineMixin implements IChatHudLine {
-    @Shadow @Final private Text content;
+    @Shadow @Final private Component content;
     @Unique private int id;
     @Unique private GameProfile sender;
 

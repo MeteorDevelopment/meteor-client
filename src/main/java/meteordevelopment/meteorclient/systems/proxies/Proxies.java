@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -208,8 +208,8 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.put("settings", settings.toTag());
         tag.put("proxies", NbtUtils.listToTag(proxies));
@@ -218,7 +218,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     }
 
     @Override
-    public Proxies fromTag(NbtCompound tag) {
+    public Proxies fromTag(CompoundTag tag) {
         if (tag.contains("settings")) settings.fromTag(tag.getCompoundOrEmpty("settings"));
         proxies = NbtUtils.listFromTag(tag.getListOrEmpty("proxies"), Proxy::new);
 

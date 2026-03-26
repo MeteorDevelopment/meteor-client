@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.utils.notebot.instrumentdetect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.enums.NoteBlockInstrument;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 
 public interface InstrumentDetectFunction {
     /**

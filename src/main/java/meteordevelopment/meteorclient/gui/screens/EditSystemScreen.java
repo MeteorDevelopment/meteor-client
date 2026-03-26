@@ -29,7 +29,7 @@ public abstract class EditSystemScreen<T> extends WindowScreen {
 
         WButton done = add(theme.button(isNew ? "Create" : "Save")).expandX().widget();
         done.action = () -> {
-            if (save()) close();
+            if (save()) onClose();
         };
 
         enterAction = done.action;

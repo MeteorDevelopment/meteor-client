@@ -5,19 +5,18 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.item.Item;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 
 public class ItemListSetting extends Setting<List<Item>> {
     public final Predicate<Item> filter;
@@ -37,7 +36,7 @@ public class ItemListSetting extends Setting<List<Item>> {
 
         try {
             for (String value : values) {
-                Item item = parseId(Registries.ITEM, value);
+                Item item = parseId(BuiltInRegistries.ITEM, value);
                 if (item != null && (filter == null || filter.test(item))) items.add(item);
             }
         } catch (Exception ignored) {}
@@ -57,14 +56,14 @@ public class ItemListSetting extends Setting<List<Item>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.ITEM.getIds();
+        return BuiltInRegistries.ITEM.keySet();
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
-        NbtList valueTag = new NbtList();
+    public CompoundTag save(CompoundTag tag) {
+        ListTag valueTag = new ListTag();
         for (Item item : get()) {
-            if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) valueTag.add(NbtString.of(Registries.ITEM.getId(item).toString()));
+            if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) valueTag.add(StringTag.valueOf(BuiltInRegistries.ITEM.getKey(item).toString()));
         }
         tag.put("value", valueTag);
 
@@ -72,12 +71,12 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    public List<Item> load(NbtCompound tag) {
+    public List<Item> load(CompoundTag tag) {
         get().clear();
 
-        NbtList valueTag = tag.getListOrEmpty("value");
-        for (NbtElement tagI : valueTag) {
-            Item item = Registries.ITEM.get(Identifier.of(tagI.asString().orElse("")));
+        ListTag valueTag = tag.getListOrEmpty("value");
+        for (Tag tagI : valueTag) {
+            Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(tagI.asString().orElse("")));
 
             if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) get().add(item);
         }

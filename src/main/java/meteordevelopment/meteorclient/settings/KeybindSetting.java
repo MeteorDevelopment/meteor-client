@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -78,14 +78,14 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
+    public CompoundTag save(CompoundTag tag) {
         tag.put("value", get().toTag());
 
         return tag;
     }
 
     @Override
-    public Keybind load(NbtCompound tag) {
+    public Keybind load(CompoundTag tag) {
         get().fromTag(tag.getCompoundOrEmpty("value"));
 
         return get();

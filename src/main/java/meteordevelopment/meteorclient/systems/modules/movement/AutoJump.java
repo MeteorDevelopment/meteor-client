@@ -47,18 +47,18 @@ public class AutoJump extends Module {
 
     private boolean jump() {
         return switch (jumpIf.get()) {
-            case Sprinting -> mc.player.isSprinting() && (mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0);
-            case Walking -> mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0;
+            case Sprinting -> mc.player.isSprinting() && (mc.player.zza != 0 || mc.player.xxa != 0);
+            case Walking -> mc.player.zza != 0 || mc.player.xxa != 0;
             case Always -> true;
         };
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (!mc.player.isOnGround() || mc.player.isSneaking() || !jump()) return;
+        if (!mc.player.onGround() || mc.player.isShiftKeyDown() || !jump()) return;
 
-        if (mode.get() == Mode.Jump) mc.player.jump();
-        else ((IVec3d) mc.player.getVelocity()).meteor$setY(velocityHeight.get());
+        if (mode.get() == Mode.Jump) mc.player.jumpFromGround();
+        else ((IVec3d) mc.player.getDeltaMovement()).meteor$setY(velocityHeight.get());
     }
 
     public enum JumpWhen {

@@ -5,13 +5,12 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.client.render.ProjectionMatrix2;
-import org.joml.Matrix4f;
+import net.minecraft.world.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ProjectionMatrix2.class)
-public interface ProjectionMatrix2Accessor {
-    @Invoker("getMatrix")
-    Matrix4f meteor$callGetMatrix(float width, float height);
+@Mixin(Projectile.class)
+public interface ProjectileAccessor {
+    @Invoker("shouldBounceOnWorldBorder")
+    boolean meteor$shouldBounceOnWorldBorder();
 }

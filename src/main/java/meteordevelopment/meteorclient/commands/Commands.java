@@ -13,10 +13,9 @@ import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
-
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.SharedSuggestionProvider;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -25,7 +24,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Commands {
     public static final List<Command> COMMANDS = new ArrayList<>();
-    public static CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
+    public static CommandDispatcher<SharedSuggestionProvider> DISPATCHER = new CommandDispatcher<>();
 
     @PostInit(dependencies = PathManagers.class)
     public static void init() {
@@ -80,7 +79,7 @@ public class Commands {
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {
-        DISPATCHER.execute(message, mc.getNetworkHandler().getCommandSource());
+        DISPATCHER.execute(message, mc.getConnection().getSuggestionsProvider());
     }
 
     public static Command get(String name) {
@@ -94,7 +93,7 @@ public class Commands {
     }
 
     /**
-     * Argument types that rely on Minecraft registries access those registries through a {@link CommandRegistryAccess}
+     * Argument types that rely on Minecraft registries access those registries through a {@link CommandBuildContext}
      * object. Since dynamic registries are specific to each server, we need to make a new CommandRegistryAccess object
      * every time we join a server.
      * <p>
@@ -112,8 +111,8 @@ public class Commands {
      */
     @EventHandler
     private static void onJoin(GameJoinedEvent event) {
-        ClientPlayNetworkHandler networkHandler = mc.getNetworkHandler();
-        Command.REGISTRY_ACCESS = CommandRegistryAccess.of(networkHandler.getRegistryManager(), networkHandler.getEnabledFeatures());
+        ClientPacketListener networkHandler = mc.getConnection();
+        Command.REGISTRY_ACCESS = CommandBuildContext.simple(networkHandler.registryAccess(), networkHandler.enabledFeatures());
 
         DISPATCHER = new CommandDispatcher<>();
         for (Command command : COMMANDS) {

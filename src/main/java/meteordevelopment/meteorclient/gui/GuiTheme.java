@@ -28,13 +28,14 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public static final double TITLE_TEXT_SCALE = 1.25;
@@ -283,14 +284,16 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public abstract boolean hideHUD();
 
     public double textWidth(String text, int length, boolean title) {
-        return scale(textRenderer().getWidth(text, length, false) * (title ? TITLE_TEXT_SCALE : 1));
+        int safeLength = Math.min(length, text.length());
+        String visible = safeLength == text.length() ? text : text.substring(0, safeLength);
+        return scale(mc.font.width(visible) * 2 * (title ? TITLE_TEXT_SCALE : 1));
     }
     public double textWidth(String text) {
         return textWidth(text, text.length(), false);
     }
 
     public double textHeight(boolean title) {
-        return scale(textRenderer().getHeight() * (title ? TITLE_TEXT_SCALE : 1));
+        return scale(mc.font.lineHeight * 2 * (title ? TITLE_TEXT_SCALE : 1));
     }
     public double textHeight() {
         return textHeight(false);
@@ -321,13 +324,13 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     // Saving / Loading
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
         tag.put("settings", settings.toTag());
 
-        NbtCompound configs = new NbtCompound();
+        CompoundTag configs = new CompoundTag();
         for (String id : windowConfigs.keySet()) {
             configs.put(id, windowConfigs.get(id).toTag());
         }
@@ -337,11 +340,11 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
 
     @Override
-    public GuiTheme fromTag(NbtCompound tag) {
+    public GuiTheme fromTag(CompoundTag tag) {
         tag.getCompound("settings").ifPresent(settings::fromTag);
 
         tag.getCompound("windowConfigs").ifPresent(configs -> {
-            for (String id : configs.getKeys()) {
+            for (String id : configs.keySet()) {
                 windowConfigs.put(id, new WindowConfig().fromTag(configs.getCompound(id).get()));
             }
         });

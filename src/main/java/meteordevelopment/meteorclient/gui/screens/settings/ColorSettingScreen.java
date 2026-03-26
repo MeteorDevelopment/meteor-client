@@ -20,8 +20,8 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.gui.Click;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -93,7 +93,7 @@ public class ColorSettingScreen extends WindowScreen {
         WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
 
         WButton backButton = bottomList.add(theme.button("Back")).expandX().widget();
-        backButton.action = this::close;
+        backButton.action = this::onClose;
 
         WButton copyButton = bottomList.add(theme.button(GuiRenderer.COPY)).widget();
         copyButton.action = this::toClipboard;
@@ -278,7 +278,7 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        public boolean onMouseClicked(Click click, boolean doubled) {
+        public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
             if (doubled) return false;
 
             if (mouseOver) {
@@ -296,7 +296,7 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        public boolean onMouseReleased(Click click) {
+        public boolean onMouseReleased(MouseButtonEvent click) {
             if (dragging) {
                 dragging = false;
                 setFocused(false);
@@ -366,7 +366,7 @@ public class ColorSettingScreen extends WindowScreen {
     @Override
     public boolean fromClipboard() {
         if (!NbtUtils.fromClipboard(setting.get())) {
-            String clipboard = mc.keyboard.getClipboard().trim();
+            String clipboard = mc.keyboardHandler.getClipboard().trim();
             SettingColor parsed;
 
             parsed = parseRGBA(clipboard);
@@ -552,7 +552,7 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        public boolean onMouseClicked(Click click, boolean doubled) {
+        public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
             if (doubled) return false;
 
             if (mouseOver) {
@@ -570,7 +570,7 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        public boolean onMouseReleased(Click click) {
+        public boolean onMouseReleased(MouseButtonEvent click) {
             if (dragging) {
                 dragging = false;
                 setFocused(false);
@@ -584,7 +584,7 @@ public class ColorSettingScreen extends WindowScreen {
             if (dragging) {
                 if (mouseX >= this.x && mouseX <= this.x + width) {
                     handleX += mouseX - lastMouseX;
-                    handleX = MathHelper.clamp(handleX, 0, width);
+                    handleX = Mth.clamp(handleX, 0, width);
                 } else {
                     if (handleX > 0 && mouseX < this.x) handleX = 0;
                     else if (handleX < width && mouseX > this.x + width) handleX = width;

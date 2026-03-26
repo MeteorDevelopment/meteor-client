@@ -5,9 +5,6 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
-import net.minecraft.network.packet.BundlePacket;
-import net.minecraft.network.packet.BundleSplitterPacket;
-import net.minecraft.network.packet.Packet;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
@@ -20,6 +17,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Predicate;
+import net.minecraft.network.protocol.BundleDelimiterPacket;
+import net.minecraft.network.protocol.BundlePacket;
+import net.minecraft.network.protocol.Packet;
 
 public class PacketUtilsUtil {
     private PacketUtilsUtil() {
@@ -77,7 +77,7 @@ public class PacketUtilsUtil {
             );
             writer.newLine();
             processPackets(writer, "net.minecraft.network.packet.s2c", "S2C_PACKETS", "S2C_PACKETS_R",
-                packet -> BundlePacket.class.isAssignableFrom(packet) || BundleSplitterPacket.class.isAssignableFrom(packet)
+                packet -> BundlePacket.class.isAssignableFrom(packet) || BundleDelimiterPacket.class.isAssignableFrom(packet)
             );
 
             writer.write("    }\n\n");

@@ -17,8 +17,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 
 public class Sprint extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -71,7 +71,7 @@ public class Sprint extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onTickMovement(TickEvent.Post event) {
-        if (unsprintInWater.get() && mc.player.isTouchingWater()) return;
+        if (unsprintInWater.get() && mc.player.isInWater()) return;
 
         mc.player.setSprinting(shouldSprint());
     }
@@ -80,9 +80,9 @@ public class Sprint extends Module {
     private void onPacketSend(PacketEvent.Send event) {
         if (!unsprintOnHit.get()) return;
         if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)
-            || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
+            || !packet.meteor$isAttack()) return;
 
-        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
+        mc.getConnection().send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.STOP_SPRINTING));
         mc.player.setSprinting(false);
     }
 
@@ -90,29 +90,29 @@ public class Sprint extends Module {
     private void onPacketSent(PacketEvent.Sent event) {
         if (!unsprintOnHit.get() || !keepSprint.get()) return;
         if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)
-            || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
+            || !packet.meteor$isAttack()) return;
 
         if (!shouldSprint() || mc.player.isSprinting()) return;
 
-        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));
+        mc.getConnection().send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_SPRINTING));
         mc.player.setSprinting(true);
     }
 
     public boolean shouldSprint() {
-        if (mc.currentScreen != null && !Modules.get().get(GUIMove.class).sprint.get()) return false;
+        if (mc.screen != null && !Modules.get().get(GUIMove.class).sprint.get()) return false;
 
         float movement = mode.get() == Mode.Rage
-            ? (Math.abs(mc.player.forwardSpeed) + Math.abs(mc.player.sidewaysSpeed))
-            : mc.player.forwardSpeed;
+            ? (Math.abs(mc.player.zza) + Math.abs(mc.player.xxa))
+            : mc.player.zza;
 
-        if (movement <= (mc.player.isSubmergedInWater() ? 1.0E-5F : 0.8)) {
+        if (movement <= (mc.player.isUnderWater() ? 1.0E-5F : 0.8)) {
             if (mode.get() == Mode.Strict || !permaSprint.get()) return false;
         }
 
-        boolean strictSprint = !(mc.player.isPartlyTouchingWater())
-            && !mc.player.hasBlindnessEffect()
-            && mc.player.hasVehicle() ? (mc.player.getVehicle().canSprintAsVehicle() && mc.player.getVehicle().isLogicalSideForUpdatingMovement()) : mc.player.getHungerManager().canSprint()
-            && (!mc.player.horizontalCollision || mc.player.collidedSoftly);
+        boolean strictSprint = !(mc.player.isInShallowWater())
+            && !mc.player.isMobilityRestricted()
+            && mc.player.isPassenger() ? (mc.player.getVehicle().canSprint() && mc.player.getVehicle().isLocalInstanceAuthoritative()) : mc.player.getFoodData().hasEnoughFood()
+            && (!mc.player.horizontalCollision || mc.player.minorHorizontalCollision);
 
         return isActive() && (mode.get() == Mode.Rage || strictSprint);
     }

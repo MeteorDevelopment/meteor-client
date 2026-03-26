@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public interface PlayerEntityAccessor {
-    @Invoker("canChangeIntoPose")
-    boolean meteor$canChangeIntoPose(EntityPose pose);
+    @Invoker("canPlayerFitWithinBlocksAndEntitiesWhen")
+    boolean meteor$canChangeIntoPose(Pose pose);
 }

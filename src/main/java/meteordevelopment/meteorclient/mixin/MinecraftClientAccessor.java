@@ -7,72 +7,72 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.yggdrasil.ProfileResult;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.SocialInteractionsManager;
-import net.minecraft.client.resource.ResourceReloadLogger;
-import net.minecraft.client.session.ProfileKeys;
-import net.minecraft.client.session.Session;
-import net.minecraft.client.session.report.AbuseReportContext;
-import net.minecraft.client.texture.PlayerSkinProvider;
-import net.minecraft.util.ApiServices;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.ResourceLoadStateTracker;
+import net.minecraft.client.User;
+import net.minecraft.client.gui.screens.social.PlayerSocialManager;
+import net.minecraft.client.multiplayer.ProfileKeyPairManager;
+import net.minecraft.client.multiplayer.chat.report.ReportingContext;
+import net.minecraft.client.resources.SkinManager;
+import net.minecraft.server.Services;
 
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 public interface MinecraftClientAccessor {
-    @Accessor("currentFps")
+    @Accessor("fps")
     static int meteor$getFps() {
         return 0;
     }
 
     @Mutable
-    @Accessor("session")
-    void meteor$setSession(Session session);
+    @Accessor("user")
+    void meteor$setSession(User session);
 
-    @Accessor("resourceReloadLogger")
-    ResourceReloadLogger meteor$getResourceReloadLogger();
+    @Accessor("reloadStateTracker")
+    ResourceLoadStateTracker meteor$getResourceReloadLogger();
 
-    @Accessor("attackCooldown")
+    @Accessor("missTime")
     int meteor$getAttackCooldown();
 
-    @Accessor("attackCooldown")
+    @Accessor("missTime")
     void meteor$setAttackCooldown(int attackCooldown);
 
-    @Invoker("doAttack")
+    @Invoker("startAttack")
     boolean meteor$leftClick();
 
     @Mutable
-    @Accessor("profileKeys")
-    void meteor$setProfileKeys(ProfileKeys keys);
+    @Accessor("profileKeyPairManager")
+    void meteor$setProfileKeys(ProfileKeyPairManager keys);
 
     @Mutable
     @Accessor("userApiService")
     void meteor$setUserApiService(UserApiService apiService);
 
     @Mutable
-    @Accessor("skinProvider")
-    void meteor$setSkinProvider(PlayerSkinProvider skinProvider);
+    @Accessor("skinManager")
+    void meteor$setSkinProvider(SkinManager skinProvider);
 
     @Mutable
-    @Accessor("socialInteractionsManager")
-    void meteor$setSocialInteractionsManager(SocialInteractionsManager socialInteractionsManager);
+    @Accessor("playerSocialManager")
+    void meteor$setSocialInteractionsManager(PlayerSocialManager socialInteractionsManager);
 
     @Mutable
-    @Accessor("abuseReportContext")
-    void meteor$setAbuseReportContext(AbuseReportContext abuseReportContext);
+    @Accessor("reportingContext")
+    void meteor$setAbuseReportContext(ReportingContext abuseReportContext);
 
     @Mutable
-    @Accessor("gameProfileFuture")
+    @Accessor("profileFuture")
     void meteor$setGameProfileFuture(CompletableFuture<ProfileResult> future);
 
     @Mutable
-    @Accessor("apiServices")
-    void meteor$setApiServices(ApiServices apiServices);
+    @Accessor("services")
+    void meteor$setApiServices(Services apiServices);
 
-    @Invoker("handleInputEvents")
+    @Invoker("handleKeybinds")
     void meteor$handleInputEvents();
 }

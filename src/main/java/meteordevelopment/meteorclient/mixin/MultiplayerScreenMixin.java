@@ -11,11 +11,11 @@ import meteordevelopment.meteorclient.systems.modules.player.NameProtect;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-@Mixin(MultiplayerScreen.class)
+@Mixin(JoinMultiplayerScreen.class)
 public abstract class MultiplayerScreenMixin extends Screen {
     @Unique
     private int textColor1;
@@ -37,26 +37,26 @@ public abstract class MultiplayerScreenMixin extends Screen {
     private int loggedInAsLength;
 
     @Unique
-    private ButtonWidget accounts;
+    private Button accounts;
 
     @Unique
-    private ButtonWidget proxies;
+    private Button proxies;
 
-    public MultiplayerScreenMixin(Text title) {
+    public MultiplayerScreenMixin(Component title) {
         super(title);
     }
 
-    @Inject(method = "refreshWidgetPositions", at = @At("TAIL"))
+    @Inject(method = "repositionElements", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         textColor1 = Color.fromRGBA(255, 255, 255, 255);
         textColor2 = Color.fromRGBA(175, 175, 175, 255);
 
         loggedInAs = "Logged in as ";
-        loggedInAsLength = textRenderer.getWidth(loggedInAs);
+        loggedInAsLength = font.width(loggedInAs);
 
         if (accounts == null) {
-            accounts = addDrawableChild(
-                new ButtonWidget.Builder(Text.literal("Accounts"), button -> client.setScreen(GuiThemes.get().accountsScreen()))
+            accounts = addRenderableWidget(
+                new Button.Builder(Component.literal("Accounts"), button -> minecraft.setScreen(GuiThemes.get().accountsScreen()))
                     .size(75, 20)
                     .build()
             );
@@ -64,8 +64,8 @@ public abstract class MultiplayerScreenMixin extends Screen {
         accounts.setPosition(this.width - 75 - 3, 3);
 
         if (proxies == null) {
-            proxies = addDrawableChild(
-                    new ButtonWidget.Builder(Text.literal("Proxies"), button -> client.setScreen(GuiThemes.get().proxiesScreen()))
+            proxies = addRenderableWidget(
+                    new Button.Builder(Component.literal("Proxies"), button -> minecraft.setScreen(GuiThemes.get().proxiesScreen()))
                         .size(75, 20)
                         .build()
                 );
@@ -74,17 +74,17 @@ public abstract class MultiplayerScreenMixin extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        super.render(context, mouseX, mouseY, deltaTicks);
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
+        super.extractRenderState(context, mouseX, mouseY, deltaTicks);
 
         int x = 3;
         int y = 3;
 
         // Logged in as
-        context.drawTextWithShadow(mc.textRenderer, loggedInAs, x, y, textColor1);
-        context.drawTextWithShadow(mc.textRenderer, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
+        context.text(mc.font, loggedInAs, x, y, textColor1);
+        context.text(mc.font, Modules.get().get(NameProtect.class).getName(minecraft.getUser().getName()), x + loggedInAsLength, y, textColor2);
 
-        y += textRenderer.fontHeight + 2;
+        y += font.lineHeight + 2;
 
         // Proxy
         Proxy proxy = Proxies.get().getEnabled();
@@ -92,8 +92,8 @@ public abstract class MultiplayerScreenMixin extends Screen {
         String left = proxy != null ? "Using proxy " : "Not using a proxy";
         String right = proxy != null ? (proxy.name.get() != null && !proxy.name.get().isEmpty() ? "(" + proxy.name.get() + ") " : "") + proxy.address.get() + ":" + proxy.port.get() : null;
 
-        context.drawTextWithShadow(mc.textRenderer, left, x, y, textColor1);
+        context.text(mc.font, left, x, y, textColor1);
         if (right != null)
-            context.drawTextWithShadow(mc.textRenderer, right, x + textRenderer.getWidth(left), y, textColor2);
+            context.text(mc.font, right, x + font.width(left), y, textColor2);
     }
 }

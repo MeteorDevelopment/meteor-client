@@ -31,7 +31,6 @@ import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.world.*;
-import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
@@ -39,10 +38,10 @@ import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Pair;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -149,8 +148,8 @@ public class Modules extends System<Modules> {
         return active;
     }
 
-    public List<Pair<Module, String>> searchTitles(String text) {
-        Map<Pair<Module, String>, Integer> modules = new HashMap<>();
+    public List<Tuple<Module, String>> searchTitles(String text) {
+        Map<Tuple<Module, String>, Integer> modules = new HashMap<>();
 
         for (Module module : this.moduleInstances.values()) {
             String title = module.title;
@@ -166,10 +165,10 @@ public class Modules extends System<Modules> {
                 }
             }
 
-            modules.put(new Pair<>(module, title), score);
+            modules.put(new Tuple<>(module, title), score);
         }
 
-        List<Pair<Module, String>> l = new ArrayList<>(modules.keySet());
+        List<Tuple<Module, String>> l = new ArrayList<>(modules.keySet());
         l.sort(Comparator.comparingInt(modules::get));
 
         return l;
@@ -276,7 +275,7 @@ public class Modules extends System<Modules> {
     }
 
     private void onAction(boolean isKey, int value, int modifiers, boolean isPress) {
-        if (mc.currentScreen != null || Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
+        if (mc.screen != null || Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
 
         for (Module module : moduleInstances.values()) {
             if (module.keybind.matches(isKey, value, modifiers) && (isPress || (module.toggleOnBindRelease && module.isActive()))) {
@@ -333,12 +332,12 @@ public class Modules extends System<Modules> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
-        NbtList modulesTag = new NbtList();
+        ListTag modulesTag = new ListTag();
         for (Module module : getAll()) {
-            NbtCompound moduleTag = module.toTag();
+            CompoundTag moduleTag = module.toTag();
             if (moduleTag != null) modulesTag.add(moduleTag);
         }
         tag.put("modules", modulesTag);
@@ -347,13 +346,13 @@ public class Modules extends System<Modules> {
     }
 
     @Override
-    public Modules fromTag(NbtCompound tag) {
+    public Modules fromTag(CompoundTag tag) {
         disableAll();
 
-        NbtList modulesTag = tag.getListOrEmpty("modules");
-        for (NbtElement moduleTagI : modulesTag) {
-            NbtCompound moduleTag = (NbtCompound) moduleTagI;
-            Module module = get(moduleTag.getString("name", ""));
+        ListTag modulesTag = tag.getListOrEmpty("modules");
+        for (Tag moduleTagI : modulesTag) {
+            CompoundTag moduleTag = (CompoundTag) moduleTagI;
+            Module module = get(moduleTag.getStringOr("name", ""));
             if (module != null) module.fromTag(moduleTag);
         }
 
@@ -554,7 +553,7 @@ public class Modules extends System<Modules> {
         add(new PacketMine());
         add(new StashFinder());
         add(new SpawnProofer());
-        add(new Timer());
+        add(new meteordevelopment.meteorclient.systems.modules.world.Timer());
         add(new VeinMiner());
 
         if (BaritoneUtils.IS_AVAILABLE) {

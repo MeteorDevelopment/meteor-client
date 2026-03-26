@@ -125,10 +125,10 @@ public class ProxiesImportScreen extends WindowScreen {
         WButton refresh = add(theme.button("Check proxies")).expandX().widget();
         refresh.action = () -> {
             Proxies.get().checkProxies(false);
-            close();
+            onClose();
         };
 
         WButton btnBack = add(theme.button("Back")).expandX().widget();
-        btnBack.action = this::close;
+        btnBack.action = this::onClose;
     }
 }

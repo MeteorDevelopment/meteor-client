@@ -30,17 +30,28 @@ import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
 import meteordevelopment.meteorclient.systems.modules.player.NoRotate;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientCommonNetworkHandler;
-import net.minecraft.client.network.ClientConnectionState;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.CommonListenerCookie;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
+import net.minecraft.network.protocol.game.ClientboundLoginPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundStartConfigurationPacket;
+import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -48,31 +59,31 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ClientPlayNetworkHandler.class)
-public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkHandler {
+@Mixin(ClientPacketListener.class)
+public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonPacketListenerImpl {
     @Shadow
-    private ClientWorld world;
+    private ClientLevel level;
 
-    protected ClientPlayNetworkHandlerMixin(MinecraftClient client, ClientConnection connection, ClientConnectionState connectionState) {
+    protected ClientPlayNetworkHandlerMixin(Minecraft client, Connection connection, CommonListenerCookie connectionState) {
         super(client, connection, connectionState);
     }
 
-    @Inject(method = "onEntitySpawn", at = @At("HEAD"), cancellable = true)
-    private void onEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo info) {
-        if (packet != null && packet.getEntityType() != null) {
-            if (Modules.get().get(NoRender.class).noEntity(packet.getEntityType()) && Modules.get().get(NoRender.class).getDropSpawnPacket()) {
+    @Inject(method = "handleAddEntity", at = @At("HEAD"), cancellable = true)
+    private void onEntitySpawn(ClientboundAddEntityPacket packet, CallbackInfo info) {
+        if (packet != null && packet.getType() != null) {
+            if (Modules.get().get(NoRender.class).noEntity(packet.getType()) && Modules.get().get(NoRender.class).getDropSpawnPacket()) {
                 info.cancel();
             }
         }
     }
 
-    @Inject(method = "onGameJoin", at = @At("HEAD"))
-    private void onGameJoinHead(GameJoinS2CPacket packet, CallbackInfo info, @Share("worldNotNull") LocalBooleanRef worldNotNull) {
-        worldNotNull.set(world != null);
+    @Inject(method = "handleLogin", at = @At("HEAD"))
+    private void onGameJoinHead(ClientboundLoginPacket packet, CallbackInfo info, @Share("worldNotNull") LocalBooleanRef worldNotNull) {
+        worldNotNull.set(level != null);
     }
 
-    @Inject(method = "onGameJoin", at = @At("TAIL"))
-    private void onGameJoinTail(GameJoinS2CPacket packet, CallbackInfo info, @Share("worldNotNull") LocalBooleanRef worldNotNull) {
+    @Inject(method = "handleLogin", at = @At("TAIL"))
+    private void onGameJoinTail(ClientboundLoginPacket packet, CallbackInfo info, @Share("worldNotNull") LocalBooleanRef worldNotNull) {
         if (worldNotNull.get()) {
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
         }
@@ -81,89 +92,89 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
     }
 
     // the server sends a GameJoin packet after the reconfiguration phase
-    @Inject(method = "onEnterReconfiguration", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V", shift = At.Shift.AFTER))
-    private void onEnterReconfiguration(EnterReconfigurationS2CPacket packet, CallbackInfo info) {
+    @Inject(method = "handleConfigurationStart", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V", shift = At.Shift.AFTER))
+    private void onEnterReconfiguration(ClientboundStartConfigurationPacket packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
     }
 
-    @Inject(method = "onPlaySound", at = @At("HEAD"))
-    private void onPlaySound(PlaySoundS2CPacket packet, CallbackInfo info) {
+    @Inject(method = "handleSoundEvent", at = @At("HEAD"))
+    private void onPlaySound(ClientboundSoundPacket packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(PlaySoundPacketEvent.get(packet));
     }
 
-    @Inject(method = "onChunkData", at = @At("TAIL"))
-    private void onChunkData(ChunkDataS2CPacket packet, CallbackInfo info) {
-        WorldChunk chunk = client.world.getChunk(packet.getChunkX(), packet.getChunkZ());
+    @Inject(method = "handleLevelChunkWithLight", at = @At("TAIL"))
+    private void onChunkData(ClientboundLevelChunkWithLightPacket packet, CallbackInfo info) {
+        LevelChunk chunk = minecraft.level.getChunk(packet.getX(), packet.getZ());
         MeteorClient.EVENT_BUS.post(new ChunkDataEvent(chunk));
     }
 
-    @Inject(method = "onScreenHandlerSlotUpdate", at = @At("TAIL"))
-    private void onContainerSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo info) {
+    @Inject(method = "handleContainerSetSlot", at = @At("TAIL"))
+    private void onContainerSlotUpdate(ClientboundContainerSetSlotPacket packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(ContainerSlotUpdateEvent.get(packet));
     }
 
-    @Inject(method = "onInventory", at = @At("TAIL"))
-    private void onInventory(InventoryS2CPacket packet, CallbackInfo info) {
+    @Inject(method = "handleContainerContent", at = @At("TAIL"))
+    private void onInventory(ClientboundContainerSetContentPacket packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(InventoryEvent.get(packet));
     }
 
-    @Inject(method = "onEntitiesDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/s2c/play/EntitiesDestroyS2CPacket;getEntityIds()Lit/unimi/dsi/fastutil/ints/IntList;"))
-    private void onEntitiesDestroy(EntitiesDestroyS2CPacket packet, CallbackInfo ci) {
+    @Inject(method = "handleRemoveEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundRemoveEntitiesPacket;getEntityIds()Lit/unimi/dsi/fastutil/ints/IntList;"))
+    private void onEntitiesDestroy(ClientboundRemoveEntitiesPacket packet, CallbackInfo ci) {
         for (int id : packet.getEntityIds()) {
-            MeteorClient.EVENT_BUS.post(EntityDestroyEvent.get(client.world.getEntityById(id)));
+            MeteorClient.EVENT_BUS.post(EntityDestroyEvent.get(minecraft.level.getEntity(id)));
         }
     }
 
-    @Inject(method = "onExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V", shift = At.Shift.AFTER))
-    private void onExplosionVelocity(ExplosionS2CPacket packet, CallbackInfo ci) {
+    @Inject(method = "handleExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V", shift = At.Shift.AFTER))
+    private void onExplosionVelocity(ClientboundExplodePacket packet, CallbackInfo ci) {
         Velocity velocity = Modules.get().get(Velocity.class);
         if (!velocity.explosions.get()) return;
 
         IExplosionS2CPacket explosionPacket = (IExplosionS2CPacket) (Object) packet;
-        explosionPacket.meteor$setVelocityX((float) (packet.playerKnockback().orElse(Vec3d.ZERO).x * velocity.getHorizontal(velocity.explosionsHorizontal)));
-        explosionPacket.meteor$setVelocityY((float) (packet.playerKnockback().orElse(Vec3d.ZERO).y * velocity.getVertical(velocity.explosionsVertical)));
-        explosionPacket.meteor$setVelocityZ((float) (packet.playerKnockback().orElse(Vec3d.ZERO).z * velocity.getHorizontal(velocity.explosionsHorizontal)));
+        explosionPacket.meteor$setVelocityX((float) (packet.playerKnockback().orElse(Vec3.ZERO).x * velocity.getHorizontal(velocity.explosionsHorizontal)));
+        explosionPacket.meteor$setVelocityY((float) (packet.playerKnockback().orElse(Vec3.ZERO).y * velocity.getVertical(velocity.explosionsVertical)));
+        explosionPacket.meteor$setVelocityZ((float) (packet.playerKnockback().orElse(Vec3.ZERO).z * velocity.getHorizontal(velocity.explosionsHorizontal)));
     }
 
-    @Inject(method = "onItemPickupAnimation", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getEntityById(I)Lnet/minecraft/entity/Entity;", ordinal = 0))
-    private void onItemPickupAnimation(ItemPickupAnimationS2CPacket packet, CallbackInfo info) {
-        Entity itemEntity = client.world.getEntityById(packet.getEntityId());
-        Entity entity = client.world.getEntityById(packet.getCollectorEntityId());
+    @Inject(method = "handleTakeItemEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V", shift = At.Shift.AFTER))
+    private void onItemPickupAnimation(ClientboundTakeItemEntityPacket packet, CallbackInfo info) {
+        Entity itemEntity = minecraft.level.getEntity(packet.getItemId());
+        Entity entity = minecraft.level.getEntity(packet.getPlayerId());
 
-        if (itemEntity instanceof ItemEntity && entity == client.player) {
-            MeteorClient.EVENT_BUS.post(PickItemsEvent.get(((ItemEntity) itemEntity).getStack(), packet.getStackAmount()));
+        if (itemEntity instanceof ItemEntity && entity == minecraft.player) {
+            MeteorClient.EVENT_BUS.post(PickItemsEvent.get(((ItemEntity) itemEntity).getItem(), packet.getAmount()));
         }
     }
 
-    @Inject(method = "onPlayerPositionLook", at = @At("HEAD"))
-    private void onPlayerPositionLookHead(PlayerPositionLookS2CPacket packet, CallbackInfo ci,
+    @Inject(method = "handleMovePlayer", at = @At("HEAD"))
+    private void onPlayerPositionLookHead(ClientboundPlayerPositionPacket packet, CallbackInfo ci,
           @Share("noRotateYaw") LocalFloatRef yawRef,
           @Share("noRotatePitch") LocalFloatRef pitchRef) {
         NoRotate noRotate = Modules.get().get(NoRotate.class);
-        if (!noRotate.isActive() || client.player == null) return;
+        if (!noRotate.isActive() || minecraft.player == null) return;
 
-        yawRef.set(client.player.getYaw());
-        pitchRef.set(client.player.getPitch());
+        yawRef.set(minecraft.player.getYRot());
+        pitchRef.set(minecraft.player.getXRot());
     }
 
-    @Inject(method = "onPlayerPositionLook", at = @At("RETURN"))
-    private void onPlayerPositionLookReturn(PlayerPositionLookS2CPacket packet, CallbackInfo ci,
+    @Inject(method = "handleMovePlayer", at = @At("RETURN"))
+    private void onPlayerPositionLookReturn(ClientboundPlayerPositionPacket packet, CallbackInfo ci,
         @Share("noRotateYaw") LocalFloatRef yawRef,
         @Share("noRotatePitch") LocalFloatRef pitchRef) {
         NoRotate noRotate = Modules.get().get(NoRotate.class);
-        if (!noRotate.isActive() || client.player == null) return;
+        if (!noRotate.isActive() || minecraft.player == null) return;
 
         float savedYaw = yawRef.get();
         float savedPitch = pitchRef.get();
 
         //not noticeable by player but forces a server update
-        client.player.setYaw(savedYaw + 0.000001f);
-        client.player.setPitch(savedPitch + 0.000001f);
-        client.player.headYaw = savedYaw;
-        client.player.bodyYaw = savedYaw;
+        minecraft.player.setYRot(savedYaw + 0.000001f);
+        minecraft.player.setXRot(savedPitch + 0.000001f);
+        minecraft.player.yHeadRot = savedYaw;
+        minecraft.player.yBodyRot = savedYaw;
     }
 
-    @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "sendChat", at = @At("HEAD"), cancellable = true)
     private void onSendChatMessage(String message, CallbackInfo ci, @Local(argsOnly = true) LocalRef<String> messageRef) {
         if (!message.startsWith(Config.get().prefix.get()) && !(BaritoneUtils.IS_AVAILABLE && message.startsWith(BaritoneUtils.getPrefix()))) {
             SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(message));
@@ -184,7 +195,7 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
                 ChatUtils.error(e.getMessage());
             }
 
-            client.inGameHud.getChatHud().addToMessageHistory(message);
+            minecraft.gui.getChat().addRecentChat(message);
             ci.cancel();
         }
     }

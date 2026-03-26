@@ -32,7 +32,7 @@ public class Strafe extends SpeedMode {
                     speed = 1.18f * getDefaultSpeed() - 0.01;
                 }
             case 1: //Jump
-                if (!PlayerUtils.isMoving() || !mc.player.isOnGround()) break;
+                if (!PlayerUtils.isMoving() || !mc.player.onGround()) break;
 
                 ((IVec3d) event.movement).meteor$setY(getHop(0.40123128));
                 speed *= settings.ncpSpeed.get();
@@ -40,7 +40,7 @@ public class Strafe extends SpeedMode {
                 break;
             case 2: speed = distance - 0.76 * (distance - getDefaultSpeed()); stage++; break; //Slowdown after jump
             case 3: //Reset on collision or predict and update speed
-                if (!mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, mc.player.getVelocity().y, 0.0)) || mc.player.verticalCollision && stage > 0) {
+                if (!mc.level.noCollision(mc.player.getBoundingBox().move(0.0, mc.player.getDeltaMovement().y, 0.0)) || mc.player.verticalCollision && stage > 0) {
                     stage = 0;
                 }
                 speed = distance - (distance / 159.0);
@@ -68,9 +68,9 @@ public class Strafe extends SpeedMode {
     }
 
     public static Vector2d transformStrafe(double speed) {
-        float forward = Math.signum(MeteorClient.mc.player.input.getMovementInput().y);
-        float side = Math.signum(MeteorClient.mc.player.input.getMovementInput().x);
-        float yaw = MeteorClient.mc.player.getLerpedYaw(MeteorClient.mc.getRenderTickCounter().getTickProgress(true));
+        float forward = Math.signum(MeteorClient.mc.player.input.getMoveVector().y);
+        float side = Math.signum(MeteorClient.mc.player.input.getMoveVector().x);
+        float yaw = MeteorClient.mc.player.getYRot(MeteorClient.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 
         if (forward == 0.0f && side == 0.0f) return new Vector2d();
 
@@ -86,6 +86,6 @@ public class Strafe extends SpeedMode {
 
     @Override
     public void onTick() {
-        distance = Math.sqrt((mc.player.getX() - mc.player.lastX) * (mc.player.getX() - mc.player.lastX) + (mc.player.getZ() - mc.player.lastZ) * (mc.player.getZ() - mc.player.lastZ));
+        distance = Math.sqrt((mc.player.getX() - mc.player.xo) * (mc.player.getX() - mc.player.xo) + (mc.player.getZ() - mc.player.zo) * (mc.player.getZ() - mc.player.zo));
     }
 }

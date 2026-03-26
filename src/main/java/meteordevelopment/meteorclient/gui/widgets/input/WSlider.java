@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.gui.widgets.input;
 
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import net.minecraft.client.gui.Click;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 
 public abstract class WSlider extends WWidget {
     public Runnable action;
@@ -25,7 +25,7 @@ public abstract class WSlider extends WWidget {
     protected double valueAtDragStart;
 
     public WSlider(double value, double min, double max) {
-        this.value = MathHelper.clamp(value, min, max);
+        this.value = Mth.clamp(value, min, max);
         this.min = min;
         this.max = max;
     }
@@ -43,7 +43,7 @@ public abstract class WSlider extends WWidget {
     }
 
     @Override
-    public boolean onMouseClicked(Click click, boolean doubled) {
+    public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
         if (mouseOver && !doubled) {
             valueAtDragStart = value;
             double handleSize = handleSize();
@@ -89,7 +89,7 @@ public abstract class WSlider extends WWidget {
         if (dragging) {
             if (mouseOverX) {
                 valueWidth += mouseX - lastMouseX;
-                valueWidth = MathHelper.clamp(valueWidth, 0, width - s);
+                valueWidth = Mth.clamp(valueWidth, 0, width - s);
 
                 set((valueWidth / (width - s)) * (max - min) + min);
                 if (action != null) action.run();
@@ -106,7 +106,7 @@ public abstract class WSlider extends WWidget {
     }
 
     @Override
-    public boolean onMouseReleased(Click click) {
+    public boolean onMouseReleased(MouseButtonEvent click) {
         if (dragging) {
             if (value != valueAtDragStart && actionOnRelease != null) {
                 actionOnRelease.run();
@@ -148,7 +148,7 @@ public abstract class WSlider extends WWidget {
 	}
 
     public void set(double value) {
-        this.value = MathHelper.clamp(value, min, max);
+        this.value = Mth.clamp(value, min, max);
     }
 
     public double get() {

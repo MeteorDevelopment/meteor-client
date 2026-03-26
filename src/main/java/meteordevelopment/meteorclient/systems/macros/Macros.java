@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -85,14 +85,14 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
         tag.put("macros", NbtUtils.listToTag(macros));
         return tag;
     }
 
     @Override
-    public Macros fromTag(NbtCompound tag) {
+    public Macros fromTag(CompoundTag tag) {
         for (Macro macro : macros) MeteorClient.EVENT_BUS.unsubscribe(macro);
 
         macros = NbtUtils.listFromTag(tag.getListOrEmpty("macros"), Macro::new);

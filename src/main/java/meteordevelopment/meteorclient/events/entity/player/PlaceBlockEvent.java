@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.events.entity.player;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
 
 public class PlaceBlockEvent extends Cancellable {
     private static final PlaceBlockEvent INSTANCE = new PlaceBlockEvent();

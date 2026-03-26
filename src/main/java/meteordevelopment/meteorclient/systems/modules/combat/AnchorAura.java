@@ -24,18 +24,18 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class AnchorAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -245,14 +245,14 @@ public class AnchorAura extends Module {
     );
 
     private double bestPlaceDamage;
-    private final BlockPos.Mutable bestPlacePos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos bestPlacePos = new BlockPos.MutableBlockPos();
 
     private double bestBreakDamage;
-    private final BlockPos.Mutable bestBreakPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos bestBreakPos = new BlockPos.MutableBlockPos();
 
     private BlockPos renderBlockPos;
     private int placeDelayLeft, chargeDelayLeft, breakDelayLeft;
-    private PlayerEntity target;
+    private Player target;
 
     public AnchorAura() {
         super(Categories.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");
@@ -274,7 +274,7 @@ public class AnchorAura extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.world.getRegistryKey() == World.NETHER) {
+        if (mc.level.dimension() == Level.NETHER) {
             error("You can't blow up respawn anchors in this dimension, disabling.");
             toggle();
             return;
@@ -318,8 +318,8 @@ public class AnchorAura extends Module {
             }
 
             float bestDamage = isPlacing ? (float) bestPlaceDamage : (float) bestBreakDamage;
-            float selfDamage = DamageUtils.anchorDamage(mc.player, blockPos.toCenterPos());
-            float targetDamage = DamageUtils.anchorDamage(target, blockPos.toCenterPos());
+            float selfDamage = DamageUtils.anchorDamage(mc.player, blockPos.getCenter());
+            float targetDamage = DamageUtils.anchorDamage(target, blockPos.getCenter());
 
             // Is the anchor optimal?
             if (targetDamage >= minDamage.get() && targetDamage > bestDamage
@@ -374,18 +374,18 @@ public class AnchorAura extends Module {
     }
 
     private void doInteract(FindItemResult glowStone) {
-        BlockState blockState = mc.world.getBlockState(bestBreakPos);
+        BlockState blockState = mc.level.getBlockState(bestBreakPos);
         if (blockState.getBlock() != Blocks.RESPAWN_ANCHOR) return;
 
-        Vec3d center = bestBreakPos.toCenterPos();
-        int charges = blockState.get(Properties.CHARGES);
+        Vec3 center = bestBreakPos.getCenter();
+        int charges = blockState.getValue(BlockStateProperties.RESPAWN_ANCHOR_CHARGES);
 
         // Charge the anchor
         if (charges == 0 && chargeDelayLeft++ >= chargeDelay.get()) {
             if (!glowStone.found()) return;
 
             InvUtils.swap(glowStone.slot(), swapBack.get());
-            BlockUtils.interact(new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), Hand.MAIN_HAND, swing.get());
+            BlockUtils.interact(new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), InteractionHand.MAIN_HAND, swing.get());
             chargeDelayLeft = 0;
             charges++;
         }
@@ -396,22 +396,22 @@ public class AnchorAura extends Module {
             if (!fir.found()) return;
 
             InvUtils.swap(fir.slot(), swapBack.get());
-            BlockUtils.interact(new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), Hand.MAIN_HAND, swing.get());
+            BlockUtils.interact(new BlockHitResult(center, BlockUtils.getDirection(bestBreakPos), bestBreakPos, true), InteractionHand.MAIN_HAND, swing.get());
             breakDelayLeft = 0;
 
             // Instantly break the anchor on client, stops invalid block placements
-            mc.world.setBlockState(bestBreakPos, mc.world.getFluidState(bestBreakPos).getBlockState(), 0);
+            mc.level.setBlock(bestBreakPos, mc.level.getFluidState(bestBreakPos).createLegacyBlock(), 0);
         }
 
         if (swapBack.get()) InvUtils.swapBack();
     }
 
     private boolean isOutOfRange(BlockPos blockPos, double baseRange, double wallsRange) {
-        Vec3d pos = blockPos.toCenterPos();
+        Vec3 pos = blockPos.getCenter();
         if (!PlayerUtils.isWithin(pos, baseRange)) return true;
 
-        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
-        BlockHitResult result = mc.world.raycast(raycastContext);
+        ClipContext raycastContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        BlockHitResult result = mc.level.clip(raycastContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !PlayerUtils.isWithin(pos, wallsRange);
 
@@ -420,7 +420,7 @@ public class AnchorAura extends Module {
 
     private boolean isAirPlace(BlockPos blockPos) {
         for (Direction direction : Direction.values()) {
-            if (!mc.world.getBlockState(blockPos.offset(direction)).isReplaceable()) return false;
+            if (!mc.level.getBlockState(blockPos.relative(direction)).canBeReplaced()) return false;
         }
 
         return true;
@@ -429,7 +429,7 @@ public class AnchorAura extends Module {
     private boolean shouldPause() {
         if (pauseOnUse.get() && mc.player.isUsingItem()) return true;
 
-        if (pauseOnMine.get() && mc.interactionManager.isBreakingBlock()) return true;
+        if (pauseOnMine.get() && mc.gameMode.isDestroying()) return true;
 
         CrystalAura CA = Modules.get().get(CrystalAura.class);
         return pauseOnCA.get() && CA.isActive() && CA.kaTimer > 0;

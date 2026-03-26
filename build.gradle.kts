@@ -48,7 +48,7 @@ val jij: Configuration by configurations.creating
 
 configurations {
     // include mods
-    modImplementation.configure {
+    implementation.configure {
         extendsFrom(modInclude)
     }
     include.configure {
@@ -67,29 +67,28 @@ configurations {
 dependencies {
     // Fabric
     minecraft(libs.minecraft)
-    mappings(variantOf(libs.yarn) { classifier("v2") })
-    modImplementation(libs.fabric.loader)
+    implementation(libs.fabric.loader)
 
-    val fapiVersion = libs.versions.fabric.api.get()
-    modInclude(fabricApi.module("fabric-api-base", fapiVersion))
-    modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
+    modInclude(libs.fabric.api.base)
+    modInclude(libs.fabric.resource.loader.v1)
 
     // Compat fixes
-    modCompileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
-    modCompileOnly(libs.sodium) { isTransitive = false }
-    modCompileOnly(libs.lithium) { isTransitive = false }
-    modCompileOnly(libs.iris) { isTransitive = false }
-    modCompileOnly(libs.viafabricplus) { isTransitive = false }
-    modCompileOnly(libs.viafabricplus.api) { isTransitive = false }
+    compileOnly(libs.fabric.renderer.indigo)
+    compileOnly(libs.sodium) { isTransitive = false }
+    compileOnly(libs.lithium) { isTransitive = false }
+    compileOnly(libs.iris) { isTransitive = false }
+    compileOnly(libs.viafabricplus) { isTransitive = false }
+    compileOnly(libs.viafabricplus.api) { isTransitive = false }
 
-    modCompileOnly(libs.baritone)
-    modCompileOnly(libs.modmenu)
+    compileOnly(libs.baritone)
+    compileOnly(libs.modmenu) { isTransitive = false }
 
     // Libraries (JAR-in-JAR)
     jij(libs.orbit)
     jij(libs.starscript)
     jij(libs.discord.ipc)
     jij(libs.reflections)
+    jij(libs.javassist)
     jij(libs.netty.handler.proxy) { isTransitive = false }
     jij(libs.netty.codec.socks) { isTransitive = false }
     jij(libs.waybackauthlib)
@@ -104,42 +103,13 @@ sourceSets {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
 
     if (System.getenv("CI")?.toBoolean() == true) {
         withSourcesJar()
         withJavadocJar()
-    }
-}
-
-// Handle transitive dependencies for jar-in-jar
-// Based on implementation from BaseProject by FlorianMichael/EnZaXD
-// Source: https://github.com/FlorianMichael/BaseProject/blob/main/src/main/kotlin/de/florianmichael/baseproject/Fabric.kt
-// Licensed under Apache License 2.0
-afterEvaluate {
-    val jijConfig = configurations.findByName("jij") ?: return@afterEvaluate
-
-    // Dependencies to exclude from jar-in-jar
-    val excluded = setOf(
-        "org.slf4j",    // Logging provided by Minecraft
-        "jsr305"        // Compile time annotations only
-    )
-
-    jijConfig.incoming.resolutionResult.allDependencies.forEach { dep ->
-        val requested = dep.requested.displayName
-
-        if (excluded.any { requested.contains(it) }) return@forEach
-
-        val compileOnlyDep = dependencies.create(requested) {
-            isTransitive = false
-        }
-
-        val implDep = dependencies.create(compileOnlyDep)
-
-        dependencies.add("compileOnlyApi", compileOnlyDep)
-        dependencies.add("implementation", implDep)
-        dependencies.add("include", compileOnlyDep)
     }
 }
 

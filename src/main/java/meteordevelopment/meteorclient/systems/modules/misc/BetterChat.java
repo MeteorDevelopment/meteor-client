@@ -24,18 +24,17 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.PlayerSkinDrawer;
-import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.PlayerFaceExtractor;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -254,7 +253,7 @@ public class BetterChat extends Module {
 
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
-        Text message = event.getMessage();
+        Component message = event.getMessage();
 
         if (filterRegex.get()) {
             String messageString = message.getString();
@@ -269,10 +268,10 @@ public class BetterChat extends Module {
         if (antiClear.get()) {
             String messageString = message.getString();
             if (antiClearRegex.matcher(messageString).find()) {
-                MutableText newMessage = Text.empty();
+                MutableComponent newMessage = Component.empty();
                 message.visit((style, string) -> {
                     Matcher antiClearMatcher = antiClearRegex.matcher(string);
-                    newMessage.append(Text.literal(
+                    newMessage.append(Component.literal(
                         antiClearMatcher.find() ? antiClearMatcher.replaceAll("\n\n") : string
                     ).setStyle(style));
 
@@ -283,7 +282,7 @@ public class BetterChat extends Module {
         }
 
         if (antiSpam.get()) {
-            Text antiSpammed = appendAntiSpam(message);
+            Component antiSpammed = appendAntiSpam(message);
 
             if (antiSpammed != null) {
                 message = antiSpammed;
@@ -291,9 +290,9 @@ public class BetterChat extends Module {
         }
 
         if (timestamps.get()) {
-            Text timestamp = Text.literal("<" + dateFormat.format(new Date()) + "> ").formatted(Formatting.GRAY);
+            Component timestamp = Component.literal("<" + dateFormat.format(new Date()) + "> ").withStyle(ChatFormatting.GRAY);
 
-            message = Text.empty().append(timestamp).append(message);
+            message = Component.empty().append(timestamp).append(message);
         }
 
         event.setMessage(message);
@@ -310,9 +309,9 @@ public class BetterChat extends Module {
         message = getPrefix() + message + getSuffix();
 
         if (coordsProtection.get() && containsCoordinates(message)) {
-            MutableText warningMessage = Text.literal("It looks like there are coordinates in your message! ");
+            MutableComponent warningMessage = Component.literal("It looks like there are coordinates in your message! ");
 
-            MutableText sendButton = getSendButton(message);
+            MutableComponent sendButton = getSendButton(message);
             warningMessage.append(sendButton);
 
             ChatUtils.sendMsg(warningMessage);
@@ -326,12 +325,12 @@ public class BetterChat extends Module {
 
     // Anti Spam
 
-    private Text appendAntiSpam(Text text) {
+    private Component appendAntiSpam(Component text) {
         String textString = text.getString();
-        Text returnText = null;
+        Component returnText = null;
         int messageIndex = -1;
 
-        List<ChatHudLine> messages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).meteor$getMessages();
+        List<GuiMessage> messages = ((ChatHudAccessor) mc.gui.getChat()).meteor$getMessages();
         if (messages.isEmpty()) return null;
 
         for (int i = 0; i < Math.min(antiSpamDepth.get(), messages.size()); i++) {
@@ -344,7 +343,7 @@ public class BetterChat extends Module {
 
             if (textString.equals(stringToCheck)) {
                 messageIndex = i;
-                returnText = text.copy().append(Text.literal(" (2)").formatted(Formatting.GRAY));
+                returnText = text.copy().append(Component.literal(" (2)").withStyle(ChatFormatting.GRAY));
                 break;
             } else {
                 Matcher matcher = antiSpamRegex.matcher(stringToCheck);
@@ -355,14 +354,14 @@ public class BetterChat extends Module {
 
                 if (stringToCheck.substring(0, matcher.start()).equals(textString)) {
                     messageIndex = i;
-                    returnText = text.copy().append(Text.literal(" (" + (number + 1) + ")").formatted(Formatting.GRAY));
+                    returnText = text.copy().append(Component.literal(" (" + (number + 1) + ")").withStyle(ChatFormatting.GRAY));
                     break;
                 }
             }
         }
 
         if (returnText != null) {
-            List<ChatHudLine.Visible> visible = ((ChatHudAccessor) mc.inGameHud.getChatHud()).meteor$getVisibleMessages();
+            List<GuiMessage.Line> visible = ((ChatHudAccessor) mc.gui.getChat()).meteor$getVisibleMessages();
 
             int start = -1;
             for (int i = 0; i < messageIndex; i++) {
@@ -403,7 +402,7 @@ public class BetterChat extends Module {
 
     private static final Pattern TIMESTAMP_REGEX = Pattern.compile("^<\\d{1,2}:\\d{1,2}>");
 
-    public ChatHudLine.Visible line;
+    public GuiMessage.Line line;
 
 
     /** Registers a custom player head to render based on a message prefix */
@@ -422,7 +421,7 @@ public class BetterChat extends Module {
     }
 
 
-    public void beforeDrawMessage(DrawContext context, int y, int color) {
+    public void beforeDrawMessage(GuiGraphicsExtractor context, int y, int color) {
         if (!isActive() || !playerHeads.get() || line == null) return;
 
         // Only draw the first line of multi line messages
@@ -437,7 +436,7 @@ public class BetterChat extends Module {
         line = null;
     }
 
-    private void drawTexture(DrawContext context, IChatHudLine line, int y, int color) {
+    private void drawTexture(GuiGraphicsExtractor context, IChatHudLine line, int y, int color) {
         String text = line.meteor$getText().trim();
 
         // Custom
@@ -452,7 +451,7 @@ public class BetterChat extends Module {
         for (CustomHeadEntry entry : CUSTOM_HEAD_ENTRIES) {
             // Check prefix
             if (text.startsWith(entry.prefix(), startOffset)) {
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, entry.texture(), 0, y, 0, 0, 8, 8, 64, 64, 64, 64, color);
+                context.blit(RenderPipelines.GUI_TEXTURED, entry.texture(), 0, y, 0f, 0f, 8, 8, 64, 64);
                 return;
             }
         }
@@ -461,10 +460,10 @@ public class BetterChat extends Module {
         GameProfile sender = getSender(line, text);
         if (sender == null) return;
 
-        PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(sender.id());
+        PlayerInfo entry = mc.getConnection().getPlayerInfo(sender.id());
         if (entry == null) return;
 
-        PlayerSkinDrawer.draw(context, entry.getSkinTextures(), 0, y, 8, color);
+        PlayerFaceExtractor.extractRenderState(context, entry.getSkin(), 0, y, 8, color);
     }
 
     private GameProfile getSender(IChatHudLine line, String text) {
@@ -477,7 +476,7 @@ public class BetterChat extends Module {
             if (usernameMatcher.matches()) {
                 String username = usernameMatcher.group(1);
 
-                PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(username);
+                PlayerInfo entry = mc.getConnection().getPlayerInfo(username);
                 if (entry != null) sender = entry.getProfile();
             }
         }
@@ -560,18 +559,18 @@ public class BetterChat extends Module {
         return coordRegex.matcher(message).find();
     }
 
-    private MutableText getSendButton(String message) {
-        MutableText sendButton = Text.literal("[SEND ANYWAY]");
-        MutableText hintBaseText = Text.literal("");
+    private MutableComponent getSendButton(String message) {
+        MutableComponent sendButton = Component.literal("[SEND ANYWAY]");
+        MutableComponent hintBaseText = Component.literal("");
 
-        MutableText hintMsg = Text.literal("Send your message to the global chat even if there are coordinates:");
-        hintMsg.setStyle(hintBaseText.getStyle().withFormatting(Formatting.GRAY));
+        MutableComponent hintMsg = Component.literal("Send your message to the global chat even if there are coordinates:");
+        hintMsg.setStyle(hintBaseText.getStyle().applyFormat(ChatFormatting.GRAY));
         hintBaseText.append(hintMsg);
 
-        hintBaseText.append(Text.literal('\n' + message));
+        hintBaseText.append(Component.literal('\n' + message));
 
         sendButton.setStyle(sendButton.getStyle()
-            .withFormatting(Formatting.DARK_RED)
+            .applyFormat(ChatFormatting.DARK_RED)
             .withClickEvent(new MeteorClickEvent(Commands.get("say").toString(message)))
             .withHoverEvent(new HoverEvent.ShowText(
                 hintBaseText

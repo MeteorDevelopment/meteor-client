@@ -15,15 +15,14 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.BlockHitResult;
 import java.util.List;
 import java.util.Set;
 
@@ -150,42 +149,42 @@ public class NoInteract extends Module {
 
     private boolean shouldAttackBlock(BlockPos blockPos) {
         if (blockMineMode.get() == ListMode.WhiteList &&
-            blockMine.get().contains(mc.world.getBlockState(blockPos).getBlock())) {
+            blockMine.get().contains(mc.level.getBlockState(blockPos).getBlock())) {
             return false;
         }
 
         return blockMineMode.get() != ListMode.BlackList ||
-            !blockMine.get().contains(mc.world.getBlockState(blockPos).getBlock());
+            !blockMine.get().contains(mc.level.getBlockState(blockPos).getBlock());
     }
 
-    private boolean shouldInteractBlock(BlockHitResult hitResult, Hand hand) {
+    private boolean shouldInteractBlock(BlockHitResult hitResult, InteractionHand hand) {
         // Hand Interactions
         if (blockInteractHand.get() == HandMode.Both ||
-            (blockInteractHand.get() == HandMode.Mainhand && hand == Hand.MAIN_HAND) ||
-            (blockInteractHand.get() == HandMode.Offhand && hand == Hand.OFF_HAND)) {
+            (blockInteractHand.get() == HandMode.Mainhand && hand == InteractionHand.MAIN_HAND) ||
+            (blockInteractHand.get() == HandMode.Offhand && hand == InteractionHand.OFF_HAND)) {
             return false;
         }
 
         // Blocks
         if (blockInteractMode.get() == ListMode.BlackList &&
-            blockInteract.get().contains(mc.world.getBlockState(hitResult.getBlockPos()).getBlock())) {
+            blockInteract.get().contains(mc.level.getBlockState(hitResult.getBlockPos()).getBlock())) {
             return false;
         }
 
         return blockInteractMode.get() != ListMode.WhiteList ||
-            blockInteract.get().contains(mc.world.getBlockState(hitResult.getBlockPos()).getBlock());
+            blockInteract.get().contains(mc.level.getBlockState(hitResult.getBlockPos()).getBlock());
     }
 
     private boolean shouldAttackEntity(Entity entity) {
         // Friends
         if ((friends.get() == InteractMode.Both || friends.get() == InteractMode.Hit) &&
-            entity instanceof PlayerEntity && !Friends.get().shouldAttack((PlayerEntity) entity)) {
+            entity instanceof Player && !Friends.get().shouldAttack((Player) entity)) {
             return false;
         }
 
         // Babies
         if ((babies.get() == InteractMode.Both || babies.get() == InteractMode.Hit) &&
-            entity instanceof AnimalEntity && ((AnimalEntity) entity).isBaby()) {
+            entity instanceof Animal && ((Animal) entity).isBaby()) {
             return false;
         }
 
@@ -202,23 +201,23 @@ public class NoInteract extends Module {
             entityHit.get().contains(entity.getType());
     }
 
-    private boolean shouldInteractEntity(Entity entity, Hand hand) {
+    private boolean shouldInteractEntity(Entity entity, InteractionHand hand) {
         // Hand Interactions
         if (entityInteractHand.get() == HandMode.Both ||
-            (entityInteractHand.get() == HandMode.Mainhand && hand == Hand.MAIN_HAND) ||
-            (entityInteractHand.get() == HandMode.Offhand && hand == Hand.OFF_HAND)) {
+            (entityInteractHand.get() == HandMode.Mainhand && hand == InteractionHand.MAIN_HAND) ||
+            (entityInteractHand.get() == HandMode.Offhand && hand == InteractionHand.OFF_HAND)) {
             return false;
         }
 
         // Friends
         if ((friends.get() == InteractMode.Both || friends.get() == InteractMode.Interact) &&
-            entity instanceof PlayerEntity && !Friends.get().shouldAttack((PlayerEntity) entity)) {
+            entity instanceof Player && !Friends.get().shouldAttack((Player) entity)) {
             return false;
         }
 
         // Babies
         if ((babies.get() == InteractMode.Both || babies.get() == InteractMode.Interact) &&
-            entity instanceof AnimalEntity && ((AnimalEntity) entity).isBaby()) {
+            entity instanceof Animal && ((Animal) entity).isBaby()) {
             return false;
         }
 

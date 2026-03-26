@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static net.minecraft.command.CommandSource.suggestMatching;
+import static net.minecraft.commands.SharedSuggestionProvider.suggest;
 
 public class FakePlayerArgumentType implements ArgumentType<String> {
     private static final FakePlayerArgumentType INSTANCE = new FakePlayerArgumentType();
@@ -41,7 +41,7 @@ public class FakePlayerArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return suggestMatching(FakePlayerManager.stream().map(fakePlayerEntity -> fakePlayerEntity.getName().getString()), builder);
+        return suggest(FakePlayerManager.stream().map(fakePlayerEntity -> fakePlayerEntity.getName().getString()), builder);
     }
 
     @Override

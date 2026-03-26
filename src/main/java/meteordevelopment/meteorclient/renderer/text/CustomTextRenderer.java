@@ -9,8 +9,7 @@ import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
-
+import net.minecraft.client.Minecraft;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -124,10 +123,10 @@ public class CustomTextRenderer implements TextRenderer {
             mesh.end();
 
             MeshRenderer.begin()
-                .attachments(MinecraftClient.getInstance().getFramebuffer())
+                .attachments(Minecraft.getInstance().getMainRenderTarget())
                 .pipeline(MeteorRenderPipelines.UI_TEXT)
                 .mesh(mesh)
-                .sampler("u_Texture", font.texture.getGlTextureView(), font.texture.getSampler())
+                .sampler("u_Texture", font.texture.getTextureView(), font.texture.getSampler())
                 .end();
         }
 

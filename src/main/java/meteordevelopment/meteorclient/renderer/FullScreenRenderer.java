@@ -24,7 +24,7 @@ public class FullScreenRenderer {
 
     @PreInit
     public static void init() {
-        mesh = new MeshBuilder(MeteorVertexFormats.POS2, VertexFormat.DrawMode.TRIANGLES, 4, 6);
+        mesh = new MeshBuilder(MeteorVertexFormats.POS2, VertexFormat.Mode.TRIANGLES, 4, 6);
 
         mesh.begin();
 

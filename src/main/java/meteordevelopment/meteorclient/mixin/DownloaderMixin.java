@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
-import net.minecraft.util.Downloader;
+import net.minecraft.server.packs.DownloadQueue;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,20 +27,20 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
  * @author Izuna
  * @see <a href="https://github.com/CCBlueX/LiquidBounce/blob/nextgen/src/main/java/net/ccbluex/liquidbounce/injection/mixins/minecraft/util/MixinDownloader.java">MixinDownloader.java</a>
  */
-@Mixin(Downloader.class)
+@Mixin(DownloadQueue.class)
 public class DownloaderMixin {
     @Shadow
     @Final
-    private Path directory;
+    private Path cacheDir;
 
-    @ModifyExpressionValue(method = "method_55485", at = @At(value = "INVOKE", target = "Ljava/nio/file/Path;resolve(Ljava/lang/String;)Ljava/nio/file/Path;"))
+    @ModifyExpressionValue(method = "lambda$runDownload$0", at = @At(value = "INVOKE", target = "Ljava/nio/file/Path;resolve(Ljava/lang/String;)Ljava/nio/file/Path;"))
     private Path hookResolve(Path original, @Local(argsOnly = true) UUID id) {
-        UUID accountId = mc.getSession().getUuidOrNull();
+        UUID accountId = mc.getUser().getProfileId();
         if (accountId == null) {
             MeteorClient.LOG.warn("Failed to change resource pack download directory because the account id is null.");
             return original;
         }
 
-        return directory.resolve(accountId.toString()).resolve(id.toString());
+        return cacheDir.resolve(accountId.toString()).resolve(id.toString());
     }
 }

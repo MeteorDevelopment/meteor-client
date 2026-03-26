@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BedBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.BedBlock;
 
 public class ReverseStep extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -53,24 +53,24 @@ public class ReverseStep extends Module {
         Entity vehicle = mc.player.getVehicle();
         if (vehicle != null && vehicles.get()) {
             if (canSnap(vehicle)) {
-                ((IVec3d) vehicle.getVelocity()).meteor$setY(-fallSpeed.get());
+                ((IVec3d) vehicle.getDeltaMovement()).meteor$setY(-fallSpeed.get());
             }
         } else {
-            if (mc.player.isHoldingOntoLadder() || mc.player.forwardSpeed == 0 && mc.player.sidewaysSpeed == 0) return;
+            if (mc.player.isSuppressingSlidingDownLadder() || mc.player.zza == 0 && mc.player.xxa == 0) return;
             if (!isOnBed() && canSnap(mc.player)) {
-                ((IVec3d)mc.player.getVelocity()).meteor$setY(-fallSpeed.get());
+                ((IVec3d)mc.player.getDeltaMovement()).meteor$setY(-fallSpeed.get());
             }
         }
     }
 
     private boolean canSnap(Entity entity) {
-        if (!entity.isOnGround() || entity.isSubmergedInWater() || entity.isInLava() || mc.options.jumpKey.isPressed() || entity.noClip)
+        if (!entity.onGround() || entity.isUnderWater() || entity.isInLava() || mc.options.keyJump.isDown() || entity.noPhysics)
             return false;
-        return !mc.world.isSpaceEmpty(entity.getBoundingBox().offset(0.0, (float) -(fallDistance.get() + 0.01), 0.0));
+        return !mc.level.noCollision(entity.getBoundingBox().move(0.0, (float) -(fallDistance.get() + 0.01), 0.0));
     }
 
     private boolean isOnBed() {
-        BlockPos.Mutable blockPos = mc.player.getBlockPos().mutableCopy();
+        BlockPos.MutableBlockPos blockPos = mc.player.blockPosition().mutable();
 
         if (check(blockPos, 0, 0)) return true;
 
@@ -88,9 +88,9 @@ public class ReverseStep extends Module {
         return xa >= 0.7 && za >= 0.7 && check(blockPos, 1, 1);
     }
 
-    private boolean check(BlockPos.Mutable blockPos, int x, int z) {
+    private boolean check(BlockPos.MutableBlockPos blockPos, int x, int z) {
         blockPos.move(x, 0, z);
-        boolean is = mc.world.getBlockState(blockPos).getBlock() instanceof BedBlock;
+        boolean is = mc.level.getBlockState(blockPos).getBlock() instanceof BedBlock;
         blockPos.move(-x, 0, -z);
 
         return is;

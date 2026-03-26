@@ -19,7 +19,7 @@ public class ProvidedStringSetting extends StringSetting {
         this.supplier = supplier;
     }
 
-    public static class Builder extends SettingBuilder<Builder, String, ProvidedStringSetting> {
+    public static class Builder extends SettingBuilder<meteordevelopment.meteorclient.settings.ProvidedStringSetting.Builder, String, ProvidedStringSetting> {
         private Class<? extends WTextBox.Renderer> renderer;
         private Supplier<String[]> supplier;
         private boolean wide;
@@ -28,17 +28,17 @@ public class ProvidedStringSetting extends StringSetting {
             super(null);
         }
 
-        public Builder renderer(Class<? extends WTextBox.Renderer> renderer) {
+        public meteordevelopment.meteorclient.settings.ProvidedStringSetting.Builder renderer(Class<? extends WTextBox.Renderer> renderer) {
             this.renderer = renderer;
             return this;
         }
 
-        public Builder supplier(Supplier<String[]> supplier) {
+        public meteordevelopment.meteorclient.settings.ProvidedStringSetting.Builder supplier(Supplier<String[]> supplier) {
             this.supplier = supplier;
             return this;
         }
 
-        public Builder wide() {
+        public meteordevelopment.meteorclient.settings.ProvidedStringSetting.Builder wide() {
             wide = true;
             return this;
         }

@@ -12,12 +12,12 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BlockSelection extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -70,17 +70,17 @@ public class BlockSelection extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.crosshairTarget == null || !(mc.crosshairTarget instanceof BlockHitResult result) || result.getType() == HitResult.Type.MISS) return;
+        if (mc.hitResult == null || !(mc.hitResult instanceof BlockHitResult result) || result.getType() == HitResult.Type.MISS) return;
 
-        if (hideInside.get() && result.isInsideBlock()) return;
+        if (hideInside.get() && result.isInside()) return;
 
         BlockPos bp = result.getBlockPos();
-        Direction side = result.getSide();
+        Direction side = result.getDirection();
 
-        VoxelShape shape = mc.world.getBlockState(bp).getOutlineShape(mc.world, bp);
+        VoxelShape shape = mc.level.getBlockState(bp).getShape(mc.level, bp);
 
         if (shape.isEmpty()) return;
-        Box box = shape.getBoundingBox();
+        AABB box = shape.bounds();
 
         if (oneSide.get()) {
             if (side == Direction.UP || side == Direction.DOWN) {
@@ -98,13 +98,13 @@ public class BlockSelection extends Module {
         else {
             if (advanced.get()) {
                 if (shapeMode.get() == ShapeMode.Both || shapeMode.get() == ShapeMode.Lines) {
-                    shape.forEachEdge((minX, minY, minZ, maxX, maxY, maxZ) -> {
+                    shape.forAllEdges((minX, minY, minZ, maxX, maxY, maxZ) -> {
                         event.renderer.line(bp.getX() + minX, bp.getY() + minY, bp.getZ() + minZ, bp.getX() + maxX, bp.getY() + maxY, bp.getZ() + maxZ, lineColor.get());
                     });
                 }
 
                 if (shapeMode.get() == ShapeMode.Both || shapeMode.get() == ShapeMode.Sides) {
-                    for (Box b : shape.getBoundingBoxes()) {
+                    for (AABB b : shape.toAabbs()) {
                         render(event, bp, b);
                     }
                 }
@@ -115,7 +115,7 @@ public class BlockSelection extends Module {
         }
     }
 
-    private void render(Render3DEvent event, BlockPos bp, Box box) {
+    private void render(Render3DEvent event, BlockPos bp, AABB box) {
         event.renderer.box(bp.getX() + box.minX, bp.getY() + box.minY, bp.getZ() + box.minZ, bp.getX() + box.maxX, bp.getY() + box.maxY, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }

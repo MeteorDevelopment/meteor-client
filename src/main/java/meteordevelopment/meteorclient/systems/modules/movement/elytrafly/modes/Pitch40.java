@@ -69,7 +69,7 @@ public class Pitch40 extends ElytraFlightMode {
             pitch += randPitch(elytraFly.pitch40rotationSpeedDown.get().floatValue(), 0.50F);
         }
 
-        mc.player.setPitch(pitch);
+        mc.player.setXRot(pitch);
     }
 
     @Override

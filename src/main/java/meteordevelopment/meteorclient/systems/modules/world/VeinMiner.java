@@ -18,16 +18,15 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.shape.VoxelShape;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -155,9 +154,9 @@ public class VeinMiner extends Module {
 
     @EventHandler
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
-        BlockState state = mc.world.getBlockState(event.blockPos);
+        BlockState state = mc.level.getBlockState(event.blockPos);
 
-        if (state.getHardness(mc.world, event.blockPos) < 0)
+        if (state.getDestroySpeed(mc.level, event.blockPos) < 0)
             return;
         if (mode.get() == ListMode.Whitelist && !selectedBlocks.get().contains(state.getBlock()))
             return;
@@ -204,24 +203,24 @@ public class VeinMiner extends Module {
         public void set(StartBreakingBlockEvent event) {
             this.blockPos = event.blockPos;
             this.direction = event.direction;
-            this.originalBlock = mc.world.getBlockState(blockPos).getBlock();
+            this.originalBlock = mc.level.getBlockState(blockPos).getBlock();
             this.mining = false;
         }
 
         public void set(BlockPos pos, Direction dir) {
             this.blockPos = pos;
             this.direction = dir;
-            this.originalBlock = mc.world.getBlockState(pos).getBlock();
+            this.originalBlock = mc.level.getBlockState(pos).getBlock();
             this.mining = false;
         }
 
         public boolean shouldRemove() {
-            return mc.world.getBlockState(blockPos).getBlock() != originalBlock || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.player.getBlockInteractionRange();
+            return mc.level.getBlockState(blockPos).getBlock() != originalBlock || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getStepX(), blockPos.getY() + direction.getStepY(), blockPos.getZ() + direction.getStepZ()) > mc.player.blockInteractionRange();
         }
 
         public void mine() {
             if (!mining) {
-                mc.player.swingHand(Hand.MAIN_HAND);
+                mc.player.swing(InteractionHand.MAIN_HAND);
                 mining = true;
             }
             if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::updateBlockBreakingProgress);
@@ -233,7 +232,7 @@ public class VeinMiner extends Module {
         }
 
         public void render(Render3DEvent event) {
-            VoxelShape shape = mc.world.getBlockState(blockPos).getOutlineShape(mc.world, blockPos);
+            VoxelShape shape = mc.level.getBlockState(blockPos).getShape(mc.level, blockPos);
 
             double x1 = blockPos.getX();
             double y1 = blockPos.getY();
@@ -243,12 +242,12 @@ public class VeinMiner extends Module {
             double z2 = blockPos.getZ() + 1;
 
             if (!shape.isEmpty()) {
-                x1 = blockPos.getX() + shape.getMin(Direction.Axis.X);
-                y1 = blockPos.getY() + shape.getMin(Direction.Axis.Y);
-                z1 = blockPos.getZ() + shape.getMin(Direction.Axis.Z);
-                x2 = blockPos.getX() + shape.getMax(Direction.Axis.X);
-                y2 = blockPos.getY() + shape.getMax(Direction.Axis.Y);
-                z2 = blockPos.getZ() + shape.getMax(Direction.Axis.Z);
+                x1 = blockPos.getX() + shape.min(Direction.Axis.X);
+                y1 = blockPos.getY() + shape.min(Direction.Axis.Y);
+                z1 = blockPos.getZ() + shape.min(Direction.Axis.Z);
+                x2 = blockPos.getX() + shape.max(Direction.Axis.X);
+                y2 = blockPos.getY() + shape.max(Direction.Axis.Y);
+                z2 = blockPos.getZ() + shape.max(Direction.Axis.Z);
             }
 
             event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
@@ -259,10 +258,10 @@ public class VeinMiner extends Module {
         if (depth<=0) return;
         if (foundBlockPositions.contains(pos)) return;
         foundBlockPositions.add(pos);
-        if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.player.getBlockInteractionRange()) return;
+        if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.player.blockInteractionRange()) return;
         for(Vec3i neighbourOffset: blockNeighbours) {
-            BlockPos neighbour = pos.add(neighbourOffset);
-            if (mc.world.getBlockState(neighbour).getBlock().asItem() == item) {
+            BlockPos neighbour = pos.offset(neighbourOffset);
+            if (mc.level.getBlockState(neighbour).getBlock().asItem() == item) {
                 MyBlock block = blockPool.get();
                 block.set(neighbour,dir);
                 blocks.add(block);

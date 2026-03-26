@@ -190,7 +190,7 @@ public class Ambience extends Module {
     }
 
     private void reload() {
-        if (mc.worldRenderer != null && isActive()) mc.worldRenderer.reload();
+        if (mc.levelRenderer != null && isActive()) mc.levelRenderer.allChanged();
     }
 
     public SettingColor skyColor() {

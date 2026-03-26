@@ -15,10 +15,10 @@ import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3x2fStack;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
@@ -28,7 +28,7 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RenderUtils {
-    public static Vec3d center;
+    public static Vec3 center;
     public static final Matrix4f projection = new Matrix4f();
 
     private static final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
@@ -47,12 +47,12 @@ public class RenderUtils {
     }
 
     // Items
-    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride, boolean disableGuiScale) {
-        Matrix3x2fStack matrices = drawContext.getMatrices();
+    public static void drawItem(GuiGraphicsExtractor drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride, boolean disableGuiScale) {
+        Matrix3x2fStack matrices = drawContext.pose();
         matrices.pushMatrix();
 
         if (disableGuiScale) {
-            matrices.scale(1.0f / mc.getWindow().getScaleFactor());
+            matrices.scale(1.0f / mc.getWindow().getGuiScale());
         }
 
         matrices.scale(scale, scale);
@@ -60,13 +60,13 @@ public class RenderUtils {
         int scaledX = (int) (x / scale);
         int scaledY = (int) (y / scale);
 
-        drawContext.drawItem(itemStack, scaledX, scaledY);
-        if (overlay) drawContext.drawStackOverlay(mc.textRenderer, itemStack, scaledX, scaledY, countOverride);
+        drawContext.item(itemStack, scaledX, scaledY);
+        if (overlay) drawContext.itemDecorations(mc.font, itemStack, scaledX, scaledY, countOverride);
 
         matrices.popMatrix();
     }
 
-    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
+    public static void drawItem(GuiGraphicsExtractor drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
         drawItem(drawContext, itemStack, x, y, scale, overlay, null, true);
     }
 
@@ -79,8 +79,8 @@ public class RenderUtils {
         Vector4f center4 = new Vector4f(0, 0, 0, 1).mul(invProjection).mul(invView);
         center4.div(center4.w);
 
-        Vec3d camera = mc.gameRenderer.getCamera().getCameraPos();
-        center = new Vec3d(camera.x + center4.x, camera.y + center4.y, camera.z + center4.z);
+        Vec3 camera = mc.gameRenderer.getMainCamera().position();
+        center = new Vec3(camera.x + center4.x, camera.y + center4.y, camera.z + center4.z);
     }
 
     public static void renderTickingBlock(BlockPos blockPos, Color sideColor, Color lineColor, ShapeMode shapeMode, int excludeDir, int duration, boolean fade, boolean shrink) {
@@ -119,7 +119,7 @@ public class RenderUtils {
     }
 
     public static class RenderBlock {
-        public BlockPos.Mutable pos = new BlockPos.Mutable();
+        public BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
         public Color sideColor, lineColor;
         public ShapeMode shapeMode;

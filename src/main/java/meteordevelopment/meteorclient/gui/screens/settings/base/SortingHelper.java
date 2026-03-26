@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.gui.screens.settings.base;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.util.collection.IndexedIterable;
+import net.minecraft.core.IdMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,7 +85,7 @@ public final class SortingHelper {
     }
 
     private static <T> List<T> createList(Iterable<?> iterable) {
-        if (iterable instanceof IndexedIterable<?> indexed) {
+        if (iterable instanceof IdMap<?> indexed) {
             return new ObjectArrayList<>(indexed.size());
         } else if (iterable instanceof Collection<?> collection) {
             return new ObjectArrayList<>(collection.size());

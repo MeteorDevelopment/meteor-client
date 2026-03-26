@@ -7,19 +7,19 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import net.minecraft.block.entity.MobSpawnerBlockEntity;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.MobSpawnerBlockEntityRenderer;
-import net.minecraft.client.render.block.entity.state.MobSpawnerBlockEntityRenderState;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.SpawnerRenderer;
+import net.minecraft.client.renderer.blockentity.state.SpawnerRenderState;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(MobSpawnerBlockEntityRenderer.class)
-public abstract class MobSpawnerBlockEntityRendererMixin implements BlockEntityRenderer<MobSpawnerBlockEntity, MobSpawnerBlockEntityRenderState> {
-    @Inject(method = "renderDisplayEntity", at = @At("HEAD"), cancellable = true)
-    private static void onRenderDisplayEntity(CallbackInfo ci) {
+@Mixin(SpawnerRenderer.class)
+public abstract class MobSpawnerBlockEntityRendererMixin implements BlockEntityRenderer<SpawnerBlockEntity, SpawnerRenderState> {
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/blockentity/state/SpawnerRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("HEAD"), cancellable = true)
+    private void onRenderDisplayEntity(CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noMobInSpawner()) ci.cancel();
     }
 }

@@ -6,11 +6,11 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(PlayerMoveC2SPacket.class)
+@Mixin(ServerboundMovePlayerPacket.class)
 public abstract class PlayerMoveC2SPacketMixin implements IPlayerMoveC2SPacket {
     @Unique private int tag;
 

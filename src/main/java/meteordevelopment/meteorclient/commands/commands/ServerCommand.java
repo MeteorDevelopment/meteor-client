@@ -15,24 +15,24 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.DefaultPermissions;
-import net.minecraft.command.permission.PermissionPredicate;
-import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
-import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
-import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.LocalDifficulty;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
+import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
+import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
+import net.minecraft.server.permissions.PermissionSet;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.attribute.EnvironmentAttributes;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.apache.commons.lang3.Strings;
 
 import java.net.InetAddress;
@@ -60,7 +60,7 @@ public class ServerCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.executes(context -> {
             basicInfo();
             return SINGLE_SUCCESS;
@@ -75,7 +75,7 @@ public class ServerCommand extends Command {
             plugins.addAll(commandTreePlugins);
 
             if (alias != null) {
-                mc.getNetworkHandler().sendPacket(new RequestCommandCompletionsC2SPacket(RANDOM.nextInt(200), alias + " "));
+                mc.getConnection().send(new ServerboundCommandSuggestionPacket(RANDOM.nextInt(200), alias + " "));
                 tick = true;
             } else printPlugins();
 
@@ -84,26 +84,26 @@ public class ServerCommand extends Command {
 
         builder.then(literal("tps").executes(ctx -> {
             float tps = TickRate.INSTANCE.getTickRate();
-            Formatting color;
-            if (tps > 17.0f) color = Formatting.GREEN;
-            else if (tps > 12.0f) color = Formatting.YELLOW;
-            else color = Formatting.RED;
+            ChatFormatting color;
+            if (tps > 17.0f) color = ChatFormatting.GREEN;
+            else if (tps > 12.0f) color = ChatFormatting.YELLOW;
+            else color = ChatFormatting.RED;
             info("Current TPS: %s%.2f(default).", color, tps);
             return SINGLE_SUCCESS;
         }));
     }
 
     private void basicInfo() {
-        if (mc.isIntegratedServerRunning()) {
-            IntegratedServer server = mc.getServer();
+        if (mc.hasSingleplayerServer()) {
+            IntegratedServer server = mc.getSingleplayerServer();
 
             info("Singleplayer");
-            if (server != null) info("Version: %s", server.getVersion());
+            if (server != null) info("Version: %s", server.getServerVersion());
 
             return;
         }
 
-        ServerInfo server = mc.getCurrentServerEntry();
+        ServerData server = mc.getCurrentServer();
 
         if (server == null) {
             info("Couldn't obtain any server information.");
@@ -112,61 +112,61 @@ public class ServerCommand extends Command {
 
         String ipv4 = "";
         try {
-            ipv4 = InetAddress.getByName(server.address).getHostAddress();
+            ipv4 = InetAddress.getByName(server.ip).getHostAddress();
         } catch (UnknownHostException ignored) {}
 
-        MutableText ipText;
+        MutableComponent ipText;
 
         if (ipv4.isEmpty()) {
-            ipText = Text.literal(Formatting.GRAY + server.address);
+            ipText = Component.literal(ChatFormatting.GRAY + server.ip);
             ipText.setStyle(ipText.getStyle()
-                .withClickEvent(new ClickEvent.CopyToClipboard(server.address))
-                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
+                .withClickEvent(new ClickEvent.CopyToClipboard(server.ip))
+                .withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard")))
             );
         }
         else {
-            ipText = Text.literal(Formatting.GRAY + server.address);
+            ipText = Component.literal(ChatFormatting.GRAY + server.ip);
             ipText.setStyle(ipText.getStyle()
-                .withClickEvent(new ClickEvent.CopyToClipboard(server.address))
-                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
+                .withClickEvent(new ClickEvent.CopyToClipboard(server.ip))
+                .withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard")))
             );
-            MutableText ipv4Text = Text.literal(String.format("%s (%s)", Formatting.GRAY, ipv4));
+            MutableComponent ipv4Text = Component.literal(String.format("%s (%s)", ChatFormatting.GRAY, ipv4));
             ipv4Text.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent.CopyToClipboard(ipv4))
-                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
+                .withHoverEvent(new HoverEvent.ShowText(Component.literal("Copy to clipboard")))
             );
             ipText.append(ipv4Text);
         }
         info(
-            Text.literal(String.format("%sIP: ", Formatting.GRAY))
+            Component.literal(String.format("%sIP: ", ChatFormatting.GRAY))
             .append(ipText)
         );
 
-        info("Port: %d", ServerAddress.parse(server.address).getPort());
-        info("Type: %s", mc.getNetworkHandler().getBrand() != null ? mc.getNetworkHandler().getBrand() : "unknown");
-        info("Motd: %s", server.label != null ? server.label.getString() : "unknown");
+        info("Port: %d", ServerAddress.parseString(server.ip).getPort());
+        info("Type: %s", mc.getConnection().serverBrand() != null ? mc.getConnection().serverBrand() : "unknown");
+        info("Motd: %s", server.motd != null ? server.motd.getString() : "unknown");
         info("Version: %s", server.version.getString());
-        info("Protocol version: %d", server.protocolVersion);
+        info("Protocol version: %d", server.protocol);
         info("Difficulty: %s (Local: %.2f)",
-            mc.world.getDifficulty().getTranslatableName().getString(),
-            new LocalDifficulty(
-                mc.world.getDifficulty(),
-                mc.world.getTimeOfDay(),
-                mc.world.getChunk(mc.player.getBlockPos()).getInhabitedTime(),
-                DimensionType.MOON_SIZES[mc.world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL, mc.player.getBlockPos()).getIndex()] // lol
-            ).getLocalDifficulty()
+            mc.level.getDifficulty().getDisplayName().getString(),
+            new DifficultyInstance(
+                mc.level.getDifficulty(),
+                mc.level.getGameTime(),
+                mc.level.getChunk(mc.player.blockPosition()).getInhabitedTime(),
+                DimensionType.MOON_BRIGHTNESS_PER_PHASE[mc.level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, mc.player.blockPosition()).index()] // lol
+            ).getEffectiveDifficulty()
         );
-        info("Day: %d", mc.world.getTimeOfDay() / 24000L);
+        info("Day: %d", mc.level.getGameTime() / 24000L);
         info("Permission level: %s", formatPerms());
     }
 
     public String formatPerms() {
-        PermissionPredicate permissions = mc.player.getPermissions();
+        PermissionSet permissions = mc.player.permissions();
 
-        if (permissions.hasPermission(DefaultPermissions.OWNERS)) return "4 (Owner)";
-        else if (permissions.hasPermission(DefaultPermissions.ADMINS)) return "3 (Admin)";
-        else if (permissions.hasPermission(DefaultPermissions.GAMEMASTERS)) return "2 (Gamemaster)";
-        else if (permissions.hasPermission(DefaultPermissions.MODERATORS)) return "1 (Moderator)";
+        if (permissions.hasPermission(Permissions.COMMANDS_OWNER)) return "4 (Owner)";
+        else if (permissions.hasPermission(Permissions.COMMANDS_ADMIN)) return "3 (Admin)";
+        else if (permissions.hasPermission(Permissions.COMMANDS_GAMEMASTER)) return "2 (Gamemaster)";
+        else if (permissions.hasPermission(Permissions.COMMANDS_MODERATOR)) return "1 (Moderator)";
         else return "0 (No Perms)";
     }
 
@@ -198,7 +198,7 @@ public class ServerCommand extends Command {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (tick && event.packet instanceof RequestCommandCompletionsC2SPacket) event.cancel();
+        if (tick && event.packet instanceof ServerboundCommandSuggestionPacket) event.cancel();
     }
 
     @EventHandler
@@ -206,15 +206,15 @@ public class ServerCommand extends Command {
         // should return the same set of plugins that command completing '/' would
         // the rationale is that since we should get this packet whenever we log into the server, we can capture it
         // straight away and not need to send a command completion packet for essentially the same results
-        if (event.packet instanceof CommandTreeS2CPacket packet) {
+        if (event.packet instanceof ClientboundCommandsPacket packet) {
             ClientPlayNetworkHandlerAccessor handler = (ClientPlayNetworkHandlerAccessor) event.connection.getPacketListener();
             commandTreePlugins.clear();
             alias = null;
 
             // This gets the root node of the command tree. From there, all of its children have to be of type
             // LiteralCommandNode, so we don't need to worry about checking or casting and can just grab the name
-            packet.getCommandTree(
-                CommandRegistryAccess.of(handler.meteor$getCombinedDynamicRegistries(), handler.meteor$getEnabledFeatures()),
+            packet.getRoot(
+                CommandBuildContext.simple(handler.meteor$getCombinedDynamicRegistries(), handler.meteor$getEnabledFeatures()),
                 ClientPlayNetworkHandlerAccessor.meteor$getCommandNodeFactory()
             ).getChildren().forEach(node -> {
                 String[] split = node.getName().split(":");
@@ -233,8 +233,8 @@ public class ServerCommand extends Command {
         if (!tick) return;
 
         try {
-            if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
-                Suggestions matches = packet.getSuggestions();
+            if (event.packet instanceof ClientboundCommandSuggestionsPacket packet) {
+                Suggestions matches = packet.toSuggestions();
 
                 if (matches.isEmpty()) {
                     error("An error occurred while trying to find plugins.");
@@ -255,10 +255,10 @@ public class ServerCommand extends Command {
 
     private String formatName(String name) {
         if (ANTICHEAT_LIST.contains(name.toLowerCase())) {
-            return String.format("%s%s(default)", Formatting.RED, name);
+            return String.format("%s%s(default)", ChatFormatting.RED, name);
         }
         else if (Strings.CI.contains(name, "exploit") || Strings.CI.contains(name, "cheat") || Strings.CI.contains(name, "illegal")) {
-            return String.format("%s%s(default)", Formatting.RED, name);
+            return String.format("%s%s(default)", ChatFormatting.RED, name);
         }
 
         return String.format("(highlight)%s(default)", name);

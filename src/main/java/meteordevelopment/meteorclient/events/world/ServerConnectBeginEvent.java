@@ -5,15 +5,15 @@
 
 package meteordevelopment.meteorclient.events.world;
 
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 
 public class ServerConnectBeginEvent {
     private static final ServerConnectBeginEvent INSTANCE = new ServerConnectBeginEvent();
     public ServerAddress address;
-    public ServerInfo info;
+    public ServerData info;
 
-    public static ServerConnectBeginEvent get(ServerAddress address, ServerInfo info) {
+    public static ServerConnectBeginEvent get(ServerAddress address, ServerData info) {
         INSTANCE.address = address;
         INSTANCE.info = info;
         return INSTANCE;

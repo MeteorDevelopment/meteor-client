@@ -28,12 +28,12 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.DeathScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
 import java.text.SimpleDateFormat;
@@ -94,7 +94,7 @@ public class WaypointsModule extends Module {
     @EventHandler
     private void onRender2D(Render2DEvent event) {
         TextRenderer text = TextRenderer.get();
-        Vector3d center = new Vector3d(mc.getWindow().getFramebufferWidth() / 2.0, mc.getWindow().getFramebufferHeight() / 2.0, 0);
+        Vector3d center = new Vector3d(mc.getWindow().getWidth() / 2.0, mc.getWindow().getHeight() / 2.0, 0);
         int textRenderDist = textRenderDistance.get();
 
         List<Waypoint> toRemove = new ArrayList<>();
@@ -109,7 +109,7 @@ public class WaypointsModule extends Module {
 
             // Only perform hide when near check if player is alive
             // Otherwise, death waypoints immediately get hidden
-            boolean playerAlive = (mc.player != null && !mc.player.isDead());
+            boolean playerAlive = (mc.player != null && !mc.player.isDeadOrDying());
             boolean waypointIsNear = waypoint.actionWhenNearCheck((int) Math.floor(dist));
             if (playerAlive && waypointIsNear) {
                 switch (waypoint.actionWhenNear.get()) {
@@ -169,13 +169,13 @@ public class WaypointsModule extends Module {
     private void onOpenScreen(OpenScreenEvent event) {
         if (!(event.screen instanceof DeathScreen)) return;
 
-        if (!event.isCancelled()) addDeath(mc.player.getEntityPos());
+        if (!event.isCancelled()) addDeath(mc.player.position());
     }
 
-    public void addDeath(Vec3d deathPos) {
+    public void addDeath(Vec3 deathPos) {
         String time = dateFormat.format(new Date());
         if (dpChat.get()) {
-            MutableText text = Text.literal("Died at ");
+            MutableComponent text = Component.literal("Died at ");
             text.append(formatCoords(deathPos));
             text.append(String.format(" on %s.", time));
             info(text);
@@ -186,7 +186,7 @@ public class WaypointsModule extends Module {
             Waypoint waypoint = new Waypoint.Builder()
                 .name("Death " + time)
                 .icon("skull")
-                .pos(BlockPos.ofFloored(deathPos).up(2))
+                .pos(BlockPos.containing(deathPos).above(2))
                 .dimension(PlayerUtils.getDimension())
                 .build();
 
@@ -279,7 +279,7 @@ public class WaypointsModule extends Module {
         @Override
         public Waypoint create() {
             return new Waypoint.Builder()
-                .pos(MinecraftClient.getInstance().player.getBlockPos().up(2))
+                .pos(Minecraft.getInstance().player.blockPosition().above(2))
                 .dimension(PlayerUtils.getDimension())
                 .build();
         }

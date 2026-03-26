@@ -12,6 +12,7 @@ import baritone.api.pathing.goals.GoalBlock;
 import baritone.api.process.ICustomGoalProcess;
 import baritone.api.process.IMineProcess;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -19,18 +20,17 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FluidBlock;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -100,7 +100,7 @@ public class InfinityMiner extends Module {
     private final IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
     private final Settings baritoneSettings = BaritoneAPI.getSettings();
 
-    private final BlockPos.Mutable homePos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos homePos = new BlockPos.MutableBlockPos();
 
     private boolean prevMineScanDroppedItems;
     private boolean repairing;
@@ -113,7 +113,7 @@ public class InfinityMiner extends Module {
     public void onActivate() {
         prevMineScanDroppedItems = baritoneSettings.mineScanDroppedItems.value;
         baritoneSettings.mineScanDroppedItems.value = true;
-        homePos.set(mc.player.getBlockPos());
+        homePos.set(mc.player.blockPosition());
         repairing = false;
     }
 
@@ -129,9 +129,9 @@ public class InfinityMiner extends Module {
             if (walkHome.get()) {
                 if (isBaritoneNotWalking()) {
                     info("Walking home.");
-                    baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(homePos));
+                    baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(homePos.getX(), homePos.getY(), homePos.getZ()));
                 }
-                else if (mc.player.getBlockPos().equals(homePos) && logOut.get()) logOut();
+                else if (mc.player.blockPosition().equals(homePos) && logOut.get()) logOut();
             }
             else if (logOut.get()) logOut();
             else {
@@ -179,13 +179,13 @@ public class InfinityMiner extends Module {
     }
 
     private boolean needsRepair() {
-        ItemStack itemStack = mc.player.getMainHandStack();
-        double toolPercentage = ((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage();
+        ItemStack itemStack = mc.player.getMainHandItem();
+        double toolPercentage = ((itemStack.getMaxDamage() - itemStack.getDamageValue()) * 100f) / (float) itemStack.getMaxDamage();
         return !(toolPercentage > startMining.get() || (toolPercentage > startRepairing.get() && !repairing));
     }
 
     private boolean findPickaxe() {
-        Predicate<ItemStack> pickaxePredicate = (stack -> stack.isIn(ItemTags.PICKAXES)
+        Predicate<ItemStack> pickaxePredicate = (stack -> stack.is(ItemTags.PICKAXES)
             && Utils.hasEnchantment(stack, Enchantments.MENDING)
             && !Utils.hasEnchantment(stack, Enchantments.SILK_TOUCH));
         FindItemResult bestPick = InvUtils.findInHotbar(pickaxePredicate);
@@ -201,22 +201,18 @@ public class InfinityMiner extends Module {
     }
 
     private void mineTargetBlocks() {
-        Block[] array = new Block[targetBlocks.get().size()];
-
         baritone.getPathingBehavior().cancelEverything();
-        baritone.getMineProcess().mine(targetBlocks.get().toArray(array));
+        BaritoneUtils.mineByBlockIds(baritone.getMineProcess(), targetBlocks.get());
     }
 
     private void mineRepairBlocks() {
-        Block[] array = new Block[repairBlocks.get().size()];
-
         baritone.getPathingBehavior().cancelEverything();
-        baritone.getMineProcess().mine(repairBlocks.get().toArray(array));
+        BaritoneUtils.mineByBlockIds(baritone.getMineProcess(), repairBlocks.get());
     }
 
     private void logOut() {
         toggle();
-        mc.player.networkHandler.sendPacket(new DisconnectS2CPacket(Text.literal("[Infinity Miner] Inventory is full.")));
+        mc.player.connection.send(new ClientboundDisconnectPacket(Component.literal("[Infinity Miner] Inventory is full.")));
     }
 
     private boolean isBaritoneNotMining() {
@@ -228,16 +224,16 @@ public class InfinityMiner extends Module {
     }
 
     private boolean filterBlocks(Block block) {
-        return block != Blocks.AIR && block.getDefaultState().getHardness(mc.world, null) != -1 && !(block instanceof FluidBlock);
+        return block != Blocks.AIR && block.defaultBlockState().getDestroySpeed(mc.level, null) != -1 && !(block instanceof LiquidBlock);
     }
 
     private boolean isFull() {
         for (int i = 0; i <= 35; i++) {
-            ItemStack itemStack = mc.player.getInventory().getStack(i);
+            ItemStack itemStack = mc.player.getInventory().getItem(i);
             if (itemStack.isEmpty()) return false;
 
             for (Item item : targetItems.get()) {
-                if (itemStack.getItem() == item && itemStack.getCount() < itemStack.getMaxCount()) {
+                if (itemStack.getItem() == item && itemStack.getCount() < itemStack.getMaxStackSize()) {
                     return false;
                 }
             }

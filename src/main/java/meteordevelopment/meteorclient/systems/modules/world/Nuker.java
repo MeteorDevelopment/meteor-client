@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -27,18 +28,17 @@ import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.Block;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -289,13 +289,13 @@ public class Nuker extends Module {
     private final Set<BlockPos> interacted = new ObjectOpenHashSet<>();
 
     private boolean firstBlock;
-    private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos lastBlockPos = new BlockPos.MutableBlockPos();
 
     private int timer;
     private int noBlockTimer;
 
-    private final BlockPos.Mutable pos1 = new BlockPos.Mutable(); // Rendering for cubes
-    private final BlockPos.Mutable pos2 = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos pos1 = new BlockPos.MutableBlockPos(); // Rendering for cubes
+    private final BlockPos.MutableBlockPos pos2 = new BlockPos.MutableBlockPos();
     int maxh = 0;
     int maxv = 0;
 
@@ -348,7 +348,7 @@ public class Nuker extends Module {
         // Calculate some stuff
         double pX = mc.player.getX(), pY = mc.player.getY(), pZ = mc.player.getZ();
         double rangeSq = Math.pow(range.get(), 2);
-        BlockPos playerBlockPos = mc.player.getBlockPos();
+        BlockPos playerBlockPos = mc.player.blockPosition();
 
         if (shape.get() == Shape.UniformCube) range.set((double) Math.round(range.get()));
 
@@ -365,7 +365,7 @@ public class Nuker extends Module {
         } else {
             // Only change me if you want to mess with 3D rotations:
             // I messed with it
-            Direction direction = mc.player.getHorizontalFacing();
+            Direction direction = mc.player.getDirection();
             switch (direction) {
                 case Direction.SOUTH -> {
                     pZ_ += 1;
@@ -398,14 +398,14 @@ public class Nuker extends Module {
         // Flatten
         if (mode.get() == Mode.Flatten) pos1.setY((int) Math.floor(pY + 0.5));
 
-        Box box = new Box(pos1.toCenterPos(), pos2.toCenterPos());
+        AABB box = new AABB(pos1.getCenter(), pos2.getCenter());
 
         // Find blocks to break
         BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
-            Vec3d center = blockPos.toCenterPos();
+            Vec3 center = blockPos.getCenter();
             switch (shape.get()) {
                 case Sphere -> {
-                    if (Utils.squaredDistance(pX, pY, pZ, center.getX(), center.getY(), center.getZ()) > rangeSq) return;
+                    if (Utils.squaredDistance(pX, pY, pZ, center.x(), center.y(), center.z()) > rangeSq) return;
                 }
                 case UniformCube -> {
                     if (chebyshevDist(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ(), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= range.get()) return;
@@ -419,10 +419,10 @@ public class Nuker extends Module {
             if (mode.get() == Mode.Flatten && blockPos.getY() + 0.5 < pY) return;
 
             // Smash
-            if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0) return;
+            if (mode.get() == Mode.Smash && blockState.getDestroySpeed(mc.level, blockPos) != 0) return;
 
             // Use only optimal tools
-            if (suitableTools.get() && !interact.get() && !mc.player.getMainHandStack().isSuitableFor(blockState)) return;
+            if (suitableTools.get() && !interact.get() && !mc.player.getMainHandItem().isCorrectToolForDrops(blockState)) return;
 
             // Block must be breakable
             if (!BlockUtils.canBreak(blockPos, blockState) && !interact.get()) return;
@@ -437,7 +437,7 @@ public class Nuker extends Module {
             if (interact.get() && interacted.contains(blockPos)) return;
 
             // Add block
-            blocks.add(blockPos.toImmutable());
+            blocks.add(blockPos.immutable());
         });
 
         // Break block if found
@@ -497,16 +497,16 @@ public class Nuker extends Module {
     private void breakBlock(BlockPos blockPos) {
         if (interact.get()) {
             // Interact mode
-            BlockUtils.interact(new BlockHitResult(blockPos.toCenterPos(), BlockUtils.getDirection(blockPos), blockPos, true), Hand.MAIN_HAND, swing.get());
+            BlockUtils.interact(new BlockHitResult(blockPos.getCenter(), BlockUtils.getDirection(blockPos), blockPos, true), InteractionHand.MAIN_HAND, swing.get());
             interacted.add(blockPos);
         } else if (packetMine.get()) {
             // Packet mine mode
-            mc.interactionManager.sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos), sequence));
+            ((ClientPlayerInteractionManagerAccessor) mc.gameMode).meteor$startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos), sequence));
 
-            if (swing.get()) mc.player.swingHand(Hand.MAIN_HAND);
-            else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+            if (swing.get()) mc.player.swing(InteractionHand.MAIN_HAND);
+            else mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
 
-            mc.interactionManager.sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos), sequence));
+            ((ClientPlayerInteractionManagerAccessor) mc.gameMode).meteor$startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos), sequence));
         } else {
             // Legit mine mode
             BlockUtils.breakBlock(blockPos, swing.get());
@@ -514,9 +514,9 @@ public class Nuker extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3d pos = blockPos.toCenterPos();
-        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
-        BlockHitResult result = mc.world.raycast(raycastContext);
+        Vec3 pos = blockPos.getCenter();
+        ClipContext raycastContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        BlockHitResult result = mc.level.clip(raycastContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !PlayerUtils.isWithin(pos, wallsRange.get());
 
@@ -524,13 +524,13 @@ public class Nuker extends Module {
     }
 
     private void addTargetedBlockToList() {
-        if (!selectBlockBind.get().isPressed() || mc.currentScreen != null) return;
+        if (!selectBlockBind.get().isPressed() || mc.screen != null) return;
 
-        HitResult hitResult = mc.crosshairTarget;
+        HitResult hitResult = mc.hitResult;
         if (hitResult == null || hitResult.getType() != HitResult.Type.BLOCK) return;
 
         BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
-        Block targetBlock = mc.world.getBlockState(pos).getBlock();
+        Block targetBlock = mc.level.getBlockState(pos).getBlock();
 
         List<Block> list = listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get();
         String modeName = listMode.get().name();

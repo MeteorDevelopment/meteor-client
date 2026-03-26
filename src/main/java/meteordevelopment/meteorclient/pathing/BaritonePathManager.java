@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.pathing;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.Goal;
-import baritone.api.pathing.goals.GoalGetToBlock;
+import baritone.api.pathing.goals.GoalBlock;
 import baritone.api.pathing.goals.GoalXZ;
 import baritone.api.process.IBaritoneProcess;
 import baritone.api.process.PathingCommand;
@@ -17,12 +17,11 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 import java.util.function.Predicate;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -76,7 +75,7 @@ public class BaritonePathManager implements IPathManager {
             return;
         }
 
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(pos));
+        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(pos.getX(), pos.getY(), pos.getZ()));
     }
 
     @Override
@@ -87,12 +86,12 @@ public class BaritonePathManager implements IPathManager {
 
     @Override
     public void mine(Block... blocks) {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(blocks);
+        BaritoneUtils.mineByBlockIds(BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess(), java.util.List.of(blocks));
     }
 
     @Override
     public void follow(Predicate<Entity> entity) {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity);
+        BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow((Predicate) entity);
     }
 
     @Override
@@ -157,11 +156,11 @@ public class BaritonePathManager implements IPathManager {
             if (timer <= 0) {
                 timer = 20;
 
-                Vec3d pos = mc.player.getEntityPos();
+                Vec3 pos = mc.player.position();
                 float theta = (float) Math.toRadians(yaw);
 
-                x = (int) Math.floor(pos.x - (double) MathHelper.sin(theta) * 100);
-                z = (int) Math.floor(pos.z + (double) MathHelper.cos(theta) * 100);
+                x = (int) Math.floor(pos.x - (double) Mth.sin(theta) * 100);
+                z = (int) Math.floor(pos.z + (double) Mth.cos(theta) * 100);
             }
 
             timer--;

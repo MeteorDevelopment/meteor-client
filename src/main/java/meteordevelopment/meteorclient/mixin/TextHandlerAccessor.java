@@ -5,12 +5,12 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.client.font.TextHandler;
+import net.minecraft.client.StringSplitter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(TextHandler.class)
+@Mixin(StringSplitter.class)
 public interface TextHandlerAccessor {
-    @Accessor("widthRetriever")
-    TextHandler.WidthRetriever meteor$getWidthRetriever();
+    @Accessor("widthProvider")
+    StringSplitter.WidthProvider meteor$getWidthProvider();
 }

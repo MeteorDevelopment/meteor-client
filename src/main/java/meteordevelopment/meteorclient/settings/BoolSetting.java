@@ -5,10 +5,9 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.nbt.NbtCompound;
-
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.nbt.CompoundTag;
 
 public class BoolSetting extends Setting<Boolean> {
     private static final List<String> SUGGESTIONS = List.of("true", "false", "toggle");
@@ -36,15 +35,15 @@ public class BoolSetting extends Setting<Boolean> {
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
+    public CompoundTag save(CompoundTag tag) {
         tag.putBoolean("value", get());
 
         return tag;
     }
 
     @Override
-    public Boolean load(NbtCompound tag) {
-        set(tag.getBoolean("value", false));
+    public Boolean load(CompoundTag tag) {
+        set(tag.getBooleanOr("value", false));
 
         return get();
     }

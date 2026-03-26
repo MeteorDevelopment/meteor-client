@@ -13,41 +13,40 @@ import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.Dynamic3CommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.CommandSource;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.gen.structure.Structure;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
-public class RegistryEntryReferenceArgumentType<T> implements ArgumentType<RegistryEntry.Reference<T>> {
-    private static final RegistryEntryReferenceArgumentType<Enchantment> ENCHANTMENT = new RegistryEntryReferenceArgumentType<>(RegistryKeys.ENCHANTMENT);
-    private static final RegistryEntryReferenceArgumentType<EntityAttribute> ENTITY_ATTRIBUTE = new RegistryEntryReferenceArgumentType<>(RegistryKeys.ATTRIBUTE);
-    private static final RegistryEntryReferenceArgumentType<Structure> STRUCTURE = new RegistryEntryReferenceArgumentType<>(RegistryKeys.STRUCTURE);
-    private static final RegistryEntryReferenceArgumentType<EntityType<?>> ENTITY_TYPE = new RegistryEntryReferenceArgumentType<>(RegistryKeys.ENTITY_TYPE);
-    private static final RegistryEntryReferenceArgumentType<StatusEffect> STATUS_EFFECT = new RegistryEntryReferenceArgumentType<>(RegistryKeys.STATUS_EFFECT);
+public class RegistryEntryReferenceArgumentType<T> implements ArgumentType<Holder.Reference<T>> {
+    private static final RegistryEntryReferenceArgumentType<Enchantment> ENCHANTMENT = new RegistryEntryReferenceArgumentType<>(Registries.ENCHANTMENT);
+    private static final RegistryEntryReferenceArgumentType<Attribute> ENTITY_ATTRIBUTE = new RegistryEntryReferenceArgumentType<>(Registries.ATTRIBUTE);
+    private static final RegistryEntryReferenceArgumentType<Structure> STRUCTURE = new RegistryEntryReferenceArgumentType<>(Registries.STRUCTURE);
+    private static final RegistryEntryReferenceArgumentType<EntityType<?>> ENTITY_TYPE = new RegistryEntryReferenceArgumentType<>(Registries.ENTITY_TYPE);
+    private static final RegistryEntryReferenceArgumentType<MobEffect> STATUS_EFFECT = new RegistryEntryReferenceArgumentType<>(Registries.MOB_EFFECT);
 
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012");
     public static final Dynamic2CommandExceptionType NOT_FOUND_EXCEPTION = new Dynamic2CommandExceptionType(
-        (element, type) -> Text.stringifiedTranslatable("argument.resource.not_found", element, type)
+        (element, type) -> Component.translatableEscape("argument.resource.not_found", element, type)
     );
     public static final Dynamic3CommandExceptionType INVALID_TYPE_EXCEPTION = new Dynamic3CommandExceptionType(
-        (element, type, expectedType) -> Text.stringifiedTranslatable("argument.resource.invalid_type", element, type, expectedType)
+        (element, type, expectedType) -> Component.translatableEscape("argument.resource.invalid_type", element, type, expectedType)
     );
-    private final RegistryKey<? extends Registry<T>> registryRef;
+    private final ResourceKey<? extends Registry<T>> registryRef;
 
-    private RegistryEntryReferenceArgumentType(RegistryKey<? extends Registry<T>> registryRef) {
+    private RegistryEntryReferenceArgumentType(ResourceKey<? extends Registry<T>> registryRef) {
         this.registryRef = registryRef;
     }
 
@@ -55,7 +54,7 @@ public class RegistryEntryReferenceArgumentType<T> implements ArgumentType<Regis
         return ENCHANTMENT;
     }
 
-    public static RegistryEntryReferenceArgumentType<EntityAttribute> entityAttribute() {
+    public static RegistryEntryReferenceArgumentType<Attribute> entityAttribute() {
         return ENTITY_ATTRIBUTE;
     }
 
@@ -67,54 +66,54 @@ public class RegistryEntryReferenceArgumentType<T> implements ArgumentType<Regis
         return ENTITY_TYPE;
     }
 
-    public static RegistryEntryReferenceArgumentType<StatusEffect> statusEffect() {
+    public static RegistryEntryReferenceArgumentType<MobEffect> statusEffect() {
         return STATUS_EFFECT;
     }
 
-    public static RegistryEntry.Reference<Enchantment> getEnchantment(CommandContext<?> context, String name) throws CommandSyntaxException {
-        return getRegistryEntry(context, name, RegistryKeys.ENCHANTMENT);
+    public static Holder.Reference<Enchantment> getEnchantment(CommandContext<?> context, String name) throws CommandSyntaxException {
+        return getRegistryEntry(context, name, Registries.ENCHANTMENT);
     }
 
-    public static RegistryEntry.Reference<EntityAttribute> getEntityAttribute(CommandContext<?> context, String name) throws CommandSyntaxException {
-        return getRegistryEntry(context, name, RegistryKeys.ATTRIBUTE);
+    public static Holder.Reference<Attribute> getEntityAttribute(CommandContext<?> context, String name) throws CommandSyntaxException {
+        return getRegistryEntry(context, name, Registries.ATTRIBUTE);
     }
 
-    public static RegistryEntry.Reference<Structure> getStructure(CommandContext<?> context, String name) throws CommandSyntaxException {
-        return getRegistryEntry(context, name, RegistryKeys.STRUCTURE);
+    public static Holder.Reference<Structure> getStructure(CommandContext<?> context, String name) throws CommandSyntaxException {
+        return getRegistryEntry(context, name, Registries.STRUCTURE);
     }
 
-    public static RegistryEntry.Reference<EntityType<?>> getEntityType(CommandContext<?> context, String name) throws CommandSyntaxException {
-        return getRegistryEntry(context, name, RegistryKeys.ENTITY_TYPE);
+    public static Holder.Reference<EntityType<?>> getEntityType(CommandContext<?> context, String name) throws CommandSyntaxException {
+        return getRegistryEntry(context, name, Registries.ENTITY_TYPE);
     }
 
-    public static RegistryEntry.Reference<StatusEffect> getStatusEffect(CommandContext<?> context, String name) throws CommandSyntaxException {
-        return getRegistryEntry(context, name, RegistryKeys.STATUS_EFFECT);
+    public static Holder.Reference<MobEffect> getStatusEffect(CommandContext<?> context, String name) throws CommandSyntaxException {
+        return getRegistryEntry(context, name, Registries.MOB_EFFECT);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> RegistryEntry.Reference<T> getRegistryEntry(CommandContext<?> context, String name, RegistryKey<Registry<T>> registryRef) throws CommandSyntaxException {
-        RegistryEntry.Reference<T> reference = context.getArgument(name, RegistryEntry.Reference.class);
-        RegistryKey<?> registryKey = reference.registryKey();
-        if (registryKey.isOf(registryRef)) {
+    private static <T> Holder.Reference<T> getRegistryEntry(CommandContext<?> context, String name, ResourceKey<Registry<T>> registryRef) throws CommandSyntaxException {
+        Holder.Reference<T> reference = context.getArgument(name, Holder.Reference.class);
+        ResourceKey<?> registryKey = reference.key();
+        if (registryKey.isFor(registryRef)) {
             return reference;
         } else {
-            throw INVALID_TYPE_EXCEPTION.create(registryKey.getValue(), registryKey.getRegistry(), registryRef.getValue());
+            throw INVALID_TYPE_EXCEPTION.create(registryKey.identifier(), registryKey.registry(), registryRef.identifier());
         }
     }
 
     @Override
-    public RegistryEntry.Reference<T> parse(StringReader reader) throws CommandSyntaxException {
-        Identifier identifier = Identifier.fromCommandInput(reader);
-        RegistryKey<T> registryKey = RegistryKey.of(this.registryRef, identifier);
-        return MinecraftClient.getInstance().getNetworkHandler().getRegistryManager()
-            .getOrThrow(this.registryRef)
-            .getOptional(registryKey)
-            .orElseThrow(() -> NOT_FOUND_EXCEPTION.createWithContext(reader, identifier, this.registryRef.getValue()));
+    public Holder.Reference<T> parse(StringReader reader) throws CommandSyntaxException {
+        Identifier identifier = Identifier.read(reader);
+        ResourceKey<T> registryKey = ResourceKey.create(this.registryRef, identifier);
+        return Minecraft.getInstance().getConnection().registryAccess()
+            .lookupOrThrow(this.registryRef)
+            .get(registryKey)
+            .orElseThrow(() -> NOT_FOUND_EXCEPTION.createWithContext(reader, identifier, this.registryRef.identifier()));
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestIdentifiers(MinecraftClient.getInstance().getNetworkHandler().getRegistryManager().getOrThrow(this.registryRef).streamKeys().map(RegistryKey::getValue), builder);
+        return SharedSuggestionProvider.suggestResource(Minecraft.getInstance().getConnection().registryAccess().lookupOrThrow(this.registryRef).listElementIds().map(ResourceKey::identifier), builder);
     }
 
     @Override

@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.meteordev.starscript.Script;
 
 import java.util.ArrayList;
@@ -50,12 +50,12 @@ public class Macro implements ISerializable<Macro> {
     private boolean dirty;
 
     public Macro() {}
-    public Macro(NbtElement tag) {
-        fromTag((NbtCompound) tag);
+    public Macro(Tag tag) {
+        fromTag((CompoundTag) tag);
     }
 
     public boolean onAction(boolean isKey, int value, int modifiers) {
-        if (!keybind.get().matches(isKey, value, modifiers) || mc.currentScreen != null) return false;
+        if (!keybind.get().matches(isKey, value, modifiers) || mc.screen != null) return false;
         return onAction();
     }
 
@@ -83,8 +83,8 @@ public class Macro implements ISerializable<Macro> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.put("settings", settings.toTag());
 
@@ -92,7 +92,7 @@ public class Macro implements ISerializable<Macro> {
     }
 
     @Override
-    public Macro fromTag(NbtCompound tag) {
+    public Macro fromTag(CompoundTag tag) {
         if (tag.contains("settings")) {
             settings.fromTag(tag.getCompoundOrEmpty("settings"));
         }

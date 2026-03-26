@@ -10,8 +10,8 @@ import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPac
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.passive.AbstractDonkeyEntity;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
 
 public class MountBypass extends Module {
     private boolean dontCancel;
@@ -28,7 +28,7 @@ public class MountBypass extends Module {
         }
 
         if (event.packet instanceof IPlayerInteractEntityC2SPacket packet) {
-            if (packet.meteor$getType() == PlayerInteractEntityC2SPacket.InteractType.INTERACT_AT && packet.meteor$getEntity() instanceof AbstractDonkeyEntity) event.cancel();
+            if (packet.meteor$isInteractAt() && packet.meteor$getEntity() instanceof AbstractChestedHorse) event.cancel();
         }
     }
 }

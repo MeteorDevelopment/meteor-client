@@ -14,13 +14,12 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.decoration.EndCrystalEntity;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import java.util.OptionalDouble;
 
 public class Step extends Module {
@@ -67,7 +66,7 @@ public class Step extends Module {
 
     @Override
     public void onActivate() {
-        prevStepHeight = mc.player.getStepHeight();
+        prevStepHeight = mc.player.maxUpStep();
 
         prevPathManagerStep = PathManagers.get().getSettings().getStep().get();
         PathManagers.get().getSettings().getStep().set(true);
@@ -75,18 +74,18 @@ public class Step extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isSneaking()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isSneaking());
+        boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isShiftKeyDown()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isShiftKeyDown());
         double height = getMaxSafeHeight();
         if (work && height > 0) {
-            mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(height);
+            mc.player.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(height);
         } else {
-            mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
+            mc.player.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
         }
     }
 
     @Override
     public void onDeactivate() {
-        mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
+        mc.player.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
 
         PathManagers.get().getSettings().getStep().set(prevPathManagerStep);
     }
@@ -96,10 +95,10 @@ public class Step extends Module {
     }
 
     private double getExplosionDamage() {
-        OptionalDouble crystalDamage = Streams.stream(mc.world.getEntities())
-                .filter(entity -> entity instanceof EndCrystalEntity)
+        OptionalDouble crystalDamage = Streams.stream(mc.level.entitiesForRendering())
+                .filter(entity -> entity instanceof EndCrystal)
                 .filter(Entity::isAlive)
-                .mapToDouble(entity -> DamageUtils.crystalDamage(mc.player, entity.getEntityPos()))
+                .mapToDouble(entity -> DamageUtils.crystalDamage(mc.player, entity.position()))
                 .max();
         return crystalDamage.orElse(0.0);
     }
@@ -118,35 +117,35 @@ public class Step extends Module {
         double max = height.get();
         double h = 0;
         double currentDamage =getExplosionDamage();
-        Box initial = mc.player.getBoundingBox();
+        AABB initial = mc.player.getBoundingBox();
 
         // all of this is to avoid running into crystals which are behind
         // one block when holding a movement key because standing on the
         // near edge of that block is technically safe
 
-        Vec3d inputOffset = mc.player.getRotationVector();
-        Vec2f input = mc.player.input.getMovementInput();
+        Vec3 inputOffset = mc.player.getLookAngle();
+        Vec2 input = mc.player.input.getMoveVector();
         ((IVec3d) inputOffset).meteor$setY(0);
-        inputOffset = inputOffset.normalize().multiply(1.2);
+        inputOffset = inputOffset.normalize().scale(1.2);
         double zdot = inputOffset.z;
         double xdot = inputOffset.x;
-        inputOffset = new Vec3d(input.y * xdot + input.x * zdot, 0, input.x * xdot + input.y * zdot);
+        inputOffset = new Vec3(input.y * xdot + input.x * zdot, 0, input.x * xdot + input.y * zdot);
 
         for (int i = 1; i < max; i++) {
-            mc.player.setBoundingBox(initial.offset(0, i, 0));
+            mc.player.setBoundingBox(initial.move(0, i, 0));
             if (!isSaferThanWith(currentDamage)) {
                 mc.player.setBoundingBox(initial);
                 return h;
             }
 
-            mc.player.setBoundingBox(mc.player.getBoundingBox().offset(inputOffset));
+            mc.player.setBoundingBox(mc.player.getBoundingBox().move(inputOffset));
             if (!isSaferThanWith(currentDamage)) {
                 mc.player.setBoundingBox(initial);
                 return h;
             }
             h += 1;
         }
-        mc.player.setBoundingBox(initial.offset(0, max, 0));
+        mc.player.setBoundingBox(initial.move(0, max, 0));
 
         if (isSaferThanWith(currentDamage)) h = max;
 

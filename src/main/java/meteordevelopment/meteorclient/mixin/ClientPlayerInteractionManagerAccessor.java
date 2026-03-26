@@ -5,19 +5,25 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.multiplayer.prediction.PredictiveAction;
+import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ClientPlayerInteractionManager.class)
+@Mixin(MultiPlayerGameMode.class)
 public interface ClientPlayerInteractionManagerAccessor {
-    @Accessor("currentBreakingProgress")
+    @Accessor("destroyProgress")
     float meteor$getBreakingProgress();
 
-    @Accessor("currentBreakingProgress")
+    @Accessor("destroyProgress")
     void meteor$setCurrentBreakingProgress(float progress);
 
-    @Accessor("currentBreakingPos")
+    @Accessor("destroyBlockPos")
     BlockPos meteor$getCurrentBreakingBlockPos();
+
+    @Invoker("startPrediction")
+    void meteor$startPrediction(ClientLevel level, PredictiveAction action);
 }

@@ -13,26 +13,25 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.RegistryEntryReferenceArgumentType;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.command.CommandSource;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.Text;
-
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import java.util.function.ToIntFunction;
 
 public class EnchantCommand extends Command {
-    private static final SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(Text.literal("You must be in creative mode to use this."));
-    private static final SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(Text.literal("You need to hold some item to enchant."));
+    private static final SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(Component.literal("You must be in creative mode to use this."));
+    private static final SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(Component.literal("You need to hold some item to enchant."));
 
     public EnchantCommand() {
         super("enchant", "Enchants the item in your hand. REQUIRES Creative mode.");
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(literal("one").then(argument("enchantment", RegistryEntryReferenceArgumentType.enchantment())
             .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
                 one(context, enchantment -> context.getArgument("level", Integer.class));
@@ -76,7 +75,7 @@ public class EnchantCommand extends Command {
 
         builder.then(literal("remove").then(argument("enchantment", RegistryEntryReferenceArgumentType.enchantment()).executes(context -> {
             ItemStack itemStack = tryGetItemStack();
-            RegistryEntry.Reference<Enchantment> enchantment = RegistryEntryReferenceArgumentType.getEnchantment(context, "enchantment");
+            Holder.Reference<Enchantment> enchantment = RegistryEntryReferenceArgumentType.getEnchantment(context, "enchantment");
             Utils.removeEnchantment(itemStack, enchantment.value());
 
             syncItem();
@@ -84,10 +83,10 @@ public class EnchantCommand extends Command {
         })));
     }
 
-    private void one(CommandContext<CommandSource> context, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
+    private void one(CommandContext<SharedSuggestionProvider> context, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        RegistryEntry.Reference<Enchantment> enchantment = RegistryEntryReferenceArgumentType.getEnchantment(context, "enchantment");
+        Holder.Reference<Enchantment> enchantment = RegistryEntryReferenceArgumentType.getEnchantment(context, "enchantment");
         Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
 
         syncItem();
@@ -96,9 +95,9 @@ public class EnchantCommand extends Command {
     private void all(boolean onlyPossible, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        mc.getNetworkHandler().getRegistryManager().getOptional(RegistryKeys.ENCHANTMENT).ifPresent(registry -> {
-            registry.streamEntries().forEach(enchantment -> {
-                if (!onlyPossible || enchantment.value().isAcceptableItem(itemStack)) {
+        mc.getConnection().registryAccess().lookup(Registries.ENCHANTMENT).ifPresent(registry -> {
+            registry.listElements().forEach(enchantment -> {
+                if (!onlyPossible || enchantment.value().canEnchant(itemStack)) {
                     Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
                 }
             });
@@ -122,8 +121,8 @@ public class EnchantCommand extends Command {
     }
 
     private ItemStack getItemStack() {
-        ItemStack itemStack = mc.player.getMainHandStack();
-        if (itemStack == null) itemStack = mc.player.getOffHandStack();
+        ItemStack itemStack = mc.player.getMainHandItem();
+        if (itemStack == null) itemStack = mc.player.getOffhandItem();
         return itemStack.isEmpty() ? null : itemStack;
     }
 }

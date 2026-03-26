@@ -5,46 +5,26 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.blaze3d.systems.RenderPassBackend;
+import meteordevelopment.meteorclient.gui.renderer.ScissorState;
 import meteordevelopment.meteorclient.mixininterface.IGpuDevice;
-import net.minecraft.client.gl.GlBackend;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(GlBackend.class)
+@Mixin(targets = "com.mojang.blaze3d.opengl.GlDevice")
 public abstract class GlBackendMixin implements IGpuDevice {
-    @Unique
-    private int x, y, width, height;
-
-    @Unique
-    private boolean set;
-
     @Override
     public void meteor$pushScissor(int x, int y, int width, int height) {
-        if (set)
-            throw new IllegalStateException("Currently there can only be one global scissor pushed");
-
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-
-        set = true;
+        ScissorState.push(x, y, width, height);
     }
 
     @Override
     public void meteor$popScissor() {
-        if (!set)
-            throw new IllegalStateException("No scissor pushed");
-
-        set = false;
+        ScissorState.pop();
     }
 
     @Deprecated
     @Override
-    public void meteor$onCreateRenderPass(RenderPass pass) {
-        if (set) {
-            pass.enableScissor(x, y, width, height);
-        }
+    public void meteor$onCreateRenderPass(RenderPassBackend pass) {
+        ScissorState.onCreateRenderPass(pass);
     }
 }

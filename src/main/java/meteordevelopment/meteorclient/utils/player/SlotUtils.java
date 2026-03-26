@@ -8,20 +8,43 @@ package meteordevelopment.meteorclient.utils.player;
 import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
 import meteordevelopment.meteorclient.mixin.ItemGroupsAccessor;
 import meteordevelopment.meteorclient.mixin.MountScreenHandlerAccessor;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.SkeletonHorseEntity;
-import net.minecraft.entity.mob.ZombieHorseEntity;
-import net.minecraft.entity.passive.AbstractDonkeyEntity;
-import net.minecraft.entity.passive.CamelEntity;
-import net.minecraft.entity.passive.HorseEntity;
-import net.minecraft.entity.passive.LlamaEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.*;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.inventory.*;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.camel.Camel;
+import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
+import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.animal.equine.Llama;
+import net.minecraft.world.entity.animal.equine.SkeletonHorse;
+import net.minecraft.world.entity.animal.equine.ZombieHorse;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.inventory.BeaconMenu;
+import net.minecraft.world.inventory.BlastFurnaceMenu;
+import net.minecraft.world.inventory.BrewingStandMenu;
+import net.minecraft.world.inventory.CartographyTableMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.CrafterMenu;
+import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.DispenserMenu;
+import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.inventory.FurnaceMenu;
+import net.minecraft.world.inventory.GrindstoneMenu;
+import net.minecraft.world.inventory.HopperMenu;
+import net.minecraft.world.inventory.HorseInventoryMenu;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.LecternMenu;
+import net.minecraft.world.inventory.LoomMenu;
+import net.minecraft.world.inventory.MerchantMenu;
+import net.minecraft.world.inventory.ShulkerBoxMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.SmithingMenu;
+import net.minecraft.world.inventory.SmokerMenu;
+import net.minecraft.world.inventory.StonecutterMenu;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -31,7 +54,7 @@ public class SlotUtils {
      * player inventory - e.g. {@code mc.player.getInventory().getSelectedSlot()} returns the slot index of your
      * selected slot (i.e. main hand).
      *
-     * @see net.minecraft.entity.player.PlayerInventory
+     * @see net.minecraft.world.entity.player.Inventory
      * @see Slot#index
      */
     public static final int HOTBAR_START = 0;
@@ -51,37 +74,37 @@ public class SlotUtils {
      * to translate slot indices to the ids for each handled screen.
      *
      * @see <a href="https://minecraft.wiki/w/Java_Edition_protocol/Inventory">the minecraft.wiki page</a> for every slot id
-     * @see ClientPlayerInteractionManager#clickSlot(int, int, int, SlotActionType, PlayerEntity)
-     * @see ScreenHandler#internalOnSlotClick(int, int, SlotActionType, PlayerEntity)
-     * @see Slot#id
+     * @see MultiPlayerGameMode#clickSlot(int, int, int, ContainerInput, Player)
+     * @see AbstractContainerMenu#doClick(int, int, ContainerInput, Player)
+     * @see Slot#index
      */
     public static int indexToId(int i) {
         if (mc.player == null) return -1;
-        ScreenHandler handler = mc.player.currentScreenHandler;
+        AbstractContainerMenu handler = mc.player.containerMenu;
 
-        if (handler instanceof PlayerScreenHandler) return survivalInventory(i);
-        if (handler instanceof CreativeInventoryScreen.CreativeScreenHandler) return creativeInventory(i);
-        if (handler instanceof GenericContainerScreenHandler genericContainerScreenHandler) return genericContainer(i, genericContainerScreenHandler.getRows());
-        if (handler instanceof CraftingScreenHandler) return craftingTable(i);
-        if (handler instanceof FurnaceScreenHandler) return furnace(i);
-        if (handler instanceof BlastFurnaceScreenHandler) return furnace(i);
-        if (handler instanceof SmokerScreenHandler) return furnace(i);
-        if (handler instanceof Generic3x3ContainerScreenHandler) return generic3x3(i);
-        if (handler instanceof EnchantmentScreenHandler) return enchantmentTable(i);
-        if (handler instanceof BrewingStandScreenHandler) return brewingStand(i);
-        if (handler instanceof MerchantScreenHandler) return villager(i);
-        if (handler instanceof BeaconScreenHandler) return beacon(i);
-        if (handler instanceof AnvilScreenHandler) return anvil(i);
-        if (handler instanceof HopperScreenHandler) return hopper(i);
-        if (handler instanceof ShulkerBoxScreenHandler) return genericContainer(i, 3);
-        if (handler instanceof HorseScreenHandler) return horse(handler, i);
-        if (handler instanceof CartographyTableScreenHandler) return cartographyTable(i);
-        if (handler instanceof GrindstoneScreenHandler) return grindstone(i);
-        if (handler instanceof LecternScreenHandler) return lectern();
-        if (handler instanceof LoomScreenHandler) return loom(i);
-        if (handler instanceof StonecutterScreenHandler) return stonecutter(i);
-        if (handler instanceof CrafterScreenHandler) return crafter(i);
-        if (handler instanceof SmithingScreenHandler) return smithingTable(i);
+        if (handler instanceof InventoryMenu) return survivalInventory(i);
+        if (handler instanceof CreativeModeInventoryScreen.ItemPickerMenu) return creativeInventory(i);
+        if (handler instanceof ChestMenu genericContainerScreenHandler) return genericContainer(i, genericContainerScreenHandler.getRowCount());
+        if (handler instanceof CraftingMenu) return craftingTable(i);
+        if (handler instanceof FurnaceMenu) return furnace(i);
+        if (handler instanceof BlastFurnaceMenu) return furnace(i);
+        if (handler instanceof SmokerMenu) return furnace(i);
+        if (handler instanceof DispenserMenu) return generic3x3(i);
+        if (handler instanceof EnchantmentMenu) return enchantmentTable(i);
+        if (handler instanceof BrewingStandMenu) return brewingStand(i);
+        if (handler instanceof MerchantMenu) return villager(i);
+        if (handler instanceof BeaconMenu) return beacon(i);
+        if (handler instanceof AnvilMenu) return anvil(i);
+        if (handler instanceof HopperMenu) return hopper(i);
+        if (handler instanceof ShulkerBoxMenu) return genericContainer(i, 3);
+        if (handler instanceof HorseInventoryMenu) return horse(handler, i);
+        if (handler instanceof CartographyTableMenu) return cartographyTable(i);
+        if (handler instanceof GrindstoneMenu) return grindstone(i);
+        if (handler instanceof LecternMenu) return lectern();
+        if (handler instanceof LoomMenu) return loom(i);
+        if (handler instanceof StonecutterMenu) return stonecutter(i);
+        if (handler instanceof CrafterMenu) return crafter(i);
+        if (handler instanceof SmithingMenu) return smithingTable(i);
 
         return -1;
     }
@@ -94,7 +117,7 @@ public class SlotUtils {
     }
 
     private static int creativeInventory(int i) {
-        if (CreativeInventoryScreenAccessor.meteor$getSelectedTab() != Registries.ITEM_GROUP.get(ItemGroupsAccessor.meteor$getInventory()))
+        if (CreativeInventoryScreenAccessor.meteor$getSelectedTab() != BuiltInRegistries.CREATIVE_MODE_TAB.getValue(ItemGroupsAccessor.meteor$getInventory()))
             return -1;
         return survivalInventory(i);
     }
@@ -159,18 +182,18 @@ public class SlotUtils {
         return -1;
     }
 
-    private static int horse(ScreenHandler handler, int i) {
+    private static int horse(AbstractContainerMenu handler, int i) {
         LivingEntity entity = ((MountScreenHandlerAccessor) handler).meteor$getMount();
 
-        if (entity instanceof LlamaEntity llamaEntity) {
+        if (entity instanceof Llama llamaEntity) {
             int strength = llamaEntity.getStrength();
             if (isHotbar(i)) return (2 + 3 * strength) + 28 + i;
             if (isMain(i)) return (2 + 3 * strength) + 1 + (i - 9);
-        } else if (entity instanceof HorseEntity || entity instanceof SkeletonHorseEntity
-            || entity instanceof ZombieHorseEntity || entity instanceof CamelEntity) {
+        } else if (entity instanceof Horse || entity instanceof SkeletonHorse
+            || entity instanceof ZombieHorse || entity instanceof Camel) {
             if (isHotbar(i)) return 29 + i;
             if (isMain(i)) return 2 + (i - 9);
-        } else if (entity instanceof AbstractDonkeyEntity abstractDonkeyEntity) {
+        } else if (entity instanceof AbstractChestedHorse abstractDonkeyEntity) {
             boolean chest = abstractDonkeyEntity.hasChest();
             if (isHotbar(i)) return (chest ? 44 : 29) + i;
             if (isMain(i)) return (chest ? 17 : 2) + (i - 9);

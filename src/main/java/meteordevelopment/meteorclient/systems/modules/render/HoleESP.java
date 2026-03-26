@@ -20,13 +20,12 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.chunk.WorldChunk;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.LevelChunk;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -180,22 +179,22 @@ public class HoleESP extends Module {
 
             for (Direction direction : Direction.values()) {
                 if (direction == Direction.UP) continue;
-                BlockPos offsetPos = blockPos.offset(direction);
-                Block block = mc.world.getBlockState(offsetPos).getBlock();
-                boolean breakable = block.getHardness() >= 0;
+                BlockPos offsetPos = blockPos.relative(direction);
+                Block block = mc.level.getBlockState(offsetPos).getBlock();
+                boolean breakable = block.defaultDestroyTime() >= 0;
 
                 if (((AbstractBlockAccessor) block).meteor$isCollidable() && !breakable) bedrock++;
-                else if (block.getBlastResistance() >= 600 && breakable) obsidian++;
+                else if (block.getExplosionResistance() >= 600 && breakable) obsidian++;
                 else if (direction == Direction.DOWN) return;
                 else if (doubles.get() && air == null && validHole(offsetPos)) {
                     for (Direction dir : Direction.values()) {
                         if (dir == direction.getOpposite() || dir == Direction.UP) continue;
 
-                        block = mc.world.getBlockState(offsetPos.offset(dir)).getBlock();
-                        breakable = block.getHardness() >= 0;
+                        block = mc.level.getBlockState(offsetPos.relative(dir)).getBlock();
+                        breakable = block.defaultDestroyTime() >= 0;
 
                         if (((AbstractBlockAccessor) block).meteor$isCollidable() && !breakable) bedrock++;
-                        else if (block.getBlastResistance() >= 600 && breakable) obsidian++;
+                        else if (block.getExplosionResistance() >= 600 && breakable) obsidian++;
                         else return;
                     }
 
@@ -213,16 +212,16 @@ public class HoleESP extends Module {
     }
 
     private boolean validHole(BlockPos pos) {
-        if (ignoreOwn.get() && mc.player.getBlockPos().equals(pos)) return false;
+        if (ignoreOwn.get() && mc.player.blockPosition().equals(pos)) return false;
 
-        WorldChunk chunk = mc.world.getChunk(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()));
+        LevelChunk chunk = mc.level.getChunk(SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ()));
         Block block = chunk.getBlockState(pos).getBlock();
         if (!webs.get() && block == Blocks.COBWEB) return false;
 
         if (((AbstractBlockAccessor) block).meteor$isCollidable()) return false;
 
         for (int i = 0; i < holeHeight.get(); i++) {
-            if (((AbstractBlockAccessor) chunk.getBlockState(pos.up(i)).getBlock()).meteor$isCollidable()) return false;
+            if (((AbstractBlockAccessor) chunk.getBlockState(pos.above(i)).getBlock()).meteor$isCollidable()) return false;
         }
 
         return true;
@@ -234,7 +233,7 @@ public class HoleESP extends Module {
     }
 
     private static class Hole {
-        public BlockPos.Mutable blockPos = new BlockPos.Mutable();
+        public BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
         public byte exclude;
         public Type type;
 

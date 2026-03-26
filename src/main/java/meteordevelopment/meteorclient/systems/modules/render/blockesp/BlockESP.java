@@ -20,12 +20,11 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.dimension.DimensionType;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.dimension.DimensionType;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +75,7 @@ public class BlockESP extends Module {
         .build()
     );
 
-    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
@@ -97,11 +96,11 @@ public class BlockESP extends Module {
             groups.clear();
         }
 
-        for (Chunk chunk : Utils.chunks()) {
+        for (ChunkAccess chunk : Utils.chunks()) {
             searchChunk(chunk);
         }
 
-        lastDimension = mc.world.getDimension();
+        lastDimension = mc.level.dimensionType();
     }
 
     @Override
@@ -125,17 +124,17 @@ public class BlockESP extends Module {
     }
 
     private void updateChunk(int x, int z) {
-        ESPChunk chunk = chunks.get(ChunkPos.toLong(x, z));
+        ESPChunk chunk = chunks.get(ChunkPos.pack(x, z));
         if (chunk != null) chunk.update();
     }
 
     private void updateBlock(int x, int y, int z) {
-        ESPChunk chunk = chunks.get(ChunkPos.toLong(x >> 4, z >> 4));
+        ESPChunk chunk = chunks.get(ChunkPos.pack(x >> 4, z >> 4));
         if (chunk != null) chunk.update(x, y, z);
     }
 
     public ESPBlock getBlock(int x, int y, int z) {
-        ESPChunk chunk = chunks.get(ChunkPos.toLong(x >> 4, z >> 4));
+        ESPChunk chunk = chunks.get(ChunkPos.pack(x >> 4, z >> 4));
         return chunk == null ? null : chunk.get(x, y, z);
     }
 
@@ -158,21 +157,21 @@ public class BlockESP extends Module {
         searchChunk(event.chunk());
     }
 
-    private void searchChunk(Chunk chunk) {
+    private void searchChunk(ChunkAccess chunk) {
         workerThread.submit(() -> {
             if (!isActive()) return;
             ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
 
             if (schunk.size() > 0) {
                 synchronized (chunks) {
-                    chunks.put(chunk.getPos().toLong(), schunk);
+                    chunks.put(chunk.getPos().pack(), schunk);
                     schunk.update();
 
                     // Update neighbour chunks
-                    updateChunk(chunk.getPos().x - 1, chunk.getPos().z);
-                    updateChunk(chunk.getPos().x + 1, chunk.getPos().z);
-                    updateChunk(chunk.getPos().x, chunk.getPos().z - 1);
-                    updateChunk(chunk.getPos().x, chunk.getPos().z + 1);
+                    updateChunk(chunk.getPos().x() - 1, chunk.getPos().z());
+                    updateChunk(chunk.getPos().x() + 1, chunk.getPos().z());
+                    updateChunk(chunk.getPos().x(), chunk.getPos().z() - 1);
+                    updateChunk(chunk.getPos().x(), chunk.getPos().z() + 1);
                 }
             }
         });
@@ -187,7 +186,7 @@ public class BlockESP extends Module {
 
         int chunkX = bx >> 4;
         int chunkZ = bz >> 4;
-        long key = ChunkPos.toLong(chunkX, chunkZ);
+        long key = ChunkPos.pack(chunkX, chunkZ);
 
         boolean added = blocks.get().contains(event.newState.getBlock()) && !blocks.get().contains(event.oldState.getBlock());
         boolean removed = !added && !blocks.get().contains(event.newState.getBlock()) && blocks.get().contains(event.oldState.getBlock());
@@ -226,7 +225,7 @@ public class BlockESP extends Module {
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        DimensionType dimension = mc.world.getDimension();
+        DimensionType dimension = mc.level.dimensionType();
 
         if (lastDimension != dimension) onActivate();
         lastDimension = dimension;

@@ -5,19 +5,18 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.block.Block;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
 
 public class BlockListSetting extends Setting<List<Block>> {
     public final Predicate<Block> filter;
@@ -40,7 +39,7 @@ public class BlockListSetting extends Setting<List<Block>> {
 
         try {
             for (String value : values) {
-                Block block = parseId(Registries.BLOCK, value);
+                Block block = parseId(BuiltInRegistries.BLOCK, value);
                 if (block != null && (filter == null || filter.test(block))) blocks.add(block);
             }
         } catch (Exception ignored) {}
@@ -55,14 +54,14 @@ public class BlockListSetting extends Setting<List<Block>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.BLOCK.getIds();
+        return BuiltInRegistries.BLOCK.keySet();
     }
 
     @Override
-    protected NbtCompound save(NbtCompound tag) {
-        NbtList valueTag = new NbtList();
+    protected CompoundTag save(CompoundTag tag) {
+        ListTag valueTag = new ListTag();
         for (Block block : get()) {
-            valueTag.add(NbtString.of(Registries.BLOCK.getId(block).toString()));
+            valueTag.add(StringTag.valueOf(BuiltInRegistries.BLOCK.getKey(block).toString()));
         }
         tag.put("value", valueTag);
 
@@ -70,12 +69,12 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
-    protected List<Block> load(NbtCompound tag) {
+    protected List<Block> load(CompoundTag tag) {
         get().clear();
 
-        NbtList valueTag = tag.getListOrEmpty("value");
-        for (NbtElement tagI : valueTag) {
-            Block block = Registries.BLOCK.get(Identifier.of(tagI.asString().orElse("")));
+        ListTag valueTag = tag.getListOrEmpty("value");
+        for (Tag tagI : valueTag) {
+            Block block = BuiltInRegistries.BLOCK.getValue(Identifier.parse(tagI.asString().orElse("")));
 
             if (filter == null || filter.test(block)) get().add(block);
         }

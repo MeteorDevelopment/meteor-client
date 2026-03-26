@@ -3,7 +3,7 @@ package meteordevelopment.meteorclient.utils.render.postprocess;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import meteordevelopment.meteorclient.mixininterface.IWorldRenderer;
 import meteordevelopment.meteorclient.utils.render.CustomOutlineVertexConsumerProvider;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -19,12 +19,12 @@ public abstract class EntityShader extends PostProcessShader {
 
     @Override
     protected void preDraw() {
-        ((IWorldRenderer) mc.worldRenderer).meteor$pushEntityOutlineFramebuffer(framebuffer);
+        ((IWorldRenderer) mc.levelRenderer).meteor$pushEntityOutlineFramebuffer(framebuffer);
     }
 
     @Override
     protected void postDraw() {
-        ((IWorldRenderer) mc.worldRenderer).meteor$popEntityOutlineFramebuffer();
+        ((IWorldRenderer) mc.levelRenderer).meteor$popEntityOutlineFramebuffer();
     }
 
     public void submitVertices() {

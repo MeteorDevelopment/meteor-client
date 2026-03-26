@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.gui.widgets.pressable;
 
-import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public class WConfirmedMinus extends WMinus {
     protected boolean pressedOnce = false;
 
     @Override
-    public boolean onMouseClicked(Click click, boolean doubled) {
+    public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
         boolean pressed = super.onMouseClicked(click, doubled);
         if (!pressed) {
             pressedOnce = false;
@@ -20,7 +20,7 @@ public class WConfirmedMinus extends WMinus {
     }
 
     @Override
-    public boolean onMouseReleased(Click click) {
+    public boolean onMouseReleased(MouseButtonEvent click) {
         if (pressed && pressedOnce) super.onMouseReleased(click);
         pressedOnce = pressed;
         return pressed = false;

@@ -15,12 +15,12 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.mob.EndermanEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 
 public class EndermanLook extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -47,33 +47,33 @@ public class EndermanLook extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         // if either are true nothing happens when you look at an enderman
-        if (mc.player.getEquippedStack(EquipmentSlot.HEAD).isOf(Blocks.CARVED_PUMPKIN.asItem()) || mc.player.getAbilities().creativeMode) return;
+        if (mc.player.getItemBySlot(EquipmentSlot.HEAD).is(Blocks.CARVED_PUMPKIN.asItem()) || mc.player.getAbilities().instabuild) return;
 
-        for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof EndermanEntity enderman) || !enderman.isAlive() || !mc.player.canSee(enderman)) continue;
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            if (!(entity instanceof EnderMan enderman) || !enderman.isAlive() || !mc.player.hasLineOfSight(enderman)) continue;
 
             switch (lookMode.get()) {
                 case Away -> {
-                    if (enderman.isAngry() && stun.get()) Rotations.rotate(Rotations.getYaw(enderman), Rotations.getPitch(enderman, Target.Head), -75, null);
-                    else if (angleCheck(enderman)) Rotations.rotate(mc.player.getYaw(), 90, -75, null);
+                    if (enderman.isCreepy() && stun.get()) Rotations.rotate(Rotations.getYaw(enderman), Rotations.getPitch(enderman, Target.Head), -75, null);
+                    else if (angleCheck(enderman)) Rotations.rotate(mc.player.getYRot(), 90, -75, null);
                 }
                 case At -> {
-                    if (!enderman.isAngry()) Rotations.rotate(Rotations.getYaw(enderman), Rotations.getPitch(enderman, Target.Head), -75, null);
+                    if (!enderman.isCreepy()) Rotations.rotate(Rotations.getYaw(enderman), Rotations.getPitch(enderman, Target.Head), -75, null);
                 }
             }
         }
     }
 
     /**
-     * @see EndermanEntity#isPlayerStaring(PlayerEntity)
+     * @see EnderMan#isBeingStaredBy(Player)
      */
-    private boolean angleCheck(EndermanEntity entity) {
-        Vec3d vec3d = mc.player.getRotationVec(1.0F).normalize();
-        Vec3d vec3d2 = new Vec3d(entity.getX() - mc.player.getX(), entity.getEyeY() - mc.player.getEyeY(), entity.getZ() - mc.player.getZ());
+    private boolean angleCheck(EnderMan entity) {
+        Vec3 vec3d = mc.player.getViewVector(1.0F).normalize();
+        Vec3 vec3d2 = new Vec3(entity.getX() - mc.player.getX(), entity.getEyeY() - mc.player.getEyeY(), entity.getZ() - mc.player.getZ());
 
         double d = vec3d2.length();
         vec3d2 = vec3d2.normalize();
-        double e = vec3d.dotProduct(vec3d2);
+        double e = vec3d.dot(vec3d2);
 
         return e > 1.0D - 0.025D / d;
     }

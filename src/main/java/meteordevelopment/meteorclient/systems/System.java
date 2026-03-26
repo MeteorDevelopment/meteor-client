@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.systems;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.files.StreamUtils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.ReportedException;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.util.crash.CrashException;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -44,7 +44,7 @@ public abstract class System<T> implements ISerializable<T> {
         File file = getFile();
         if (file == null) return;
 
-        NbtCompound tag = toTag();
+        CompoundTag tag = toTag();
         if (tag == null) return;
 
         try {
@@ -81,7 +81,7 @@ public abstract class System<T> implements ISerializable<T> {
             if (file.exists()) {
                 try {
                     fromTag(NbtIo.read(file.toPath()));
-                } catch (CrashException e) {
+                } catch (ReportedException e) {
                     String backupName = FilenameUtils.removeExtension(file.getName()) + "-" + ZonedDateTime.now().format(DATE_TIME_FORMATTER) + ".backup.nbt";
                     File backup = new File(file.getParentFile(), backupName);
 
@@ -113,12 +113,12 @@ public abstract class System<T> implements ISerializable<T> {
     }
 
     @Override
-    public NbtCompound toTag() {
+    public CompoundTag toTag() {
         return null;
     }
 
     @Override
-    public T fromTag(NbtCompound tag) {
+    public T fromTag(CompoundTag tag) {
         return null;
     }
 }

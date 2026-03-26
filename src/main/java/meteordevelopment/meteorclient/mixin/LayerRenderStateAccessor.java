@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.client.render.model.json.Transformation;
+import net.minecraft.client.resources.model.cuboid.ItemTransform;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ItemRenderState.LayerRenderState.class)
+@Mixin(ItemStackRenderState.LayerRenderState.class)
 public interface LayerRenderStateAccessor {
-    @Accessor("transform")
-    Transformation meteor$getTransform();
+    @Accessor("itemTransform")
+    ItemTransform meteor$getTransform();
 }

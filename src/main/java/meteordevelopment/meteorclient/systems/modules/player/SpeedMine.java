@@ -13,14 +13,13 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.level.block.Block;
 import java.util.List;
 
-import static net.minecraft.entity.effect.StatusEffects.HASTE;
+import static net.minecraft.world.effect.MobEffects.HASTE;
 
 public class SpeedMine extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -35,7 +34,7 @@ public class SpeedMine extends Module {
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Selected blocks.")
-        .filter(block -> block.getHardness() > 0)
+        .filter(block -> block.defaultDestroyTime() > 0)
         .visible(() -> mode.get() != Mode.Haste)
         .build()
     );
@@ -97,19 +96,19 @@ public class SpeedMine extends Module {
         if (!Utils.canUpdate()) return;
 
         if (mode.get() == Mode.Haste) {
-            StatusEffectInstance haste = mc.player.getStatusEffect(HASTE);
+            MobEffectInstance haste = mc.player.getEffect(HASTE);
 
             if (haste == null || haste.getAmplifier() <= hasteAmplifier.get() - 1) {
-                mc.player.setStatusEffect(new StatusEffectInstance(HASTE, -1, hasteAmplifier.get() - 1, false, false, false), null);
+                mc.player.forceAddEffect(new MobEffectInstance(HASTE, -1, hasteAmplifier.get() - 1, false, false, false), null);
             }
         }
         else if (mode.get() == Mode.Damage) {
-            ClientPlayerInteractionManagerAccessor im = (ClientPlayerInteractionManagerAccessor) mc.interactionManager;
+            ClientPlayerInteractionManagerAccessor im = (ClientPlayerInteractionManagerAccessor) mc.gameMode;
             float progress = im.meteor$getBreakingProgress();
             BlockPos pos = im.meteor$getCurrentBreakingBlockPos();
 
             if (pos == null || progress <= 0) return;
-            if (progress + mc.world.getBlockState(pos).calcBlockBreakingDelta(mc.player, mc.world, pos) >= 0.7f)
+            if (progress + mc.level.getBlockState(pos).getDestroyProgress(mc.player, mc.level, pos) >= 0.7f)
                 im.meteor$setCurrentBreakingProgress(1f);
         }
     }
@@ -119,16 +118,16 @@ public class SpeedMine extends Module {
         if (!(mode.get() == Mode.Damage) || !grimBypass.get()) return;
 
         // https://github.com/GrimAnticheat/Grim/issues/1296
-        if (event.packet instanceof PlayerActionC2SPacket packet && packet.getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, packet.getPos().up(), packet.getDirection()));
+        if (event.packet instanceof ServerboundPlayerActionPacket packet && packet.getAction() == ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK) {
+            mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, packet.getPos().above(), packet.getDirection()));
         }
     }
 
     private void removeHaste() {
         if (!Utils.canUpdate()) return;
 
-        StatusEffectInstance haste = mc.player.getStatusEffect(HASTE);
-        if (haste != null && !haste.shouldShowIcon()) mc.player.removeStatusEffect(HASTE);
+        MobEffectInstance haste = mc.player.getEffect(HASTE);
+        if (haste != null && !haste.showIcon()) mc.player.removeEffect(HASTE);
     }
 
     public boolean filter(Block block) {

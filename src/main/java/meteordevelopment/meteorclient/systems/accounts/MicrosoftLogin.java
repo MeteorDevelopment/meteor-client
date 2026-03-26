@@ -9,7 +9,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.util.Pair;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.Util;
 
 import java.io.IOException;
@@ -57,7 +57,7 @@ public class MicrosoftLogin {
 
         startServer();
         String url = "https://login.live.com/oauth20_authorize.srf?client_id=" + CLIENT_ID + "&response_type=code&redirect_uri=http://127.0.0.1:" + PORT + "&scope=XboxLive.signin%20offline_access&prompt=select_account";
-        Util.getOperatingSystem().open(url);
+        Util.getPlatform().openUri(url);
 
         return url;
     }
@@ -138,12 +138,12 @@ public class MicrosoftLogin {
     private static void handleRequest(HttpExchange req) throws IOException {
         if (req.getRequestMethod().equals("GET")) {
             // Login
-            List<Pair<String, String>> query = parseURL(req.getRequestURI().getRawQuery());
+            List<Tuple<String, String>> query = parseURL(req.getRequestURI().getRawQuery());
 
             boolean ok = false;
-            for (Pair<String, String> pair : query) {
-                if (pair.getLeft().equals("code")) {
-                    handleCode(pair.getRight());
+            for (Tuple<String, String> pair : query) {
+                if (pair.getA().equals("code")) {
+                    handleCode(pair.getB());
 
                     ok = true;
                     break;
@@ -179,8 +179,8 @@ public class MicrosoftLogin {
     }
 
     // reimplementation of apache https URLEncodedUtils#parse
-    private static List<Pair<String, String>> parseURL(String string) {
-        List<Pair<String, String>> query = new ArrayList<>();
+    private static List<Tuple<String, String>> parseURL(String string) {
+        List<Tuple<String, String>> query = new ArrayList<>();
         char[] buf = string.toCharArray();
         int i = 0;
         while (i < buf.length) {
@@ -207,7 +207,7 @@ public class MicrosoftLogin {
             }
 
             if (!name.isEmpty()) {
-                query.add(new Pair<>(urlDecode(name.toString()), urlDecode(value.toString())));
+                query.add(new Tuple<>(urlDecode(name.toString()), urlDecode(value.toString())));
             }
         }
 

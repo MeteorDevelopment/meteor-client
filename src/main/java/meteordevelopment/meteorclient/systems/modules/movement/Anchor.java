@@ -12,10 +12,10 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 public class Anchor extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -61,7 +61,7 @@ public class Anchor extends Module {
         .build()
     );
 
-    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
     private boolean wasInHole;
     private boolean foundHole;
     private int holeX, holeZ;
@@ -83,16 +83,16 @@ public class Anchor extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        cancelJump = foundHole && cancelMove.get() && mc.player.getPitch() >= minPitch.get();
+        cancelJump = foundHole && cancelMove.get() && mc.player.getXRot() >= minPitch.get();
     }
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
         controlMovement = false;
 
-        int x = MathHelper.floor(mc.player.getX());
-        int y = MathHelper.floor(mc.player.getY());
-        int z = MathHelper.floor(mc.player.getZ());
+        int x = Mth.floor(mc.player.getX());
+        int y = Mth.floor(mc.player.getY());
+        int z = Mth.floor(mc.player.getZ());
 
         if (isHole(x, y, z)) {
             wasInHole = true;
@@ -104,7 +104,7 @@ public class Anchor extends Module {
         if (wasInHole && holeX == x && holeZ == z) return;
         else if (wasInHole) wasInHole = false;
 
-        if (mc.player.getPitch() < minPitch.get()) return;
+        if (mc.player.getXRot() < minPitch.get()) return;
 
         foundHole = false;
         double holeX = 0;
@@ -112,7 +112,7 @@ public class Anchor extends Module {
 
         for (int i = 0; i < maxHeight.get(); i++) {
             y--;
-            if (y <= mc.world.getBottomY() || !isAir(x, y, z)) break;
+            if (y <= mc.level.getMinY() || !isAir(x, y, z)) break;
 
             if (isHole(x, y, z)) {
                 foundHole = true;
@@ -124,10 +124,10 @@ public class Anchor extends Module {
 
         if (foundHole) {
             controlMovement = true;
-            deltaX = MathHelper.clamp(holeX - mc.player.getX(), -0.05, 0.05);
-            deltaZ = MathHelper.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
+            deltaX = Mth.clamp(holeX - mc.player.getX(), -0.05, 0.05);
+            deltaZ = Mth.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
 
-            ((IVec3d) mc.player.getVelocity()).meteor$set(deltaX, mc.player.getVelocity().y - (pull.get() ? pullSpeed.get() : 0), deltaZ);
+            ((IVec3d) mc.player.getDeltaMovement()).meteor$set(deltaX, mc.player.getDeltaMovement().y - (pull.get() ? pullSpeed.get() : 0), deltaZ);
         }
     }
 
@@ -141,12 +141,12 @@ public class Anchor extends Module {
 
     private boolean isHoleBlock(int x, int y, int z) {
         blockPos.set(x, y, z);
-        Block block = mc.world.getBlockState(blockPos).getBlock();
+        Block block = mc.level.getBlockState(blockPos).getBlock();
         return block == Blocks.BEDROCK || block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN;
     }
 
     private boolean isAir(int x, int y, int z) {
         blockPos.set(x, y, z);
-        return !((AbstractBlockAccessor)mc.world.getBlockState(blockPos).getBlock()).meteor$isCollidable();
+        return !((AbstractBlockAccessor)mc.level.getBlockState(blockPos).getBlock()).meteor$isCollidable();
     }
 }

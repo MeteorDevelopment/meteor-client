@@ -7,13 +7,13 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.ServerSpoof;
-import net.minecraft.client.resource.server.ServerResourcePackLoader;
+import net.minecraft.client.resources.server.DownloadedPackSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ServerResourcePackLoader.class)
+@Mixin(DownloadedPackSource.class)
 public abstract class ServerResourcePackLoaderMixin {
     @Inject(method = "onReloadSuccess", at = @At("TAIL"))
     private void removeInactivePacksTail(CallbackInfo ci) {

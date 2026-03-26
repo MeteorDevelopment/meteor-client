@@ -8,6 +8,11 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import com.mojang.blaze3d.resource.ResourceHandle;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
@@ -25,22 +30,26 @@ import meteordevelopment.meteorclient.utils.render.WrapperImmediateVertexConsume
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.postprocess.EntityShader;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.command.RenderDispatcher;
-import net.minecraft.client.render.entity.EntityRenderManager;
-import net.minecraft.client.render.state.OutlineRenderState;
-import net.minecraft.client.render.state.WeatherRenderState;
-import net.minecraft.client.render.state.WorldBorderRenderState;
-import net.minecraft.client.render.state.WorldRenderState;
-import net.minecraft.client.util.Handle;
-import net.minecraft.client.util.ObjectAllocator;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
-import org.joml.Matrix4f;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LevelTargetBundle;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.WeatherEffectRenderer;
+import net.minecraft.client.renderer.WorldBorderRenderer;
+import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
+import net.minecraft.client.renderer.state.level.BlockOutlineRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
+import net.minecraft.client.renderer.state.level.WeatherRenderState;
+import net.minecraft.client.renderer.state.level.WorldBorderRenderState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4fc;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -56,64 +65,58 @@ import java.util.function.Function;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public abstract class WorldRendererMixin implements IWorldRenderer {
 
     @Unique private NoRender noRender;
     @Unique private ESP esp;
 
     // if a world exists, meteor is initialised
-    @Inject(method = "setWorld", at = @At("TAIL"))
-    private void onSetWorld(ClientWorld world, CallbackInfo ci) {
+    @Inject(method = "setLevel", at = @At("TAIL"))
+    private void onSetWorld(ClientLevel world, CallbackInfo ci) {
         esp = Modules.get().get(ESP.class);
         noRender = Modules.get().get(NoRender.class);
     }
 
-    @Inject(method = "checkEmpty", at = @At("HEAD"), cancellable = true)
-    private void onCheckEmpty(MatrixStack matrixStack, CallbackInfo info) {
+    @Inject(method = "checkPoseStack", at = @At("HEAD"), cancellable = true)
+    private void onCheckEmpty(PoseStack matrixStack, CallbackInfo info) {
         info.cancel();
     }
 
-    @Inject(method = "drawBlockOutline", at = @At("HEAD"), cancellable = true)
-    private void onDrawHighlightedBlockOutline(MatrixStack matrices, VertexConsumer vertexConsumer, double x, double y, double z, OutlineRenderState state, int i, float f, CallbackInfo ci) {
+    @Inject(method = "renderHitOutline", at = @At("HEAD"), cancellable = true)
+    private void onDrawHighlightedBlockOutline(PoseStack matrices, VertexConsumer vertexConsumer, double x, double y, double z, BlockOutlineRenderState state, int i, float f, CallbackInfo ci) {
         if (Modules.get().isActive(BlockSelection.class)) ci.cancel();
     }
 
-    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;updateCamera(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;Z)V"), index = 2)
+    @ModifyArg(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;cullTerrain(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;Z)V"), index = 2)
     private boolean renderSetupTerrainModifyArg(boolean spectator) {
         return Modules.get().isActive(Freecam.class) || spectator;
     }
 
     // No Render
 
-    @WrapWithCondition(method = "method_62216", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WeatherRendering;renderPrecipitation(Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/client/render/state/WeatherRenderState;)V"))
-    private boolean shouldRenderPrecipitation(WeatherRendering instance, VertexConsumerProvider vertexConsumers, Vec3d pos, WeatherRenderState weatherRenderState) {
+    @WrapWithCondition(method = "lambda$addWeatherPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WeatherEffectRenderer;render(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/client/renderer/state/level/WeatherRenderState;)V"))
+    private boolean shouldRenderPrecipitation(WeatherEffectRenderer instance, Vec3 pos, WeatherRenderState weatherRenderState) {
         return !noRender.noWeather();
     }
 
-    @WrapWithCondition(method = "method_62216", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldBorderRendering;render(Lnet/minecraft/client/render/state/WorldBorderRenderState;Lnet/minecraft/util/math/Vec3d;DD)V"))
-    private boolean shouldRenderWorldBorder(WorldBorderRendering instance, WorldBorderRenderState state, Vec3d cameraPos, double viewDistanceBlocks, double farPlaneDistance) {
+    @WrapWithCondition(method = "lambda$addWeatherPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WorldBorderRenderer;render(Lnet/minecraft/client/renderer/state/level/WorldBorderRenderState;Lnet/minecraft/world/phys/Vec3;DD)V"))
+    private boolean shouldRenderWorldBorder(WorldBorderRenderer instance, WorldBorderRenderState state, Vec3 cameraPos, double viewDistanceBlocks, double farPlaneDistance) {
         return !noRender.noWorldBorder();
     }
 
-	@Inject(method = "hasBlindnessOrDarkness(Lnet/minecraft/client/render/Camera;)Z", at = @At("HEAD"), cancellable = true)
-	private void hasBlindnessOrDarkness(Camera camera, CallbackInfoReturnable<Boolean> info) {
-		if (noRender.noBlindness() || noRender.noDarkness()) info.setReturnValue(null);
-	}
-
     // Entity Shaders
 
-    @Inject(method = "render", at = @At("HEAD"))
-    private void onRenderHead(ObjectAllocator allocator,
-                              RenderTickCounter tickCounter,
+    @Inject(method = "renderLevel", at = @At("HEAD"))
+    private void onRenderHead(GraphicsResourceAllocator allocator,
+                              DeltaTracker tickCounter,
                               boolean renderBlockOutline,
-                              Camera camera,
-                              Matrix4f positionMatrix,
-                              Matrix4f projectionMatrix,
-                              Matrix4f matrix4f2,
+                              CameraRenderState cameraRenderState,
+                              Matrix4fc projectionMatrix,
                               GpuBufferSlice fog,
                               Vector4f fogColor,
                               boolean shouldRenderSky,
+                              ChunkSectionsToRender chunkSectionsToRender,
                               CallbackInfo ci) {
         PostProcessShaders.beginRender();
     }
@@ -122,22 +125,23 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     private final OutlineRenderCommandQueue outlineRenderCommandQueue = new OutlineRenderCommandQueue();
 
     @Unique
-    private VertexConsumerProvider provider;
+    private MultiBufferSource provider;
 
     @Unique
-    private RenderDispatcher renderDispatcher;
+    private FeatureRenderDispatcher renderDispatcher;
 
-    @Inject(method = "pushEntityRenders", at = @At("TAIL"))
-    private void onPushEntityRenders(MatrixStack matrices, WorldRenderState worldState, OrderedRenderCommandQueue queue, CallbackInfo info) {
+    @Inject(method = "submitEntities", at = @At("TAIL"))
+    private void onPushEntityRenders(PoseStack matrices, LevelRenderState worldState, SubmitNodeCollector queue, CallbackInfo info) {
         if (renderDispatcher == null) {
-            renderDispatcher = new RenderDispatcher(
+            renderDispatcher = new FeatureRenderDispatcher(
                 outlineRenderCommandQueue,
-                mc.getBlockRenderManager(),
+                mc.getModelManager(),
                 new WrapperImmediateVertexConsumerProvider(() -> provider),
                 mc.getAtlasManager(),
                 NoopOutlineVertexConsumerProvider.INSTANCE,
                 NoopImmediateVertexConsumerProvider.INSTANCE,
-                mc.textRenderer
+                mc.font,
+                mc.gameRenderer.getGameRenderState()
             );
         }
 
@@ -146,7 +150,7 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     }
 
     @Unique
-    private void draw(WorldRenderState worldState, MatrixStack matrices, EntityShader shader, Function<Entity, Color> colorGetter) {
+    private void draw(LevelRenderState worldState, PoseStack matrices, EntityShader shader, Function<Entity, Color> colorGetter) {
         var camera = worldState.cameraRenderState.pos;
         var empty = true;
 
@@ -160,13 +164,13 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
             if (color == null) continue;
             outlineRenderCommandQueue.setColor(color);
 
-            var renderer = entityRenderManager.getRenderer(state);
-            var offset = renderer.getPositionOffset(state);
+            var renderer = entityRenderDispatcher.getRenderer(state);
+            var offset = renderer.getRenderOffset(state);
 
-            matrices.push();
+            matrices.pushPose();
             matrices.translate(state.x - camera.x + offset.x, state.y - camera.y + offset.y, state.z - camera.z + offset.z);
-            renderer.render(state, matrices, outlineRenderCommandQueue, worldState.cameraRenderState);
-            matrices.pop();
+            renderer.submit(state, matrices, outlineRenderCommandQueue, worldState.cameraRenderState);
+            matrices.popPose();
 
             empty = false;
         }
@@ -177,30 +181,30 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
         meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
         provider = shader.vertexConsumerProvider;
 
-        renderDispatcher.render();
-        outlineRenderCommandQueue.onNextFrame();
+        renderDispatcher.renderAllFeatures();
+        outlineRenderCommandQueue.endFrame();
 
         provider = null;
         meteor$popEntityOutlineFramebuffer();
     }
 
-    @ModifyExpressionValue(method = "fillEntityRenderStates", at = @At(value= "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;isRenderingReady(Lnet/minecraft/util/math/BlockPos;)Z"))
+    @ModifyExpressionValue(method = "extractVisibleEntities", at = @At(value= "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;isSectionCompiledAndVisible(Lnet/minecraft/core/BlockPos;)Z"))
     boolean fillEntityRenderStatesIsRenderingReady(boolean original) {
         if (esp.forceRender()) return true;
         return original;
     }
 
-    @Inject(method = "method_62214", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
+    @Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;endOutlineBatch()V"))
     private void onRender(CallbackInfo ci) {
         PostProcessShaders.submitEntityVertices();
     }
 
-    @Inject(method = "onResized", at = @At("HEAD"))
+    @Inject(method = "resize", at = @At("HEAD"))
     private void onResized(int width, int height, CallbackInfo info) {
         PostProcessShaders.onResized(width, height);
     }
 
-    @ModifyArg(method = "method_62205", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/CloudRenderer;renderClouds(ILnet/minecraft/client/option/CloudRenderMode;FLnet/minecraft/util/math/Vec3d;JF)V"))
+    @ModifyArg(method = "lambda$addCloudsPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/CloudRenderer;render(ILnet/minecraft/client/CloudStatus;FILnet/minecraft/world/phys/Vec3;JF)V"), index = 0)
     private int modifyColor(int original) {
         Ambience ambience = Modules.get().get(Ambience.class);
         if (ambience.isActive() && ambience.customCloudColor.get()) {
@@ -213,20 +217,20 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     // IWorldRenderer
 
     @Shadow
-    private Framebuffer entityOutlineFramebuffer;
+    private RenderTarget entityOutlineTarget;
 
     @Shadow
     @Final
-    private DefaultFramebufferSet framebufferSet;
+    private LevelTargetBundle targets;
 
     @Shadow
     @Final
-    private EntityRenderManager entityRenderManager;
+    private EntityRenderDispatcher entityRenderDispatcher;
     @Unique
-    private Stack<Framebuffer> framebufferStack;
+    private Stack<RenderTarget> framebufferStack;
 
     @Unique
-    private Stack<Handle<Framebuffer>> framebufferHandleStack;
+    private Stack<ResourceHandle<RenderTarget>> framebufferHandleStack;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void init$IWorldRenderer(CallbackInfo info) {
@@ -235,17 +239,17 @@ public abstract class WorldRendererMixin implements IWorldRenderer {
     }
 
     @Override
-    public void meteor$pushEntityOutlineFramebuffer(Framebuffer framebuffer) {
-        framebufferStack.push(this.entityOutlineFramebuffer);
-        this.entityOutlineFramebuffer = framebuffer;
+    public void meteor$pushEntityOutlineFramebuffer(RenderTarget framebuffer) {
+        framebufferStack.push(this.entityOutlineTarget);
+        this.entityOutlineTarget = framebuffer;
 
-        framebufferHandleStack.push(this.framebufferSet.entityOutlineFramebuffer);
-        this.framebufferSet.entityOutlineFramebuffer = () -> framebuffer;
+        framebufferHandleStack.push(this.targets.entityOutline);
+        this.targets.entityOutline = () -> framebuffer;
     }
 
     @Override
     public void meteor$popEntityOutlineFramebuffer() {
-        this.entityOutlineFramebuffer = framebufferStack.pop();
-        this.framebufferSet.entityOutlineFramebuffer = framebufferHandleStack.pop();
+        this.entityOutlineTarget = framebufferStack.pop();
+        this.targets.entityOutline = framebufferHandleStack.pop();
     }
 }

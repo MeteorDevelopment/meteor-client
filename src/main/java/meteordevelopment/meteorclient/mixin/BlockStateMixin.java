@@ -5,29 +5,27 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import com.mojang.serialization.MapCodec;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.BlockActivateEvent;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(BlockState.class)
-public abstract class BlockStateMixin extends AbstractBlock.AbstractBlockState {
-    public BlockStateMixin(Block block, Reference2ObjectArrayMap<Property<?>, Comparable<?>> propertyMap, MapCodec<BlockState> mapCodec) {
-        super(block, propertyMap, mapCodec);
+public abstract class BlockStateMixin extends BlockBehaviour.BlockStateBase {
+    public BlockStateMixin(Block block, Property<?>[] properties, Comparable<?>[] values) {
+        super(block, properties, values);
     }
 
     @Override
-    public ActionResult onUse(World world, PlayerEntity player, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(Level world, Player player, BlockHitResult hit) {
         MeteorClient.EVENT_BUS.post(BlockActivateEvent.get((BlockState) (Object) this));
-        return super.onUse(world, player, hit);
+        return super.useWithoutItem(world, player, hit);
     }
 }

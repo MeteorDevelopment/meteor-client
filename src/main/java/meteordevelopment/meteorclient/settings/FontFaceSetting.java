@@ -9,8 +9,7 @@ import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.renderer.text.FontFamily;
 import meteordevelopment.meteorclient.renderer.text.FontInfo;
-import net.minecraft.nbt.NbtCompound;
-
+import net.minecraft.nbt.CompoundTag;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -56,19 +55,19 @@ public class FontFaceSetting extends Setting<FontFace> {
     }
 
     @Override
-    protected NbtCompound save(NbtCompound tag) {
+    protected CompoundTag save(CompoundTag tag) {
         tag.putString("family", get().info.family());
         tag.putString("type", get().info.type().toString());
         return tag;
     }
 
     @Override
-    protected FontFace load(NbtCompound tag) {
-        String family = tag.getString("family", "");
+    protected FontFace load(CompoundTag tag) {
+        String family = tag.getStringOr("family", "");
         FontInfo.Type type;
 
         try {
-            type = FontInfo.Type.valueOf(tag.getString("type", ""));
+            type = FontInfo.Type.valueOf(tag.getStringOr("type", ""));
         }
         catch (IllegalArgumentException ignored) {
             set(Fonts.DEFAULT_FONT);

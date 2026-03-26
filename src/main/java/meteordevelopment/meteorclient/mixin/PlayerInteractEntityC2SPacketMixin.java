@@ -9,9 +9,8 @@ import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPac
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Sneak;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,23 +18,28 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-@Mixin(PlayerInteractEntityC2SPacket.class)
+@Mixin(ServerboundInteractPacket.class)
 public abstract class PlayerInteractEntityC2SPacketMixin implements IPlayerInteractEntityC2SPacket {
-    @Shadow @Final private PlayerInteractEntityC2SPacket.InteractTypeHandler type;
-    @Shadow @Final private int entityId;
+    @Shadow public abstract int entityId();
+    @Shadow public abstract net.minecraft.world.phys.Vec3 location();
 
     @Override
-    public PlayerInteractEntityC2SPacket.InteractType meteor$getType() {
-        return type.getType();
+    public boolean meteor$isAttack() {
+        return false;
+    }
+
+    @Override
+    public boolean meteor$isInteractAt() {
+        return location() != null;
     }
 
     @Override
     public Entity meteor$getEntity() {
-        return mc.world.getEntityById(entityId);
+        return mc.level.getEntity(entityId());
     }
 
-    @ModifyVariable(method = "<init>(IZLnet/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler;)V", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private static boolean setSneaking(boolean sneaking) {
-        return Modules.get().get(Sneak.class).doPacket() || Modules.get().get(NoSlow.class).airStrict() || sneaking;
+    @ModifyVariable(method = "<init>", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private static boolean setSneaking(boolean usingSecondaryAction) {
+        return Modules.get().get(Sneak.class).doPacket() || Modules.get().get(NoSlow.class).airStrict() || usingSecondaryAction;
     }
 }

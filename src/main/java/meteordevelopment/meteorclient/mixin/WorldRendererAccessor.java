@@ -6,14 +6,13 @@
 package meteordevelopment.meteorclient.mixin;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.entity.player.BlockBreakingInfo;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.server.level.BlockDestructionProgress;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public interface WorldRendererAccessor {
-    @Accessor("blockBreakingInfos")
-    Int2ObjectMap<BlockBreakingInfo> meteor$getBlockBreakingInfos();
+    @Accessor("destroyingBlocks")
+    Int2ObjectMap<BlockDestructionProgress> meteor$getBlockBreakingInfos();
 }

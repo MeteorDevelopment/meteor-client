@@ -9,17 +9,17 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Stream;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
+
+import com.mojang.blaze3d.platform.NativeImage;
 
 public class Capes {
     private static final String CAPE_OWNERS_URL = "https://meteorclient.com/api/capeowners";
@@ -98,8 +98,8 @@ public class Capes {
         }
     }
 
-    public static Identifier get(PlayerEntity player) {
-        String capeName = OWNERS.get(player.getUuid());
+    public static Identifier get(Player player) {
+        String capeName = OWNERS.get(player.getUUID());
         if (capeName != null) {
             Cape cape = TEXTURES.get(capeName);
             if (cape == null) return null;
@@ -172,7 +172,7 @@ public class Capes {
         }
 
         public void register() {
-            mc.getTextureManager().registerTexture(identifier, new NativeImageBackedTexture(null, img));
+            mc.getTextureManager().register(identifier, new DynamicTexture(null, img));
             img = null;
 
             downloading = false;

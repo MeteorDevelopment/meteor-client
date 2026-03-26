@@ -17,8 +17,7 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gui.DrawContext;
-
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +106,7 @@ public class AddHudElementScreen extends WindowScreen {
         if (object == null) return;
         if (object instanceof HudElementInfo<?>.Preset preset) {
             Hud.get().add(preset, x, y);
-            close();
+            onClose();
         }
         else {
             HudElementInfo<?> info = (HudElementInfo<?>) object;
@@ -120,13 +119,13 @@ public class AddHudElementScreen extends WindowScreen {
             }
             else {
                 Hud.get().add(info, x, y);
-                close();
+                onClose();
             }
         }
     }
 
     @Override
-    protected void onRenderBefore(DrawContext drawContext, float delta) {
+    protected void onRenderBefore(GuiGraphicsExtractor drawContext, float delta) {
         HudEditorScreen.renderElements(drawContext);
     }
 

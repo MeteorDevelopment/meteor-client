@@ -7,9 +7,9 @@ package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
-import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
-import net.minecraft.util.PlayerInput;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.world.entity.player.Input;
 
 public class DismountCommand extends Command {
     public DismountCommand() {
@@ -17,10 +17,10 @@ public class DismountCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.executes(context -> {
-            PlayerInput sneak = new PlayerInput(false, false, false, false, false, true, false);
-            mc.getNetworkHandler().sendPacket(new PlayerInputC2SPacket(sneak));
+            Input sneak = new Input(false, false, false, false, false, true, false);
+            mc.getConnection().send(new ServerboundPlayerInputPacket(sneak));
             return SINGLE_SUCCESS;
         });
     }

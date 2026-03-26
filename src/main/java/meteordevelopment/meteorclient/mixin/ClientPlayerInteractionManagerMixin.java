@@ -14,21 +14,22 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.BreakDelay;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.network.SequencedPacketCreator;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.multiplayer.prediction.PredictiveAction;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,113 +41,113 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-@Mixin(ClientPlayerInteractionManager.class)
+@Mixin(MultiPlayerGameMode.class)
 public abstract class ClientPlayerInteractionManagerMixin implements IClientPlayerInteractionManager {
-    @Shadow private int blockBreakingCooldown;
+    @Shadow private int destroyDelay;
 
-    @Shadow protected abstract void syncSelectedSlot();
-
-    @Shadow
-    public abstract boolean breakBlock(BlockPos pos);
+    @Shadow protected abstract void ensureHasSentCarriedItem();
 
     @Shadow
-    public abstract void sendSequencedPacket(ClientWorld world, SequencedPacketCreator packetCreator);
+    public abstract boolean destroyBlock(BlockPos pos);
 
-    @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
-    private void onClickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo info) {
-        if (actionType == SlotActionType.THROW && slotId >= 0 && slotId < player.currentScreenHandler.slots.size()) {
-            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.currentScreenHandler.slots.get(slotId).getStack())).isCancelled()) info.cancel();
+    @Shadow
+    public abstract void startPrediction(ClientLevel world, PredictiveAction packetCreator);
+
+    @Inject(method = "handleContainerInput", at = @At("HEAD"), cancellable = true)
+    private void onClickSlot(int syncId, int slotId, int button, ContainerInput actionType, Player player, CallbackInfo info) {
+        if (actionType == ContainerInput.THROW && slotId >= 0 && slotId < player.containerMenu.slots.size()) {
+            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.containerMenu.slots.get(slotId).getItem())).isCancelled()) info.cancel();
         }
         else if (slotId == -999) {
             // Clicking outside of inventory
-            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.currentScreenHandler.getCursorStack())).isCancelled()) info.cancel();
+            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.containerMenu.getCarried())).isCancelled()) info.cancel();
         }
     }
 
-    @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "startDestroyBlock", at = @At("HEAD"), cancellable = true)
     private void onAttackBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> info) {
         if (MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(blockPos, direction)).isCancelled()) info.cancel();
         else {
             SpeedMine sm = Modules.get().get(SpeedMine.class);
-            BlockState state = mc.world.getBlockState(blockPos);
+            BlockState state = mc.level.getBlockState(blockPos);
 
             if (!sm.instamine() || !sm.filter(state.getBlock())) return;
 
-            if (state.calcBlockBreakingDelta(mc.player, mc.world, blockPos) > 0.5f) {
-                breakBlock(blockPos);
-                sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction, sequence));
-                sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction, sequence));
+            if (state.getDestroyProgress(mc.player, mc.level, blockPos) > 0.5f) {
+                destroyBlock(blockPos);
+                startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction, sequence));
+                startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction, sequence));
                 info.setReturnValue(true);
             }
         }
     }
 
-    @Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true)
-    public void interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-        if (MeteorClient.EVENT_BUS.post(InteractBlockEvent.get(player.getMainHandStack().isEmpty() ? Hand.OFF_HAND : hand, hitResult)).isCancelled()) cir.setReturnValue(ActionResult.FAIL);
+    @Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true)
+    public void interactBlock(LocalPlayer player, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> cir) {
+        if (MeteorClient.EVENT_BUS.post(InteractBlockEvent.get(player.getMainHandItem().isEmpty() ? InteractionHand.OFF_HAND : hand, hitResult)).isCancelled()) cir.setReturnValue(InteractionResult.FAIL);
     }
 
-    @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
-    private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {
+    @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
+    private void onAttackEntity(Player player, Entity target, CallbackInfo info) {
         if (MeteorClient.EVENT_BUS.post(AttackEntityEvent.get(target)).isCancelled()) info.cancel();
     }
 
-    @Inject(method = "interactEntity", at = @At("HEAD"), cancellable = true)
-    private void onInteractEntity(PlayerEntity player, Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> info) {
-        if (MeteorClient.EVENT_BUS.post(InteractEntityEvent.get(entity, hand)).isCancelled()) info.setReturnValue(ActionResult.FAIL);
+    @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
+    private void onInteractEntity(Player player, Entity entity, EntityHitResult hitResult, InteractionHand hand, CallbackInfoReturnable<InteractionResult> info) {
+        if (MeteorClient.EVENT_BUS.post(InteractEntityEvent.get(entity, hand)).isCancelled()) info.setReturnValue(InteractionResult.FAIL);
     }
 
-    @Inject(method = "dropCreativeStack", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "handleCreativeModeItemDrop", at = @At("HEAD"), cancellable = true)
     private void onDropCreativeStack(ItemStack stack, CallbackInfo info) {
         if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack)).isCancelled()) info.cancel();
     }
 
-    @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
-    private void creativeBreakDelayChange(ClientPlayerInteractionManager interactionManager, int value) {
+    @Redirect(method = "continueDestroyBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;destroyDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
+    private void creativeBreakDelayChange(MultiPlayerGameMode interactionManager, int value) {
         BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
-        blockBreakingCooldown = event.cooldown;
+        destroyDelay = event.cooldown;
     }
 
-    @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 2))
-    private void survivalBreakDelayChange(ClientPlayerInteractionManager interactionManager, int value) {
+    @Redirect(method = "continueDestroyBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;destroyDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 2))
+    private void survivalBreakDelayChange(MultiPlayerGameMode interactionManager, int value) {
         BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
-        blockBreakingCooldown = event.cooldown;
+        destroyDelay = event.cooldown;
     }
 
-    @Redirect(method = "attackBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
-    private void creativeBreakDelayChange2(ClientPlayerInteractionManager interactionManager, int value) {
+    @Redirect(method = "startDestroyBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;destroyDelay:I", opcode = Opcodes.PUTFIELD))
+    private void creativeBreakDelayChange2(MultiPlayerGameMode interactionManager, int value) {
         BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
-        blockBreakingCooldown = event.cooldown;
+        destroyDelay = event.cooldown;
     }
 
-    @ModifyExpressionValue(method = "method_41930", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;calcBlockBreakingDelta(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
+    @ModifyExpressionValue(method = "continueDestroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getDestroyProgress(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
     private float modifyBlockBreakingDelta(float original) {
         if (Modules.get().get(BreakDelay.class).preventInstaBreak() && original >= 1) {
-            BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(blockBreakingCooldown));
-            blockBreakingCooldown = event.cooldown;
+            BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(destroyDelay));
+            destroyDelay = event.cooldown;
             return 0;
         }
         return original;
     }
 
-    @Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "destroyBlock", at = @At("HEAD"), cancellable = true)
     private void onBreakBlock(BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
         if (MeteorClient.EVENT_BUS.post(BreakBlockEvent.get(blockPos)).isCancelled()) info.setReturnValue(false);
     }
 
-    @Inject(method = "interactItem", at = @At("HEAD"), cancellable = true)
-    private void onInteractItem(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> info) {
+    @Inject(method = "useItem", at = @At("HEAD"), cancellable = true)
+    private void onInteractItem(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> info) {
         InteractItemEvent event = MeteorClient.EVENT_BUS.post(InteractItemEvent.get(hand));
         if (event.toReturn != null) info.setReturnValue(event.toReturn);
     }
 
-    @Inject(method = "cancelBlockBreaking", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "stopDestroyBlock", at = @At("HEAD"), cancellable = true)
     private void onCancelBlockBreaking(CallbackInfo info) {
         if (BlockUtils.breaking) info.cancel();
     }
 
     @Override
     public void meteor$syncSelected() {
-        syncSelectedSlot();
+        ensureHasSentCarriedItem();
     }
 }

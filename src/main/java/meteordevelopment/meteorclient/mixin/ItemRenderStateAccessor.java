@@ -5,15 +5,15 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.client.render.item.ItemRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ItemRenderState.class)
+@Mixin(ItemStackRenderState.class)
 public interface ItemRenderStateAccessor {
-    @Accessor("layerCount")
+    @Accessor("activeLayerCount")
     int meteor$getLayerCount();
 
     @Accessor("layers")
-    ItemRenderState.LayerRenderState[] meteor$getLayers();
+    ItemStackRenderState.LayerRenderState[] meteor$getLayers();
 }

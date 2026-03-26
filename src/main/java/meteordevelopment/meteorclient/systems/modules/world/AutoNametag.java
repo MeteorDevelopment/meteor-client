@@ -18,12 +18,11 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.EntityHitResult;
-
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.EntityHitResult;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -96,7 +95,7 @@ public class AutoNametag extends Module {
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!entities.get().contains(entity.getType())) return false;
 
-            if (entity.hasCustomName() && (!renametag.get() || entity.getCustomName().equals(mc.player.getInventory().getStack(findNametag.slot()).getName())))
+            if (entity.hasCustomName() && (!renametag.get() || entity.getCustomName().equals(mc.player.getInventory().getItem(findNametag.slot()).getHoverName())))
                 return false;
 
             return entityCooldowns.getInt(entity) <= 0;
@@ -127,10 +126,9 @@ public class AutoNametag extends Module {
     }
 
     private void interact() {
-        Hand hand = offHand ? Hand.OFF_HAND : Hand.MAIN_HAND;
+        InteractionHand hand = offHand ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
         EntityHitResult location = new EntityHitResult(target, target.getBoundingBox().getCenter());
-        mc.interactionManager.interactEntityAtLocation(mc.player, target, location, hand);
-        mc.interactionManager.interactEntity(mc.player, target, hand);
+        mc.gameMode.interact(mc.player, target, location, hand);
         InvUtils.swapBack();
 
         entityCooldowns.put(target, 20);

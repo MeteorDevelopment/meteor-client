@@ -6,9 +6,9 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.config.Config;
-import net.minecraft.client.gui.screen.SplashTextRenderer;
-import net.minecraft.client.resource.SplashTextResourceSupplier;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.SplashRenderer;
+import net.minecraft.client.resources.SplashManager;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 import java.util.Random;
 
-@Mixin(SplashTextResourceSupplier.class)
+@Mixin(SplashManager.class)
 public abstract class SplashTextResourceSupplierMixin {
     @Unique
     private boolean override = true;
@@ -27,11 +27,11 @@ public abstract class SplashTextResourceSupplierMixin {
     @Unique
     private final List<String> meteorSplashes = getMeteorSplashes();
 
-    @Inject(method = "get", at = @At("HEAD"), cancellable = true)
-    private void onApply(CallbackInfoReturnable<SplashTextRenderer> cir) {
+    @Inject(method = "getSplash", at = @At("HEAD"), cancellable = true)
+    private void onApply(CallbackInfoReturnable<SplashRenderer> cir) {
         if (Config.get() == null || !Config.get().titleScreenSplashes.get()) return;
 
-        if (override) cir.setReturnValue(new SplashTextRenderer(Text.literal(meteorSplashes.get(random.nextInt(meteorSplashes.size())))));
+        if (override) cir.setReturnValue(new SplashRenderer(Component.literal(meteorSplashes.get(random.nextInt(meteorSplashes.size())))));
         override = !override;
     }
 

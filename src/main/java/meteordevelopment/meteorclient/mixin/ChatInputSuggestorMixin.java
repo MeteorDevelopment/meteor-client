@@ -11,9 +11,9 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
-import net.minecraft.client.gui.screen.ChatInputSuggestor;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.command.CommandSource;
+import net.minecraft.client.gui.components.CommandSuggestions;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.commands.SharedSuggestionProvider;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,18 +25,18 @@ import java.util.concurrent.CompletableFuture;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-@Mixin(ChatInputSuggestor.class)
+@Mixin(CommandSuggestions.class)
 public abstract class ChatInputSuggestorMixin {
-    @Shadow private ParseResults<CommandSource> parse;
-    @Shadow @Final TextFieldWidget textField;
-    @Shadow boolean completingSuggestions;
+    @Shadow private ParseResults<SharedSuggestionProvider> currentParse;
+    @Shadow @Final EditBox input;
+    @Shadow boolean keepSuggestions;
     @Shadow private CompletableFuture<Suggestions> pendingSuggestions;
-    @Shadow private ChatInputSuggestor.SuggestionWindow window;
+    @Shadow private CommandSuggestions.SuggestionsList suggestions;
 
     @Shadow
-    protected abstract void showCommandSuggestions();
+    protected abstract void updateUsageInfo(ParseResults<?> parseResults, Suggestions suggestions);
 
-    @Inject(method = "refresh",
+    @Inject(method = "updateCommandInfo",
         at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z", remap = false),
         cancellable = true
     )
@@ -47,18 +47,14 @@ public abstract class ChatInputSuggestorMixin {
         if (reader.canRead(length) && reader.getString().startsWith(prefix, reader.getCursor())) {
             reader.setCursor(reader.getCursor() + length);
 
-            if (this.parse == null) {
-                this.parse = Commands.DISPATCHER.parse(reader, mc.getNetworkHandler().getCommandSource());
+            if (this.currentParse == null) {
+                this.currentParse = Commands.DISPATCHER.parse(reader, mc.getConnection().getSuggestionsProvider());
             }
 
-            int cursor = textField.getCursor();
-            if (cursor >= length && (this.window == null || !this.completingSuggestions)) {
-                this.pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(this.parse, cursor);
-                this.pendingSuggestions.thenRun(() -> {
-                    if (this.pendingSuggestions.isDone()) {
-                        this.showCommandSuggestions();
-                    }
-                });
+            int cursor = input.getCursorPosition();
+            if (cursor >= length && (this.suggestions == null || !this.keepSuggestions)) {
+                this.pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(this.currentParse, cursor);
+                this.pendingSuggestions.thenAccept(suggestions -> this.updateUsageInfo(this.currentParse, suggestions));
             }
 
             ci.cancel();

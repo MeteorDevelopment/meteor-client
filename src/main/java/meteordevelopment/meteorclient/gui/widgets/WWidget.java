@@ -9,9 +9,9 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.BaseWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WView;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public abstract class WWidget implements BaseWidget {
     public boolean visible = true;
@@ -97,15 +97,15 @@ public abstract class WWidget implements BaseWidget {
 
     // Events
 
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         return onMouseClicked(click, doubled);
     }
-    public boolean onMouseClicked(Click click, boolean doubled) { return false; }
+    public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) { return false; }
 
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         return onMouseReleased(click);
     }
-    public boolean onMouseReleased(Click click) { return false; }
+    public boolean onMouseReleased(MouseButtonEvent click) { return false; }
 
     public void mouseMoved(double mouseX, double mouseY, double lastMouseX, double lastMouseY) {
         mouseOver = isOver(mouseX, mouseY);
@@ -118,20 +118,20 @@ public abstract class WWidget implements BaseWidget {
     }
     public boolean onMouseScrolled(double amount) { return false; }
 
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         return onKeyPressed(input);
     }
-    public boolean onKeyPressed(KeyInput input) { return false; }
+    public boolean onKeyPressed(KeyEvent input) { return false; }
 
-    public boolean keyRepeated(KeyInput input) {
+    public boolean keyRepeated(KeyEvent input) {
         return onKeyRepeated(input);
     }
-    public boolean onKeyRepeated(KeyInput input) { return false; }
+    public boolean onKeyRepeated(KeyEvent input) { return false; }
 
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         return onCharTyped(input);
     }
-    public boolean onCharTyped(CharInput input) { return false; }
+    public boolean onCharTyped(CharacterEvent input) { return false; }
 
     // Other
 

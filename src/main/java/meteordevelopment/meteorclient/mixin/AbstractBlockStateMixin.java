@@ -7,20 +7,20 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(AbstractBlock.AbstractBlockState.class)
+@Mixin(BlockBehaviour.BlockStateBase.class)
 public abstract class AbstractBlockStateMixin {
-    @Inject(method = "getModelOffset", at = @At("HEAD"), cancellable = true)
-    private void modifyPos(BlockPos pos, CallbackInfoReturnable<Vec3d> info) {
+    @Inject(method = "getOffset", at = @At("HEAD"), cancellable = true)
+    private void modifyPos(BlockPos pos, CallbackInfoReturnable<Vec3> info) {
         if (Modules.get() == null) return;
 
-        if (Modules.get().get(NoRender.class).noTextureRotations()) info.setReturnValue(Vec3d.ZERO);
+        if (Modules.get().get(NoRender.class).noTextureRotations()) info.setReturnValue(Vec3.ZERO);
     }
 }

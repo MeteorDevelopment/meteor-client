@@ -8,11 +8,10 @@ package meteordevelopment.meteorclient.gui.widgets.containers;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import net.minecraft.client.Mouse;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-
+import net.minecraft.client.MouseHandler;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -57,8 +56,8 @@ public abstract class WContainer extends WWidget {
         for (Cell<?> cell : cells) {
             cell.move(deltaX, deltaY);
 
-            Mouse mouse = mc.mouse;
-            cell.widget().mouseMoved(mouse.getX(), mouse.getY(), mouse.getX(), mouse.getY());
+            MouseHandler mouse = mc.mouseHandler;
+            cell.widget().mouseMoved(mouse.xpos(), mouse.ypos(), mouse.xpos(), mouse.ypos());
         }
     }
 
@@ -155,7 +154,7 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         try {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().mouseClicked(click, doubled)) return true;
@@ -166,7 +165,7 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         try {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().mouseReleased(click)) return true;
@@ -199,7 +198,7 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         try {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().keyPressed(input)) return true;
@@ -210,7 +209,7 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public boolean keyRepeated(KeyInput input) {
+    public boolean keyRepeated(KeyEvent input) {
         try {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().keyRepeated(input)) return true;
@@ -221,7 +220,7 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         try {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().charTyped(input)) return true;

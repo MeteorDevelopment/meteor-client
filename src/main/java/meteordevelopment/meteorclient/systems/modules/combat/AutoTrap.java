@@ -22,15 +22,14 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.world.RaycastContext;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import java.util.Set;
 import java.util.LinkedHashSet;
 import java.util.ArrayList;
@@ -177,7 +176,7 @@ public class AutoTrap extends Module {
     );
 
     private final List<BlockPos> placePositions = new ArrayList<>();
-    private PlayerEntity target;
+    private Player target;
     private boolean placed;
     private int timer;
 
@@ -207,7 +206,7 @@ public class AutoTrap extends Module {
         }
 
         // Grab blocks from hotbar
-        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.byItem(itemStack.getItem())));
         if (!block.found()) return;
 
         // Find target to trap
@@ -250,54 +249,54 @@ public class AutoTrap extends Module {
         }
     }
 
-    private void fillPlaceArray(PlayerEntity target) {
+    private void fillPlaceArray(Player target) {
         placePositions.clear();
 
         // Get block positions of all four corners of the bottom of our target's bounding box
         double epsilon = 1e-5;
-        Box box = target.getBoundingBox();
+        AABB box = target.getBoundingBox();
         List<BlockPos> corners = new ArrayList<>();
-        corners.add(BlockPos.ofFloored(box.minX, box.minY, box.minZ));
-        corners.add(BlockPos.ofFloored(box.minX, box.minY, box.maxZ - epsilon));
-        corners.add(BlockPos.ofFloored(box.maxX - epsilon, box.minY, box.minZ));
-        corners.add(BlockPos.ofFloored(box.maxX - epsilon, box.minY, box.maxZ - epsilon));
+        corners.add(BlockPos.containing(box.minX, box.minY, box.minZ));
+        corners.add(BlockPos.containing(box.minX, box.minY, box.maxZ - epsilon));
+        corners.add(BlockPos.containing(box.maxX - epsilon, box.minY, box.minZ));
+        corners.add(BlockPos.containing(box.maxX - epsilon, box.minY, box.maxZ - epsilon));
 
         // Add our place positions based on blocks our target is overlapping
         Set<BlockPos> overlappedPositions = new LinkedHashSet<>(corners); // Remove duplicate entries
         for (BlockPos targetPos : overlappedPositions) {
             switch (topPlacement.get()) {
                 case Full -> {
-                    add(targetPos.add(0, 2, 0));
-                    add(targetPos.add(1, 1, 0));
-                    add(targetPos.add(-1, 1, 0));
-                    add(targetPos.add(0, 1, 1));
-                    add(targetPos.add(0, 1, -1));
+                    add(targetPos.offset(0, 2, 0));
+                    add(targetPos.offset(1, 1, 0));
+                    add(targetPos.offset(-1, 1, 0));
+                    add(targetPos.offset(0, 1, 1));
+                    add(targetPos.offset(0, 1, -1));
                 }
                 case Face -> {
-                    add(targetPos.add(1, 1, 0));
-                    add(targetPos.add(-1, 1, 0));
-                    add(targetPos.add(0, 1, 1));
-                    add(targetPos.add(0, 1, -1));
+                    add(targetPos.offset(1, 1, 0));
+                    add(targetPos.offset(-1, 1, 0));
+                    add(targetPos.offset(0, 1, 1));
+                    add(targetPos.offset(0, 1, -1));
                 }
-                case Top -> add(targetPos.add(0, 2, 0));
+                case Top -> add(targetPos.offset(0, 2, 0));
             }
 
             switch (bottomPlacement.get()) {
                 case Platform -> {
-                    add(targetPos.add(0, -1, 0));
-                    add(targetPos.add(1, -1, 0));
-                    add(targetPos.add(-1, -1, 0));
-                    add(targetPos.add(0, -1, 1));
-                    add(targetPos.add(0, -1, -1));
+                    add(targetPos.offset(0, -1, 0));
+                    add(targetPos.offset(1, -1, 0));
+                    add(targetPos.offset(-1, -1, 0));
+                    add(targetPos.offset(0, -1, 1));
+                    add(targetPos.offset(0, -1, -1));
                 }
                 case Full -> {
-                    add(targetPos.add(0, -1, 0));
-                    add(targetPos.add(1, 0, 0));
-                    add(targetPos.add(-1, 0, 0));
-                    add(targetPos.add(0, 0, -1));
-                    add(targetPos.add(0, 0, 1));
+                    add(targetPos.offset(0, -1, 0));
+                    add(targetPos.offset(1, 0, 0));
+                    add(targetPos.offset(-1, 0, 0));
+                    add(targetPos.offset(0, 0, -1));
+                    add(targetPos.offset(0, 0, 1));
                 }
-                case Single -> add(targetPos.add(0, -1, 0));
+                case Single -> add(targetPos.offset(0, -1, 0));
             }
         }
 
@@ -321,11 +320,11 @@ public class AutoTrap extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3d pos = blockPos.toCenterPos();
+        Vec3 pos = blockPos.getCenter();
         if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
 
-        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
-        BlockHitResult result = mc.world.raycast(raycastContext);
+        ClipContext raycastContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        BlockHitResult result = mc.level.clip(raycastContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !PlayerUtils.isWithin(pos, placeWallsRange.get());
 

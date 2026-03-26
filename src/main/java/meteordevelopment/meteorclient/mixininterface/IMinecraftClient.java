@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import net.minecraft.client.gl.Framebuffer;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 
 public interface IMinecraftClient {
     void meteor$rightClick();
 
-    void meteor$setFramebuffer(Framebuffer framebuffer);
+    void meteor$setFramebuffer(RenderTarget framebuffer);
 }

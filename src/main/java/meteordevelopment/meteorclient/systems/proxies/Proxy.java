@@ -10,9 +10,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -91,8 +90,8 @@ public class Proxy implements ISerializable<Proxy> {
     //     the only complication would be that some ips seem to be valid for both 4 and 5
 
     private Proxy() {}
-    public Proxy(NbtElement tag) {
-        fromTag((NbtCompound) tag);
+    public Proxy(Tag tag) {
+        fromTag((CompoundTag) tag);
     }
 
     public boolean resolveAddress() {
@@ -262,8 +261,8 @@ public class Proxy implements ISerializable<Proxy> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.put("settings", settings.toTag());
 
@@ -271,7 +270,7 @@ public class Proxy implements ISerializable<Proxy> {
     }
 
     @Override
-    public Proxy fromTag(NbtCompound tag) {
+    public Proxy fromTag(CompoundTag tag) {
         tag.getCompound("settings").ifPresent(settings::fromTag);
 
         return this;

@@ -13,13 +13,13 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.PlayerInput;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class SafeWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -90,58 +90,58 @@ public class SafeWalk extends Module {
     private void onClipAtLedge(ClipAtLedgeEvent event) {
         if (fallDistance.get() > 1) {
             // meteordevelopment.meteorclient.utils.entity.DamageUtils.fallDamage
-            int surface = mc.world.getWorldChunk(mc.player.getBlockPos()).getHeightmap(Heightmap.Type.MOTION_BLOCKING).get(mc.player.getBlockX() & 15, mc.player.getBlockZ() & 15);
+            int surface = mc.level.getChunkAt(mc.player.blockPosition()).getOrCreateHeightmapUnprimed(Heightmap.Types.MOTION_BLOCKING).getFirstAvailable(mc.player.getBlockX() & 15, mc.player.getBlockZ() & 15);
             if (mc.player.getBlockY() >= surface) {
                 if (mc.player.getBlockY() - surface < fallDistance.get()) return;
             }
 
             else {
-                BlockHitResult raycastResult = mc.world.raycast(new RaycastContext(mc.player.getEntityPos(), new Vec3d(mc.player.getX(), mc.world.getBottomY(), mc.player.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.WATER, mc.player));
+                BlockHitResult raycastResult = mc.level.clip(new ClipContext(mc.player.position(), new Vec3(mc.player.getX(), mc.level.getMinY(), mc.player.getZ()), ClipContext.Block.COLLIDER, ClipContext.Fluid.WATER, mc.player));
                 if (raycastResult.getType() != HitResult.Type.MISS) {
-                    if ((int) (mc.player.getY() - raycastResult.getBlockPos().up().getY()) < fallDistance.get()) return;
+                    if ((int) (mc.player.getY() - raycastResult.getBlockPos().above().getY()) < fallDistance.get()) return;
                 }
             }
         }
 
         if (sneak.get()) {
             boolean closeToEdge = false;
-            boolean isSprinting = !sneakSprint.get() && mc.options.sprintKey.isPressed();
+            boolean isSprinting = !sneakSprint.get() && mc.options.keySprint.isDown();
 
-            Box playerBox = mc.player.getBoundingBox();
-            Box adjustedBox = getAdjustedPlayerBox(playerBox);
+            AABB playerBox = mc.player.getBoundingBox();
+            AABB adjustedBox = getAdjustedPlayerBox(playerBox);
 
-            if (mc.world.isSpaceEmpty(mc.player, adjustedBox) && mc.player.isOnGround()) closeToEdge = true;
+            if (mc.level.noCollision(mc.player, adjustedBox) && mc.player.onGround()) closeToEdge = true;
 
             if (!isSprinting) {
                 if (closeToEdge) {
-                    mc.player.input.playerInput = new PlayerInput(
-                        mc.player.input.playerInput.forward(),
-                        mc.player.input.playerInput.backward(),
-                        mc.player.input.playerInput.left(),
-                        mc.player.input.playerInput.right(),
-                        mc.player.input.playerInput.jump(),
+                    mc.player.input.keyPresses = new Input(
+                        mc.player.input.keyPresses.forward(),
+                        mc.player.input.keyPresses.backward(),
+                        mc.player.input.keyPresses.left(),
+                        mc.player.input.keyPresses.right(),
+                        mc.player.input.keyPresses.jump(),
                         true,
-                        mc.player.input.playerInput.sprint()
+                        mc.player.input.keyPresses.sprint()
                     );
                 } else if (safeSneak.get()) {
                     event.setClip(true);
                 }
             }
         } else {
-            if (!mc.player.isSneaking()) event.setClip(true);
+            if (!mc.player.isShiftKeyDown()) event.setClip(true);
         }
     }
 
-    private Box getAdjustedPlayerBox(Box playerBox) {
-        return playerBox.stretch(0, -mc.player.getStepHeight(), 0)
-            .expand(-edgeDistance.get(), 0, -edgeDistance.get());
+    private AABB getAdjustedPlayerBox(AABB playerBox) {
+        return playerBox.expandTowards(0, -mc.player.maxUpStep(), 0)
+            .inflate(-edgeDistance.get(), 0, -edgeDistance.get());
     }
 
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (sneak.get() && renderEdgeDistance.get()) {
-            Box playerBox = mc.player.getBoundingBox();
-            Box adjustedBox = getAdjustedPlayerBox(playerBox);
+            AABB playerBox = mc.player.getBoundingBox();
+            AABB adjustedBox = getAdjustedPlayerBox(playerBox);
 
             event.renderer.box(adjustedBox, Color.BLUE, Color.RED, ShapeMode.Lines, 0);
 

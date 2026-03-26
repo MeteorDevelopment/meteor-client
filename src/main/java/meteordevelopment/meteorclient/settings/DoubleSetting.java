@@ -5,9 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.nbt.NbtCompound;
-
 import java.util.function.Consumer;
+import net.minecraft.nbt.CompoundTag;
 
 public class DoubleSetting extends Setting<Double> {
     public final double min, max;
@@ -43,15 +42,15 @@ public class DoubleSetting extends Setting<Double> {
     }
 
     @Override
-    protected NbtCompound save(NbtCompound tag) {
+    protected CompoundTag save(CompoundTag tag) {
         tag.putDouble("value", get());
 
         return tag;
     }
 
     @Override
-    public Double load(NbtCompound tag) {
-        set(tag.getDouble("value", 0.0));
+    public Double load(CompoundTag tag) {
+        set(tag.getDoubleOr("value", 0.0));
 
         return get();
     }

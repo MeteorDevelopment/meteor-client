@@ -9,17 +9,17 @@ import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.screens.EditBookTitleAndAuthorScreen;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.BookScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.BookViewScreen;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -35,33 +35,33 @@ import java.util.Base64;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-@Mixin(BookScreen.class)
+@Mixin(BookViewScreen.class)
 public abstract class BookScreenMixin extends Screen {
     @Shadow
-    private BookScreen.Contents contents;
+    private BookViewScreen.BookAccess bookAccess;
 
     @Shadow
-    private int pageIndex;
+    private int currentPage;
 
-    public BookScreenMixin(Text title) {
+    public BookScreenMixin(Component title) {
         super(title);
     }
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        addDrawableChild(
-            new ButtonWidget.Builder(Text.literal("Copy"), button -> {
-                    NbtList listTag = new NbtList();
-                    for (int i = 0; i < contents.getPageCount(); i++) listTag.add(NbtString.of(contents.getPage(i).getString()));
+        addRenderableWidget(
+            new Button.Builder(Component.literal("Copy"), button -> {
+                    ListTag listTag = new ListTag();
+                    for (int i = 0; i < bookAccess.getPageCount(); i++) listTag.add(StringTag.valueOf(bookAccess.getPage(i).getString()));
 
-                    NbtCompound tag = new NbtCompound();
+                    CompoundTag tag = new CompoundTag();
                     tag.put("pages", listTag);
-                    tag.putInt("currentPage", pageIndex);
+                    tag.putInt("currentPage", currentPage);
 
                     FastByteArrayOutputStream bytes = new FastByteArrayOutputStream();
                     DataOutputStream out = new DataOutputStream(bytes);
                     try {
-                        NbtIo.write(tag, out);
+                        NbtIo.writeUnnamedTagWithFallback(tag, out);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -75,32 +75,32 @@ public abstract class BookScreenMixin extends Screen {
                     if (size > available) {
                         ChatUtils.error("Could not copy to clipboard: Out of memory.");
                     } else {
-                        GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), encoded);
+                        GLFW.glfwSetClipboardString(mc.getWindow().handle(), encoded);
                     }
                 })
-                .position(4, 4)
+                .pos(4, 4)
                 .size(120, 20)
                 .build()
         );
 
         // Edit title & author
-        ItemStack itemStack = mc.player.getMainHandStack();
-        Hand hand = Hand.MAIN_HAND;
+        ItemStack itemStack = mc.player.getMainHandItem();
+        InteractionHand hand = InteractionHand.MAIN_HAND;
 
         if (itemStack.getItem() != Items.WRITTEN_BOOK) {
-            itemStack = mc.player.getOffHandStack();
-            hand = Hand.OFF_HAND;
+            itemStack = mc.player.getOffhandItem();
+            hand = InteractionHand.OFF_HAND;
         }
         if (itemStack.getItem() != Items.WRITTEN_BOOK) return;
 
         ItemStack book = itemStack; // Fuck you Java
-        Hand hand2 = hand; // Honestly
+        InteractionHand hand2 = hand; // Honestly
 
-        addDrawableChild(
-                new ButtonWidget.Builder(Text.literal("Edit title & author"), button -> {
+        addRenderableWidget(
+                new Button.Builder(Component.literal("Edit title & author"), button -> {
                     mc.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2));
                 })
-                .position(4, 4 + 20 + 2)
+                .pos(4, 4 + 20 + 2)
                 .size(120, 20)
                 .build()
         );

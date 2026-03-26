@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.systems.hud.elements.TextHud;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import net.minecraft.util.crash.CrashReport;
+import net.minecraft.CrashReport;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,7 +22,7 @@ import java.util.List;
 
 @Mixin(CrashReport.class)
 public abstract class CrashReportMixin {
-    @Inject(method = "addDetails", at = @At("TAIL"))
+    @Inject(method = "getDetails(Ljava/lang/StringBuilder;)V", at = @At("TAIL"))
     private void onAddDetails(StringBuilder sb, CallbackInfo info) {
         sb.append("\n\n-- Meteor Client --\n\n");
         sb.append("Version: ").append(MeteorClient.VERSION).append("\n");

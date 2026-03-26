@@ -12,16 +12,20 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.CoordinateArgument;
-import net.minecraft.command.argument.EntityAnchorArgumentType;
-import net.minecraft.command.argument.Vec3ArgumentType;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.*;
-import net.minecraft.world.World;
-
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,9 +68,9 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.PosArgument> {
     private static final BlockPosArgumentType INSTANCE = new BlockPosArgumentType();
     private static final Collection<String> EXAMPLES = Arrays.asList("0 0 0", "~ ~ ~", "^ ^ ^", "^1 ^ ^-5", "~0.5 ~1 ~-5");
-    public static final SimpleCommandExceptionType UNLOADED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("argument.pos.unloaded"));
-    public static final SimpleCommandExceptionType OUT_OF_WORLD_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("argument.pos.outofworld"));
-    public static final SimpleCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("argument.pos.outofbounds"));
+    public static final SimpleCommandExceptionType UNLOADED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("argument.pos.unloaded"));
+    public static final SimpleCommandExceptionType OUT_OF_WORLD_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("argument.pos.outofworld"));
+    public static final SimpleCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("argument.pos.outofbounds"));
 
     private BlockPosArgumentType() {}
 
@@ -75,16 +79,16 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
     }
 
     public static <S> BlockPos getLoadedBlockPos(CommandContext<S> context, String name) throws CommandSyntaxException {
-        ClientWorld clientLevel = mc.world;
+        ClientLevel clientLevel = mc.level;
         return getLoadedBlockPos(context, clientLevel, name);
     }
 
-    public static <S> BlockPos getLoadedBlockPos(CommandContext<S> context, ClientWorld level, String name) throws CommandSyntaxException {
+    public static <S> BlockPos getLoadedBlockPos(CommandContext<S> context, ClientLevel level, String name) throws CommandSyntaxException {
         BlockPos blockPos = getBlockPos(context, name);
-        ChunkPos chunkPos = new ChunkPos(blockPos);
-        if (!level.getChunkManager().isChunkLoaded(chunkPos.x, chunkPos.z)) {
+        ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()));
+        if (!level.getChunkSource().hasChunk(chunkPos.x(), chunkPos.z())) {
             throw UNLOADED_EXCEPTION.create();
-        } else if (!level.isInBuildLimit(blockPos)) {
+        } else if (!level.isInWorldBounds(blockPos)) {
             throw OUT_OF_WORLD_EXCEPTION.create();
         } else {
             return blockPos;
@@ -97,7 +101,7 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
 
     public static <S> BlockPos getValidBlockPos(CommandContext<S> context, String name) throws CommandSyntaxException {
         BlockPos blockPos = getBlockPos(context, name);
-        if (!World.isValid(blockPos)) {
+        if (!Level.isInSpawnableBounds(blockPos)) {
             throw OUT_OF_BOUNDS_EXCEPTION.create();
         } else {
             return blockPos;
@@ -109,18 +113,18 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
     }
 
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (!(context.getSource() instanceof CommandSource)) {
+        if (!(context.getSource() instanceof SharedSuggestionProvider)) {
             return Suggestions.empty();
         } else {
             String string = builder.getRemaining();
-            Collection<CommandSource.RelativePosition> collection;
+            Collection<SharedSuggestionProvider.TextCoordinates> collection;
             if (!string.isEmpty() && string.charAt(0) == '^') {
-                collection = Collections.singleton(CommandSource.RelativePosition.ZERO_LOCAL);
+                collection = Collections.singleton(SharedSuggestionProvider.TextCoordinates.DEFAULT_LOCAL);
             } else {
-                collection = ((CommandSource) context.getSource()).getBlockPositionSuggestions();
+                collection = ((SharedSuggestionProvider) context.getSource()).getRelevantCoordinates();
             }
 
-            return CommandSource.suggestPositions(string, collection, builder, CommandManager.getCommandValidator(this::parse));
+            return SharedSuggestionProvider.suggestCoordinates(string, collection, builder, Commands.createValidator(this::parse));
         }
     }
 
@@ -129,12 +133,12 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
     }
 
     public interface PosArgument {
-        <S> Vec3d getPosition(S var1);
+        <S> Vec3 getPosition(S var1);
 
-        <S> Vec2f getRotation(S var1);
+        <S> Vec2 getRotation(S var1);
 
         default <S> BlockPos getBlockPos(S source) {
-            return BlockPos.ofFloored(this.getPosition(source));
+            return BlockPos.containing(this.getPosition(source));
         }
 
         boolean isXRelative();
@@ -145,26 +149,26 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
     }
 
     public static class DefaultPosArgument implements PosArgument {
-        private final CoordinateArgument x;
-        private final CoordinateArgument y;
-        private final CoordinateArgument z;
+        private final WorldCoordinate x;
+        private final WorldCoordinate y;
+        private final WorldCoordinate z;
 
-        public DefaultPosArgument(CoordinateArgument x, CoordinateArgument y, CoordinateArgument z) {
+        public DefaultPosArgument(WorldCoordinate x, WorldCoordinate y, WorldCoordinate z) {
             this.x = x;
             this.y = y;
             this.z = z;
         }
 
         @Override
-        public <S> Vec3d getPosition(S source) {
-            Vec3d vec3 = mc.player.getEntityPos();
-            return new Vec3d(this.x.toAbsoluteCoordinate(vec3.x), this.y.toAbsoluteCoordinate(vec3.y), this.z.toAbsoluteCoordinate(vec3.z));
+        public <S> Vec3 getPosition(S source) {
+            Vec3 vec3 = mc.player.position();
+            return new Vec3(this.x.get(vec3.x), this.y.get(vec3.y), this.z.get(vec3.z));
         }
 
         @Override
-        public <S> Vec2f getRotation(S source) {
-            Vec2f vec2 = mc.player.getRotationClient();
-            return new Vec2f((float) this.x.toAbsoluteCoordinate(vec2.x), (float) this.y.toAbsoluteCoordinate(vec2.y));
+        public <S> Vec2 getRotation(S source) {
+            Vec2 vec2 = mc.player.getRotationVector();
+            return new Vec2((float) this.x.get(vec2.x), (float) this.y.get(vec2.y));
         }
 
         @Override
@@ -194,46 +198,46 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
 
         public static DefaultPosArgument parse(StringReader reader) throws CommandSyntaxException {
             int cursor = reader.getCursor();
-            CoordinateArgument worldCoordinate = CoordinateArgument.parse(reader);
+            WorldCoordinate worldCoordinate = WorldCoordinate.parseInt(reader);
             if (reader.canRead() && reader.peek() == ' ') {
                 reader.skip();
-                CoordinateArgument worldCoordinate2 = CoordinateArgument.parse(reader);
+                WorldCoordinate worldCoordinate2 = WorldCoordinate.parseInt(reader);
                 if (reader.canRead() && reader.peek() == ' ') {
                     reader.skip();
-                    CoordinateArgument worldCoordinate3 = CoordinateArgument.parse(reader);
+                    WorldCoordinate worldCoordinate3 = WorldCoordinate.parseInt(reader);
                     return new DefaultPosArgument(worldCoordinate, worldCoordinate2, worldCoordinate3);
                 }
             }
             reader.setCursor(cursor);
-            throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
+            throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
         }
 
         public static DefaultPosArgument parse(StringReader reader, boolean centerIntegers) throws CommandSyntaxException {
             int cursor = reader.getCursor();
-            CoordinateArgument worldCoordinate = CoordinateArgument.parse(reader, centerIntegers);
+            WorldCoordinate worldCoordinate = WorldCoordinate.parseDouble(reader, centerIntegers);
             if (reader.canRead() && reader.peek() == ' ') {
                 reader.skip();
-                CoordinateArgument worldCoordinate2 = CoordinateArgument.parse(reader, false);
+                WorldCoordinate worldCoordinate2 = WorldCoordinate.parseDouble(reader, false);
                 if (reader.canRead() && reader.peek() == ' ') {
                     reader.skip();
-                    CoordinateArgument worldCoordinate3 = CoordinateArgument.parse(reader, centerIntegers);
+                    WorldCoordinate worldCoordinate3 = WorldCoordinate.parseDouble(reader, centerIntegers);
                     return new DefaultPosArgument(worldCoordinate, worldCoordinate2, worldCoordinate3);
                 }
             }
             reader.setCursor(cursor);
-            throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
+            throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
         }
 
         public static DefaultPosArgument absolute(double x, double y, double z) {
-            return new DefaultPosArgument(new CoordinateArgument(false, x), new CoordinateArgument(false, y), new CoordinateArgument(false, z));
+            return new DefaultPosArgument(new WorldCoordinate(false, x), new WorldCoordinate(false, y), new WorldCoordinate(false, z));
         }
 
-        public static DefaultPosArgument absolute(Vec2f vec) {
-            return new DefaultPosArgument(new CoordinateArgument(false, vec.x), new CoordinateArgument(false, vec.y), new CoordinateArgument(true, 0.0));
+        public static DefaultPosArgument absolute(Vec2 vec) {
+            return new DefaultPosArgument(new WorldCoordinate(false, vec.x), new WorldCoordinate(false, vec.y), new WorldCoordinate(true, 0.0));
         }
 
         public static DefaultPosArgument current() {
-            return new DefaultPosArgument(new CoordinateArgument(true, 0.0), new CoordinateArgument(true, 0.0), new CoordinateArgument(true, 0.0));
+            return new DefaultPosArgument(new WorldCoordinate(true, 0.0), new WorldCoordinate(true, 0.0), new WorldCoordinate(true, 0.0));
         }
 
         @Override
@@ -256,27 +260,27 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
         }
 
         @Override
-        public <S> Vec3d getPosition(S source) {
-            Vec2f vec2 = mc.player.getRotationClient();
-            Vec3d vec3 = EntityAnchorArgumentType.EntityAnchor.FEET.positionAt(mc.player);
-            float f = MathHelper.cos((vec2.y + 90.0F) * (float) (Math.PI / 180.0));
-            float g = MathHelper.sin((vec2.y + 90.0F) * (float) (Math.PI / 180.0));
-            float h = MathHelper.cos(-vec2.x * (float) (Math.PI / 180.0));
-            float i = MathHelper.sin(-vec2.x * (float) (Math.PI / 180.0));
-            float j = MathHelper.cos((-vec2.x + 90.0F) * (float) (Math.PI / 180.0));
-            float k = MathHelper.sin((-vec2.x + 90.0F) * (float) (Math.PI / 180.0));
-            Vec3d vec32 = new Vec3d(f * h, i, g * h);
-            Vec3d vec33 = new Vec3d(f * j, k, g * j);
-            Vec3d vec34 = vec32.crossProduct(vec33).multiply(-1.0);
+        public <S> Vec3 getPosition(S source) {
+            Vec2 vec2 = mc.player.getRotationVector();
+            Vec3 vec3 = EntityAnchorArgument.Anchor.FEET.apply(mc.player);
+            float f = Mth.cos((vec2.y + 90.0F) * (float) (Math.PI / 180.0));
+            float g = Mth.sin((vec2.y + 90.0F) * (float) (Math.PI / 180.0));
+            float h = Mth.cos(-vec2.x * (float) (Math.PI / 180.0));
+            float i = Mth.sin(-vec2.x * (float) (Math.PI / 180.0));
+            float j = Mth.cos((-vec2.x + 90.0F) * (float) (Math.PI / 180.0));
+            float k = Mth.sin((-vec2.x + 90.0F) * (float) (Math.PI / 180.0));
+            Vec3 vec32 = new Vec3(f * h, i, g * h);
+            Vec3 vec33 = new Vec3(f * j, k, g * j);
+            Vec3 vec34 = vec32.cross(vec33).scale(-1.0);
             double d = vec32.x * this.z + vec33.x * this.y + vec34.x * this.x;
             double e = vec32.y * this.z + vec33.y * this.y + vec34.y * this.x;
             double l = vec32.z * this.z + vec33.z * this.y + vec34.z * this.x;
-            return new Vec3d(vec3.x + d, vec3.y + e, vec3.z + l);
+            return new Vec3(vec3.x + d, vec3.y + e, vec3.z + l);
         }
 
         @Override
-        public <S> Vec2f getRotation(S source) {
-            return Vec2f.ZERO;
+        public <S> Vec2 getRotation(S source) {
+            return Vec2.ZERO;
         }
 
         @Override
@@ -299,13 +303,13 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
             double d = readCoordinate(reader, cursor);
             if (!reader.canRead() || reader.peek() != ' ') {
                 reader.setCursor(cursor);
-                throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
+                throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
             }
             reader.skip();
             double e = readCoordinate(reader, cursor);
             if (!reader.canRead() || reader.peek() != ' ') {
                 reader.setCursor(cursor);
-                throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
+                throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
             }
             reader.skip();
             double f = readCoordinate(reader, cursor);
@@ -314,11 +318,11 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
 
         private static double readCoordinate(StringReader reader, int startingCursorPos) throws CommandSyntaxException {
             if (!reader.canRead()) {
-                throw CoordinateArgument.MISSING_COORDINATE.createWithContext(reader);
+                throw WorldCoordinate.ERROR_EXPECTED_DOUBLE.createWithContext(reader);
             }
             if (reader.peek() != '^') {
                 reader.setCursor(startingCursorPos);
-                throw Vec3ArgumentType.MIXED_COORDINATE_EXCEPTION.createWithContext(reader);
+                throw Vec3Argument.ERROR_MIXED_TYPE.createWithContext(reader);
             }
             reader.skip();
             return reader.canRead() && reader.peek() != ' ' ? reader.readDouble() : 0.0;

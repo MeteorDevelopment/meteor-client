@@ -5,9 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.nbt.NbtCompound;
-
 import java.util.function.Consumer;
+import net.minecraft.nbt.CompoundTag;
 
 public class IntSetting extends Setting<Integer> {
     public final int min, max;
@@ -39,15 +38,15 @@ public class IntSetting extends Setting<Integer> {
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
+    public CompoundTag save(CompoundTag tag) {
         tag.putInt("value", get());
 
         return tag;
     }
 
     @Override
-    public Integer load(NbtCompound tag) {
-        set(tag.getInt("value", 0));
+    public Integer load(CompoundTag tag) {
+        set(tag.getIntOr("value", 0));
 
         return get();
     }

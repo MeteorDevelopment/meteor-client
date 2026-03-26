@@ -6,13 +6,13 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.mixininterface.IBox;
-import net.minecraft.util.math.Box;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(Box.class)
+@Mixin(AABB.class)
 public abstract class BoxMixin implements IBox {
     @Shadow @Final @Mutable public double minX;
     @Shadow @Final @Mutable public double minY;
