@@ -5,17 +5,25 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.util.UndashedUuid;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -38,7 +46,6 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         if (!friends.contains(friend)) {
             friends.add(friend);
             save();
-
             return true;
         }
 
@@ -56,11 +63,8 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     public Friend get(String name) {
         for (Friend friend : friends) {
-            if (friend.name.equalsIgnoreCase(name)) {
-                return friend;
-            }
+            if (friend.name.equalsIgnoreCase(name)) return friend;
         }
-
         return null;
     }
 
@@ -100,9 +104,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
-
         tag.put("friends", NbtUtils.listToTag(friends));
-
         return tag;
     }
 
@@ -130,5 +132,37 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         MeteorExecutor.execute(() -> friends.forEach(Friend::updateInfo));
 
         return this;
+    }
+
+    public int importFromMio() throws Exception {
+        Path path = Paths.get(
+            MinecraftClient.getInstance().runDirectory.getAbsolutePath(),
+            "mio-fabric",
+            "socials.json"
+        );
+
+        if (!Files.exists(path)) return -1;
+
+        String json = Files.readString(path);
+        JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+        JsonArray socials = root.getAsJsonArray("socials");
+
+        int added = 0;
+
+        for (JsonElement element : socials) {
+            JsonObject obj = element.getAsJsonObject();
+
+            String role = obj.get("role").getAsString();
+            if (!role.equalsIgnoreCase("friend")) continue;
+
+            String name = obj.get("name").getAsString();
+
+            if (get(name) == null) {
+                add(new Friend(name));
+                added++;
+            }
+        }
+
+        return added;
     }
 }
