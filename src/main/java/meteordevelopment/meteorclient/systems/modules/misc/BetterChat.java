@@ -22,7 +22,6 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -528,8 +527,11 @@ public class BetterChat extends Module {
 
                 for (var friend : Friends.get()) {
                     String name = friend.getName();
-                    int idx = remaining.indexOf(name);
-                    if (idx != -1 && (earliestIndex == -1 || idx < earliestIndex)) {
+                    Matcher m = Pattern.compile("\\b" + Pattern.quote(name) + "\\b").matcher(remaining);
+                    if (!m.find()) continue;
+
+                    int idx = m.start();
+                    if (earliestIndex == -1 || idx < earliestIndex) {
                         earliestIndex = idx;
                         earliestName = name;
                     }
