@@ -27,7 +27,7 @@ public class Pitch40 extends ElytraFlightMode {
             elytraFly.toggle();
         }
 
-        pitch = 32.0F;
+        pitch = 37.72F;
     }
 
     /**
@@ -45,8 +45,8 @@ public class Pitch40 extends ElytraFlightMode {
         super.onTick();
 
         /*
-        When descending, look at 32-33 deg
-        When ascending, look up at -49 at 10*pitch speed, then lower at 0.5 deg/tick until at 32-33
+        When descending, look at 37.72 deg
+        When ascending, look up at -54.77 at 5.45 degree/tick, then lower at 0.90 deg/tick until at 37.72
          */
 
         if (pitchingDown && mc.player.getY() <= elytraFly.pitch40lowerBounds.get()) {
@@ -58,15 +58,15 @@ public class Pitch40 extends ElytraFlightMode {
 
         // Pitch upwards
         if (!pitchingDown) {
-            pitch -= randPitch(elytraFly.pitch40rotationSpeed.get().floatValue(), 3.0F);
+            pitch -= randPitch(elytraFly.pitch40rotationSpeedUp.get().floatValue(), 1.0F);
 
-            if (pitch < -49.0) {
-                pitch = -49.0F;
+            if (pitch < -54.77F) {
+                pitch = -54.77F;
                 pitchingDown = true;
             }
         // Pitch downwards
-        } else if (pitch < 32.0) {
-            pitch += randPitch(0.5F, 0.125F);
+        } else if (pitch < 37.72F) {
+            pitch += randPitch(elytraFly.pitch40rotationSpeedDown.get().floatValue(), 0.50F);
         }
 
         mc.player.setPitch(pitch);

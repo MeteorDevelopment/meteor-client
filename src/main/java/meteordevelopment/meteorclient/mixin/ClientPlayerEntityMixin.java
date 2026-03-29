@@ -25,12 +25,12 @@ import net.minecraft.client.input.Input;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.JumpingMount;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.JumpingMount;
 import net.minecraft.util.PlayerInput;
-import org.objectweb.asm.Opcodes;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -117,7 +117,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         if (Modules.get().get(EntityControl.class).cancelJump()) info.setReturnValue(null);
     }
 
-    @ModifyReturnValue(method = "getCrosshairTarget(FLnet/minecraft/entity/Entity;)Lnet/minecraft/util/hit/HitResult;", at = @At("RETURN"))
+    @ModifyReturnValue(method = "getCrosshairTarget(Lnet/minecraft/entity/Entity;DDF)Lnet/minecraft/util/hit/HitResult;", at = @At("RETURN"))
     private static HitResult onUpdateTargetedEntity(HitResult original, @Local HitResult hitResult) {
         if (original instanceof EntityHitResult ehr) {
             if (Modules.get().get(NoMiningTrace.class).canWork(ehr.getEntity()) && hitResult.getType() == HitResult.Type.BLOCK) {

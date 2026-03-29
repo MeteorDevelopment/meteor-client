@@ -61,7 +61,10 @@ public class FontFaceSettingScreen extends WindowScreen {
         };
 
         WView view = add(theme.view()).expandX().widget();
+        // Prevents double scrolling for view-in-view scenario
+        view.maxHeight = window.view.maxHeight - 128;
         view.scrollOnlyWhenMouseOver = false;
+
         table = view.add(theme.table()).expandX().widget();
 
         initTable();

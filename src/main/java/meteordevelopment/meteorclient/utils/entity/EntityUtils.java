@@ -208,6 +208,38 @@ public class EntityUtils {
         return distanceColor;
     }
 
+    public static Color getColorFromHealth(Entity entity, Color nonLivingEntityColor) {
+        // For entities without health (items, pearls, etc.)
+        if (!(entity instanceof LivingEntity living)) {
+            return new Color(nonLivingEntityColor);
+        }
+
+        float health = living.getHealth();
+        float maxHealth = living.getMaxHealth();
+
+        if (maxHealth <= 0) {
+            return new Color(nonLivingEntityColor);
+        }
+
+        double percent = health / maxHealth;
+
+        percent = Math.max(0.0, Math.min(1.0, percent));
+
+        int r, g;
+
+        if (percent < 0.5) {
+            // Red to Yellow
+            r = 255;
+            g = (int) (255 * (percent / 0.5));
+        } else {
+            // Yellow to Green
+            g = 255;
+            r = 255 - (int) (255 * ((percent - 0.5) / 0.5));
+        }
+
+        return new Color(r, g, 0, 255);
+    }
+
     public static boolean intersectsWithEntity(Box box, Predicate<Entity> predicate) {
         EntityLookup<Entity> entityLookup = ((WorldAccessor) mc.world).meteor$getEntityLookup();
 

@@ -9,12 +9,13 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.entity.ProjectileEntitySimulator;
+import meteordevelopment.meteorclient.utils.entity.simulator.ProjectileEntitySimulator;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.SpectralArrowEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -54,13 +55,6 @@ public class ArrowDodge extends Module {
         .build()
     );
 
-    private final Setting<Boolean> accurate = sgGeneral.add(new BoolSetting.Builder()
-        .name("accurate")
-        .description("Whether or not to calculate more accurate.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Setting<Boolean> groundCheck = sgGeneral.add(new BoolSetting.Builder()
         .name("ground-check")
         .description("Tries to prevent you from falling to your death.")
@@ -78,7 +72,7 @@ public class ArrowDodge extends Module {
     private final Setting<Boolean> ignoreOwn = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-own")
         .description("Ignore your own projectiles.")
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 
@@ -116,16 +110,16 @@ public class ArrowDodge extends Module {
 
         for (Entity e : mc.world.getEntities()) {
             if (!(e instanceof ProjectileEntity projectile)) continue;
-            if (!allProjectiles.get() && !(projectile instanceof ArrowEntity)) continue;
+            if (!allProjectiles.get() && !(projectile instanceof ArrowEntity || projectile instanceof SpectralArrowEntity)) continue;
             if (ignoreOwn.get()) {
                 Entity owner = projectile.getOwner();
                 if (owner != null && owner.getUuid().equals(mc.player.getUuid())) continue;
             }
 
-            if (!simulator.set(projectile, accurate.get())) continue;
+            if (!simulator.set(projectile)) continue;
             for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
                 points.add(vec3s.get().set(simulator.pos));
-                if (simulator.tick() != null) break;
+                if (simulator.tick().shouldStop) break;
             }
         }
 

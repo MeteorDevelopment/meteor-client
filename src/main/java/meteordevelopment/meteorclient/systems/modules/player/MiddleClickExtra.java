@@ -10,10 +10,7 @@ import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -44,9 +41,17 @@ public class MiddleClickExtra extends Module {
     );
 
     private final Setting<Boolean> message = sgGeneral.add(new BoolSetting.Builder()
-        .name("message")
-        .description("Sends a message to the player when you add them as a friend.")
+        .name("send-message")
+        .description("Sends a message when you add a player as a friend.")
         .defaultValue(false)
+        .visible(() -> mode.get() == Mode.AddFriend)
+        .build()
+    );
+
+    private final Setting<String> friendMessage = sgGeneral.add(new StringSetting.Builder()
+        .name("message-to-send")
+        .description("Message to send when you add a player as a friend (use %player for the player's name)")
+        .defaultValue("/msg %player I just friended you on Meteor.")
         .visible(() -> mode.get() == Mode.AddFriend)
         .build()
     );
@@ -109,7 +114,11 @@ public class MiddleClickExtra extends Module {
             if (!Friends.get().isFriend(player)) {
                 Friends.get().add(new Friend(player));
                 info("Added %s to friends", player.getName().getString());
-                if (message.get()) ChatUtils.sendPlayerMsg("/msg " + player.getName() + " I just friended you on Meteor.");
+                if (message.get()) {
+                    String messageNotify = friendMessage.get().replace("%player", player.getName().getString());
+                    ChatUtils.sendPlayerMsg(messageNotify);
+                }
+
             } else {
                 Friends.get().remove(Friends.get().get(player));
                 info("Removed %s from friends", player.getName().getString());

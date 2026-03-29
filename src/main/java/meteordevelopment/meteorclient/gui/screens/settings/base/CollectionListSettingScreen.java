@@ -61,7 +61,9 @@ public abstract class CollectionListSettingScreen<T> extends WindowScreen {
             if (v != null) addValue(v);
         });
 
-        if (!left.cells.isEmpty()) table.add(theme.verticalSeparator()).expandWidgetY();
+        if (Config.get().syncListSettingWidths.get() || !left.cells.isEmpty()) {
+            table.add(theme.verticalSeparator()).expandWidgetY();
+        }
 
         // Right (selected)
         WTable right = abc(collection, false, t -> {

@@ -10,5 +10,3 @@ pluginManagement {
 }
 
 rootProject.name = "meteor-client"
-
-include("launch")

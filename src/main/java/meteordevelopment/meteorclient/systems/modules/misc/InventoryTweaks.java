@@ -70,6 +70,21 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
+    private final Setting<Boolean> uncapBundleScrolling = sgGeneral.add(new BoolSetting.Builder()
+        .name("uncap-bundle-scrolling")
+        .description("Whether to uncap the bundle scrolling feature to let you select any item.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> frameInput = sgGeneral.add(new BoolSetting.Builder()
+        .name("frame-input-handling")
+        .description("Changes input handling to work every frame instead of every tick. A very minor effect but may\n" +
+            "make inputs feel smoother, especially in laggy environments. Will flag anticheats that check packet order (Grim).")
+        .defaultValue(false)
+        .build()
+    );
+
     // Sorting
 
     private final Setting<Boolean> sortingEnabled = sgSorting.add(new BoolSetting.Builder()
@@ -101,13 +116,6 @@ public class InventoryTweaks extends Module {
         .description("Disables the inventory sorter when in creative mode.")
         .defaultValue(true)
         .visible(sortingEnabled::get)
-        .build()
-    );
-
-    private final Setting<Boolean> uncapBundleScrolling = sgGeneral.add(new BoolSetting.Builder()
-        .name("uncap-bundle-scrolling")
-        .description("Whether to uncap the bundle scrolling feature to let you select any item.")
-        .defaultValue(true)
         .build()
     );
 
@@ -404,19 +412,6 @@ public class InventoryTweaks extends Module {
         for (int i = start; i < end; i++) {
             if (!handler.getSlot(i).hasStack()) continue;
 
-            int sleep;
-            if (initial) {
-                sleep = autoStealInitDelay.get();
-                initial = false;
-            } else sleep = getSleepTime();
-            if (sleep > 0) {
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {
-                    MeteorClient.LOG.error("Error when sleeping the slot mover", e);
-                }
-            }
-
             // Exit if user closes screen or exit world
             if (mc.currentScreen == null || !Utils.canUpdate()) break;
 
@@ -432,6 +427,22 @@ public class InventoryTweaks extends Module {
                 if (dumpFilter.get() == ListMode.Blacklist && dumpItems.get().contains(item))
                     continue;
             }
+
+            int sleep;
+            if (initial) {
+                sleep = autoStealInitDelay.get();
+                initial = false;
+            } else sleep = getSleepTime();
+            if (sleep > 0) {
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    MeteorClient.LOG.error("Error when sleeping the slot mover", e);
+                }
+            }
+
+            // Exit if user closes screen or exit world
+            if (mc.currentScreen == null || !Utils.canUpdate()) break;
 
             if (steal && stealDrop.get()) {
                 if (dropBackwards.get()) {
@@ -461,6 +472,10 @@ public class InventoryTweaks extends Module {
 
     public boolean uncapBundleScrolling() {
         return isActive() && uncapBundleScrolling.get();
+    }
+
+    public boolean frameInput() {
+        return isActive() && frameInput.get();
     }
 
     public boolean canSteal(ScreenHandler handler) {

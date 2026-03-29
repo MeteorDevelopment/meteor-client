@@ -44,17 +44,35 @@ public class BreakIndicators extends Module {
         .build()
     );
 
-    private final Setting<SettingColor> startColor = sgGeneral.add(new ColorSetting.Builder()
-        .name("start-color")
-        .description("The color for the non-broken block.")
+    private final Setting<SettingColor> startSideColor = sgGeneral.add(new ColorSetting.Builder()
+        .name("start-side-color")
+        .description("The side color for the non-broken block.")
         .defaultValue(new SettingColor(25, 252, 25, 150))
+        .visible(() -> shapeMode.get().sides())
         .build()
     );
 
-    private final Setting<SettingColor> endColor = sgGeneral.add(new ColorSetting.Builder()
-        .name("end-color")
-        .description("The color for the fully-broken block.")
+    private final Setting<SettingColor> startLineColor = sgGeneral.add(new ColorSetting.Builder()
+        .name("start-line-color")
+        .description("The line color for the non-broken block.")
+        .defaultValue(new SettingColor(25, 252, 25, 150))
+        .visible(() -> shapeMode.get().lines())
+        .build()
+    );
+
+    private final Setting<SettingColor> endSideColor = sgGeneral.add(new ColorSetting.Builder()
+        .name("end-side-color")
+        .description("The side color for the fully-broken block.")
         .defaultValue(new SettingColor(255, 25, 25, 150))
+        .visible(() -> shapeMode.get().sides())
+        .build()
+    );
+
+    private final Setting<SettingColor> endLineColor = sgGeneral.add(new ColorSetting.Builder()
+        .name("end-line-color")
+        .description("The line color for the fully-broken block.")
+        .defaultValue(new SettingColor(255, 25, 25, 150))
+        .visible(() -> shapeMode.get().lines())
         .build()
     );
 
@@ -164,8 +182,8 @@ public class BreakIndicators extends Module {
         double y2 = pos.getY() + box.maxY + yShrink;
         double z2 = pos.getZ() + box.maxZ + zShrink;
 
-        Color c1Sides = startColor.get().copy().a(startColor.get().a / 2);
-        Color c2Sides = endColor.get().copy().a(endColor.get().a / 2);
+        Color c1Sides = startSideColor.get().copy().a(startSideColor.get().a / 2);
+        Color c2Sides = endSideColor.get().copy().a(endSideColor.get().a / 2);
 
         cSides.set(
             (int) Math.round(c1Sides.r + (c2Sides.r - c1Sides.r) * progress),
@@ -174,8 +192,8 @@ public class BreakIndicators extends Module {
             (int) Math.round(c1Sides.a + (c2Sides.a - c1Sides.a) * progress)
         );
 
-        Color c1Lines = startColor.get();
-        Color c2Lines = endColor.get();
+        Color c1Lines = startLineColor.get();
+        Color c2Lines = endLineColor.get();
 
         cLines.set(
             (int) Math.round(c1Lines.r + (c2Lines.r - c1Lines.r) * progress),

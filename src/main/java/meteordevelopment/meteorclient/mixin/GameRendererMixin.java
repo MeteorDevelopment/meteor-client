@@ -9,11 +9,13 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
+import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.GetFovEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.mixininterface.IGameRenderer;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
@@ -55,7 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(GameRenderer.class)
-public abstract class GameRendererMixin {
+public abstract class GameRendererMixin implements IGameRenderer {
     @Shadow
     @Final
     private MinecraftClient client;
@@ -121,20 +123,24 @@ public abstract class GameRendererMixin {
         if (depthRenderer == null) depthRenderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH, MeteorRenderPipelines.WORLD_COLORED_DEPTH);
         Render3DEvent event = Render3DEvent.get(matrixStack, renderer, depthRenderer, tickDelta, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
 
-        // Call utility classes
-
-        RenderUtils.updateScreenCenter(projection, position);
-        NametagUtils.onRender(position);
-
         // Update model view matrix
 
         RenderSystem.getModelViewStack().pushMatrix().mul(position);
 
         matrices.push();
         tiltViewWhenHurt(matrices, camera.getLastTickProgress());
-        if (client.options.getBobView().getValue()) bobView(matrices, camera.getLastTickProgress());
-        RenderSystem.getModelViewStack().mul(matrices.peek().getPositionMatrix().invert());
+        if (client.options.getBobView().getValue())
+            bobView(matrices, camera.getLastTickProgress());
+
+        Matrix4f inverseBob = new Matrix4f(matrices.peek().getPositionMatrix()).invert();
+        RenderSystem.getModelViewStack().mul(inverseBob);
         matrices.pop();
+
+        // Call utility classes (apply bob correction when Iris shaders are active)
+
+        Matrix4f correctedPosition = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(position).mul(inverseBob) : position;
+        RenderUtils.updateScreenCenter(projection, correctedPosition);
+        NametagUtils.onRender(position);
 
         // Render
 
@@ -168,8 +174,7 @@ public abstract class GameRendererMixin {
             widgetScreen.renderCustom(context, mouseX, mouseY, tickCounter.getDynamicDeltaTicks());
 
             RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(client.getFramebuffer().getDepthAttachment(), 1.0);
-            guiRenderer.render(fogRenderer.getFogBuffer(FogRenderer.FogType.NONE));
-            guiRenderer.incrementFrame();
+            meteor$flushGuiState();
         }
     }
 
@@ -249,5 +254,11 @@ public abstract class GameRendererMixin {
         if (!Modules.get().get(Freecam.class).renderHands() ||
             !Modules.get().get(Zoom.class).renderHands())
             ci.cancel();
+    }
+
+    @Override
+    public void meteor$flushGuiState() {
+        guiRenderer.render(fogRenderer.getFogBuffer(FogRenderer.FogType.NONE));
+        guiRenderer.incrementFrame();
     }
 }

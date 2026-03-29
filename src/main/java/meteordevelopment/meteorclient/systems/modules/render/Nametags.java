@@ -127,6 +127,13 @@ public class Nametags extends Module {
         .build()
     );
 
+    private final Setting<Boolean> displayPrefix = sgPlayers.add(new BoolSetting.Builder()
+        .name("use-display-name")
+        .description("Uses the players server display name instead of their account name.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> displayGameMode = sgPlayers.add(new BoolSetting.Builder()
         .name("gamemode")
         .description("Shows the player's GameMode.")
@@ -412,7 +419,10 @@ public class Nametags extends Module {
         Color nameColor = PlayerUtils.getPlayerColor(player, this.nameColor.get());
 
         if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getName().getString());
-        else name = player.getName().getString();
+        else {
+            if (displayPrefix.get()) name = player.getDisplayName().getString();
+            else name = player.getName().getString();
+        }
 
         // Health
         float absorption = player.getAbsorptionAmount();
