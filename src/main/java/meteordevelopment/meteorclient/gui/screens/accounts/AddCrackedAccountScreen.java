@@ -11,11 +11,7 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
 
-import java.util.regex.Pattern;
-
 public class AddCrackedAccountScreen extends AddAccountScreen {
-    private static final Pattern USERNAME_REGEX = Pattern.compile("^[A-Za-z0-9_]{3,16}$");
-
     public AddCrackedAccountScreen(GuiTheme theme, AccountsScreen parent) {
         super(theme, "Add Cracked Account", parent);
     }
@@ -27,7 +23,8 @@ public class AddCrackedAccountScreen extends AddAccountScreen {
         // Name
         t.add(theme.label("Name: "));
         WTextBox name = t.add(theme.textBox("", "seasnail8169", (text, c) ->
-            Character.isLetterOrDigit(c) || c == '_'
+            /** @see net.minecraft.util.StringHelper#isValidPlayerName */
+            c > 32 && c < 127
         )).minWidth(400).expandX().widget();
         name.setFocused(true);
         t.row();
@@ -36,7 +33,7 @@ public class AddCrackedAccountScreen extends AddAccountScreen {
         add = t.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
             String username = name.get().trim();
-            if (!USERNAME_REGEX.matcher(username).matches()) return;
+            if (username.length() > 16) return;
 
             CrackedAccount account = new CrackedAccount(username);
             if (!(Accounts.get().exists(account))) {
