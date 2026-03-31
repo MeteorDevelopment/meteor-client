@@ -15,7 +15,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +25,7 @@ import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class ProfileArgumentType implements ArgumentType<String> {
     private static final ProfileArgumentType INSTANCE = new ProfileArgumentType();
-    private static final DynamicCommandExceptionType NO_SUCH_PROFILE = new DynamicCommandExceptionType(name -> Text.literal("Profile with name " + name + " doesn't exist."));
+    private static final DynamicCommandExceptionType NO_SUCH_PROFILE = new DynamicCommandExceptionType(name -> Component.literal("Profile with name " + name + " doesn't exist."));
 
     private static final Collection<String> EXAMPLES = List.of("pvp.meteorclient.com", "anarchy");
 
@@ -37,7 +37,8 @@ public class ProfileArgumentType implements ArgumentType<String> {
         return Profiles.get().get(context.getArgument("profile", String.class));
     }
 
-    private ProfileArgumentType() {}
+    private ProfileArgumentType() {
+    }
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {

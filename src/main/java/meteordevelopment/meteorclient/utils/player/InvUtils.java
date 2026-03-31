@@ -6,12 +6,12 @@
 package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.mixininterface.IClientPlayerInteractionManager;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 import org.jetbrains.annotations.Range;
 
 import java.util.function.Predicate;
@@ -177,13 +177,13 @@ public class InvUtils {
     }
 
     public static Action move() {
-        ACTION.type = SlotActionType.PICKUP;
+        ACTION.type = ClickType.PICKUP;
         ACTION.two = true;
         return ACTION;
     }
 
     public static Action click() {
-        ACTION.type = SlotActionType.PICKUP;
+        ACTION.type = ClickType.PICKUP;
         return ACTION;
     }
 
@@ -192,33 +192,34 @@ public class InvUtils {
      * From should be the slot in the hotbar, to should be the slot you're switching an item from.
      */
     public static Action quickSwap() {
-        ACTION.type = SlotActionType.SWAP;
+        ACTION.type = ClickType.SWAP;
         return ACTION;
     }
 
     public static Action shiftClick() {
-        ACTION.type = SlotActionType.QUICK_MOVE;
+        ACTION.type = ClickType.QUICK_MOVE;
         return ACTION;
     }
 
     public static Action drop() {
-        ACTION.type = SlotActionType.THROW;
+        ACTION.type = ClickType.THROW;
         ACTION.data = 1;
         return ACTION;
     }
 
     public static Action dropOne() {
-        ACTION.type = SlotActionType.THROW;
+        ACTION.type = ClickType.THROW;
         ACTION.data = 0;
         return ACTION;
     }
 
     public static void dropHand() {
-        if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, ScreenHandler.EMPTY_SPACE_SLOT_INDEX, 0, SlotActionType.PICKUP, mc.player);
+        if (!mc.player.currentScreenHandler.getCursorStack().isEmpty())
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, AbstractContainerMenu.EMPTY_SPACE_SLOT_INDEX, 0, ClickType.PICKUP, mc.player);
     }
 
     public static class Action {
-        private SlotActionType type = null;
+        private ClickType type = null;
         private boolean two = false;
         private int from = -1;
         private int to = -1;
@@ -333,7 +334,7 @@ public class InvUtils {
         private void run() {
             boolean hadEmptyCursor = mc.player.currentScreenHandler.getCursorStack().isEmpty();
 
-            if (type == SlotActionType.SWAP) {
+            if (type == ClickType.SWAP) {
                 data = from;
                 from = to;
             }
@@ -343,7 +344,7 @@ public class InvUtils {
                 if (two) click(to);
             }
 
-            SlotActionType preType = type;
+            ClickType preType = type;
             boolean preTwo = two;
             int preFrom = from;
             int preTo = to;
@@ -354,7 +355,7 @@ public class InvUtils {
             to = -1;
             data = 0;
 
-            if (!isRecursive && hadEmptyCursor && preType == SlotActionType.PICKUP && preTwo && (preFrom != -1 && preTo != -1) && !mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+            if (!isRecursive && hadEmptyCursor && preType == ClickType.PICKUP && preTwo && (preFrom != -1 && preTo != -1) && !mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
                 isRecursive = true;
                 InvUtils.click().slotId(preFrom);
                 isRecursive = false;

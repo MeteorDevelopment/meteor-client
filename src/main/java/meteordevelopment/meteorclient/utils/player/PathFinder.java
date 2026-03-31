@@ -8,13 +8,13 @@ package meteordevelopment.meteorclient.utils.player;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.command.argument.EntityAnchorArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 
@@ -56,8 +56,8 @@ public class PathFinder {
         return getBlockStateAtPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ()).isAir();
     }
 
-    public Vec3d getNextStraightPos() {
-        Vec3d nextPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+    public Vec3 getNextStraightPos() {
+        Vec3 nextPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
         double multiplier = 1.0;
         while (nextPos == mc.player.getEntityPos()) {
             nextPos = new Vec3d((int) (mc.player.getX() + multiplier * Math.cos(Math.toRadians(mc.player.getYaw()))), (int) (mc.player.getY()), (int) (mc.player.getZ() + multiplier * Math.sin(Math.toRadians(mc.player.getYaw()))));
@@ -68,8 +68,8 @@ public class PathFinder {
 
     public int getYawToTarget() {
         if (target == null || mc.player == null) return Integer.MAX_VALUE;
-        Vec3d tPos = target.getEntityPos();
-        Vec3d pPos = mc.player.getEntityPos();
+        Vec3 tPos = target.getEntityPos();
+        Vec3 pPos = mc.player.getEntityPos();
         int yaw;
         int direction = getDirection();
         double tan = (tPos.z - pPos.z) / (tPos.x - pPos.x);
@@ -83,8 +83,8 @@ public class PathFinder {
 
     public int getDirection() {
         if (target == null || mc.player == null) return 0;
-        Vec3d targetPos = target.getEntityPos();
-        Vec3d playerPos = mc.player.getEntityPos();
+        Vec3 targetPos = target.getEntityPos();
+        Vec3 playerPos = mc.player.getEntityPos();
         if (targetPos.x == playerPos.x && targetPos.z > playerPos.z)
             return SOUTH;
         if (targetPos.x == playerPos.x && targetPos.z < playerPos.z)
@@ -128,7 +128,7 @@ public class PathFinder {
 
     public void lookAtDestination(PathBlock pathBlock) {
         if (mc.player != null) {
-            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(pathBlock.blockPos.getX(), pathBlock.blockPos.getY() + mc.player.getStandingEyeHeight(), pathBlock.blockPos.getZ()));
+            mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3d(pathBlock.blockPos.getX(), pathBlock.blockPos.getY() + mc.player.getStandingEyeHeight(), pathBlock.blockPos.getZ()));
         }
     }
 

@@ -12,11 +12,11 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dimension;
-import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.BlockPos;
 
 import java.util.Map;
 import java.util.Objects;
@@ -125,10 +125,10 @@ public class Waypoint implements ISerializable<Waypoint> {
         createdAt = System.currentTimeMillis();
     }
 
-    public Waypoint(NbtElement tag) {
-        NbtCompound nbt = (NbtCompound) tag;
+    public Waypoint(Tag tag) {
+        CompoundTag nbt = (CompoundTag) tag;
 
-        uuid = nbt.get("uuid", Uuids.INT_STREAM_CODEC).orElse(UUID.randomUUID());
+        uuid = nbt.get("uuid", UUIDUtil.INT_STREAM_CODEC).orElse(UUID.randomUUID());
         createdAt = System.currentTimeMillis();
 
         fromTag(nbt);
@@ -216,17 +216,17 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new NbtCompound();
 
-        tag.put("uuid", Uuids.INT_STREAM_CODEC, uuid);
+        tag.put("uuid", UUIDUtil.INT_STREAM_CODEC, uuid);
         tag.put("settings", settings.toTag());
 
         return tag;
     }
 
     @Override
-    public Waypoint fromTag(NbtCompound tag) {
+    public Waypoint fromTag(CompoundTag tag) {
         if (tag.contains("settings")) {
             settings.fromTag(tag.getCompoundOrEmpty("settings"));
         }

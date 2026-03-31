@@ -15,12 +15,12 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.GpuSampler;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.Vec3d;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.textures.GpuSampler;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.util.Tuple;
+import net.minecraft.util.ARGB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -44,9 +44,10 @@ public class MeshRenderer {
     private @Nullable GpuBuffer indexBuffer;
     private Matrix4f matrix;
     private final HashMap<String, GpuBufferSlice> uniforms = new HashMap<>();
-    private final HashMap<String, Pair<GpuTextureView, GpuSampler>> samplers = new HashMap<>();
+    private final HashMap<String, Tuple<GpuTextureView, GpuSampler>> samplers = new HashMap<>();
 
-    private MeshRenderer() {}
+    private MeshRenderer() {
+    }
 
     public static MeshRenderer begin() {
         if (taken)
@@ -62,7 +63,7 @@ public class MeshRenderer {
         return this;
     }
 
-    public MeshRenderer attachments(Framebuffer framebuffer) {
+    public MeshRenderer attachments(RenderTarget framebuffer) {
         colorAttachment = framebuffer.getColorAttachmentView();
         depthAttachment = framebuffer.getDepthAttachmentView();
         return this;
@@ -94,7 +95,7 @@ public class MeshRenderer {
         return this.transform(matrix);
     }
 
-    public MeshRenderer mesh(MeshBuilder mesh, MatrixStack matrices) {
+    public MeshRenderer mesh(MeshBuilder mesh, PoseStack matrices) {
         this.mesh = mesh;
         return this.transform(matrices);
     }
@@ -104,7 +105,7 @@ public class MeshRenderer {
         return this;
     }
 
-    public MeshRenderer transform(MatrixStack matrices) {
+    public MeshRenderer transform(PoseStack matrices) {
         this.matrix = matrices.peek().getPositionMatrix();
         return this;
     }
@@ -154,7 +155,7 @@ public class MeshRenderer {
 
             {
                 OptionalInt clearColor = this.clearColor != null ?
-                    OptionalInt.of(ColorHelper.getArgb(this.clearColor.a, this.clearColor.r, this.clearColor.g, this.clearColor.b)) :
+                    OptionalInt.of(ARGB.getArgb(this.clearColor.a, this.clearColor.r, this.clearColor.g, this.clearColor.b)) :
                     OptionalInt.empty();
 
                 GpuBufferSlice meshData = MeshUniforms.write(RenderUtils.projection, RenderSystem.getModelViewStack());
@@ -201,7 +202,7 @@ public class MeshRenderer {
     }
 
     private static void applyCameraPos() {
-        Vec3d cameraPos = mc.gameRenderer.getCamera().getCameraPos();
+        Vec3 cameraPos = mc.gameRenderer.getCamera().getCameraPos();
         RenderSystem.getModelViewStack().translate(0, (float) -cameraPos.y, 0);
     }
 }

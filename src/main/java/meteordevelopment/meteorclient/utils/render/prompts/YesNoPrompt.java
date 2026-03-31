@@ -8,13 +8,15 @@ package meteordevelopment.meteorclient.utils.render.prompts;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class YesNoPrompt extends Prompt<YesNoPrompt> {
-    private Runnable onYes = () -> {};
-    private Runnable onNo = () -> {};
+    private Runnable onYes = () -> {
+    };
+    private Runnable onNo = () -> {
+    };
 
     private YesNoPrompt(GuiTheme theme, Screen parent) {
         super(theme, parent);

@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
-import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.DeltaTracker;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,13 +15,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(RenderTickCounter.Dynamic.class)
+@Mixin(DeltaTracker.Timer.class)
 public abstract class RenderTickCounterDynamicMixin {
     @Shadow
-    private float dynamicDeltaTicks;
+    private float deltaTicks;
 
-    @Inject(method = "beginRenderTick(J)I", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/RenderTickCounter$Dynamic;lastTimeMillis:J", opcode = Opcodes.PUTFIELD))
+    @Inject(method = "advanceGameTime(J)I", at = @At(value = "FIELD", target = "Lnet/minecraft/client/DeltaTracker$Timer;lastMs:J", opcode = Opcodes.PUTFIELD))
     private void onBeingRenderTick(long a, CallbackInfoReturnable<Integer> info) {
-        dynamicDeltaTicks *= (float) Modules.get().get(Timer.class).getMultiplier();
+        deltaTicks *= (float) Modules.get().get(Timer.class).getMultiplier();
     }
 }

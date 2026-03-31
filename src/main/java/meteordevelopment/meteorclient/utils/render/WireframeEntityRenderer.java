@@ -1,3 +1,4 @@
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -7,33 +8,33 @@ package meteordevelopment.meteorclient.utils.render;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.mixin.RenderLayerAccessor;
+import meteordevelopment.meteorclient.mixin.RenderTypeAccessor;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.OutputTarget;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
-import net.minecraft.client.render.command.RenderDispatcher;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class WireframeEntityRenderer {
-    private static final MatrixStack matrices = new MatrixStack();
+    private static final PoseStack matrices = new MatrixStack();
 
     private static Renderer3D renderer;
 
-    private static final OrderedRenderCommandQueueImpl renderCommandQueue = new OrderedRenderCommandQueueImpl();
+    private static final SubmitNodeStorage renderCommandQueue = new OrderedRenderCommandQueueImpl();
 
-    private static final RenderDispatcher renderDispatcher = new RenderDispatcher(
+    private static final FeatureRenderDispatcher renderDispatcher = new RenderDispatcher(
         renderCommandQueue,
         mc.getBlockRenderManager(),
         MyVertexConsumerProvider.INSTANCE,
@@ -63,14 +64,14 @@ public class WireframeEntityRenderer {
 
         float tickDelta = mc.world.getTickManager().isFrozen() ? 1 : event.tickDelta;
 
-        offsetX = MathHelper.lerp(tickDelta, entity.lastRenderX, entity.getX());
-        offsetY = MathHelper.lerp(tickDelta, entity.lastRenderY, entity.getY());
-        offsetZ = MathHelper.lerp(tickDelta, entity.lastRenderZ, entity.getZ());
+        offsetX = Mth.lerp(tickDelta, entity.lastRenderX, entity.getX());
+        offsetY = Mth.lerp(tickDelta, entity.lastRenderY, entity.getY());
+        offsetZ = Mth.lerp(tickDelta, entity.lastRenderZ, entity.getZ());
 
         var renderer = (EntityRenderer<Entity, EntityRenderState>) mc.getEntityRenderDispatcher().getRenderer(entity);
         var state = renderer.getAndUpdateRenderState(entity, tickDelta);
 
-        Vec3d entityOffset = renderer.getPositionOffset(state);
+        Vec3 entityOffset = renderer.getPositionOffset(state);
         offsetX += entityOffset.x;
         offsetY += entityOffset.y;
         offsetZ += entityOffset.z;
@@ -84,16 +85,16 @@ public class WireframeEntityRenderer {
         renderCommandQueue.onNextFrame();
     }
 
-    private static class MyVertexConsumerProvider extends VertexConsumerProvider.Immediate {
+    private static class MyVertexConsumerProvider extends MultiBufferSource.BufferSource {
         public static final MyVertexConsumerProvider INSTANCE = new MyVertexConsumerProvider();
-        private final Object2ObjectOpenHashMap<RenderLayer, MyVertexConsumer> buffers = new Object2ObjectOpenHashMap<>();
+        private final Object2ObjectOpenHashMap<RenderType, MyVertexConsumer> buffers = new Object2ObjectOpenHashMap<>();
 
         protected MyVertexConsumerProvider() {
             super(null, null);
         }
 
         @Override
-        public VertexConsumer getBuffer(RenderLayer layer) {
+        public VertexConsumer getBuffer(RenderType layer) {
             if (((RenderLayerAccessor) layer).getRenderSetup().outputTarget == OutputTarget.ITEM_ENTITY_TARGET) {
                 return NoopVertexConsumer.INSTANCE;
             }
@@ -114,7 +115,7 @@ public class WireframeEntityRenderer {
         }
 
         @Override
-        public void draw(RenderLayer layer) {
+        public void draw(RenderType layer) {
             throw new RuntimeException();
         }
     }

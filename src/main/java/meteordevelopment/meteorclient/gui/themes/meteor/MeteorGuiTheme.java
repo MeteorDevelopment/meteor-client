@@ -30,7 +30,7 @@ import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.util.MacWindowUtil;
+import com.mojang.blaze3d.platform.MacosUtil;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -104,11 +104,11 @@ public class MeteorGuiTheme extends GuiTheme {
     // Background
 
     public final ThreeStateColorSetting backgroundColor = new ThreeStateColorSetting(
-            sgBackgroundColors,
-            "background",
-            new SettingColor(20, 20, 20, 200),
-            new SettingColor(30, 30, 30, 200),
-            new SettingColor(40, 40, 40, 200)
+        sgBackgroundColors,
+        "background",
+        new SettingColor(20, 20, 20, 200),
+        new SettingColor(30, 30, 30, 200),
+        new SettingColor(40, 40, 40, 200)
     );
 
     public final Setting<SettingColor> moduleBackground = color(sgBackgroundColors, "module-background", "Color of module background when active.", new SettingColor(50, 50, 50));
@@ -116,11 +116,11 @@ public class MeteorGuiTheme extends GuiTheme {
     // Outline
 
     public final ThreeStateColorSetting outlineColor = new ThreeStateColorSetting(
-            sgOutline,
-            "outline",
-            new SettingColor(0, 0, 0),
-            new SettingColor(10, 10, 10),
-            new SettingColor(20, 20, 20)
+        sgOutline,
+        "outline",
+        new SettingColor(0, 0, 0),
+        new SettingColor(10, 10, 10),
+        new SettingColor(20, 20, 20)
     );
 
     // Separator
@@ -132,24 +132,24 @@ public class MeteorGuiTheme extends GuiTheme {
     // Scrollbar
 
     public final ThreeStateColorSetting scrollbarColor = new ThreeStateColorSetting(
-            sgScrollbar,
-            "Scrollbar",
-            new SettingColor(30, 30, 30, 200),
-            new SettingColor(40, 40, 40, 200),
-            new SettingColor(50, 50, 50, 200)
+        sgScrollbar,
+        "Scrollbar",
+        new SettingColor(30, 30, 30, 200),
+        new SettingColor(40, 40, 40, 200),
+        new SettingColor(50, 50, 50, 200)
     );
 
     // Slider
 
     public final ThreeStateColorSetting sliderHandle = new ThreeStateColorSetting(
-            sgSlider,
-            "slider-handle",
-            new SettingColor(130, 0, 255),
-            new SettingColor(140, 30, 255),
-            new SettingColor(150, 60, 255)
+        sgSlider,
+        "slider-handle",
+        new SettingColor(130, 0, 255),
+        new SettingColor(140, 30, 255),
+        new SettingColor(150, 60, 255)
     );
 
-    public final Setting<SettingColor> sliderLeft = color(sgSlider, "slider-left", "Color of slider left part.", new SettingColor(100,35,170));
+    public final Setting<SettingColor> sliderLeft = color(sgSlider, "slider-left", "Color of slider left part.", new SettingColor(100, 35, 170));
     public final Setting<SettingColor> sliderRight = color(sgSlider, "slider-right", "Color of slider right part.", new SettingColor(50, 50, 50));
 
     // Starscript
@@ -173,11 +173,12 @@ public class MeteorGuiTheme extends GuiTheme {
 
     private Setting<SettingColor> color(SettingGroup group, String name, String description, SettingColor color) {
         return group.add(new ColorSetting.Builder()
-                .name(name + "-color")
-                .description(description)
-                .defaultValue(color)
-                .build());
+            .name(name + "-color")
+            .description(description)
+            .defaultValue(color)
+            .build());
     }
+
     private Setting<SettingColor> color(String name, String description, SettingColor color) {
         return color(sgColors, name, description, color);
     }
@@ -370,7 +371,7 @@ public class MeteorGuiTheme extends GuiTheme {
     public double scale(double value) {
         double scaled = value * scale.get();
 
-        if (MacWindowUtil.IS_MAC) {
+        if (MacosUtil.IS_MAC) {
             scaled /= (double) mc.getWindow().getWidth() / mc.getWindow().getFramebufferWidth();
         }
 

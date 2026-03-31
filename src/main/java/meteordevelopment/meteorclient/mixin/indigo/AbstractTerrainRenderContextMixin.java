@@ -19,10 +19,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(AbstractTerrainRenderContext.class)
 public abstract class AbstractTerrainRenderContextMixin {
-    @Final @Shadow(remap = false)
+    @Final
+    @Shadow(remap = false)
     protected BlockRenderInfo blockInfo;
 
-    @Inject(method = "bufferQuad", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/impl/client/indigo/renderer/render/AbstractTerrainRenderContext;bufferQuad(Lnet/fabricmc/fabric/impl/client/indigo/renderer/mesh/MutableQuadViewImpl;Lnet/minecraft/client/render/VertexConsumer;)V"), cancellable = true)
+    @Inject(method = "bufferQuad", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/impl/client/indigo/renderer/render/AbstractTerrainRenderContext;bufferQuad(Lnet/fabricmc/fabric/impl/client/indigo/renderer/mesh/MutableQuadViewImpl;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V"), cancellable = true)
     private void onBufferQuad(MutableQuadViewImpl quad, CallbackInfo ci) {
         int alpha = Xray.getAlpha(blockInfo.blockState, blockInfo.blockPos);
 

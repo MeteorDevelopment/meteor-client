@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
 
 public class HudElementPresetsScreen extends WindowScreen {
@@ -71,7 +71,7 @@ public class HudElementPresetsScreen extends WindowScreen {
     }
 
     @Override
-    protected void onRenderBefore(DrawContext drawContext, float delta) {
+    protected void onRenderBefore(GuiGraphics drawContext, float delta) {
         HudEditorScreen.renderElements(drawContext);
     }
 }

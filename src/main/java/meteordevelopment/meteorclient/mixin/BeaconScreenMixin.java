@@ -7,17 +7,17 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterBeacons;
-import net.minecraft.block.entity.BeaconBlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.BeaconScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.BeaconScreenHandler;
-import net.minecraft.text.Text;
+import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.BeaconScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.core.Holder;
+import net.minecraft.world.inventory.BeaconMenu;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,31 +28,31 @@ import java.util.Collection;
 import java.util.List;
 
 @Mixin(BeaconScreen.class)
-public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandler> {
+public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMenu> {
     @Shadow
-    protected abstract <T extends ClickableWidget> void addButton(T button);
+    protected abstract <T extends AbstractWidget> void addBeaconButton(T button);
 
-    public BeaconScreenMixin(BeaconScreenHandler handler, PlayerInventory inventory, Text title) {
+    public BeaconScreenMixin(BeaconMenu handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
     }
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Ljava/util/List;clear()V", shift = At.Shift.AFTER), cancellable = true)
     private void changeButtons(CallbackInfo ci) {
         if (!Modules.get().get(BetterBeacons.class).isActive()) return;
-        List<RegistryEntry<StatusEffect>> effects = BeaconBlockEntity.EFFECTS_BY_LEVEL.stream().flatMap(Collection::stream).toList();
-        if (MinecraftClient.getInstance().currentScreen instanceof BeaconScreen beaconScreen) {
-            addButton(beaconScreen.new DoneButtonWidget(this.x + 164, this.y + 107));
-            addButton(beaconScreen.new CancelButtonWidget(this.x + 190, this.y + 107));
+        List<Holder<MobEffect>> effects = BeaconBlockEntity.EFFECTS_BY_LEVEL.stream().flatMap(Collection::stream).toList();
+        if (Minecraft.getInstance().currentScreen instanceof BeaconScreen beaconScreen) {
+            addBeaconButton(beaconScreen.new DoneButtonWidget(this.x + 164, this.y + 107));
+            addBeaconButton(beaconScreen.new CancelButtonWidget(this.x + 190, this.y + 107));
 
             for (int x = 0; x < 3; x++) {
                 for (int y = 0; y < 2; y++) {
-                    RegistryEntry<StatusEffect> effect = effects.get(x * 2 + y);
+                    Holder<MobEffect> effect = effects.get(x * 2 + y);
                     int xMin = this.x + x * 25;
                     int yMin = this.y + y * 25;
-                    addButton(beaconScreen.new EffectButtonWidget(xMin + 27, yMin + 32, effect, true, -1));
-                    BeaconScreen.EffectButtonWidget secondaryWidget = beaconScreen.new EffectButtonWidget(xMin + 133, yMin + 32, effect, false, 3);
+                    addBeaconButton(beaconScreen.new EffectButtonWidget(xMin + 27, yMin + 32, effect, true, -1));
+                    BeaconScreen.BeaconPowerButton secondaryWidget = beaconScreen.new EffectButtonWidget(xMin + 133, yMin + 32, effect, false, 3);
                     if (getScreenHandler().getProperties() != 4) secondaryWidget.active = false;
-                    addButton(secondaryWidget);
+                    addBeaconButton(secondaryWidget);
                 }
             }
         }
@@ -60,7 +60,7 @@ public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandle
     }
 
     @Inject(method = "drawBackground", at = @At("TAIL"))
-    private void onDrawBackground(DrawContext context, float delta, int mouseX, int mouseY, CallbackInfo ci) {
+    private void onDrawBackground(GuiGraphics context, float delta, int mouseX, int mouseY, CallbackInfo ci) {
         if (!Modules.get().get(BetterBeacons.class).isActive()) return;
         //this will clear the background from useless pyramid graphics
         context.fill(x + 10, y + 7, x + 220, y + 98, 0xFF212121);

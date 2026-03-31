@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.PotionSetting;
 import meteordevelopment.meteorclient.utils.misc.MyPotion;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.resources.language.I18n;
 
 public class PotionSettingScreen extends WindowScreen {
     private final PotionSetting setting;

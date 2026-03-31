@@ -1,3 +1,4 @@
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -5,20 +6,20 @@
 
 package meteordevelopment.meteorclient.utils.world;
 
-import meteordevelopment.meteorclient.mixin.ClientChunkManagerAccessor;
+import meteordevelopment.meteorclient.mixin.ClientChunkCacheAccessor;
 import meteordevelopment.meteorclient.mixin.ClientChunkMapAccessor;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.level.chunk.ChunkAccess;
 
 import java.util.Iterator;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class ChunkIterator implements Iterator<Chunk> {
+public class ChunkIterator implements Iterator<ChunkAccess> {
     private final ClientChunkMapAccessor map = (ClientChunkMapAccessor) (Object) ((ClientChunkManagerAccessor) mc.world.getChunkManager()).meteor$getChunks();
     private final boolean onlyWithLoadedNeighbours;
 
     private int i = 0;
-    private Chunk chunk;
+    private ChunkAccess chunk;
 
     public ChunkIterator(boolean onlyWithLoadedNeighbours) {
         this.onlyWithLoadedNeighbours = onlyWithLoadedNeighbours;
@@ -26,8 +27,8 @@ public class ChunkIterator implements Iterator<Chunk> {
         getNext();
     }
 
-    private Chunk getNext() {
-        Chunk prev = chunk;
+    private ChunkAccess getNext() {
+        ChunkAccess prev = chunk;
         chunk = null;
 
         while (i < map.meteor$getChunks().length()) {
@@ -38,7 +39,7 @@ public class ChunkIterator implements Iterator<Chunk> {
         return prev;
     }
 
-    private boolean isInRadius(Chunk chunk) {
+    private boolean isInRadius(ChunkAccess chunk) {
         int x = chunk.getPos().x;
         int z = chunk.getPos().z;
 
@@ -51,7 +52,7 @@ public class ChunkIterator implements Iterator<Chunk> {
     }
 
     @Override
-    public Chunk next() {
+    public ChunkAccess next() {
         return getNext();
     }
 }

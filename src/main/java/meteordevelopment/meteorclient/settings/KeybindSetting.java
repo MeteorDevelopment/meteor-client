@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -33,12 +33,14 @@ public class KeybindSetting extends Setting<Keybind> {
     private void onKeyBinding(KeyEvent event) {
         if (widget == null) return;
         if (event.action == KeyAction.Press && event.key() == GLFW.GLFW_KEY_ESCAPE && widget.onClear()) event.cancel();
-        else if (event.action == KeyAction.Release && widget.onAction(true, event.key(), event.modifiers())) event.cancel();
+        else if (event.action == KeyAction.Release && widget.onAction(true, event.key(), event.modifiers()))
+            event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onMouseClickBinding(MouseClickEvent event) {
-        if (event.action == KeyAction.Press && widget != null && widget.onAction(false, event.button(), 0)) event.cancel();
+        if (event.action == KeyAction.Press && widget != null && widget.onAction(false, event.button(), 0))
+            event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -78,14 +80,14 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
+    public CompoundTag save(CompoundTag tag) {
         tag.put("value", get().toTag());
 
         return tag;
     }
 
     @Override
-    public Keybind load(NbtCompound tag) {
+    public Keybind load(CompoundTag tag) {
         get().fromTag(tag.getCompoundOrEmpty("value"));
 
         return get();

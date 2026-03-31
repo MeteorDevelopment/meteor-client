@@ -20,11 +20,11 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.Iterator;
 import java.util.List;
@@ -76,7 +76,7 @@ public class BlockESP extends Module {
         .build()
     );
 
-    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos blockPos = new BlockPos.Mutable();
 
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
@@ -97,7 +97,7 @@ public class BlockESP extends Module {
             groups.clear();
         }
 
-        for (Chunk chunk : Utils.chunks()) {
+        for (ChunkAccess chunk : Utils.chunks()) {
             searchChunk(chunk);
         }
 
@@ -158,7 +158,7 @@ public class BlockESP extends Module {
         searchChunk(event.chunk());
     }
 
-    private void searchChunk(Chunk chunk) {
+    private void searchChunk(ChunkAccess chunk) {
         workerThread.submit(() -> {
             if (!isActive()) return;
             ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
@@ -235,7 +235,7 @@ public class BlockESP extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         synchronized (chunks) {
-            for (Iterator<ESPChunk> it = chunks.values().iterator(); it.hasNext();) {
+            for (Iterator<ESPChunk> it = chunks.values().iterator(); it.hasNext(); ) {
                 ESPChunk chunk = it.next();
 
                 if (chunk.shouldBeDeleted()) {
@@ -247,8 +247,7 @@ public class BlockESP extends Module {
                     });
 
                     it.remove();
-                }
-                else chunk.render(event);
+                } else chunk.render(event);
             }
 
             if (tracers.get()) {

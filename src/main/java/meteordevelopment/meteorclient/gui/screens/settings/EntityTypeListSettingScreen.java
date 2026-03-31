@@ -19,12 +19,12 @@ import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.settings.EntityTypeListSetting;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Names;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Pair;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.Tuple;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -136,8 +136,8 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         Cell<WSection> miscCell = add(misc).expandX();
         miscT = misc.add(theme.table()).expandX().widget();
 
-        var spawnEggItems = Registries.ITEM.stream()
-            .filter(item -> item.getComponents().contains(DataComponentTypes.ENTITY_DATA))
+        var spawnEggItems = BuiltInRegistries.ITEM.stream()
+            .filter(item -> item.getComponents().contains(DataComponents.ENTITY_DATA))
             .toList();
 
         Consumer<EntityType<?>> entityTypeForEach = entityType -> {
@@ -169,17 +169,17 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
         // Sort all entities
         if (filterText.isEmpty()) {
-            Registries.ENTITY_TYPE.forEach(entityTypeForEach);
+            BuiltInRegistries.ENTITY_TYPE.forEach(entityTypeForEach);
         } else {
-            List<Pair<EntityType<?>, Integer>> entities = new ArrayList<>();
-            Registries.ENTITY_TYPE.forEach(entity -> {
+            List<Tuple<EntityType<?>, Integer>> entities = new ArrayList<>();
+            BuiltInRegistries.ENTITY_TYPE.forEach(entity -> {
                 int words = Utils.searchInWords(Names.get(entity), filterText);
                 int diff = Utils.searchLevenshteinDefault(Names.get(entity), filterText, false);
 
                 if (words > 0 || diff < Names.get(entity).length() / 2) entities.add(new Pair<>(entity, -diff));
             });
             entities.sort(Comparator.comparingInt(value -> -value.getRight()));
-            for (Pair<EntityType<?>, Integer> pair : entities) entityTypeForEach.accept(pair.getLeft());
+            for (Tuple<EntityType<?>, Integer> pair : entities) entityTypeForEach.accept(pair.getLeft());
         }
 
         if (animalsT.cells.isEmpty()) list.cells.remove(animalsCell);
@@ -197,8 +197,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                 if (!monstersT.cells.isEmpty()) monsters.setExpanded(true);
                 if (!ambientT.cells.isEmpty()) ambient.setExpanded(true);
                 if (!miscT.cells.isEmpty()) misc.setExpanded(true);
-            }
-            else {
+            } else {
                 if (!animalsT.cells.isEmpty()) animals.setExpanded(false);
                 if (!waterAnimalsT.cells.isEmpty()) waterAnimals.setExpanded(false);
                 if (!monstersT.cells.isEmpty()) monsters.setExpanded(false);
@@ -235,7 +234,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         ItemStack stack = null;
 
         for (var item : spawnEggItems) {
-            var component = item.getComponents().get(DataComponentTypes.ENTITY_DATA);
+            var component = item.getComponents().get(DataComponents.ENTITY_DATA);
 
             //noinspection DataFlowIssue
             if (component.getType() == entityType) {

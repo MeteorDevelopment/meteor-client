@@ -12,25 +12,25 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.ItemStackArgumentType;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
 
 public class DropCommand extends Command {
-    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(Text.literal("Can't drop items while in spectator."));
-    private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(Text.literal("Could not find an item with that name!"));
+    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(Component.literal("Can't drop items while in spectator."));
+    private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(Component.literal("Could not find an item with that name!"));
 
     public DropCommand() {
         super("drop", "Automatically drops specified items.");
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         // Main Hand
         builder.then(literal("hand").executes(context -> drop(player -> player.dropSelectedItem(true))));
 
@@ -61,7 +61,7 @@ public class DropCommand extends Command {
 
         // Armor
         builder.then(literal("armor").executes(context -> drop(player -> {
-            for (EquipmentSlot equipmentSlot : AttributeModifierSlot.ARMOR) {
+            for (EquipmentSlot equipmentSlot : EquipmentSlotGroup.ARMOR) {
                 if (equipmentSlot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
                     InvUtils.drop().slotArmor(equipmentSlot.getEntitySlotId());
                 }
@@ -69,7 +69,7 @@ public class DropCommand extends Command {
         })));
 
         // Specific item
-        builder.then(argument("item", ItemStackArgumentType.itemStack(REGISTRY_ACCESS))
+        builder.then(argument("item", ItemArgument.itemStack(REGISTRY_ACCESS))
             .executes(context -> drop(player -> {
                 dropItem(player, context, Integer.MAX_VALUE);
             }))
@@ -81,8 +81,8 @@ public class DropCommand extends Command {
         );
     }
 
-    private void dropItem(ClientPlayerEntity player, CommandContext<CommandSource> context, int amount) throws CommandSyntaxException {
-        ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
+    private void dropItem(LocalPlayer player, CommandContext<SharedSuggestionProvider> context, int amount) throws CommandSyntaxException {
+        ItemStack stack = ItemArgument.getItemStackArgument(context, "item").createStack(1, false);
         if (stack == null || stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
 
         for (int i = 0; i < player.getInventory().size() && amount > 0; i++) {
@@ -112,6 +112,6 @@ public class DropCommand extends Command {
     // Separate interface so exceptions can be thrown from it (which is not the case for Consumer)
     @FunctionalInterface
     private interface PlayerConsumer {
-        void accept(ClientPlayerEntity player) throws CommandSyntaxException;
+        void accept(LocalPlayer player) throws CommandSyntaxException;
     }
 }

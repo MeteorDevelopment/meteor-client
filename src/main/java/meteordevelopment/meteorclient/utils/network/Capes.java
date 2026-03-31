@@ -9,10 +9,10 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +48,7 @@ public class Capes {
         MeteorExecutor.execute(() -> {
             // Cape owners
             Stream<String> lines = Http.get(CAPE_OWNERS_URL)
-                .exceptionHandler(e -> MeteorClient.LOG.error("Could not load capes: {}",  e.getMessage()))
+                .exceptionHandler(e -> MeteorClient.LOG.error("Could not load capes: {}", e.getMessage()))
                 .sendLines();
             if (lines != null) {
                 lines.forEach(s -> {
@@ -98,7 +98,7 @@ public class Capes {
         }
     }
 
-    public static Identifier get(PlayerEntity player) {
+    public static Identifier get(Player player) {
         String capeName = OWNERS.get(player.getUuid());
         if (capeName != null) {
             Cape cape = TEXTURES.get(capeName);

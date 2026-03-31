@@ -12,8 +12,8 @@ import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.SpeedMode;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.SpeedModes;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.phys.Vec3;
 
 public class Vanilla extends SpeedMode {
     public Vanilla() {
@@ -26,8 +26,8 @@ public class Vanilla extends SpeedMode {
         double velX = vel.getX();
         double velZ = vel.getZ();
 
-        if (mc.player.hasStatusEffect(StatusEffects.SPEED)) {
-            double value = (mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier() + 1) * 0.205;
+        if (mc.player.hasStatusEffect(MobEffects.SPEED)) {
+            double value = (mc.player.getStatusEffect(MobEffects.SPEED).getAmplifier() + 1) * 0.205;
             velX += velX * value;
             velZ += velZ * value;
         }

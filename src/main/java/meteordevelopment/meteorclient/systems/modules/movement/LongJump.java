@@ -17,8 +17,8 @@ import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 
 public class LongJump extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -136,7 +136,7 @@ public class LongJump extends Module {
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.packet instanceof PlayerPositionLookS2CPacket && disableOnRubberband.get()) {
+        if (event.packet instanceof ClientboundPlayerPositionPacket && disableOnRubberband.get()) {
             info("Rubberband detected! Disabling...");
             toggle();
         }
@@ -180,14 +180,12 @@ public class LongJump extends Module {
                 if (PlayerUtils.isMoving() && (!onJump.get() || mc.options.jumpKey.isPressed()) && !mc.player.isInLava() && !mc.player.isTouchingWater()) {
                     if (stage == 0) moveSpeed = getMoveSpeed() * burstInitialSpeed.get();
                     else if (stage == 1) {
-                         ((IVec3d) event.movement).meteor$setY(0.42);
-                         moveSpeed *= burstBoostFactor.get();
-                    }
-                    else if (stage == 2) {
+                        ((IVec3d) event.movement).meteor$setY(0.42);
+                        moveSpeed *= burstBoostFactor.get();
+                    } else if (stage == 2) {
                         final double difference = lastDist - getMoveSpeed();
                         moveSpeed = lastDist - difference;
-                    }
-                    else moveSpeed = lastDist - lastDist / 159;
+                    } else moveSpeed = lastDist - lastDist / 159;
 
                     setMoveSpeed(event, moveSpeed = Math.max(getMoveSpeed(), moveSpeed));
                     if (!mc.player.verticalCollision && !mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, mc.player.getVelocity().y, 0.0)) && !mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, -0.4, 0.0))) {
@@ -220,7 +218,8 @@ public class LongJump extends Module {
 
                 double velocityY = mc.player.getVelocity().y;
 
-                if (airTicks - 6 >= 0 && airTicks - 6 < glide.length) updateY(velocityY * glide[(airTicks - 6)] * glideMultiplier.get());
+                if (airTicks - 6 >= 0 && airTicks - 6 < glide.length)
+                    updateY(velocityY * glide[(airTicks - 6)] * glideMultiplier.get());
 
                 if (velocityY < -0.2 && velocityY > -0.24) updateY(velocityY * 0.7 * glideMultiplier.get());
                 else if (velocityY < -0.25 && velocityY > -0.32) updateY(velocityY * 0.8 * glideMultiplier.get());
@@ -228,12 +227,10 @@ public class LongJump extends Module {
 
                 if (airTicks - 1 >= 0 && airTicks - 1 < motion.length) {
                     mc.player.setVelocity((forward * motion[(airTicks - 1)] * 3 * cos) * glideMultiplier.get(), mc.player.getVelocity().y, (forward * motion[(airTicks - 1)] * 3 * sin) * glideMultiplier.get());
-                }
-                else {
+                } else {
                     mc.player.setVelocity(0, mc.player.getVelocity().y, 0);
                 }
-            }
-            else {
+            } else {
                 if (autoDisable.get() && jumped) {
                     jumped = false;
                     toggle();
@@ -243,9 +240,8 @@ public class LongJump extends Module {
                 groundTicks += 1;
                 if (groundTicks <= 2) {
                     mc.player.setVelocity(forward * 0.009999999776482582 * cos * glideMultiplier.get(), mc.player.getVelocity().y, forward * 0.009999999776482582 * sin * glideMultiplier.get());
-                }
-                else {
-                    mc.player.setVelocity(forward * 0.30000001192092896  * cos * glideMultiplier.get(), 0.42399999499320984, forward * 0.30000001192092896 * sin * glideMultiplier.get());
+                } else {
+                    mc.player.setVelocity(forward * 0.30000001192092896 * cos * glideMultiplier.get(), 0.42399999499320984, forward * 0.30000001192092896 * sin * glideMultiplier.get());
                 }
             }
         }
@@ -272,8 +268,8 @@ public class LongJump extends Module {
 
     private double getMoveSpeed() {
         double base = 0.2873;
-        if (mc.player.hasStatusEffect(StatusEffects.SPEED)) {
-            base *= 1.0 + 0.2 * (mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier() + 1);
+        if (mc.player.hasStatusEffect(MobEffects.SPEED)) {
+            base *= 1.0 + 0.2 * (mc.player.getStatusEffect(MobEffects.SPEED).getAmplifier() + 1);
         }
         return base;
     }
@@ -285,8 +281,7 @@ public class LongJump extends Module {
 
         if (!PlayerUtils.isMoving()) {
             ((IVec3d) event.movement).meteor$setXZ(0, 0);
-        }
-        else {
+        } else {
             if (forward != 0) {
                 if (strafe > 0) yaw += ((forward > 0) ? -45 : 45);
                 else if (strafe < 0) yaw += ((forward > 0) ? 45 : -45);

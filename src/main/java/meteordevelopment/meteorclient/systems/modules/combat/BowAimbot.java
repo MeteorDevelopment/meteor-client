@@ -18,15 +18,15 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ArrowItem;
-import net.minecraft.item.BowItem;
-import net.minecraft.item.Items;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Set;
 
@@ -94,20 +94,22 @@ public class BowAimbot extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (!PlayerUtils.isAlive() || !itemInHand()) return;
-        if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
+        if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found())
+            return;
 
         target = TargetUtils.get(entity -> {
             if (entity == mc.player || entity == mc.getCameraEntity()) return false;
-            if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
+            if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive())
+                return false;
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!entities.get().contains(entity.getType())) return false;
             if (!nametagged.get() && entity.hasCustomName()) return false;
             if (!PlayerUtils.canSeeEntity(entity)) return false;
-            if (entity instanceof PlayerEntity player) {
+            if (entity instanceof Player player) {
                 if (player.isCreative()) return false;
                 if (!Friends.get().shouldAttack(player)) return false;
             }
-            return !(entity instanceof AnimalEntity animal) || babies.get() || !animal.isBaby();
+            return !(entity instanceof Animal animal) || babies.get() || !animal.isBaby();
         }, priority.get());
 
         if (target == null) {
@@ -137,7 +139,7 @@ public class BowAimbot extends Module {
         float velocity = BowItem.getPullProgress(mc.player.getItemUseTime());
 
         // Positions
-        Vec3d pos = target.getEntityPos();
+        Vec3 pos = target.getEntityPos();
 
         double relativeX = pos.x - mc.player.getX();
         double relativeY = pos.y + (target.getHeight() / 2) - mc.player.getEyeY();

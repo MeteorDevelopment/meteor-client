@@ -24,23 +24,23 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.Tameable;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.entity.mob.*;
-import net.minecraft.entity.passive.FrogEntity;
-import net.minecraft.entity.passive.ParrotEntity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.entity.passive.WolfEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.animal.frog.Frog;
+import net.minecraft.world.entity.animal.parrot.Parrot;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.item.*;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameMode;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.GameType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,11 +94,11 @@ public class KillAura extends Module {
     private final Setting<ShieldMode> shieldMode = sgGeneral.add(new EnumSetting.Builder<ShieldMode>()
         .name("shield-mode")
         .description("""
-            What to do when your target is blocking with a shield:
-            - Ignore:   Don't attack them if they are blocking
-            - Break:    Swap to an axe to disable the shield (Only if Auto Switch is enabled)
-            - None:     Attack them as normal
-        """)
+                What to do when your target is blocking with a shield:
+                - Ignore:   Don't attack them if they are blocking
+                - Break:    Swap to an axe to disable the shield (Only if Auto Switch is enabled)
+                - None:     Attack them as normal
+            """)
         .defaultValue(ShieldMode.None)
         .build()
     );
@@ -285,7 +285,7 @@ public class KillAura extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) {
+        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameType.SPECTATOR) {
             stopAttacking();
             return;
         }
@@ -329,7 +329,8 @@ public class KillAura extends Module {
 
         if (autoSwitch.get()) {
             FindItemResult weaponResult = new FindItemResult(mc.player.getInventory().getSelectedSlot(), -1);
-            if (attackWhenHolding.get() == AttackItems.Weapons) weaponResult = InvUtils.find(this::acceptableWeapon, 0, 8);
+            if (attackWhenHolding.get() == AttackItems.Weapons)
+                weaponResult = InvUtils.find(this::acceptableWeapon, 0, 8);
 
             if (shouldShieldBreak()) {
                 FindItemResult axeResult = InvUtils.find(itemStack -> itemStack.getItem() instanceof AxeItem, 0, 8);
@@ -337,7 +338,7 @@ public class KillAura extends Module {
             }
 
             if (!swapped) {
-                previousSlot  = mc.player.getInventory().getSelectedSlot();
+                previousSlot = mc.player.getInventory().getSelectedSlot();
                 swapped = true;
             }
 
@@ -350,7 +351,8 @@ public class KillAura extends Module {
         }
 
         attacking = true;
-        if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
+        if (rotation.get() == RotationMode.Always)
+            Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
         if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
             PathManagers.get().pause();
             wasPathing = true;
@@ -361,7 +363,7 @@ public class KillAura extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof UpdateSelectedSlotC2SPacket) {
+        if (event.packet instanceof ServerboundSetCarriedItemPacket) {
             switchTimer = switchDelay.get();
         }
     }
@@ -396,11 +398,11 @@ public class KillAura extends Module {
         if (entity.equals(mc.player) || entity.equals(mc.getCameraEntity())) return false;
         if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
 
-        Box hitbox = entity.getBoundingBox();
+        AABB hitbox = entity.getBoundingBox();
         if (!PlayerUtils.isWithin(
-            MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
-            MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
-            MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
+            Mth.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
+            Mth.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
+            Mth.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
             range.get()
         )) return false;
 
@@ -408,14 +410,15 @@ public class KillAura extends Module {
         if (ignoreNamed.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
         if (ignoreTamed.get()) {
-            if (entity instanceof Tameable tameable
+            if (entity instanceof OwnableEntity tameable
                 && tameable.getOwner() != null
                 && tameable.getOwner().equals(mc.player)
             ) return false;
         }
         if (ignorePassive.get()) {
             if (entity instanceof EndermanEntity enderman && !enderman.isAngry()) return false;
-            if ((entity instanceof PiglinEntity || entity instanceof ZombifiedPiglinEntity || entity instanceof WolfEntity) && !((MobEntity) entity).isAttacking()) return false;
+            if ((entity instanceof PiglinEntity || entity instanceof ZombifiedPiglinEntity || entity instanceof Wolf) && !((MobEntity) entity).isAttacking())
+                return false;
         }
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
@@ -434,7 +437,7 @@ public class KillAura extends Module {
                 };
             }
             // Passive mobs with baby variants (animals, villagers)
-            if (entity instanceof PassiveEntity && (!(entity instanceof FrogEntity || entity instanceof ParrotEntity))) {
+            if (entity instanceof AgeableMob && (!(entity instanceof Frog || entity instanceof Parrot))) {
                 return switch (passiveMobAgeFilter.get()) {
                     case Baby -> livingEntity.isBaby();
                     case Adult -> !livingEntity.isBaby();
@@ -463,10 +466,11 @@ public class KillAura extends Module {
     }
 
     private void attack(Entity target) {
-        if (rotation.get() == RotationMode.OnHit) Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body));
+        if (rotation.get() == RotationMode.OnHit)
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body));
 
         mc.interactionManager.attackEntity(mc.player, target);
-        mc.player.swingHand(Hand.MAIN_HAND);
+        mc.player.swingHand(InteractionHand.MAIN_HAND);
 
         hitTimer = 0;
     }

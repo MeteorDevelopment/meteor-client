@@ -8,10 +8,10 @@ package meteordevelopment.meteorclient.utils.misc.text;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 
 import java.util.*;
 
@@ -22,7 +22,7 @@ public class TextUtils {
     private TextUtils() {
     }
 
-    public static List<ColoredText> toColoredTextList(Text text) {
+    public static List<ColoredText> toColoredTextList(MutableComponent text) {
         Deque<ColoredText> stack = new ArrayDeque<>();
         List<ColoredText> coloredTexts = new ArrayList<>();
         preOrderTraverse(text, stack, coloredTexts);
@@ -36,10 +36,10 @@ public class TextUtils {
      * @param orderedText the {@link OrderedText} to parse.
      * @return The {@link Text} equivalent of the {@link OrderedText} parameter.
      */
-    public static MutableText parseOrderedText(OrderedText orderedText) {
-        MutableText parsedText = Text.empty();
+    public static MutableComponent parseOrderedText(FormattedCharSequence orderedText) {
+        MutableComponent parsedText = MutableComponent.empty();
         orderedText.accept((i, style, codePoint) -> {
-            parsedText.append(Text.literal(new String(Character.toChars(codePoint))).setStyle(style));
+            parsedText.append(MutableComponent.literal(new String(Character.toChars(codePoint))).setStyle(style));
             return true;
         });
         return parsedText;
@@ -51,7 +51,7 @@ public class TextUtils {
      * @param text the {@link Text} to scan through
      * @return You know what it returns. Read the docs! Also, returns white if the internal {@link Object2IntMap.Entry} is null
      */
-    public static Color getMostPopularColor(Text text) {
+    public static Color getMostPopularColor(MutableComponent text) {
         Object2IntMap.Entry<Color> biggestEntry = null;
         for (var entry : getColoredCharacterCount(toColoredTextList(text)).object2IntEntrySet()) {
             if (biggestEntry == null) biggestEntry = entry;
@@ -64,9 +64,9 @@ public class TextUtils {
      * Takes a {@link List} of {@link ColoredText} and returns a {@link HashMap}, where the keys are all the existing {@link Color}s in the
      * aforementioned list, and the corresponding keys are the number of characters that have that color.
      *
-     * @param coloredTexts The list of {@link ColoredText} to obtain the color count of. Best paired with the output from {@link #toColoredTextList(Text)}
+     * @param coloredTexts The list of {@link ColoredText} to obtain the color count of. Best paired with the output from {@link #toColoredTextList(MutableComponent)}
      * @return a {@link Map} whose keys are colors (and the set of keys being all possible colors used in the list, thus all colors in the text,
-     * if the argument for this function is fed from the return from {@link #toColoredTextList(Text)}), and the corresponding values being {@link Integer}s
+     * if the argument for this function is fed from the return from {@link #toColoredTextList(MutableComponent)}), and the corresponding values being {@link Integer}s
      * representing the number of occurrences of text that bear that color. The order of the keys are in no particular order
      */
     public static Object2IntMap<Color> getColoredCharacterCount(List<ColoredText> coloredTexts) {
@@ -93,7 +93,7 @@ public class TextUtils {
      * @param stack        An empty stack. This is used by the recursive algorithm to keep track of the parents of the current iteration
      * @param coloredTexts The list of colored text to return
      */
-    private static void preOrderTraverse(Text text, Deque<ColoredText> stack, List<ColoredText> coloredTexts) {
+    private static void preOrderTraverse(MutableComponent text, Deque<ColoredText> stack, List<ColoredText> coloredTexts) {
         if (text == null)
             return;
 
@@ -123,7 +123,7 @@ public class TextUtils {
         coloredTexts.add(coloredText);
         stack.push(coloredText); // For the recursion algorithm's child, the current coloredText is its parent, so add to stack
         // Recursively traverse
-        for (Text child : text.getSiblings())
+        for (MutableComponent child : text.getSiblings())
             preOrderTraverse(child, stack, coloredTexts);
 
         stack.pop();

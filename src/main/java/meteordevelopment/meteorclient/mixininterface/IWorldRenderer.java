@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import net.minecraft.client.gl.Framebuffer;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 
 public interface IWorldRenderer {
-    void meteor$pushEntityOutlineFramebuffer(Framebuffer framebuffer);
+    void meteor$pushEntityOutlineFramebuffer(RenderTarget framebuffer);
 
     void meteor$popEntityOutlineFramebuffer();
 }

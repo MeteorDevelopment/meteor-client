@@ -7,9 +7,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
-import net.minecraft.client.gl.DynamicUniformStorage;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.SimpleFramebuffer;
+import net.minecraft.client.renderer.DynamicUniformStorage;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 
 import java.nio.ByteBuffer;
 
@@ -18,7 +18,7 @@ import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public abstract class PostProcessShader {
     protected final RenderPipeline pipeline;
-    public final Framebuffer framebuffer;
+    public final RenderTarget framebuffer;
 
     protected PostProcessShader(RenderPipeline pipeline) {
         this.pipeline = pipeline;
@@ -27,8 +27,11 @@ public abstract class PostProcessShader {
 
     protected abstract boolean shouldDraw();
 
-    protected void preDraw() {}
-    protected void postDraw() {}
+    protected void preDraw() {
+    }
+
+    protected void postDraw() {
+    }
 
     protected abstract void setupPass(MeshRenderer renderer);
 
@@ -82,7 +85,7 @@ public abstract class PostProcessShader {
         UNIFORM_STORAGE.clear();
     }
 
-    private record UniformData(float sizeX, float sizeY, float time) implements DynamicUniformStorage.Uploadable {
+    private record UniformData(float sizeX, float sizeY, float time) implements DynamicUniformStorage.DynamicUniform {
         @Override
         public void write(ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)

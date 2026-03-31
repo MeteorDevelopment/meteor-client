@@ -14,8 +14,8 @@ import meteordevelopment.meteorclient.settings.IBlockData;
 import meteordevelopment.meteorclient.settings.IGeneric;
 import meteordevelopment.meteorclient.utils.misc.IChangeable;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.block.Block;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.nbt.CompoundTag;
 
 public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlockData<ESPBlockData> {
     public ShapeMode shapeMode;
@@ -81,8 +81,8 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new NbtCompound();
 
         tag.putString("shapeMode", shapeMode.name());
         tag.put("lineColor", lineColor.toTag());
@@ -97,7 +97,7 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
     }
 
     @Override
-    public ESPBlockData fromTag(NbtCompound tag) {
+    public ESPBlockData fromTag(CompoundTag tag) {
         shapeMode = ShapeMode.valueOf(tag.getString("shapeMode", ""));
         lineColor.fromTag(tag.getCompoundOrEmpty("lineColor"));
         sideColor.fromTag(tag.getCompoundOrEmpty("sideColor"));

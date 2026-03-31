@@ -19,12 +19,12 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.ClipContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,7 +132,7 @@ public class AutoWeb extends Module {
     );
 
     private final List<BlockPos> placePositions = new ArrayList<>();
-    private PlayerEntity target = null;
+    private Player target = null;
 
     public AutoWeb() {
         super(Categories.Combat, "auto-web", "Automatically places webs on other players.");
@@ -161,7 +161,7 @@ public class AutoWeb extends Module {
         FindItemResult webs = InvUtils.findInHotbar(Items.COBWEB);
         if (!webs.found()) return;
 
-        Vec3d pos = target.getEntityPos();
+        Vec3 pos = target.getEntityPos();
 
         // Prediction mode via target's movement delta
         if (predictMovement.get()) {
@@ -192,10 +192,10 @@ public class AutoWeb extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3d pos = blockPos.toCenterPos();
+        Vec3 pos = blockPos.toCenterPos();
         if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
 
-        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+        ClipContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
         BlockHitResult result = mc.world.raycast(raycastContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !PlayerUtils.isWithin(pos, placeWallsRange.get());

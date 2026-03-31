@@ -9,16 +9,16 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ESPBlock {
-    private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private static final BlockPos.MutableBlockPos blockPos = new BlockPos.Mutable();
 
     private static final BlockESP blockEsp = Modules.get().get(BlockESP.class);
 
@@ -42,7 +42,7 @@ public class ESPBlock {
     public static final int BO_RI = 1 << 17;
     public static final int BO_LE = 1 << 18;
 
-    public static final int[] SIDES = { FO, BA, LE, RI, TO, BO };
+    public static final int[] SIDES = {FO, BA, LE, RI, TO, BO};
 
     public final int x, y, z;
     private BlockState state;
@@ -81,8 +81,7 @@ public class ESPBlock {
 
             if (firstGroup == null) {
                 firstGroup = neighbour.group;
-            }
-            else {
+            } else {
                 if (firstGroup != neighbour.group) firstGroup.merge(neighbour.group);
             }
         }
@@ -127,7 +126,7 @@ public class ESPBlock {
 
         if (neighbourState.getBlock() != state.getBlock()) return false;
 
-        VoxelShape cube = VoxelShapes.fullCube();
+        VoxelShape cube = Shapes.fullCube();
         VoxelShape shape = state.getOutlineShape(mc.world, blockPos);
         VoxelShape neighbourShape = neighbourState.getOutlineShape(mc.world, blockPos);
 
@@ -195,8 +194,7 @@ public class ESPBlock {
 
         if (neighbours == 0) {
             event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode, 0);
-        }
-        else {
+        } else {
             // Lines
             if (shapeMode.lines()) {
                 // Vertical, BA_LE

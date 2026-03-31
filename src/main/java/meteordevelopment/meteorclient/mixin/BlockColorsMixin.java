@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
-import net.minecraft.client.color.block.BlockColorProvider;
+import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.block.BlockColors;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -22,12 +22,12 @@ public abstract class BlockColorsMixin {
         method = "create",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/color/block/BlockColors;registerColorProvider(Lnet/minecraft/client/color/block/BlockColorProvider;[Lnet/minecraft/block/Block;)V",
+            target = "Lnet/minecraft/client/color/block/BlockColors;register(Lnet/minecraft/client/color/block/BlockColor;[Lnet/minecraft/world/level/block/Block;)V",
             ordinal = 3
         ),
         index = 0
     )
-    private static BlockColorProvider modifySpruceLeavesColor(BlockColorProvider provider) {
+    private static BlockColor modifySpruceLeavesColor(BlockColor provider) {
         return (state, world, pos, tintIndex) -> getModifiedColor(-10380959);
     }
 
@@ -35,12 +35,12 @@ public abstract class BlockColorsMixin {
         method = "create",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/color/block/BlockColors;registerColorProvider(Lnet/minecraft/client/color/block/BlockColorProvider;[Lnet/minecraft/block/Block;)V",
+            target = "Lnet/minecraft/client/color/block/BlockColors;register(Lnet/minecraft/client/color/block/BlockColor;[Lnet/minecraft/world/level/block/Block;)V",
             ordinal = 4
         ),
         index = 0
     )
-    private static BlockColorProvider modifyBirchLeavesColor(BlockColorProvider provider) {
+    private static BlockColor modifyBirchLeavesColor(BlockColor provider) {
         return (state, world, pos, tintIndex) -> getModifiedColor(-8345771);
     }
 

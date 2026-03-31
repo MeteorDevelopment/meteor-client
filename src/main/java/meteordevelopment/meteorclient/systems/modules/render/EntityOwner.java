@@ -19,12 +19,12 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LazyEntityReference;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
@@ -62,10 +62,11 @@ public class EntityOwner extends Module {
     @EventHandler
     private void onRender2D(Render2DEvent event) {
         for (Entity entity : mc.world.getEntities()) {
-            @Nullable LazyEntityReference<LivingEntity> owner;
+            @Nullable EntityReference<LivingEntity> owner;
 
-            if (entity instanceof TameableEntity tameable) owner = tameable.getOwnerReference();
-            else if (entity instanceof EnderPearlEntity pearl) owner = LazyEntityReference.of((LivingEntity)pearl.getOwner());
+            if (entity instanceof TamableAnimal tameable) owner = tameable.getOwnerReference();
+            else if (entity instanceof ThrownEnderpearl pearl)
+                owner = EntityReference.of((LivingEntity) pearl.getOwner());
             else continue;
 
             if (owner != null) {
@@ -100,10 +101,10 @@ public class EntityOwner extends Module {
         NametagUtils.end();
     }
 
-    private String getOwnerName(LazyEntityReference<LivingEntity> owner) {
+    private String getOwnerName(EntityReference<LivingEntity> owner) {
         // Check if the player is online
-        @Nullable LivingEntity ownerEntity = LazyEntityReference.resolve(owner, mc.world, LivingEntity.class);
-        if (ownerEntity instanceof PlayerEntity playerEntity) return playerEntity.getName().getString();
+        @Nullable LivingEntity ownerEntity = EntityReference.resolve(owner, mc.world, LivingEntity.class);
+        if (ownerEntity instanceof Player playerEntity) return playerEntity.getName().getString();
 
         UUID uuid = owner.getUuid();
 

@@ -17,12 +17,12 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.MaceItem;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.MaceItem;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 
 public class Criticals extends Module {
 
@@ -52,17 +52,17 @@ public class Criticals extends Module {
     );
 
     private final Setting<Double> extraHeight = sgMace.add(new DoubleSetting.Builder()
-    	.name("additional-height")
-    	.description("The amount of additional height to spoof. More height means more damage.")
-    	.defaultValue(0.0)
+        .name("additional-height")
+        .description("The amount of additional height to spoof. More height means more damage.")
+        .defaultValue(0.0)
         .min(0)
         .sliderRange(0, 100)
         .visible(mace::get)
-    	.build()
+        .build()
     );
 
     private PlayerInteractEntityC2SPacket attackPacket;
-    private HandSwingC2SPacket swingPacket;
+    private ServerboundSwingPacket swingPacket;
     private boolean sendPackets;
     private int sendTimer;
     private double lastY;
@@ -131,12 +131,11 @@ public class Criticals extends Module {
                     }
                 }
             }
-        }
-        else if (event.packet instanceof HandSwingC2SPacket && mode.get() != Mode.Packet) {
+        } else if (event.packet instanceof ServerboundSwingPacket && mode.get() != Mode.Packet) {
             if (skipCrit()) return;
 
             if (sendPackets && swingPacket == null) {
-                swingPacket = (HandSwingC2SPacket) event.packet;
+                swingPacket = (ServerboundSwingPacket) event.packet;
                 event.cancel();
             }
         }

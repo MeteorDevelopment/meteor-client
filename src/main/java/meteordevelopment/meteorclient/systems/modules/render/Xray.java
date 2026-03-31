@@ -18,13 +18,13 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.level.BlockGetter;
 
 import java.util.List;
 
@@ -80,7 +80,8 @@ public class Xray extends Module {
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
-        if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) return theme.label("Warning: Due to shaders in use, opacity is overridden to 0.");
+        if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse())
+            return theme.label("Warning: Due to shaders in use, opacity is overridden to 0.");
 
         return null;
     }
@@ -100,11 +101,11 @@ public class Xray extends Module {
         event.lightLevel = 1;
     }
 
-    public boolean modifyDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, boolean returns) {
+    public boolean modifyDrawSide(BlockState state, BlockGetter view, BlockPos pos, Direction facing, boolean returns) {
         if (!returns && !isBlocked(state.getBlock(), pos)) {
             BlockPos adjPos = pos.offset(facing);
             BlockState adjState = view.getBlockState(adjPos);
-            return adjState.getCullingFace(facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || !adjState.isOpaqueFullCube() || isBlocked(adjState.getBlock(), adjPos);
+            return adjState.getCullingFace(facing.getOpposite()) != Shapes.fullCube() || adjState.getBlock() != state.getBlock() || !adjState.isOpaqueFullCube() || isBlocked(adjState.getBlock(), adjPos);
         }
 
         return returns;
@@ -127,8 +128,7 @@ public class Xray extends Module {
             else alpha = wallHack.opacity.get();
 
             return alpha;
-        }
-        else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
+        } else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
             return ((MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse())) ? 0 : xray.opacity.get();
         }
 

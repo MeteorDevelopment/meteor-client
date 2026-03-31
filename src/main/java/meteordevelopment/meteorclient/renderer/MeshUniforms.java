@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.renderer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import net.minecraft.client.gl.DynamicUniformStorage;
+import net.minecraft.client.renderer.DynamicUniformStorage;
 import org.joml.Matrix4f;
 
 import java.nio.ByteBuffer;
@@ -34,7 +34,7 @@ public class MeshUniforms {
         return STORAGE.write(DATA);
     }
 
-    private static final class Data implements DynamicUniformStorage.Uploadable {
+    private static final class Data implements DynamicUniformStorage.DynamicUniform {
         private Matrix4f proj;
         private Matrix4f modelView;
 

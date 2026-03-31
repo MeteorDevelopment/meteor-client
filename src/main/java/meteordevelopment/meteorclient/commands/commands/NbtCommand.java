@@ -13,24 +13,24 @@ import com.mojang.serialization.DataResult;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.ComponentMapArgumentType;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.DataCommandObject;
-import net.minecraft.command.EntityDataObject;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.command.argument.RegistryKeyArgumentType;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.server.commands.data.DataAccessor;
+import net.minecraft.server.commands.data.EntityDataAccessor;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.commands.arguments.ResourceKeyArgument;
 import net.minecraft.component.*;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import net.minecraft.util.Unit;
 
 import java.util.List;
@@ -39,15 +39,15 @@ import java.util.Set;
 
 public class NbtCommand extends Command {
     private static final DynamicCommandExceptionType MALFORMED_ITEM_EXCEPTION = new DynamicCommandExceptionType(
-        error -> Text.stringifiedTranslatable("arguments.item.malformed", error)
+        error -> MutableComponent.stringifiedTranslatable("arguments.item.malformed", error)
     );
-    private final Text copyButton = Text.literal("NBT").setStyle(Style.EMPTY
-        .withFormatting(Formatting.UNDERLINE)
+    private final MutableComponent copyButton = MutableComponent.literal("NBT").setStyle(Style.EMPTY
+        .withFormatting(ChatFormatting.UNDERLINE)
         .withClickEvent(new MeteorClickEvent(
             this.toString("copy")
         ))
         .withHoverEvent(new HoverEvent.ShowText(
-            Text.literal("Copy the NBT data to your clipboard.")
+            MutableComponent.literal("Copy the NBT data to your clipboard.")
         )));
 
     public NbtCommand() {
@@ -55,7 +55,7 @@ public class NbtCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(literal("add").then(argument("component", ComponentMapArgumentType.componentMap(REGISTRY_ACCESS)).executes(ctx -> {
             ItemStack stack = mc.player.getInventory().getSelectedStack();
 
@@ -107,14 +107,14 @@ public class NbtCommand extends Command {
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("remove").then(argument("component", RegistryKeyArgumentType.registryKey(RegistryKeys.DATA_COMPONENT_TYPE)).executes(ctx -> {
+        builder.then(literal("remove").then(argument("component", ResourceKeyArgument.registryKey(Registries.DATA_COMPONENT_TYPE)).executes(ctx -> {
             ItemStack stack = mc.player.getInventory().getSelectedStack();
 
             if (validBasic(stack)) {
                 @SuppressWarnings("unchecked")
-                RegistryKey<ComponentType<?>> componentTypeKey = (RegistryKey<ComponentType<?>>) ctx.getArgument("component", RegistryKey.class);
+                ResourceKey<ComponentType<?>> componentTypeKey = (ResourceKey<ComponentType<?>>) ctx.getArgument("component", ResourceKey.class);
 
-                ComponentType<?> componentType = Registries.DATA_COMPONENT_TYPE.get(componentTypeKey);
+                ComponentType<?> componentType = BuiltInRegistries.DATA_COMPONENT_TYPE.get(componentTypeKey);
 
                 MergedComponentMap components = (MergedComponentMap) stack.getComponents();
                 components.applyChanges(ComponentChanges.builder().remove(componentType).build());
@@ -129,7 +129,7 @@ public class NbtCommand extends Command {
                 ComponentMap components = stack.getComponents();
                 String remaining = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
 
-                CommandSource.forEachMatching(components.getTypes().stream().map(Registries.DATA_COMPONENT_TYPE::getEntry).toList(), remaining, entry -> {
+                SharedSuggestionProvider.forEachMatching(components.getTypes().stream().map(BuiltInRegistries.DATA_COMPONENT_TYPE::getEntry).toList(), remaining, entry -> {
                     if (entry.getKey().isPresent()) return entry.getKey().get().getValue();
                     return null;
                 }, entry -> {
@@ -146,15 +146,15 @@ public class NbtCommand extends Command {
         })));
 
         builder.then(literal("get").executes(context -> {
-            DataCommandObject dataCommandObject = new EntityDataObject(mc.player);
-            NbtPathArgumentType.NbtPath handPath = NbtPathArgumentType.NbtPath.parse("SelectedItem");
+            DataAccessor dataCommandObject = new EntityDataObject(mc.player);
+            NbtPathArgument.NbtPath handPath = NbtPathArgument.NbtPath.parse("SelectedItem");
 
-            MutableText text = Text.empty().append(copyButton);
+            MutableComponent text = MutableComponent.empty().append(copyButton);
 
             try {
-                List<NbtElement> nbtElement = handPath.get(dataCommandObject.getNbt());
+                List<Tag> nbtElement = handPath.get(dataCommandObject.getNbt());
                 if (!nbtElement.isEmpty()) {
-                    text.append(" ").append(NbtHelper.toPrettyPrintedText(nbtElement.getFirst()));
+                    text.append(" ").append(NbtUtils.toPrettyPrintedText(nbtElement.getFirst()));
                 }
             } catch (CommandSyntaxException e) {
                 text.append("{}");
@@ -166,16 +166,16 @@ public class NbtCommand extends Command {
         }));
 
         builder.then(literal("copy").executes(context -> {
-            DataCommandObject dataCommandObject = new EntityDataObject(mc.player);
-            NbtPathArgumentType.NbtPath handPath = NbtPathArgumentType.NbtPath.parse("SelectedItem");
+            DataAccessor dataCommandObject = new EntityDataObject(mc.player);
+            NbtPathArgument.NbtPath handPath = NbtPathArgument.NbtPath.parse("SelectedItem");
 
-            MutableText text = Text.empty().append(copyButton);
+            MutableComponent text = MutableComponent.empty().append(copyButton);
             String nbt = "{}";
 
             try {
-                List<NbtElement> nbtElement = handPath.get(dataCommandObject.getNbt());
+                List<Tag> nbtElement = handPath.get(dataCommandObject.getNbt());
                 if (!nbtElement.isEmpty()) {
-                    text.append(" ").append(NbtHelper.toPrettyPrintedText(nbtElement.getFirst()));
+                    text.append(" ").append(NbtUtils.toPrettyPrintedText(nbtElement.getFirst()));
                     nbt = nbtElement.getFirst().toString();
                 }
             } catch (CommandSyntaxException e) {

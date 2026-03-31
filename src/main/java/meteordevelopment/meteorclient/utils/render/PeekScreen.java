@@ -9,16 +9,16 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ShulkerBoxScreenHandler;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ColorHelper;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.ShulkerBoxMenu;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import org.lwjgl.glfw.GLFW;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -33,7 +33,7 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         if (tooltips.shouldOpenContents(click) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
@@ -45,12 +45,12 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         return false;
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         if (tooltips.shouldOpenContents(input) && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
@@ -69,11 +69,11 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+    protected void drawBackground(GuiGraphics context, float delta, int mouseX, int mouseY) {
         Color color = Utils.getShulkerColor(storageBlock);
 
         int i = (width - backgroundWidth) / 2;
         int j = (height - backgroundHeight) / 2;
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, i, j, 0f, 0f, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight, 256, 256, ColorHelper.fromFloats(color.a / 255f, color.r / 255f, color.g / 255f, color.b / 255f));
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, i, j, 0f, 0f, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight, 256, 256, ARGB.fromFloats(color.a / 255f, color.r / 255f, color.g / 255f, color.b / 255f));
     }
 }

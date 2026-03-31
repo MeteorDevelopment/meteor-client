@@ -9,7 +9,7 @@ import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.TextureFormat;
 import meteordevelopment.meteorclient.renderer.Texture;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.stb.STBImageResize;

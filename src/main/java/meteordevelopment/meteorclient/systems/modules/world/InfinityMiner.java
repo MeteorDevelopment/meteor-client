@@ -19,17 +19,17 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FluidBlock;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -100,7 +100,7 @@ public class InfinityMiner extends Module {
     private final IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
     private final Settings baritoneSettings = BaritoneAPI.getSettings();
 
-    private final BlockPos.Mutable homePos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos homePos = new BlockPos.Mutable();
 
     private boolean prevMineScanDroppedItems;
     private boolean repairing;
@@ -130,10 +130,8 @@ public class InfinityMiner extends Module {
                 if (isBaritoneNotWalking()) {
                     info("Walking home.");
                     baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(homePos));
-                }
-                else if (mc.player.getBlockPos().equals(homePos) && logOut.get()) logOut();
-            }
-            else if (logOut.get()) logOut();
+                } else if (mc.player.getBlockPos().equals(homePos) && logOut.get()) logOut();
+            } else if (logOut.get()) logOut();
             else {
                 info("Inventory full, stopping process.");
                 toggle();
@@ -164,8 +162,7 @@ public class InfinityMiner extends Module {
             }
 
             if (isBaritoneNotMining()) mineRepairBlocks();
-        }
-        else {
+        } else {
             if (needsRepair()) {
                 warning("Pickaxe needs repair, beginning repair process");
                 repairing = true;
@@ -190,7 +187,8 @@ public class InfinityMiner extends Module {
             && !Utils.hasEnchantment(stack, Enchantments.SILK_TOUCH));
         FindItemResult bestPick = InvUtils.findInHotbar(pickaxePredicate);
 
-        if (bestPick.isOffhand()) InvUtils.shiftClick().fromOffhand().toHotbar(mc.player.getInventory().getSelectedSlot());
+        if (bestPick.isOffhand())
+            InvUtils.shiftClick().fromOffhand().toHotbar(mc.player.getInventory().getSelectedSlot());
         else if (bestPick.isHotbar()) InvUtils.swap(bestPick.slot(), false);
 
         return InvUtils.testInMainHand(pickaxePredicate);
@@ -216,7 +214,7 @@ public class InfinityMiner extends Module {
 
     private void logOut() {
         toggle();
-        mc.player.networkHandler.sendPacket(new DisconnectS2CPacket(Text.literal("[Infinity Miner] Inventory is full.")));
+        mc.player.networkHandler.sendPacket(new DisconnectS2CPacket(Component.literal("[Infinity Miner] Inventory is full.")));
     }
 
     private boolean isBaritoneNotMining() {
@@ -228,7 +226,7 @@ public class InfinityMiner extends Module {
     }
 
     private boolean filterBlocks(Block block) {
-        return block != Blocks.AIR && block.getDefaultState().getHardness(mc.world, null) != -1 && !(block instanceof FluidBlock);
+        return block != Blocks.AIR && block.getDefaultState().getHardness(mc.world, null) != -1 && !(block instanceof LiquidBlock);
     }
 
     private boolean isFull() {

@@ -13,9 +13,9 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.BlockSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.Registries;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.apache.commons.lang3.Strings;
 
 public class BlockSettingScreen extends WindowScreen {
@@ -49,7 +49,7 @@ public class BlockSettingScreen extends WindowScreen {
     }
 
     private void initTable() {
-        for (Block block : Registries.BLOCK) {
+        for (Block block : BuiltInRegistries.BLOCK) {
             if (setting.filter != null && !setting.filter.test(block)) continue;
             if (skipValue(block)) continue;
 
@@ -68,6 +68,6 @@ public class BlockSettingScreen extends WindowScreen {
     }
 
     protected boolean skipValue(Block value) {
-        return value == Blocks.AIR || Registries.BLOCK.getId(value).getPath().endsWith("_wall_banner");
+        return value == Blocks.AIR || BuiltInRegistries.BLOCK.getId(value).getPath().endsWith("_wall_banner");
     }
 }

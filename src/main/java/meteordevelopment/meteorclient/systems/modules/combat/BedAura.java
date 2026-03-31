@@ -24,17 +24,17 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.meteorclient.utils.world.CardinalDirection;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BedBlock;
-import net.minecraft.block.entity.BedBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BedItem;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.entity.BedBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BedItem;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 
 public class BedAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -179,7 +179,7 @@ public class BedAura extends Module {
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
         .description("The side color for positions to be placed.")
-        .defaultValue(new SettingColor(15, 255, 211,75))
+        .defaultValue(new SettingColor(15, 255, 211, 75))
         .build()
     );
 
@@ -191,7 +191,7 @@ public class BedAura extends Module {
     );
 
     private CardinalDirection direction;
-    private PlayerEntity target;
+    private Player target;
     private BlockPos placePos, breakPos;
     private int timer;
 
@@ -208,7 +208,7 @@ public class BedAura extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         // Check if beds can explode here
-        if (mc.world.getRegistryKey() == World.OVERWORLD) {
+        if (mc.world.getRegistryKey() == Level.OVERWORLD) {
             error("You can't blow up beds in this dimension, disabling.");
             toggle();
             return;
@@ -241,8 +241,7 @@ public class BedAura extends Module {
         // Place bed
         if (timer <= 0 && placeBed(placePos)) {
             timer = delay.get();
-        }
-        else {
+        } else {
             timer--;
         }
 
@@ -250,7 +249,7 @@ public class BedAura extends Module {
         breakBed(breakPos);
     }
 
-    private BlockPos findPlace(PlayerEntity target) {
+    private BlockPos findPlace(Player target) {
         if (!InvUtils.find(itemStack -> itemStack.getItem() instanceof BedItem).found()) return null;
 
         for (int index = 0; index < 3; index++) {
@@ -282,11 +281,11 @@ public class BedAura extends Module {
     }
 
     private BlockPos findBreak() {
-        for (BlockEntity blockEntity : Utils.blockEntities()) {
+        for (BedBlockEntity blockEntity : Utils.blockEntities()) {
             if (!(blockEntity instanceof BedBlockEntity)) continue;
 
             BlockPos bedPos = blockEntity.getPos();
-            Vec3d bedVec = Utils.vec3d(bedPos);
+            Vec3 bedVec = Utils.vec3d(bedPos);
 
             if (PlayerUtils.isWithinReach(bedVec)
                 && DamageUtils.bedDamage(target, bedVec) >= minDamage.get()
@@ -329,7 +328,7 @@ public class BedAura extends Module {
         boolean wasSneaking = mc.player.isSneaking();
         if (wasSneaking) mc.player.setSneaking(false);
 
-        mc.interactionManager.interactBlock(mc.player, Hand.OFF_HAND, new BlockHitResult(Vec3d.ofCenter(pos), Direction.UP, pos, false));
+        mc.interactionManager.interactBlock(mc.player, InteractionHand.OFF_HAND, new BlockHitResult(Vec3.ofCenter(pos), Direction.UP, pos, false));
 
         mc.player.setSneaking(wasSneaking);
     }
@@ -342,10 +341,14 @@ public class BedAura extends Module {
             int z = placePos.getZ();
 
             switch (direction) {
-                case North -> event.renderer.box(x, y, z, x + 1, y + 0.6, z + 2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                case South -> event.renderer.box(x, y, z - 1, x + 1, y + 0.6, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                case East -> event.renderer.box(x - 1, y, z, x + 1, y + 0.6, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                case West -> event.renderer.box(x, y, z, x + 2, y + 0.6, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                case North ->
+                    event.renderer.box(x, y, z, x + 1, y + 0.6, z + 2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                case South ->
+                    event.renderer.box(x, y, z - 1, x + 1, y + 0.6, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                case East ->
+                    event.renderer.box(x - 1, y, z, x + 1, y + 0.6, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                case West ->
+                    event.renderer.box(x, y, z, x + 2, y + 0.6, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
             }
         }
     }

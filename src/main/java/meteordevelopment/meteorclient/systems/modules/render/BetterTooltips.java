@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
 import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
 import meteordevelopment.meteorclient.gui.screens.ContainerInventoryScreen;
 import meteordevelopment.meteorclient.mixin.EntityAccessor;
-import meteordevelopment.meteorclient.mixin.EntityBucketItemAccessor;
+import meteordevelopment.meteorclient.mixin.MobBucketItemAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -23,30 +23,30 @@ import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.screen.ingame.BookScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.input.AbstractInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.component.DataComponentTypes;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.screens.inventory.BookViewScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.component.type.*;
-import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
-import net.minecraft.entity.Bucketable;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.world.item.component.SuspiciousStewEffects.Entry;
+import net.minecraft.world.entity.animal.Bucketable;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.item.*;
-import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.RawFilteredPair;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Formatting;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.network.Filterable;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.ChatFormatting;
 
 import java.util.Comparator;
 import java.util.List;
@@ -249,19 +249,19 @@ public class BetterTooltips extends Module {
         // Status effects
         if (statusEffects.get()) {
             if (event.itemStack().getItem() == Items.SUSPICIOUS_STEW) {
-                SuspiciousStewEffectsComponent stewEffectsComponent = event.itemStack().get(DataComponentTypes.SUSPICIOUS_STEW_EFFECTS);
+                SuspiciousStewEffectsComponent stewEffectsComponent = event.itemStack().get(DataComponents.SUSPICIOUS_STEW_EFFECTS);
                 if (stewEffectsComponent != null) {
-                    for (StewEffect effectTag : stewEffectsComponent.effects()) {
-                        StatusEffectInstance effect = new StatusEffectInstance(effectTag.effect(), effectTag.duration(), 0);
+                    for (Entry effectTag : stewEffectsComponent.effects()) {
+                        MobEffectInstance effect = new StatusEffectInstance(effectTag.effect(), effectTag.duration(), 0);
                         event.appendStart(getStatusText(effect));
                     }
                 }
             } else {
-                ConsumableComponent consumable = event.itemStack().get(DataComponentTypes.CONSUMABLE);
+                ConsumableComponent consumable = event.itemStack().get(DataComponents.CONSUMABLE);
                 if (consumable != null) {
                     consumable.onConsumeEffects().stream()
-                        .filter(ApplyEffectsConsumeEffect.class::isInstance)
-                        .map(ApplyEffectsConsumeEffect.class::cast)
+                        .filter(ApplyStatusEffectsConsumeEffect.class::isInstance)
+                        .map(ApplyStatusEffectsConsumeEffect.class::cast)
                         .flatMap(apply -> apply.effects().stream())
                         .forEach(effect -> event.appendStart(getStatusText(effect)));
                 }
@@ -269,16 +269,16 @@ public class BetterTooltips extends Module {
         }
 
         // Food info
-        if (foodInfo.get() && event.itemStack().contains(DataComponentTypes.FOOD)) {
-            FoodComponent food = event.itemStack().get(DataComponentTypes.FOOD);
+        if (foodInfo.get() && event.itemStack().contains(DataComponents.FOOD)) {
+            FoodComponent food = event.itemStack().get(DataComponents.FOOD);
             // Those emojis really look like in-game hunger bar
-            event.appendStart(Text.literal(String.format("🍖 %d (💛 %.1f)", food.nutrition(), food.saturation())).formatted(Formatting.GRAY));
+            event.appendStart(MutableComponent.literal(String.format("🍖 %d (💛 %.1f)", food.nutrition(), food.saturation())).formatted(ChatFormatting.GRAY));
         }
 
         // Item size tooltip
         if (byteSize.get()) {
             switch (ItemStack.CODEC.encodeStart(mc.player.getRegistryManager().getOps(NbtOps.INSTANCE), event.itemStack())) {
-                case DataResult.Success<NbtElement> success -> {
+                case DataResult.Success<Tag> success -> {
                     try {
                         success.value().write(ByteCountDataOutput.INSTANCE);
 
@@ -296,15 +296,14 @@ public class BetterTooltips extends Module {
 
                         ByteCountDataOutput.INSTANCE.reset();
 
-                        event.appendEnd(Text.literal(count).formatted(Formatting.DARK_GRAY));
+                        event.appendEnd(MutableComponent.literal(count).formatted(ChatFormatting.DARK_GRAY));
                     } catch (Exception e) {
-                        event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
+                        event.appendEnd(MutableComponent.literal("Error getting bytes.").formatted(ChatFormatting.RED));
                     }
                 }
-                case DataResult.Error<NbtElement> ignored ->
-                    event.appendEnd(Text.literal("Error getting bytes.").formatted(Formatting.RED));
-                default ->
-                    throw new MatchException(null, null);
+                case DataResult.Error<Tag> ignored ->
+                    event.appendEnd(MutableComponent.literal("Error getting bytes.").formatted(ChatFormatting.RED));
+                default -> throw new MatchException(null, null);
             }
         }
 
@@ -324,21 +323,21 @@ public class BetterTooltips extends Module {
         else if (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest()) {
             event.tooltipData = EChestMemory.isKnown()
                 ? new ContainerTooltipComponent(EChestMemory.ITEMS.toArray(new ItemStack[27]), ECHEST_COLOR)
-                : new TextTooltipComponent(Text.literal("Unknown inventory.").formatted(Formatting.DARK_RED));
+                : new TextTooltipComponent(MutableComponent.literal("Unknown inventory.").formatted(ChatFormatting.DARK_RED));
         }
 
         // Map preview
         else if (event.itemStack.getItem() == Items.FILLED_MAP && previewMaps()) {
-            MapIdComponent mapIdComponent = event.itemStack.get(DataComponentTypes.MAP_ID);
+            MapIdComponent mapIdComponent = event.itemStack.get(DataComponents.MAP_ID);
             if (mapIdComponent != null) event.tooltipData = new MapTooltipComponent(mapIdComponent.id());
         }
 
         // Book preview
         else if ((event.itemStack.getItem() == Items.WRITABLE_BOOK || event.itemStack.getItem() == Items.WRITTEN_BOOK) && previewBooks()) {
-            Text page = getFirstPage(event.itemStack);
+            MutableComponent page = getFirstPage(event.itemStack);
             if (page != null) {
                 int pageCount = getBookPageCount(event.itemStack);
-                Text pageWithCount = page.copy().append(Text.literal(String.format(" (%d pages)", pageCount)).formatted(Formatting.GRAY));
+                MutableComponent pageWithCount = page.copy().append(MutableComponent.literal(String.format(" (%d pages)", pageCount)).formatted(ChatFormatting.GRAY));
                 event.tooltipData = new BookTooltipComponent(pageWithCount);
             }
         }
@@ -346,21 +345,21 @@ public class BetterTooltips extends Module {
         // Banner preview
         else if (event.itemStack.getItem() instanceof BannerItem && previewBanners()) {
             event.tooltipData = new BannerTooltipComponent(event.itemStack);
-        } else if (event.itemStack.contains(DataComponentTypes.PROVIDES_BANNER_PATTERNS) && previewBanners()) {
+        } else if (event.itemStack.contains(DataComponents.PROVIDES_BANNER_PATTERNS) && previewBanners()) {
             event.tooltipData = createBannerFromBannerPatternItem(event.itemStack);
         } else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
-            if (!event.itemStack.getOrDefault(DataComponentTypes.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT).layers().isEmpty()) {
+            if (!event.itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT).layers().isEmpty()) {
                 event.tooltipData = createBannerFromShield(event.itemStack);
             }
         }
 
         // Fish peek
         else if (event.itemStack.getItem() instanceof EntityBucketItem bucketItem && previewEntities()) {
-            EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).meteor$getEntityType();
-            LivingEntity entity = (LivingEntity) type.create(mc.world, SpawnReason.NATURAL);
+            EntityType<?> type = ((MobBucketItemAccessor) bucketItem).meteor$getType();
+            LivingEntity entity = (LivingEntity) type.create(mc.world, EntitySpawnReason.NATURAL);
 
             if (entity != null) {
-                NbtComponent nbtComponent = event.itemStack.getOrDefault(DataComponentTypes.BUCKET_ENTITY_DATA, null);
+                NbtComponent nbtComponent = event.itemStack.getOrDefault(DataComponents.BUCKET_ENTITY_DATA, null);
                 if (nbtComponent == null) {
                     return;
                 }
@@ -374,8 +373,8 @@ public class BetterTooltips extends Module {
 
         // Bundle preview
         else if (event.itemStack.getItem() instanceof BundleItem && previewBundles()) {
-            if (event.itemStack.contains(DataComponentTypes.BUNDLE_CONTENTS)) {
-                BundleContentsComponent bundleContents = event.itemStack.get(DataComponentTypes.BUNDLE_CONTENTS);
+            if (event.itemStack.contains(DataComponents.BUNDLE_CONTENTS)) {
+                BundleContentsComponent bundleContents = event.itemStack.get(DataComponents.BUNDLE_CONTENTS);
                 if (bundleContents != null && !bundleContents.isEmpty()) {
                     ItemStack[] bundleItems = new ItemStack[bundleContents.size()];
                     int index = 0;
@@ -388,7 +387,7 @@ public class BetterTooltips extends Module {
         }
     }
 
-    public void applyCompactShulkerTooltip(List<ItemStack> stacks, Consumer<Text> textConsumer) {
+    public void applyCompactShulkerTooltip(List<ItemStack> stacks, Consumer<MutableComponent> textConsumer) {
         Object2IntMap<Item> counts = new Object2IntOpenHashMap<>();
 
         for (ItemStack item : stacks) {
@@ -399,13 +398,13 @@ public class BetterTooltips extends Module {
         }
 
         counts.keySet().stream().sorted(Comparator.comparingInt(value -> -counts.getInt(value))).limit(5).forEach(item -> {
-            MutableText mutableText = item.getName().copyContentOnly();
-            mutableText.append(Text.literal(" x").append(String.valueOf(counts.getInt(item))).formatted(Formatting.GRAY));
+            MutableComponent mutableText = item.getName().copyContentOnly();
+            mutableText.append(MutableComponent.literal(" x").append(String.valueOf(counts.getInt(item))).formatted(ChatFormatting.GRAY));
             textConsumer.accept(mutableText);
         });
 
         if (counts.size() > 5) {
-            textConsumer.accept((Text.translatable("container.shulkerBox.more", counts.size() - 5)).formatted(Formatting.ITALIC));
+            textConsumer.accept((MutableComponent.translatable("container.shulkerBox.more", counts.size() - 5)).formatted(ChatFormatting.ITALIC));
         }
     }
 
@@ -419,38 +418,38 @@ public class BetterTooltips extends Module {
                 || (event.itemStack().getItem() instanceof EntityBucketItem && entitiesInBuckets.get())
                 || (event.itemStack().getItem() instanceof BundleItem && bundles.get())
                 || (event.itemStack().getItem() instanceof BannerItem && banners.get())
-                || (event.itemStack().contains(DataComponentTypes.PROVIDES_BANNER_PATTERNS) && banners.get())
+                || (event.itemStack().contains(DataComponents.PROVIDES_BANNER_PATTERNS) && banners.get())
                 || (event.itemStack().getItem() == Items.SHIELD && banners.get())
         );
 
         if (showPreviewText) {
             // we don't want to add the spacer if the tooltip is hidden
-            if (spacer) event.appendEnd(Text.literal(""));
-            event.appendEnd(Text.literal("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
+            if (spacer) event.appendEnd(MutableComponent.literal(""));
+            event.appendEnd(MutableComponent.literal("Hold " + ChatFormatting.YELLOW + keybind + ChatFormatting.RESET + " to preview"));
         }
     }
 
-    private MutableText getStatusText(StatusEffectInstance effect) {
-        MutableText text = Text.translatable(effect.getTranslationKey());
+    private MutableComponent getStatusText(MobEffectInstance effect) {
+        MutableComponent text = MutableComponent.translatable(effect.getTranslationKey());
         if (effect.getAmplifier() != 0) {
-            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
+            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, MobEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
         } else {
-            text.append(String.format(" (%s)", StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
+            text.append(String.format(" (%s)", MobEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
         }
 
-        if (effect.getEffectType().value().isBeneficial()) return text.formatted(Formatting.BLUE);
-        return text.formatted(Formatting.RED);
+        if (effect.getEffectType().value().isBeneficial()) return text.formatted(ChatFormatting.BLUE);
+        return text.formatted(ChatFormatting.RED);
     }
 
     @SuppressWarnings("DataFlowIssue")
-    private Text getFirstPage(ItemStack bookItem) {
-        if (bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT) != null) {
-            List<RawFilteredPair<String>> pages = bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT).pages();
+    private MutableComponent getFirstPage(ItemStack bookItem) {
+        if (bookItem.get(DataComponents.WRITABLE_BOOK_CONTENT) != null) {
+            List<Filterable<String>> pages = bookItem.get(DataComponents.WRITABLE_BOOK_CONTENT).pages();
 
             if (pages.isEmpty()) return null;
-            return Text.literal(pages.getFirst().get(false));
-        } else if (bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null) {
-            List<RawFilteredPair<Text>> pages = bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).pages();
+            return MutableComponent.literal(pages.getFirst().get(false));
+        } else if (bookItem.get(DataComponents.WRITTEN_BOOK_CONTENT) != null) {
+            List<Filterable<MutableComponent>> pages = bookItem.get(DataComponents.WRITTEN_BOOK_CONTENT).pages();
             if (pages.isEmpty()) return null;
 
             return pages.getFirst().get(false);
@@ -460,23 +459,23 @@ public class BetterTooltips extends Module {
     }
 
     private int getBookPageCount(ItemStack bookItem) {
-        if (bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT) != null) {
-            return bookItem.get(DataComponentTypes.WRITABLE_BOOK_CONTENT).pages().size();
-        } else if (bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null) {
-            return bookItem.get(DataComponentTypes.WRITTEN_BOOK_CONTENT).pages().size();
+        if (bookItem.get(DataComponents.WRITABLE_BOOK_CONTENT) != null) {
+            return bookItem.get(DataComponents.WRITABLE_BOOK_CONTENT).pages().size();
+        } else if (bookItem.get(DataComponents.WRITTEN_BOOK_CONTENT) != null) {
+            return bookItem.get(DataComponents.WRITTEN_BOOK_CONTENT).pages().size();
         }
         return 0;
     }
 
     private BannerTooltipComponent createBannerFromBannerPatternItem(ItemStack item) {
         // I can't imagine getting the banner pattern from a banner pattern item would fail without some serious messing around
-        BannerPatternsComponent component = new BannerPatternsComponent.Builder().add(mc.player.getRegistryManager().getOrThrow(RegistryKeys.BANNER_PATTERN).getOrThrow(item.get(DataComponentTypes.PROVIDES_BANNER_PATTERNS)).get(0), DyeColor.WHITE).build();
+        BannerPatternsComponent component = new BannerPatternsComponent.Builder().add(mc.player.getRegistryManager().getOrThrow(Registries.BANNER_PATTERN).getOrThrow(item.get(DataComponents.PROVIDES_BANNER_PATTERNS)).get(0), DyeColor.WHITE).build();
         return new BannerTooltipComponent(DyeColor.GRAY, component);
     }
 
     private BannerTooltipComponent createBannerFromShield(ItemStack shieldItem) {
-        DyeColor dyeColor2 = shieldItem.getOrDefault(DataComponentTypes.BASE_COLOR, DyeColor.WHITE);
-        BannerPatternsComponent bannerPatternsComponent = shieldItem.getOrDefault(DataComponentTypes.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT);
+        DyeColor dyeColor2 = shieldItem.getOrDefault(DataComponents.BASE_COLOR, DyeColor.WHITE);
+        BannerPatternsComponent bannerPatternsComponent = shieldItem.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternsComponent.DEFAULT);
         return new BannerTooltipComponent(dyeColor2, bannerPatternsComponent);
     }
 
@@ -484,9 +483,10 @@ public class BetterTooltips extends Module {
         return (isActive() && openContents.get()) && (!pauseInCreative.get() || !mc.player.isInCreativeMode());
     }
 
-    public boolean shouldOpenContents(AbstractInput input) {
-        if (input instanceof Click click) return openContents() && openContentsKey.get().matches(click.buttonInfo());
-        if (input instanceof KeyInput keyInput) return openContents() && openContentsKey.get().matches(keyInput);
+    public boolean shouldOpenContents(InputWithModifiers input) {
+        if (input instanceof MouseButtonEvent click)
+            return openContents() && openContentsKey.get().matches(click.buttonInfo());
+        if (input instanceof KeyEvent keyInput) return openContents() && openContentsKey.get().matches(keyInput);
 
         return false;
     }
@@ -495,15 +495,15 @@ public class BetterTooltips extends Module {
         if (!openContents() || itemStack.isEmpty()) return false;
 
         if (itemStack.getItem() instanceof BundleItem) {
-            if (mc.currentScreen instanceof HandledScreen) mc.currentScreen.close();
+            if (mc.currentScreen instanceof AbstractContainerScreen) mc.currentScreen.close();
             mc.setScreen(new ContainerInventoryScreen(itemStack));
             return true;
         } else if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
             Utils.openContainer(itemStack, PEEK_SCREEN, false);
             return true;
         } else if (itemStack.getItem() == Items.WRITABLE_BOOK || itemStack.getItem() == Items.WRITTEN_BOOK) {
-            if (mc.currentScreen instanceof HandledScreen) mc.currentScreen.close();
-            mc.setScreen(new BookScreen(BookScreen.Contents.create(itemStack)));
+            if (mc.currentScreen instanceof AbstractContainerScreen) mc.currentScreen.close();
+            mc.setScreen(new BookScreen(BookViewScreen.BookAccess.create(itemStack)));
             return true;
         }
 

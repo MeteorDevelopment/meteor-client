@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.prompts.YesNoPrompt;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 public class ConfigTab extends Tab {
     public ConfigTab() {
@@ -51,8 +51,7 @@ public class ConfigTab extends Tab {
                         .onYes(() -> Config.get().prefix.set("."))
                         .id("empty-command-prefix")
                         .show();
-                }
-                else if (prefix.equals("/")) {
+                } else if (prefix.equals("/")) {
                     YesNoPrompt.create(theme, this.parent)
                         .title("Potential prefix conflict")
                         .message("You have set your command prefix to '/', which is used by minecraft.")
@@ -61,8 +60,7 @@ public class ConfigTab extends Tab {
                         .onYes(() -> Config.get().prefix.set("."))
                         .id("minecraft-prefix-conflict")
                         .show();
-                }
-                else if (prefix.length() > 7) {
+                } else if (prefix.length() > 7) {
                     YesNoPrompt.create(theme, this.parent)
                         .title("Long command prefix")
                         .message("You have set your command prefix to a very long string.")

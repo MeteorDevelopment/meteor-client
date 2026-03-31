@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Items;
 
 public class EXPThrower extends Module {
     public EXPThrower() {
@@ -27,8 +27,7 @@ public class EXPThrower extends Module {
         Rotations.rotate(mc.player.getYaw(), 90, () -> {
             if (exp.getHand() != null) {
                 mc.interactionManager.interactItem(mc.player, exp.getHand());
-            }
-            else {
+            } else {
                 InvUtils.swap(exp.slot(), true);
                 mc.interactionManager.interactItem(mc.player, exp.getHand());
                 InvUtils.swapBack();

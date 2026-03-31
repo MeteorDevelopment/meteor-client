@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.mixininterface.ISimpleOption;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.SimpleOption;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.OptionInstance;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,14 +15,23 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+// TODO(Ravel): can not resolve target class SimpleOption
+// TODO(Ravel): can not resolve target class SimpleOption
 @Mixin(SimpleOption.class)
 public abstract class SimpleOptionMixin implements ISimpleOption {
-    @Shadow Object value;
-    @Shadow @Final private Consumer<Object> changeCallback;
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
+    @Shadow
+    Object value;
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
+    @Shadow
+    @Final
+    private Consumer<Object> changeCallback;
 
     @Override
     public void meteor$set(Object value) {
-        if (!MinecraftClient.getInstance().isRunning()) {
+        if (!Minecraft.getInstance().isRunning()) {
             this.value = value;
         } else {
             if (!Objects.equals(this.value, value)) {

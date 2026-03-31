@@ -19,16 +19,16 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.AnvilBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.level.block.AnvilBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 
 /**
  * @author seasnail8169
@@ -105,7 +105,7 @@ public class Burrow extends Module {
         .build()
     );
 
-    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos blockPos = new BlockPos.Mutable();
     private boolean shouldBurrow;
 
     public Burrow() {
@@ -187,10 +187,10 @@ public class Burrow extends Module {
         if (center.get()) PlayerUtils.centerPlayer();
 
         if (instant.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), false, mc.player.horizontalCollision));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), false, mc.player.horizontalCollision));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), false, mc.player.horizontalCollision));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), false, mc.player.horizontalCollision));
+            mc.player.networkHandler.sendPacket(new ServerboundMovePlayerPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), false, mc.player.horizontalCollision));
+            mc.player.networkHandler.sendPacket(new ServerboundMovePlayerPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), false, mc.player.horizontalCollision));
+            mc.player.networkHandler.sendPacket(new ServerboundMovePlayerPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), false, mc.player.horizontalCollision));
+            mc.player.networkHandler.sendPacket(new ServerboundMovePlayerPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), false, mc.player.horizontalCollision));
         }
 
 
@@ -199,13 +199,13 @@ public class Burrow extends Module {
         if (!(mc.player.getInventory().getStack(block.slot()).getItem() instanceof BlockItem)) return;
         InvUtils.swap(block.slot(), true);
 
-        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
-        mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        mc.interactionManager.interactBlock(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
+        mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(InteractionHand.MAIN_HAND));
 
         InvUtils.swapBack();
 
         if (instant.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false, mc.player.horizontalCollision));
+            mc.player.networkHandler.sendPacket(new ServerboundMovePlayerPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false, mc.player.horizontalCollision));
         } else {
             mc.player.updatePosition(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ());
         }
@@ -214,8 +214,10 @@ public class Burrow extends Module {
     private FindItemResult getItem() {
         return switch (block.get()) {
             case EChest -> InvUtils.findInHotbar(Items.ENDER_CHEST);
-            case Anvil -> InvUtils.findInHotbar(itemStack -> net.minecraft.block.Block.getBlockFromItem(itemStack.getItem()) instanceof AnvilBlock);
-            case Held -> new FindItemResult(mc.player.getInventory().getSelectedSlot(), mc.player.getMainHandStack().getCount());
+            case Anvil ->
+                InvUtils.findInHotbar(itemStack -> net.minecraft.block.Block.getBlockFromItem(itemStack.getItem()) instanceof AnvilBlock);
+            case Held ->
+                new FindItemResult(mc.player.getInventory().getSelectedSlot(), mc.player.getMainHandStack().getCount());
             default -> InvUtils.findInHotbar(Items.OBSIDIAN, Items.CRYING_OBSIDIAN);
         };
     }

@@ -35,9 +35,9 @@ import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -55,7 +55,7 @@ public class MeteorClient implements ClientModInitializer {
     public static MeteorClient INSTANCE;
     public static MeteorAddon ADDON;
 
-    public static MinecraftClient mc;
+    public static Minecraft mc;
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
     public static final Logger LOG;
@@ -84,7 +84,7 @@ public class MeteorClient implements ClientModInitializer {
         }
 
         // Global minecraft client accessor
-        mc = MinecraftClient.getInstance();
+        mc = Minecraft.getInstance();
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             LOG.info("Force loading mixins");

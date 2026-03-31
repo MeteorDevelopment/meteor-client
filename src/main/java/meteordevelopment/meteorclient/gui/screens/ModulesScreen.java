@@ -19,10 +19,10 @@ import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.util.MacWindowUtil;
-import net.minecraft.item.Items;
-import net.minecraft.util.Pair;
+import net.minecraft.client.input.KeyEvent;
+import com.mojang.blaze3d.platform.MacosUtil;
+import net.minecraft.world.item.Items;
+import net.minecraft.util.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,14 +86,14 @@ public class ModulesScreen extends TabScreen {
     protected void createSearchW(WContainer w, String text) {
         if (!text.isEmpty()) {
             // Titles
-            List<Pair<Module, String>> modules = Modules.get().searchTitles(text);
+            List<Tuple<Module, String>> modules = Modules.get().searchTitles(text);
 
             if (!modules.isEmpty()) {
                 WSection section = w.add(theme.section("Modules")).expandX().widget();
                 section.spacing = 0;
 
                 int count = 0;
-                for (Pair<Module, String> p : modules) {
+                for (Tuple<Module, String> p : modules) {
                     if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
                     section.add(theme.module(p.getLeft(), p.getRight())).expandX();
                     count++;
@@ -148,10 +148,10 @@ public class ModulesScreen extends TabScreen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput value) {
+    public boolean keyPressed(KeyEvent value) {
         if (locked) return false;
 
-        boolean cntrl = MacWindowUtil.IS_MAC ? value.modifiers() == GLFW_MOD_SUPER : value.modifiers() == GLFW_MOD_CONTROL;
+        boolean cntrl = MacosUtil.IS_MAC ? value.modifiers() == GLFW_MOD_SUPER : value.modifiers() == GLFW_MOD_CONTROL;
 
         if (cntrl && value.key() == GLFW_KEY_F) {
             if (searchWindow != null) searchWindow.setExpanded(true);

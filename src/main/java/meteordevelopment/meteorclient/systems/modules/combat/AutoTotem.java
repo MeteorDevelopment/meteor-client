@@ -15,11 +15,11 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityStatuses;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityEvent;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 
 public class AutoTotem extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -105,8 +105,8 @@ public class AutoTotem extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (!(event.packet instanceof EntityStatusS2CPacket p)) return;
-        if (p.getStatus() != EntityStatuses.USE_TOTEM_OF_UNDYING) return;
+        if (!(event.packet instanceof ClientboundEntityEventPacket p)) return;
+        if (p.getStatus() != EntityEvent.USE_TOTEM_OF_UNDYING) return;
 
         Entity entity = p.getEntity(mc.world);
         if (entity == null || !(entity.equals(mc.player))) return;

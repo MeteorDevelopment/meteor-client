@@ -18,17 +18,17 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.mob.SkeletonHorseEntity;
-import net.minecraft.entity.mob.ZombieHorseEntity;
-import net.minecraft.entity.passive.LlamaEntity;
-import net.minecraft.entity.passive.PigEntity;
-import net.minecraft.entity.passive.StriderEntity;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.equine.SkeletonHorse;
+import net.minecraft.world.entity.animal.equine.ZombieHorse;
+import net.minecraft.world.entity.animal.equine.Llama;
+import net.minecraft.world.entity.animal.pig.Pig;
+import net.minecraft.world.entity.monster.Strider;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.EntityHitResult;
 
 import java.util.Set;
 
@@ -69,8 +69,10 @@ public class AutoMount extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (!entities.get().contains(entity.getType())) continue;
             if (!PlayerUtils.isWithin(entity, 4)) continue;
-            if ((entity instanceof PigEntity || entity instanceof SkeletonHorseEntity || entity instanceof StriderEntity || entity instanceof ZombieHorseEntity) && !((MobEntity) entity).hasSaddleEquipped()) continue;
-            if (!(entity instanceof LlamaEntity) && entity instanceof MobEntity mobEntity && checkSaddle.get() && !mobEntity.hasSaddleEquipped()) continue;
+            if ((entity instanceof Pig || entity instanceof SkeletonHorse || entity instanceof Strider || entity instanceof ZombieHorse) && !((Mob) entity).hasSaddleEquipped())
+                continue;
+            if (!(entity instanceof Llama) && entity instanceof Mob mobEntity && checkSaddle.get() && !mobEntity.hasSaddleEquipped())
+                continue;
             interact(entity, rotate.get());
             return;
         }
@@ -86,7 +88,7 @@ public class AutoMount extends Module {
 
     private void interact(Entity entity) {
         EntityHitResult location = new EntityHitResult(entity, entity.getBoundingBox().getCenter());
-        mc.interactionManager.interactEntityAtLocation(mc.player, entity, location, Hand.MAIN_HAND);
-        mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
+        mc.interactionManager.interactEntityAtLocation(mc.player, entity, location, InteractionHand.MAIN_HAND);
+        mc.interactionManager.interactEntity(mc.player, entity, InteractionHand.MAIN_HAND);
     }
 }

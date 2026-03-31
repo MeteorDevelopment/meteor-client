@@ -8,8 +8,8 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
-import net.minecraft.block.SweetBerryBushBlock;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.level.block.SweetBerryBushBlock;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,6 +20,8 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(SweetBerryBushBlock.class)
 public abstract class SweetBerryBushBlockMixin {
+    // TODO(Ravel): target method method_9548 with the signature not found
+// TODO(Ravel): target method onEntityCollision with the signature not found
     @Dynamic("Explicit 1.21.9 Support")
     @Inject(method = {
         "onEntityCollision", // 1.21.10

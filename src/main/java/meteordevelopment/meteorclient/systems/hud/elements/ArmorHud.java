@@ -12,9 +12,9 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -167,7 +167,8 @@ public class ArmorHud extends HudElement {
                 if (itemStack.isDamageable() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
                     String message = switch (durability.get()) {
                         case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
-                        case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
+                        case Percentage ->
+                            Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
                         default -> "err";
                     };
 

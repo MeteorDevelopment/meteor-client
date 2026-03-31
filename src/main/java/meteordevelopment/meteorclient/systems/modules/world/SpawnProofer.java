@@ -17,10 +17,10 @@ import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.ClipContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,8 +94,8 @@ public class SpawnProofer extends Module {
         .build()
     );
 
-    private final Pool<BlockPos.Mutable> spawnPool = new Pool<>(BlockPos.Mutable::new);
-    private final List<BlockPos.Mutable> spawns = new ArrayList<>();
+    private final Pool<BlockPos.MutableBlockPos> spawnPool = new Pool<>(BlockPos.MutableBlockPos::new);
+    private final List<BlockPos.MutableBlockPos> spawns = new ArrayList<>();
     private int timer;
 
     public SpawnProofer() {
@@ -122,7 +122,7 @@ public class SpawnProofer extends Module {
             BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos, blockState, lightLevel.get());
 
             if ((spawn == BlockUtils.MobSpawn.Always && (mode.get() == Mode.Always || mode.get() == Mode.Both)) ||
-                    spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
+                spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
 
                 if (!BlockUtils.canPlace(blockPos)) return;
 
@@ -170,10 +170,10 @@ public class SpawnProofer extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3d pos = blockPos.toCenterPos();
+        Vec3 pos = blockPos.toCenterPos();
         if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
 
-        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+        ClipContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
         BlockHitResult result = mc.world.raycast(raycastContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !PlayerUtils.isWithin(pos, wallsRange.get());

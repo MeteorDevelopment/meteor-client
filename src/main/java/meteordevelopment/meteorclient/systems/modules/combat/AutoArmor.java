@@ -16,17 +16,17 @@ import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifiersComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.ItemTags;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -51,7 +51,7 @@ public class AutoArmor extends Module {
         .build()
     );
 
-    private final Setting<Set<RegistryKey<Enchantment>>> avoidedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> avoidedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
         .name("avoided-enchantments")
         .description("Enchantments that should be avoided.")
         .defaultValue(Enchantments.BINDING_CURSE, Enchantments.FROST_WALKER)
@@ -79,7 +79,7 @@ public class AutoArmor extends Module {
         .build()
     );
 
-    private final Object2IntMap<RegistryEntry<Enchantment>> enchantments = new Object2IntOpenHashMap<>();
+    private final Object2IntMap<Holder<Enchantment>> enchantments = new Object2IntOpenHashMap<>();
     private final ArmorPiece[] armorPieces = new ArmorPiece[4];
     private final ArmorPiece helmet = new ArmorPiece(EquipmentSlot.HEAD);
     private final ArmorPiece chestplate = new ArmorPiece(EquipmentSlot.CHEST);
@@ -144,7 +144,7 @@ public class AutoArmor extends Module {
     }
 
     private boolean hasAvoidedEnchantment() {
-        for (RegistryEntry<Enchantment> enchantment : enchantments.keySet()) {
+        for (Holder<Enchantment> enchantment : enchantments.keySet()) {
             if (enchantment.matches(avoidedEnchantments.get()::contains)) {
                 return true;
             }
@@ -154,8 +154,8 @@ public class AutoArmor extends Module {
     }
 
     private int getItemSlotId(ItemStack itemStack) {
-        if (itemStack.contains(DataComponentTypes.GLIDER)) return 2;
-        return itemStack.get(DataComponentTypes.EQUIPPABLE).slot().getEntitySlotId();
+        if (itemStack.contains(DataComponents.GLIDER)) return 2;
+        return itemStack.get(DataComponents.EQUIPPABLE).slot().getEntitySlotId();
     }
 
     private int getScore(ItemStack itemStack) {
@@ -165,7 +165,7 @@ public class AutoArmor extends Module {
         int score = 0;
 
         // Prefer blast protection on leggings if enabled
-        RegistryKey<Enchantment> protection = preferredProtection.get().enchantment;
+        ResourceKey<Enchantment> protection = preferredProtection.get().enchantment;
         if (isArmor(itemStack) && blastLeggings.get() && getItemSlotId(itemStack) == 1) {
             protection = Enchantments.BLAST_PROTECTION;
         }
@@ -178,10 +178,10 @@ public class AutoArmor extends Module {
         score += Utils.getEnchantmentLevel(enchantments, Enchantments.UNBREAKING);
         score += 2 * Utils.getEnchantmentLevel(enchantments, Enchantments.MENDING);
 
-        if (itemStack.contains(DataComponentTypes.ATTRIBUTE_MODIFIERS)) {
-            AttributeModifiersComponent component = itemStack.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
-            for (AttributeModifiersComponent.Entry modifier : component.modifiers()) {
-                if (modifier.attribute() == EntityAttributes.ARMOR || modifier.attribute() == EntityAttributes.ARMOR_TOUGHNESS) {
+        if (itemStack.contains(DataComponents.ATTRIBUTE_MODIFIERS)) {
+            ItemAttributeModifiers component = itemStack.get(DataComponents.ATTRIBUTE_MODIFIERS);
+            for (ItemAttributeModifiers.Entry modifier : component.modifiers()) {
+                if (modifier.attribute() == Attributes.ARMOR || modifier.attribute() == Attributes.ARMOR_TOUGHNESS) {
                     double e = modifier.modifier().value();
 
                     score += (int) switch (modifier.modifier().operation()) {
@@ -230,9 +230,9 @@ public class AutoArmor extends Module {
         FireProtection(Enchantments.FIRE_PROTECTION),
         ProjectileProtection(Enchantments.PROJECTILE_PROTECTION);
 
-        private final RegistryKey<Enchantment> enchantment;
+        private final ResourceKey<Enchantment> enchantment;
 
-        Protection(RegistryKey<Enchantment> enchantment) {
+        Protection(ResourceKey<Enchantment> enchantment) {
             this.enchantment = enchantment;
         }
     }
@@ -315,7 +315,7 @@ public class AutoArmor extends Module {
         }
 
         private int decreaseScoreByAvoidedEnchantments(int score) {
-            for (RegistryKey<Enchantment> enchantment : avoidedEnchantments.get()) {
+            for (ResourceKey<Enchantment> enchantment : avoidedEnchantments.get()) {
                 score -= 2 * enchantments.getInt(enchantment);
             }
 

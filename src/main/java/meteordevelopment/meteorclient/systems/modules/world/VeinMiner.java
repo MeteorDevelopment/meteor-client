@@ -18,15 +18,15 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -170,7 +170,7 @@ public class VeinMiner extends Module {
             MyBlock block = blockPool.get();
             block.set(event);
             blocks.add(block);
-            mineNearbyBlocks(block.originalBlock.asItem(),event.blockPos,event.direction,depth.get());
+            mineNearbyBlocks(block.originalBlock.asItem(), event.blockPos, event.direction, depth.get());
         }
     }
 
@@ -221,10 +221,11 @@ public class VeinMiner extends Module {
 
         public void mine() {
             if (!mining) {
-                mc.player.swingHand(Hand.MAIN_HAND);
+                mc.player.swingHand(InteractionHand.MAIN_HAND);
                 mining = true;
             }
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::updateBlockBreakingProgress);
+            if (rotate.get())
+                Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::updateBlockBreakingProgress);
             else updateBlockBreakingProgress();
         }
 
@@ -256,17 +257,18 @@ public class VeinMiner extends Module {
     }
 
     private void mineNearbyBlocks(Item item, BlockPos pos, Direction dir, int depth) {
-        if (depth<=0) return;
+        if (depth <= 0) return;
         if (foundBlockPositions.contains(pos)) return;
         foundBlockPositions.add(pos);
-        if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.player.getBlockInteractionRange()) return;
-        for(Vec3i neighbourOffset: blockNeighbours) {
+        if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.player.getBlockInteractionRange())
+            return;
+        for (Vec3i neighbourOffset : blockNeighbours) {
             BlockPos neighbour = pos.add(neighbourOffset);
             if (mc.world.getBlockState(neighbour).getBlock().asItem() == item) {
                 MyBlock block = blockPool.get();
-                block.set(neighbour,dir);
+                block.set(neighbour, dir);
                 blocks.add(block);
-                mineNearbyBlocks(item, neighbour, dir, depth-1);
+                mineNearbyBlocks(item, neighbour, dir, depth - 1);
             }
         }
     }

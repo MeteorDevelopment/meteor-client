@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.option.Perspective;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.CameraType;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 public class FreeLook extends Module {
@@ -64,7 +64,7 @@ public class FreeLook extends Module {
     public float cameraYaw;
     public float cameraPitch;
 
-    private Perspective prePers;
+    private CameraType prePers;
 
     public FreeLook() {
         super(Categories.Render, "free-look", "Allows more rotation options in third person.");
@@ -76,7 +76,8 @@ public class FreeLook extends Module {
         cameraPitch = mc.player.getPitch();
         prePers = mc.options.getPerspective();
 
-        if (prePers != Perspective.THIRD_PERSON_BACK &&  togglePerspective.get()) mc.options.setPerspective(Perspective.THIRD_PERSON_BACK);
+        if (prePers != CameraType.THIRD_PERSON_BACK && togglePerspective.get())
+            mc.options.setPerspective(CameraType.THIRD_PERSON_BACK);
     }
 
     @Override
@@ -85,7 +86,7 @@ public class FreeLook extends Module {
     }
 
     public boolean playerMode() {
-        return isActive() && mc.options.getPerspective() == Perspective.THIRD_PERSON_BACK && mode.get() == Mode.Player;
+        return isActive() && mc.options.getPerspective() == CameraType.THIRD_PERSON_BACK && mode.get() == Mode.Player;
     }
 
     public boolean cameraMode() {
@@ -119,8 +120,8 @@ public class FreeLook extends Module {
             }
         }
 
-        mc.player.setPitch(MathHelper.clamp(mc.player.getPitch(), -90, 90));
-        cameraPitch = MathHelper.clamp(cameraPitch, -90, 90);
+        mc.player.setPitch(Mth.clamp(mc.player.getPitch(), -90, 90));
+        cameraPitch = Mth.clamp(cameraPitch, -90, 90);
     }
 
     public enum Mode {

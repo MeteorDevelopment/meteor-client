@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.systems.modules.combat.AutoTotem;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.Arrays;
 import java.util.List;
@@ -131,7 +131,7 @@ public class AutoReplenish extends Module {
         items[slot] = stack.copy();
 
         if (slot == 9) slot = SlotUtils.OFFHAND;
-        
+
         if (excludedItems.get().contains(stack.getItem())) return;
         if (excludedItems.get().contains(prevStack.getItem())) return;
 
@@ -156,7 +156,8 @@ public class AutoReplenish extends Module {
 
         // eliminate occasional loops when moving items from hotbar to itself
         if (fromSlot == mc.player.getInventory().getSelectedSlot() || fromSlot == SlotUtils.OFFHAND) return;
-        if (fromSlot < 9 && fromSlot < slot && slot != mc.player.getInventory().getSelectedSlot() && slot != SlotUtils.OFFHAND) return;
+        if (fromSlot < 9 && fromSlot < slot && slot != mc.player.getInventory().getSelectedSlot() && slot != SlotUtils.OFFHAND)
+            return;
 
         InvUtils.move().from(fromSlot).to(slot);
     }

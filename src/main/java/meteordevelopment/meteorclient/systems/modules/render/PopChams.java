@@ -16,10 +16,10 @@ import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityStatuses;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityEvent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,8 +103,8 @@ public class PopChams extends Module {
 
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (!(event.packet instanceof EntityStatusS2CPacket p)) return;
-        if (p.getStatus() != EntityStatuses.USE_TOTEM_OF_UNDYING) return;
+        if (!(event.packet instanceof ClientboundEntityEventPacket p)) return;
+        if (p.getStatus() != EntityEvent.USE_TOTEM_OF_UNDYING) return;
 
         Entity entity = p.getEntity(mc.world);
         if (!(entity instanceof PlayerEntity player) || entity == mc.player) return;

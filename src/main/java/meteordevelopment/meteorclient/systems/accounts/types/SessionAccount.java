@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.client.session.Session;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.client.User;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Optional;
 
@@ -25,7 +25,7 @@ public class SessionAccount extends Account<SessionAccount> implements TokenAcco
     }
 
     @Override
-    public SessionAccount fromTag(NbtCompound tag) {
+    public SessionAccount fromTag(CompoundTag tag) {
         super.fromTag(tag);
 
         accessToken = tag.getString("token", "");
@@ -33,8 +33,8 @@ public class SessionAccount extends Account<SessionAccount> implements TokenAcco
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = super.toTag();
+    public CompoundTag toTag() {
+        CompoundTag tag = super.toTag();
         tag.putString("token", accessToken);
         return tag;
     }

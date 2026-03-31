@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.AbstractBlockAccessor;
+import meteordevelopment.meteorclient.mixin.BlockBehaviourAccessor;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -20,12 +20,12 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,7 +184,7 @@ public class HoleESP extends Module {
                 Block block = mc.world.getBlockState(offsetPos).getBlock();
                 boolean breakable = block.getHardness() >= 0;
 
-                if (((AbstractBlockAccessor) block).meteor$isCollidable() && !breakable) bedrock++;
+                if (((BlockBehaviourAccessor) block).meteor$isHasCollision() && !breakable) bedrock++;
                 else if (block.getBlastResistance() >= 600 && breakable) obsidian++;
                 else if (direction == Direction.DOWN) return;
                 else if (doubles.get() && air == null && validHole(offsetPos)) {
@@ -194,7 +194,7 @@ public class HoleESP extends Module {
                         block = mc.world.getBlockState(offsetPos.offset(dir)).getBlock();
                         breakable = block.getHardness() >= 0;
 
-                        if (((AbstractBlockAccessor) block).meteor$isCollidable() && !breakable) bedrock++;
+                        if (((BlockBehaviourAccessor) block).meteor$isHasCollision() && !breakable) bedrock++;
                         else if (block.getBlastResistance() >= 600 && breakable) obsidian++;
                         else return;
                     }
@@ -205,8 +205,7 @@ public class HoleESP extends Module {
 
             if (obsidian + bedrock == 5 && air == null) {
                 holes.add(holePool.get().set(blockPos, obsidian == 5 ? Hole.Type.Obsidian : (bedrock == 5 ? Hole.Type.Bedrock : Hole.Type.Mixed), NULL));
-            }
-            else if (obsidian + bedrock == 8 && doubles.get() && air != null) {
+            } else if (obsidian + bedrock == 8 && doubles.get() && air != null) {
                 holes.add(holePool.get().set(blockPos, obsidian == 8 ? Hole.Type.Obsidian : (bedrock == 8 ? Hole.Type.Bedrock : Hole.Type.Mixed), Dir.get(air)));
             }
         });
@@ -215,14 +214,15 @@ public class HoleESP extends Module {
     private boolean validHole(BlockPos pos) {
         if (ignoreOwn.get() && mc.player.getBlockPos().equals(pos)) return false;
 
-        WorldChunk chunk = mc.world.getChunk(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()));
+        LevelChunk chunk = mc.world.getChunk(SectionPos.getSectionCoord(pos.getX()), SectionPos.getSectionCoord(pos.getZ()));
         Block block = chunk.getBlockState(pos).getBlock();
         if (!webs.get() && block == Blocks.COBWEB) return false;
 
-        if (((AbstractBlockAccessor) block).meteor$isCollidable()) return false;
+        if (((BlockBehaviourAccessor) block).meteor$isHasCollision()) return false;
 
         for (int i = 0; i < holeHeight.get(); i++) {
-            if (((AbstractBlockAccessor) chunk.getBlockState(pos.up(i)).getBlock()).meteor$isCollidable()) return false;
+            if (((BlockBehaviourAccessor) chunk.getBlockState(pos.up(i)).getBlock()).meteor$isHasCollision())
+                return false;
         }
 
         return true;
@@ -230,11 +230,12 @@ public class HoleESP extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        for (Hole hole : holes) hole.render(event.renderer, shapeMode.get(), height.get(), topQuad.get(), bottomQuad.get());
+        for (Hole hole : holes)
+            hole.render(event.renderer, shapeMode.get(), height.get(), topQuad.get(), bottomQuad.get());
     }
 
     private static class Hole {
-        public BlockPos.Mutable blockPos = new BlockPos.Mutable();
+        public BlockPos.MutableBlockPos blockPos = new BlockPos.Mutable();
         public byte exclude;
         public Type type;
 
@@ -249,16 +250,16 @@ public class HoleESP extends Module {
         public Color getTopColor() {
             return switch (this.type) {
                 case Obsidian -> Modules.get().get(HoleESP.class).obsidianColorTop.get();
-                case Bedrock  -> Modules.get().get(HoleESP.class).bedrockColorTop.get();
-                default       -> Modules.get().get(HoleESP.class).mixedColorTop.get();
+                case Bedrock -> Modules.get().get(HoleESP.class).bedrockColorTop.get();
+                default -> Modules.get().get(HoleESP.class).mixedColorTop.get();
             };
         }
 
         public Color getBottomColor() {
             return switch (this.type) {
                 case Obsidian -> Modules.get().get(HoleESP.class).obsidianColorBottom.get();
-                case Bedrock  -> Modules.get().get(HoleESP.class).bedrockColorBottom.get();
-                default       -> Modules.get().get(HoleESP.class).mixedColorBottom.get();
+                case Bedrock -> Modules.get().get(HoleESP.class).bedrockColorBottom.get();
+                default -> Modules.get().get(HoleESP.class).mixedColorBottom.get();
             };
         }
 
@@ -274,10 +275,14 @@ public class HoleESP extends Module {
             int originalBottompA = bottom.a;
 
             if (mode.lines()) {
-                if (Dir.isNot(exclude, Dir.WEST) && Dir.isNot(exclude, Dir.NORTH)) renderer.line(x, y, z, x, y + height, z, bottom, top);
-                if (Dir.isNot(exclude, Dir.WEST) && Dir.isNot(exclude, Dir.SOUTH)) renderer.line(x, y, z + 1, x, y + height, z + 1, bottom, top);
-                if (Dir.isNot(exclude, Dir.EAST) && Dir.isNot(exclude, Dir.NORTH)) renderer.line(x + 1, y, z, x + 1, y + height, z, bottom, top);
-                if (Dir.isNot(exclude, Dir.EAST) && Dir.isNot(exclude, Dir.SOUTH)) renderer.line(x + 1, y, z + 1, x + 1, y + height, z + 1, bottom, top);
+                if (Dir.isNot(exclude, Dir.WEST) && Dir.isNot(exclude, Dir.NORTH))
+                    renderer.line(x, y, z, x, y + height, z, bottom, top);
+                if (Dir.isNot(exclude, Dir.WEST) && Dir.isNot(exclude, Dir.SOUTH))
+                    renderer.line(x, y, z + 1, x, y + height, z + 1, bottom, top);
+                if (Dir.isNot(exclude, Dir.EAST) && Dir.isNot(exclude, Dir.NORTH))
+                    renderer.line(x + 1, y, z, x + 1, y + height, z, bottom, top);
+                if (Dir.isNot(exclude, Dir.EAST) && Dir.isNot(exclude, Dir.SOUTH))
+                    renderer.line(x + 1, y, z + 1, x + 1, y + height, z + 1, bottom, top);
 
                 if (Dir.isNot(exclude, Dir.NORTH)) renderer.line(x, y, z, x + 1, y, z, bottom);
                 if (Dir.isNot(exclude, Dir.NORTH)) renderer.line(x, y + height, z, x + 1, y + height, z, top);
@@ -294,14 +299,20 @@ public class HoleESP extends Module {
                 top.a = originalTopA / 2;
                 bottom.a = originalBottompA / 2;
 
-                if (Dir.isNot(exclude, Dir.UP) && topQuad) renderer.quad(x, y + height, z, x, y + height, z + 1, x + 1, y + height, z + 1, x + 1, y + height, z, top); // Top
-                if (Dir.isNot(exclude, Dir.DOWN) && bottomQuad) renderer.quad(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z, bottom); // Bottom
+                if (Dir.isNot(exclude, Dir.UP) && topQuad)
+                    renderer.quad(x, y + height, z, x, y + height, z + 1, x + 1, y + height, z + 1, x + 1, y + height, z, top); // Top
+                if (Dir.isNot(exclude, Dir.DOWN) && bottomQuad)
+                    renderer.quad(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z, bottom); // Bottom
 
-                if (Dir.isNot(exclude, Dir.NORTH)) renderer.gradientQuadVertical(x, y, z, x + 1, y + height, z, top, bottom); // North
-                if (Dir.isNot(exclude, Dir.SOUTH)) renderer.gradientQuadVertical(x, y, z + 1, x + 1, y + height, z + 1, top, bottom); // South
+                if (Dir.isNot(exclude, Dir.NORTH))
+                    renderer.gradientQuadVertical(x, y, z, x + 1, y + height, z, top, bottom); // North
+                if (Dir.isNot(exclude, Dir.SOUTH))
+                    renderer.gradientQuadVertical(x, y, z + 1, x + 1, y + height, z + 1, top, bottom); // South
 
-                if (Dir.isNot(exclude, Dir.WEST)) renderer.gradientQuadVertical(x, y, z, x, y + height, z + 1, top, bottom); // West
-                if (Dir.isNot(exclude, Dir.EAST)) renderer.gradientQuadVertical(x + 1, y, z, x + 1, y + height, z + 1, top, bottom); // East
+                if (Dir.isNot(exclude, Dir.WEST))
+                    renderer.gradientQuadVertical(x, y, z, x, y + height, z + 1, top, bottom); // West
+                if (Dir.isNot(exclude, Dir.EAST))
+                    renderer.gradientQuadVertical(x + 1, y, z, x + 1, y + height, z + 1, top, bottom); // East
 
                 top.a = originalTopA;
                 bottom.a = originalBottompA;

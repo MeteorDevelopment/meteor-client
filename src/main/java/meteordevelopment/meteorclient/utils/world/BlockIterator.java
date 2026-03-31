@@ -13,8 +13,8 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -27,7 +27,7 @@ public class BlockIterator {
 
     private static final List<Runnable> afterCallbacks = new ReferenceArrayList<>();
 
-    private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private static final BlockPos.MutableBlockPos blockPos = new BlockPos.Mutable();
     private static int hRadius, vRadius;
 
     private static boolean disableCurrent;

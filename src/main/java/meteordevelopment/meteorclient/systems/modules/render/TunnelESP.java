@@ -23,20 +23,20 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 public class TunnelESP extends Module {
-    private static final BlockPos.Mutable BP = new BlockPos.Mutable();
-    private static final Direction[] DIRECTIONS = { Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
+    private static final BlockPos.MutableBlockPos BP = new BlockPos.Mutable();
+    private static final Direction[] DIRECTIONS = {Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST};
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -103,7 +103,7 @@ public class TunnelESP extends Module {
         return (byte) (p & 0xFF);
     }
 
-    private void searchChunk(Chunk chunk, TChunk tChunk) {
+    private void searchChunk(ChunkAccess chunk, TChunk tChunk) {
         // Prepare variables
         Context ctx = new Context();
         IntSet set = new IntOpenHashSet();
@@ -117,7 +117,7 @@ public class TunnelESP extends Module {
         // Search for first set of tunnels
         for (int x = startX; x <= endX; x++) {
             for (int z = startZ; z <= endZ; z++) {
-                int height = chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE).get(x - startX, z - startZ);
+                int height = chunk.getHeightmap(Heightmap.Types.WORLD_SURFACE).get(x - startX, z - startZ);
 
                 for (short y = (short) mc.world.getBottomY(); y < height; y++) {
                     if (isTunnel(ctx, x, y, z)) set.add(pack(x - startX, y, z - startZ));
@@ -128,7 +128,7 @@ public class TunnelESP extends Module {
         // Remove tunnels which are 1 block long
         IntSet positions = new IntOpenHashSet();
 
-        for (IntIterator it = set.iterator(); it.hasNext();) {
+        for (IntIterator it = set.iterator(); it.hasNext(); ) {
             int packed = it.nextInt();
 
             byte x = getPackedX(packed);
@@ -208,7 +208,7 @@ public class TunnelESP extends Module {
             for (TChunk tChunk : chunks.values()) tChunk.marked = false;
             int added = 0;
 
-            for (Chunk chunk : Utils.chunks(true)) {
+            for (ChunkAccess chunk : Utils.chunks(true)) {
                 long key = ChunkPos.toLong(chunk.getPos().x, chunk.getPos().z);
 
                 if (chunks.containsKey(key)) chunks.get(key).marked = true;
@@ -238,20 +238,16 @@ public class TunnelESP extends Module {
         if (x == -1) {
             chunk = chunks.get(ChunkPos.toLong(chunk.x - 1, chunk.z));
             key = pack(15, y, z);
-        }
-        else if (x == 16) {
+        } else if (x == 16) {
             chunk = chunks.get(ChunkPos.toLong(chunk.x + 1, chunk.z));
             key = pack(0, y, z);
-        }
-        else if (z == -1) {
+        } else if (z == -1) {
             chunk = chunks.get(ChunkPos.toLong(chunk.x, chunk.z - 1));
             key = pack(x, y, 15);
-        }
-        else if (z == 16) {
+        } else if (z == 16) {
             chunk = chunks.get(ChunkPos.toLong(chunk.x, chunk.z + 1));
             key = pack(x, y, 0);
-        }
-        else key = pack(x, y, z);
+        } else key = pack(x, y, z);
 
         return chunk != null && chunk.positions != null && chunk.positions.contains(key);
     }
@@ -272,7 +268,7 @@ public class TunnelESP extends Module {
             if (positions == null) return;
 
             // Manual iteration to avoid boxing
-            for (IntIterator it = positions.iterator(); it.hasNext();) {
+            for (IntIterator it = positions.iterator(); it.hasNext(); ) {
                 int pos = it.nextInt();
 
                 int x = getPackedX(pos);
@@ -283,7 +279,8 @@ public class TunnelESP extends Module {
 
                 if (connected.get()) {
                     for (Direction dir : DIRECTIONS) {
-                        if (chunkContains(this, x + dir.getOffsetX(), y, z + dir.getOffsetZ())) excludeDir |= Dir.get(dir);
+                        if (chunkContains(this, x + dir.getOffsetX(), y, z + dir.getOffsetZ()))
+                            excludeDir |= Dir.get(dir);
                     }
                 }
 
@@ -300,9 +297,9 @@ public class TunnelESP extends Module {
     }
 
     private static class Context {
-        private final World world;
+        private final Level world;
 
-        private Chunk lastChunk;
+        private ChunkAccess lastChunk;
 
         public Context() {
             this.world = MeteorClient.mc.world;
@@ -314,14 +311,14 @@ public class TunnelESP extends Module {
             int cx = x >> 4;
             int cz = z >> 4;
 
-            Chunk chunk;
+            ChunkAccess chunk;
 
             if (lastChunk != null && lastChunk.getPos().x == cx && lastChunk.getPos().z == cz) chunk = lastChunk;
             else chunk = world.getChunk(cx, cz, ChunkStatus.FULL, false);
 
             if (chunk == null) return Blocks.VOID_AIR.getDefaultState();
 
-            ChunkSection section = chunk.getSectionArray()[chunk.getSectionIndex(y)];
+            LevelChunkSection section = chunk.getSectionArray()[chunk.getSectionIndex(y)];
             if (section == null) return Blocks.VOID_AIR.getDefaultState();
 
             lastChunk = chunk;

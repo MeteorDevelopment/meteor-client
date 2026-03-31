@@ -17,8 +17,8 @@ import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Vanil
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.MovementType;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 
 public class Speed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -113,7 +113,7 @@ public class Speed extends Module {
 
     @EventHandler
     private void onPlayerMove(PlayerMoveEvent event) {
-        if (event.type != MovementType.SELF || stopSpeed()) return;
+        if (event.type != MoverType.SELF || stopSpeed()) return;
 
         if (timer.get() != Timer.OFF) {
             Modules.get().get(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
@@ -131,7 +131,7 @@ public class Speed extends Module {
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.packet instanceof PlayerPositionLookS2CPacket) currentMode.onRubberband();
+        if (event.packet instanceof ClientboundPlayerPositionPacket) currentMode.onRubberband();
     }
 
     private void onSpeedModeChanged(SpeedModes mode) {

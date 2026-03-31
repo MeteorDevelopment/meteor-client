@@ -5,11 +5,11 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
-import net.minecraft.client.input.Input;
-import net.minecraft.util.PlayerInput;
-import net.minecraft.util.math.Vec2f;
+import net.minecraft.client.player.ClientInput;
+import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.phys.Vec2;
 
-public class CustomPlayerInput extends Input {
+public class CustomPlayerInput extends ClientInput {
     @Override
     public void tick() {
         float f = this.playerInput.forward() == this.playerInput.backward() ? 0.0F : (this.playerInput.forward() ? 1.0F : -1.0F);
@@ -18,7 +18,7 @@ public class CustomPlayerInput extends Input {
     }
 
     public void stop() {
-        this.playerInput = PlayerInput.DEFAULT;
+        this.playerInput = Input.DEFAULT;
     }
 
     public void forward(boolean bool) {

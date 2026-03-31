@@ -5,23 +5,23 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.BundleContentsComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.BundleContents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import org.apache.commons.lang3.math.Fraction;
 
 import java.util.List;
 
-public class BundleTooltipComponent implements TooltipComponent, MeteorTooltipData {
+public class BundleTooltipComponent implements ClientTooltipComponent, MeteorTooltipData {
     private static final Identifier BUNDLE_SLOT_BACKGROUND_TEXTURE = Identifier.ofVanilla("container/bundle/slot_background");
     private static final Identifier BUNDLE_PROGRESS_BAR_BORDER_TEXTURE = Identifier.ofVanilla("container/bundle/bundle_progressbar_border");
     private static final Identifier BUNDLE_PROGRESS_BAR_FILL_TEXTURE = Identifier.ofVanilla("container/bundle/bundle_progressbar_fill");
@@ -34,14 +34,14 @@ public class BundleTooltipComponent implements TooltipComponent, MeteorTooltipDa
     private static final int ROW_WIDTH = 8 + SLOTS_PER_ROW * SLOT_DIMENSION + 8;
     private static final int PROGRESS_BAR_WIDTH = 94;
     private static final int PROGRESS_BAR_HEIGHT = 13;
-    private static final Text BUNDLE_FULL = Text.translatable("item.minecraft.bundle.full");
+    private static final Component BUNDLE_FULL = Component.translatable("item.minecraft.bundle.full");
 
     private final ItemStack[] items;
-    private final BundleContentsComponent bundleContents;
+    private final BundleContents bundleContents;
     private final int width;
     private final int height;
 
-    public BundleTooltipComponent(ItemStack[] items, BundleContentsComponent bundleContents) {
+    public BundleTooltipComponent(ItemStack[] items, BundleContents bundleContents) {
         this.items = items;
         this.bundleContents = bundleContents;
 
@@ -51,17 +51,17 @@ public class BundleTooltipComponent implements TooltipComponent, MeteorTooltipDa
     }
 
     @Override
-    public TooltipComponent getComponent() {
+    public ClientTooltipComponent getComponent() {
         return this;
     }
 
     @Override
-    public int getHeight(TextRenderer textRenderer) {
+    public int getHeight(Font textRenderer) {
         return height;
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) {
+    public int getWidth(Font textRenderer) {
         return width;
     }
 
@@ -71,7 +71,7 @@ public class BundleTooltipComponent implements TooltipComponent, MeteorTooltipDa
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
+    public void drawItems(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
         int row = 0;
         int col = 0;
 
@@ -99,7 +99,7 @@ public class BundleTooltipComponent implements TooltipComponent, MeteorTooltipDa
         drawProgressBar(progressBarX, progressBarY, textRenderer, context);
     }
 
-    private void drawItem(ItemStack itemStack, int index, int x, int y, TextRenderer textRenderer, DrawContext drawContext) {
+    private void drawItem(ItemStack itemStack, int index, int x, int y, Font textRenderer, GuiGraphics drawContext) {
         boolean bl = bundleContents.getSelectedStackIndex() == index;
         if (bl) {
             drawContext.drawGuiTexture(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_HIGHLIGHT_BACK_TEXTURE, x, y, 24, 24);
@@ -114,21 +114,21 @@ public class BundleTooltipComponent implements TooltipComponent, MeteorTooltipDa
         }
     }
 
-    private void drawSelectedItemTooltip(TextRenderer textRenderer, DrawContext drawContext, int x, int y, int width) {
+    private void drawSelectedItemTooltip(Font textRenderer, GuiGraphics drawContext, int x, int y, int width) {
         if (this.bundleContents.hasSelectedStack()) {
             ItemStack itemStack = this.bundleContents.get(this.bundleContents.getSelectedStackIndex());
-            Text text = itemStack.getFormattedName();
+            Component text = itemStack.getFormattedName();
             int i = textRenderer.getWidth(text.asOrderedText());
             int j = x + width / 2 - 12;
-            TooltipComponent tooltipComponent = TooltipComponent.of(text.asOrderedText());
+            ClientTooltipComponent tooltipComponent = ClientTooltipComponent.of(text.asOrderedText());
             drawContext.drawTooltipImmediately(
-                textRenderer, List.of(tooltipComponent), j - i / 2, y - 37, HoveredTooltipPositioner.INSTANCE, itemStack.get(DataComponentTypes.TOOLTIP_STYLE)
+                textRenderer, List.of(tooltipComponent), j - i / 2, y - 37, DefaultTooltipPositioner.INSTANCE, itemStack.get(DataComponents.TOOLTIP_STYLE)
             );
         }
     }
 
-    private void drawProgressBar(int x, int y, TextRenderer textRenderer, DrawContext context) {
-        int fillAmount = MathHelper.clamp(MathHelper.multiplyFraction(bundleContents.getOccupancy(), PROGRESS_BAR_WIDTH), 0, PROGRESS_BAR_WIDTH);
+    private void drawProgressBar(int x, int y, Font textRenderer, GuiGraphics context) {
+        int fillAmount = Mth.clamp(Mth.multiplyFraction(bundleContents.getOccupancy(), PROGRESS_BAR_WIDTH), 0, PROGRESS_BAR_WIDTH);
 
         Identifier fillTexture = bundleContents.getOccupancy().compareTo(Fraction.ONE) >= 0
             ? BUNDLE_PROGRESS_BAR_FULL_TEXTURE
@@ -137,13 +137,13 @@ public class BundleTooltipComponent implements TooltipComponent, MeteorTooltipDa
         context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, fillTexture, x + 1, y, fillAmount, PROGRESS_BAR_HEIGHT);
         context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, BUNDLE_PROGRESS_BAR_BORDER_TEXTURE, x, y, PROGRESS_BAR_WIDTH, PROGRESS_BAR_HEIGHT);
 
-        Text label = getProgressBarLabel();
+        Component label = getProgressBarLabel();
         if (label != null) {
-            context.drawCenteredTextWithShadow(textRenderer, label, x + PROGRESS_BAR_WIDTH / 2, y + 3, Colors.WHITE);
+            context.drawCenteredTextWithShadow(textRenderer, label, x + PROGRESS_BAR_WIDTH / 2, y + 3, CommonColors.WHITE);
         }
     }
 
-    private Text getProgressBarLabel() {
-        return bundleContents.getOccupancy().compareTo(Fraction.ONE) >= 0 ? BUNDLE_FULL : Text.literal(String.format("%.2f%%", bundleContents.getOccupancy().floatValue() * 100));
+    private Component getProgressBarLabel() {
+        return bundleContents.getOccupancy().compareTo(Fraction.ONE) >= 0 ? BUNDLE_FULL : Component.literal(String.format("%.2f%%", bundleContents.getOccupancy().floatValue() * 100));
     }
 }

@@ -14,8 +14,8 @@ import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
-import net.minecraft.client.session.Session;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.client.User;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -83,8 +83,8 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new NbtCompound();
 
         tag.putString("type", type.name());
         tag.putString("name", name);
@@ -95,8 +95,9 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
     }
 
     @Override
-    public TheAlteningAccount fromTag(NbtCompound tag) {
-        if (tag.getString("name").isEmpty() || tag.getCompound("cache").isEmpty() || tag.getString("token").isEmpty()) throw new NbtException();
+    public TheAlteningAccount fromTag(CompoundTag tag) {
+        if (tag.getString("name").isEmpty() || tag.getCompound("cache").isEmpty() || tag.getString("token").isEmpty())
+            throw new NbtException();
 
         name = tag.getString("name").get();
         token = tag.getString("token").get();

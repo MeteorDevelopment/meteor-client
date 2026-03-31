@@ -9,8 +9,8 @@ import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.process.IBaritoneProcess;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
-import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.mixin.MultiPlayerGameModeAccessor;
+import meteordevelopment.meteorclient.mixin.MinecraftAccessor;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -23,28 +23,28 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import net.minecraft.SharedConstants;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.stat.Stat;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Holder;
+import net.minecraft.stats.Stat;
+import net.minecraft.stats.Stats;
+import net.minecraft.resources.Identifier;
+import net.minecraft.IdentifierException;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
 import org.meteordev.starscript.Script;
 import org.meteordev.starscript.Section;
@@ -70,7 +70,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class MeteorStarscript {
     public static Starscript ss = new Starscript();
 
-    private static final BlockPos.Mutable BP = new BlockPos.Mutable();
+    private static final BlockPos.MutableBlockPos BP = new BlockPos.Mutable();
     private static final StringBuilder SB = new StringBuilder();
 
     @PreInit(dependencies = PathManagers.class)
@@ -79,7 +79,7 @@ public class MeteorStarscript {
 
         // General
         ss.set("mc_version", SharedConstants.getGameVersion().name());
-        ss.set("fps", () -> Value.number(MinecraftClientAccessor.meteor$getFps()));
+        ss.set("fps", () -> Value.number(MinecraftAccessor.meteor$getFps()));
         ss.set("ping", MeteorStarscript::ping);
         ss.set("time", () -> Value.string(LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));
         ss.set("cps", () -> Value.number(CPSUtils.getCpsAverage()));
@@ -143,7 +143,7 @@ public class MeteorStarscript {
                 .set("z", () -> Value.number(mc.player != null ? Utils.getPlayerSpeed().z : 0))
             )
 
-            .set("breaking_progress", () -> Value.number(mc.interactionManager != null ? ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).meteor$getBreakingProgress() : 0))
+            .set("breaking_progress", () -> Value.number(mc.interactionManager != null ? ((MultiPlayerGameModeAccessor) mc.interactionManager).meteor$getBreakingProgress() : 0))
             .set("biome", MeteorStarscript::biome)
 
             .set("dimension", () -> Value.string(PlayerUtils.getDimension().name()))
@@ -218,12 +218,12 @@ public class MeteorStarscript {
     public static Section runSection(Script script, StringBuilder sb) {
         try {
             return ss.run(script, sb);
-        }
-        catch (StarscriptError error) {
+        } catch (StarscriptError error) {
             printChatError(error);
             return null;
         }
     }
+
     public static String run(Script script, StringBuilder sb) {
         Section section = runSection(script, sb);
         return section != null ? section.toString() : null;
@@ -243,11 +243,13 @@ public class MeteorStarscript {
         String caller = getCallerName();
 
         if (caller != null) {
-            if (i != -1) ChatUtils.errorPrefix("Starscript", "%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller);
-            else ChatUtils.errorPrefix("Starscript", "%d '%c': %s (from %s)", error.character, error.ch, error.message, caller);
-        }
-        else {
-            if (i != -1) ChatUtils.errorPrefix("Starscript", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
+            if (i != -1)
+                ChatUtils.errorPrefix("Starscript", "%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller);
+            else
+                ChatUtils.errorPrefix("Starscript", "%d '%c': %s (from %s)", error.character, error.ch, error.message, caller);
+        } else {
+            if (i != -1)
+                ChatUtils.errorPrefix("Starscript", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
             else ChatUtils.errorPrefix("Starscript", "%d '%c': %s", error.character, error.ch, error.message);
         }
     }
@@ -289,10 +291,10 @@ public class MeteorStarscript {
 
         Identifier name = popIdentifier(ss, "First argument to player.has_potion_effect() needs to a string.");
 
-        Optional<RegistryEntry.Reference<StatusEffect>> effect = Registries.STATUS_EFFECT.getEntry(name);
+        Optional<Holder.Reference<MobEffect>> effect = BuiltInRegistries.STATUS_EFFECT.getEntry(name);
         if (effect.isEmpty()) return Value.bool(false);
 
-        StatusEffectInstance effectInstance = mc.player.getStatusEffect(effect.get());
+        MobEffectInstance effectInstance = mc.player.getStatusEffect(effect.get());
         return Value.bool(effectInstance != null);
     }
 
@@ -302,10 +304,10 @@ public class MeteorStarscript {
 
         Identifier name = popIdentifier(ss, "First argument to player.get_potion_effect() needs to a string.");
 
-        Optional<RegistryEntry.Reference<StatusEffect>> effect = Registries.STATUS_EFFECT.getEntry(name);
+        Optional<Holder.Reference<MobEffect>> effect = BuiltInRegistries.STATUS_EFFECT.getEntry(name);
         if (effect.isEmpty()) return Value.null_();
 
-        StatusEffectInstance effectInstance = mc.player.getStatusEffect(effect.get());
+        MobEffectInstance effectInstance = mc.player.getStatusEffect(effect.get());
         if (effectInstance == null) return Value.null_();
 
         return wrap(effectInstance);
@@ -317,7 +319,7 @@ public class MeteorStarscript {
 
         long time = System.currentTimeMillis();
         if ((time - lastRequestedStatsTime) / 1000.0 >= 1 && mc.getNetworkHandler() != null) {
-            mc.getNetworkHandler().sendPacket(new ClientStatusC2SPacket(ClientStatusC2SPacket.Mode.REQUEST_STATS));
+            mc.getNetworkHandler().sendPacket(new ClientStatusC2SPacket(ServerboundClientCommandPacket.Action.REQUEST_STATS));
             lastRequestedStatsTime = time;
         }
 
@@ -325,16 +327,16 @@ public class MeteorStarscript {
         Identifier name = popIdentifier(ss, (argCount > 1 ? "Second" : "First") + " argument to player.get_stat() needs to be a string.");
 
         Stat<?> stat = switch (type) {
-            case "mined" -> Stats.MINED.getOrCreateStat(Registries.BLOCK.get(name));
-            case "crafted" -> Stats.CRAFTED.getOrCreateStat(Registries.ITEM.get(name));
-            case "used" -> Stats.USED.getOrCreateStat(Registries.ITEM.get(name));
-            case "broken" -> Stats.BROKEN.getOrCreateStat(Registries.ITEM.get(name));
-            case "picked_up" -> Stats.PICKED_UP.getOrCreateStat(Registries.ITEM.get(name));
-            case "dropped" -> Stats.DROPPED.getOrCreateStat(Registries.ITEM.get(name));
-            case "killed" -> Stats.KILLED.getOrCreateStat(Registries.ENTITY_TYPE.get(name));
-            case "killed_by" -> Stats.KILLED_BY.getOrCreateStat(Registries.ENTITY_TYPE.get(name));
+            case "mined" -> Stats.MINED.getOrCreateStat(BuiltInRegistries.BLOCK.get(name));
+            case "crafted" -> Stats.CRAFTED.getOrCreateStat(BuiltInRegistries.ITEM.get(name));
+            case "used" -> Stats.USED.getOrCreateStat(BuiltInRegistries.ITEM.get(name));
+            case "broken" -> Stats.BROKEN.getOrCreateStat(BuiltInRegistries.ITEM.get(name));
+            case "picked_up" -> Stats.PICKED_UP.getOrCreateStat(BuiltInRegistries.ITEM.get(name));
+            case "dropped" -> Stats.DROPPED.getOrCreateStat(BuiltInRegistries.ITEM.get(name));
+            case "killed" -> Stats.KILLED.getOrCreateStat(BuiltInRegistries.ENTITY_TYPE.get(name));
+            case "killed_by" -> Stats.KILLED_BY.getOrCreateStat(BuiltInRegistries.ENTITY_TYPE.get(name));
             case "custom" -> {
-                name = Registries.CUSTOM_STAT.get(name);
+                name = BuiltInRegistries.CUSTOM_STAT.get(name);
                 yield name != null ? Stats.CUSTOM.getOrCreateStat(name) : null;
             }
             default -> null;
@@ -400,7 +402,7 @@ public class MeteorStarscript {
         Identifier id = Identifier.tryParse(idRaw);
         if (id == null) return Value.number(0);
 
-        Item item = Registries.ITEM.get(id);
+        Item item = BuiltInRegistries.ITEM.get(id);
         if (item == Items.AIR || mc.player == null) return Value.number(0);
 
         int count = 0;
@@ -510,7 +512,7 @@ public class MeteorStarscript {
         if (mc.player == null || mc.world == null) return Value.string("");
 
         BP.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
-        return mc.world.getRegistryManager().getOptional(RegistryKeys.BIOME)
+        return mc.world.getRegistryManager().getOptional(Registries.BIOME)
             .map(biomeRegistry -> {
                 Identifier id = biomeRegistry.getId(mc.world.getBiome(BP).value());
                 if (id == null) return Value.string("Unknown");
@@ -531,7 +533,7 @@ public class MeteorStarscript {
     private static Value ping() {
         if (mc.getNetworkHandler() == null || mc.player == null) return Value.number(0);
 
-        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        PlayerInfo playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
         return Value.number(playerListEntry != null ? playerListEntry.getLatency() : 0);
     }
 
@@ -541,9 +543,9 @@ public class MeteorStarscript {
     }
 
     private static Value posString(boolean opposite, boolean camera) {
-        Vec3d pos;
+        Vec3 pos;
         if (camera) pos = mc.gameRenderer.getCamera().getCameraPos();
-        else pos = mc.player != null ? mc.player.getEntityPos() : Vec3d.ZERO;
+        else pos = mc.player != null ? mc.player.getEntityPos() : Vec3.ZERO;
 
         double x = pos.x;
         double z = pos.z;
@@ -554,8 +556,7 @@ public class MeteorStarscript {
             if (dimension == Dimension.Overworld) {
                 x /= 8;
                 z /= 8;
-            }
-            else if (dimension == Dimension.Nether) {
+            } else if (dimension == Dimension.Nether) {
                 x *= 8;
                 z *= 8;
             }
@@ -581,8 +582,9 @@ public class MeteorStarscript {
     private static Value crosshairValue() {
         if (mc.world == null || mc.crosshairTarget == null) return Value.null_();
 
-        if (mc.crosshairTarget.getType() == HitResult.Type.MISS) return Value.string("");
-        if (mc.crosshairTarget instanceof BlockHitResult hit) return wrap(hit.getBlockPos(), mc.world.getBlockState(hit.getBlockPos()));
+        if (mc.crosshairTarget.getType() == BlockHitResult.Type.MISS) return Value.string("");
+        if (mc.crosshairTarget instanceof BlockHitResult hit)
+            return wrap(hit.getBlockPos(), mc.world.getBlockState(hit.getBlockPos()));
         return wrap(((EntityHitResult) mc.crosshairTarget).getEntity());
     }
 
@@ -591,8 +593,7 @@ public class MeteorStarscript {
     public static Identifier popIdentifier(Starscript ss, String errorMessage) {
         try {
             return Identifier.of(ss.popString(errorMessage));
-        }
-        catch (InvalidIdentifierException e) {
+        } catch (IdentifierException e) {
             ss.error(e.getMessage());
             return null;
         }
@@ -604,12 +605,13 @@ public class MeteorStarscript {
         String name = itemStack.isEmpty() ? "" : Names.get(itemStack.getItem());
 
         int durability = 0;
-        if (!itemStack.isEmpty() && itemStack.isDamageable()) durability = itemStack.getMaxDamage() - itemStack.getDamage();
+        if (!itemStack.isEmpty() && itemStack.isDamageable())
+            durability = itemStack.getMaxDamage() - itemStack.getDamage();
 
         return Value.map(new ValueMap()
             .set("_toString", Value.string(itemStack.getCount() <= 1 ? name : String.format("%s %dx", name, itemStack.getCount())))
             .set("name", Value.string(name))
-            .set("id", Value.string(Registries.ITEM.getId(itemStack.getItem()).toString()))
+            .set("id", Value.string(BuiltInRegistries.ITEM.getId(itemStack.getItem()).toString()))
             .set("count", Value.number(itemStack.getCount()))
             .set("durability", Value.number(durability))
             .set("max_durability", Value.number(itemStack.getMaxDamage()))
@@ -619,7 +621,7 @@ public class MeteorStarscript {
     public static Value wrap(BlockPos blockPos, BlockState blockState) {
         return Value.map(new ValueMap()
             .set("_toString", Value.string(Names.get(blockState.getBlock())))
-            .set("id", Value.string(Registries.BLOCK.getId(blockState.getBlock()).toString()))
+            .set("id", Value.string(BuiltInRegistries.BLOCK.getId(blockState.getBlock()).toString()))
             .set("pos", Value.map(new ValueMap()
                 .set("_toString", posString(blockPos.getX(), blockPos.getY(), blockPos.getZ()))
                 .set("x", Value.number(blockPos.getX()))
@@ -632,8 +634,8 @@ public class MeteorStarscript {
     public static Value wrap(Entity entity) {
         return Value.map(new ValueMap()
             .set("_toString", Value.string(entity.getName().getString()))
-            .set("id", Value.string(Registries.ENTITY_TYPE.getId(entity.getType()).toString()))
-            .set("health", Value.number(entity instanceof LivingEntity e ? e.getHealth(): 0))
+            .set("id", Value.string(BuiltInRegistries.ENTITY_TYPE.getId(entity.getType()).toString()))
+            .set("health", Value.number(entity instanceof LivingEntity e ? e.getHealth() : 0))
             .set("absorption", Value.number(entity instanceof LivingEntity e ? e.getAbsorptionAmount() : 0))
             .set("pos", Value.map(new ValueMap()
                 .set("_toString", posString(entity.getX(), entity.getY(), entity.getZ()))
@@ -652,7 +654,7 @@ public class MeteorStarscript {
         );
     }
 
-    public static Value wrap(StatusEffectInstance effectInstance) {
+    public static Value wrap(MobEffectInstance effectInstance) {
         return Value.map(new ValueMap()
             .set("duration", effectInstance.getDuration())
             .set("level", effectInstance.getAmplifier() + 1)

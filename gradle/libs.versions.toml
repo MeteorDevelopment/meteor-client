@@ -1,13 +1,12 @@
 [versions]
 # Fabric (https://fabricmc.net/develop)
 minecraft = "1.21.11"
-yarn-mappings = "1.21.11+build.3"
-fabric-loader = "0.18.2"
-fabric-api = "0.140.0+1.21.11"
+fabric-loader = "0.18.5"
+fabric-api = "0.141.3+1.21.11"
 
 # Plugins
 # Loom (https://github.com/FabricMC/fabric-loom)
-loom = "1.14-SNAPSHOT"
+loom = "1.15-SNAPSHOT"
 
 # Mods
 # Baritone (https://github.com/MeteorDevelopment/baritone)
@@ -38,7 +37,6 @@ waybackauthlib = "1.0.1"
 [libraries]
 # Fabric base
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
-yarn = { module = "net.fabricmc:yarn", version.ref = "yarn-mappings" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 
 # Mods

@@ -28,10 +28,10 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.listeners.ConsumerListener;
-import net.minecraft.client.gl.DynamicUniformStorage;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.renderer.DynamicUniformStorage;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 
 import java.nio.ByteBuffer;
 
@@ -151,7 +151,7 @@ public class Blur extends Module {
         int width = (int) (mc.getWindow().getFramebufferWidth() * scale);
         int height = (int) (mc.getWindow().getFramebufferHeight() * scale);
 
-        return RenderSystem.getDevice().createTextureView(RenderSystem.getDevice().createTexture("Blur - " + i, 15,  TextureFormat.RGBA8, width, height, 1, 1));
+        return RenderSystem.getDevice().createTextureView(RenderSystem.getDevice().createTexture("Blur - " + i, 15, TextureFormat.RGBA8, width, height, 1, 1));
     }
 
     private void onRenderAfterWorld() {
@@ -235,7 +235,7 @@ public class Blur extends Module {
         Screen screen = mc.currentScreen;
 
         if (screen instanceof WidgetScreen) return meteor.get();
-        if (screen instanceof HandledScreen) return inventories.get();
+        if (screen instanceof AbstractContainerScreen) return inventories.get();
         if (screen instanceof ChatScreen) return chat.get();
         if (screen != null) return other.get();
 
@@ -266,7 +266,8 @@ public class Blur extends Module {
 
     private static final FixedUniformStorage<BlurUniformData> UNIFORM_STORAGE = new FixedUniformStorage<>("Meteor - Blur UBO", UNIFORM_SIZE, 6);
 
-    private record BlurUniformData(float halfTexelSizeX, float halfTexelSizeY, float offset) implements DynamicUniformStorage.Uploadable {
+    private record BlurUniformData(float halfTexelSizeX, float halfTexelSizeY,
+                                   float offset) implements DynamicUniformStorage.DynamicUniform {
         @Override
         public void write(ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)

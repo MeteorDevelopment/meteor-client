@@ -9,9 +9,9 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.IGetter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -112,11 +112,11 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return NO_SUGGESTIONS;
     }
 
-    protected abstract NbtCompound save(NbtCompound tag);
+    protected abstract CompoundTag save(CompoundTag tag);
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new NbtCompound();
 
         tag.putString("name", name);
         save(tag);
@@ -124,10 +124,10 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return tag;
     }
 
-    protected abstract T load(NbtCompound tag);
+    protected abstract T load(CompoundTag tag);
 
     @Override
-    public T fromTag(NbtCompound tag) {
+    public T fromTag(CompoundTag tag) {
         T value = load(tag);
         onChanged();
 

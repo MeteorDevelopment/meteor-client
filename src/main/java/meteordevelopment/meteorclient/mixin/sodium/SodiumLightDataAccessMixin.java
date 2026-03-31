@@ -9,10 +9,10 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.caffeinemc.mods.sodium.client.model.light.data.LightDataAccess;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.LightType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.LightLayer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,9 +28,10 @@ public abstract class SodiumLightDataAccessMixin {
     private static final int FULL_LIGHT = 15 | 15 << 4 | 15 << 8;
 
     @Shadow
-    protected BlockRenderView level;
-    @Shadow @Final
-    private BlockPos.Mutable pos;
+    protected BlockAndTintGetter level;
+    @Shadow
+    @Final
+    private BlockPos.MutableBlockPos pos;
 
     @Unique
     private Xray xray;
@@ -58,11 +59,11 @@ public abstract class SodiumLightDataAccessMixin {
 
     @ModifyVariable(method = "compute", at = @At(value = "STORE"), name = "sl")
     private int compute_assignSL(int sl) {
-        return Math.max(fb.getLuminance(LightType.SKY), sl);
+        return Math.max(fb.getLuminance(LightLayer.SKY), sl);
     }
 
     @ModifyVariable(method = "compute", at = @At(value = "STORE"), name = "bl")
     private int compute_assignBL(int bl) {
-        return Math.max(fb.getLuminance(LightType.BLOCK), bl);
+        return Math.max(fb.getLuminance(LightLayer.BLOCK), bl);
     }
 }

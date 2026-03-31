@@ -3,7 +3,7 @@ package meteordevelopment.meteorclient.utils.render.postprocess;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import meteordevelopment.meteorclient.mixininterface.IWorldRenderer;
 import meteordevelopment.meteorclient.utils.render.CustomOutlineVertexConsumerProvider;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 

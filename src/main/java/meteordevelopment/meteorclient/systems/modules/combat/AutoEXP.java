@@ -15,12 +15,12 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.InteractionHand;
 
 public class AutoEXP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -93,7 +93,7 @@ public class AutoEXP extends Module {
 
         if (repairingI == -1) {
             if (mode.get() != Mode.Hands) {
-                for (EquipmentSlot slot : AttributeModifierSlot.ARMOR) {
+                for (EquipmentSlot slot : EquipmentSlotGroup.ARMOR) {
                     ItemStack stack = mc.player.getEquippedStack(slot);
                     if (needsRepair(stack, minThreshold.get())) {
                         repairingI = SlotUtils.ARMOR_START + slot.getEntitySlotId();
@@ -103,9 +103,9 @@ public class AutoEXP extends Module {
             }
 
             if (mode.get() != Mode.Armor && repairingI == -1) {
-                for (Hand hand : Hand.values()) {
+                for (InteractionHand hand : InteractionHand.values()) {
                     if (needsRepair(mc.player.getStackInHand(hand), minThreshold.get())) {
-                        repairingI = hand == Hand.MAIN_HAND ? mc.player.getInventory().getSelectedSlot() : SlotUtils.OFFHAND;
+                        repairingI = hand == InteractionHand.MAIN_HAND ? mc.player.getInventory().getSelectedSlot() : SlotUtils.OFFHAND;
                         break;
                     }
                 }
@@ -129,10 +129,9 @@ public class AutoEXP extends Module {
                 Rotations.rotate(mc.player.getYaw(), 90, () -> {
                     if (exp.getHand() != null) {
                         mc.interactionManager.interactItem(mc.player, exp.getHand());
-                    }
-                    else {
+                    } else {
                         InvUtils.swap(exp.slot(), true);
-                        mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                        mc.interactionManager.interactItem(mc.player, InteractionHand.MAIN_HAND);
                         InvUtils.swapBack();
                     }
                 });

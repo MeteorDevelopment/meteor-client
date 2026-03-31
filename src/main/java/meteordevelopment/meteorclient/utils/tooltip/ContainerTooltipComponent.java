@@ -8,14 +8,14 @@ package meteordevelopment.meteorclient.utils.tooltip;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.Identifier;
 
-public class ContainerTooltipComponent implements TooltipComponent, MeteorTooltipData {
+public class ContainerTooltipComponent implements ClientTooltipComponent, MeteorTooltipData {
     private static final Identifier TEXTURE_CONTAINER_BACKGROUND = MeteorClient.identifier("textures/container.png");
 
     private final ItemStack[] items;
@@ -27,22 +27,22 @@ public class ContainerTooltipComponent implements TooltipComponent, MeteorToolti
     }
 
     @Override
-    public TooltipComponent getComponent() {
+    public ClientTooltipComponent getComponent() {
         return this;
     }
 
     @Override
-    public int getHeight(TextRenderer textRenderer) {
+    public int getHeight(Font textRenderer) {
         return 67;
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) {
+    public int getWidth(Font textRenderer) {
         return 176;
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
+    public void drawItems(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
         // Background
         context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE_CONTAINER_BACKGROUND, x, y, 0, 0, 176, 67, 176, 67, color.getPacked());
 

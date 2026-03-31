@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.ArrayDeque;
 import java.util.Queue;

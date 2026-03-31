@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.events.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 public class EntityAddedEvent {
     private static final EntityAddedEvent INSTANCE = new EntityAddedEvent();

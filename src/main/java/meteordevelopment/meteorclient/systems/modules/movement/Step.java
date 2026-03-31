@@ -14,12 +14,12 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.decoration.EndCrystalEntity;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.OptionalDouble;
 
@@ -78,15 +78,15 @@ public class Step extends Module {
         boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isSneaking()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isSneaking());
         double height = getMaxSafeHeight();
         if (work && height > 0) {
-            mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(height);
+            mc.player.getAttributeInstance(Attributes.STEP_HEIGHT).setBaseValue(height);
         } else {
-            mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
+            mc.player.getAttributeInstance(Attributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
         }
     }
 
     @Override
     public void onDeactivate() {
-        mc.player.getAttributeInstance(EntityAttributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
+        mc.player.getAttributeInstance(Attributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
 
         PathManagers.get().getSettings().getStep().set(prevPathManagerStep);
     }
@@ -97,10 +97,10 @@ public class Step extends Module {
 
     private double getExplosionDamage() {
         OptionalDouble crystalDamage = Streams.stream(mc.world.getEntities())
-                .filter(entity -> entity instanceof EndCrystalEntity)
-                .filter(Entity::isAlive)
-                .mapToDouble(entity -> DamageUtils.crystalDamage(mc.player, entity.getEntityPos()))
-                .max();
+            .filter(entity -> entity instanceof EndCrystal)
+            .filter(Entity::isAlive)
+            .mapToDouble(entity -> DamageUtils.crystalDamage(mc.player, entity.getEntityPos()))
+            .max();
         return crystalDamage.orElse(0.0);
     }
 
@@ -117,15 +117,15 @@ public class Step extends Module {
 
         double max = height.get();
         double h = 0;
-        double currentDamage =getExplosionDamage();
-        Box initial = mc.player.getBoundingBox();
+        double currentDamage = getExplosionDamage();
+        AABB initial = mc.player.getBoundingBox();
 
         // all of this is to avoid running into crystals which are behind
         // one block when holding a movement key because standing on the
         // near edge of that block is technically safe
 
         Vec3d inputOffset = mc.player.getRotationVector();
-        Vec2f input = mc.player.input.getMovementInput();
+        Vec2 input = mc.player.input.getMovementInput();
         ((IVec3d) inputOffset).meteor$setY(0);
         inputOffset = inputOffset.normalize().multiply(1.2);
         double zdot = inputOffset.z;

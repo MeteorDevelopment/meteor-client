@@ -19,10 +19,10 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class GuiRenderer {
     public WWidget tooltipWidget;
     private double tooltipAnimProgress;
 
-    private DrawContext drawContext;
+    private GuiGraphics drawContext;
 
     public static GuiTexture addTexture(Identifier id) {
         return TEXTURE_PACKER.add(id);
@@ -81,7 +81,7 @@ public class GuiRenderer {
         TEXTURE = TEXTURE_PACKER.pack();
     }
 
-    public void begin(DrawContext drawContext) {
+    public void begin(GuiGraphics drawContext) {
         this.drawContext = drawContext;
         this.drawContext.createNewRootLayer();
 
@@ -173,9 +173,9 @@ public class GuiRenderer {
         scissorPool.free(scissor);
     }
 
-    public boolean renderTooltip(DrawContext drawContext, double mouseX, double mouseY, double delta) {
+    public boolean renderTooltip(GuiGraphics drawContext, double mouseX, double mouseY, double delta) {
         tooltipAnimProgress += (tooltip != null ? 1 : -1) * delta * 14;
-        tooltipAnimProgress = MathHelper.clamp(tooltipAnimProgress, 0, 1);
+        tooltipAnimProgress = Mth.clamp(tooltipAnimProgress, 0, 1);
 
         boolean toReturn = false;
 
@@ -188,8 +188,10 @@ public class GuiRenderer {
             double deltaX = -tooltipWidget.x + mouseX + 12;
             double deltaY = -tooltipWidget.y + mouseY + 12;
 
-            if (mouseX + 12 + tooltipWidget.width > getWindowWidth()) deltaX = -tooltipWidget.x + getWindowWidth() - tooltipWidget.width;
-            if (mouseY + 12 + tooltipWidget.height > getWindowHeight()) deltaY = -tooltipWidget.y + getWindowHeight() - tooltipWidget.height;
+            if (mouseX + 12 + tooltipWidget.width > getWindowWidth())
+                deltaX = -tooltipWidget.x + getWindowWidth() - tooltipWidget.width;
+            if (mouseY + 12 + tooltipWidget.height > getWindowHeight())
+                deltaY = -tooltipWidget.y + getWindowHeight() - tooltipWidget.height;
 
             tooltipWidget.move(deltaX, deltaY);
 
@@ -223,15 +225,19 @@ public class GuiRenderer {
     public void quad(double x, double y, double width, double height, Color cTopLeft, Color cTopRight, Color cBottomRight, Color cBottomLeft) {
         r.quad(x, y, width, height, cTopLeft, cTopRight, cBottomRight, cBottomLeft);
     }
+
     public void quad(double x, double y, double width, double height, Color colorLeft, Color colorRight) {
         quad(x, y, width, height, colorLeft, colorRight, colorRight, colorLeft);
     }
+
     public void quad(double x, double y, double width, double height, Color color) {
         quad(x, y, width, height, color, color);
     }
+
     public void quad(WWidget widget, Color color) {
         quad(widget.x, widget.y, widget.width, widget.height, color);
     }
+
     public void quad(double x, double y, double width, double height, GuiTexture texture, Color color) {
         rTex.texQuad(x, y, width, height, texture.get(width, height), color);
     }
@@ -241,7 +247,7 @@ public class GuiRenderer {
     }
 
     public void triangle(double x1, double y1, double x2, double y2, double x3, double y3, Color color) {
-        r.triangle(x1, y1, x2, y2, x3, y3 ,color);
+        r.triangle(x1, y1, x2, y2, x3, y3, color);
     }
 
     public void text(String text, double x, double y, Color color, boolean title) {

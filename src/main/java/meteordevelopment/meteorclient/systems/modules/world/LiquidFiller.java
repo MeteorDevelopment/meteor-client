@@ -16,21 +16,21 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItem;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ClipContext;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class LiquidFiller extends Module {
-    private final SettingGroup sgGeneral  = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
 
     private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
@@ -128,11 +128,11 @@ public class LiquidFiller extends Module {
         .build()
     );
 
-    private final List<BlockPos.Mutable> blocks = new ArrayList<>();
+    private final List<BlockPos.MutableBlockPos> blocks = new ArrayList<>();
 
     private int timer;
 
-    public LiquidFiller(){
+    public LiquidFiller() {
         super(Categories.World, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
     }
 
@@ -166,7 +166,7 @@ public class LiquidFiller extends Module {
         if (!item.found()) return;
 
         // Loop blocks around the player
-        BlockIterator.register((int) Math.ceil(placeRange.get()+1), (int) Math.ceil(placeRange.get()), (blockPos, blockState) -> {
+        BlockIterator.register((int) Math.ceil(placeRange.get() + 1), (int) Math.ceil(placeRange.get()), (blockPos, blockState) -> {
 
             // Check raycast and range
             if (isOutOfRange(blockPos)) return;
@@ -230,7 +230,7 @@ public class LiquidFiller extends Module {
     private boolean isOutOfRange(BlockPos blockPos) {
         if (!isWithinShape(blockPos, placeRange.get())) return true;
 
-        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), blockPos.toCenterPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+        ClipContext raycastContext = new RaycastContext(mc.player.getEyePos(), blockPos.toCenterPos(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
         BlockHitResult result = mc.world.raycast(raycastContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !isWithinShape(blockPos, placeWallsRange.get());

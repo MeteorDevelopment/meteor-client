@@ -17,8 +17,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 
 public class Sprint extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -82,7 +82,7 @@ public class Sprint extends Module {
         if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)
             || packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
-        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
+        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ServerboundPlayerCommandPacket.Action.STOP_SPRINTING));
         mc.player.setSprinting(false);
     }
 
@@ -94,7 +94,7 @@ public class Sprint extends Module {
 
         if (!shouldSprint() || mc.player.isSprinting()) return;
 
-        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));
+        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_SPRINTING));
         mc.player.setSprinting(true);
     }
 
@@ -112,7 +112,7 @@ public class Sprint extends Module {
         boolean strictSprint = !(mc.player.isPartlyTouchingWater())
             && !mc.player.hasBlindnessEffect()
             && mc.player.hasVehicle() ? (mc.player.getVehicle().canSprintAsVehicle() && mc.player.getVehicle().isLogicalSideForUpdatingMovement()) : mc.player.getHungerManager().canSprint()
-            && (!mc.player.horizontalCollision || mc.player.collidedSoftly);
+                                                                                                                                                     && (!mc.player.horizontalCollision || mc.player.collidedSoftly);
 
         return isActive() && (mode.get() == Mode.Rage || strictSprint);
     }

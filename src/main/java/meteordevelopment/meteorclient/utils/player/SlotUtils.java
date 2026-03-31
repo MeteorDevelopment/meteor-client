@@ -1,3 +1,4 @@
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -5,23 +6,23 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
-import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
-import meteordevelopment.meteorclient.mixin.ItemGroupsAccessor;
-import meteordevelopment.meteorclient.mixin.MountScreenHandlerAccessor;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.SkeletonHorseEntity;
-import net.minecraft.entity.mob.ZombieHorseEntity;
-import net.minecraft.entity.passive.AbstractDonkeyEntity;
-import net.minecraft.entity.passive.CamelEntity;
-import net.minecraft.entity.passive.HorseEntity;
-import net.minecraft.entity.passive.LlamaEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registries;
+import meteordevelopment.meteorclient.mixin.CreativeModeInventoryScreenAccessor;
+import meteordevelopment.meteorclient.mixin.CreativeModeTabsAccessor;
+import meteordevelopment.meteorclient.mixin.AbstractMountInventoryMenuAccessor;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.equine.SkeletonHorse;
+import net.minecraft.world.entity.animal.equine.ZombieHorse;
+import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
+import net.minecraft.world.entity.animal.camel.Camel;
+import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.animal.equine.Llama;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.screen.*;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.ClickType;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -51,8 +52,8 @@ public class SlotUtils {
      * to translate slot indices to the ids for each handled screen.
      *
      * @see <a href="https://minecraft.wiki/w/Java_Edition_protocol/Inventory">the minecraft.wiki page</a> for every slot id
-     * @see ClientPlayerInteractionManager#clickSlot(int, int, int, SlotActionType, PlayerEntity)
-     * @see ScreenHandler#internalOnSlotClick(int, int, SlotActionType, PlayerEntity)
+     * @see ClientPlayerInteractionManager#clickSlot(int, int, int, ClickType, Player)
+     * @see ScreenHandler#internalOnSlotClick(int, int, ClickType, Player)
      * @see Slot#id
      */
     public static int indexToId(int i) {
@@ -60,8 +61,9 @@ public class SlotUtils {
         ScreenHandler handler = mc.player.currentScreenHandler;
 
         if (handler instanceof PlayerScreenHandler) return survivalInventory(i);
-        if (handler instanceof CreativeInventoryScreen.CreativeScreenHandler) return creativeInventory(i);
-        if (handler instanceof GenericContainerScreenHandler genericContainerScreenHandler) return genericContainer(i, genericContainerScreenHandler.getRows());
+        if (handler instanceof CreativeModeInventoryScreen.ItemPickerMenu) return creativeInventory(i);
+        if (handler instanceof GenericContainerScreenHandler genericContainerScreenHandler)
+            return genericContainer(i, genericContainerScreenHandler.getRows());
         if (handler instanceof CraftingScreenHandler) return craftingTable(i);
         if (handler instanceof FurnaceScreenHandler) return furnace(i);
         if (handler instanceof BlastFurnaceScreenHandler) return furnace(i);
@@ -94,7 +96,7 @@ public class SlotUtils {
     }
 
     private static int creativeInventory(int i) {
-        if (CreativeInventoryScreenAccessor.meteor$getSelectedTab() != Registries.ITEM_GROUP.get(ItemGroupsAccessor.meteor$getInventory()))
+        if (CreativeInventoryScreenAccessor.meteor$getSelectedTab() != BuiltInRegistries.ITEM_GROUP.get(ItemGroupsAccessor.meteor$getInventory()))
             return -1;
         return survivalInventory(i);
     }
@@ -162,15 +164,15 @@ public class SlotUtils {
     private static int horse(ScreenHandler handler, int i) {
         LivingEntity entity = ((MountScreenHandlerAccessor) handler).meteor$getMount();
 
-        if (entity instanceof LlamaEntity llamaEntity) {
+        if (entity instanceof Llama llamaEntity) {
             int strength = llamaEntity.getStrength();
             if (isHotbar(i)) return (2 + 3 * strength) + 28 + i;
             if (isMain(i)) return (2 + 3 * strength) + 1 + (i - 9);
-        } else if (entity instanceof HorseEntity || entity instanceof SkeletonHorseEntity
-            || entity instanceof ZombieHorseEntity || entity instanceof CamelEntity) {
+        } else if (entity instanceof SkeletonHorse || entity instanceof SkeletonHorse
+            || entity instanceof ZombieHorse || entity instanceof Camel) {
             if (isHotbar(i)) return 29 + i;
             if (isMain(i)) return 2 + (i - 9);
-        } else if (entity instanceof AbstractDonkeyEntity abstractDonkeyEntity) {
+        } else if (entity instanceof AbstractChestedHorse abstractDonkeyEntity) {
             boolean chest = abstractDonkeyEntity.hasChest();
             if (isHotbar(i)) return (chest ? 44 : 29) + i;
             if (isMain(i)) return (chest ? 17 : 2) + (i - 9);

@@ -6,25 +6,31 @@
 package meteordevelopment.meteorclient.utils.entity.fakeplayer;
 
 import com.mojang.authlib.GameProfile;
-import meteordevelopment.meteorclient.mixin.AbstractClientPlayerEntityAccessor;
-import net.minecraft.client.network.OtherClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.entity.player.PlayerEntity;
+import meteordevelopment.meteorclient.mixin.AbstractClientPlayerAccessor;
+import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class FakePlayerEntity extends OtherClientPlayerEntity {
-    /** Disables entity push with this fake player */
+public class FakePlayerEntity extends RemotePlayer {
+    /**
+     * Disables entity push with this fake player
+     */
     public boolean doNotPush;
-    /** Stops rendering the fake player when you are inside it */
+    /**
+     * Stops rendering the fake player when you are inside it
+     */
     public boolean hideWhenInsideCamera;
-    /** Prevents you from interacting with the fake player; will also prevent TargetUtils selecting it as a target */
+    /**
+     * Prevents you from interacting with the fake player; will also prevent TargetUtils selecting it as a target
+     */
     public boolean noHit;
 
-    public FakePlayerEntity(PlayerEntity player, String name, float health, boolean copyInv) {
+    public FakePlayerEntity(RemotePlayer player, String name, float health, boolean copyInv) {
         super(mc.world, new GameProfile(UUID.randomUUID(), name));
 
         copyPositionAndRotation(player);
@@ -61,11 +67,11 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
 
     @Nullable
     @Override
-    protected PlayerListEntry getPlayerListEntry() {
-        PlayerListEntry entry = super.getPlayerListEntry();
+    protected PlayerInfo getPlayerListEntry() {
+        PlayerInfo entry = super.getPlayerListEntry();
 
         if (entry == null) {
-            ((AbstractClientPlayerEntityAccessor) this).meteor$setPlayerListEntry(mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid()));
+            ((AbstractClientPlayerAccessor) this).meteor$setPlayerInfo(mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid()));
         }
 
         return entry;

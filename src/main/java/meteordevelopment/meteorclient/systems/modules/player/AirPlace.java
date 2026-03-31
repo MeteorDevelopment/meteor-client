@@ -16,13 +16,13 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.item.*;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class AirPlace extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -77,7 +77,7 @@ public class AirPlace extends Module {
         .build()
     );
 
-    private HitResult hitResult;
+    private BlockHitResult hitResult;
 
     public AirPlace() {
         super(Categories.Player, "air-place", "Places a block where your crosshair is pointing at.");
@@ -86,7 +86,7 @@ public class AirPlace extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (!InvUtils.testInHands(this::placeable)) return;
-        if (mc.crosshairTarget != null && mc.crosshairTarget.getType() != HitResult.Type.MISS) return;
+        if (mc.crosshairTarget != null && mc.crosshairTarget.getType() != BlockHitResult.Type.MISS) return;
 
         double r = customRange.get() ? range.get() : mc.player.getBlockInteractionRange();
         hitResult = mc.getCameraEntity().raycast(r, 0, false);
@@ -99,20 +99,21 @@ public class AirPlace extends Module {
         Block toPlace = Blocks.OBSIDIAN;
         Item i = mc.player.getStackInHand(event.hand).getItem();
         if (i instanceof BlockItem blockItem) toPlace = blockItem.getBlock();
-        if (!BlockUtils.canPlaceBlock(bhr.getBlockPos(), (i instanceof ArmorStandItem || i instanceof BlockItem), toPlace)) return;
+        if (!BlockUtils.canPlaceBlock(bhr.getBlockPos(), (i instanceof ArmorStandItem || i instanceof BlockItem), toPlace))
+            return;
 
-        Vec3d hitPos = Vec3d.ofCenter(bhr.getBlockPos());
+        Vec3 hitPos = Vec3.ofCenter(bhr.getBlockPos());
 
         BlockHitResult b = new BlockHitResult(hitPos, mc.player.getMovementDirection().getOpposite(), bhr.getBlockPos(), false);
         BlockUtils.interact(b, event.hand, true);
 
-        event.toReturn = ActionResult.SUCCESS;
+        event.toReturn = InteractionResult.SUCCESS;
     }
 
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (!(hitResult instanceof BlockHitResult bhr)
-            || (mc.crosshairTarget != null && mc.crosshairTarget.getType() != HitResult.Type.MISS)
+            || (mc.crosshairTarget != null && mc.crosshairTarget.getType() != BlockHitResult.Type.MISS)
             || !mc.world.getBlockState(bhr.getBlockPos()).isReplaceable()
             || !InvUtils.testInHands(this::placeable)
             || !render.get()) return;

@@ -23,8 +23,8 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.KeyEvent;
 
 public class AutoWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -133,7 +133,7 @@ public class AutoWalk extends Module {
         if (isMovementKey(event.input) && event.action == KeyAction.Press) onMovement();
     }
 
-     @EventHandler
+    @EventHandler
     private void onMouseClick(MouseClickEvent event) {
         if (isMovementButton(event.click) && event.action == KeyAction.Press) onMovement();
     }
@@ -156,7 +156,7 @@ public class AutoWalk extends Module {
         mc.options.rightKey.setPressed(false);
     }
 
-    private boolean isMovementKey(KeyInput input) {
+    private boolean isMovementKey(KeyEvent input) {
         return mc.options.forwardKey.matchesKey(input)
             || mc.options.backKey.matchesKey(input)
             || mc.options.leftKey.matchesKey(input)
@@ -165,7 +165,7 @@ public class AutoWalk extends Module {
             || mc.options.jumpKey.matchesKey(input);
     }
 
-    private boolean isMovementButton(Click click) {
+    private boolean isMovementButton(MouseButtonEvent click) {
         return mc.options.forwardKey.matchesMouse(click)
             || mc.options.backKey.matchesMouse(click)
             || mc.options.leftKey.matchesMouse(click)

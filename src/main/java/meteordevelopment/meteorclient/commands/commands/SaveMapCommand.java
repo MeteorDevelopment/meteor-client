@@ -1,3 +1,4 @@
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -12,14 +13,14 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.mixin.MapTextureManagerAccessor;
-import net.minecraft.client.texture.MapTextureManager;
-import net.minecraft.command.CommandSource;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.map.MapState;
-import net.minecraft.text.Text;
+import net.minecraft.client.resources.MapTextureManager;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
@@ -33,8 +34,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class SaveMapCommand extends Command {
-    private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(Text.literal("You must be holding a filled map."));
-    private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(Text.literal("Something went wrong."));
+    private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(Component.literal("You must be holding a filled map."));
+    private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(Component.literal("Something went wrong."));
 
     private final PointerBuffer filters;
 
@@ -50,7 +51,7 @@ public class SaveMapCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.executes(context -> {
             saveMap(128);
 
@@ -65,14 +66,14 @@ public class SaveMapCommand extends Command {
     @SuppressWarnings("deprecation") // Use of NativeImage#makePixelArray
     private void saveMap(int scale) throws CommandSyntaxException {
         ItemStack map = getMap();
-        MapState state = getMapState();
+        MapItemSavedData state = getMapState();
         if (map == null || state == null) throw MAP_NOT_FOUND.create();
 
         File path = getPath();
         if (path == null) throw OOPS.create();
 
         MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.gameRenderer.getClient().getMapTextureManager();
-        MapTextureManager.MapTexture texture = textureManager.meteor$invokeGetMapTexture(map.get(DataComponentTypes.MAP_ID), state);
+        MapTextureManager.MapInstance texture = textureManager.meteor$invokeGetMapTexture(map.get(DataComponents.MAP_ID), state);
         if (texture.texture.getImage() == null) throw OOPS.create();
 
         try {
@@ -93,11 +94,11 @@ public class SaveMapCommand extends Command {
         }
     }
 
-    private @Nullable MapState getMapState() {
+    private @Nullable MapItemSavedData getMapState() {
         ItemStack map = getMap();
         if (map == null) return null;
 
-        return FilledMapItem.getMapState(map.get(DataComponentTypes.MAP_ID), mc.world);
+        return MapItem.getMapState(map.get(DataComponents.MAP_ID), mc.world);
     }
 
     private @Nullable File getPath() {

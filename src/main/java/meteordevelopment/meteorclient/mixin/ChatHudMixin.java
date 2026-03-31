@@ -16,13 +16,13 @@ import meteordevelopment.meteorclient.mixininterface.IChatHudLineVisible;
 import meteordevelopment.meteorclient.mixininterface.IMessageHandler;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.hud.ChatHud;
-import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.client.gui.hud.MessageIndicator;
-import net.minecraft.network.message.MessageSignatureData;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.GuiMessage;
+import net.minecraft.client.GuiMessageTag;
+import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,14 +33,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
+// TODO(Ravel): can not resolve target class ChatHud
+// TODO(Ravel): can not resolve target class ChatHud
 @Mixin(ChatHud.class)
 public abstract class ChatHudMixin implements IChatHud {
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
-    MinecraftClient client;
+    Minecraft client;
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
     private List<ChatHudLine.Visible> visibleMessages;
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
     private List<ChatHudLine> messages;
@@ -50,28 +58,36 @@ public abstract class ChatHudMixin implements IChatHud {
     @Unique
     private int nextId;
 
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
-    public abstract void addMessage(Text message);
+    public abstract void addMessage(FormattedCharSequence message);
 
     @Override
-    public void meteor$add(Text message, int id) {
+    public void meteor$add(FormattedCharSequence message, int id) {
         nextId = id;
         addMessage(message);
         nextId = 0;
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Ljava/util/List;addFirst(Ljava/lang/Object;)V", shift = At.Shift.AFTER))
     private void onAddMessageAfterNewChatHudLineVisible(ChatHudLine message, CallbackInfo ci) {
         ((IChatHudLine) (Object) visibleMessages.getFirst()).meteor$setId(nextId);
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;addFirst(Ljava/lang/Object;)V", shift = At.Shift.AFTER))
     private void onAddMessageAfterNewChatHudLine(ChatHudLine message, CallbackInfo ci) {
         ((IChatHudLine) (Object) messages.getFirst()).meteor$setId(nextId);
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @SuppressWarnings("DataFlowIssue")
-    @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
+    @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "NEW", target = "(ILnet/minecraft/util/FormattedCharSequence;Lnet/minecraft/client/GuiMessageTag;Z)Lnet/minecraft/client/GuiMessage$Line;"))
     private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @SuppressWarnings("LocalMayBeArgsOnly") @Local(ordinal = 1) int j) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
         if (handler == null) return line;
@@ -84,7 +100,9 @@ public abstract class ChatHudMixin implements IChatHud {
         return line;
     }
 
-    @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V", at = @At(value = "NEW", target = "(ILnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)Lnet/minecraft/client/gui/hud/ChatHudLine;"))
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
+    @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V", at = @At(value = "NEW", target = "(ILnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)Lnet/minecraft/client/GuiMessage;"))
     private ChatHudLine onAddMessage_modifyChatHudLine(ChatHudLine line) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
         if (handler == null) return line;
@@ -93,8 +111,10 @@ public abstract class ChatHudMixin implements IChatHud {
         return line;
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V", cancellable = true)
-    private void onAddMessage(Text message, MessageSignatureData signatureData, MessageIndicator indicator, CallbackInfo ci, @Local(argsOnly = true) LocalRef<Text> messageRef, @Local(argsOnly = true) LocalRef<MessageIndicator> indicatorRef) {
+    private void onAddMessage(FormattedCharSequence message, MessageSignature signatureData, GuiMessageTag indicator, CallbackInfo ci, @Local(argsOnly = true) LocalRef<FormattedCharSequence> messageRef, @Local(argsOnly = true) LocalRef<GuiMessageTag> indicatorRef) {
         ReceiveMessageEvent event = MeteorClient.EVENT_BUS.post(ReceiveMessageEvent.get(message, indicator, nextId));
 
         if (event.isCancelled()) ci.cancel();
@@ -115,7 +135,9 @@ public abstract class ChatHudMixin implements IChatHud {
         }
     }
 
-    //modify max lengths for messages and visible messages
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
+//modify max lengths for messages and visible messages
     @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "CONSTANT", args = "intValue=100"))
     private int maxLength(int size) {
         if (Modules.get() == null || !getBetterChat().isLongerChat()) return size;
@@ -123,6 +145,8 @@ public abstract class ChatHudMixin implements IChatHud {
         return size + betterChat.getExtraChatLines();
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @ModifyExpressionValue(method = "addVisibleMessage", at = @At(value = "CONSTANT", args = "intValue=100"))
     private int maxLengthVisible(int size) {
         if (Modules.get() == null || !getBetterChat().isLongerChat()) return size;
@@ -132,20 +156,26 @@ public abstract class ChatHudMixin implements IChatHud {
 
     // Player Heads
 
-    @ModifyExpressionValue(method = "render(Lnet/minecraft/client/gui/hud/ChatHud$Backend;IIZ)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;ceil(F)I"))
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
+    @ModifyExpressionValue(method = "render(Lnet/minecraft/client/gui/hud/ChatHud$Backend;IIZ)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;ceil(F)I"))
     private int onRender_modifyWidth(int width) {
         return getBetterChat().modifyChatWidth(width);
     }
 
     // Anti spam
 
-    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;isChatFocused()Z"))
-    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, @Local List<OrderedText> list) {
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
+    @Inject(method = "addVisibleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;isChatFocused()Z"))
+    private void onBreakChatMessageLines(ChatHudLine message, CallbackInfo ci, @Local List<FormattedCharSequence> list) {
         if (Modules.get() == null) return; // baritone calls addMessage before we initialise
 
         getBetterChat().lines.addFirst(list.size());
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(method = "addMessage(Lnet/minecraft/client/gui/hud/ChatHudLine;)V", at = @At(value = "INVOKE", target = "Ljava/util/List;removeLast()Ljava/lang/Object;"))
     private void onRemoveMessage(ChatHudLine message, CallbackInfo ci) {
         if (Modules.get() == null) return;
@@ -159,11 +189,15 @@ public abstract class ChatHudMixin implements IChatHud {
         }
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(method = "clear", at = @At("HEAD"))
     private void onClear(boolean clearHistory, CallbackInfo ci) {
         getBetterChat().lines.clear();
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(method = "refresh", at = @At("HEAD"))
     private void onRefresh(CallbackInfo ci) {
         getBetterChat().lines.clear();

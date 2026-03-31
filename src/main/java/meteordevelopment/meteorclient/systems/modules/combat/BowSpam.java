@@ -15,11 +15,11 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.ArrowItem;
-import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.InteractionHand;
 
 public class BowSpam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -98,12 +98,11 @@ public class BowSpam extends Module {
                 }
 
                 InvUtils.swap(slot, true);
-                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                mc.interactionManager.interactItem(mc.player, InteractionHand.MAIN_HAND);
                 InvUtils.swapBack();
 
                 ticks = 0;
-            }
-            else {
+            } else {
                 ticks++;
             }
 

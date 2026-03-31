@@ -14,23 +14,23 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.MaceItem;
-import net.minecraft.item.TridentItem;
-import net.minecraft.registry.tag.EntityTypeTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MaceItem;
+import net.minecraft.world.item.TridentItem;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -412,13 +412,13 @@ public class AttributeSwap extends Module {
         boolean durability = smartDurability.get();
 
         boolean isLiving = target instanceof LivingEntity;
-        boolean isPlayer = target instanceof PlayerEntity;
+        boolean isPlayer = target instanceof Player;
         boolean isOnFire = target != null && target.isOnFire();
         boolean isUndead = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_SMITE);
         boolean isArthropod = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS);
         boolean isAquatic = target != null && target.getType().isIn(EntityTypeTags.SENSITIVE_TO_IMPALING);
-        boolean hasFireResistance = isLiving && (((LivingEntity) target).hasStatusEffect(StatusEffects.FIRE_RESISTANCE) || hasFireProtectionArmor((LivingEntity) target));
-        double armor = isLiving ? ((LivingEntity) target).getAttributeValue(EntityAttributes.ARMOR) : 0;
+        boolean hasFireResistance = isLiving && (((LivingEntity) target).hasStatusEffect(MobEffects.FIRE_RESISTANCE) || hasFireProtectionArmor((LivingEntity) target));
+        double armor = isLiving ? ((LivingEntity) target).getAttributeValue(Attributes.ARMOR) : 0;
         float health = isLiving ? ((LivingEntity) target).getHealth() : 0;
 
         int bestSlot = -1;
@@ -458,18 +458,18 @@ public class AttributeSwap extends Module {
 
     private Entity getTargetEntity() {
         double maxDistance = 7;
-        Vec3d start = mc.player.getCameraPosVec(1.0f);
-        Vec3d look = mc.player.getRotationVec(1.0f);
-        Vec3d end = start.add(look.multiply(maxDistance));
+        Vec3 start = mc.player.getCameraPosVec(1.0f);
+        Vec3 look = mc.player.getRotationVec(1.0f);
+        Vec3 end = start.add(look.multiply(maxDistance));
 
-        Box box = mc.player.getBoundingBox().stretch(look.multiply(maxDistance)).expand(1.0);
+        AABB box = mc.player.getBoundingBox().stretch(look.multiply(maxDistance)).expand(1.0);
 
         Entity target = null;
         double closestDistance = maxDistance * maxDistance;
 
         for (Entity entity : mc.world.getOtherEntities(mc.player, box, e -> !e.isSpectator() && e.canHit())) {
             // expanding entity's hitbox by 0.15 to simulate spear's actual hitbox margin
-            Box expandedBox = entity.getBoundingBox().expand(0.150);
+            AABB expandedBox = entity.getBoundingBox().expand(0.150);
 
             if (expandedBox.raycast(start, end).isPresent()) {
                 double distSq = start.squaredDistanceTo(entity.getX(), entity.getY(), entity.getZ());
@@ -625,7 +625,7 @@ public class AttributeSwap extends Module {
     }
 
     private boolean hasFireProtectionArmor(LivingEntity entity) {
-        for (EquipmentSlot slot : AttributeModifierSlot.ARMOR) {
+        for (EquipmentSlot slot : EquipmentSlotGroup.ARMOR) {
             ItemStack stack = entity.getEquippedStack(slot);
             if (stack.isEmpty()) continue;
 

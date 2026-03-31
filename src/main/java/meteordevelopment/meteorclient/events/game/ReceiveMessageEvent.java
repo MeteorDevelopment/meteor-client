@@ -6,18 +6,18 @@
 package meteordevelopment.meteorclient.events.game;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.client.gui.hud.MessageIndicator;
-import net.minecraft.text.Text;
+import net.minecraft.client.GuiMessageTag;
+import net.minecraft.network.chat.Component;
 
 public class ReceiveMessageEvent extends Cancellable {
     private static final ReceiveMessageEvent INSTANCE = new ReceiveMessageEvent();
 
-    private Text message;
-    private MessageIndicator indicator;
+    private Component message;
+    private GuiMessageTag indicator;
     private boolean modified;
     public int id;
 
-    public static ReceiveMessageEvent get(Text message, MessageIndicator indicator, int id) {
+    public static ReceiveMessageEvent get(Component message, GuiMessageTag indicator, int id) {
         INSTANCE.setCancelled(false);
         INSTANCE.message = message;
         INSTANCE.indicator = indicator;
@@ -26,20 +26,20 @@ public class ReceiveMessageEvent extends Cancellable {
         return INSTANCE;
     }
 
-    public Text getMessage() {
+    public Component getMessage() {
         return message;
     }
 
-    public MessageIndicator getIndicator() {
+    public GuiMessageTag getIndicator() {
         return indicator;
     }
 
-    public void setMessage(Text message) {
+    public void setMessage(Component message) {
         this.message = message;
         this.modified = true;
     }
 
-    public void setIndicator(MessageIndicator indicator) {
+    public void setIndicator(GuiMessageTag indicator) {
         this.indicator = indicator;
         this.modified = true;
     }

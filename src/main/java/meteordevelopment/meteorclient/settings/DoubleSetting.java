@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
@@ -43,14 +43,14 @@ public class DoubleSetting extends Setting<Double> {
     }
 
     @Override
-    protected NbtCompound save(NbtCompound tag) {
+    protected CompoundTag save(CompoundTag tag) {
         tag.putDouble("value", get());
 
         return tag;
     }
 
     @Override
-    public Double load(NbtCompound tag) {
+    public Double load(CompoundTag tag) {
         set(tag.getDouble("value", 0.0));
 
         return get();

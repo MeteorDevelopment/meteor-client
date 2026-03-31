@@ -15,12 +15,12 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.render.MapRenderState;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.MapIdComponent;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.map.MapState;
+import net.minecraft.client.renderer.state.MapRenderState;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
 
@@ -86,8 +86,8 @@ public class MapHud extends HudElement {
     );
 
     private final MapRenderState renderState = new MapRenderState();
-    private @Nullable MapIdComponent mapComponent;
-    private @Nullable MapState mapState;
+    private @Nullable MapId mapComponent;
+    private @Nullable MapItemSavedData mapState;
 
     public MapHud() {
         super(INFO);
@@ -107,26 +107,26 @@ public class MapHud extends HudElement {
             case SlotIndex -> mapStack = mc.player.getInventory().getStack(slotIndex.get());
             case MapId -> {
                 FindItemResult mapResult = InvUtils.find(stack -> {
-                    MapIdComponent mapIdComponent = stack.get(DataComponentTypes.MAP_ID);
+                    MapId mapIdComponent = stack.get(DataComponents.MAP_ID);
                     return mapIdComponent != null && mapIdComponent.id() == mapId.get();
                 });
                 if (mapResult.found()) mapStack = mc.player.getInventory().getStack(mapResult.slot());
             }
             case Simple -> {
                 FindItemResult mapResult = InvUtils.find(stack -> {
-                    MapIdComponent mapIdComponent = stack.get(DataComponentTypes.MAP_ID);
+                    MapId mapIdComponent = stack.get(DataComponents.MAP_ID);
                     return mapIdComponent != null;
                 });
                 if (mapResult.found()) mapStack = mc.player.getInventory().getStack(mapResult.slot());
             }
         }
 
-        if (mapStack.isEmpty() || !mapStack.contains(DataComponentTypes.MAP_ID)) {
+        if (mapStack.isEmpty() || !mapStack.contains(DataComponents.MAP_ID)) {
             mapComponent = null;
             mapState = null;
         } else {
-            mapComponent = mapStack.get(DataComponentTypes.MAP_ID);
-            mapState = FilledMapItem.getMapState(mapComponent, mc.world);
+            mapComponent = mapStack.get(DataComponents.MAP_ID);
+            mapState = MapItem.getMapState(mapComponent, mc.world);
         }
     }
 

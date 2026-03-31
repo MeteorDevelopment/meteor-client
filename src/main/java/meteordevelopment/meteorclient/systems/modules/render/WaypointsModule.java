@@ -28,12 +28,12 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.DeathScreen;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
 import java.text.SimpleDateFormat;
@@ -172,10 +172,10 @@ public class WaypointsModule extends Module {
         if (!event.isCancelled()) addDeath(mc.player.getEntityPos());
     }
 
-    public void addDeath(Vec3d deathPos) {
+    public void addDeath(Vec3 deathPos) {
         String time = dateFormat.format(new Date());
         if (dpChat.get()) {
-            MutableText text = Text.literal("Died at ");
+            MutableComponent text = MutableComponent.literal("Died at ");
             text.append(formatCoords(deathPos));
             text.append(String.format(" on %s.", time));
             info(text);
@@ -279,7 +279,7 @@ public class WaypointsModule extends Module {
         @Override
         public Waypoint create() {
             return new Waypoint.Builder()
-                .pos(MinecraftClient.getInstance().player.getBlockPos().up(2))
+                .pos(Minecraft.getInstance().player.getBlockPos().up(2))
                 .dimension(PlayerUtils.getDimension())
                 .build();
         }

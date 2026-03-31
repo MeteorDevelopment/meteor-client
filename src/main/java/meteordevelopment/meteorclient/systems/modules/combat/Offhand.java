@@ -16,11 +16,11 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.Items;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.Items;
+import net.minecraft.tags.ItemTags;
 
 import static meteordevelopment.orbit.EventPriority.HIGHEST;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
@@ -89,7 +89,7 @@ public class Offhand extends Module {
         .name("sword-pot")
         .description("Will switch to a potion when holding a sword and right click.")
         .defaultValue(false)
-        .visible(() -> !rightgapple.get() && !alwaysPot.get() && !alwaysSwordGap.get() )
+        .visible(() -> !rightgapple.get() && !alwaysPot.get() && !alwaysSwordGap.get())
         .build()
     );
 
@@ -99,8 +99,8 @@ public class Offhand extends Module {
         .name("min-health")
         .description("Will hold a totem when below this amount of health.")
         .defaultValue(10)
-        .range(0,36)
-        .sliderRange(0,36)
+        .range(0, 36)
+        .sliderRange(0, 36)
         .build()
     );
 
@@ -191,9 +191,10 @@ public class Offhand extends Module {
         }
 
         // Always Gap
-        else if ((mc.player.getMainHandStack().isIn(ItemTags.SWORDS) || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysSwordGap.get()) currentItem = Item.EGap;
+        else if ((mc.player.getMainHandStack().isIn(ItemTags.SWORDS) || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysSwordGap.get())
+            currentItem = Item.EGap;
 
-        // Potion Click
+            // Potion Click
         else if (potionClick.get()) {
             if (!locked) {
                 if (mc.player.getMainHandStack().isIn(ItemTags.SWORDS)) {
@@ -205,7 +206,8 @@ public class Offhand extends Module {
         }
 
         // Always Pot
-        else if ((mc.player.getMainHandStack().isIn(ItemTags.SWORDS) || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysPot.get()) currentItem = Item.Potion;
+        else if ((mc.player.getMainHandStack().isIn(ItemTags.SWORDS) || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysPot.get())
+            currentItem = Item.Potion;
 
 
         else currentItem = preferreditem.get();
@@ -248,7 +250,7 @@ public class Offhand extends Module {
         return mc.player.getMainHandStack().getItem() == Items.BOW
             || mc.player.getMainHandStack().getItem() == Items.TRIDENT
             || mc.player.getMainHandStack().getItem() == Items.CROSSBOW
-            || mc.player.getMainHandStack().getItem().getComponents().contains(DataComponentTypes.FOOD);
+            || mc.player.getMainHandStack().getItem().getComponents().contains(DataComponents.FOOD);
     }
 
     @Override
@@ -265,6 +267,7 @@ public class Offhand extends Module {
         Shield(Items.SHIELD),
         Potion(Items.POTION);
         final net.minecraft.item.Item item;
+
         Item(net.minecraft.item.Item item) {
             this.item = item;
         }

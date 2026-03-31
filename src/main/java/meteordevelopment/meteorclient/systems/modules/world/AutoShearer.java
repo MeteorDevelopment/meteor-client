@@ -17,11 +17,11 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.sheep.Sheep;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.EntityHitResult;
 
 public class AutoShearer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -49,7 +49,7 @@ public class AutoShearer extends Module {
     );
 
     private Entity entity;
-    private Hand hand;
+    private InteractionHand hand;
 
     public AutoShearer() {
         super(Categories.World, "auto-shearer", "Automatically shears sheep.");
@@ -65,7 +65,8 @@ public class AutoShearer extends Module {
         entity = null;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || !PlayerUtils.isWithin(entity, distance.get())) continue;
+            if (!(entity instanceof Sheep) || ((Sheep) entity).isSheared() || ((Sheep) entity).isBaby() || !PlayerUtils.isWithin(entity, distance.get()))
+                continue;
 
             FindItemResult findShear = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.SHEARS && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
             if (!InvUtils.swap(findShear.slot(), true)) return;
@@ -73,7 +74,8 @@ public class AutoShearer extends Module {
             this.hand = findShear.getHand();
             this.entity = entity;
 
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
+            if (rotate.get())
+                Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
             else interact();
 
             return;

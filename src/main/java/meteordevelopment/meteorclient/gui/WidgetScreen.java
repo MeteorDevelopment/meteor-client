@@ -17,14 +17,14 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CursorStyle;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.util.MacWindowUtil;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import com.mojang.blaze3d.platform.MacosUtil;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public abstract class WidgetScreen extends Screen {
     protected boolean firstInit = true;
 
     public WidgetScreen(GuiTheme theme, String title) {
-        super(Text.literal(title));
+        super(Component.literal(title));
 
         this.parent = mc.currentScreen;
         this.root = new WFullScreenRoot();
@@ -119,7 +119,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (locked) return false;
 
         double mouseX = click.x();
@@ -133,7 +133,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         if (locked) return false;
 
         double mouseX = click.x();
@@ -143,7 +143,8 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
-        if (debug && click.button() == GLFW_MOUSE_BUTTON_RIGHT) DEBUG_RENDERER.mouseReleased(root, new Click(mouseX, mouseY, click.buttonInfo()), 0);
+        if (debug && click.button() == GLFW_MOUSE_BUTTON_RIGHT)
+            DEBUG_RENDERER.mouseReleased(root, new Click(mouseX, mouseY, click.buttonInfo()), 0);
 
         return root.mouseReleased(new Click(mouseX, mouseY, click.buttonInfo()));
     }
@@ -172,7 +173,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean keyReleased(KeyInput input) {
+    public boolean keyReleased(KeyEvent input) {
         if (locked) return false;
 
         if ((input.modifiers() == GLFW_MOD_CONTROL || input.modifiers() == GLFW_MOD_SUPER) && input.key() == GLFW_KEY_9) {
@@ -189,7 +190,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         if (locked) return false;
 
         boolean shouldReturn = root.keyPressed(input) || super.keyPressed(input);
@@ -227,39 +228,39 @@ public abstract class WidgetScreen extends Screen {
             return true;
         }
 
-        boolean control = MacWindowUtil.IS_MAC ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
+        boolean control = MacosUtil.IS_MAC ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
 
         return (control && input.key() == GLFW_KEY_C && toClipboard())
             || (control && input.key() == GLFW_KEY_V && fromClipboard());
     }
 
-    public void keyRepeated(KeyInput input) {
+    public void keyRepeated(KeyEvent input) {
         if (locked) return;
 
         root.keyRepeated(input);
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         if (locked) return false;
 
         return root.charTyped(input);
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
         if (this.client.world == null) {
             this.renderPanoramaBackground(context, deltaTicks);
         }
     }
 
-    public void renderCustom(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderCustom(GuiGraphics context, int mouseX, int mouseY, float delta) {
         int s = mc.getWindow().getScaleFactor();
         mouseX *= s;
         mouseY *= s;
 
         animProgress += (delta / 20 * 14) * (closing ? -1 : 1);
-        animProgress = MathHelper.clamp(animProgress, 0, 1);
+        animProgress = Mth.clamp(animProgress, 0, 1);
 
         if (closing && (animProgress == 0 || parent != null)) {
             closeInternal();
@@ -300,7 +301,8 @@ public abstract class WidgetScreen extends Screen {
         }
     }
 
-    protected void onRenderBefore(DrawContext drawContext, float delta) {}
+    protected void onRenderBefore(GuiGraphics drawContext, float delta) {
+    }
 
     @Override
     public void resize(int width, int height) {
@@ -361,7 +363,8 @@ public abstract class WidgetScreen extends Screen {
         }
     }
 
-    protected void onClosed() {}
+    protected void onClosed() {
+    }
 
     public boolean toClipboard() {
         return false;

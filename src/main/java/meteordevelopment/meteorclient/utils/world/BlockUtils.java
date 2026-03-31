@@ -18,26 +18,26 @@ import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
-import net.minecraft.block.enums.BlockHalf;
-import net.minecraft.block.enums.SlabType;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffectUtil;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.registry.tag.FluidTags;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.effect.MobEffectUtil;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.Level;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -78,22 +78,22 @@ public class BlockUtils {
 
     public static boolean place(BlockPos blockPos, FindItemResult findItemResult, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
         if (findItemResult.isOffhand()) {
-            return place(blockPos, Hand.OFF_HAND, mc.player.getInventory().getSelectedSlot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
+            return place(blockPos, InteractionHand.OFF_HAND, mc.player.getInventory().getSelectedSlot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
         } else if (findItemResult.isHotbar()) {
-            return place(blockPos, Hand.MAIN_HAND, findItemResult.slot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
+            return place(blockPos, InteractionHand.MAIN_HAND, findItemResult.slot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
         }
         return false;
     }
 
-    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
+    public static boolean place(BlockPos blockPos, InteractionHand hand, int slot, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
         if (slot < 0 || slot > 8) return false;
 
         Block toPlace = Blocks.OBSIDIAN;
-        ItemStack i = hand == Hand.MAIN_HAND ? mc.player.getInventory().getStack(slot) : mc.player.getInventory().getStack(SlotUtils.OFFHAND);
+        ItemStack i = hand == InteractionHand.MAIN_HAND ? mc.player.getInventory().getStack(slot) : mc.player.getInventory().getStack(SlotUtils.OFFHAND);
         if (i.getItem() instanceof BlockItem blockItem) toPlace = blockItem.getBlock();
         if (!canPlaceBlock(blockPos, checkEntities, toPlace)) return false;
 
-        Vec3d hitPos = Vec3d.ofCenter(blockPos);
+        Vec3 hitPos = Vec3.ofCenter(blockPos);
 
         BlockPos neighbour;
         Direction side = getPlaceSide(blockPos);
@@ -128,11 +128,11 @@ public class BlockUtils {
         return true;
     }
 
-    public static void interact(BlockHitResult blockHitResult, Hand hand, boolean swing) {
+    public static void interact(BlockHitResult blockHitResult, InteractionHand hand, boolean swing) {
         boolean wasSneaking = mc.player.isSneaking();
         mc.player.setSneaking(false);
 
-        ActionResult result = mc.interactionManager.interactBlock(mc.player, hand, blockHitResult);
+        InteractionResult result = mc.interactionManager.interactBlock(mc.player, hand, blockHitResult);
 
         if (result.isAccepted()) {
             if (swing) mc.player.swingHand(hand);
@@ -146,7 +146,7 @@ public class BlockUtils {
         if (blockPos == null) return false;
 
         // Check y level
-        if (!World.isValid(blockPos)) return false;
+        if (!Level.isValid(blockPos)) return false;
 
         // Check if current block is replaceable
         if (!mc.world.getBlockState(blockPos).isReplaceable()) return false;
@@ -164,7 +164,7 @@ public class BlockUtils {
     }
 
     public static Direction getPlaceSide(BlockPos blockPos) {
-        Vec3d lookVec = blockPos.toCenterPos().subtract(mc.player.getEyePos());
+        Vec3 lookVec = blockPos.toCenterPos().subtract(mc.player.getEyePos());
         double bestRelevancy = -Double.MAX_VALUE;
         Direction bestSide = null;
 
@@ -192,7 +192,7 @@ public class BlockUtils {
         return getClosestPlaceSide(blockPos, mc.player.getEyePos());
     }
 
-    public static Direction getClosestPlaceSide(BlockPos blockPos, Vec3d pos) {
+    public static Direction getClosestPlaceSide(BlockPos blockPos, Vec3 pos) {
         Direction closestSide = null;
         double closestDistance = Double.MAX_VALUE;
 
@@ -238,7 +238,7 @@ public class BlockUtils {
         if (!canBreak(blockPos, mc.world.getBlockState(blockPos))) return false;
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field, and we don't want it to change when it has been stored in a field somewhere
-        BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
+        BlockPos pos = blockPos instanceof BlockPos.MutableBlockPos ? new BlockPos(blockPos) : blockPos;
 
         InstantRebreak ir = Modules.get().get(InstantRebreak.class);
         if (ir != null && ir.isActive() && ir.blockPos.equals(pos) && ir.shouldMine()) {
@@ -250,8 +250,8 @@ public class BlockUtils {
             mc.interactionManager.updateBlockBreakingProgress(pos, getDirection(blockPos));
         else mc.interactionManager.attackBlock(pos, getDirection(blockPos));
 
-        if (swing) mc.player.swingHand(Hand.MAIN_HAND);
-        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        if (swing) mc.player.swingHand(InteractionHand.MAIN_HAND);
+        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(InteractionHand.MAIN_HAND));
 
         breaking = true;
         breakingThisTick = true;
@@ -261,7 +261,7 @@ public class BlockUtils {
 
     public static boolean canBreak(BlockPos blockPos, BlockState state) {
         if (!mc.player.isCreative() && state.getHardness(mc.world, blockPos) < 0) return false;
-        return state.getOutlineShape(mc.world, blockPos) != VoxelShapes.empty();
+        return state.getOutlineShape(mc.world, blockPos) != Shapes.empty();
     }
 
     public static boolean canBreak(BlockPos blockPos) {
@@ -314,8 +314,8 @@ public class BlockUtils {
 
         if (!isValidSpawnBlock(mc.world.getBlockState(blockPos.down()))) return MobSpawn.Never;
 
-        if (mc.world.getLightLevel(LightType.BLOCK, blockPos) > spawnLightLimit) return MobSpawn.Never;
-        else if (mc.world.getLightLevel(LightType.SKY, blockPos) > spawnLightLimit) return  MobSpawn.Potential;
+        if (mc.world.getLightLevel(LightLayer.BLOCK, blockPos) > spawnLightLimit) return MobSpawn.Never;
+        else if (mc.world.getLightLevel(LightLayer.SKY, blockPos) > spawnLightLimit) return MobSpawn.Potential;
 
         return MobSpawn.Always;
     }
@@ -330,7 +330,7 @@ public class BlockUtils {
 
         if (block == Blocks.SOUL_SAND || block == Blocks.MUD) return true;
         if (block instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
-        if (block instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP) return true;
+        if (block instanceof StairsBlock && blockState.get(StairsBlock.HALF) == Half.TOP) return true;
 
         return blockState.isOpaqueFullCube();
     }
@@ -361,7 +361,7 @@ public class BlockUtils {
         Always
     }
 
-    private static final ThreadLocal<BlockPos.Mutable> EXPOSED_POS = ThreadLocal.withInitial(BlockPos.Mutable::new);
+    private static final ThreadLocal<BlockPos.MutableBlockPos> EXPOSED_POS = ThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
 
     public static boolean isExposed(BlockPos blockPos) {
         for (Direction direction : Direction.values()) {
@@ -393,12 +393,12 @@ public class BlockUtils {
             if (efficiency > 0 && !tool.isEmpty()) speed += efficiency * efficiency + 1;
         }
 
-        if (StatusEffectUtil.hasHaste(mc.player)) {
-            speed *= 1 + (StatusEffectUtil.getHasteAmplifier(mc.player) + 1) * 0.2F;
+        if (MobEffectUtil.hasHaste(mc.player)) {
+            speed *= 1 + (MobEffectUtil.getHasteAmplifier(mc.player) + 1) * 0.2F;
         }
 
-        if (mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE)) {
-            float k = switch (mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) {
+        if (mc.player.hasStatusEffect(MobEffects.MINING_FATIGUE)) {
+            float k = switch (mc.player.getStatusEffect(MobEffects.MINING_FATIGUE).getAmplifier()) {
                 case 0 -> 0.3F;
                 case 1 -> 0.09F;
                 case 2 -> 0.0027F;
@@ -409,7 +409,7 @@ public class BlockUtils {
         }
 
         if (mc.player.isSubmergedIn(FluidTags.WATER)) {
-            speed *= mc.player.getAttributeValue(EntityAttributes.SUBMERGED_MINING_SPEED);
+            speed *= mc.player.getAttributeValue(Attributes.SUBMERGED_MINING_SPEED);
         }
 
         if (!mc.player.isOnGround()) {
@@ -422,7 +422,7 @@ public class BlockUtils {
     /**
      * Mutates a {@link BlockPos.Mutable} around an origin
      */
-    public static BlockPos.Mutable mutateAround(BlockPos.Mutable mutable, BlockPos origin, int xOffset, int yOffset, int zOffset) {
+    public static BlockPos.MutableBlockPos mutateAround(BlockPos.MutableBlockPos mutable, BlockPos origin, int xOffset, int yOffset, int zOffset) {
         return mutable.set(origin.getX() + xOffset, origin.getY() + yOffset, origin.getZ() + zOffset);
     }
 }

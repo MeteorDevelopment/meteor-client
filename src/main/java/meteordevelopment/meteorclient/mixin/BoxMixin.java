@@ -6,21 +6,53 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.mixininterface.IBox;
-import net.minecraft.util.math.Box;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
+// TODO(Ravel): can not resolve target class Box
+// TODO(Ravel): can not resolve target class Box
 @Mixin(Box.class)
 public abstract class BoxMixin implements IBox {
-    @Shadow @Final @Mutable public double minX;
-    @Shadow @Final @Mutable public double minY;
-    @Shadow @Final @Mutable public double minZ;
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
+    @Shadow
+    @Final
+    @Mutable
+    public double minX;
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
+    @Shadow
+    @Final
+    @Mutable
+    public double minY;
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
+    @Shadow
+    @Final
+    @Mutable
+    public double minZ;
 
-    @Shadow @Final @Mutable public double maxX;
-    @Shadow @Final @Mutable public double maxY;
-    @Shadow @Final @Mutable public double maxZ;
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
+    @Shadow
+    @Final
+    @Mutable
+    public double maxX;
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
+    @Shadow
+    @Final
+    @Mutable
+    public double maxY;
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
+    @Shadow
+    @Final
+    @Mutable
+    public double maxZ;
 
     @Override
     public void meteor$expand(double v) {

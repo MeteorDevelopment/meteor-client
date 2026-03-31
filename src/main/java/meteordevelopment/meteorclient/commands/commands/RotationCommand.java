@@ -9,9 +9,9 @@ import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.DirectionArgumentType;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 
 public class RotationCommand extends Command {
     public RotationCommand() {
@@ -19,7 +19,7 @@ public class RotationCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder
             .then(literal("set")
                 .then(argument("direction", DirectionArgumentType.create())
@@ -59,7 +59,7 @@ public class RotationCommand extends Command {
                             mc.player.setPitch(pitch >= 0 ? Math.min(pitch, 90) : Math.max(pitch, -90));
 
                             float yaw = mc.player.getYaw() + context.getArgument("yaw", Float.class);
-                            mc.player.setYaw(MathHelper.wrapDegrees(yaw));
+                            mc.player.setYaw(Mth.wrapDegrees(yaw));
 
                             return SINGLE_SUCCESS;
                         })

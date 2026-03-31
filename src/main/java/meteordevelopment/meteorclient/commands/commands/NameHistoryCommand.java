@@ -14,10 +14,10 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.command.CommandSource;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
 
 import java.net.URI;
 import java.text.DateFormat;
@@ -31,10 +31,10 @@ public class NameHistoryCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(context -> {
             MeteorExecutor.execute(() -> {
-                PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.get(context);
+                PlayerInfo lookUpTarget = PlayerListEntryArgumentType.get(context);
                 UUID uuid = lookUpTarget.getProfile().id();
 
                 NameHistory history = Http.get("https://laby.net/api/v2/user/" + uuid + "/get-profile")
@@ -61,29 +61,29 @@ public class NameHistoryCommand extends Command {
                     )
                     .withHoverEvent(new HoverEvent.ShowText(
                         Text.literal("View on laby.net")
-                            .formatted(Formatting.YELLOW)
-                            .formatted(Formatting.ITALIC)
+                            .formatted(ChatFormatting.YELLOW)
+                            .formatted(ChatFormatting.ITALIC)
                     ))
                 );
 
-                info(initial.append(Text.literal(" Username History:").formatted(Formatting.GRAY)));
+                info(initial.append(Text.literal(" Username History:").formatted(ChatFormatting.GRAY)));
 
                 for (Name entry : history.username_history) {
                     MutableText nameText = Text.literal(entry.name);
-                    nameText.formatted(Formatting.AQUA);
+                    nameText.formatted(ChatFormatting.AQUA);
 
                     if (entry.changed_at != null && entry.changed_at.getTime() != 0) {
                         MutableText changed = Text.literal("Changed at: ");
-                        changed.formatted(Formatting.GRAY);
+                        changed.formatted(ChatFormatting.GRAY);
 
                         DateFormat formatter = new SimpleDateFormat("hh:mm:ss, dd/MM/yyyy");
-                        changed.append(Text.literal(formatter.format(entry.changed_at)).formatted(Formatting.WHITE));
+                        changed.append(Text.literal(formatter.format(entry.changed_at)).formatted(ChatFormatting.WHITE));
 
                         nameText.setStyle(nameText.getStyle().withHoverEvent(new HoverEvent.ShowText(changed)));
                     }
 
                     if (!entry.accurate) {
-                        MutableText text = Text.literal("*").formatted(Formatting.WHITE);
+                        MutableText text = Text.literal("*").formatted(ChatFormatting.WHITE);
 
                         text.setStyle(text.getStyle().withHoverEvent(new HoverEvent.ShowText(Text.literal("This name history entry is not accurate according to laby.net"))));
 

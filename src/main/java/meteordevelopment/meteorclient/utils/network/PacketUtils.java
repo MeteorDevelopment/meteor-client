@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.utils.network;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
-import net.minecraft.network.packet.Packet;
+import net.minecraft.network.protocol.Packet;
 
 import java.util.Map;
 import java.util.Set;

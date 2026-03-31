@@ -10,9 +10,9 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.GameMode;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class TargetUtils {
             if (!PlayerUtils.isWithin(entity, range)) return false;
             if (!Friends.get().shouldAttack(player)) return false;
             if (entity instanceof FakePlayerEntity fakePlayer) return !fakePlayer.noHit;
-            return EntityUtils.getGameMode(player) == GameMode.SURVIVAL;
+            return EntityUtils.getGameMode(player) == GameType.SURVIVAL;
         }, priority);
     }
 

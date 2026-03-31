@@ -7,30 +7,30 @@ package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.mixininterface.ISlot;
 import meteordevelopment.meteorclient.utils.render.PeekScreen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Pair;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.util.Tuple;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class InventorySorter {
-    private final HandledScreen<?> screen;
+    private final AbstractContainerScreen<?> screen;
     private final InvPart originInvPart;
 
     private boolean invalid;
     private List<Action> actions;
     private int timer, currentActionI;
 
-    public InventorySorter(HandledScreen<?> screen, Slot originSlot) {
+    public InventorySorter(AbstractContainerScreen<?> screen, Slot originSlot) {
         this.screen = screen;
 
         this.originInvPart = getInvPart(originSlot);
@@ -49,8 +49,7 @@ public class InventorySorter {
 
         if (timer >= delay) {
             timer = 0;
-        }
-        else {
+        } else {
             timer++;
             return false;
         }
@@ -67,7 +66,8 @@ public class InventorySorter {
         List<MySlot> slots = new ArrayList<>();
 
         for (Slot slot : screen.getScreenHandler().slots) {
-            if (getInvPart(slot) == originInvPart) slots.add(new MySlot(((ISlot) slot).meteor$getId(), slot.getStack()));
+            if (getInvPart(slot) == originInvPart)
+                slots.add(new MySlot(((ISlot) slot).meteor$getId(), slot.getStack()));
         }
 
         slots.sort(Comparator.comparingInt(value -> value.id));
@@ -82,7 +82,8 @@ public class InventorySorter {
         SlotMap slotMap = new SlotMap();
 
         for (MySlot slot : slots) {
-            if (slot.itemStack.isEmpty() || !slot.itemStack.isStackable() || slot.itemStack.getCount() >= slot.itemStack.getMaxCount()) continue;
+            if (slot.itemStack.isEmpty() || !slot.itemStack.isStackable() || slot.itemStack.getCount() >= slot.itemStack.getMaxCount())
+                continue;
 
             slotMap.get(slot.itemStack).add(slot);
         }
@@ -109,7 +110,8 @@ public class InventorySorter {
                     slotToStackTo.itemStack = new ItemStack(slotToStackTo.itemStack.getItem(), slotToStackTo.itemStack.getCount() + slot.itemStack.getCount());
                     slot.itemStack = ItemStack.EMPTY;
 
-                    if (slotToStackTo.itemStack.getCount() >= slotToStackTo.itemStack.getMaxCount()) slotToStackTo = null;
+                    if (slotToStackTo.itemStack.getCount() >= slotToStackTo.itemStack.getMaxCount())
+                        slotToStackTo = null;
                 }
                 // Handle state when combining the two stacks produces leftovers
                 else {
@@ -166,7 +168,7 @@ public class InventorySorter {
         if (bestI.isEmpty() && !slotI.isEmpty()) return true;
         else if (!bestI.isEmpty() && slotI.isEmpty()) return false;
 
-        int c = Registries.ITEM.getId(bestI.getItem()).compareTo(Registries.ITEM.getId(slotI.getItem()));
+        int c = BuiltInRegistries.ITEM.getId(bestI.getItem()).compareTo(BuiltInRegistries.ITEM.getId(slotI.getItem()));
         if (c == 0) {
             if (slotI.getCount() != bestI.getCount()) return slotI.getCount() > bestI.getCount();
             if (slotI.getDamage() != bestI.getDamage()) return slotI.getDamage() > bestI.getDamage();
@@ -178,11 +180,10 @@ public class InventorySorter {
     private InvPart getInvPart(Slot slot) {
         int i = ((ISlot) slot).meteor$getIndex();
 
-        if (slot.inventory instanceof PlayerInventory && (!(screen instanceof CreativeInventoryScreen) || ((ISlot) slot).meteor$getId() > 8)) {
+        if (slot.inventory instanceof Inventory && (!(screen instanceof CreativeModeInventoryScreen) || ((ISlot) slot).meteor$getId() > 8)) {
             if (SlotUtils.isHotbar(i)) return InvPart.Hotbar;
             else if (SlotUtils.isMain(i)) return InvPart.Player;
-        }
-        else if ((screen instanceof GenericContainerScreen || screen instanceof ShulkerBoxScreen) && slot.inventory instanceof SimpleInventory) {
+        } else if ((screen instanceof ContainerScreen || screen instanceof ShulkerBoxScreen) && slot.inventory instanceof SimpleContainer) {
             return InvPart.Main;
         }
 
@@ -207,10 +208,10 @@ public class InventorySorter {
     }
 
     private static class SlotMap {
-        private final List<Pair<ItemStack, List<MySlot>>> map = new ArrayList<>();
+        private final List<Tuple<ItemStack, List<MySlot>>> map = new ArrayList<>();
 
         public List<MySlot> get(ItemStack itemStack) {
-            for (Pair<ItemStack, List<MySlot>> entry : map) {
+            for (Tuple<ItemStack, List<MySlot>> entry : map) {
                 if (ItemStack.areItemsAndComponentsEqual(itemStack, entry.getLeft())) {
                     return entry.getRight();
                 }
@@ -222,5 +223,6 @@ public class InventorySorter {
         }
     }
 
-    private record Action(int from, int to) {}
+    private record Action(int from, int to) {
+    }
 }

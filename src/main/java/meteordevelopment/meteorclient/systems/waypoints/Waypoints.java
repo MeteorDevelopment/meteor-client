@@ -19,11 +19,11 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.NotNull;
 
@@ -73,8 +73,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
                     String name = Strings.CS.removeEnd(file.getName(), PNG);
                     AbstractTexture texture = new NativeImageBackedTexture(() -> name, NativeImage.read(inputStream));
                     icons.put(name, texture);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     MeteorClient.LOG.error("Failed to read a waypoint icon", e);
                 }
             }
@@ -83,6 +82,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     /**
      * Adds a waypoint or saves it if it already exists
+     *
      * @return {@code true} if waypoint already exists
      */
     public boolean add(Waypoint waypoint) {
@@ -173,17 +173,17 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new NbtCompound();
         tag.put("waypoints", NbtUtils.listToTag(waypoints));
         return tag;
     }
 
     @Override
-    public Waypoints fromTag(NbtCompound tag) {
+    public Waypoints fromTag(CompoundTag tag) {
         waypoints.clear();
 
-        for (NbtElement waypointTag : tag.getListOrEmpty("waypoints")) {
+        for (Tag waypointTag : tag.getListOrEmpty("waypoints")) {
             waypoints.add(new Waypoint(waypointTag));
         }
 

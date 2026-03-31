@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class Category {
     public final String name;
@@ -18,6 +18,7 @@ public class Category {
         this.nameHash = name.hashCode();
         this.icon = icon == null ? Items.AIR.getDefaultStack() : icon;
     }
+
     public Category(String name) {
         this(name, null);
     }

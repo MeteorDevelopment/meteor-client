@@ -25,19 +25,19 @@ import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BedItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BedItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Mth;
 import org.joml.Matrix4fStack;
 
 import java.util.ArrayList;
@@ -96,7 +96,7 @@ public class CombatHud extends HudElement {
 
     // Enchantments
 
-    private final Setting<Set<RegistryKey<Enchantment>>> displayedEnchantments = sgEnchantments.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> displayedEnchantments = sgEnchantments.add(new EnchantmentListSetting.Builder()
         .name("displayed-enchantments")
         .description("The enchantments that are shown on nametags.")
         .vanillaDefaults()
@@ -214,7 +214,7 @@ public class CombatHud extends HudElement {
         .build()
     );
 
-    private PlayerEntity playerEntity;
+    private Player playerEntity;
 
     public CombatHud() {
         super(INFO);
@@ -263,7 +263,7 @@ public class CombatHud extends HudElement {
                 (int) (y + 10 * getScale()),
                 (int) (50 * getScale()),
                 (int) (60 * getScale()),
-                -MathHelper.wrapDegrees(playerEntity.lastYaw + (playerEntity.getYaw() - playerEntity.lastYaw) * mc.getRenderTickCounter().getTickProgress(true)),
+                -Mth.wrapDegrees(playerEntity.lastYaw + (playerEntity.getYaw() - playerEntity.lastYaw) * mc.getRenderTickCounter().getTickProgress(true)),
                 -playerEntity.getPitch()
             );
 
@@ -388,16 +388,16 @@ public class CombatHud extends HudElement {
 
                 armorY = (y / getScale()) + 18;
 
-                ItemEnchantmentsComponent enchantments = EnchantmentHelper.getEnchantments(itemStack);
-                List<ObjectIntPair<RegistryEntry<Enchantment>>> enchantmentsToShow = new ArrayList<>();
+                ItemEnchantments enchantments = EnchantmentHelper.getEnchantments(itemStack);
+                List<ObjectIntPair<Holder<Enchantment>>> enchantmentsToShow = new ArrayList<>();
 
-                for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : enchantments.getEnchantmentEntries()) {
+                for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.getEnchantmentEntries()) {
                     if (entry.getKey().matches(displayedEnchantments.get()::contains)) {
                         enchantmentsToShow.add(new ObjectIntImmutablePair<>(entry.getKey(), entry.getIntValue()));
                     }
                 }
 
-                for (ObjectIntPair<RegistryEntry<Enchantment>> entry : enchantmentsToShow) {
+                for (ObjectIntPair<Holder<Enchantment>> entry : enchantmentsToShow) {
                     String enchantName = Utils.getEnchantSimpleName(entry.left(), 3) + " " + entry.rightInt();
 
                     double enchX = (((x / getScale()) + position * 20) + 8) - (TextRenderer.get().getWidth(enchantName) / 2);

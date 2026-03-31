@@ -8,14 +8,14 @@ package meteordevelopment.meteorclient.utils.misc;
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.PreInit;
-import net.minecraft.client.network.ClientConnectionState;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.OtherClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.NetworkSide;
+import net.minecraft.client.multiplayer.CommonListenerCookie;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.world.Difficulty;
 
 import java.util.UUID;
@@ -23,9 +23,9 @@ import java.util.UUID;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FakeClientPlayer {
-    private static ClientWorld world;
-    private static PlayerEntity player;
-    private static PlayerListEntry playerListEntry;
+    private static ClientLevel world;
+    private static RemotePlayer player;
+    private static PlayerInfo playerListEntry;
 
     private static UUID lastId;
     private static boolean needsNewEntry;
@@ -38,13 +38,13 @@ public class FakeClientPlayer {
         MeteorClient.EVENT_BUS.subscribe(FakeClientPlayer.class);
     }
 
-    public static PlayerEntity getPlayer() {
+    public static RemotePlayer getPlayer() {
         UUID id = mc.getSession().getUuidOrNull();
 
         if (player == null || (!id.equals(lastId))) {
             if (world == null) {
                 world = new ClientWorld(
-                    new ClientPlayNetworkHandler(mc, new ClientConnection(NetworkSide.CLIENTBOUND), new ClientConnectionState(
+                    new ClientPlayNetworkHandler(mc, new ClientConnection(PacketFlow.CLIENTBOUND), new ClientConnectionState(
                         null,
                         new GameProfile(mc.getSession().getUuidOrNull(), mc.getSession().getUsername()),
                         null,
@@ -60,7 +60,7 @@ public class FakeClientPlayer {
                         null,
                         false)
                     ),
-                    new ClientWorld.Properties(Difficulty.NORMAL, false, false),
+                    new ClientLevel.Properties(Difficulty.NORMAL, false, false),
                     world.getRegistryKey(),
                     world.getDimensionEntry(),
                     1,
@@ -81,7 +81,7 @@ public class FakeClientPlayer {
         return player;
     }
 
-    public static PlayerListEntry getPlayerListEntry() {
+    public static PlayerInfo getPlayerListEntry() {
         if (playerListEntry == null || needsNewEntry) {
             playerListEntry = new PlayerListEntry(new GameProfile(lastId, mc.getSession().getUsername()), false);
             needsNewEntry = false;

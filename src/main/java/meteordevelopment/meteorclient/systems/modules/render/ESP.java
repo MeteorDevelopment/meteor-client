@@ -21,12 +21,12 @@ import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.util.Mth;
 import org.joml.Vector3d;
 
 import java.util.Set;
@@ -233,11 +233,13 @@ public class ESP extends Module {
         count = 0;
 
         Entity target = null;
-        if (highlightTarget.get() && targetHitbox.get() && mc.crosshairTarget instanceof EntityHitResult hr) target = hr.getEntity();
+        if (highlightTarget.get() && targetHitbox.get() && mc.crosshairTarget instanceof EntityHitResult hr)
+            target = hr.getEntity();
 
         for (Entity entity : mc.world.getEntities()) {
             if (target != entity && shouldSkip(entity)) continue;
-            if (target == entity || mode.get() == Mode.Box || mode.get() == Mode.Wireframe) drawBoundingBox(event, entity);
+            if (target == entity || mode.get() == Mode.Box || mode.get() == Mode.Wireframe)
+                drawBoundingBox(event, entity);
             count++;
         }
     }
@@ -256,15 +258,15 @@ public class ESP extends Module {
         boolean target = drawAsTarget(entity);
 
         if (mode.get() == Mode.Box || (targetHitbox.get() && target)) {
-            double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
-            double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
-            double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
+            double x = Mth.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
+            double y = Mth.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
+            double z = Mth.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
 
             ShapeMode shape = shapeMode.get();
             if (target && mode.get() != Mode.Box) shape = ShapeMode.Lines;
             if (target) lineColor.set(targetHitboxColor.get());
 
-            Box box = entity.getBoundingBox();
+            AABB box = entity.getBoundingBox();
             event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shape, 0);
         }
     }
@@ -281,11 +283,11 @@ public class ESP extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (shouldSkip(entity)) continue;
 
-            Box box = entity.getBoundingBox();
+            AABB box = entity.getBoundingBox();
 
-            double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
-            double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
-            double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
+            double x = Mth.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
+            double y = Mth.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
+            double z = Mth.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
 
             // Check corners
             pos1.set(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
@@ -396,7 +398,7 @@ public class ESP extends Module {
 
     public Color getEntityTypeColor(Entity entity) {
         if (colorMode.get() == ESPColorMode.EntityType) {
-            if (entity instanceof PlayerEntity player) {
+            if (entity instanceof Player player) {
                 return PlayerUtils.getPlayerColor(player, playersColor.get());
             } else {
                 return switch (entity.getType().getSpawnGroup()) {
@@ -409,12 +411,13 @@ public class ESP extends Module {
             }
         }
 
-        if (friendOverride.get() && entity instanceof PlayerEntity player
+        if (friendOverride.get() && entity instanceof Player player
             && Friends.get().isFriend(player)) {
             return Config.get().friendColor.get();
         }
 
-        if (colorMode.get() == ESPColorMode.Health) return EntityUtils.getColorFromHealth(entity, nonLivingEntityColor.get());
+        if (colorMode.get() == ESPColorMode.Health)
+            return EntityUtils.getColorFromHealth(entity, nonLivingEntityColor.get());
         else return EntityUtils.getColorFromDistance(entity);
     }
 

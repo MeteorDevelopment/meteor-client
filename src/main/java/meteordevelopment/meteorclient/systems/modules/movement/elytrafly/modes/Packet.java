@@ -8,15 +8,15 @@ package meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightMode;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.phys.Vec3;
 
 public class Packet extends ElytraFlightMode {
 
-    private final Vec3d vec3d = new Vec3d(0,0,0);
+    private final Vec3 vec3d = new Vec3d(0, 0, 0);
 
     public Packet() {
         super(ElytraFlightModes.Packet);
@@ -32,7 +32,8 @@ public class Packet extends ElytraFlightMode {
     public void onTick() {
         super.onTick();
 
-        if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA || mc.player.fallDistance <= 0.2 || mc.options.sneakKey.isPressed()) return;
+        if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA || mc.player.fallDistance <= 0.2 || mc.options.sneakKey.isPressed())
+            return;
 
         if (mc.options.forwardKey.isPressed()) {
             vec3d.add(0, 0, elytraFly.horizontalSpeed.get());
@@ -49,15 +50,15 @@ public class Packet extends ElytraFlightMode {
         }
 
         mc.player.setVelocity(vec3d);
-        mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
+        mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
+        mc.player.networkHandler.sendPacket(new ServerboundMovePlayerPacket.OnGroundOnly(true, mc.player.horizontalCollision));
     }
 
     //Walalalalalalalalalalalala
     @Override
     public void onPacketSend(PacketEvent.Send event) {
-        if (event.packet instanceof PlayerMoveC2SPacket) {
-            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+        if (event.packet instanceof ServerboundMovePlayerPacket) {
+            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
         }
     }
 

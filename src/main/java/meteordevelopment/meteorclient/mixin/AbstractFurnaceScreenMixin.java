@@ -7,17 +7,17 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.AutoSmelter;
-import net.minecraft.client.gui.screen.ingame.AbstractFurnaceScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.AbstractFurnaceScreenHandler;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screens.inventory.AbstractFurnaceScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractFurnaceMenu;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(AbstractFurnaceScreen.class)
-public abstract class AbstractFurnaceScreenMixin<T extends AbstractFurnaceScreenHandler> extends HandledScreen<T> implements RecipeBookProvider {
-    public AbstractFurnaceScreenMixin(T container, PlayerInventory playerInventory, Text name) {
+public abstract class AbstractFurnaceScreenMixin<T extends AbstractFurnaceMenu> extends AbstractContainerScreen<T> implements RecipeUpdateListener {
+    public AbstractFurnaceScreenMixin(T container, Inventory playerInventory, Component name) {
         super(container, playerInventory, name);
     }
 

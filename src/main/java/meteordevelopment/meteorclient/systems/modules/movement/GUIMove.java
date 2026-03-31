@@ -1,3 +1,4 @@
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -9,7 +10,7 @@ import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
-import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
+import meteordevelopment.meteorclient.mixin.CreativeModeInventoryScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -18,11 +19,11 @@ import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screen.ingame.*;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.util.Mth;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -106,6 +107,7 @@ public class GUIMove extends Module {
     public boolean disableSpace() {
         return isActive() && jump.get() && mc.options.jumpKey.isDefault();
     }
+
     public boolean disableArrows() {
         return isActive() && arrowsRotate.get();
     }
@@ -151,7 +153,7 @@ public class GUIMove extends Module {
                 if (Input.isKeyPressed(GLFW_KEY_UP)) pitch -= rotationDelta;
                 if (Input.isKeyPressed(GLFW_KEY_DOWN)) pitch += rotationDelta;
 
-                pitch = MathHelper.clamp(pitch, -90, 90);
+                pitch = Mth.clamp(pitch, -90, 90);
 
                 mc.player.setYaw(yaw);
                 mc.player.setPitch(pitch);
@@ -168,7 +170,7 @@ public class GUIMove extends Module {
         }
     }
 
-    private void pass(KeyBinding bind, int key, KeyAction action) {
+    private void pass(KeyMapping bind, int key, KeyAction action) {
         if (Input.getKey(bind) != key) return;
         if (action == KeyAction.Press) bind.setPressed(true);
         if (action == KeyAction.Release) bind.setPressed(false);
@@ -176,7 +178,7 @@ public class GUIMove extends Module {
 
     public boolean skip() {
         if (mc.currentScreen == null ||
-            (mc.currentScreen instanceof CreativeInventoryScreen && CreativeInventoryScreenAccessor.meteor$getSelectedTab() == ItemGroups.getSearchGroup())
+            (mc.currentScreen instanceof CreativeInventoryScreen && CreativeInventoryScreenAccessor.meteor$getSelectedTab() == CreativeModeTabs.getSearchGroup())
             || mc.currentScreen instanceof ChatScreen
             || mc.currentScreen instanceof SignEditScreen
             || mc.currentScreen instanceof AnvilScreen

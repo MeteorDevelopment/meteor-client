@@ -12,13 +12,13 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.AbstractBannerBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.particle.ParticleType;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.world.level.block.AbstractBannerBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
 
 import java.util.List;
 import java.util.Set;
@@ -315,10 +315,10 @@ public class NoRender extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
+    private final Setting<List<AbstractBannerBlock>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
         .name("block-entities")
         .description("Block entities (chest, shulker block, etc.) to not render.")
-        .filter(block -> block instanceof BlockEntityProvider && !(block instanceof AbstractBannerBlock))
+        .filter(block -> block instanceof EntityBlock && !(block instanceof AbstractBannerBlock))
         .build()
     );
 
@@ -460,6 +460,7 @@ public class NoRender extends Module {
     public boolean noCrosshair() {
         return isActive() && noCrosshair.get();
     }
+
     public boolean noTitle() {
         return isActive() && noTitle.get();
     }

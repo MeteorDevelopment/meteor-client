@@ -11,11 +11,11 @@ import com.mojang.datafixers.util.Pair;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
+import meteordevelopment.meteorclient.mixin.KeyMappingAccessor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.command.CommandSource;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.List;
 public class InputCommand extends Command {
     private static final List<KeypressHandler> activeHandlers = new ArrayList<>();
 
-    private static final List<Pair<KeyBinding, String>> holdKeys = List.of(
+    private static final List<Pair<KeyMapping, String>> holdKeys = List.of(
         new Pair<>(mc.options.forwardKey, "forwards"),
         new Pair<>(mc.options.backKey, "backwards"),
         new Pair<>(mc.options.leftKey, "left"),
@@ -35,7 +35,7 @@ public class InputCommand extends Command {
         new Pair<>(mc.options.attackKey, "attack")
     );
 
-    private static final List<Pair<KeyBinding, String>> pressKeys = List.of(
+    private static final List<Pair<KeyMapping, String>> pressKeys = List.of(
         new Pair<>(mc.options.swapHandsKey, "swap"),
         new Pair<>(mc.options.dropKey, "drop")
     );
@@ -45,8 +45,8 @@ public class InputCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        for (Pair<KeyBinding, String> keyBinding : holdKeys) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+        for (Pair<KeyMapping, String> keyBinding : holdKeys) {
             builder.then(literal(keyBinding.getSecond())
                 .executes(context -> {
                     activeHandlers.add(new KeypressHandler(keyBinding.getFirst(), 1));
@@ -61,7 +61,7 @@ public class InputCommand extends Command {
             );
         }
 
-        for (Pair<KeyBinding, String> keyBinding : pressKeys) {
+        for (Pair<KeyMapping, String> keyBinding : pressKeys) {
             builder.then(literal(keyBinding.getSecond())
                 .executes(context -> {
                     press(keyBinding.getFirst());
@@ -70,7 +70,7 @@ public class InputCommand extends Command {
             );
         }
 
-        for (KeyBinding keyBinding : mc.options.hotbarKeys) {
+        for (KeyMapping keyBinding : mc.options.hotbarKeys) {
             builder.then(literal(keyBinding.getId().substring(4))
                 .executes(context -> {
                     press(keyBinding);
@@ -113,17 +113,17 @@ public class InputCommand extends Command {
         })));
     }
 
-    private static void press(KeyBinding keyBinding) {
-        KeyBindingAccessor accessor = (KeyBindingAccessor) keyBinding;
-        accessor.meteor$setTimesPressed(accessor.meteor$getTimesPressed() + 1);
+    private static void press(KeyMapping keyBinding) {
+        KeyMappingAccessor accessor = (KeyMappingAccessor) keyBinding;
+        accessor.meteor$setClickCount(accessor.meteor$getClickCount() + 1);
     }
 
     private static class KeypressHandler {
-        private final KeyBinding key;
+        private final KeyMapping key;
         private final int totalTicks;
         private int ticks;
 
-        public KeypressHandler(KeyBinding key, int ticks) {
+        public KeypressHandler(KeyMapping key, int ticks) {
             this.key = key;
             this.totalTicks = ticks;
             this.ticks = ticks;

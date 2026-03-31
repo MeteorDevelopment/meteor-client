@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import net.minecraft.client.render.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 public class NoopVertexConsumer implements VertexConsumer {
     public static final NoopVertexConsumer INSTANCE = new NoopVertexConsumer();

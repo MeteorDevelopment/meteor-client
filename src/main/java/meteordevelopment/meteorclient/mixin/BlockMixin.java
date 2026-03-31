@@ -10,19 +10,19 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Slippy;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.core.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(Block.class)
-public abstract class BlockMixin extends AbstractBlock implements ItemConvertible {
+@Mixin(BlockBehaviour.class)
+public abstract class BlockMixin extends BlockBehaviour implements ItemLike {
     public BlockMixin(Settings settings) {
         super(settings);
     }
@@ -33,7 +33,7 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
         if (Modules.get() == null) return original;
 
         Slippy slippy = Modules.get().get(Slippy.class);
-        Block block = (Block) (Object) this;
+        BlockBehaviour block = (BlockBehaviour) (Object) this;
 
         if (slippy.isActive() && (slippy.listMode.get() == Slippy.ListMode.Whitelist ? slippy.allowedBlocks.get().contains(block) : !slippy.ignoredBlocks.get().contains(block))) {
             return slippy.friction.get().floatValue();

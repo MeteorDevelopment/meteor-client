@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.events.entity.player;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.material.FluidState;
 
 /**
  * As of writing, using any method that gets the players pose within this event will cause a crash.

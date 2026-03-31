@@ -22,14 +22,14 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.ClipContext;
 
 import java.util.Set;
 import java.util.LinkedHashSet;
@@ -177,7 +177,7 @@ public class AutoTrap extends Module {
     );
 
     private final List<BlockPos> placePositions = new ArrayList<>();
-    private PlayerEntity target;
+    private Player target;
     private boolean placed;
     private int timer;
 
@@ -250,12 +250,12 @@ public class AutoTrap extends Module {
         }
     }
 
-    private void fillPlaceArray(PlayerEntity target) {
+    private void fillPlaceArray(Player target) {
         placePositions.clear();
 
         // Get block positions of all four corners of the bottom of our target's bounding box
         double epsilon = 1e-5;
-        Box box = target.getBoundingBox();
+        AABB box = target.getBoundingBox();
         List<BlockPos> corners = new ArrayList<>();
         corners.add(BlockPos.ofFloored(box.minX, box.minY, box.minZ));
         corners.add(BlockPos.ofFloored(box.minX, box.minY, box.maxZ - epsilon));
@@ -321,10 +321,10 @@ public class AutoTrap extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3d pos = blockPos.toCenterPos();
+        Vec3 pos = blockPos.toCenterPos();
         if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
 
-        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+        ClipContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
         BlockHitResult result = mc.world.raycast(raycastContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !PlayerUtils.isWithin(pos, placeWallsRange.get());

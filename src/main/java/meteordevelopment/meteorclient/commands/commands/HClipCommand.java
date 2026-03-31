@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 public class HClipCommand extends Command {
     public HClipCommand() {
@@ -18,10 +18,10 @@ public class HClipCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(argument("blocks", DoubleArgumentType.doubleArg()).executes(context -> {
             double blocks = context.getArgument("blocks", Double.class);
-            Vec3d forward = Vec3d.fromPolar(0, mc.player.getYaw()).normalize();
+            Vec3 forward = Vec3.fromPolar(0, mc.player.getYaw()).normalize();
 
             if (mc.player.hasVehicle()) {
                 Entity vehicle = mc.player.getVehicle();

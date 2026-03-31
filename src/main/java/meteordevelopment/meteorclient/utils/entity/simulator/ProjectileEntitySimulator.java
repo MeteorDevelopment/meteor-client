@@ -1,3 +1,5 @@
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -53,7 +55,8 @@ public class ProjectileEntitySimulator {
     private float airDrag, waterDrag;
     private boolean isTouchingWater;
 
-    public record MotionData(float power, float roll, double gravity, float airDrag, float waterDrag, EntityType<?> entity) {
+    public record MotionData(float power, float roll, double gravity, float airDrag, float waterDrag,
+                             EntityType<?> entity) {
         public MotionData withPower(float power) {
             return new MotionData(power, this.roll(), this.gravity(), this.airDrag(), this.waterDrag(), this.entity());
         }
@@ -63,25 +66,25 @@ public class ProjectileEntitySimulator {
     // https://minecraft.wiki/w/Entity#Motion
 
     // ThrownEntity
-    private static final MotionData EGG                = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityType.EGG);
-    private static final MotionData ENDER_PEARL        = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityType.ENDER_PEARL);
-    private static final MotionData SNOWBALL           = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityType.SNOWBALL);
-    private static final MotionData EXPERIENCE_BOTTLE  = new MotionData(0.7f, -20, 0.07, 0.99f, 0.8f, EntityType.EXPERIENCE_BOTTLE);
-    private static final MotionData LINGERING_POTION   = new MotionData(0.5f, -20, 0.05, 0.99f, 0.8f, EntityType.LINGERING_POTION);
-    private static final MotionData SPLASH_POTION      = new MotionData(0.5f, -20, 0.05, 0.99f, 0.8f, EntityType.SPLASH_POTION);
+    private static final MotionData EGG = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityType.EGG);
+    private static final MotionData ENDER_PEARL = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityType.ENDER_PEARL);
+    private static final MotionData SNOWBALL = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityType.SNOWBALL);
+    private static final MotionData EXPERIENCE_BOTTLE = new MotionData(0.7f, -20, 0.07, 0.99f, 0.8f, EntityType.EXPERIENCE_BOTTLE);
+    private static final MotionData LINGERING_POTION = new MotionData(0.5f, -20, 0.05, 0.99f, 0.8f, EntityType.LINGERING_POTION);
+    private static final MotionData SPLASH_POTION = new MotionData(0.5f, -20, 0.05, 0.99f, 0.8f, EntityType.SPLASH_POTION);
 
     // ExplosiveProjectileEntity
-    private static final MotionData EXPLOSIVE          = new MotionData(0, 0, 0, 1, 1, null); // fireball, wither skull, etc.
-    private static final MotionData WIND_CHARGE        = new MotionData(1.5f, 0, 0, 1, 1, EntityType.WIND_CHARGE);
+    private static final MotionData EXPLOSIVE = new MotionData(0, 0, 0, 1, 1, null); // fireball, wither skull, etc.
+    private static final MotionData WIND_CHARGE = new MotionData(1.5f, 0, 0, 1, 1, EntityType.WIND_CHARGE);
 
     // PersistentProjectileEntity
-    private static final MotionData ARROW              = new MotionData(0, 0, 0.05, 0.99f, 0.6f, EntityType.ARROW);
-    private static final MotionData TRIDENT            = new MotionData(2.5f, 0, 0.05, 0.99f, 0.99f, EntityType.TRIDENT);
+    private static final MotionData ARROW = new MotionData(0, 0, 0.05, 0.99f, 0.6f, EntityType.ARROW);
+    private static final MotionData TRIDENT = new MotionData(2.5f, 0, 0.05, 0.99f, 0.99f, EntityType.TRIDENT);
 
     // Other
-    private static final MotionData FIREWORK_ROCKET    = new MotionData(0, 0, 0, 1, 1, EntityType.FIREWORK_ROCKET);
-    private static final MotionData FISHING_BOBBER     = new MotionData(0, 0, 0.03, 0.92f, 0, EntityType.FISHING_BOBBER);
-    private static final MotionData LLAMA_SPIT         = new MotionData(1.5f, 0, 0.06, 0.99f, 0, EntityType.LLAMA_SPIT);
+    private static final MotionData FIREWORK_ROCKET = new MotionData(0, 0, 0, 1, 1, EntityType.FIREWORK_ROCKET);
+    private static final MotionData FISHING_BOBBER = new MotionData(0, 0, 0.03, 0.92f, 0, EntityType.FISHING_BOBBER);
+    private static final MotionData LLAMA_SPIT = new MotionData(1.5f, 0, 0.06, 0.99f, 0, EntityType.LLAMA_SPIT);
 
 
     // held items
@@ -108,20 +111,19 @@ public class ProjectileEntitySimulator {
                 float speed = CrossbowItemAccessor.meteor$getSpeed(projectilesComponent);
                 if (projectilesComponent.contains(Items.FIREWORK_ROCKET)) {
                     set(user, angleOffset, accurate, tickDelta, FIREWORK_ROCKET.withPower(speed));
-                }
-                else set(user, angleOffset, accurate, tickDelta, ARROW.withPower(speed));
+                } else set(user, angleOffset, accurate, tickDelta, ARROW.withPower(speed));
 
                 this.pierceLevel = projectilesComponent.contains(Items.FIREWORK_ROCKET) ? 0 : Utils.getEnchantmentLevel(itemStack, Enchantments.PIERCING);
             }
-            case WindChargeItem ignored         -> set(user, angleOffset, accurate, tickDelta, WIND_CHARGE);
-            case TridentItem ignored            -> set(user, angleOffset, accurate, tickDelta, TRIDENT);
-            case SnowballItem ignored           -> set(user, angleOffset, accurate, tickDelta, SNOWBALL);
-            case EggItem ignored                -> set(user, angleOffset, accurate, tickDelta, EGG);
-            case EnderPearlItem ignored         -> set(user, angleOffset, accurate, tickDelta, ENDER_PEARL);
-            case ExperienceBottleItem ignored   -> set(user, angleOffset, accurate, tickDelta, EXPERIENCE_BOTTLE);
-            case SplashPotionItem ignored       -> set(user, angleOffset, accurate, tickDelta, SPLASH_POTION);
-            case LingeringPotionItem ignored    -> set(user, angleOffset, accurate, tickDelta, LINGERING_POTION);
-            case FishingRodItem ignored         -> setFishingBobber(user, tickDelta, FISHING_BOBBER);
+            case WindChargeItem ignored -> set(user, angleOffset, accurate, tickDelta, WIND_CHARGE);
+            case TridentItem ignored -> set(user, angleOffset, accurate, tickDelta, TRIDENT);
+            case SnowballItem ignored -> set(user, angleOffset, accurate, tickDelta, SNOWBALL);
+            case EggItem ignored -> set(user, angleOffset, accurate, tickDelta, EGG);
+            case EnderPearlItem ignored -> set(user, angleOffset, accurate, tickDelta, ENDER_PEARL);
+            case ExperienceBottleItem ignored -> set(user, angleOffset, accurate, tickDelta, EXPERIENCE_BOTTLE);
+            case SplashPotionItem ignored -> set(user, angleOffset, accurate, tickDelta, SPLASH_POTION);
+            case LingeringPotionItem ignored -> set(user, angleOffset, accurate, tickDelta, LINGERING_POTION);
+            case FishingRodItem ignored -> setFishingBobber(user, tickDelta, FISHING_BOBBER);
             default -> {
                 return false;
             }
@@ -134,7 +136,8 @@ public class ProjectileEntitySimulator {
         // I lost my mind for an hour trying to figure out why arrows and tridents were spawning lower than expected,
         // and it was because no slow air strict was silently causing the player to crouch AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
         EntityPose pose = user.getPose();
-        if (user == mc.player && (Modules.get().get(NoSlow.class).airStrict() || Modules.get().get(Sneak.class).doPacket())) pose = EntityPose.CROUCHING;
+        if (user == mc.player && (Modules.get().get(NoSlow.class).airStrict() || Modules.get().get(Sneak.class).doPacket()))
+            pose = EntityPose.CROUCHING;
         Utils.set(pos, user, tickDelta).add(0, user.getEyeHeight(pose) - 0.1f, 0);
 
         double yaw;
@@ -154,8 +157,7 @@ public class ProjectileEntitySimulator {
             x = -Math.sin(yaw * 0.017453292) * Math.cos(pitch * 0.017453292);
             y = -Math.sin((pitch + data.roll()) * 0.017453292);
             z = Math.cos(yaw * 0.017453292) * Math.cos(pitch * 0.017453292);
-        }
-        else {
+        } else {
             Vec3d oppositeRotationVec = user.getOppositeRotationVector(1.0F);
             Quaterniond quaternion = new Quaterniond().setAngleAxis(angleOffset, oppositeRotationVec.x, oppositeRotationVec.y, oppositeRotationVec.z);
             Vec3d rotationVec = user.getRotationVec(1.0F);
@@ -167,7 +169,7 @@ public class ProjectileEntitySimulator {
             z = vector3d.z;
         }
 
-         velocity.set(x, y, z).normalize().mul(data.power());
+        velocity.set(x, y, z).normalize().mul(data.power());
 
         if (accurate) {
             Vec3d vel = user.getMovement();
@@ -195,7 +197,8 @@ public class ProjectileEntitySimulator {
         double k = Math.sin(-pitch * 0.017453292F);
 
         EntityPose pose = user.getPose();
-        if (user == mc.player && (Modules.get().get(NoSlow.class).airStrict() || Modules.get().get(Sneak.class).doPacket())) pose = EntityPose.CROUCHING;
+        if (user == mc.player && (Modules.get().get(NoSlow.class).airStrict() || Modules.get().get(Sneak.class).doPacket()))
+            pose = EntityPose.CROUCHING;
         Utils.set(pos, user, tickDelta).sub(i * 0.3, 0, h * 0.3).add(0, user.getEyeHeight(pose), 0);
 
         velocity.set(-i, MathHelper.clamp(-(k / j), -5, 5), -h);
@@ -214,18 +217,18 @@ public class ProjectileEntitySimulator {
         if (entity instanceof ProjectileInGroundAccessor ppe && ppe.meteor$invokeIsInGround()) return false;
 
         switch (entity) {
-            case ArrowEntity e                  -> set(e, ARROW);
-            case SpectralArrowEntity e          -> set(e, ARROW);
-            case TridentEntity e                -> set(e, TRIDENT);
-            case EnderPearlEntity e             -> set(e, ENDER_PEARL);
-            case SnowballEntity e               -> set(e, SNOWBALL);
-            case EggEntity e                    -> set(e, EGG);
-            case ExperienceBottleEntity e       -> set(e, EXPERIENCE_BOTTLE);
-            case SplashPotionEntity e           -> set(e, SPLASH_POTION);
-            case LingeringPotionEntity e        -> set(e, LINGERING_POTION);
-            case AbstractWindChargeEntity e     -> set(e, WIND_CHARGE);
-            case ExplosiveProjectileEntity e    -> set(e, EXPLOSIVE);
-            case LlamaSpitEntity e              -> set(e, LLAMA_SPIT);
+            case ArrowEntity e -> set(e, ARROW);
+            case SpectralArrowEntity e -> set(e, ARROW);
+            case TridentEntity e -> set(e, TRIDENT);
+            case EnderPearlEntity e -> set(e, ENDER_PEARL);
+            case SnowballEntity e -> set(e, SNOWBALL);
+            case EggEntity e -> set(e, EGG);
+            case ExperienceBottleEntity e -> set(e, EXPERIENCE_BOTTLE);
+            case SplashPotionEntity e -> set(e, SPLASH_POTION);
+            case LingeringPotionEntity e -> set(e, LINGERING_POTION);
+            case AbstractWindChargeEntity e -> set(e, WIND_CHARGE);
+            case ExplosiveProjectileEntity e -> set(e, EXPLOSIVE);
+            case LlamaSpitEntity e -> set(e, LLAMA_SPIT);
             default -> {
                 return false;
             }
@@ -385,8 +388,7 @@ public class ProjectileEntitySimulator {
             }
 
             return new SimulationStep(stop, hits.toArray(new HitResult[0]));
-        }
-        else {
+        } else {
             HitResult entityCollision = ProjectileUtil.getEntityCollision(
                 mc.world,
                 simulatingEntity,
@@ -434,8 +436,7 @@ public class ProjectileEntitySimulator {
             }
 
             return true;
-        }
-        else if (hitResult instanceof BlockHitResult bhr) {
+        } else if (hitResult instanceof BlockHitResult bhr) {
             Utils.set(pos, bhr.getPos());
 
             if (simulatingEntity.deflectsAgainstWorldBorder() && bhr.isAgainstWorldBorder()) {

@@ -28,21 +28,21 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderer;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.render.GuiRenderer;
-import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.render.state.GuiRenderState;
-import net.minecraft.client.render.BufferBuilderStorage;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.render.fog.FogRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.profiler.Profilers;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.renderer.fog.FogRenderer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.util.profiling.Profiler;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -56,18 +56,28 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO(Ravel): can not resolve target class net.minecraft.client.renderer.GameRenderer
+// TODO(Ravel): can not resolve target class GameRenderer
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin implements IGameRenderer {
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft client;
 
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     public abstract void updateCrosshairTarget(float tickDelta);
 
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     public abstract void reset();
 
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
     private Camera camera;
@@ -79,48 +89,68 @@ public abstract class GameRendererMixin implements IGameRenderer {
     private Renderer3D depthRenderer;
 
     @Unique
-    private final MatrixStack matrices = new MatrixStack();
+    private final PoseStack matrices = new MatrixStack();
 
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
-    protected abstract void bobView(MatrixStack matrices, float tickDelta);
+    protected abstract void bobView(PoseStack matrices, float tickDelta);
 
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
-    protected abstract void tiltViewWhenHurt(MatrixStack matrices, float tickDelta);
+    protected abstract void tiltViewWhenHurt(PoseStack matrices, float tickDelta);
 
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
-    private BufferBuilderStorage buffers;
+    private RenderBuffers buffers;
 
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
     private GuiRenderer guiRenderer;
 
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
     private FogRenderer fogRenderer;
 
+    // TODO(Ravel): Could not determine a single target
+// TODO(Ravel): Could not determine a single target
     @Shadow
     @Final
     GuiRenderState guiState;
 
-    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/gui/render/state/GuiRenderState;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/command/RenderDispatcher;Ljava/util/List;)V"))
-    private List<SpecialGuiElementRenderer<?>> meteor$addSpecialRenderers(List<SpecialGuiElementRenderer<?>> list) {
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/gui/render/state/GuiRenderState;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;Ljava/util/List;)V"))
+    private List<PictureInPictureRenderer<?>> meteor$addSpecialRenderers(List<PictureInPictureRenderer<?>> list) {
         list = new ArrayList<>(list);
         list.add(new CustomBannerGuiElementRenderer(buffers.getEntityVertexConsumers(), client.getAtlasManager()));
 
         return List.of(list.toArray(new SpecialGuiElementRenderer<?>[0]));
     }
 
-    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
-    private void onRenderWorld(RenderTickCounter tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 1) Matrix4f position, @Local(ordinal = 0) float tickDelta, @Local MatrixStack matrixStack) {
+    // TODO(Ravel): @At.args is not supported
+// TODO(Ravel): no target class
+// TODO(Ravel): @At.args is not supported
+// TODO(Ravel): no target class
+    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = {"ldc=hand"}))
+    private void onRenderWorld(DeltaTracker tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 1) Matrix4f position, @Local(ordinal = 0) float tickDelta, @Local PoseStack matrixStack) {
         if (!Utils.canUpdate()) return;
 
-        Profilers.get().push(MeteorClient.MOD_ID + "_render");
+        Profiler.get().push(MeteorClient.MOD_ID + "_render");
 
         // Create renderer and event
 
-        if (renderer == null) renderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES, MeteorRenderPipelines.WORLD_COLORED);
-        if (depthRenderer == null) depthRenderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH, MeteorRenderPipelines.WORLD_COLORED_DEPTH);
+        if (renderer == null)
+            renderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES, MeteorRenderPipelines.WORLD_COLORED);
+        if (depthRenderer == null)
+            depthRenderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH, MeteorRenderPipelines.WORLD_COLORED_DEPTH);
         Render3DEvent event = Render3DEvent.get(matrixStack, renderer, depthRenderer, tickDelta, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
 
         // Update model view matrix
@@ -154,16 +184,20 @@ public abstract class GameRendererMixin implements IGameRenderer {
 
         RenderSystem.getModelViewStack().popMatrix();
 
-        Profilers.get().pop();
+        Profiler.get().pop();
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(method = "renderWorld", at = @At("TAIL"))
     private void onRenderWorldTail(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(RenderAfterWorldEvent.get());
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;render(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V", shift = At.Shift.AFTER))
-    private void onRenderGui(RenderTickCounter tickCounter, boolean tick, CallbackInfo info) {
+    private void onRenderGui(DeltaTracker tickCounter, boolean tick, CallbackInfo info) {
         if (client.currentScreen instanceof WidgetScreen widgetScreen) {
             guiState.clear();
             var mouseX = (int) client.mouse.getScaledX(client.getWindow());
@@ -178,6 +212,8 @@ public abstract class GameRendererMixin implements IGameRenderer {
         }
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
     private void onShowFloatingItem(ItemStack floatingItem, CallbackInfo info) {
         if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
@@ -185,11 +221,15 @@ public abstract class GameRendererMixin implements IGameRenderer {
         }
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @ModifyExpressionValue(method = "renderWorld", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F", ordinal = 0))
     private float applyCameraTransformationsMathHelperLerpProxy(float original) {
         return Modules.get().get(NoRender.class).noNausea() ? 0 : original;
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @ModifyReturnValue(method = "getFov", at = @At("RETURN"))
     private float modifyFov(float original) {
         return MeteorClient.EVENT_BUS.post(GetFovEvent.get(original)).fov;
@@ -200,6 +240,8 @@ public abstract class GameRendererMixin implements IGameRenderer {
     @Unique
     private boolean freecamSet = false;
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(method = "updateCrosshairTarget", at = @At("HEAD"), cancellable = true)
     private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo info) {
         Freecam freecam = Modules.get().get(Freecam.class);
@@ -249,6 +291,8 @@ public abstract class GameRendererMixin implements IGameRenderer {
         }
     }
 
+    // TODO(Ravel): no target class
+// TODO(Ravel): no target class
     @Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)
     private void renderHand(float tickProgress, boolean sleeping, Matrix4f positionMatrix, CallbackInfo ci) {
         if (!Modules.get().get(Freecam.class).renderHands() ||
@@ -258,7 +302,7 @@ public abstract class GameRendererMixin implements IGameRenderer {
 
     @Override
     public void meteor$flushGuiState() {
-        guiRenderer.render(fogRenderer.getFogBuffer(FogRenderer.FogType.NONE));
+        guiRenderer.render(fogRenderer.getFogBuffer(FogRenderer.FogMode.NONE));
         guiRenderer.incrementFrame();
     }
 }

@@ -1,34 +1,34 @@
 accessWidener	v2	named
 
-accessible   class   net/minecraft/client/texture/PlayerSkinProvider$FileCache
-accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explosion
-accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
-accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
-accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
-accessible   class   net/minecraft/client/world/ClientChunkManager$ClientChunkMap
+accessible   class   net/minecraft/client/resources/SkinManager$TextureCache
+accessible   class   net/minecraft/client/particle/FireworkParticles$SparkParticle
+accessible   class   net/minecraft/network/protocol/game/ServerboundInteractPacket$ActionType
+accessible   class   net/minecraft/network/protocol/game/ServerboundInteractPacket$InteractionAtLocationAction
+accessible   class   net/minecraft/network/protocol/game/ServerboundInteractPacket$Action
+accessible   class   net/minecraft/client/multiplayer/ClientChunkCache$Storage
 
-accessible   class   net/minecraft/client/texture/MapTextureManager$MapTexture
-accessible   field   net/minecraft/client/texture/MapTextureManager$MapTexture texture Lnet/minecraft/client/texture/NativeImageBackedTexture;
+accessible   class   net/minecraft/client/resources/MapTextureManager$MapInstance
+accessible   field   net/minecraft/client/resources/MapTextureManager$MapInstance texture Lnet/minecraft/client/renderer/texture/DynamicTexture;
 
-accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$EffectButtonWidget
-accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$DoneButtonWidget
-accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$CancelButtonWidget
+accessible   class   net/minecraft/client/gui/screens/inventory/BeaconScreen$BeaconPowerButton
+accessible   class   net/minecraft/client/gui/screens/inventory/BeaconScreen$BeaconConfirmButton
+accessible   class   net/minecraft/client/gui/screens/inventory/BeaconScreen$BeaconCancelButton
 
-accessible   class   net/minecraft/client/resource/ResourceReloadLogger$ReloadState
+accessible   class   net/minecraft/client/ResourceLoadStateTracker$ReloadState
 
-accessible   class   com/mojang/blaze3d/opengl/GlStateManager$CapabilityTracker
+accessible   class   com/mojang/blaze3d/opengl/GlStateManager$BooleanState
 accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder <init> ()V
 accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder withSnippet (Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;)V
 
-accessible   field   net/minecraft/client/render/command/OrderedRenderCommandQueueImpl batchingQueues Lit/unimi/dsi/fastutil/ints/Int2ObjectAVLTreeMap;
+accessible   field   net/minecraft/client/renderer/SubmitNodeStorage submitsPerOrder Lit/unimi/dsi/fastutil/ints/Int2ObjectAVLTreeMap;
 
 # Auto Fish
-accessible   class   net/minecraft/entity/projectile/FishingBobberEntity$State
-accessible   field   net/minecraft/entity/projectile/FishingBobberEntity state Lnet/minecraft/entity/projectile/FishingBobberEntity$State;
+accessible   class   net/minecraft/world/entity/projectile/FishingHook$FishHookState
+accessible   field   net/minecraft/world/entity/projectile/FishingHook currentState Lnet/minecraft/world/entity/projectile/FishingHook$FishHookState;
 
-accessible   method  net/minecraft/client/network/ClientPlayerInteractionManager sendSequencedPacket (Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/network/SequencedPacketCreator;)V
+accessible   method  net/minecraft/client/multiplayer/MultiPlayerGameMode startPrediction (Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/multiplayer/prediction/PredictiveAction;)V
 
-accessible   class   net/minecraft/client/gui/DrawContext$ScissorStack
-accessible   field   net/minecraft/client/render/RenderSetup outputTarget Lnet/minecraft/client/render/OutputTarget;
+accessible   class   net/minecraft/client/gui/GuiGraphics$ScissorStack
+accessible   field   net/minecraft/client/renderer/rendertype/RenderSetup outputTarget Lnet/minecraft/client/renderer/rendertype/OutputTarget;
 
-accessible   method   net/minecraft/entity/projectile/ProjectileEntity deflectsAgainstWorldBorder ()Z
+accessible   method   net/minecraft/world/entity/projectile/Projectile shouldBounceOnWorldBorder ()Z

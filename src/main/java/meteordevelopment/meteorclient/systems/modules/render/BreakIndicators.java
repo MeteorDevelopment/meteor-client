@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
-import meteordevelopment.meteorclient.mixin.WorldRendererAccessor;
+import meteordevelopment.meteorclient.mixin.MultiPlayerGameModeAccessor;
+import meteordevelopment.meteorclient.mixin.LevelRendererAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -18,11 +18,11 @@ import meteordevelopment.meteorclient.systems.modules.world.PacketMine;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.BlockBreakingInfo;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.server.level.BlockDestructionProgress;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.List;
 import java.util.Map;
@@ -112,17 +112,17 @@ public class BreakIndicators extends Module {
     }
 
     private void renderNormal(Render3DEvent event) {
-        Map<Integer, BlockBreakingInfo> blocks = ((WorldRendererAccessor) mc.worldRenderer).meteor$getBlockBreakingInfos();
+        Map<Integer, BlockDestructionProgress> blocks = ((LevelRendererAccessor) mc.worldRenderer).meteor$getDestroyingBlocks();
 
-        float ownBreakingStage = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).meteor$getBreakingProgress();
-        BlockPos ownBreakingPos = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).meteor$getCurrentBreakingBlockPos();
+        float ownBreakingStage = ((MultiPlayerGameModeAccessor) mc.interactionManager).meteor$getBreakingProgress();
+        BlockPos ownBreakingPos = ((MultiPlayerGameModeAccessor) mc.interactionManager).meteor$getCurrentBreakingBlockPos();
 
         if (ownBreakingPos != null && ownBreakingStage > 0) {
             BlockState state = mc.world.getBlockState(ownBreakingPos);
             VoxelShape shape = state.getOutlineShape(mc.world, ownBreakingPos);
             if (shape == null || shape.isEmpty()) return;
 
-            Box orig = shape.getBoundingBox();
+            AABB orig = shape.getBoundingBox();
 
             double shrinkFactor = 1d - ownBreakingStage;
 
@@ -138,7 +138,7 @@ public class BreakIndicators extends Module {
             VoxelShape shape = state.getOutlineShape(mc.world, pos);
             if (shape == null || shape.isEmpty()) return;
 
-            Box orig = shape.getBoundingBox();
+            AABB orig = shape.getBoundingBox();
 
             double shrinkFactor = (9 - (stage + 1)) / 9d;
             double progress = 1d - shrinkFactor;
@@ -153,7 +153,7 @@ public class BreakIndicators extends Module {
                 VoxelShape shape = block.blockState.getOutlineShape(mc.world, block.blockPos);
                 if (shape == null || shape.isEmpty()) return;
 
-                Box orig = shape.getBoundingBox();
+                AABB orig = shape.getBoundingBox();
 
                 double progressNormalised = Math.min(1, block.progress());
                 double shrinkFactor = 1d - progressNormalised;
@@ -164,8 +164,8 @@ public class BreakIndicators extends Module {
         }
     }
 
-    private void renderBlock(Render3DEvent event, Box orig, BlockPos pos, double shrinkFactor, double progress) {
-        Box box = orig.shrink(
+    private void renderBlock(Render3DEvent event, AABB orig, BlockPos pos, double shrinkFactor, double progress) {
+        AABB box = orig.shrink(
             orig.getLengthX() * shrinkFactor,
             orig.getLengthY() * shrinkFactor,
             orig.getLengthZ() * shrinkFactor

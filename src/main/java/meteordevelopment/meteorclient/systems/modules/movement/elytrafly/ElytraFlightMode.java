@@ -11,16 +11,16 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.Vec3;
 
 public class ElytraFlightMode {
-    protected final MinecraftClient mc;
+    protected final Minecraft mc;
     protected final ElytraFly elytraFly;
     private final ElytraFlightModes type;
 
@@ -30,12 +30,12 @@ public class ElytraFlightMode {
     protected int jumpTimer;
     protected double velX, velY, velZ;
     protected double ticksLeft;
-    protected Vec3d forward, right;
+    protected Vec3 forward, right;
     protected double acceleration;
 
     public ElytraFlightMode(ElytraFlightModes type) {
         this.elytraFly = Modules.get().get(ElytraFly.class);
-        this.mc = MinecraftClient.getInstance();
+        this.mc = Minecraft.getInstance();
         this.type = type;
     }
 
@@ -101,7 +101,7 @@ public class ElytraFlightMode {
                 mc.player.setJumping(false);
                 mc.player.setSprinting(true);
                 mc.player.jump();
-                mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+                mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
             }
         }
 
@@ -124,13 +124,13 @@ public class ElytraFlightMode {
                 if (!itemResult.found()) return;
 
                 if (itemResult.isOffhand()) {
-                    mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
-                    mc.player.swingHand(Hand.OFF_HAND);
+                    mc.interactionManager.interactItem(mc.player, InteractionHand.OFF_HAND);
+                    mc.player.swingHand(InteractionHand.OFF_HAND);
                 } else {
                     InvUtils.swap(itemResult.slot(), true);
 
-                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                    mc.player.swingHand(Hand.MAIN_HAND);
+                    mc.interactionManager.interactItem(mc.player, InteractionHand.MAIN_HAND);
+                    mc.player.swingHand(InteractionHand.MAIN_HAND);
 
                     InvUtils.swapBack();
                 }

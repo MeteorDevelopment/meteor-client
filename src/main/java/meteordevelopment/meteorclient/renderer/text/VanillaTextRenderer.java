@@ -7,11 +7,11 @@ package meteordevelopment.meteorclient.renderer.text;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.font.TextRenderer.TextLayerType;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.BufferAllocator;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.Font.DisplayMode;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 
@@ -20,10 +20,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class VanillaTextRenderer implements TextRenderer {
     public static final VanillaTextRenderer INSTANCE = new VanillaTextRenderer();
 
-    private final BufferAllocator buffer = new BufferAllocator(2048);
-    private final VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(buffer);
+    private final ByteBufferBuilder buffer = new BufferAllocator(2048);
+    private final MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(buffer);
 
-    private final MatrixStack matrices = new MatrixStack();
+    private final PoseStack matrices = new MatrixStack();
     private final Matrix4f emptyMatrix = new Matrix4f();
 
     public double scale = 2;
@@ -80,7 +80,7 @@ public class VanillaTextRenderer implements TextRenderer {
             matrix = matrices.peek().getPositionMatrix();
         }
 
-        mc.textRenderer.draw(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, matrix, immediate, TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+        mc.textRenderer.draw(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, matrix, immediate, DisplayMode.NORMAL, 0, LightTexture.MAX_LIGHT_COORDINATE);
         double x2 = (x / scale) + mc.textRenderer.getWidth(text);
 
         if (scaleIndividually) matrices.pop();

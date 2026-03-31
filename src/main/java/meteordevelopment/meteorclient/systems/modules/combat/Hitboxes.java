@@ -10,12 +10,12 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.MaceItem;
-import net.minecraft.item.TridentItem;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.MaceItem;
+import net.minecraft.world.item.TridentItem;
+import net.minecraft.tags.ItemTags;
 
 import java.util.Set;
 
@@ -120,7 +120,8 @@ public class Hitboxes extends Module {
     }
 
     public double getEntityValue(Entity entity) {
-        if (!(isActive() && testWeapon()) || (ignoreFriends.get() && entity instanceof PlayerEntity playerEntity && Friends.get().isFriend(playerEntity))) return 0;
+        if (!(isActive() && testWeapon()) || (ignoreFriends.get() && entity instanceof Player playerEntity && Friends.get().isFriend(playerEntity)))
+            return 0;
         if (entities.get().contains(entity.getType())) return value.get();
         return 0;
     }

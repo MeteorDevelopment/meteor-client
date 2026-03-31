@@ -13,8 +13,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.Settings;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +30,8 @@ public class SettingValueArgumentType implements ArgumentType<String> {
         return context.getArgument("value", String.class);
     }
 
-    private SettingValueArgumentType() {}
+    private SettingValueArgumentType() {
+    }
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
@@ -67,9 +68,9 @@ public class SettingValueArgumentType implements ArgumentType<String> {
     public static CompletableFuture<Suggestions> suggest(SuggestionsBuilder builder, @NotNull Setting<?> setting) {
         Iterable<Identifier> identifiers = setting.getIdentifierSuggestions();
         if (identifiers != null) {
-            return CommandSource.suggestIdentifiers(identifiers, builder);
+            return SharedSuggestionProvider.suggestIdentifiers(identifiers, builder);
         }
 
-        return CommandSource.suggestMatching(setting.getSuggestions(), builder);
+        return SharedSuggestionProvider.suggestMatching(setting.getSuggestions(), builder);
     }
 }

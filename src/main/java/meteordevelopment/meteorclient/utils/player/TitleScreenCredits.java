@@ -15,11 +15,11 @@ import meteordevelopment.meteorclient.mixininterface.IText;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.MeteorToast;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.Items;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
@@ -64,12 +64,14 @@ public class TitleScreenCredits {
                             MeteorClient.LOG.info("See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens");
                         }
                     }
-                    case Http.FORBIDDEN -> MeteorClient.LOG.warn("Could not fetch updates for addon '{}': Rate-limited by GitHub.", credit.addon.name);
-                    case Http.NOT_FOUND -> MeteorClient.LOG.warn("Could not fetch updates for addon '{}': GitHub repository '{}' not found.", credit.addon.name, repo.getOwnerName());
+                    case Http.FORBIDDEN ->
+                        MeteorClient.LOG.warn("Could not fetch updates for addon '{}': Rate-limited by GitHub.", credit.addon.name);
+                    case Http.NOT_FOUND ->
+                        MeteorClient.LOG.warn("Could not fetch updates for addon '{}': GitHub repository '{}' not found.", credit.addon.name, repo.getOwnerName());
                     case Http.SUCCESS -> {
                         if (!credit.addon.getCommit().equals(res.body().commit.sha)) {
                             synchronized (credit.text) {
-                                credit.text.append(Text.literal("*").formatted(Formatting.RED));
+                                credit.text.append(Text.literal("*").formatted(ChatFormatting.RED));
                                 ((IText) ((Text) credit.text)).meteor$invalidateCache(); // ???
                             }
                         }
@@ -83,20 +85,20 @@ public class TitleScreenCredits {
         Credit credit = new Credit(addon);
 
         credit.text.append(Text.literal(addon.name).styled(style -> style.withColor(addon.color.getPacked())));
-        credit.text.append(Text.literal(" by ").formatted(Formatting.GRAY));
+        credit.text.append(Text.literal(" by ").formatted(ChatFormatting.GRAY));
 
         for (int i = 0; i < addon.authors.length; i++) {
             if (i > 0) {
-                credit.text.append(Text.literal(i == addon.authors.length - 1 ? " & " : ", ").formatted(Formatting.GRAY));
+                credit.text.append(Text.literal(i == addon.authors.length - 1 ? " & " : ", ").formatted(ChatFormatting.GRAY));
             }
 
-            credit.text.append(Text.literal(addon.authors[i]).formatted(Formatting.WHITE));
+            credit.text.append(Text.literal(addon.authors[i]).formatted(ChatFormatting.WHITE));
         }
 
         credits.add(credit);
     }
 
-    public static void render(DrawContext context) {
+    public static void render(GuiGraphics context) {
         if (credits.isEmpty()) init();
 
         int y = 3;
@@ -136,7 +138,7 @@ public class TitleScreenCredits {
 
     private static class Credit {
         public final MeteorAddon addon;
-        public final MutableText text = Text.empty();
+        public final MutableComponent text = Text.empty();
 
         public Credit(MeteorAddon addon) {
             this.addon = addon;

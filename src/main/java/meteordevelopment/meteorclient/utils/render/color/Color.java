@@ -7,11 +7,11 @@ package meteordevelopment.meteorclient.utils.render.color;
 
 import meteordevelopment.meteorclient.utils.misc.ICopyable;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Style;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -57,10 +57,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     public Color(float r, float g, float b, float a) {
-        this.r = (int)(r*255);
-        this.g = (int)(g*255);
-        this.b = (int)(b*255);
-        this.a = (int)(a*255);
+        this.r = (int) (r * 255);
+        this.g = (int) (g * 255);
+        this.b = (int) (b * 255);
+        this.a = (int) (a * 255);
 
         validate();
     }
@@ -86,7 +86,7 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         this.a = color.getAlpha();
     }
 
-    public Color(Formatting formatting) {
+    public Color(ChatFormatting formatting) {
         if (formatting.isColor()) {
             this.r = toRGBAR(formatting.getColorValue());
             this.g = toRGBAG(formatting.getColorValue());
@@ -303,7 +303,7 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         else if (a > 255) a = 255;
     }
 
-    public Vec3d getVec3d() {
+    public Vec3 getVec3d() {
         return new Vec3d(r / 255.0, g / 255.0, b / 255.0);
     }
 
@@ -320,8 +320,8 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new NbtCompound();
 
         tag.putInt("r", r);
         tag.putInt("g", g);
@@ -332,7 +332,7 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     @Override
-    public Color fromTag(NbtCompound tag) {
+    public Color fromTag(CompoundTag tag) {
         r = tag.getInt("r", 0);
         g = tag.getInt("g", 0);
         b = tag.getInt("b", 0);

@@ -5,17 +5,17 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class EntityTooltipComponent implements MeteorTooltipData, TooltipComponent {
+public class EntityTooltipComponent implements MeteorTooltipData, ClientTooltipComponent {
     protected final LivingEntity entity;
     private static double spin;
 
@@ -24,22 +24,22 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public TooltipComponent getComponent() {
+    public ClientTooltipComponent getComponent() {
         return this;
     }
 
     @Override
-    public int getHeight(TextRenderer textRenderer) {
+    public int getHeight(Font textRenderer) {
         return 48;
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) {
+    public int getWidth(Font textRenderer) {
         return 64;
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, int width, int height, DrawContext context) {
+    public void drawItems(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
         var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).getAndUpdateRenderState(entity, 1);
 
         state.light = 15728880;

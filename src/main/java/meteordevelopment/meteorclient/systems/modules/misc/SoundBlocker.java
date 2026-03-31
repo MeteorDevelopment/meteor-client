@@ -12,9 +12,9 @@ import meteordevelopment.meteorclient.settings.SoundEventListSetting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.registry.Registries;
-import net.minecraft.sound.SoundEvent;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.sounds.SoundEvent;
 
 import java.util.List;
 
@@ -42,6 +42,6 @@ public class SoundBlocker extends Module {
     }
 
     public boolean shouldBlock(SoundInstance soundInstance) {
-        return isActive() && sounds.get().contains(Setting.parseId(Registries.SOUND_EVENT, soundInstance.getId().getPath()));
+        return isActive() && sounds.get().contains(Setting.parseId(BuiltInRegistries.SOUND_EVENT, soundInstance.getId().getPath()));
     }
 }

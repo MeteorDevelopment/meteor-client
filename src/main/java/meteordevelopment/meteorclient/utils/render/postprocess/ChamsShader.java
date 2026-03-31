@@ -20,9 +20,9 @@ import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gl.DynamicUniformStorage;
-import net.minecraft.entity.Entity;
-import net.minecraft.resource.Resource;
+import net.minecraft.client.renderer.DynamicUniformStorage;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.server.packs.resources.Resource;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
@@ -34,7 +34,7 @@ import java.util.Optional;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ChamsShader extends EntityShader {
-    private static final String[] FILE_FORMATS = { "png", "jpg" };
+    private static final String[] FILE_FORMATS = {"png", "jpg"};
 
     private static Texture IMAGE_TEX;
     private static Chams chams;
@@ -75,8 +75,7 @@ public class ChamsShader extends EntityShader {
                 STBImage.stbi_image_free(image);
                 STBImage.stbi_set_flip_vertically_on_load(false);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             MeteorClient.LOG.error("Error loading the chams shader", e);
         }
     }
@@ -123,7 +122,7 @@ public class ChamsShader extends EntityShader {
         UNIFORM_STORAGE.clear();
     }
 
-    private record UniformData(float r, float g, float b, float a) implements DynamicUniformStorage.Uploadable {
+    private record UniformData(float r, float g, float b, float a) implements DynamicUniformStorage.DynamicUniform {
         @Override
         public void write(ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)

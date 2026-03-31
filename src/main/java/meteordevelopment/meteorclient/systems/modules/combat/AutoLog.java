@@ -20,16 +20,16 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityStatuses;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Formatting;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityEvent;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
+import net.minecraft.ChatFormatting;
 
 import java.util.Set;
 
@@ -158,8 +158,8 @@ public class AutoLog extends Module {
 
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (!(event.packet instanceof EntityStatusS2CPacket p)) return;
-        if (p.getStatus() != EntityStatuses.USE_TOTEM_OF_UNDYING) return;
+        if (!(event.packet instanceof ClientboundEntityEventPacket p)) return;
+        if (p.getStatus() != EntityEvent.USE_TOTEM_OF_UNDYING) return;
 
         Entity entity = p.getEntity(mc.world);
         if (entity == null || !entity.equals(mc.player)) return;
@@ -197,9 +197,9 @@ public class AutoLog extends Module {
             return; // only check all entities if needed
 
         for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof PlayerEntity player && player.getUuid() != mc.player.getUuid()) {
+            if (entity instanceof Player player && player.getUuid() != mc.player.getUuid()) {
                 if (onlyTrusted.get() && player != mc.player && !Friends.get().isFriend(player)) {
-                    disconnect(Text.literal("Non-trusted player '" + Formatting.RED + player.getName().getString() + Formatting.WHITE + "' appeared in your render distance."));
+                    disconnect(MutableComponent.literal("Non-trusted player '" + ChatFormatting.RED + player.getName().getString() + ChatFormatting.WHITE + "' appeared in your render distance."));
                     if (toggleOff.get()) this.toggle();
                     return;
                 }
@@ -232,8 +232,7 @@ public class AutoLog extends Module {
             if (useTotalCount.get() && totalEntities >= combinedEntityThreshold.get()) {
                 disconnect("Total number of selected entities within range exceeded the limit.");
                 if (toggleOff.get()) this.toggle();
-            }
-            else if (!useTotalCount.get()) {
+            } else if (!useTotalCount.get()) {
                 // Check if the count of each entity type exceeds the specified limit
                 for (Object2IntMap.Entry<EntityType<?>> entry : entityCounts.object2IntEntrySet()) {
                     if (entry.getIntValue() >= individualEntityThreshold.get()) {
@@ -247,16 +246,16 @@ public class AutoLog extends Module {
     }
 
     private void disconnect(String reason) {
-        disconnect(Text.literal(reason));
+        disconnect(MutableComponent.literal(reason));
     }
 
-    private void disconnect(Text reason) {
-        MutableText text = Text.literal("[AutoLog] ");
+    private void disconnect(MutableComponent reason) {
+        MutableComponent text = MutableComponent.literal("[AutoLog] ");
         text.append(reason);
 
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
         if (autoReconnect.isActive() && toggleAutoReconnect.get()) {
-            text.append(Text.literal("\n\nINFO - AutoReconnect was disabled").withColor(Colors.GRAY));
+            text.append(MutableComponent.literal("\n\nINFO - AutoReconnect was disabled").withColor(CommonColors.GRAY));
             autoReconnect.toggle();
         }
 

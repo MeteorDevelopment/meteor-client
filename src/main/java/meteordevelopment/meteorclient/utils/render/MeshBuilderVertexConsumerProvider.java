@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.utils.render;
 
 import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvider {
     private final MeshBuilderVertexConsumer vertexConsumer;
@@ -18,7 +18,7 @@ public class MeshBuilderVertexConsumerProvider implements IVertexConsumerProvide
     }
 
     @Override
-    public VertexConsumer getBuffer(RenderLayer layer) {
+    public VertexConsumer getBuffer(RenderType layer) {
         return new W(vertexConsumer); // new instance each call to fix duplicate delegates
     }
 

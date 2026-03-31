@@ -5,22 +5,22 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.function.Supplier;
 
-public class WrapperImmediateVertexConsumerProvider extends VertexConsumerProvider.Immediate {
-    private final Supplier<VertexConsumerProvider> supplier;
+public class WrapperImmediateVertexConsumerProvider extends MultiBufferSource.BufferSource {
+    private final Supplier<MultiBufferSource> supplier;
 
-    public WrapperImmediateVertexConsumerProvider(Supplier<VertexConsumerProvider> supplier) {
+    public WrapperImmediateVertexConsumerProvider(Supplier<MultiBufferSource> supplier) {
         super(null, null);
         this.supplier = supplier;
     }
 
     @Override
-    public VertexConsumer getBuffer(RenderLayer layer) {
+    public VertexConsumer getBuffer(RenderType layer) {
         return supplier.get().getBuffer(layer);
     }
 
@@ -29,6 +29,6 @@ public class WrapperImmediateVertexConsumerProvider extends VertexConsumerProvid
     }
 
     @Override
-    public void draw(RenderLayer layer) {
+    public void draw(RenderType layer) {
     }
 }

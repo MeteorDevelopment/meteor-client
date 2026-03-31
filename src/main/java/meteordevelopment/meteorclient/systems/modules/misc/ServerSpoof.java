@@ -13,16 +13,16 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.packet.BrandCustomPayload;
-import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.c2s.common.ResourcePackStatusC2SPacket;
-import net.minecraft.network.packet.s2c.common.ResourcePackSendS2CPacket;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.protocol.common.custom.BrandPayload;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.Strings;
 
 import java.net.MalformedURLException;
@@ -71,7 +71,7 @@ public class ServerSpoof extends Module {
         .build()
     );
 
-    private MutableText msg;
+    private MutableComponent msg;
     public boolean silentAcceptResourcePack = false;
 
     public ServerSpoof() {
@@ -84,8 +84,8 @@ public class ServerSpoof extends Module {
     private void onPacketSend(PacketEvent.Send event) {
         if (!isActive()) return;
 
-        if (event.packet instanceof CustomPayloadC2SPacket) {
-            Identifier id = ((CustomPayloadC2SPacket) event.packet).payload().getId().id();
+        if (event.packet instanceof ServerboundCustomPayloadPacket) {
+            Identifier id = ((ServerboundCustomPayloadPacket) event.packet).payload().getId().id();
 
             if (blockChannels.get()) {
                 for (String channel : channels.get()) {
@@ -96,8 +96,8 @@ public class ServerSpoof extends Module {
                 }
             }
 
-            if (spoofBrand.get() && id.equals(BrandCustomPayload.ID.id())) {
-                CustomPayloadC2SPacket spoofedPacket = new CustomPayloadC2SPacket(new BrandCustomPayload(brand.get()));
+            if (spoofBrand.get() && id.equals(BrandPayload.ID.id())) {
+                ServerboundCustomPayloadPacket spoofedPacket = new CustomPayloadC2SPacket(new BrandCustomPayload(brand.get()));
 
                 event.sendSilently(spoofedPacket);
                 event.cancel();
@@ -105,33 +105,33 @@ public class ServerSpoof extends Module {
         }
 
         // we want to accept the pack silently to prevent the server detecting you bypassed it when logging in
-        if (silentAcceptResourcePack && event.packet instanceof ResourcePackStatusC2SPacket) event.cancel();
+        if (silentAcceptResourcePack && event.packet instanceof ServerboundResourcePackPacket) event.cancel();
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
         if (!isActive() || !resourcePack.get()) return;
-        if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
+        if (!(event.packet instanceof ClientboundResourcePackPushPacket packet)) return;
 
         event.cancel();
-        event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ResourcePackStatusC2SPacket.Status.ACCEPTED));
-        event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ResourcePackStatusC2SPacket.Status.DOWNLOADED));
-        event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED));
+        event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ServerboundResourcePackPacket.Action.ACCEPTED));
+        event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ServerboundResourcePackPacket.Action.DOWNLOADED));
+        event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED));
 
-        msg = Text.literal("This server has ");
+        msg = MutableComponent.literal("This server has ");
         msg.append(packet.required() ? "a required " : "an optional ").append("resource pack. ");
 
-        MutableText link = Text.literal("[Open URL]");
+        MutableComponent link = MutableComponent.literal("[Open URL]");
         link.setStyle(link.getStyle()
-            .withColor(Formatting.BLUE)
+            .withColor(ChatFormatting.BLUE)
             .withUnderline(true)
             .withClickEvent(new ClickEvent.OpenUrl(URI.create(packet.url())))
-            .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to open the pack url")))
+            .withHoverEvent(new HoverEvent.ShowText(MutableComponent.literal("Click to open the pack url")))
         );
 
-        MutableText acceptance = Text.literal("[Accept Pack]");
+        MutableComponent acceptance = MutableComponent.literal("[Accept Pack]");
         acceptance.setStyle(acceptance.getStyle()
-            .withColor(Formatting.DARK_GREEN)
+            .withColor(ChatFormatting.DARK_GREEN)
             .withUnderline(true)
             .withClickEvent(new RunnableClickEvent(() -> {
                 URL url = getParsedResourcePackUrl(packet.url());
@@ -141,7 +141,7 @@ public class ServerSpoof extends Module {
                     mc.getServerResourcePackProvider().addResourcePack(packet.id(), url, packet.hash());
                 }
             }))
-            .withHoverEvent(new HoverEvent.ShowText(Text.literal("Click to accept and apply the pack.")))
+            .withHoverEvent(new HoverEvent.ShowText(MutableComponent.literal("Click to accept and apply the pack.")))
         );
 
         msg.append(link).append(" ");

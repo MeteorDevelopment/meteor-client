@@ -21,22 +21,22 @@ import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityStatuses;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
-import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerRemoveS2CPacket;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.collection.ArrayListDeque;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityEvent;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.util.ArrayListDeque;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -192,8 +192,8 @@ public class Notifier extends Module {
     private boolean loginPacket = true;
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
-    private final Map<Integer, Vec3d> pearlStartPosMap = new HashMap<>();
-    private final ArrayListDeque<Text> messageQueue = new ArrayListDeque<>();
+    private final Map<Integer, Vec3> pearlStartPosMap = new HashMap<>();
+    private final ArrayListDeque<MutableComponent> messageQueue = new ArrayListDeque<>();
 
     private final Random random = new Random();
 
@@ -208,21 +208,21 @@ public class Notifier extends Module {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Despawn) {
             if (event.entity instanceof PlayerEntity) {
                 if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
-                    ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getName().getString());
+                    ChatUtils.sendMsg(event.entity.getId() + 100, ChatFormatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getName().getString());
 
                     if (visualMakeSound.get())
-                        mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
+                        mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundSource.AMBIENT, 3.0F, 1.0F);
                 }
             } else {
-                MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
-                text.append(Text.literal(" has spawned at ").formatted(Formatting.GRAY));
+                MutableComponent text = MutableComponent.literal(event.entity.getType().getName().getString()).formatted(ChatFormatting.WHITE);
+                text.append(MutableComponent.literal(" has spawned at ").formatted(ChatFormatting.GRAY));
                 text.append(formatCoords(event.entity.getEntityPos()));
-                text.append(Text.literal(".").formatted(Formatting.GRAY));
+                text.append(MutableComponent.literal(".").formatted(ChatFormatting.GRAY));
                 info(text);
             }
         }
 
-        if (pearl.get() && event.entity instanceof EnderPearlEntity pearlEntity) {
+        if (pearl.get() && event.entity instanceof ThrownEnderpearl pearlEntity) {
             pearlStartPosMap.put(pearlEntity.getId(), new Vec3d(pearlEntity.getX(), pearlEntity.getY(), pearlEntity.getZ()));
         }
     }
@@ -232,16 +232,16 @@ public class Notifier extends Module {
         if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Spawn) {
             if (event.entity instanceof PlayerEntity) {
                 if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
-                    ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getName().getString());
+                    ChatUtils.sendMsg(event.entity.getId() + 100, ChatFormatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getName().getString());
 
                     if (visualMakeSound.get())
-                        mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
+                        mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundSource.AMBIENT, 3.0F, 1.0F);
                 }
             } else {
-                MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
-                text.append(Text.literal(" has despawned at ").formatted(Formatting.GRAY));
+                MutableComponent text = MutableComponent.literal(event.entity.getType().getName().getString()).formatted(ChatFormatting.WHITE);
+                text.append(MutableComponent.literal(" has despawned at ").formatted(ChatFormatting.GRAY));
                 text.append(formatCoords(event.entity.getEntityPos()));
-                text.append(Text.literal(".").formatted(Formatting.GRAY));
+                text.append(MutableComponent.literal(".").formatted(ChatFormatting.GRAY));
                 info(text);
             }
         }
@@ -250,7 +250,7 @@ public class Notifier extends Module {
             Entity e = event.entity;
             int i = e.getId();
             if (pearlStartPosMap.containsKey(i)) {
-                EnderPearlEntity pearl = (EnderPearlEntity) e;
+                ThrownEnderpearl pearl = (ThrownEnderpearl) e;
                 if (pearl.getOwner() != null && pearl.getOwner() instanceof PlayerEntity p) {
                     double d = pearlStartPosMap.get(i).distanceTo(e.getEntityPos());
                     if ((!Friends.get().isFriend(p) || !pearlIgnoreFriends.get()) && (!p.equals(mc.player) || !pearlIgnoreOwn.get())) {
@@ -294,20 +294,23 @@ public class Notifier extends Module {
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
         switch (event.packet) {
-            case PlayerListS2CPacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Joins) -> {
+            case
+                ClientboundPlayerInfoUpdatePacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Joins) -> {
                 if (loginPacket) {
                     loginPacket = false;
                     return;
                 }
 
-                if (packet.getActions().contains(PlayerListS2CPacket.Action.ADD_PLAYER)) {
+                if (packet.getActions().contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
                     createJoinNotifications(packet);
                 }
             }
-            case PlayerRemoveS2CPacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Leaves) ->
+            case
+                ClientboundPlayerInfoRemovePacket packet when joinsLeavesMode.get().equals(JoinLeaveModes.Both) || joinsLeavesMode.get().equals(JoinLeaveModes.Leaves) ->
                 createLeaveNotification(packet);
 
-            case EntityStatusS2CPacket packet when totemPops.get() && packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING && packet.getEntity(mc.world) instanceof PlayerEntity entity -> {
+            case
+                ClientboundEntityEventPacket packet when totemPops.get() && packet.getStatus() == EntityEvent.USE_TOTEM_OF_UNDYING && packet.getEntity(mc.world) instanceof PlayerEntity entity -> {
                 if ((entity.equals(mc.player) && totemsIgnoreOwn.get())
                     || (Friends.get().isFriend(entity) && totemsIgnoreOthers.get())
                     || (!Friends.get().isFriend(entity) && totemsIgnoreFriends.get())
@@ -320,10 +323,11 @@ public class Notifier extends Module {
                     double distance = PlayerUtils.distanceTo(entity);
                     if (totemsDistanceCheck.get() && distance > totemsDistance.get()) return;
 
-                    ChatUtils.sendMsg(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+                    ChatUtils.sendMsg(getChatId(entity), ChatFormatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
                 }
             }
-            default -> {}
+            default -> {
+            }
         }
     }
 
@@ -349,7 +353,7 @@ public class Notifier extends Module {
                 if (player.deathTime > 0 || player.getHealth() <= 0) {
                     int pops = totemPopMap.removeInt(player.getUuid());
 
-                    ChatUtils.sendMsg(getChatId(player), Formatting.GRAY, "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+                    ChatUtils.sendMsg(getChatId(player), ChatFormatting.GRAY, "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
                     chatIdMap.removeInt(player.getUuid());
                 }
             }
@@ -360,46 +364,46 @@ public class Notifier extends Module {
         return chatIdMap.computeIfAbsent(entity.getUuid(), value -> random.nextInt());
     }
 
-    private void createJoinNotifications(PlayerListS2CPacket packet) {
-        for (PlayerListS2CPacket.Entry entry : packet.getPlayerAdditionEntries()) {
+    private void createJoinNotifications(ClientboundPlayerInfoUpdatePacket packet) {
+        for (ClientboundPlayerInfoUpdatePacket.Entry entry : packet.getPlayerAdditionEntries()) {
             if (entry.profile() == null) continue;
 
             if (simpleNotifications.get()) {
-                messageQueue.addLast(Text.literal(
-                    Formatting.GRAY + "["
-                        + Formatting.GREEN + "+"
-                        + Formatting.GRAY + "] "
+                messageQueue.addLast(MutableComponent.literal(
+                    ChatFormatting.GRAY + "["
+                        + ChatFormatting.GREEN + "+"
+                        + ChatFormatting.GRAY + "] "
                         + entry.profile().name()
                 ));
             } else {
-                messageQueue.addLast(Text.literal(
-                    Formatting.WHITE
+                messageQueue.addLast(MutableComponent.literal(
+                    ChatFormatting.WHITE
                         + entry.profile().name()
-                        + Formatting.GRAY + " joined."
+                        + ChatFormatting.GRAY + " joined."
                 ));
             }
         }
     }
 
-    private void createLeaveNotification(PlayerRemoveS2CPacket packet) {
+    private void createLeaveNotification(ClientboundPlayerInfoRemovePacket packet) {
         if (mc.getNetworkHandler() == null) return;
 
         for (UUID id : packet.profileIds()) {
-            PlayerListEntry toRemove = mc.getNetworkHandler().getPlayerListEntry(id);
+            PlayerInfo toRemove = mc.getNetworkHandler().getPlayerListEntry(id);
             if (toRemove == null) continue;
 
             if (simpleNotifications.get()) {
-                messageQueue.addLast(Text.literal(
-                    Formatting.GRAY + "["
-                        + Formatting.RED + "-"
-                        + Formatting.GRAY + "] "
+                messageQueue.addLast(MutableComponent.literal(
+                    ChatFormatting.GRAY + "["
+                        + ChatFormatting.RED + "-"
+                        + ChatFormatting.GRAY + "] "
                         + toRemove.getProfile().name()
                 ));
             } else {
-                messageQueue.addLast(Text.literal(
-                    Formatting.WHITE
+                messageQueue.addLast(MutableComponent.literal(
+                    ChatFormatting.WHITE
                         + toRemove.getProfile().name()
-                        + Formatting.GRAY + " left."
+                        + ChatFormatting.GRAY + " left."
                 ));
             }
         }

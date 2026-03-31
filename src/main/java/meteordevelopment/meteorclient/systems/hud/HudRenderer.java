@@ -21,11 +21,11 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -56,14 +56,14 @@ public class HudRenderer {
         })
         .build(CacheLoader.from(HudRenderer::loadFont));
 
-    public DrawContext drawContext;
+    public GuiGraphics drawContext;
     public double delta;
 
     private HudRenderer() {
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 
-    public void begin(DrawContext drawContext) {
+    public void begin(GuiGraphics drawContext) {
         Renderer2D.COLOR.begin();
 
         this.drawContext = drawContext;
@@ -92,16 +92,14 @@ public class HudRenderer {
                         .mesh(fontHolder.getMesh())
                         .sampler("u_Texture", fontHolder.font.texture.getGlTextureView(), fontHolder.font.texture.getSampler())
                         .end();
-                }
-                else {
+                } else {
                     it.remove();
                     fontCache.put(fontHolder.font.getHeight(), fontHolder);
                 }
 
                 fontHolder.visited = false;
             }
-        }
-        else {
+        } else {
             VanillaTextRenderer.INSTANCE.end();
             VanillaTextRenderer.INSTANCE.scaleIndividually = false;
         }
@@ -159,13 +157,13 @@ public class HudRenderer {
             font.render(mesh, text, x, y, color, scale);
 
             CustomTextRenderer.SHADOW_COLOR.a = preShadowA;
-        }
-        else {
+        } else {
             width = font.render(mesh, text, x, y, color, scale);
         }
 
         return width;
     }
+
     public double text(String text, double x, double y, Color color, boolean shadow) {
         return text(text, x, y, color, shadow, -1);
     }
@@ -181,12 +179,15 @@ public class HudRenderer {
         VanillaTextRenderer.INSTANCE.scale = (scale == -1 ? hud.getTextScale() : scale) * 2;
         return VanillaTextRenderer.INSTANCE.getWidth(text, shadow);
     }
+
     public double textWidth(String text, boolean shadow) {
         return textWidth(text, shadow, -1);
     }
+
     public double textWidth(String text, double scale) {
         return textWidth(text, false, scale);
     }
+
     public double textWidth(String text) {
         return textWidth(text, false, -1);
     }
@@ -200,9 +201,11 @@ public class HudRenderer {
         VanillaTextRenderer.INSTANCE.scale = (scale == -1 ? hud.getTextScale() : scale) * 2;
         return VanillaTextRenderer.INSTANCE.getHeight(shadow);
     }
+
     public double textHeight(boolean shadow) {
         return textHeight(shadow, -1);
     }
+
     public double textHeight() {
         return textHeight(false, -1);
     }
@@ -219,7 +222,7 @@ public class HudRenderer {
         RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay);
     }
 
-    public void entity(LivingEntity entity,  int x, int y, int width, int height, float yaw, float pitch) {
+    public void entity(LivingEntity entity, int x, int y, int width, int height, float yaw, float pitch) {
         float previousBodyYaw = entity.bodyYaw;
         float previousYaw = entity.getYaw();
         float previousPitch = entity.getPitch();

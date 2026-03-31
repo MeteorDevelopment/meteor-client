@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 

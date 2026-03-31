@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.DirectionAccessor;
-import meteordevelopment.meteorclient.mixin.WorldRendererAccessor;
+import meteordevelopment.meteorclient.mixin.LevelRendererAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -24,19 +24,19 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.EndCrystalEntity;
-import net.minecraft.entity.player.BlockBreakingInfo;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+import net.minecraft.server.level.BlockDestructionProgress;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -333,7 +333,7 @@ public class Surround extends Module {
             BlockPos placePos = playerPos.offset(direction);
 
             // Place support blocks if air place is disabled
-            if (!airPlace.get() && isAirPlace(placePos) && mc.world.getBlockState(placePos).isReplaceable()){
+            if (!airPlace.get() && isAirPlace(placePos) && mc.world.getBlockState(placePos).isReplaceable()) {
                 if (place(placePos.down(), block) && ++placedCount >= blocksPerTick.get()) break;
 
                 if (mc.world.getBlockState(placePos.down()).isReplaceable()) complete = false;
@@ -372,7 +372,7 @@ public class Surround extends Module {
 
         // Check if the block is being mined
         boolean beingMined = false;
-        for (BlockBreakingInfo value : ((WorldRendererAccessor) mc.worldRenderer).meteor$getBlockBreakingInfos().values()) {
+        for (BlockDestructionProgress value : ((LevelRendererAccessor) mc.worldRenderer).meteor$getDestroyingBlocks().values()) {
             if (value.getPos().equals(placePos)) {
                 beingMined = true;
                 break;
@@ -383,24 +383,23 @@ public class Surround extends Module {
 
         // If the block is air or is being mined, destroy nearby crystals to be safe
         if (protect.get() && !placed && isThreat) {
-            Box box = new Box(
+            AABB box = new Box(
                 placePos.getX() - 1, placePos.getY() - 1, placePos.getZ() - 1,
                 placePos.getX() + 1, placePos.getY() + 1, placePos.getZ() + 1
             );
 
-            Predicate<Entity> entityPredicate = entity -> entity instanceof EndCrystalEntity && DamageUtils.crystalDamage(mc.player, entity.getEntityPos()) < PlayerUtils.getTotalHealth();
+            Predicate<Entity> entityPredicate = entity -> entity instanceof EndCrystal && DamageUtils.crystalDamage(mc.player, entity.getEntityPos()) < PlayerUtils.getTotalHealth();
 
             for (Entity crystal : mc.world.getOtherEntities(null, box, entityPredicate)) {
                 if (rotate.get()) {
                     Rotations.rotate(Rotations.getPitch(crystal), Rotations.getYaw(crystal), () -> {
-                        mc.player.networkHandler.sendPacket(PlayerInteractEntityC2SPacket.attack(crystal, mc.player.isSneaking()));
+                        mc.player.networkHandler.sendPacket(ServerboundInteractPacket.attack(crystal, mc.player.isSneaking()));
                     });
-                }
-                else {
-                    mc.player.networkHandler.sendPacket(PlayerInteractEntityC2SPacket.attack(crystal, mc.player.isSneaking()));
+                } else {
+                    mc.player.networkHandler.sendPacket(ServerboundInteractPacket.attack(crystal, mc.player.isSneaking()));
                 }
 
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(InteractionHand.MAIN_HAND));
             }
         }
 
@@ -408,8 +407,8 @@ public class Surround extends Module {
     }
 
     @EventHandler
-    private void onPacketReceive(PacketEvent.Receive event)  {
-        if (event.packet instanceof DeathMessageS2CPacket packet) {
+    private void onPacketReceive(PacketEvent.Receive event) {
+        if (event.packet instanceof ClientboundPlayerCombatKillPacket packet) {
             Entity entity = mc.world.getEntityById(packet.playerId());
             if (entity == mc.player && toggleOnDeath.get()) {
                 toggle();
@@ -423,9 +422,9 @@ public class Surround extends Module {
 
         // Unbreakable eg. bedrock
         if (blockState.getBlock().getHardness() < 0) return BlockType.Safe;
-        // Blast resistant eg. obsidian
+            // Blast resistant eg. obsidian
         else if (blockState.getBlock().getBlastResistance() >= 600) return BlockType.Normal;
-        // Anything else
+            // Anything else
         else return BlockType.Unsafe;
     }
 

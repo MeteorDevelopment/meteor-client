@@ -13,9 +13,9 @@ import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,7 +25,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Commands {
     public static final List<Command> COMMANDS = new ArrayList<>();
-    public static CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
+    public static CommandDispatcher<SharedSuggestionProvider> DISPATCHER = new CommandDispatcher<>();
 
     @PostInit(dependencies = PathManagers.class)
     public static void init() {
@@ -112,8 +112,8 @@ public class Commands {
      */
     @EventHandler
     private static void onJoin(GameJoinedEvent event) {
-        ClientPlayNetworkHandler networkHandler = mc.getNetworkHandler();
-        Command.REGISTRY_ACCESS = CommandRegistryAccess.of(networkHandler.getRegistryManager(), networkHandler.getEnabledFeatures());
+        ClientPacketListener networkHandler = mc.getNetworkHandler();
+        Command.REGISTRY_ACCESS = CommandBuildContext.of(networkHandler.getRegistryManager(), networkHandler.getEnabledFeatures());
 
         DISPATCHER = new CommandDispatcher<>();
         for (Command command : COMMANDS) {

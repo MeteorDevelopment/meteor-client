@@ -17,9 +17,9 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
-import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.world.phys.shapes.Shapes;
 
 import java.util.List;
 
@@ -63,11 +63,11 @@ public class Collisions extends Module {
         if (mc.world == null || mc.player == null) return;
         if (!event.state.getFluidState().isEmpty()) return;
         if (blocks.get().contains(event.state.getBlock())) {
-            event.shape = VoxelShapes.fullCube();
+            event.shape = Shapes.fullCube();
         } else if (magma.get() && !mc.player.isSneaking()
             && event.state.isAir()
             && mc.world.getBlockState(event.pos.down()).getBlock() == Blocks.MAGMA_BLOCK) {
-            event.shape = VoxelShapes.fullCube();
+            event.shape = Shapes.fullCube();
         }
     }
 
@@ -83,12 +83,12 @@ public class Collisions extends Module {
     @EventHandler
     private void onPacketSend(PacketEvent.Send event) {
         if (!unloadedChunks.get()) return;
-        if (event.packet instanceof VehicleMoveC2SPacket packet) {
+        if (event.packet instanceof ServerboundMoveVehiclePacket packet) {
             if (!mc.world.getChunkManager().isChunkLoaded((int) packet.position().getX() >> 4, (int) packet.position().getZ() >> 4)) {
                 mc.player.getVehicle().updatePosition(mc.player.getVehicle().lastX, mc.player.getVehicle().lastY, mc.player.getVehicle().lastZ);
                 event.cancel();
             }
-        } else if (event.packet instanceof PlayerMoveC2SPacket packet) {
+        } else if (event.packet instanceof ServerboundMovePlayerPacket packet) {
             if (!mc.world.getChunkManager().isChunkLoaded((int) packet.getX(mc.player.getX()) >> 4, (int) packet.getZ(mc.player.getZ()) >> 4)) {
                 event.cancel();
             }

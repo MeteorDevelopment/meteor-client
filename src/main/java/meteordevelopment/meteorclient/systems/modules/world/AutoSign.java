@@ -15,9 +15,9 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
-import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
+import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -38,7 +38,7 @@ public class AutoSign extends Module {
 
     // Some servers (e.g., 2b2t) don't like the sign packet being sent too soon after the swing or block click packets, so queue them.
     // Delaying by sleeping in the event handler may be fine for a single sign, but would visibly lag the UI at a larger scale.
-    private final Queue<UpdateSignC2SPacket> queue = new ArrayDeque<>();
+    private final Queue<ServerboundSignUpdatePacket> queue = new ArrayDeque<>();
     private int timer = 0;
 
     public AutoSign() {
@@ -72,9 +72,9 @@ public class AutoSign extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof UpdateSignC2SPacket)) return;
+        if (!(event.packet instanceof ServerboundSignUpdatePacket)) return;
 
-        text = ((UpdateSignC2SPacket) event.packet).getText();
+        text = ((ServerboundSignUpdatePacket) event.packet).getText();
     }
 
     @EventHandler

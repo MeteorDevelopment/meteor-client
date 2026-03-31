@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
-import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
+import meteordevelopment.meteorclient.mixin.KeyMappingAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
@@ -31,13 +31,13 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -222,7 +222,7 @@ public class KeyboardHud extends HudElement {
             boolean pressed = key.isPressed;
             float target = pressed ? 1 : 0;
 
-            float tickDelta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
+            float tickDelta = Minecraft.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
             float frameDelta = (float) (tickDelta / 20 / fadeTime.get()) * (pressed ? 1 : -1);
             key.delta = Math.clamp(key.delta + frameDelta, 0, 1);
 
@@ -239,15 +239,15 @@ public class KeyboardHud extends HudElement {
                 java.awt.Color.RGBtoHSB(c2.r, c2.g, c2.b, hsb1);
 
                 int rgb = java.awt.Color.HSBtoRGB(
-                    MathHelper.lerp(key.delta, hsb1[0], hsb2[0]),
-                    MathHelper.lerp(key.delta, hsb1[1], hsb2[1]),
-                    MathHelper.lerp(key.delta, hsb1[2], hsb2[2])
+                    Mth.lerp(key.delta, hsb1[0], hsb2[0]),
+                    Mth.lerp(key.delta, hsb1[1], hsb2[1]),
+                    Mth.lerp(key.delta, hsb1[2], hsb2[2])
                 );
 
                 out.r = Color.toRGBAR(rgb);
                 out.g = Color.toRGBAG(rgb);
                 out.b = Color.toRGBAB(rgb);
-                out.a = MathHelper.lerp(key.delta, pressedColor.get().a, unpressedColor.get().a);
+                out.a = Mth.lerp(key.delta, pressedColor.get().a, unpressedColor.get().a);
             }
         } else {
             out.set(key.isPressed ? pressedColor.get() : unpressedColor.get());
@@ -566,10 +566,10 @@ public class KeyboardHud extends HudElement {
         double s = scale.get();
 
         // because of a meteor bug, the modules search field swallows inputs
-        InputUtil.Key guiKey = ((KeyBindingAccessor) KeyBinds.OPEN_GUI).meteor$getKey();
+        InputConstants.Key guiKey = ((KeyMappingAccessor) KeyBinds.OPEN_GUI).meteor$getKey();
 
         for (Key key : keys) {
-            if (key.matches(guiKey.getCode(), guiKey.getCode(), guiKey.getCategory() != InputUtil.Type.MOUSE)) {
+            if (key.matches(guiKey.getCode(), guiKey.getCode(), guiKey.getCategory() != InputConstants.Type.MOUSE)) {
                 if (key.isPressed != key.isNativelyPressed()) {
                     key.update(key.isPressed ? KeyAction.Release : KeyAction.Press);
                 }
@@ -657,7 +657,7 @@ public class KeyboardHud extends HudElement {
 
     public static class Key {
         public String name = "";
-        public KeyBinding binding;
+        public KeyMapping binding;
         public Keybind keybind;
         public double x, y, width, height;
         public boolean showCps = false;
@@ -672,7 +672,7 @@ public class KeyboardHud extends HudElement {
             this.height = 40;
         }
 
-        public Key(NbtCompound compound) {
+        public Key(CompoundTag compound) {
             this.keybind = Keybind.none().fromTag(compound.getCompoundOrEmpty("key"));
             this.name = compound.getString("name", "");
             this.x = compound.getDouble("x", 0);
@@ -682,7 +682,7 @@ public class KeyboardHud extends HudElement {
             this.showCps = compound.getBoolean("showCps", false);
         }
 
-        Key(KeyBinding binding, String name, double x, double y, double width, double height) {
+        Key(KeyMapping binding, String name, double x, double y, double width, double height) {
             this.binding = binding;
             this.name = name;
             this.x = x;
@@ -716,9 +716,9 @@ public class KeyboardHud extends HudElement {
             if (keybind != null) {
                 return keybind.isKey() == key && keybind.getValue() == input;
             } else {
-                InputUtil.Key inputKey = ((KeyBindingAccessor) binding).meteor$getKey();
-                boolean isKey = inputKey.getCategory() != InputUtil.Type.MOUSE;
-                return isKey == key && inputKey.getCategory() == InputUtil.Type.SCANCODE
+                InputConstants.Key inputKey = ((KeyMappingAccessor) binding).meteor$getKey();
+                boolean isKey = inputKey.getCategory() != InputConstants.Type.MOUSE;
+                return isKey == key && inputKey.getCategory() == InputConstants.Type.SCANCODE
                     ? scancode == inputKey.getCode()
                     : input == inputKey.getCode();
             }
@@ -743,7 +743,7 @@ public class KeyboardHud extends HudElement {
                     ? GLFW.glfwGetKey(window, keybind.getValue()) != GLFW.GLFW_RELEASE
                     : GLFW.glfwGetMouseButton(window, keybind.getValue()) != GLFW.GLFW_RELEASE;
             } else {
-                int key = ((KeyBindingAccessor) binding).meteor$getKey().getCode();
+                int key = ((KeyMappingAccessor) binding).meteor$getKey().getCode();
                 return key >= 0 && key < 8
                     ? GLFW.glfwGetMouseButton(window, key) != GLFW.GLFW_RELEASE
                     : GLFW.glfwGetKey(window, key) != GLFW.GLFW_RELEASE;
@@ -754,8 +754,8 @@ public class KeyboardHud extends HudElement {
             return rollingCps.get();
         }
 
-        public NbtCompound serialize() {
-            NbtCompound compound = new NbtCompound();
+        public CompoundTag serialize() {
+            CompoundTag compound = new NbtCompound();
             compound.put("key", keybind.toTag());
             compound.putString("name", name);
             compound.putDouble("x", x);
@@ -873,8 +873,8 @@ public class KeyboardHud extends HudElement {
         }
 
         @Override
-        protected NbtCompound save(NbtCompound tag) {
-            NbtList valueTag = new NbtList();
+        protected CompoundTag save(CompoundTag tag) {
+            ListTag valueTag = new NbtList();
             for (Key key : get()) {
                 valueTag.add(key.serialize());
             }
@@ -884,10 +884,10 @@ public class KeyboardHud extends HudElement {
         }
 
         @Override
-        protected List<Key> load(NbtCompound tag) {
+        protected List<Key> load(CompoundTag tag) {
             get().clear();
 
-            for (NbtElement tagI : tag.getListOrEmpty("value")) {
+            for (Tag tagI : tag.getListOrEmpty("value")) {
                 tagI.asCompound().ifPresent(nbtCompound -> get().add(new Key(nbtCompound)));
             }
 

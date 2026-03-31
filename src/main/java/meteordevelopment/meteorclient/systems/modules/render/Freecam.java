@@ -29,22 +29,22 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.client.option.Perspective;
-import net.minecraft.client.render.Camera;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
-import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.client.CameraType;
+import net.minecraft.client.Camera;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
+import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
+import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.ClipContext;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
@@ -144,7 +144,7 @@ public class Freecam extends Module {
     public final Vector3d pos = new Vector3d();
     public final Vector3d prevPos = new Vector3d();
 
-    private Perspective perspective;
+    private CameraType perspective;
     private double speedValue;
 
     public float yaw, pitch;
@@ -166,7 +166,7 @@ public class Freecam extends Module {
         fovScale = mc.options.getFovEffectScale().getValue();
         bobView = mc.options.getBobView().getValue();
         if (staticView.get()) {
-            mc.options.getFovEffectScale().setValue((double)0);
+            mc.options.getFovEffectScale().setValue((double) 0);
             mc.options.getBobView().setValue(false);
         }
         yaw = mc.player.getYaw();
@@ -178,7 +178,7 @@ public class Freecam extends Module {
         Utils.set(pos, mc.gameRenderer.getCamera().getCameraPos());
         Utils.set(prevPos, mc.gameRenderer.getCamera().getCameraPos());
 
-        if (mc.options.getPerspective() == Perspective.THIRD_PERSON_FRONT) {
+        if (mc.options.getPerspective() == CameraType.THIRD_PERSON_FRONT) {
             yaw += 180;
             pitch *= -1;
         }
@@ -236,17 +236,17 @@ public class Freecam extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.getCameraEntity().isInsideWall()) mc.getCameraEntity().noClip = true;
-        if (!perspective.isFirstPerson()) mc.options.setPerspective(Perspective.FIRST_PERSON);
+        if (!perspective.isFirstPerson()) mc.options.setPerspective(CameraType.FIRST_PERSON);
 
-        Vec3d forward = Vec3d.fromPolar(0, yaw);
-        Vec3d right = Vec3d.fromPolar(0, yaw + 90);
+        Vec3 forward = Vec3.fromPolar(0, yaw);
+        Vec3 right = Vec3.fromPolar(0, yaw + 90);
         double velX = 0;
         double velY = 0;
         double velZ = 0;
 
         if (rotate.get()) {
             BlockPos crossHairPos;
-            Vec3d crossHairPosition;
+            Vec3 crossHairPosition;
 
             if (mc.crosshairTarget instanceof EntityHitResult) {
                 crossHairPos = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
@@ -314,35 +314,35 @@ public class Freecam extends Module {
     }
 
     @Nullable
-    private BlockPos rayCastEntity(Vec3d posVec, Vec3d max, short maxDist) {
+    private BlockPos rayCastEntity(Vec3 posVec, Vec3 max, short maxDist) {
         EntityHitResult res = ProjectileUtil.raycast(
             mc.player,
             posVec,
             max,
-            Box.enclosing(BlockPos.ofFloored(posVec.x, posVec.y, posVec.z), BlockPos.ofFloored(max.x, max.y, max.z)),
+            AABB.enclosing(BlockPos.ofFloored(posVec.x, posVec.y, posVec.z), BlockPos.ofFloored(max.x, max.y, max.z)),
             (entity) -> true,
             maxDist
         );
 
         if (res == null) return null;
 
-        Vec3d vec = res.getPos();
+        Vec3 vec = res.getPos();
 
         return BlockPos.ofFloored(vec.x, vec.y, vec.z);
     }
 
     @Nullable
-    private BlockPos rayCastBlock(Vec3d posVec, Vec3d max) {
-        RaycastContext ctx = new RaycastContext(
+    private BlockPos rayCastBlock(Vec3 posVec, Vec3 max) {
+        ClipContext ctx = new RaycastContext(
             posVec,
             max,
-            RaycastContext.ShapeType.VISUAL,
-            RaycastContext.FluidHandling.SOURCE_ONLY,
-            ShapeContext.absent()
+            ClipContext.Block.VISUAL,
+            ClipContext.Fluid.SOURCE_ONLY,
+            CollisionContext.absent()
         );
 
         BlockHitResult res = mc.world.raycast(ctx);
-        if (res.getType() == HitResult.Type.MISS) return null;
+        if (res.getType() == BlockHitResult.Type.MISS) return null;
 
         // Don't move inside block
         return res.getBlockPos().add(res.getSide().getVector());
@@ -355,10 +355,10 @@ public class Freecam extends Module {
         if (requireDoubleClick.get() && clickTs - prevClick > 500) return;
 
         Camera cam = mc.gameRenderer.getCamera();
-        Vec3d posVec = cam.getCameraPos();
-        Vec3d lookVec = Vec3d.fromPolar(cam.getPitch(), cam.getYaw());
+        Vec3 posVec = cam.getCameraPos();
+        Vec3 lookVec = Vec3.fromPolar(cam.getPitch(), cam.getYaw());
         short maxDist = 256;
-        Vec3d max = posVec.add(lookVec.multiply(maxDist));
+        Vec3 max = posVec.add(lookVec.multiply(maxDist));
 
         BlockPos pos = rayCastEntity(posVec, max, maxDist);
         if (pos == null) {
@@ -385,28 +385,22 @@ public class Freecam extends Module {
         if (Input.getKey(mc.options.forwardKey) == key) {
             forward = action != KeyAction.Release;
             mc.options.forwardKey.setPressed(false);
-        }
-        else if (Input.getKey(mc.options.backKey) == key) {
+        } else if (Input.getKey(mc.options.backKey) == key) {
             backward = action != KeyAction.Release;
             mc.options.backKey.setPressed(false);
-        }
-        else if (Input.getKey(mc.options.rightKey) == key) {
+        } else if (Input.getKey(mc.options.rightKey) == key) {
             right = action != KeyAction.Release;
             mc.options.rightKey.setPressed(false);
-        }
-        else if (Input.getKey(mc.options.leftKey) == key) {
+        } else if (Input.getKey(mc.options.leftKey) == key) {
             left = action != KeyAction.Release;
             mc.options.leftKey.setPressed(false);
-        }
-        else if (Input.getKey(mc.options.jumpKey) == key) {
+        } else if (Input.getKey(mc.options.jumpKey) == key) {
             up = action != KeyAction.Release;
             mc.options.jumpKey.setPressed(false);
-        }
-        else if (Input.getKey(mc.options.sneakKey) == key) {
+        } else if (Input.getKey(mc.options.sneakKey) == key) {
             down = action != KeyAction.Release;
             mc.options.sneakKey.setPressed(false);
-        }
-        else {
+        } else {
             return false;
         }
 
@@ -436,21 +430,19 @@ public class Freecam extends Module {
     }
 
     @EventHandler
-    private void onPacketReceive(PacketEvent.Receive event)  {
-        if (event.packet instanceof DeathMessageS2CPacket packet) {
+    private void onPacketReceive(PacketEvent.Receive event) {
+        if (event.packet instanceof ClientboundPlayerCombatKillPacket packet) {
             Entity entity = mc.world.getEntityById(packet.playerId());
             if (entity == mc.player && toggleOnDeath.get()) {
                 toggle();
                 info("Toggled off because you died.");
             }
-        }
-        else if (event.packet instanceof HealthUpdateS2CPacket packet) {
+        } else if (event.packet instanceof ClientboundSetHealthPacket packet) {
             if (mc.player.getHealth() - packet.getHealth() > 0 && toggleOnDamage.get()) {
                 toggle();
                 info("Toggled off because you took damage.");
             }
-        }
-        else if (event.packet instanceof PlayerRespawnS2CPacket) {
+        } else if (event.packet instanceof ClientboundRespawnPacket) {
             if (isActive()) {
                 toggle();
                 info("Toggled off because you changed dimensions.");
@@ -471,7 +463,7 @@ public class Freecam extends Module {
         yaw += (float) deltaX;
         pitch += (float) deltaY;
 
-        pitch = MathHelper.clamp(pitch, -90, 90);
+        pitch = Mth.clamp(pitch, -90, 90);
     }
 
     public boolean renderHands() {
@@ -483,19 +475,22 @@ public class Freecam extends Module {
     }
 
     public double getX(float tickDelta) {
-        return MathHelper.lerp(tickDelta, prevPos.x, pos.x);
+        return Mth.lerp(tickDelta, prevPos.x, pos.x);
     }
+
     public double getY(float tickDelta) {
-        return MathHelper.lerp(tickDelta, prevPos.y, pos.y);
+        return Mth.lerp(tickDelta, prevPos.y, pos.y);
     }
+
     public double getZ(float tickDelta) {
-        return MathHelper.lerp(tickDelta, prevPos.z, pos.z);
+        return Mth.lerp(tickDelta, prevPos.z, pos.z);
     }
 
     public double getYaw(float tickDelta) {
-        return MathHelper.lerp(tickDelta, lastYaw, yaw);
+        return Mth.lerp(tickDelta, lastYaw, yaw);
     }
+
     public double getPitch(float tickDelta) {
-        return MathHelper.lerp(tickDelta, lastPitch, pitch);
+        return Mth.lerp(tickDelta, lastPitch, pitch);
     }
 }

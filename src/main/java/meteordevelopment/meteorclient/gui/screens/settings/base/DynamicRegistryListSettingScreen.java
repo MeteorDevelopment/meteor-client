@@ -11,10 +11,10 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.settings.Setting;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.registry.*;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
+import net.minecraft.resources.Identifier;
+import net.minecraft.IdentifierException;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -32,7 +32,7 @@ public abstract class DynamicRegistryListSettingScreen<T> extends CollectionList
     private static <T> Iterable<RegistryKey<T>> createUniverse(Collection<RegistryKey<T>> collection, RegistryKey<Registry<T>> registryKey) {
         Set<RegistryKey<T>> set = new ReferenceOpenHashSet<>(collection);
 
-        Optional.ofNullable(MinecraftClient.getInstance().getNetworkHandler())
+        Optional.ofNullable(Minecraft.getInstance().getNetworkHandler())
             .map(networkHandler -> (RegistryWrapper.WrapperLookup) networkHandler.getRegistryManager())
             .orElseGet(BuiltinRegistries::createWrapperLookup)
             .getOptional(registryKey)
@@ -55,7 +55,8 @@ public abstract class DynamicRegistryListSettingScreen<T> extends CollectionList
             try {
                 Identifier id = entry.contains(":") ? Identifier.of(entry) : Identifier.ofVanilla(entry);
                 addValue(RegistryKey.of(registryKey, id));
-            } catch (InvalidIdentifierException ignored) {}
+            } catch (IdentifierException ignored) {
+            }
         };
     }
 }

@@ -12,23 +12,23 @@ import meteordevelopment.meteorclient.gui.widgets.WLabel;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.mixin.TextHandlerAccessor;
+import meteordevelopment.meteorclient.mixin.StringSplitterAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.font.TextHandler;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.WritableBookContentComponent;
-import net.minecraft.component.type.WrittenBookContentComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
+import net.minecraft.client.StringSplitter;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.WritableBookContent;
+import net.minecraft.world.item.component.WrittenBookContent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
@@ -177,7 +177,7 @@ public class BookBot extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         Predicate<ItemStack> bookPredicate = i -> {
-            WritableBookContentComponent component = i.get(DataComponentTypes.WRITABLE_BOOK_CONTENT);
+            WritableBookContent component = i.get(DataComponents.WRITABLE_BOOK_CONTENT);
             return i.getItem() == Items.WRITABLE_BOOK && (component == null || component.pages().isEmpty());
         };
 
@@ -227,10 +227,10 @@ public class BookBot extends Module {
             // Handle the file being empty
             if (file.length() == 0) {
                 MutableText message = Text.literal("");
-                message.append(Text.literal("The bookbot file is empty! ").formatted(Formatting.RED));
+                message.append(Text.literal("The bookbot file is empty! ").formatted(ChatFormatting.RED));
                 message.append(Text.literal("Click here to edit it.")
                     .setStyle(Style.EMPTY
-                        .withFormatting(Formatting.UNDERLINE, Formatting.RED)
+                        .withFormatting(ChatFormatting.UNDERLINE, ChatFormatting.RED)
                         .withClickEvent(new ClickEvent.OpenFile(file.getAbsolutePath()))
                     )
                 );
@@ -274,7 +274,7 @@ public class BookBot extends Module {
             processLinesToPages(wrappedLines, pages, filteredPages, maxPages);
         } else {
             // Non-word-wrapping logic
-            TextHandler.WidthRetriever widthRetriever = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).meteor$getWidthRetriever();
+            StringSplitter.WidthProvider widthRetriever = ((StringSplitterAccessor) mc.textRenderer.getTextHandler()).meteor$getWidthProvider();
             int pageIndex = 0;
             int lineIndex = 0;
             final StringBuilder page = new StringBuilder();
@@ -370,7 +370,7 @@ public class BookBot extends Module {
         if (count.get() && bookCount != 0) title += " #" + bookCount;
 
         // Write data to book
-        mc.player.getMainHandStack().set(DataComponentTypes.WRITTEN_BOOK_CONTENT, new WrittenBookContentComponent(RawFilteredPair.of(title), mc.player.getGameProfile().name(), 0, filteredPages, true));
+        mc.player.getMainHandStack().set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContentComponent(RawFilteredPair.of(title), mc.player.getGameProfile().name(), 0, filteredPages, true));
 
         // Send book update to server
         mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().getSelectedSlot(), pages, sign.get() ? Optional.of(title) : Optional.empty()));
@@ -379,8 +379,8 @@ public class BookBot extends Module {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = super.toTag();
+    public CompoundTag toTag() {
+        CompoundTag tag = super.toTag();
 
         if (file != null && file.exists()) {
             tag.putString("file", file.getAbsolutePath());
@@ -390,7 +390,7 @@ public class BookBot extends Module {
     }
 
     @Override
-    public Module fromTag(NbtCompound tag) {
+    public Module fromTag(CompoundTag tag) {
         if (tag.contains("file")) {
             file = new File(tag.getString("file", ""));
         }

@@ -12,13 +12,13 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.MyPotion;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.Potions;
-import net.minecraft.screen.BrewingStandScreenHandler;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.inventory.BrewingStandMenu;
 
 public class AutoBrewer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -47,7 +47,7 @@ public class AutoBrewer extends Module {
         first = false;
     }
 
-    public void tick(BrewingStandScreenHandler c) {
+    public void tick(BrewingStandMenu c) {
         timer++;
 
         // When the brewing stand is opened.
@@ -84,7 +84,7 @@ public class AutoBrewer extends Module {
         }
     }
 
-    private boolean insertIngredient(BrewingStandScreenHandler c, Item ingredient) {
+    private boolean insertIngredient(BrewingStandMenu c, Item ingredient) {
         int slot = -1;
 
         for (int slotI = 5; slotI < c.slots.size(); slotI++) {
@@ -105,7 +105,7 @@ public class AutoBrewer extends Module {
         return false;
     }
 
-    private boolean checkFuel(BrewingStandScreenHandler c) {
+    private boolean checkFuel(BrewingStandMenu c) {
         if (c.getFuel() == 0) {
             int slot = -1;
 
@@ -128,17 +128,17 @@ public class AutoBrewer extends Module {
         return false;
     }
 
-    private void moveOneItem(BrewingStandScreenHandler c, int from, int to) {
+    private void moveOneItem(BrewingStandMenu c, int from, int to) {
         InvUtils.move().fromId(from).toId(to);
     }
 
-    private boolean insertWaterBottles(BrewingStandScreenHandler c) {
+    private boolean insertWaterBottles(BrewingStandMenu c) {
         for (int i = 0; i < 3; i++) {
             int slot = -1;
 
             for (int slotI = 5; slotI < c.slots.size(); slotI++) {
                 if (c.slots.get(slotI).getStack().getItem() == Items.POTION) {
-                    Potion potion = c.slots.get(slotI).getStack().get(DataComponentTypes.POTION_CONTENTS).potion().get().value();
+                    Potion potion = c.slots.get(slotI).getStack().get(DataComponents.POTION_CONTENTS).potion().get().value();
                     if (potion == Potions.WATER.value()) {
                         slot = slotI;
                         break;
@@ -158,7 +158,7 @@ public class AutoBrewer extends Module {
         return false;
     }
 
-    private boolean takePotions(BrewingStandScreenHandler c) {
+    private boolean takePotions(BrewingStandMenu c) {
         for (int i = 0; i < 3; i++) {
             InvUtils.shiftClick().slotId(i);
 

@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.ApplyTransformationEvent;
 import meteordevelopment.meteorclient.events.render.RenderItemEntityEvent;
-import meteordevelopment.meteorclient.mixin.ItemRenderStateAccessor;
+import meteordevelopment.meteorclient.mixin.ItemStackRenderStateAccessor;
 import meteordevelopment.meteorclient.mixin.LayerRenderStateAccessor;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -15,14 +15,14 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.render.model.json.Transformation;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemTransform;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.entity.item.ItemEntity;
+import com.mojang.math.Axis;
+import net.minecraft.util.RandomSource;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -40,7 +40,7 @@ public class ItemPhysics extends Module {
         .build()
     );
 
-    private final Random random = Random.createLocal();
+    private final RandomSource random = RandomSource.createLocal();
     private boolean skipTransformation;
 
     public ItemPhysics() {
@@ -54,12 +54,12 @@ public class ItemPhysics extends Module {
         if (event.renderState.itemRenderState.isEmpty() || event.itemEntity == null)
             return;
 
-        MatrixStack matrices = event.matrixStack;
+        PoseStack matrices = event.matrixStack;
 
         random.setSeed(event.itemEntity.getId() * 89748956L);
 
-        for (int i = 0; i < ((ItemRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayerCount(); i++) {
-            ItemRenderState.LayerRenderState layer = ((ItemRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayers()[i];
+        for (int i = 0; i < ((ItemStackRenderStateAccessor) event.renderState.itemRenderState).meteor$getActiveLayerCount(); i++) {
+            ItemStackRenderState.LayerRenderState layer = ((ItemStackRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayers()[i];
             ModelInfo info = getInfo(layer.getQuads());
 
             matrices.push();
@@ -68,18 +68,18 @@ public class ItemPhysics extends Module {
             offsetInWater(matrices, event.itemEntity);
 
             if (info.flat) {
-                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
+                matrices.multiply(Axis.POSITIVE_X.rotationDegrees(90));
                 matrices.translate(0, 0, info.offsetZ);
             }
 
             if (randomRotation.get()) {
-                var axis = RotationAxis.POSITIVE_Y;
+                var axis = Axis.POSITIVE_Y;
                 var x = 0.5f;
                 var y = 0.0f;
                 var z = 0.5f;
 
                 if (info.flat) {
-                    axis = RotationAxis.POSITIVE_Z;
+                    axis = Axis.POSITIVE_Z;
                     y = 0.5f;
                     z = 0.0f;
                 }
@@ -104,7 +104,7 @@ public class ItemPhysics extends Module {
     }
 
     private void renderLayer(RenderItemEntityEvent event, ModelInfo info) {
-        MatrixStack matrices = event.matrixStack;
+        PoseStack matrices = event.matrixStack;
         skipTransformation = true;
 
         for (int j = 0; j < event.renderState.renderedAmount; j++) {
@@ -127,7 +127,7 @@ public class ItemPhysics extends Module {
         skipTransformation = false;
     }
 
-    private void translate(MatrixStack matrices, ModelInfo info, float x, float y, float z) {
+    private void translate(PoseStack matrices, ModelInfo info, float x, float y, float z) {
         if (info.flat) {
             float temp = y;
             y = z;
@@ -137,7 +137,7 @@ public class ItemPhysics extends Module {
         matrices.translate(x, y, z);
     }
 
-    private void applyTransformation(MatrixStack matrices, Transformation transform) {
+    private void applyTransformation(PoseStack matrices, ItemTransform transform) {
         transform = new Transformation(
             transform.rotation(),
             new Vector3f(transform.translation().x(), 0, transform.translation().z()),
@@ -147,7 +147,7 @@ public class ItemPhysics extends Module {
         transform.apply(false, matrices.peek());
     }
 
-    private void offsetInWater(MatrixStack matrices, ItemEntity entity) {
+    private void offsetInWater(PoseStack matrices, ItemEntity entity) {
         if (entity.isTouchingWater()) {
             matrices.translate(0, 0.333f, 0);
         }
@@ -187,5 +187,6 @@ public class ItemPhysics extends Module {
         return new ModelInfo(flat, 0.5f - minY, -maxZ);
     }
 
-    record ModelInfo(boolean flat, float offsetY, float offsetZ) {}
+    record ModelInfo(boolean flat, float offsetY, float offsetZ) {
+    }
 }

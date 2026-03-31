@@ -13,12 +13,12 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 
 public class ChestSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -62,9 +62,9 @@ public class ChestSwap extends Module {
     public void swap() {
         ItemStack currentItem = mc.player.getEquippedStack(EquipmentSlot.CHEST);
 
-        if (currentItem.contains(DataComponentTypes.GLIDER)) {
+        if (currentItem.contains(DataComponents.GLIDER)) {
             equipChestplate();
-        } else if (currentItem.contains(DataComponentTypes.EQUIPPABLE) && currentItem.get(DataComponentTypes.EQUIPPABLE).slot().getEntitySlotId() == EquipmentSlot.CHEST.getEntitySlotId()) {
+        } else if (currentItem.contains(DataComponents.EQUIPPABLE) && currentItem.get(DataComponents.EQUIPPABLE).slot().getEntitySlotId() == EquipmentSlot.CHEST.getEntitySlotId()) {
             equipElytra();
         } else {
             if (!equipChestplate()) equipElytra();
@@ -120,7 +120,7 @@ public class ChestSwap extends Module {
         for (int i = 0; i < mc.player.getInventory().getMainStacks().size(); i++) {
             ItemStack item = mc.player.getInventory().getMainStacks().get(i);
 
-            if (item.contains(DataComponentTypes.GLIDER)) {
+            if (item.contains(DataComponents.GLIDER)) {
                 equip(i);
                 break;
             }

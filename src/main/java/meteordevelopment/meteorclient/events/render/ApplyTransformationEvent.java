@@ -6,15 +6,15 @@
 package meteordevelopment.meteorclient.events.render;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.client.render.model.json.Transformation;
+import net.minecraft.client.renderer.block.model.ItemTransform;
 
 public class ApplyTransformationEvent extends Cancellable {
     private static final ApplyTransformationEvent INSTANCE = new ApplyTransformationEvent();
 
-    public Transformation transformation;
+    public ItemTransform transformation;
     public boolean leftHanded;
 
-    public static ApplyTransformationEvent get(Transformation transformation, boolean leftHanded) {
+    public static ApplyTransformationEvent get(ItemTransform transformation, boolean leftHanded) {
         INSTANCE.setCancelled(false);
 
         INSTANCE.transformation = transformation;

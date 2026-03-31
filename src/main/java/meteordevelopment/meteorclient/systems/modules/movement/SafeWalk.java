@@ -13,13 +13,13 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.PlayerInput;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.ClipContext;
 
 public class SafeWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -90,14 +90,12 @@ public class SafeWalk extends Module {
     private void onClipAtLedge(ClipAtLedgeEvent event) {
         if (fallDistance.get() > 1) {
             // meteordevelopment.meteorclient.utils.entity.DamageUtils.fallDamage
-            int surface = mc.world.getWorldChunk(mc.player.getBlockPos()).getHeightmap(Heightmap.Type.MOTION_BLOCKING).get(mc.player.getBlockX() & 15, mc.player.getBlockZ() & 15);
+            int surface = mc.world.getWorldChunk(mc.player.getBlockPos()).getHeightmap(Heightmap.Types.MOTION_BLOCKING).get(mc.player.getBlockX() & 15, mc.player.getBlockZ() & 15);
             if (mc.player.getBlockY() >= surface) {
                 if (mc.player.getBlockY() - surface < fallDistance.get()) return;
-            }
-
-            else {
-                BlockHitResult raycastResult = mc.world.raycast(new RaycastContext(mc.player.getEntityPos(), new Vec3d(mc.player.getX(), mc.world.getBottomY(), mc.player.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.WATER, mc.player));
-                if (raycastResult.getType() != HitResult.Type.MISS) {
+            } else {
+                BlockHitResult raycastResult = mc.world.raycast(new RaycastContext(mc.player.getEntityPos(), new Vec3d(mc.player.getX(), mc.world.getBottomY(), mc.player.getZ()), ClipContext.Block.COLLIDER, ClipContext.Fluid.WATER, mc.player));
+                if (raycastResult.getType() != BlockHitResult.Type.MISS) {
                     if ((int) (mc.player.getY() - raycastResult.getBlockPos().up().getY()) < fallDistance.get()) return;
                 }
             }
@@ -107,8 +105,8 @@ public class SafeWalk extends Module {
             boolean closeToEdge = false;
             boolean isSprinting = !sneakSprint.get() && mc.options.sprintKey.isPressed();
 
-            Box playerBox = mc.player.getBoundingBox();
-            Box adjustedBox = getAdjustedPlayerBox(playerBox);
+            AABB playerBox = mc.player.getBoundingBox();
+            AABB adjustedBox = getAdjustedPlayerBox(playerBox);
 
             if (mc.world.isSpaceEmpty(mc.player, adjustedBox) && mc.player.isOnGround()) closeToEdge = true;
 
@@ -132,7 +130,7 @@ public class SafeWalk extends Module {
         }
     }
 
-    private Box getAdjustedPlayerBox(Box playerBox) {
+    private AABB getAdjustedPlayerBox(AABB playerBox) {
         return playerBox.stretch(0, -mc.player.getStepHeight(), 0)
             .expand(-edgeDistance.get(), 0, -edgeDistance.get());
     }
@@ -140,8 +138,8 @@ public class SafeWalk extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (sneak.get() && renderEdgeDistance.get()) {
-            Box playerBox = mc.player.getBoundingBox();
-            Box adjustedBox = getAdjustedPlayerBox(playerBox);
+            AABB playerBox = mc.player.getBoundingBox();
+            AABB adjustedBox = getAdjustedPlayerBox(playerBox);
 
             event.renderer.box(adjustedBox, Color.BLUE, Color.RED, ShapeMode.Lines, 0);
 

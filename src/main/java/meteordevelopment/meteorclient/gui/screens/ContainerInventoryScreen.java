@@ -8,18 +8,18 @@ package meteordevelopment.meteorclient.gui.screens;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.BundleContentsComponent;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.BundleItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.BundleContents;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.BundleItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ public class ContainerInventoryScreen extends Screen {
     private static final int SCREEN_WIDTH = 176;
 
     private final List<ItemStack> containerItems;
-    private final PlayerInventory playerInventory;
+    private final Inventory playerInventory;
     private final int containerRows;
     private int x, y;
 
@@ -50,7 +50,7 @@ public class ContainerInventoryScreen extends Screen {
 
         this.containerItems = new ArrayList<>();
         if (containerItem.getItem() instanceof BundleItem) {
-            BundleContentsComponent bundleContents = containerItem.get(DataComponentTypes.BUNDLE_CONTENTS);
+            BundleContents bundleContents = containerItem.get(DataComponents.BUNDLE_CONTENTS);
             if (bundleContents != null) {
                 bundleContents.iterate().forEach(containerItems::add);
             }
@@ -60,7 +60,7 @@ public class ContainerInventoryScreen extends Screen {
             Collections.addAll(containerItems, tempItems);
         }
 
-        this.containerRows = Math.max(1, MathHelper.ceilDiv(containerItems.size(), 9));
+        this.containerRows = Math.max(1, Mth.ceilDiv(containerItems.size(), 9));
     }
 
     @Override
@@ -71,7 +71,7 @@ public class ContainerInventoryScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
 
         baseX = x + 8;
@@ -128,7 +128,7 @@ public class ContainerInventoryScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         ItemStack stack = getSelectedItem((int) click.x(), (int) click.y());
@@ -140,7 +140,7 @@ public class ContainerInventoryScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
         ItemStack stack = getSelectedItem((int) mc.mouse.getScaledX(mc.getWindow()), (int) mc.mouse.getScaledY(mc.getWindow()));

@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
+import meteordevelopment.meteorclient.mixin.ServerboundMovePlayerPacketAccessor;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.pathing.PathManagers;
@@ -26,18 +26,18 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.item.MaceItem;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MaceItem;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 
 import java.util.function.Predicate;
@@ -125,9 +125,9 @@ public class NoFall extends Module {
         if (!Modules.get().isActive(Flight.class)) {
             if (mc.player.isGliding()) return;
             if (mc.player.getVelocity().y > -0.5) return;
-            ((PlayerMoveC2SPacketAccessor) event.packet).meteor$setOnGround(true);
+            ((ServerboundMovePlayerPacketAccessor) event.packet).meteor$setOnGround(true);
         } else {
-            ((PlayerMoveC2SPacketAccessor) event.packet).meteor$setOnGround(true);
+            ((ServerboundMovePlayerPacketAccessor) event.packet).meteor$setOnGround(true);
         }
     }
 
@@ -165,7 +165,7 @@ public class NoFall extends Module {
         else if (mode.get() == Mode.Place) {
             PlacedItem placedItem1 = mc.world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.WATER_EVAPORATES_GAMEPLAY) && placedItem.get() == PlacedItem.Bucket ? PlacedItem.PowderSnow : placedItem.get();
             if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
-                Item item = placedItem1.item;
+                BlockItem item = placedItem1.item;
 
                 // Place
                 FindItemResult findItemResult = InvUtils.findInHotbar(item);
@@ -175,10 +175,10 @@ public class NoFall extends Module {
                 if (anchor.get()) PlayerUtils.centerPlayer();
 
                 // Check if there is a block within 5 blocks
-                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getEntityPos(), mc.player.getEntityPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getEntityPos(), mc.player.getEntityPos().subtract(0, 5, 0), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
 
                 // Place
-                if (result != null && result.getType() == HitResult.Type.BLOCK) {
+                if (result != null && result.getType() == BlockHitResult.Type.BLOCK) {
                     targetPos = result.getBlockPos().up();
                     if (placedItem1 == PlacedItem.Bucket)
                         useItem(findItemResult, true, targetPos, true);
@@ -193,7 +193,7 @@ public class NoFall extends Module {
                 timer++;
                 if (mc.player.getBlockStateAtPos().getBlock() == placedItem1.block) {
                     useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos, true);
-                } else if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == Blocks.POWDER_SNOW && mc.player.fallDistance==0 && placedItem1.block==Blocks.POWDER_SNOW){ //check if the powder snow block is still there and the player is on the ground
+                } else if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == Blocks.POWDER_SNOW && mc.player.fallDistance == 0 && placedItem1.block == Blocks.POWDER_SNOW) { //check if the powder snow block is still there and the player is on the ground
                     useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos.down(), true);
                 }
             }
@@ -210,10 +210,10 @@ public class NoFall extends Module {
         if (interactItem) {
             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 10, true, () -> {
                 if (item.isOffhand()) {
-                    mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
+                    mc.interactionManager.interactItem(mc.player, InteractionHand.OFF_HAND);
                 } else {
                     InvUtils.swap(item.slot(), true);
-                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                    mc.interactionManager.interactItem(mc.player, InteractionHand.MAIN_HAND);
                     InvUtils.swapBack();
                 }
             });
@@ -242,10 +242,10 @@ public class NoFall extends Module {
         Cobweb(Items.COBWEB, Blocks.COBWEB),
         SlimeBlock(Items.SLIME_BLOCK, Blocks.SLIME_BLOCK);
 
-        private final Item item;
+        private final BlockItem item;
         private final Block block;
 
-        PlacedItem(Item item, Block block) {
+        PlacedItem(BlockItem item, Block block) {
             this.item = item;
             this.block = block;
         }

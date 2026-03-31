@@ -17,23 +17,23 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.text.TextUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.Dimension;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BedBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.EndCrystalEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.PotionItem;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.GameMode;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.entity.BedBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -48,7 +48,7 @@ public class PlayerUtils {
     private PlayerUtils() {
     }
 
-    public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
+    public static Color getPlayerColor(Player entity, Color defaultColor) {
         if (Friends.get().isFriend(entity)) {
             return color.set(Config.get().friendColor.get()).a(defaultColor.a);
         }
@@ -106,23 +106,23 @@ public class PlayerUtils {
     }
 
     public static void centerPlayer() {
-        double x = MathHelper.floor(mc.player.getX()) + 0.5;
-        double z = MathHelper.floor(mc.player.getZ()) + 0.5;
+        double x = Mth.floor(mc.player.getX()) + 0.5;
+        double z = Mth.floor(mc.player.getZ()) + 0.5;
         mc.player.setPosition(x, mc.player.getY(), z);
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround(), mc.player.horizontalCollision));
+        mc.player.networkHandler.sendPacket(new ServerboundMovePlayerPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround(), mc.player.horizontalCollision));
     }
 
     @SuppressWarnings("DataFlowIssue")
-    public static boolean canSeeEntity(Entity entity) {
+    public static boolean canSeeEntity(BedBlockEntity entity) {
         Vec3d vec1 = new Vec3d(0, 0, 0);
         Vec3d vec2 = new Vec3d(0, 0, 0);
 
         ((IVec3d) vec1).meteor$set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
         ((IVec3d) vec2).meteor$set(entity.getX(), entity.getY(), entity.getZ());
-        boolean canSeeFeet = mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+        boolean canSeeFeet = mc.world.raycast(new RaycastContext(vec1, vec2, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
         ((IVec3d) vec2).meteor$set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
-        boolean canSeeEyes = mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+        boolean canSeeEyes = mc.world.raycast(new RaycastContext(vec1, vec2, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
         return canSeeFeet || canSeeEyes;
     }
@@ -136,12 +136,13 @@ public class PlayerUtils {
 
         double dist = Math.sqrt(dX * dX + dZ * dZ);
 
-        return new float[]{(float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dZ, dX)) - 90.0D), (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dY, dist)))};
+        return new float[]{(float) Mth.wrapDegrees(Math.toDegrees(Math.atan2(dZ, dX)) - 90.0D), (float) Mth.wrapDegrees(Math.toDegrees(Math.atan2(dY, dist)))};
     }
 
     public static boolean shouldPause(boolean ifBreaking, boolean ifEating, boolean ifDrinking) {
         if (ifBreaking && mc.interactionManager.isBreakingBlock()) return true;
-        if (ifEating && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().getComponents().contains(DataComponentTypes.FOOD) || mc.player.getOffHandStack().getItem().getComponents().contains(DataComponentTypes.FOOD)))) return true;
+        if (ifEating && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().getComponents().contains(DataComponents.FOOD) || mc.player.getOffHandStack().getItem().getComponents().contains(DataComponents.FOOD))))
+            return true;
         return ifDrinking && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem() instanceof PotionItem || mc.player.getOffHandStack().getItem() instanceof PotionItem));
     }
 
@@ -192,14 +193,14 @@ public class PlayerUtils {
         float damageTaken = 0;
 
         if (entities) {
-            for (Entity entity : mc.world.getEntities()) {
+            for (BedBlockEntity entity : mc.world.getEntities()) {
                 // Check for end crystals
-                if (entity instanceof EndCrystalEntity) {
+                if (entity instanceof EndCrystal) {
                     float crystalDamage = DamageUtils.crystalDamage(mc.player, entity.getEntityPos());
                     if (crystalDamage > damageTaken) damageTaken = crystalDamage;
                 }
                 // Check for players holding swords
-                else if (entity instanceof PlayerEntity player && !Friends.get().isFriend(player) && isWithin(entity, 5)) {
+                else if (entity instanceof Player player && !Friends.get().isFriend(player) && isWithin(entity, 5)) {
                     float attackDamage = DamageUtils.getAttackDamage(player, mc.player);
                     if (attackDamage > damageTaken) damageTaken = attackDamage;
                 }
@@ -207,7 +208,7 @@ public class PlayerUtils {
 
             // Check for beds if in nether
             if (mc.world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.BED_RULE_GAMEPLAY).explodes()) {
-                for (BlockEntity blockEntity : Utils.blockEntities()) {
+                for (BedBlockEntity blockEntity : Utils.blockEntities()) {
                     BlockPos bp = blockEntity.getPos();
                     Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
 
@@ -237,7 +238,7 @@ public class PlayerUtils {
         return Math.sqrt(squaredDistance(x1, y1, z1, x2, y2, z2));
     }
 
-    public static double distanceTo(Entity entity) {
+    public static double distanceTo(BedBlockEntity entity) {
         return distanceTo(entity.getX(), entity.getY(), entity.getZ());
     }
 
@@ -253,7 +254,7 @@ public class PlayerUtils {
         return Math.sqrt(squaredDistanceTo(x, y, z));
     }
 
-    public static double squaredDistanceTo(Entity entity) {
+    public static double squaredDistanceTo(BedBlockEntity entity) {
         return squaredDistanceTo(entity.getX(), entity.getY(), entity.getZ());
     }
 
@@ -272,7 +273,7 @@ public class PlayerUtils {
         return org.joml.Math.fma(f, f, org.joml.Math.fma(g, g, h * h));
     }
 
-    public static boolean isWithin(Entity entity, double r) {
+    public static boolean isWithin(BedBlockEntity entity, double r) {
         return squaredDistanceTo(entity.getX(), entity.getY(), entity.getZ()) <= r * r;
     }
 
@@ -292,7 +293,7 @@ public class PlayerUtils {
         return Math.sqrt(squaredDistanceToCamera(x, y, z));
     }
 
-    public static double distanceToCamera(Entity entity) {
+    public static double distanceToCamera(BedBlockEntity entity) {
         return distanceToCamera(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ());
     }
 
@@ -301,11 +302,11 @@ public class PlayerUtils {
         return squaredDistance(cameraPos.x, cameraPos.y, cameraPos.z, x, y, z);
     }
 
-    public static double squaredDistanceToCamera(Entity entity) {
+    public static double squaredDistanceToCamera(BedBlockEntity entity) {
         return squaredDistanceToCamera(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ());
     }
 
-    public static boolean isWithinCamera(Entity entity, double r) {
+    public static boolean isWithinCamera(BedBlockEntity entity, double r) {
         return squaredDistanceToCamera(entity.getX(), entity.getY(), entity.getZ()) <= r * r;
     }
 
@@ -321,7 +322,7 @@ public class PlayerUtils {
         return squaredDistanceToCamera(x, y, z) <= r * r;
     }
 
-    public static boolean isWithinReach(Entity entity) {
+    public static boolean isWithinReach(BedBlockEntity entity) {
         return isWithinReach(entity.getX(), entity.getY(), entity.getZ());
     }
 
@@ -347,9 +348,9 @@ public class PlayerUtils {
         };
     }
 
-    public static GameMode getGameMode() {
+    public static GameType getGameMode() {
         if (mc.player == null) return null;
-        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        PlayerInfo playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
         if (playerListEntry == null) return null;
         return playerListEntry.getGameMode();
     }
@@ -365,7 +366,7 @@ public class PlayerUtils {
     public static int getPing() {
         if (mc.getNetworkHandler() == null) return 0;
 
-        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        PlayerInfo playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
         if (playerListEntry == null) return 0;
         return playerListEntry.getLatency();
     }

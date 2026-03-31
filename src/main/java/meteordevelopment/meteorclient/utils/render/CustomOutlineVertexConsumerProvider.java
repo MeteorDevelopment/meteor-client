@@ -5,16 +5,16 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.BufferAllocator;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 
-public class CustomOutlineVertexConsumerProvider implements VertexConsumerProvider {
-    private final VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(new BufferAllocator(1536));
+public class CustomOutlineVertexConsumerProvider implements MultiBufferSource {
+    private final MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(new BufferAllocator(1536));
 
     @Override
-    public VertexConsumer getBuffer(RenderLayer layer) {
+    public VertexConsumer getBuffer(RenderType layer) {
         if (layer.isOutline()) {
             return new CustomVertexConsumer(this.immediate.getBuffer(layer));
         }

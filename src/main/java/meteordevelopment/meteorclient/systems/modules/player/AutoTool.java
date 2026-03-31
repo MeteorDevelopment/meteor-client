@@ -20,13 +20,13 @@ import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShearsItem;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -219,11 +219,13 @@ public class AutoTool extends Module {
         score += Utils.getEnchantmentLevel(itemStack, Enchantments.EFFICIENCY);
         score += Utils.getEnchantmentLevel(itemStack, Enchantments.MENDING);
 
-        if (enchantPreference == EnchantPreference.Fortune) score += Utils.getEnchantmentLevel(itemStack, Enchantments.FORTUNE);
-        if (enchantPreference == EnchantPreference.SilkTouch) score += Utils.getEnchantmentLevel(itemStack, Enchantments.SILK_TOUCH);
+        if (enchantPreference == EnchantPreference.Fortune)
+            score += Utils.getEnchantmentLevel(itemStack, Enchantments.FORTUNE);
+        if (enchantPreference == EnchantPreference.SilkTouch)
+            score += Utils.getEnchantmentLevel(itemStack, Enchantments.SILK_TOUCH);
 
         if (itemStack.isIn(ItemTags.SWORDS) && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
-            score += 9000 + (itemStack.get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
+            score += 9000 + (itemStack.get(DataComponents.TOOL).getSpeed(state) * 1000);
 
         return score;
     }

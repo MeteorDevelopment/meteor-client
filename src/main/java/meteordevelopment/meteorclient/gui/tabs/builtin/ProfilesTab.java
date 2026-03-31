@@ -25,9 +25,9 @@ import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.NbtIo;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
@@ -97,7 +97,8 @@ public class ProfilesTab extends Tab {
             importBtn.action = () -> {
                 try {
                     Profile imported = importProfile();
-                    if (imported != null) MeteorClient.LOG.info("Successfully imported profile '{}'.", imported.name.get());
+                    if (imported != null)
+                        MeteorClient.LOG.info("Successfully imported profile '{}'.", imported.name.get());
                     reload();
                 } catch (IOException e) {
                     MeteorClient.LOG.error("Error importing profile", e);
@@ -146,7 +147,7 @@ public class ProfilesTab extends Tab {
             if (file == null) return null;
             File profileFile = new File(file);
 
-            NbtCompound nbt = NbtIo.read(profileFile.toPath());
+            CompoundTag nbt = NbtIo.read(profileFile.toPath());
 
             Profile p = new Profile();
             p.name.set(nbt.getString("name", profileFile.getName()));
@@ -154,7 +155,7 @@ public class ProfilesTab extends Tab {
             p.getFile().mkdirs();
 
             nbt.remove("name");
-            for (Map.Entry<String, NbtElement> entry : nbt.entrySet()) {
+            for (Map.Entry<String, Tag> entry : nbt.entrySet()) {
                 String filename = entry.getKey();
 
                 switch (filename) {
@@ -292,7 +293,7 @@ public class ProfilesTab extends Tab {
             if (path == null) return;
             Path p = Path.of(path.endsWith(".nbt") ? path : path + ".nbt");
 
-            NbtCompound nbt = new NbtCompound();
+            CompoundTag nbt = new NbtCompound();
             nbt.putString("name", profile.name.get());
 
             try {
@@ -302,8 +303,7 @@ public class ProfilesTab extends Tab {
                         f.getName().equals("modules.nbt") && modules
                     ) {
                         nbt.put(f.getName(), NbtIo.read(f.toPath()));
-                    }
-                    else if (f.getName().endsWith(".nbt") && waypoints)
+                    } else if (f.getName().endsWith(".nbt") && waypoints)
                         nbt.put(f.getName(), NbtIo.read(f.toPath()));
                 }
 

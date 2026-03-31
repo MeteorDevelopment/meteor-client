@@ -7,10 +7,10 @@ package meteordevelopment.meteorclient.utils.notebot;
 
 import meteordevelopment.meteorclient.utils.notebot.instrumentdetect.InstrumentDetectFunction;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.NoteBlock;
-import net.minecraft.block.enums.NoteBlockInstrument;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.NoteBlock;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -49,8 +49,7 @@ public class NotebotUtils {
         Didgeridoo(NoteBlockInstrument.DIDGERIDOO),
         Bit(NoteBlockInstrument.BIT),
         Banjo(NoteBlockInstrument.BANJO),
-        Pling(NoteBlockInstrument.PLING)
-        ;
+        Pling(NoteBlockInstrument.PLING);
         public static final Map<NoteBlockInstrument, OptionalInstrument> BY_MINECRAFT_INSTRUMENT = new HashMap<>();
 
         static {

@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules;
 
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Items;
 
 public class Categories {
     public static final Category Combat = new Category("Combat", Items.GOLDEN_SWORD.getDefaultStack());

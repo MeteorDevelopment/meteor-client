@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 public class Zoom extends Module {
@@ -158,7 +158,7 @@ public class Zoom extends Module {
         if (isActive()) time += event.frameTime * 5;
         else time -= event.frameTime * 5;
 
-        time = MathHelper.clamp(time, 0, 1);
+        time = Mth.clamp(time, 0, 1);
     }
 
     @EventHandler
@@ -171,7 +171,7 @@ public class Zoom extends Module {
 
     public double getScaling() {
         double delta = time < 0.5 ? 4 * time * time * time : 1 - Math.pow(-2 * time + 2, 3) / 2; // Ease in out cubic
-        return MathHelper.lerp(delta, 1, value);
+        return Mth.lerp(delta, 1, value);
     }
 
     public boolean renderHands() {

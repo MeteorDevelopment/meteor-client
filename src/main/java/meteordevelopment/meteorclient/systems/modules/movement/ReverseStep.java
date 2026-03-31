@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BedBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
 
 public class ReverseStep extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -58,7 +58,7 @@ public class ReverseStep extends Module {
         } else {
             if (mc.player.isHoldingOntoLadder() || mc.player.forwardSpeed == 0 && mc.player.sidewaysSpeed == 0) return;
             if (!isOnBed() && canSnap(mc.player)) {
-                ((IVec3d)mc.player.getVelocity()).meteor$setY(-fallSpeed.get());
+                ((IVec3d) mc.player.getVelocity()).meteor$setY(-fallSpeed.get());
             }
         }
     }
@@ -70,7 +70,7 @@ public class ReverseStep extends Module {
     }
 
     private boolean isOnBed() {
-        BlockPos.Mutable blockPos = mc.player.getBlockPos().mutableCopy();
+        BlockPos.MutableBlockPos blockPos = mc.player.getBlockPos().mutableCopy();
 
         if (check(blockPos, 0, 0)) return true;
 
@@ -88,7 +88,7 @@ public class ReverseStep extends Module {
         return xa >= 0.7 && za >= 0.7 && check(blockPos, 1, 1);
     }
 
-    private boolean check(BlockPos.Mutable blockPos, int x, int z) {
+    private boolean check(BlockPos.MutableBlockPos blockPos, int x, int z) {
         blockPos.move(x, 0, z);
         boolean is = mc.world.getBlockState(blockPos).getBlock() instanceof BedBlock;
         blockPos.move(-x, 0, -z);

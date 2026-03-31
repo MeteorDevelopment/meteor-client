@@ -8,11 +8,11 @@ package meteordevelopment.meteorclient.mixin.sodium;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
-import net.caffeinemc.mods.sodium.client.render.model.AbstractBlockRenderContext;
-import net.caffeinemc.mods.sodium.client.world.LevelSlice;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.caffeinemc.mods.sodium.client.render.chunk.compile.pipeline.BlockOcclusionCache;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class SodiumBlockOcclusionCacheMixin {
 
     @Shadow protected BlockState state;
-    @Shadow protected BlockPos pos; 
+    @Shadow protected BlockPos pos;
     @Shadow protected LevelSlice slice;
 
     @Unique private Xray xray;
@@ -44,7 +44,10 @@ public abstract class SodiumBlockOcclusionCacheMixin {
 
     @ModifyReturnValue(method = "shouldDrawSide", at = @At("RETURN"))
     private boolean shouldDrawSide(boolean original, Direction facing) {
-        if (!xray.isActive()) return original;
-        return xray.modifyDrawSide(state, slice, pos, facing, original);
+        if (xray.isActive()) {
+            return xray.modifyDrawSide(state, level, pos, facing, original);
+        }
+
+        return original;
     }
 }

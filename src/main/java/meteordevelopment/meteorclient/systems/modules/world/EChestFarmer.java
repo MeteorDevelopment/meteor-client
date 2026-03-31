@@ -19,17 +19,17 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class EChestFarmer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -122,7 +122,7 @@ public class EChestFarmer extends Module {
     private void onTick(TickEvent.Pre event) {
         // Finding target pos
         if (target == null) {
-            if (mc.crosshairTarget == null || mc.crosshairTarget.getType() != HitResult.Type.BLOCK) return;
+            if (mc.crosshairTarget == null || mc.crosshairTarget.getType() != BlockHitResult.Type.BLOCK) return;
 
             BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos().up();
             BlockState state = mc.world.getBlockState(pos);
@@ -187,7 +187,7 @@ public class EChestFarmer extends Module {
     private void onRender(Render3DEvent event) {
         if (target == null || !render.get() || Modules.get().get(PacketMine.class).isMiningBlock(target)) return;
 
-        Box box = SHAPE.getBoundingBoxes().getFirst();
+        AABB box = SHAPE.getBoundingBoxes().getFirst();
         event.renderer.box(target.getX() + box.minX, target.getY() + box.minY, target.getZ() + box.minZ, target.getX() + box.maxX, target.getY() + box.maxY, target.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }

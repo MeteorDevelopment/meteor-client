@@ -5,11 +5,11 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 
 public interface IPlayerInteractEntityC2SPacket {
-    PlayerInteractEntityC2SPacket.InteractType meteor$getType();
+    ServerboundInteractPacket.ActionType meteor$getType();
 
     Entity meteor$getEntity();
 }

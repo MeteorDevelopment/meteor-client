@@ -5,36 +5,36 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderState;
-import net.minecraft.client.render.block.entity.model.BannerFlagBlockModel;
-import net.minecraft.component.type.BannerPatternsComponent;
-import net.minecraft.util.DyeColor;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
+import net.minecraft.client.model.object.banner.BannerFlagModel;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
+import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
 
 public record CustomBannerGuiElementRenderState(
-    BannerFlagBlockModel flag,
+    BannerFlagModel flag,
     DyeColor baseColor,
-    BannerPatternsComponent resultBannerPatterns,
+    BannerPatternLayers resultBannerPatterns,
     int x1,
     int y1,
     int x2,
     int y2,
-    @Nullable ScreenRect scissorArea,
-    @Nullable ScreenRect bounds,
+    @Nullable ScreenRectangle scissorArea,
+    @Nullable ScreenRectangle bounds,
     float scale
-) implements SpecialGuiElementRenderState {
+) implements PictureInPictureRenderState {
     public CustomBannerGuiElementRenderState(
-        BannerFlagBlockModel bannerFlagBlockModel,
+        BannerFlagModel bannerFlagBlockModel,
         DyeColor color,
-        BannerPatternsComponent bannerPatterns,
+        BannerPatternLayers bannerPatterns,
         int x1,
         int y1,
         int x2,
         int y2,
-        @Nullable ScreenRect scissorArea,
+        @Nullable ScreenRectangle scissorArea,
         float scale
     ) {
-        this(bannerFlagBlockModel, color, bannerPatterns, x1, y1, x2, y2, scissorArea, SpecialGuiElementRenderState.createBounds(x1, y1, x2, y2, scissorArea), scale);
+        this(bannerFlagBlockModel, color, bannerPatterns, x1, y1, x2, y2, scissorArea, PictureInPictureRenderState.createBounds(x1, y1, x2, y2, scissorArea), scale);
     }
 }

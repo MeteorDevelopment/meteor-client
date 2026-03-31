@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.HandledScreenAccessor;
+import meteordevelopment.meteorclient.mixin.AbstractContainerScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -25,17 +25,17 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.DecoratedPotBlock;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.decoration.ItemFrameEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Hand;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DecoratedPotBlock;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.InteractionHand;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -171,10 +171,10 @@ public class InventoryTweaks extends Module {
 
     // Steal & Dump
 
-    public final Setting<List<ScreenHandlerType<?>>> stealScreens = sgStealDump.add(new ScreenHandlerListSetting.Builder()
+    public final Setting<List<MenuType<?>>> stealScreens = sgStealDump.add(new ScreenHandlerListSetting.Builder()
         .name("steal-screens")
         .description("Select the screens to display buttons and auto steal.")
-        .defaultValue(List.of(ScreenHandlerType.GENERIC_9X3, ScreenHandlerType.GENERIC_9X6))
+        .defaultValue(List.of(MenuType.GENERIC_9X3, MenuType.GENERIC_9X6))
         .build()
     );
 
@@ -311,7 +311,7 @@ public class InventoryTweaks extends Module {
     }
 
     private boolean sort() {
-        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null || (mc.player.isCreative() && disableInCreative.get()))
+        if (!sortingEnabled.get() || !(mc.currentScreen instanceof AbstractContainerScreen<?> screen) || sorter != null || (mc.player.isCreative() && disableInCreative.get()))
             return false;
 
         if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
@@ -320,7 +320,7 @@ public class InventoryTweaks extends Module {
             else InvUtils.click().slot(empty.slot());
         }
 
-        Slot focusedSlot = ((HandledScreenAccessor) screen).meteor$getFocusedSlot();
+        Slot focusedSlot = ((AbstractContainerScreenAccessor) screen).meteor$getHoveredSlot();
         if (focusedSlot == null) return false;
 
         sorter = new InventorySorter(screen, focusedSlot);
@@ -342,7 +342,8 @@ public class InventoryTweaks extends Module {
     @EventHandler
     private void onTickPost(TickEvent.Post event) {
         // Auto Drop
-        if (!Utils.canUpdate() || mc.currentScreen instanceof HandledScreen<?> || autoDropItems.get().isEmpty()) return;
+        if (!Utils.canUpdate() || mc.currentScreen instanceof AbstractContainerScreen<?> || autoDropItems.get().isEmpty())
+            return;
 
         for (int i = autoDropExcludeHotbar.get() ? 9 : 0; i < mc.player.getInventory().size(); i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
@@ -365,7 +366,7 @@ public class InventoryTweaks extends Module {
     @EventHandler
     private void onInteractEntity(InteractEntityEvent event) {
         if (!antiItemFrame.get() || antiDropOverrideBind.get().isPressed()) return;
-        if (!(event.entity instanceof ItemFrameEntity)) return;
+        if (!(event.entity instanceof ItemFrame)) return;
 
         Item item = mc.player.getStackInHand(event.hand).getItem();
         if (antiDropItems.get().contains(item)) event.cancel();
@@ -374,7 +375,7 @@ public class InventoryTweaks extends Module {
     @EventHandler
     private void onInteractBlock(InteractBlockEvent event) {
         if (!antiItemFrame.get() || antiDropOverrideBind.get().isPressed()) return;
-        if (event.hand != Hand.MAIN_HAND) return;
+        if (event.hand != InteractionHand.MAIN_HAND) return;
         Block block = mc.world.getBlockState(event.result.getBlockPos()).getBlock();
         if (!(block instanceof DecoratedPotBlock)) return;
 
@@ -386,7 +387,7 @@ public class InventoryTweaks extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!xCarry.get() || !(event.packet instanceof CloseHandledScreenC2SPacket packet)) return;
+        if (!xCarry.get() || !(event.packet instanceof ServerboundContainerClosePacket packet)) return;
 
         if (packet.getSyncId() == mc.player.playerScreenHandler.syncId) {
             invOpened = true;
@@ -407,7 +408,7 @@ public class InventoryTweaks extends Module {
         return autoStealDelay.get() + (autoStealRandomDelay.get() > 0 ? ThreadLocalRandom.current().nextInt(0, autoStealRandomDelay.get()) : 0);
     }
 
-    private void moveSlots(ScreenHandler handler, int start, int end, boolean steal) {
+    private void moveSlots(AbstractContainerMenu handler, int start, int end, boolean steal) {
         boolean initial = autoStealInitDelay.get() != 0;
         for (int i = start; i < end; i++) {
             if (!handler.getSlot(i).hasStack()) continue;
@@ -453,11 +454,11 @@ public class InventoryTweaks extends Module {
         }
     }
 
-    public void steal(ScreenHandler handler) {
+    public void steal(AbstractContainerMenu handler) {
         MeteorExecutor.execute(() -> moveSlots(handler, 0, SlotUtils.indexToId(SlotUtils.MAIN_START), true));
     }
 
-    public void dump(ScreenHandler handler) {
+    public void dump(AbstractContainerMenu handler) {
         int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START);
         MeteorExecutor.execute(() -> moveSlots(handler, playerInvOffset, playerInvOffset + 4 * 9, false));
     }
@@ -478,7 +479,7 @@ public class InventoryTweaks extends Module {
         return isActive() && frameInput.get();
     }
 
-    public boolean canSteal(ScreenHandler handler) {
+    public boolean canSteal(AbstractContainerMenu handler) {
         try {
             return (stealScreens.get().contains(handler.getType()));
         } catch (UnsupportedOperationException e) {
@@ -488,7 +489,7 @@ public class InventoryTweaks extends Module {
 
     @EventHandler
     private void onInventory(InventoryEvent event) {
-        ScreenHandler handler = mc.player.currentScreenHandler;
+        AbstractContainerMenu handler = mc.player.currentScreenHandler;
         if (canSteal(handler) && event.packet.syncId() == handler.syncId) {
             if (autoSteal.get()) {
                 steal(handler);

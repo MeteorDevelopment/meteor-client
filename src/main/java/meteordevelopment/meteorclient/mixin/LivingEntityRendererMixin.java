@@ -15,20 +15,20 @@ import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.scores.PlayerTeam;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,15 +42,15 @@ import static org.lwjgl.opengl.GL11C.*;
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> {
     // Freecam
 
-    @ModifyExpressionValue(method = "hasLabel(Lnet/minecraft/entity/LivingEntity;D)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getCameraEntity()Lnet/minecraft/entity/Entity;"))
+    @ModifyExpressionValue(method = "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getCameraEntity()Lnet/minecraft/world/entity/Entity;"))
     private Entity hasLabelGetCameraEntityProxy(Entity cameraEntity) {
         return Modules.get().isActive(Freecam.class) ? null : cameraEntity;
     }
 
     // Player model rendering in main menu
 
-    @ModifyExpressionValue(method = "hasLabel(Lnet/minecraft/entity/LivingEntity;D)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getScoreboardTeam()Lnet/minecraft/scoreboard/Team;"))
-    private Team hasLabelClientPlayerEntityGetScoreboardTeamProxy(Team team) {
+    @ModifyExpressionValue(method = "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getScoreboardTeam()Lnet/minecraft/world/scores/PlayerTeam;"))
+    private PlayerTeam hasLabelClientPlayerEntityGetScoreboardTeamProxy(PlayerTeam team) {
         return (mc.player == null) ? null : team;
     }
 
@@ -66,9 +66,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
     // Chams - player color
 
-    @WrapWithCondition(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/texture/Sprite;ILnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;)V"))
-    private <TState> boolean render$render(OrderedRenderCommandQueue instance, Model<? super TState> model, TState state, MatrixStack matrixStack, RenderLayer renderLayer, int light, int overlay, int mixColor, Sprite sprite, int outlineColor, ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlayCommand) {
-        if (!chams.isActive() || !chams.players.get() || !(((IEntityRenderState) state).meteor$getEntity() instanceof PlayerEntity player)) return true;
+    @WrapWithCondition(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/texture/TextureAtlasSprite;ILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V"))
+    private <TState> boolean render$render(SubmitNodeCollector instance, Model<? super TState> model, TState state, PoseStack matrixStack, RenderType renderLayer, int light, int overlay, int mixColor, TextureAtlasSprite sprite, int outlineColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlayCommand) {
+        if (!chams.isActive() || !chams.players.get() || !(((IEntityRenderState) state).meteor$getEntity() instanceof Player player))
+            return true;
         if (chams.ignoreSelf.get() && player == mc.player) return true;
 
         instance.submitModel(model, state, matrixStack, renderLayer, light, overlay, PlayerUtils.getPlayerColor(player, chams.playersColor.get()).getPacked(), sprite, outlineColor, null);
@@ -77,9 +78,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
     // Chams - Player texture
 
-    @ModifyReturnValue(method = "getRenderLayer", at = @At("RETURN"))
-    private RenderLayer getRenderPlayer(RenderLayer original, S state, boolean showBody, boolean translucent, boolean showOutline) {
-        if (!chams.isActive() || !(((IEntityRenderState) state).meteor$getEntity() instanceof PlayerEntity player))
+    @ModifyReturnValue(method = "getRenderType", at = @At("RETURN"))
+    private RenderType getRenderPlayer(RenderType original, S state, boolean showBody, boolean translucent, boolean showOutline) {
+        if (!chams.isActive() || !(((IEntityRenderState) state).meteor$getEntity() instanceof Player player))
             return original;
 
         if (!chams.players.get() || chams.playersTexture.get())
@@ -87,13 +88,13 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         if (chams.ignoreSelf.get() && player == mc.player)
             return original;
 
-        return RenderLayers.itemEntityTranslucentCull(Chams.BLANK);
+        return RenderTypes.itemEntityTranslucentCull(Chams.BLANK);
     }
 
     // Chams - Through walls
 
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V", at = @At("HEAD"), cancellable = true)
-    private void render$Head(S state, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CameraRenderState arg, CallbackInfo ci) {
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V", at = @At("HEAD"), cancellable = true)
+    private void render$Head(S state, PoseStack matrixStack, SubmitNodeCollector orderedRenderCommandQueue, CameraRenderState arg, CallbackInfo ci) {
         Entity entity = ((IEntityRenderState) state).meteor$getEntity();
         if (!(entity instanceof LivingEntity livingEntity)) return;
 
@@ -105,8 +106,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         }
     }
 
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V", at = @At("TAIL"))
-    private void render$Tail(S state, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CameraRenderState arg, CallbackInfo ci) {
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V", at = @At("TAIL"))
+    private void render$Tail(S state, PoseStack matrixStack, SubmitNodeCollector orderedRenderCommandQueue, CameraRenderState arg, CallbackInfo ci) {
         Entity entity = ((IEntityRenderState) state).meteor$getEntity();
         if (!(entity instanceof LivingEntity livingEntity)) return;
 

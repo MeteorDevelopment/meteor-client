@@ -1,3 +1,4 @@
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -12,27 +13,27 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
+import meteordevelopment.meteorclient.mixin.ClientPacketListenerAccessor;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.DefaultPermissions;
-import net.minecraft.command.permission.PermissionPredicate;
-import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
-import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
-import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.LocalDifficulty;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.server.permissions.PermissionSet;
+import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
+import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
+import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.attribute.EnvironmentAttributes;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.apache.commons.lang3.Strings;
 
 import java.net.InetAddress;
@@ -60,7 +61,7 @@ public class ServerCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.executes(context -> {
             basicInfo();
             return SINGLE_SUCCESS;
@@ -84,10 +85,10 @@ public class ServerCommand extends Command {
 
         builder.then(literal("tps").executes(ctx -> {
             float tps = TickRate.INSTANCE.getTickRate();
-            Formatting color;
-            if (tps > 17.0f) color = Formatting.GREEN;
-            else if (tps > 12.0f) color = Formatting.YELLOW;
-            else color = Formatting.RED;
+            ChatFormatting color;
+            if (tps > 17.0f) color = ChatFormatting.GREEN;
+            else if (tps > 12.0f) color = ChatFormatting.YELLOW;
+            else color = ChatFormatting.RED;
             info("Current TPS: %s%.2f(default).", color, tps);
             return SINGLE_SUCCESS;
         }));
@@ -103,7 +104,7 @@ public class ServerCommand extends Command {
             return;
         }
 
-        ServerInfo server = mc.getCurrentServerEntry();
+        ServerData server = mc.getCurrentServerEntry();
 
         if (server == null) {
             info("Couldn't obtain any server information.");
@@ -113,33 +114,33 @@ public class ServerCommand extends Command {
         String ipv4 = "";
         try {
             ipv4 = InetAddress.getByName(server.address).getHostAddress();
-        } catch (UnknownHostException ignored) {}
+        } catch (UnknownHostException ignored) {
+        }
 
-        MutableText ipText;
+        MutableComponent ipText;
 
         if (ipv4.isEmpty()) {
-            ipText = Text.literal(Formatting.GRAY + server.address);
+            ipText = MutableComponent.literal(ChatFormatting.GRAY + server.address);
             ipText.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent.CopyToClipboard(server.address))
-                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
+                .withHoverEvent(new HoverEvent.ShowText(MutableComponent.literal("Copy to clipboard")))
             );
-        }
-        else {
-            ipText = Text.literal(Formatting.GRAY + server.address);
+        } else {
+            ipText = MutableComponent.literal(ChatFormatting.GRAY + server.address);
             ipText.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent.CopyToClipboard(server.address))
-                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
+                .withHoverEvent(new HoverEvent.ShowText(MutableComponent.literal("Copy to clipboard")))
             );
-            MutableText ipv4Text = Text.literal(String.format("%s (%s)", Formatting.GRAY, ipv4));
+            MutableComponent ipv4Text = MutableComponent.literal(String.format("%s (%s)", ChatFormatting.GRAY, ipv4));
             ipv4Text.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent.CopyToClipboard(ipv4))
-                .withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy to clipboard")))
+                .withHoverEvent(new HoverEvent.ShowText(MutableComponent.literal("Copy to clipboard")))
             );
             ipText.append(ipv4Text);
         }
         info(
-            Text.literal(String.format("%sIP: ", Formatting.GRAY))
-            .append(ipText)
+            MutableComponent.literal(String.format("%sIP: ", ChatFormatting.GRAY))
+                .append(ipText)
         );
 
         info("Port: %d", ServerAddress.parse(server.address).getPort());
@@ -161,12 +162,12 @@ public class ServerCommand extends Command {
     }
 
     public String formatPerms() {
-        PermissionPredicate permissions = mc.player.getPermissions();
+        PermissionSet permissions = mc.player.getPermissions();
 
-        if (permissions.hasPermission(DefaultPermissions.OWNERS)) return "4 (Owner)";
-        else if (permissions.hasPermission(DefaultPermissions.ADMINS)) return "3 (Admin)";
-        else if (permissions.hasPermission(DefaultPermissions.GAMEMASTERS)) return "2 (Gamemaster)";
-        else if (permissions.hasPermission(DefaultPermissions.MODERATORS)) return "1 (Moderator)";
+        if (permissions.hasPermission(Permissions.OWNERS)) return "4 (Owner)";
+        else if (permissions.hasPermission(Permissions.ADMINS)) return "3 (Admin)";
+        else if (permissions.hasPermission(Permissions.GAMEMASTERS)) return "2 (Gamemaster)";
+        else if (permissions.hasPermission(Permissions.MODERATORS)) return "1 (Moderator)";
         else return "0 (No Perms)";
     }
 
@@ -198,7 +199,7 @@ public class ServerCommand extends Command {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (tick && event.packet instanceof RequestCommandCompletionsC2SPacket) event.cancel();
+        if (tick && event.packet instanceof ServerboundCommandSuggestionPacket) event.cancel();
     }
 
     @EventHandler
@@ -206,15 +207,15 @@ public class ServerCommand extends Command {
         // should return the same set of plugins that command completing '/' would
         // the rationale is that since we should get this packet whenever we log into the server, we can capture it
         // straight away and not need to send a command completion packet for essentially the same results
-        if (event.packet instanceof CommandTreeS2CPacket packet) {
-            ClientPlayNetworkHandlerAccessor handler = (ClientPlayNetworkHandlerAccessor) event.connection.getPacketListener();
+        if (event.packet instanceof ClientboundCommandsPacket packet) {
+            ClientPacketListenerAccessor handler = (ClientPacketListenerAccessor) event.connection.getPacketListener();
             commandTreePlugins.clear();
             alias = null;
 
             // This gets the root node of the command tree. From there, all of its children have to be of type
             // LiteralCommandNode, so we don't need to worry about checking or casting and can just grab the name
             packet.getCommandTree(
-                CommandRegistryAccess.of(handler.meteor$getCombinedDynamicRegistries(), handler.meteor$getEnabledFeatures()),
+                CommandBuildContext.of(handler.meteor$getCombinedDynamicRegistries(), handler.meteor$getEnabledFeatures()),
                 ClientPlayNetworkHandlerAccessor.meteor$getCommandNodeFactory()
             ).getChildren().forEach(node -> {
                 String[] split = node.getName().split(":");
@@ -233,7 +234,7 @@ public class ServerCommand extends Command {
         if (!tick) return;
 
         try {
-            if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
+            if (event.packet instanceof ClientboundCommandSuggestionsPacket packet) {
                 Suggestions matches = packet.getSuggestions();
 
                 if (matches.isEmpty()) {
@@ -255,10 +256,9 @@ public class ServerCommand extends Command {
 
     private String formatName(String name) {
         if (ANTICHEAT_LIST.contains(name.toLowerCase())) {
-            return String.format("%s%s(default)", Formatting.RED, name);
-        }
-        else if (Strings.CI.contains(name, "exploit") || Strings.CI.contains(name, "cheat") || Strings.CI.contains(name, "illegal")) {
-            return String.format("%s%s(default)", Formatting.RED, name);
+            return String.format("%s%s(default)", ChatFormatting.RED, name);
+        } else if (Strings.CI.contains(name, "exploit") || Strings.CI.contains(name, "cheat") || Strings.CI.contains(name, "illegal")) {
+            return String.format("%s%s(default)", ChatFormatting.RED, name);
         }
 
         return String.format("(highlight)%s(default)", name);
