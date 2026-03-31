@@ -32,6 +32,7 @@ import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
+import meteordevelopment.meteorclient.systems.modules.world.PoweredRailBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
@@ -547,6 +548,7 @@ public class Modules extends System<Modules> {
         add(new EndermanLook());
         add(new Flamethrower());
         add(new HighwayBuilder());
+        add(new PoweredRailBuilder());
         add(new LiquidFiller());
         add(new MountBypass());
         add(new NoGhostBlocks());
