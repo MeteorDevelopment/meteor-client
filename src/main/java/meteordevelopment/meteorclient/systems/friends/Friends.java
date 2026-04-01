@@ -96,6 +96,11 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         return friends.isEmpty();
     }
 
+    public enum FriendClient {
+        MIO,
+        WURST
+    }
+
     @Override
     public @NotNull Iterator<Friend> iterator() {
         return friends.iterator();
@@ -133,7 +138,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
         return this;
     }
-
+    // Mio importer
     public int importFromMio() throws Exception {
         Path path = Paths.get(
             MinecraftClient.getInstance().runDirectory.getAbsolutePath(),
@@ -151,12 +156,10 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
         for (JsonElement element : socials) {
             JsonObject obj = element.getAsJsonObject();
-
             String role = obj.get("role").getAsString();
             if (!role.equalsIgnoreCase("friend")) continue;
 
             String name = obj.get("name").getAsString();
-
             if (get(name) == null) {
                 add(new Friend(name));
                 added++;
@@ -165,4 +168,30 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
         return added;
     }
+
+    // Wurst importer
+    public int importFromWurst() throws Exception {
+        Path path = Paths.get(
+            MinecraftClient.getInstance().runDirectory.getAbsolutePath(),
+            "wurst",
+            "friends.json"
+        );
+
+        if (!Files.exists(path)) return -1;
+
+        String json = Files.readString(path);
+        JsonArray array = JsonParser.parseString(json).getAsJsonArray();
+
+        int added = 0;
+        for (JsonElement element : array) {
+            String name = element.getAsString(); // <-- read as string
+            if (get(name) == null) {
+                add(new Friend(name));
+                added++;
+            }
+        }
+
+        return added;
+    }
+    //to add more just make a new import func and parse the friends file :0
 }

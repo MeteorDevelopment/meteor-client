@@ -6,10 +6,12 @@
 package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.FriendArgumentType;
 import meteordevelopment.meteorclient.commands.arguments.PlayerListEntryArgumentType;
+import meteordevelopment.meteorclient.commands.arguments.ClientArgumentType;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -59,24 +61,44 @@ public class FriendsCommand extends Command {
             )
         );
 
-        // Sync Mio friends for now
+        // friend sync
         builder.then(literal("sync")
             .executes(context -> {
-                try {
-                    int added = Friends.get().importFromMio();
-
-                    if (added == -1) {
-                        error("Mio socials.json not found.");
-                    } else {
-                        ChatUtils.sendMsg(0, Formatting.GRAY, "Imported %d Mio friends.".formatted(added));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    error("Failed to sync Mio friends.");
-                }
-
+                ChatUtils.sendMsg(0, Formatting.GRAY, "Supported clients: mio, wurst, all");
                 return SINGLE_SUCCESS;
             })
+                .then(argument("client", ClientArgumentType.create())
+                    .suggests((context, suggestionsBuilder) -> {
+                        ClientArgumentType clientArg = ClientArgumentType.create();
+                        for (String client : clientArg.getExamples()) {
+                            suggestionsBuilder.suggest(client);
+                        }
+                        return suggestionsBuilder.buildFuture();
+                    })
+                    .executes(context -> {
+                        String client = ClientArgumentType.get(context, "client");
+                        int added = 0;
+
+                        try {
+                            switch (client) {
+                                case "mio" -> added = Friends.get().importFromMio();
+                                case "wurst" -> added = Friends.get().importFromWurst();
+                            }
+
+                            if (added == -1) {
+                                error(client + " friend file not found.");
+                            } else {
+                                ChatUtils.sendMsg(0, Formatting.GRAY, "Imported " + added + " friends from " + client + ".");
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            error("Failed to sync " + client + " friends.");
+                        }
+
+                        return SINGLE_SUCCESS;
+                    })
+                )
         );
 
         // List friends
