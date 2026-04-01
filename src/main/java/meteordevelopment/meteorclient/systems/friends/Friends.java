@@ -39,9 +39,9 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     public static Friends get() {
         return Systems.get(Friends.class);
     }
-
     public boolean add(Friend friend) {
         if (friend.name.isEmpty() || friend.name.contains(" ")) return false;
+        if (get(friend.name) != null) return false;
 
         if (!friends.contains(friend)) {
             friends.add(friend);
@@ -49,7 +49,8 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
             return true;
         }
 
-        return false;
+        return true;
+
     }
 
     public boolean remove(Friend friend) {
