@@ -87,7 +87,7 @@ public class ESPChunk {
 
 
     public static ESPChunk searchChunk(ChunkAccess chunk, List<Block> blocks) {
-        ESPChunk schunk = new ESPChunk(chunk.getPos().x, chunk.getPos().z);
+        ESPChunk schunk = new ESPChunk(chunk.getPos().x(), chunk.getPos().z());
         if (schunk.shouldBeDeleted()) return schunk;
 
         BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();

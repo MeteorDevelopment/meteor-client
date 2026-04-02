@@ -383,8 +383,8 @@ public class BetterTooltips extends Module {
                 if (bundleContents != null && !bundleContents.isEmpty()) {
                     ItemStack[] bundleItems = new ItemStack[bundleContents.size()];
                     int index = 0;
-                    for (ItemStack stack : bundleContents.items()) {
-                        bundleItems[index++] = stack;
+                    for (var template : bundleContents.items()) {
+                        bundleItems[index++] = template.create();
                     }
                     event.tooltipData = new BundleTooltipComponent(bundleItems, bundleContents);
                 }

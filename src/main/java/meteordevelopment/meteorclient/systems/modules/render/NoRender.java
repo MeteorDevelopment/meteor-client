@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ParticleEvent;
+import meteordevelopment.meteorclient.mixin.BlockEntityRenderStateAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -566,7 +567,7 @@ public class NoRender extends Module {
 
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
-        if (blockEntities.get().contains(event.blockEntityState.blockState.getBlock())) event.cancel();
+        if (blockEntities.get().contains(((BlockEntityRenderStateAccessor) event.blockEntityState).meteor$getBlockState().getBlock())) event.cancel();
     }
 
     // Entity

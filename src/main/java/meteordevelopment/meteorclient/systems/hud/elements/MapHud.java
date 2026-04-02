@@ -154,7 +154,7 @@ public class MapHud extends HudElement {
             matrices.scale(1f / mc.getWindow().getGuiScale());
             matrices.translate(this.x, this.y);
             matrices.scale(scale.get().floatValue());
-            renderer.graphics.submitMapRenderState(renderState);
+            renderer.graphics.map(renderState);
             matrices.popMatrix();
         });
     }

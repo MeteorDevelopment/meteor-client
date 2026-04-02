@@ -10,8 +10,8 @@ import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.Font.DisplayMode;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.util.LightCoordsUtil;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 
@@ -80,7 +80,7 @@ public class VanillaTextRenderer implements TextRenderer {
             matrix = matrices.last().pose();
         }
 
-        mc.font.drawInBatch(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, matrix, immediate, DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+        mc.font.drawInBatch(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, matrix, immediate, DisplayMode.NORMAL, 0, LightCoordsUtil.FULL_BRIGHT);
         double x2 = (x / scale) + mc.font.width(text);
 
         if (scaleIndividually) matrices.popPose();

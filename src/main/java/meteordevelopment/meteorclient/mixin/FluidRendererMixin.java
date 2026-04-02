@@ -10,10 +10,11 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.renderer.block.LiquidBlockRenderer;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.FluidRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,15 +23,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(LiquidBlockRenderer.class)
-public abstract class LiquidBlockRendererMixin {
+@Mixin(FluidRenderer.class)
+public abstract class FluidRendererMixin {
     @Unique
     private static final ThreadLocal<Integer> ALPHAS = ThreadLocal.withInitial(() -> -1);
     @Unique
     private static final ThreadLocal<Boolean> AMBIENT = ThreadLocal.withInitial(() -> false);
 
     @Inject(method = "tesselate", at = @At("HEAD"), cancellable = true)
-    private void onRender(BlockAndTintGetter world, BlockPos pos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState, CallbackInfo ci) {
+    private void onTesselate(BlockAndTintGetter level, BlockPos pos, FluidRenderer.Output output, BlockState blockState, FluidState fluidState, CallbackInfo ci) {
         Ambience ambience = Modules.get().get(Ambience.class);
         AMBIENT.set(ambience.isActive() && ambience.customLavaColor.get() && fluidState.is(FluidTags.LAVA));
 
@@ -42,15 +43,19 @@ public abstract class LiquidBlockRendererMixin {
     }
 
     @Inject(method = "vertex", at = @At("HEAD"), cancellable = true)
-    private void onVertex(VertexConsumer vertexConsumer, float x, float y, float z, float red, float green, float blue, float u, float v, int light, CallbackInfo ci) {
+    private void onVertex(VertexConsumer builder, float x, float y, float z, int color, float u, float v, int lightCoords, CallbackInfo ci) {
         int alpha = ALPHAS.get();
 
         if (AMBIENT.get()) {
-            Color color = Modules.get().get(Ambience.class).lavaColor.get();
-            vertex(vertexConsumer, x, y, z, color.r, color.g, color.b, (alpha != -1 ? alpha : color.a), u, v, light);
+            Color c = Modules.get().get(Ambience.class).lavaColor.get();
+            vertex(builder, x, y, z, c.r, c.g, c.b, (alpha != -1 ? alpha : c.a), u, v, lightCoords);
             ci.cancel();
         } else if (alpha != -1) {
-            vertex(vertexConsumer, x, y, z, (int) (red * 255), (int) (green * 255), (int) (blue * 255), alpha, u, v, light);
+            int red = ARGB.red(color);
+            int green = ARGB.green(color);
+            int blue = ARGB.blue(color);
+
+            vertex(builder, x, y, z, red * 255, green * 255, blue * 255, alpha, u, v, lightCoords);
             ci.cancel();
         }
     }

@@ -132,9 +132,9 @@ public abstract class GameRendererMixin implements IGameRenderer {
         RenderSystem.getModelViewStack().pushMatrix().mul(position);
 
         matrices.pushPose();
-        bobHurt(matrices, mainCamera.getPartialTickTime());
+        bobHurt(matrices, mainCamera.getCameraEntityPartialTicks(tickCounter));
         if (minecraft.options.bobView().get())
-            bobView(matrices, mainCamera.getPartialTickTime());
+            bobView(matrices, mainCamera.getCameraEntityPartialTicks(tickCounter));
 
         Matrix4f inverseBob = new Matrix4f(matrices.last().pose()).invert();
         RenderSystem.getModelViewStack().mul(inverseBob);

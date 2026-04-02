@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
-import net.minecraft.client.resources.model.MaterialSet;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(BlockEntityRenderDispatcher.class)
-public interface BlockEntityRenderDispatcherAccessor {
-    @Accessor("materials")
-    MaterialSet getMaterials();
+@Mixin(BlockEntityRenderState.class)
+public interface BlockEntityRenderStateAccessor {
+    @Accessor("blockState")
+    BlockState meteor$getBlockState();
 }

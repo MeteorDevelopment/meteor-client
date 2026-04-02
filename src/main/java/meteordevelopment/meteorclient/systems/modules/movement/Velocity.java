@@ -151,11 +151,11 @@ public class Velocity extends Module {
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
         if (knockback.get() && event.packet instanceof ClientboundSetEntityMotionPacket packet
-            && packet.getId() == mc.player.getId()) {
-            double velX = (packet.getMovement().x() - mc.player.getDeltaMovement().x) * knockbackHorizontal.get();
-            double velY = (packet.getMovement().y() - mc.player.getDeltaMovement().y) * knockbackVertical.get();
-            double velZ = (packet.getMovement().z() - mc.player.getDeltaMovement().z) * knockbackHorizontal.get();
-            ((ClientboundSetEntityMotionPacketAccessor) packet).meteor$setMovement(
+            && packet.id() == mc.player.getId()) {
+            double velX = (packet.movement().x() - mc.player.getDeltaMovement().x) * knockbackHorizontal.get();
+            double velY = (packet.movement().y() - mc.player.getDeltaMovement().y) * knockbackVertical.get();
+            double velZ = (packet.movement().z() - mc.player.getDeltaMovement().z) * knockbackHorizontal.get();
+            ((ClientboundSetEntityMotionPacketAccessor) (Object) packet).meteor$setMovement(
                 new Vec3(velX + mc.player.getDeltaMovement().x, velY + mc.player.getDeltaMovement().y, velZ + mc.player.getDeltaMovement().z)
             );
         }

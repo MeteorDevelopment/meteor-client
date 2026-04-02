@@ -5,7 +5,7 @@
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
     "MeshVertexConsumerMixin",
-    "SodiumBlockOcclusionCacheMixin",
+    "AbstractBlockRenderContextMixin",
     "SodiumBlockRendererMixin",
     "SodiumDefaultFluidRendererMixin",
     "SodiumFluidRendererImplDefaultRenderContextMixin",

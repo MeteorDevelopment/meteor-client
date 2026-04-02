@@ -209,11 +209,11 @@ public class TunnelESP extends Module {
             int added = 0;
 
             for (ChunkAccess chunk : Utils.chunks(true)) {
-                long key = ChunkPos.asLong(chunk.getPos().x, chunk.getPos().z);
+                long key = ChunkPos.pack(chunk.getPos().x(), chunk.getPos().z());
 
                 if (chunks.containsKey(key)) chunks.get(key).marked = true;
                 else if (added < 48) {
-                    TChunk tChunk = new TChunk(chunk.getPos().x, chunk.getPos().z);
+                    TChunk tChunk = new TChunk(chunk.getPos().x(), chunk.getPos().z());
                     chunks.put(tChunk.getKey(), tChunk);
 
                     MeteorExecutor.execute(() -> searchChunk(chunk, tChunk));
@@ -236,16 +236,16 @@ public class TunnelESP extends Module {
         int key;
 
         if (x == -1) {
-            chunk = chunks.get(ChunkPos.asLong(chunk.x - 1, chunk.z));
+            chunk = chunks.get(ChunkPos.pack(chunk.x - 1, chunk.z));
             key = pack(15, y, z);
         } else if (x == 16) {
-            chunk = chunks.get(ChunkPos.asLong(chunk.x + 1, chunk.z));
+            chunk = chunks.get(ChunkPos.pack(chunk.x + 1, chunk.z));
             key = pack(0, y, z);
         } else if (z == -1) {
-            chunk = chunks.get(ChunkPos.asLong(chunk.x, chunk.z - 1));
+            chunk = chunks.get(ChunkPos.pack(chunk.x, chunk.z - 1));
             key = pack(x, y, 15);
         } else if (z == 16) {
-            chunk = chunks.get(ChunkPos.asLong(chunk.x, chunk.z + 1));
+            chunk = chunks.get(ChunkPos.pack(chunk.x, chunk.z + 1));
             key = pack(x, y, 0);
         } else key = pack(x, y, z);
 
@@ -292,7 +292,7 @@ public class TunnelESP extends Module {
         }
 
         public long getKey() {
-            return ChunkPos.asLong(x, z);
+            return ChunkPos.pack(x, z);
         }
     }
 
@@ -313,7 +313,7 @@ public class TunnelESP extends Module {
 
             ChunkAccess chunk;
 
-            if (lastChunk != null && lastChunk.getPos().x == cx && lastChunk.getPos().z == cz) chunk = lastChunk;
+            if (lastChunk != null && lastChunk.getPos().x() == cx && lastChunk.getPos().z() == cz) chunk = lastChunk;
             else chunk = world.getChunk(cx, cz, ChunkStatus.FULL, false);
 
             if (chunk == null) return Blocks.VOID_AIR.defaultBlockState();

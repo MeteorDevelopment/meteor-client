@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.world.AmbientOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.mixin.BlockEntityRenderStateAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -88,7 +89,7 @@ public class Xray extends Module {
 
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
-        if (isBlocked(event.blockEntityState.blockState.getBlock(), event.blockEntityState.blockPos)) event.cancel();
+        if (isBlocked(((BlockEntityRenderStateAccessor) event.blockEntityState).meteor$getBlockState().getBlock(), event.blockEntityState.blockPos)) event.cancel();
     }
 
     @EventHandler
