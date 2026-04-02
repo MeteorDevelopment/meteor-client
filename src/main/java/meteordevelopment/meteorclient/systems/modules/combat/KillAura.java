@@ -1,3 +1,4 @@
+```java
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Set;
 
 public class KillAura extends Module {
+    // Setting groups
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTargeting = settings.createGroup("Targeting");
     private final SettingGroup sgTiming = settings.createGroup("Timing");
@@ -160,6 +162,17 @@ public class KillAura extends Module {
         .build()
     );
 
+    // NEW: Range Chance slider (0–100%)
+    private final Setting<Integer> rangeChance = sgTargeting.add(new IntSetting.Builder()
+        .name("range-chance")
+        .description("Chance (0–100%) that KillAura will randomly modify your range/reach.")
+        .defaultValue(0)
+        .min(0)
+        .max(100)
+        .sliderRange(0, 100)
+        .build()
+    );
+
     private final Setting<Double> wallsRange = sgTargeting.add(new DoubleSetting.Builder()
         .name("walls-range")
         .description("The maximum range the entity can be attacked through walls.")
@@ -260,7 +273,17 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final static ArrayList<Item> FILTER = new ArrayList<>(List.of(Items.DIAMOND_SWORD, Items.DIAMOND_AXE, Items.DIAMOND_PICKAXE, Items.DIAMOND_SHOVEL, Items.DIAMOND_HOE, Items.MACE, Items.DIAMOND_SPEAR, Items.TRIDENT));
+    private static final ArrayList<Item> FILTER = new ArrayList<>(List.of(
+        Items.DIAMOND_SWORD,
+        Items.DIAMOND_AXE,
+        Items.DIAMOND_PICKAXE,
+        Items.DIAMOND_SHOVEL,
+        Items.DIAMOND_HOE,
+        Items.MACE,
+        Items.DIAMOND_SPEAR,
+        Items.TRIDENT
+    ));
+
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
@@ -289,22 +312,29 @@ public class KillAura extends Module {
             stopAttacking();
             return;
         }
+
         if (pauseOnUse.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) {
             stopAttacking();
             return;
         }
+
         if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) {
             stopAttacking();
             return;
         }
+
         if (TickRate.INSTANCE.getTimeSinceLastTick() >= 1f && pauseOnLag.get()) {
             stopAttacking();
             return;
         }
-        if (pauseOnCA.get() && Modules.get().get(CrystalAura.class).isActive() && Modules.get().get(CrystalAura.class).kaTimer > 0) {
+
+        if (pauseOnCA.get()
+            && Modules.get().get(CrystalAura.class).isActive()
+            && Modules.get().get(CrystalAura.class).kaTimer > 0) {
             stopAttacking();
             return;
         }
+
         if (onlyOnLook.get()) {
             Entity targeted = mc.targetedEntity;
 
@@ -329,7 +359,9 @@ public class KillAura extends Module {
 
         if (autoSwitch.get()) {
             FindItemResult weaponResult = new FindItemResult(mc.player.getInventory().getSelectedSlot(), -1);
-            if (attackWhenHolding.get() == AttackItems.Weapons) weaponResult = InvUtils.find(this::acceptableWeapon, 0, 8);
+            if (attackWhenHolding.get() == AttackItems.Weapons) {
+                weaponResult = InvUtils.find(this::acceptableWeapon, 0, 8);
+            }
 
             if (shouldShieldBreak()) {
                 FindItemResult axeResult = InvUtils.find(itemStack -> itemStack.getItem() instanceof AxeItem, 0, 8);
@@ -337,7 +369,7 @@ public class KillAura extends Module {
             }
 
             if (!swapped) {
-                previousSlot  = mc.player.getInventory().getSelectedSlot();
+                previousSlot = mc.player.getInventory().getSelectedSlot();
                 swapped = true;
             }
 
@@ -350,13 +382,19 @@ public class KillAura extends Module {
         }
 
         attacking = true;
-        if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
+
+        if (rotation.get() == RotationMode.Always) {
+            Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
+        }
+
         if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
             PathManagers.get().pause();
             wasPathing = true;
         }
 
-        if (delayCheck()) targets.forEach(this::attack);
+        if (delayCheck()) {
+            targets.forEach(this::attack);
+        }
     }
 
     @EventHandler
@@ -370,10 +408,12 @@ public class KillAura extends Module {
         if (!attacking) return;
 
         attacking = false;
+
         if (wasPathing) {
             PathManagers.get().resume();
             wasPathing = false;
         }
+
         if (swapBack.get() && swapped) {
             InvUtils.swap(previousSlot, false);
             swapped = false;
@@ -392,49 +432,84 @@ public class KillAura extends Module {
         return false;
     }
 
+    // NEW: compute effective range with chance-based variation
+    private double getEffectiveRange() {
+        int chance = rangeChance.get();
+
+        // If chance is 0, always use the configured range
+        if (chance <= 0) return range.get();
+
+        // Roll chance (0–100)
+        if (Math.random() * 100 > chance) return range.get();
+
+        // Chance succeeded: apply a random variation to range
+        double base = range.get();
+
+        // Example: ±20% variation around base range
+        double variation = base * 0.20;
+        return base + (Math.random() * variation * 2 - variation);
+    }
+
     private boolean entityCheck(Entity entity) {
         if (entity.equals(mc.player) || entity.equals(mc.getCameraEntity())) return false;
         if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
 
         Box hitbox = entity.getBoundingBox();
+
+        // Use effective range (with chance) here
         if (!PlayerUtils.isWithin(
             MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
             MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
             MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
-            range.get()
+            getEffectiveRange()
         )) return false;
 
         if (!entities.get().contains(entity.getType())) return false;
         if (ignoreNamed.get() && entity.hasCustomName()) return false;
+
+        // For walls, we keep the dedicated wallsRange (no randomization),
+        // but you can swap to getEffectiveRange() if you want it affected too.
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
+
         if (ignoreTamed.get()) {
             if (entity instanceof Tameable tameable
                 && tameable.getOwner() != null
                 && tameable.getOwner().equals(mc.player)
             ) return false;
         }
+
         if (ignorePassive.get()) {
             if (entity instanceof EndermanEntity enderman && !enderman.isAngry()) return false;
-            if ((entity instanceof PiglinEntity || entity instanceof ZombifiedPiglinEntity || entity instanceof WolfEntity) && !((MobEntity) entity).isAttacking()) return false;
+            if ((entity instanceof PiglinEntity
+                || entity instanceof ZombifiedPiglinEntity
+                || entity instanceof WolfEntity)
+                && !((MobEntity) entity).isAttacking()
+            ) return false;
         }
+
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
             if (shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
             if (player instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) return false;
         }
+
         if (entity instanceof LivingEntity livingEntity) {
             // Hostile mobs with baby variants (zombies, piglins, hoglins, zoglins)
-            if (entity instanceof ZombieEntity || entity instanceof PiglinEntity
-                || entity instanceof HoglinEntity || entity instanceof ZoglinEntity) {
+            if (entity instanceof ZombieEntity
+                || entity instanceof PiglinEntity
+                || entity instanceof HoglinEntity
+                || entity instanceof ZoglinEntity) {
                 return switch (hostileMobAgeFilter.get()) {
                     case Baby -> livingEntity.isBaby();
                     case Adult -> !livingEntity.isBaby();
                     case Both -> true;
                 };
             }
+
             // Passive mobs with baby variants (animals, villagers)
-            if (entity instanceof PassiveEntity && (!(entity instanceof FrogEntity || entity instanceof ParrotEntity))) {
+            if (entity instanceof PassiveEntity
+                && (!(entity instanceof FrogEntity || entity instanceof ParrotEntity))) {
                 return switch (passiveMobAgeFilter.get()) {
                     case Baby -> livingEntity.isBaby();
                     case Adult -> !livingEntity.isBaby();
@@ -442,6 +517,7 @@ public class KillAura extends Module {
                 };
             }
         }
+
         return true;
     }
 
@@ -458,12 +534,18 @@ public class KillAura extends Module {
             if (hitTimer < delay) {
                 hitTimer++;
                 return false;
-            } else return true;
-        } else return mc.player.getAttackCooldownProgress(delay) >= 1;
+            } else {
+                return true;
+            }
+        } else {
+            return mc.player.getAttackCooldownProgress(delay) >= 1;
+        }
     }
 
     private void attack(Entity target) {
-        if (rotation.get() == RotationMode.OnHit) Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body));
+        if (rotation.get() == RotationMode.OnHit) {
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body));
+        }
 
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
@@ -519,3 +601,4 @@ public class KillAura extends Module {
         Both
     }
 }
+```
