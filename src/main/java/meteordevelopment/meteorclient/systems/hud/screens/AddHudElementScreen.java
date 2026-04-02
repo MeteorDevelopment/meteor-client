@@ -17,7 +17,7 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -123,8 +123,8 @@ public class AddHudElementScreen extends WindowScreen {
     }
 
     @Override
-    protected void onRenderBefore(GuiGraphics drawContext, float delta) {
-        HudEditorScreen.renderElements(drawContext);
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, float delta) {
+        HudEditorScreen.renderElements(graphics);
     }
 
     private record Item(String title, String description, Object object) {

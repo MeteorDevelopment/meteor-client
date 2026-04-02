@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.player.NameProtect;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -74,15 +74,15 @@ public abstract class JoinMultiplayerScreenMixin extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
-        super.render(context, mouseX, mouseY, deltaTicks);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
+        super.extractRenderState(graphics, mouseX, mouseY, deltaTicks);
 
         int x = 3;
         int y = 3;
 
         // Logged in as
-        context.drawString(mc.font, loggedInAs, x, y, textColor1);
-        context.drawString(mc.font, Modules.get().get(NameProtect.class).getName(minecraft.getUser().getName()), x + loggedInAsLength, y, textColor2);
+        graphics.text(mc.font, loggedInAs, x, y, textColor1);
+        graphics.text(mc.font, Modules.get().get(NameProtect.class).getName(minecraft.getUser().getName()), x + loggedInAsLength, y, textColor2);
 
         y += font.lineHeight + 2;
 
@@ -92,8 +92,8 @@ public abstract class JoinMultiplayerScreenMixin extends Screen {
         String left = proxy != null ? "Using proxy " : "Not using a proxy";
         String right = proxy != null ? (proxy.name.get() != null && !proxy.name.get().isEmpty() ? "(" + proxy.name.get() + ") " : "") + proxy.address.get() + ":" + proxy.port.get() : null;
 
-        context.drawString(mc.font, left, x, y, textColor1);
+        graphics.text(mc.font, left, x, y, textColor1);
         if (right != null)
-            context.drawString(mc.font, right, x + font.width(left), y, textColor2);
+            graphics.text(mc.font, right, x + font.width(left), y, textColor2);
     }
 }

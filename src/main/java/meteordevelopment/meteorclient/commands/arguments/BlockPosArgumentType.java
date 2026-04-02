@@ -85,8 +85,8 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
 
     public static <S> BlockPos getLoadedBlockPos(CommandContext<S> context, ClientLevel level, String name) throws CommandSyntaxException {
         BlockPos blockPos = getBlockPos(context, name);
-        ChunkPos chunkPos = new ChunkPos(blockPos);
-        if (!level.getChunkSource().hasChunk(chunkPos.x, chunkPos.z)) {
+        ChunkPos chunkPos = new ChunkPos(blockPos.getX(), blockPos.getZ());
+        if (!level.getChunkSource().hasChunk(chunkPos.x(), chunkPos.z())) {
             throw UNLOADED_EXCEPTION.create();
         } else if (!level.isInWorldBounds(blockPos)) {
             throw OUT_OF_WORLD_EXCEPTION.create();

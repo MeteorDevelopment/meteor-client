@@ -16,7 +16,7 @@ import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.MeteorToast;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.Items;
@@ -98,7 +98,7 @@ public class TitleScreenCredits {
         credits.add(credit);
     }
 
-    public static void render(GuiGraphics context) {
+    public static void render(GuiGraphicsExtractor graphics) {
         if (credits.isEmpty()) init();
 
         int y = 3;
@@ -106,7 +106,7 @@ public class TitleScreenCredits {
             synchronized (credit.text) {
                 int x = mc.screen.width - 3 - mc.font.width(credit.text);
 
-                context.drawString(mc.font, credit.text, x, y, -1);
+                graphics.text(mc.font, credit.text, x, y, -1);
             }
 
             y += mc.font.lineHeight + 2;

@@ -233,7 +233,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         if (!active || shouldHideHud()) return;
         if ((mc.options.hideGui || mc.debugEntries.isOverlayVisible()) && !HudEditorScreen.isOpen()) return;
 
-        HudRenderer.INSTANCE.begin(event.drawContext);
+        HudRenderer.INSTANCE.begin(event.graphics);
 
         for (HudElement element : elements) {
             element.updatePos();

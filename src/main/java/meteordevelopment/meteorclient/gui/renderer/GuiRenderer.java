@@ -19,7 +19,7 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -60,7 +60,7 @@ public class GuiRenderer {
     public WWidget tooltipWidget;
     private double tooltipAnimProgress;
 
-    private GuiGraphics drawContext;
+    private GuiGraphicsExtractor graphics;
 
     public static GuiTexture addTexture(Identifier id) {
         return TEXTURE_PACKER.add(id);
@@ -81,11 +81,11 @@ public class GuiRenderer {
         TEXTURE = TEXTURE_PACKER.pack();
     }
 
-    public void begin(GuiGraphics drawContext) {
-        this.drawContext = drawContext;
-        this.drawContext.nextStratum();
+    public void begin(GuiGraphicsExtractor graphics) {
+        this.graphics = graphics;
+        this.graphics.nextStratum();
 
-        var matrices = drawContext.pose();
+        var matrices = graphics.pose();
         matrices.pushMatrix();
         matrices.scale(1.0f / mc.getWindow().getGuiScale());
 
@@ -98,8 +98,8 @@ public class GuiRenderer {
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
 
-        drawContext.pose().popMatrix();
-        drawContext.nextStratum();
+        graphics.pose().popMatrix();
+        graphics.nextStratum();
     }
 
     public void beginRender() {
@@ -153,7 +153,7 @@ public class GuiRenderer {
         }
 
         scissorStack.push(scissorPool.get().set(x, y, width, height));
-        drawContext.enableScissor((int) x, (int) y, (int) (x + width), (int) (y + height));
+        graphics.enableScissor((int) x, (int) y, (int) (x + width), (int) (y + height));
 
         beginRender();
     }
@@ -167,13 +167,13 @@ public class GuiRenderer {
         for (Runnable task : scissor.postTasks) task.run();
         scissor.pop();
 
-        drawContext.disableScissor();
+        graphics.disableScissor();
         if (!scissorStack.isEmpty()) beginRender();
 
         scissorPool.free(scissor);
     }
 
-    public boolean renderTooltip(GuiGraphics drawContext, double mouseX, double mouseY, double delta) {
+    public boolean renderTooltip(GuiGraphicsExtractor graphics, double mouseX, double mouseY, double delta) {
         tooltipAnimProgress += (tooltip != null ? 1 : -1) * delta * 14;
         tooltipAnimProgress = Mth.clamp(tooltipAnimProgress, 0, 1);
 
@@ -197,7 +197,7 @@ public class GuiRenderer {
 
             setAlpha(tooltipAnimProgress);
 
-            begin(drawContext);
+            begin(graphics);
             tooltipWidget.render(this, mouseX, mouseY, delta);
             end();
 
@@ -269,7 +269,7 @@ public class GuiRenderer {
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay, null, false);
+        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay, null, false);
     }
 
     public void absolutePost(Runnable task) {

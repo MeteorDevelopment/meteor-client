@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.utils.tooltip;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.state.MapRenderState;
@@ -46,25 +46,25 @@ public class MapTooltipComponent implements ClientTooltipComponent, MeteorToolti
     }
 
     @Override
-    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
         var scale = Modules.get().get(BetterTooltips.class).mapsScale.get().floatValue();
 
         // Background
         int size = (int) ((128 + 16) * scale);
-        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE_MAP_BACKGROUND, x, y, 0, 0, size, size, size, size);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE_MAP_BACKGROUND, x, y, 0, 0, size, size, size, size);
 
         // Contents
         MapItemSavedData mapState = MapItem.getSavedData(new MapId(mapId), mc.level);
         if (mapState == null) return;
 
-        context.pose().pushMatrix();
-        context.pose().translate(x, y);
-        context.pose().scale(scale, scale);
-        context.pose().translate(8, 8);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(scale, scale);
+        graphics.pose().translate(8, 8);
 
         mc.getMapRenderer().extractRenderState(new MapId(mapId), mapState, mapRenderState);
-        context.submitMapRenderState(mapRenderState);
+        graphics.map(mapRenderState);
 
-        context.pose().popMatrix();
+        graphics.pose().popMatrix();
     }
 }

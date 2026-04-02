@@ -39,8 +39,8 @@ public class ChunkIterator implements Iterator<ChunkAccess> {
     }
 
     private boolean isInRadius(ChunkAccess chunk) {
-        int x = chunk.getPos().x;
-        int z = chunk.getPos().z;
+        int x = chunk.getPos().x();
+        int z = chunk.getPos().z();
 
         return mc.level.getChunkSource().hasChunk(x + 1, z) && mc.level.getChunkSource().hasChunk(x - 1, z) && mc.level.getChunkSource().hasChunk(x, z + 1) && mc.level.getChunkSource().hasChunk(x, z - 1);
     }

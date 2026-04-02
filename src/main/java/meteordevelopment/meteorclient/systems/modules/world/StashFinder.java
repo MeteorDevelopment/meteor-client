@@ -192,8 +192,8 @@ public class StashFinder extends Module {
     @EventHandler
     private void onChunkData(ChunkDataEvent event) {
         // Check the distance.
-        double chunkXAbs = Math.abs(event.chunk().getPos().x * 16);
-        double chunkZAbs = Math.abs(event.chunk().getPos().z * 16);
+        double chunkXAbs = Math.abs(event.chunk().getPos().x() * 16);
+        double chunkZAbs = Math.abs(event.chunk().getPos().z() * 16);
         if (Math.sqrt(chunkXAbs * chunkXAbs + chunkZAbs * chunkZAbs) < minimumDistance.get()) return;
 
         Chunk chunk = new Chunk(event.chunk().getPos());
@@ -488,8 +488,8 @@ public class StashFinder extends Module {
         }
 
         public void calculatePos() {
-            x = chunkPos.x * 16 + 8;
-            z = chunkPos.z * 16 + 8;
+            x = chunkPos.x() * 16 + 8;
+            z = chunkPos.z() * 16 + 8;
         }
 
         public int getTotal() {

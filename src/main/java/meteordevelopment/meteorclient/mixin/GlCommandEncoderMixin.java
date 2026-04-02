@@ -28,7 +28,7 @@ public abstract class GlCommandEncoderMixin {
     private GlDevice device;
 
     @SuppressWarnings("deprecation")
-    @Inject(method = "createRenderPass(Ljava/util/function/Supplier;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalInt;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalDouble;)Lcom/mojang/blaze3d/systems/RenderPass;", at = @At("RETURN"))
+    @Inject(method = "createRenderPass(Ljava/util/function/Supplier;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalInt;)Lcom/mojang/blaze3d/systems/RenderPassBackend;", at = @At("RETURN"))
     private void createRenderPass$iGpuDevice(CallbackInfoReturnable<RenderPass> cir) {
         ((IGpuDevice) device).meteor$onCreateRenderPass(cir.getReturnValue());
     }

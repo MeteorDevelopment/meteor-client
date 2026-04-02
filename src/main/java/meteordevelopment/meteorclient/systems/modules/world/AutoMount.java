@@ -88,7 +88,6 @@ public class AutoMount extends Module {
 
     private void interact(Entity entity) {
         EntityHitResult location = new EntityHitResult(entity, entity.getBoundingBox().getCenter());
-        mc.gameMode.interactAt(mc.player, entity, location, InteractionHand.MAIN_HAND);
-        mc.gameMode.interact(mc.player, entity, InteractionHand.MAIN_HAND);
+        mc.gameMode.interact(mc.player, entity, location, InteractionHand.MAIN_HAND);
     }
 }

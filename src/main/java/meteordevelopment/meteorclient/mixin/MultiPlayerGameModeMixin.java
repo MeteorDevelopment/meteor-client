@@ -25,10 +25,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -54,15 +55,15 @@ public abstract class MultiPlayerGameModeMixin implements IMultiPlayerGameMode {
     @Shadow
     public abstract void startPrediction(ClientLevel world, PredictiveAction packetCreator);
 
-    @Inject(method = "handleInventoryMouseClick", at = @At("HEAD"), cancellable = true)
-    private void onHandleInventoryMouseClick(int syncId, int slotId, int button, ClickType actionType, Player player, CallbackInfo ci) {
-        if (actionType == ClickType.THROW && slotId >= 0 && slotId < player.containerMenu.slots.size()) {
-            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.containerMenu.slots.get(slotId).getItem())).isCancelled())
-                ci.cancel();
-        } else if (slotId == -999) {
+    @Inject(method = "handleContainerInput", at = @At("HEAD"), cancellable = true)
+    private void onHandleInventoryMouseClick(int containerId, int slotNum, int buttonNum, ContainerInput containerInput, Player player, CallbackInfo info) {
+        if (containerInput == ContainerInput.THROW && slotNum >= 0 && slotNum < player.containerMenu.slots.size()) {
+            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.containerMenu.slots.get(slotNum).getItem())).isCancelled())
+                info.cancel();
+        } else if (slotNum == -999) {
             // Clicking outside of inventory
             if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.containerMenu.getCarried())).isCancelled())
-                ci.cancel();
+                info.cancel();
         }
     }
 
@@ -96,9 +97,9 @@ public abstract class MultiPlayerGameModeMixin implements IMultiPlayerGameMode {
     }
 
     @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
-    private void onInteract(Player player, Entity entity, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+    private void onInteract(Player player, Entity entity, EntityHitResult hitResult, InteractionHand hand, CallbackInfoReturnable<InteractionResult> info) {
         if (MeteorClient.EVENT_BUS.post(InteractEntityEvent.get(entity, hand)).isCancelled())
-            cir.setReturnValue(InteractionResult.FAIL);
+            info.setReturnValue(InteractionResult.FAIL);
     }
 
     @Inject(method = "handleCreativeModeItemDrop", at = @At("HEAD"), cancellable = true)
@@ -124,7 +125,7 @@ public abstract class MultiPlayerGameModeMixin implements IMultiPlayerGameMode {
         destroyDelay = event.cooldown;
     }
 
-    @ModifyExpressionValue(method = "method_41930", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getDestroyProgress(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
+    @ModifyExpressionValue(method = "continueDestroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getDestroyProgress(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
     private float modifyBlockBreakingDelta(float original) {
         if (Modules.get().get(BreakDelay.class).preventInstaBreak() && original >= 1) {
             BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(destroyDelay));

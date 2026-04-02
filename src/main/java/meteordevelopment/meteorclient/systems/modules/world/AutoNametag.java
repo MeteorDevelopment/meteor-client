@@ -129,8 +129,7 @@ public class AutoNametag extends Module {
     private void interact() {
         InteractionHand hand = offHand ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
         EntityHitResult location = new EntityHitResult(target, target.getBoundingBox().getCenter());
-        mc.gameMode.interactAt(mc.player, target, location, hand);
-        mc.gameMode.interact(mc.player, target, hand);
+        mc.gameMode.interact(mc.player, target, location, hand);
         InvUtils.swapBack();
 
         entityCooldowns.put(target, 20);

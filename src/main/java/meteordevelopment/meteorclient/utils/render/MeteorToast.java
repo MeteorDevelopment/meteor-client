@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.utils.render;
 
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -107,19 +107,19 @@ public class MeteorToast implements Toast {
     }
 
     @Override
-    public void render(GuiGraphics context, Font textRenderer, long startTime) {
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, width(), height());
+    public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long fullyVisibleForMs) {
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, width(), height());
 
         int textX = icon != null ? 28 : 12;
         int titleY = 12;
 
         if (text != null) {
-            context.drawString(textRenderer, text, textX, 18, TEXT_COLOR, false);
+            graphics.text(font, text, textX, 18, TEXT_COLOR, false);
             titleY = 7;
         }
 
-        context.drawString(textRenderer, title, textX, titleY, TITLE_COLOR, false);
+        graphics.text(font, title, textX, titleY, TITLE_COLOR, false);
 
-        if (icon != null) context.renderItem(icon, 8, 8);
+        if (icon != null) graphics.item(icon, 8, 8);
     }
 }

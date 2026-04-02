@@ -8,9 +8,8 @@ package meteordevelopment.meteorclient.mixin;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.SkyRenderer;
-import net.minecraft.client.renderer.state.SkyRenderState;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.SkyRenderer;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.joml.Vector4fc;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SkyRenderer.class)
 public class SkyRendererMixin {
     @Inject(method = "extractRenderState", at = @At("TAIL"))
-    private void updateRenderState(ClientLevel world, float tickProgress, Camera camera, SkyRenderState state, CallbackInfo ci) {
+    private void updateRenderState(ClientLevel level, float partialTicks, Camera camera, net.minecraft.client.renderer.state.level.SkyRenderState state, CallbackInfo info) {
         Ambience ambience = Modules.get().get(Ambience.class);
         if (!ambience.isActive()) return;
 

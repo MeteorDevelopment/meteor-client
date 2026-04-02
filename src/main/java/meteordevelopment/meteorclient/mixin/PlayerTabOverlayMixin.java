@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTab;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
@@ -43,14 +43,14 @@ public abstract class PlayerTabOverlayMixin {
         if (betterTab.isActive()) cir.setReturnValue(betterTab.getPlayerName(playerListEntry));
     }
 
-    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"), index = 0)
+    @ModifyArg(method = "extractRenderState", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"), index = 0)
     private int modifyWidth(int width) {
         BetterTab module = Modules.get().get(BetterTab.class);
 
         return module.isActive() && module.accurateLatency.get() ? width + 30 : width;
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I", shift = At.Shift.BEFORE))
+    @Inject(method = "extractRenderState", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I", shift = At.Shift.BEFORE))
     private void modifyHeight(CallbackInfo ci, @Local(ordinal = 5) LocalIntRef o, @Local(ordinal = 6) LocalIntRef p) {
         BetterTab module = Modules.get().get(BetterTab.class);
         if (!module.isActive()) return;
@@ -66,19 +66,19 @@ public abstract class PlayerTabOverlayMixin {
         p.set(newP);
     }
 
-    @Inject(method = "renderPingIcon", at = @At("HEAD"), cancellable = true)
-    private void onRenderPingIcon(GuiGraphics context, int width, int x, int y, PlayerInfo entry, CallbackInfo ci) {
+    @Inject(method = "extractPingIcon", at = @At("HEAD"), cancellable = true)
+    private void onExtractPingIcon(GuiGraphicsExtractor graphics, int slotWidth, int x, int y, PlayerInfo info, CallbackInfo ci) {
         BetterTab betterTab = Modules.get().get(BetterTab.class);
 
         if (betterTab.isActive() && betterTab.accurateLatency.get()) {
             Minecraft mc = Minecraft.getInstance();
             Font font = mc.font;
 
-            int latency = Mth.clamp(entry.getLatency(), 0, 9999);
+            int latency = Mth.clamp(info.getLatency(), 0, 9999);
             int color = latency < 150 ? 0xFF00E970 :
                 latency < 300 ? 0xFFE7D020 : 0xFFD74238;
             String text = latency + "ms";
-            context.drawString(font, text, x + width - font.width(text), y, color);
+            graphics.text(font, text, x + slotWidth - font.width(text), y, color);
             ci.cancel();
         }
     }

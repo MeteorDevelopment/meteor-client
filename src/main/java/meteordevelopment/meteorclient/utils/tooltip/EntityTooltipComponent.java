@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.utils.tooltip;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,7 +39,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, ClientTooltipC
     }
 
     @Override
-    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    public void extractImage(Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
         var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).createRenderState(entity, 1);
 
         state.lightCoords = 15728880;
@@ -60,7 +60,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, ClientTooltipC
         Vector3f translation = new Vector3f(0, 0.1f, 0);
         Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
 
-        context.submitEntityRenderState(state, scale, translation, rotation, null, x, y, x + width, y + height);
+        graphics.entity(state, scale, translation, rotation, null, x, y, x + width, y + height);
         spin += 3 * mc.getDeltaTracker().getGameTimeDeltaTicks();
     }
 }

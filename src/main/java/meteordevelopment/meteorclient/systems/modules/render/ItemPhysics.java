@@ -17,10 +17,10 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.cuboid.ItemTransform;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import org.joml.Vector3f;
@@ -40,7 +40,7 @@ public class ItemPhysics extends Module {
         .build()
     );
 
-    private final RandomSource random = RandomSource.createNewThreadLocalInstance();
+    private final RandomSource random = RandomSource.createThreadLocalInstance();
     private boolean skipTransformation;
 
     public ItemPhysics() {

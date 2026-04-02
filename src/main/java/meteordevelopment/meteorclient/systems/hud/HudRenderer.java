@@ -20,7 +20,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
@@ -55,20 +55,20 @@ public class HudRenderer {
         })
         .build(CacheLoader.from(HudRenderer::loadFont));
 
-    public GuiGraphics drawContext;
+    public GuiGraphicsExtractor graphics;
     public double delta;
 
     private HudRenderer() {
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 
-    public void begin(GuiGraphics drawContext) {
+    public void begin(GuiGraphicsExtractor graphics) {
         Renderer2D.COLOR.begin();
 
-        this.drawContext = drawContext;
+        this.graphics = graphics;
         this.delta = Utils.frameTime;
 
-        drawContext.nextStratum();
+        graphics.nextStratum();
 
         if (!hud.hasCustomFont()) {
             VanillaTextRenderer.INSTANCE.scaleIndividually = true;
@@ -106,9 +106,9 @@ public class HudRenderer {
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
 
-        drawContext.nextStratum();
+        graphics.nextStratum();
 
-        drawContext = null;
+        graphics = null;
     }
 
     public void line(double x1, double y1, double x2, double y2, Color color) {
@@ -214,11 +214,11 @@ public class HudRenderer {
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverlay) {
-        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay, countOverlay, true);
+        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay, countOverlay, true);
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay);
+        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay);
     }
 
     public void entity(LivingEntity entity, int x, int y, int width, int height, float yaw, float pitch) {
@@ -254,7 +254,7 @@ public class HudRenderer {
         Vector3f translation = new Vector3f(0, 1f, 0);
         Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
 
-        drawContext.submitEntityRenderState(state, scale, translation, rotation, null, x1, y1, x2, y2);
+        graphics.entity(state, scale, translation, rotation, null, x1, y1, x2, y2);
     }
 
     private FontHolder getFontHolder(double scale, boolean render) {

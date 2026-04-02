@@ -35,12 +35,13 @@ public class WireframeEntityRenderer {
 
     private static final FeatureRenderDispatcher renderDispatcher = new FeatureRenderDispatcher(
         renderCommandQueue,
-        mc.getBlockRenderer(),
+        mc.getModelManager(),
         MyVertexConsumerProvider.INSTANCE,
         mc.getAtlasManager(),
         NoopOutlineVertexConsumerProvider.INSTANCE,
         NoopImmediateVertexConsumerProvider.INSTANCE,
-        mc.font
+        mc.font,
+        mc.gameRenderer.getGameRenderState()
     );
 
     private static Color sideColor;
@@ -77,7 +78,7 @@ public class WireframeEntityRenderer {
 
         matrices.pushPose();
         matrices.scale((float) scale, (float) scale, (float) scale);
-        renderer.submit(state, matrices, renderCommandQueue, mc.gameRenderer.getLevelRenderState().cameraRenderState);
+        renderer.submit(state, matrices, renderCommandQueue, mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState);
         matrices.popPose();
 
         renderDispatcher.renderAllFeatures();

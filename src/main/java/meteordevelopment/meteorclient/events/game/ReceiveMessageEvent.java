@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.events.game;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.client.GuiMessageTag;
+import net.minecraft.client.multiplayer.chat.GuiMessageTag;
 import net.minecraft.network.chat.Component;
 
 public class ReceiveMessageEvent extends Cancellable {

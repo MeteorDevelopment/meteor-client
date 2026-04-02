@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.events.render;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.client.renderer.block.model.ItemTransform;
+import net.minecraft.client.resources.model.cuboid.ItemTransform;
 
 public class ApplyTransformationEvent extends Cancellable {
     private static final ApplyTransformationEvent INSTANCE = new ApplyTransformationEvent();

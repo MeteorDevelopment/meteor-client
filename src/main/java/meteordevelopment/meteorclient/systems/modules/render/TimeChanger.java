@@ -39,19 +39,19 @@ public class TimeChanger extends Module {
 
     @Override
     public void onDeactivate() {
-        mc.level.getLevelData().setDayTime(oldTime);
+        mc.level.getLevelData().setGameTime(oldTime);
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
         if (event.packet instanceof ClientboundSetTimePacket packet) {
-            oldTime = packet.dayTime();
+            oldTime = packet.gameTime();
             event.cancel();
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        mc.level.getLevelData().setDayTime(time.get().longValue());
+        mc.level.getLevelData().setGameTime(time.get().longValue());
     }
 }

@@ -14,15 +14,14 @@ import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.MaterialSet;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.sprite.SpriteGetter;
 
 public class CustomBannerGuiElementRenderer extends PictureInPictureRenderer<CustomBannerGuiElementRenderState> {
-    private final MaterialSet sprite;
+    private final SpriteGetter sprites;
 
-    public CustomBannerGuiElementRenderer(MultiBufferSource.BufferSource immediate, MaterialSet sprite) {
+    public CustomBannerGuiElementRenderer(MultiBufferSource.BufferSource immediate, SpriteGetter sprites) {
         super(immediate);
-        this.sprite = sprite;
+        this.sprites = sprites;
     }
 
     @Override
@@ -36,20 +35,17 @@ public class CustomBannerGuiElementRenderer extends PictureInPictureRenderer<Cus
         FeatureRenderDispatcher renderDispatcher = Minecraft.getInstance().gameRenderer.getFeatureRenderDispatcher();
         SubmitNodeStorage orderedRenderCommandQueueImpl = renderDispatcher.getSubmitNodeStorage();
         BannerRenderer.submitPatterns(
-            this.sprite,
+            this.sprites,
             matrixStack,
             orderedRenderCommandQueueImpl,
             15728880,
             OverlayTexture.NO_OVERLAY,
             state.flag(),
             0.0F,
-            ModelBakery.BANNER_BASE,
             true,
             state.baseColor(),
             state.resultBannerPatterns(),
-            false,
-            null,
-            0
+            null
         );
         renderDispatcher.renderAllFeatures();
     }

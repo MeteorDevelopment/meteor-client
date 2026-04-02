@@ -16,7 +16,7 @@ import meteordevelopment.meteorclient.utils.misc.IChangeable;
 import meteordevelopment.meteorclient.utils.misc.ICopyable;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Names;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -58,7 +58,7 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
     }
 
     @Override
-    protected void onRenderBefore(GuiGraphics drawContext, float delta) {
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, float delta) {
         if (invalidate) {
             this.invalidateTable();
             invalidate = false;

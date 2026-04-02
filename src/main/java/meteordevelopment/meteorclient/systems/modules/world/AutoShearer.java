@@ -84,8 +84,7 @@ public class AutoShearer extends Module {
 
     private void interact() {
         EntityHitResult location = new EntityHitResult(entity, entity.getBoundingBox().getCenter());
-        mc.gameMode.interactAt(mc.player, entity, location, hand);
-        mc.gameMode.interact(mc.player, entity, hand);
+        mc.gameMode.interact(mc.player, entity, location, hand);
         InvUtils.swapBack();
     }
 }

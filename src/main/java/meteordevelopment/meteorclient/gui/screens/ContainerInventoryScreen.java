@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.gui.screens;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -52,7 +52,9 @@ public class ContainerInventoryScreen extends Screen {
         if (containerItem.getItem() instanceof BundleItem) {
             BundleContents bundleContents = containerItem.get(DataComponents.BUNDLE_CONTENTS);
             if (bundleContents != null) {
-                bundleContents.items().forEach(containerItems::add);
+                for (var template : bundleContents.items()) {
+                    containerItems.add(template.create());
+                }
             }
         } else {
             ItemStack[] tempItems = new ItemStack[64];
@@ -71,8 +73,8 @@ public class ContainerInventoryScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         baseX = x + 8;
         baseY = y + 18;
@@ -82,7 +84,7 @@ public class ContainerInventoryScreen extends Screen {
         for (int row = 0; row < containerRows + 4; row++) {
             for (int col = 0; col < 9; col++) {
                 int slotY = row < containerRows ? baseY + row * SLOT_SIZE : playerY + (row - containerRows) * SLOT_SIZE;
-                context.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE, baseX + col * SLOT_SIZE, slotY, SLOT_SIZE, SLOT_SIZE);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE, baseX + col * SLOT_SIZE, slotY, SLOT_SIZE, SLOT_SIZE);
             }
         }
 
@@ -92,8 +94,8 @@ public class ContainerInventoryScreen extends Screen {
             if (!item.isEmpty()) {
                 int itemX = baseX + (i % 9) * SLOT_SIZE + 1;
                 int itemY = baseY + (i / 9) * SLOT_SIZE + 1;
-                context.renderItem(item, itemX, itemY);
-                context.renderItemDecorations(font, item, itemX, itemY);
+                graphics.item(item, itemX, itemY);
+                graphics.itemDecorations(font, item, itemX, itemY);
             }
         }
 
@@ -105,25 +107,25 @@ public class ContainerInventoryScreen extends Screen {
                 if (!item.isEmpty()) {
                     int itemX = baseX + col * SLOT_SIZE + 1;
                     int itemY = playerY + row * SLOT_SIZE + 1;
-                    context.renderItem(item, itemX, itemY);
-                    context.renderItemDecorations(font, item, itemX, itemY);
+                    graphics.item(item, itemX, itemY);
+                    graphics.itemDecorations(font, item, itemX, itemY);
                 }
             }
         }
 
         // drawing title headers
-        context.pose().pushMatrix();
-        context.pose().translate((float) x, (float) y);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate((float) x, (float) y);
         if (font != null) {
-            context.drawString(font, title, 8, 6, -12566464, false);
-            context.drawString(font, playerInventory.getDisplayName(), 8, 18 + containerRows * SLOT_SIZE + 10, -12566464, false);
+            graphics.text(font, title, 8, 6, -12566464, false);
+            graphics.text(font, playerInventory.getDisplayName(), 8, 18 + containerRows * SLOT_SIZE + 10, -12566464, false);
         }
-        context.pose().popMatrix();
+        graphics.pose().popMatrix();
 
         // drawing the tooltip
         ItemStack item = getSelectedItem(mouseX, mouseY);
         if (!item.isEmpty()) {
-            context.setTooltipForNextFrame(font, getTooltipFromItem(mc, item), item.getTooltipImage(), mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, getTooltipFromItem(mc, item), item.getTooltipImage(), mouseX, mouseY);
         }
     }
 

@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.utils.tooltip;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -71,7 +71,7 @@ public class BundleTooltipComponent implements ClientTooltipComponent, MeteorToo
     }
 
     @Override
-    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
         int row = 0;
         int col = 0;
 
@@ -80,9 +80,9 @@ public class BundleTooltipComponent implements ClientTooltipComponent, MeteorToo
                 int slotX = x + 8 + col * SLOT_DIMENSION;
                 int slotY = y + 8 + row * SLOT_DIMENSION;
 
-                context.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_BACKGROUND_TEXTURE, slotX, slotY, SLOT_DIMENSION, SLOT_DIMENSION);
-                drawItem(itemStack, (row * 8) + col, slotX, slotY, textRenderer, context);
-                context.renderItemDecorations(textRenderer, itemStack, slotX + 4, slotY + 4);
+                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_BACKGROUND_TEXTURE, slotX, slotY, SLOT_DIMENSION, SLOT_DIMENSION);
+                drawItem(itemStack, (row * 8) + col, slotX, slotY, font, graphics);
+                graphics.itemDecorations(font, itemStack, slotX + 4, slotY + 4);
             }
 
             col++;
@@ -92,58 +92,58 @@ public class BundleTooltipComponent implements ClientTooltipComponent, MeteorToo
             }
         }
 
-        drawSelectedItemTooltip(textRenderer, context, x, y, width);
+        drawSelectedItemTooltip(font, graphics, x, y, width);
 
         int progressBarX = x + (this.width - PROGRESS_BAR_WIDTH) / 2;
         int progressBarY = y + this.height - PROGRESS_BAR_HEIGHT - 4;
-        drawProgressBar(progressBarX, progressBarY, textRenderer, context);
+        drawProgressBar(progressBarX, progressBarY, font, graphics);
     }
 
-    private void drawItem(ItemStack itemStack, int index, int x, int y, Font textRenderer, GuiGraphics drawContext) {
-        boolean bl = bundleContents.getSelectedItem() == index;
+    private void drawItem(ItemStack itemStack, int index, int x, int y, Font font, GuiGraphicsExtractor graphics) {
+        boolean bl = bundleContents.getSelectedItemIndex() == index;
         if (bl) {
-            drawContext.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_HIGHLIGHT_BACK_TEXTURE, x, y, 24, 24);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_HIGHLIGHT_BACK_TEXTURE, x, y, 24, 24);
         } else {
-            drawContext.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_BACKGROUND_TEXTURE, x, y, 24, 24);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_BACKGROUND_TEXTURE, x, y, 24, 24);
         }
 
-        drawContext.renderItem(itemStack, x + 4, y + 4, 0);
-        drawContext.renderItemDecorations(textRenderer, itemStack, x + 4, y + 4);
+        graphics.item(itemStack, x + 4, y + 4, 0);
+        graphics.itemDecorations(font, itemStack, x + 4, y + 4);
         if (bl) {
-            drawContext.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_HIGHLIGHT_FRONT_TEXTURE, x, y, 24, 24);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_HIGHLIGHT_FRONT_TEXTURE, x, y, 24, 24);
         }
     }
 
-    private void drawSelectedItemTooltip(Font textRenderer, GuiGraphics drawContext, int x, int y, int width) {
-        if (this.bundleContents.hasSelectedItem()) {
-            ItemStack itemStack = this.bundleContents.getItemUnsafe(this.bundleContents.getSelectedItem());
+    private void drawSelectedItemTooltip(Font font, GuiGraphicsExtractor graphics, int x, int y, int width) {
+        if (this.bundleContents.getSelectedItemIndex() != -1) {
+            ItemStack itemStack = this.bundleContents.getSelectedItem().create();
             Component text = itemStack.getStyledHoverName();
-            int i = textRenderer.width(text.getVisualOrderText());
+            int i = font.width(text.getVisualOrderText());
             int j = x + width / 2 - 12;
             ClientTooltipComponent tooltipComponent = ClientTooltipComponent.create(text.getVisualOrderText());
-            drawContext.renderTooltip(
-                textRenderer, List.of(tooltipComponent), j - i / 2, y - 37, DefaultTooltipPositioner.INSTANCE, itemStack.get(DataComponents.TOOLTIP_STYLE)
+            graphics.tooltip(
+                font, List.of(tooltipComponent), j - i / 2, y - 37, DefaultTooltipPositioner.INSTANCE, itemStack.get(DataComponents.TOOLTIP_STYLE)
             );
         }
     }
 
-    private void drawProgressBar(int x, int y, Font textRenderer, GuiGraphics context) {
-        int fillAmount = Mth.clamp(Mth.mulAndTruncate(bundleContents.weight(), PROGRESS_BAR_WIDTH), 0, PROGRESS_BAR_WIDTH);
+    private void drawProgressBar(int x, int y, Font font, GuiGraphicsExtractor graphics) {
+        int fillAmount = Mth.clamp(Mth.mulAndTruncate(bundleContents.weight().getOrThrow(), PROGRESS_BAR_WIDTH), 0, PROGRESS_BAR_WIDTH);
 
-        Identifier fillTexture = bundleContents.weight().compareTo(Fraction.ONE) >= 0
+        Identifier fillTexture = bundleContents.weight().getOrThrow().compareTo(Fraction.ONE) >= 0
             ? BUNDLE_PROGRESS_BAR_FULL_TEXTURE
             : BUNDLE_PROGRESS_BAR_FILL_TEXTURE;
 
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, fillTexture, x + 1, y, fillAmount, PROGRESS_BAR_HEIGHT);
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_PROGRESS_BAR_BORDER_TEXTURE, x, y, PROGRESS_BAR_WIDTH, PROGRESS_BAR_HEIGHT);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, fillTexture, x + 1, y, fillAmount, PROGRESS_BAR_HEIGHT);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_PROGRESS_BAR_BORDER_TEXTURE, x, y, PROGRESS_BAR_WIDTH, PROGRESS_BAR_HEIGHT);
 
         Component label = getProgressBarLabel();
         if (label != null) {
-            context.drawCenteredString(textRenderer, label, x + PROGRESS_BAR_WIDTH / 2, y + 3, CommonColors.WHITE);
+            graphics.centeredText(font, label, x + PROGRESS_BAR_WIDTH / 2, y + 3, CommonColors.WHITE);
         }
     }
 
     private Component getProgressBarLabel() {
-        return bundleContents.weight().compareTo(Fraction.ONE) >= 0 ? BUNDLE_FULL : Component.literal(String.format("%.2f%%", bundleContents.weight().floatValue() * 100));
+        return bundleContents.weight().getOrThrow().compareTo(Fraction.ONE) >= 0 ? BUNDLE_FULL : Component.literal(String.format("%.2f%%", bundleContents.weight().getOrThrow().floatValue() * 100));
     }
 }

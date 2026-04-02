@@ -25,10 +25,10 @@ import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.GuiMessage;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.PlayerFaceExtractor;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -426,12 +426,12 @@ public class BetterChat extends Module {
     }
 
 
-    public void beforeDrawMessage(GuiGraphics context, int y, int color) {
+    public void beforeDrawMessage(GuiGraphicsExtractor graphics, int y, int color) {
         if (!isActive() || !playerHeads.get() || line == null) return;
 
         // Only draw the first line of multi line messages
         if (((IGuiMessageVisible) (Object) line).meteor$isStartOfEntry()) {
-            drawTexture(context, (IGuiMessage) (Object) line, y, color);
+            drawTexture(graphics, (IGuiMessage) (Object) line, y, color);
         }
     }
 
@@ -441,7 +441,7 @@ public class BetterChat extends Module {
         line = null;
     }
 
-    private void drawTexture(GuiGraphics context, IGuiMessage line, int y, int color) {
+    private void drawTexture(GuiGraphicsExtractor graphics, IGuiMessage line, int y, int color) {
         String text = line.meteor$getText().trim();
 
         // Custom
@@ -456,7 +456,7 @@ public class BetterChat extends Module {
         for (CustomHeadEntry entry : CUSTOM_HEAD_ENTRIES) {
             // Check prefix
             if (text.startsWith(entry.prefix(), startOffset)) {
-                context.blit(RenderPipelines.GUI_TEXTURED, entry.texture(), 0, y, 0, 0, 8, 8, 64, 64, 64, 64, color);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, entry.texture(), 0, y, 0, 0, 8, 8, 64, 64, 64, 64, color);
                 return;
             }
         }
@@ -468,7 +468,7 @@ public class BetterChat extends Module {
         PlayerInfo entry = mc.getConnection().getPlayerInfo(sender.id());
         if (entry == null) return;
 
-        PlayerFaceRenderer.draw(context, entry.getSkin(), 0, y, 8, color);
+        PlayerFaceExtractor.extractRenderState(graphics, entry.getSkin(), 0, y, 8, color);
     }
 
     private GameProfile getSender(IGuiMessage line, String text) {

@@ -32,18 +32,20 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.gui.render.state.GuiRenderState;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.fog.FogRenderer;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -171,7 +173,7 @@ public abstract class GameRendererMixin implements IGameRenderer {
             var mouseX = (int) minecraft.mouseHandler.getScaledXPos(minecraft.getWindow());
             var mouseY = (int) minecraft.mouseHandler.getScaledYPos(minecraft.getWindow());
 
-            var context = new GuiGraphics(minecraft, guiRenderState, mouseX, mouseY);
+            var context = new GuiGraphicsExtractor(minecraft, guiRenderState, mouseX, mouseY);
 
             widgetScreen.renderCustom(context, mouseX, mouseY, tickCounter.getGameTimeDeltaTicks());
 
@@ -252,15 +254,15 @@ public abstract class GameRendererMixin implements IGameRenderer {
     }
 
     @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)
-    private void renderItemInHand(float tickProgress, boolean sleeping, Matrix4f positionMatrix, CallbackInfo ci) {
-        if (!Modules.get().get(Freecam.class).renderHands() ||
-            !Modules.get().get(Zoom.class).renderHands())
-            ci.cancel();
+    private void renderItemInHand(CameraRenderState cameraState, float deltaPartialTick, Matrix4fc modelViewMatrix, CallbackInfo info) {
+        if (!Modules.get().get(Freecam.class).renderHands() || !Modules.get().get(Zoom.class).renderHands()) {
+            info.cancel();
+        }
     }
 
     @Override
     public void meteor$flushGuiState() {
         guiRenderer.render(fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
-        guiRenderer.incrementFrameNumber();
+        guiRenderer.endFrame();
     }
 }

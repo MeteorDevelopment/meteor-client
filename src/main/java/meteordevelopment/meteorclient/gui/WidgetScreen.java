@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CursorStyle;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -248,13 +248,13 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
         if (this.minecraft.level == null) {
-            this.renderPanorama(context, deltaTicks);
+            this.extractPanorama(graphics, deltaTicks);
         }
     }
 
-    public void renderCustom(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void renderCustom(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         int s = mc.getWindow().getGuiScale();
         mouseX *= s;
         mouseY *= s;
@@ -271,18 +271,18 @@ public abstract class WidgetScreen extends Screen {
         // Apply projection without scaling
         Utils.unscaledProjection();
 
-        onRenderBefore(context, delta);
+        onRenderBefore(graphics, delta);
 
         RENDERER.theme = theme;
         theme.beforeRender();
 
-        RENDERER.begin(context);
+        RENDERER.begin(graphics);
         RENDERER.setAlpha(animProgress);
         root.render(RENDERER, mouseX, mouseY, delta / 20);
         RENDERER.setAlpha(1);
         RENDERER.end();
 
-        boolean tooltip = RENDERER.renderTooltip(context, mouseX, mouseY, delta / 20);
+        boolean tooltip = RENDERER.renderTooltip(graphics, mouseX, mouseY, delta / 20);
 
         if (debug) {
             DEBUG_RENDERER.render(root);
@@ -301,7 +301,7 @@ public abstract class WidgetScreen extends Screen {
         }
     }
 
-    protected void onRenderBefore(GuiGraphics drawContext, float delta) {
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, float delta) {
     }
 
     @Override

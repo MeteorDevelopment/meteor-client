@@ -80,7 +80,7 @@ public class TexturePacker {
         int height = (int) (srcHeight * scaleFactor);
 
         ByteBuffer imageBuffer = BufferUtils.createByteBuffer(width * height * 4);
-        STBImageResize.stbir_resize_uint8(srcImageBuffer, srcWidth, srcHeight, 0, imageBuffer, width, height, 0, 4);
+        STBImageResize.stbir_resize_uint8_linear(srcImageBuffer, srcWidth, srcHeight, 0, imageBuffer, width, height, 0, 4);
 
         TextureRegion region = new TextureRegion(width, height);
         texture.add(region);

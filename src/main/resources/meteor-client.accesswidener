@@ -1,10 +1,7 @@
-accessWidener	v2	named
+accessWidener	v2	official
 
 accessible   class   net/minecraft/client/resources/SkinManager$TextureCache
 accessible   class   net/minecraft/client/particle/FireworkParticles$SparkParticle
-accessible   class   net/minecraft/network/protocol/game/ServerboundInteractPacket$ActionType
-accessible   class   net/minecraft/network/protocol/game/ServerboundInteractPacket$InteractionAtLocationAction
-accessible   class   net/minecraft/network/protocol/game/ServerboundInteractPacket$Action
 accessible   class   net/minecraft/client/multiplayer/ClientChunkCache$Storage
 
 accessible   class   net/minecraft/client/resources/MapTextureManager$MapInstance
@@ -22,13 +19,16 @@ accessible   method  com/mojang/blaze3d/pipeline/RenderPipeline$Builder withSnip
 
 accessible   field   net/minecraft/client/renderer/SubmitNodeStorage submitsPerOrder Lit/unimi/dsi/fastutil/ints/Int2ObjectAVLTreeMap;
 
+accessible   class   com/mojang/blaze3d/opengl/GlDevice
+accessible   class   com/mojang/blaze3d/opengl/GlCommandEncoder
+
 # Auto Fish
 accessible   class   net/minecraft/world/entity/projectile/FishingHook$FishHookState
 accessible   field   net/minecraft/world/entity/projectile/FishingHook currentState Lnet/minecraft/world/entity/projectile/FishingHook$FishHookState;
 
 accessible   method  net/minecraft/client/multiplayer/MultiPlayerGameMode startPrediction (Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/multiplayer/prediction/PredictiveAction;)V
 
-accessible   class   net/minecraft/client/gui/GuiGraphics$ScissorStack
+accessible   class   net/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack
 accessible   field   net/minecraft/client/renderer/rendertype/RenderSetup outputTarget Lnet/minecraft/client/renderer/rendertype/OutputTarget;
 
 accessible   method   net/minecraft/world/entity/projectile/Projectile shouldBounceOnWorldBorder ()Z

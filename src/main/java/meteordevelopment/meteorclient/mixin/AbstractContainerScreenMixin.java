@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.render.ItemHighlight;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -20,7 +20,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +46,7 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
 
     @Shadow
     @Nullable
-    protected abstract Slot getHoveredSlot(double xPosition, double yPosition);
+    protected abstract Slot getHoveredSlot(double x, double y);
 
     @Shadow
     public abstract T getMenu();
@@ -55,7 +55,7 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
     private boolean doubleclick;
 
     @Shadow
-    protected abstract void slotClicked(Slot slot, int invSlot, int clickData, ClickType actionType);
+    protected abstract void slotClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput);
 
     @Shadow
     public abstract void onClose();
@@ -93,7 +93,7 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
 
         Slot slot = getHoveredSlot(click.x(), click.y());
         if (slot != null && slot.hasItem() && mc.hasShiftDown())
-            slotClicked(slot, slot.index, click.button(), ClickType.QUICK_MOVE);
+            slotClicked(slot, slot.index, click.button(), ContainerInput.QUICK_MOVE);
     }
 
     // Middle click open
@@ -121,10 +121,10 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
     }
 
     // Item Highlight
-    @Inject(method = "renderSlot", at = @At("HEAD"))
-    private void onRenderSlot(GuiGraphics context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+    @Inject(method = "extractSlot", at = @At("HEAD"))
+    private void onRenderSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         int color = Modules.get().get(ItemHighlight.class).getColor(slot.getItem());
-        if (color != -1) context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, color);
+        if (color != -1) graphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, color);
     }
 
     @ModifyReturnValue(method = "showTooltipWithItemInHand", at = @At("RETURN"))

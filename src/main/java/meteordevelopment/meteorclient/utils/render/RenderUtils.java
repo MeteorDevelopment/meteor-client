@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -47,8 +47,8 @@ public class RenderUtils {
     }
 
     // Items
-    public static void drawItem(GuiGraphics drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride, boolean disableGuiScale) {
-        Matrix3x2fStack matrices = drawContext.pose();
+    public static void drawItem(GuiGraphicsExtractor graphics, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride, boolean disableGuiScale) {
+        Matrix3x2fStack matrices = graphics.pose();
         matrices.pushMatrix();
 
         if (disableGuiScale) {
@@ -60,14 +60,14 @@ public class RenderUtils {
         int scaledX = (int) (x / scale);
         int scaledY = (int) (y / scale);
 
-        drawContext.renderItem(itemStack, scaledX, scaledY);
-        if (overlay) drawContext.renderItemDecorations(mc.font, itemStack, scaledX, scaledY, countOverride);
+        graphics.item(itemStack, scaledX, scaledY);
+        if (overlay) graphics.itemDecorations(mc.font, itemStack, scaledX, scaledY, countOverride);
 
         matrices.popMatrix();
     }
 
-    public static void drawItem(GuiGraphics drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        drawItem(drawContext, itemStack, x, y, scale, overlay, null, true);
+    public static void drawItem(GuiGraphicsExtractor graphics, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
+        drawItem(graphics, itemStack, x, y, scale, overlay, null, true);
     }
 
     public static void updateScreenCenter(Matrix4f projection, Matrix4f view) {

@@ -31,7 +31,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
-import net.minecraft.client.renderer.CachedOrthoProjectionMatrixBuffer;
+import net.minecraft.client.renderer.Projection;
+import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
@@ -60,6 +61,7 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Range;
+import org.joml.Matrix4f;
 import org.joml.Vector3d;
 
 import java.io.File;
@@ -83,7 +85,7 @@ public class Utils {
     public static double frameTime;
     public static Screen screenToOpen;
 
-    private static final CachedOrthoProjectionMatrixBuffer matrix = new CachedOrthoProjectionMatrixBuffer("meteor-projection-matrix", -10, 100, true);
+    private static final ProjectionMatrixBuffer matrixBuffer = new ProjectionMatrixBuffer("meteor-projection-matrix");
 
     private Utils() {
     }
@@ -125,7 +127,7 @@ public class Utils {
     public static String getWorldTime() {
         if (mc.level == null) return "00:00";
 
-        int ticks = (int) (mc.level.getDayTime() % 24000);
+        int ticks = (int) (mc.level.getGameTime() % 24000);
         ticks += 6000;
         if (ticks > 24000) ticks -= 24000;
 
@@ -214,8 +216,12 @@ public class Utils {
         float width = mc.getWindow().getWidth();
         float height = mc.getWindow().getHeight();
 
-        RenderSystem.setProjectionMatrix(matrix.getBuffer(width, height), ProjectionType.ORTHOGRAPHIC);
-        RenderUtils.projection.set(((CachedOrthoProjectionMatrixBufferAccessor) matrix).meteor$callCreateProjectionMatrix(width, height));
+        var proj = new Projection();
+        proj.setupOrtho(-10, 100, width, height, true);
+        var matrix = proj.getMatrix(new Matrix4f());
+
+        RenderSystem.setProjectionMatrix(matrixBuffer.getBuffer(matrix), ProjectionType.ORTHOGRAPHIC);
+        RenderUtils.projection.set(matrix);
 
         rendering3D = false;
     }
@@ -224,8 +230,12 @@ public class Utils {
         float width = (float) (mc.getWindow().getWidth() / mc.getWindow().getGuiScale());
         float height = (float) (mc.getWindow().getHeight() / mc.getWindow().getGuiScale());
 
-        RenderSystem.setProjectionMatrix(matrix.getBuffer(width, height), ProjectionType.PERSPECTIVE);
-        RenderUtils.projection.set(((CachedOrthoProjectionMatrixBufferAccessor) matrix).meteor$callCreateProjectionMatrix(width, height));
+        var proj = new Projection();
+        proj.setupOrtho(-10, 100, width, height, true);
+        var matrix = proj.getMatrix(new Matrix4f());
+
+        RenderSystem.setProjectionMatrix(matrixBuffer.getBuffer(matrix), ProjectionType.PERSPECTIVE);
+        RenderUtils.projection.set(matrix);
 
         rendering3D = true;
     }

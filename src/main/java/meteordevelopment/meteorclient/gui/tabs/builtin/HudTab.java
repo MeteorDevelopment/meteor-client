@@ -17,7 +17,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -76,8 +76,8 @@ public class HudTab extends Tab {
         }
 
         @Override
-        protected void onRenderBefore(GuiGraphics drawContext, float delta) {
-            HudEditorScreen.renderElements(drawContext);
+        protected void onRenderBefore(GuiGraphicsExtractor graphics, float delta) {
+            HudEditorScreen.renderElements(graphics);
         }
 
         @Override

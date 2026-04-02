@@ -82,7 +82,7 @@ public class DropCommand extends Command {
     }
 
     private void dropItem(LocalPlayer player, CommandContext<SharedSuggestionProvider> context, int amount) throws CommandSyntaxException {
-        ItemStack stack = ItemArgument.getItem(context, "item").createItemStack(1, false);
+        ItemStack stack = ItemArgument.getItem(context, "item").createItemStack(1);
         if (stack == null || stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
 
         for (int i = 0; i < player.getInventory().getContainerSize() && amount > 0; i++) {

@@ -151,12 +151,12 @@ public class ServerCommand extends Command {
             mc.level.getDifficulty().getDisplayName().getString(),
             new DifficultyInstance(
                 mc.level.getDifficulty(),
-                mc.level.getDayTime(),
+                mc.level.getGameTime(),
                 mc.level.getChunk(mc.player.blockPosition()).getInhabitedTime(),
                 DimensionType.MOON_BRIGHTNESS_PER_PHASE[mc.level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, mc.player.blockPosition()).index()] // lol
             ).getDifficulty()
         );
-        info("Day: %d", mc.level.getDayTime() / 24000L);
+        info("Day: %d", mc.level.getGameTime() / 24000L);
         info("Permission level: %s", formatPerms());
     }
 

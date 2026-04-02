@@ -16,7 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.Objective;
@@ -35,80 +35,80 @@ public abstract class GuiMixin {
     @Shadow
     public abstract void onDisconnected();
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+    @Inject(method = "extractRenderState", at = @At("TAIL"))
+    private void onExtractRenderState(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         ((IGameRenderer) mc.gameRenderer).meteor$flushGuiState();
-        context.nextStratum();
+        graphics.nextStratum();
 
         Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
 
         Utils.unscaledProjection();
 
-        MeteorClient.EVENT_BUS.post(Render2DEvent.get(context, context.guiWidth(), context.guiWidth(), tickCounter.getGameTimeDeltaPartialTick(true)));
+        MeteorClient.EVENT_BUS.post(Render2DEvent.get(graphics, graphics.guiWidth(), graphics.guiWidth(), deltaTracker.getGameTimeDeltaPartialTick(true)));
 
-        context.nextStratum();
+        graphics.nextStratum();
         Utils.scaledProjection();
 
         Profiler.get().pop();
     }
 
-    @Inject(method = "renderEffects", at = @At("HEAD"), cancellable = true)
-    private void onRenderStatusEffectOverlay(CallbackInfo ci) {
+    @Inject(method = "extractEffects", at = @At("HEAD"), cancellable = true)
+    private void onExtractStatusEffectOverlay(CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noPotionIcons()) ci.cancel();
     }
 
-    @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
-    private void onRenderPortalOverlay(GuiGraphics context, float nauseaStrength, CallbackInfo ci) {
+    @Inject(method = "extractPortalOverlay", at = @At("HEAD"), cancellable = true)
+    private void onExtractPortalOverlay(GuiGraphicsExtractor graphics, float nauseaStrength, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noPortalOverlay()) ci.cancel();
     }
 
-    @ModifyArgs(method = "renderCameraOverlays", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderTextureOverlay(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/Identifier;F)V", ordinal = 0))
-    private void onRenderPumpkinOverlay(Args args) {
+    @ModifyArgs(method = "extractCameraOverlays", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;extractTextureOverlay(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/resources/Identifier;F)V", ordinal = 0))
+    private void onExtractPumpkinOverlay(Args args) {
         if (Modules.get().get(NoRender.class).noPumpkinOverlay()) args.set(2, 0f);
     }
 
-    @ModifyArgs(method = "renderCameraOverlays", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderTextureOverlay(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/Identifier;F)V", ordinal = 1))
-    private void onRenderPowderedSnowOverlay(Args args) {
+    @ModifyArgs(method = "extractCameraOverlays", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;extractTextureOverlay(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/resources/Identifier;F)V", ordinal = 1))
+    private void onExtractPowderedSnowOverlay(Args args) {
         if (Modules.get().get(NoRender.class).noPowderedSnowOverlay()) args.set(2, 0f);
     }
 
-    @Inject(method = "renderVignette", at = @At("HEAD"), cancellable = true)
-    private void onRenderVignetteOverlay(GuiGraphics context, Entity entity, CallbackInfo ci) {
+    @Inject(method = "extractVignette", at = @At("HEAD"), cancellable = true)
+    private void onExtractVignetteOverlay(GuiGraphicsExtractor graphics, Entity camera, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noVignette()) ci.cancel();
     }
 
-    @Inject(method = "displayScoreboardSidebar(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/scores/Objective;)V", at = @At("HEAD"), cancellable = true)
-    private void onRenderScoreboardSidebar(GuiGraphics context, Objective objective, CallbackInfo ci) {
+    @Inject(method = "displayScoreboardSidebar", at = @At("HEAD"), cancellable = true)
+    private void onExtractScoreboardSidebar(GuiGraphicsExtractor graphics, Objective objective, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noScoreboard()) ci.cancel();
     }
 
-    @Inject(method = "renderScoreboardSidebar(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V", at = @At("HEAD"), cancellable = true)
-    private void onRenderScoreboardSidebar(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+    @Inject(method = "extractScoreboardSidebar", at = @At("HEAD"), cancellable = true)
+    private void onExtractScoreboardSidebar(GuiGraphicsExtractor graphics, DeltaTracker tickCounter, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noScoreboard()) ci.cancel();
     }
 
-    @Inject(method = "renderSpyglassOverlay", at = @At("HEAD"), cancellable = true)
-    private void onRenderSpyglassOverlay(GuiGraphics context, float scale, CallbackInfo ci) {
+    @Inject(method = "extractSpyglassOverlay", at = @At("HEAD"), cancellable = true)
+    private void onExtractSpyglassOverlay(GuiGraphicsExtractor graphics, float scale, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noSpyglassOverlay()) ci.cancel();
     }
 
-    @ModifyExpressionValue(method = "renderCrosshair", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/CameraType;isFirstPerson()Z"))
+    @ModifyExpressionValue(method = "extractCrosshair", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/CameraType;isFirstPerson()Z"))
     private boolean alwaysRenderCrosshairInFreecam(boolean firstPerson) {
         return Modules.get().isActive(Freecam.class) || firstPerson;
     }
 
-    @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
-    private void onRenderCrosshair(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+    @Inject(method = "extractCrosshair", at = @At("HEAD"), cancellable = true)
+    private void onExtractCrosshair(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noCrosshair()) ci.cancel();
     }
 
-    @Inject(method = "renderTitle", at = @At("HEAD"), cancellable = true)
-    private void onRenderTitle(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+    @Inject(method = "extractTitle", at = @At("HEAD"), cancellable = true)
+    private void onExtractTitle(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noTitle()) ci.cancel();
     }
 
-    @Inject(method = "renderSelectedItemName", at = @At("HEAD"), cancellable = true)
-    private void onRenderHeldItemTooltip(GuiGraphics context, CallbackInfo ci) {
+    @Inject(method = "extractSelectedItemName", at = @At("HEAD"), cancellable = true)
+    private void onExtractHeldItemTooltip(GuiGraphicsExtractor graphics, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noHeldItemName()) ci.cancel();
     }
 
@@ -119,8 +119,8 @@ public abstract class GuiMixin {
         }
     }
 
-    @Inject(method = "renderConfusionOverlay", at = @At("HEAD"), cancellable = true)
-    private void onRenderNausea(GuiGraphics context, float distortionStrength, CallbackInfo ci) {
+    @Inject(method = "extractConfusionOverlay", at = @At("HEAD"), cancellable = true)
+    private void onExtractNausea(GuiGraphicsExtractor graphics, float distortionStrength, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noNausea()) ci.cancel();
     }
 }

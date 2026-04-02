@@ -48,7 +48,7 @@ val jij: Configuration by configurations.creating
 
 configurations {
     // include mods
-    modImplementation.configure {
+    implementation.configure {
         extendsFrom(modInclude)
     }
     include.configure {
@@ -67,23 +67,22 @@ configurations {
 dependencies {
     // Fabric
     minecraft(libs.minecraft)
-    mappings(loom.officialMojangMappings())
-    modImplementation(libs.fabric.loader)
+    implementation(libs.fabric.loader)
 
     val fapiVersion = libs.versions.fabric.api.get()
     modInclude(fabricApi.module("fabric-api-base", fapiVersion))
     modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
 
     // Compat fixes
-    modCompileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
-    modCompileOnly(libs.sodium) { isTransitive = false }
-    modCompileOnly(libs.lithium) { isTransitive = false }
-    modCompileOnly(libs.iris) { isTransitive = false }
-    modCompileOnly(libs.viafabricplus) { isTransitive = false }
-    modCompileOnly(libs.viafabricplus.api) { isTransitive = false }
+    compileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
+    compileOnly(libs.sodium) { isTransitive = false }
+    compileOnly(libs.lithium) { isTransitive = false }
+    compileOnly(libs.iris) { isTransitive = false }
+    compileOnly(libs.viafabricplus) { isTransitive = false }
+    compileOnly(libs.viafabricplus.api) { isTransitive = false }
 
-    modCompileOnly(libs.baritone)
-    modCompileOnly(libs.modmenu)
+    compileOnly(libs.baritone)
+    compileOnly(libs.modmenu)
 
     // Libraries (JAR-in-JAR)
     jij(libs.orbit)
@@ -104,8 +103,8 @@ sourceSets {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 
     if (System.getenv("CI")?.toBoolean() == true) {
         withSourcesJar()
@@ -117,7 +116,8 @@ java {
 // Based on implementation from BaseProject by FlorianMichael/EnZaXD
 // Source: https://github.com/FlorianMichael/BaseProject/blob/main/src/main/kotlin/de/florianmichael/baseproject/Fabric.kt
 // Licensed under Apache License 2.0
-afterEvaluate {
+// TODO(26.1)
+/*afterEvaluate {
     val jijConfig = configurations.findByName("jij") ?: return@afterEvaluate
 
     // Dependencies to exclude from jar-in-jar
@@ -137,11 +137,11 @@ afterEvaluate {
 
         val implDep = dependencies.create(compileOnlyDep)
 
-        dependencies.add("compileOnlyApi", compileOnlyDep)
+        dependencies.add("compileOnly", compileOnlyDep)
         dependencies.add("implementation", implDep)
         dependencies.add("include", compileOnlyDep)
     }
-}
+}*/
 
 loom {
     accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")

@@ -9,13 +9,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeStorage;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -32,7 +32,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class SimpleBlockRenderer {
     private static final PoseStack MATRICES = new PoseStack();
-    private static final List<BlockModelPart> PARTS = new ArrayList<>();
+    private static final List<BlockStateModelPart> PARTS = new ArrayList<>();
     private static final Direction[] DIRECTIONS = Direction.values();
     private static final RandomSource RANDOM = RandomSource.create();
 
@@ -42,12 +42,13 @@ public abstract class SimpleBlockRenderer {
 
     private static final FeatureRenderDispatcher renderDispatcher = new FeatureRenderDispatcher(
         renderCommandQueue,
-        mc.getBlockRenderer(),
+        mc.getModelManager(),
         new WrapperImmediateVertexConsumerProvider(() -> provider),
         mc.getAtlasManager(),
         NoopOutlineVertexConsumerProvider.INSTANCE,
         NoopImmediateVertexConsumerProvider.INSTANCE,
-        mc.font
+        mc.font,
+        mc.gameRenderer.getGameRenderState()
     );
 
     private SimpleBlockRenderer() {
@@ -64,7 +65,7 @@ public abstract class SimpleBlockRenderer {
 
             BlockEntityRenderState state = renderer.createRenderState();
             renderer.extractRenderState(blockEntity, state, tickDelta, mc.gameRenderer.getMainCamera().position(), null);
-            renderer.submit(state, MATRICES, renderCommandQueue, mc.gameRenderer.getLevelRenderState().cameraRenderState);
+            renderer.submit(state, MATRICES, renderCommandQueue, mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState);
 
             renderDispatcher.renderAllFeatures();
             renderCommandQueue.endFrame();
@@ -80,7 +81,7 @@ public abstract class SimpleBlockRenderer {
 
         VertexConsumer consumer = consumerProvider.getBuffer(RenderTypes.solidMovingBlock());
 
-        BlockStateModel model = mc.getBlockRenderer().getBlockModel(state);
+        BlockStateModel model = mc.getModelManager().getBlockStateModelSet().get(state);
         model.collectParts(RANDOM, PARTS);
 
         Vec3 offset = state.getOffset(pos);
@@ -88,7 +89,7 @@ public abstract class SimpleBlockRenderer {
         float offsetY = (float) offset.y;
         float offsetZ = (float) offset.z;
 
-        for (BlockModelPart part : PARTS) {
+        for (BlockStateModelPart part : PARTS) {
             for (Direction direction : DIRECTIONS) {
                 List<BakedQuad> quads = part.getQuads(direction);
                 if (!quads.isEmpty()) renderQuads(quads, offsetX, offsetY, offsetZ, consumer);

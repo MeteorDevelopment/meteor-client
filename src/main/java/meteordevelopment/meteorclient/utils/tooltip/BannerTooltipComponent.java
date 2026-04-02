@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
-import meteordevelopment.meteorclient.mixin.GuiGraphicsAccessor;
+import meteordevelopment.meteorclient.mixin.GuiGraphicsExtractorAccessor;
 import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderState;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
@@ -59,12 +59,12 @@ public class BannerTooltipComponent implements MeteorTooltipData, ClientTooltipC
     }
 
     @Override
-    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    public void extractImage(Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor graphics) {
         var centerX = width / 2 - getWidth(null) / 2;
 
-        GuiGraphicsAccessor contextAccessor = (GuiGraphicsAccessor) context;
+        GuiGraphicsExtractorAccessor contextAccessor = (GuiGraphicsExtractorAccessor) graphics;
 
-        contextAccessor.getGuiRenderState().submitPicturesInPictureState(new CustomBannerGuiElementRenderState(
+        contextAccessor.getGuiRenderState().addPicturesInPictureState(new CustomBannerGuiElementRenderState(
             bannerFlag, color, patterns,
             centerX + x, y,
             centerX + x + getWidth(null), y + getHeight(null),

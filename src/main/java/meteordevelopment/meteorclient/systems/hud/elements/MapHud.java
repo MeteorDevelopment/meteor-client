@@ -149,12 +149,12 @@ public class MapHud extends HudElement {
         renderer.post(() -> {
             mc.getMapRenderer().extractRenderState(mapComponent, mapState, renderState);
 
-            Matrix3x2fStack matrices = renderer.drawContext.pose();
+            Matrix3x2fStack matrices = renderer.graphics.pose();
             matrices.pushMatrix();
             matrices.scale(1f / mc.getWindow().getGuiScale());
             matrices.translate(this.x, this.y);
             matrices.scale(scale.get().floatValue());
-            renderer.drawContext.submitMapRenderState(renderState);
+            renderer.graphics.submitMapRenderState(renderState);
             matrices.popMatrix();
         });
     }

@@ -9,7 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Zoom;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Mth;
 import org.joml.*;
 
@@ -85,10 +85,10 @@ public class NametagUtils {
         begin(matrices, pos);
     }
 
-    public static void begin(Vector3d pos, GuiGraphics drawContext) {
+    public static void begin(Vector3d pos, GuiGraphicsExtractor graphics) {
         begin(pos);
 
-        Matrix3x2fStack matrices = drawContext.pose();
+        Matrix3x2fStack matrices = graphics.pose();
         matrices.pushMatrix();
         matrices.scale(1.0f / mc.getWindow().getGuiScale());
         matrices.translate((float) pos.x, (float) pos.y);
@@ -105,9 +105,9 @@ public class NametagUtils {
         RenderSystem.getModelViewStack().popMatrix();
     }
 
-    public static void end(GuiGraphics drawContext) {
+    public static void end(GuiGraphicsExtractor graphics) {
         end();
-        drawContext.pose().popMatrix();
+        graphics.pose().popMatrix();
     }
 
     private static double getScale(Vector3d pos) {

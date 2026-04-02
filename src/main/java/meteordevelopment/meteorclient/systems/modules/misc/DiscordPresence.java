@@ -28,8 +28,8 @@ import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.options.*;
 import net.minecraft.client.gui.screens.options.controls.ControlsScreen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
+import net.minecraft.client.gui.screens.worldselection.AbstractGameRulesScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import net.minecraft.client.gui.screens.worldselection.EditGameRulesScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.realms.RealmsScreen;
@@ -249,7 +249,7 @@ public class DiscordPresence extends Module {
 
                 if (mc.screen instanceof TitleScreen) rpc.setState("Looking at title screen");
                 else if (mc.screen instanceof SelectWorldScreen) rpc.setState("Selecting world");
-                else if (mc.screen instanceof CreateWorldScreen || mc.screen instanceof EditGameRulesScreen)
+                else if (mc.screen instanceof CreateWorldScreen || mc.screen instanceof AbstractGameRulesScreen)
                     rpc.setState("Creating world");
                 else if (mc.screen instanceof EditWorldScreen) rpc.setState("Editing world");
                 else if (mc.screen instanceof LevelLoadingScreen) rpc.setState("Loading world");

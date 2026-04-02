@@ -16,10 +16,9 @@ import meteordevelopment.meteorclient.mixininterface.IGuiMessage;
 import meteordevelopment.meteorclient.mixininterface.IGuiMessageVisible;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
-import net.minecraft.client.GuiMessage;
-import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.util.FormattedCharSequence;
@@ -37,7 +36,8 @@ import java.util.List;
 public abstract class ChatComponentMixin implements IChatHud {
     @Shadow
     @Final
-    Minecraft minecraft;
+    private Minecraft minecraft;
+    
     @Shadow
     @Final
     private List<GuiMessage.Line> trimmedMessages;

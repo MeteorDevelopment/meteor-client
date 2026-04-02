@@ -7,12 +7,14 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
-import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.color.block.BlockTintSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+
+import java.util.List;
 
 @Mixin(BlockColors.class)
 public abstract class BlockColorsMixin {
@@ -22,26 +24,26 @@ public abstract class BlockColorsMixin {
         method = "createDefault",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/color/block/BlockColors;register(Lnet/minecraft/client/color/block/BlockColor;[Lnet/minecraft/world/level/block/Block;)V",
+            target = "Lnet/minecraft/client/color/block/BlockColors;register(Ljava/util/List;[Lnet/minecraft/world/level/block/Block;)V",
             ordinal = 3
         ),
         index = 0
     )
-    private static BlockColor modifySpruceLeavesColor(BlockColor provider) {
-        return (state, world, pos, tintIndex) -> getModifiedColor(-10380959);
+    private static List<BlockTintSource> modifySpruceLeavesColor(List<BlockTintSource> layers) {
+        return List.of(state -> getModifiedColor(-10380959));
     }
 
     @ModifyArg(
         method = "createDefault",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/color/block/BlockColors;register(Lnet/minecraft/client/color/block/BlockColor;[Lnet/minecraft/world/level/block/Block;)V",
+            target = "Lnet/minecraft/client/color/block/BlockColors;register(Ljava/util/List;[Lnet/minecraft/world/level/block/Block;)V",
             ordinal = 4
         ),
         index = 0
     )
-    private static BlockColor modifyBirchLeavesColor(BlockColor provider) {
-        return (state, world, pos, tintIndex) -> getModifiedColor(-8345771);
+    private static List<BlockTintSource> modifyBirchLeavesColor(List<BlockTintSource> layers) {
+        return List.of(state -> getModifiedColor(-8345771));
     }
 
     @Unique

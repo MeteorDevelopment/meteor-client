@@ -16,7 +16,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.other.Snapper;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -281,7 +281,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         int s = mc.getWindow().getGuiScale();
 
         mouseX *= s;
@@ -291,7 +291,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         boolean renderSplitLines = pressed && !selection.isEmpty() && moved;
         if (renderSplitLines || splitLinesAnimation > 0) renderSplitLines(renderSplitLines, delta / 20);
-        renderElements(context);
+        renderElements(graphics);
 
         Renderer2D.COLOR.begin();
         onRender(mouseX, mouseY);
@@ -301,11 +301,11 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         runAfterRenderTasks();
     }
 
-    public static void renderElements(GuiGraphics drawContext) {
+    public static void renderElements(GuiGraphicsExtractor graphics) {
         Hud hud = Hud.get();
         boolean inactiveOnly = Utils.canUpdate() && hud.active;
 
-        HudRenderer.INSTANCE.begin(drawContext);
+        HudRenderer.INSTANCE.begin(graphics);
 
         for (HudElement element : hud) {
             element.updatePos();

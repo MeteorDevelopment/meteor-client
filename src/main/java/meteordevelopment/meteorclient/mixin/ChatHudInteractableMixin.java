@@ -9,7 +9,7 @@ import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import net.minecraft.client.gui.ActiveTextCollector;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.TextAlignment;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
@@ -29,7 +29,7 @@ public class ChatHudInteractableMixin {
 
     @Shadow
     @Final
-    private GuiGraphics graphics;
+    private GuiGraphicsExtractor graphics;
 
     @ModifyReceiver(method = "handleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/ActiveTextCollector;accept(Lnet/minecraft/client/gui/TextAlignment;IILnet/minecraft/client/gui/ActiveTextCollector$Parameters;Lnet/minecraft/util/FormattedCharSequence;)V"))
     private ActiveTextCollector onRender_beforeDrawTextWithShadow(ActiveTextCollector instance, TextAlignment alignment, int x, int y, ActiveTextCollector.Parameters transformation, FormattedCharSequence orderedText) {

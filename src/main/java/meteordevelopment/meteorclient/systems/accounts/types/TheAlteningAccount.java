@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.systems.accounts.types;
 
 import com.mojang.authlib.Environment;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import de.florianmichael.waybackauthlib.InvalidCredentialsException;
-import de.florianmichael.waybackauthlib.WaybackAuthLib;
+import de.florianreuth.waybackauthlib.InvalidCredentialsException;
+import de.florianreuth.waybackauthlib.WaybackAuthLib;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
