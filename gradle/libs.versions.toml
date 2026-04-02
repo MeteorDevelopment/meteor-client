@@ -31,7 +31,7 @@ reflections = "0.10.2"
 netty = "4.2.7.Final"
 # ViaFabricPlus (https://github.com/ViaVersion/ViaFabricPlus)
 viafabricplus = "4.5.0"
-# WaybackAuthLib (https://github.com/FlorianMichael/WaybackAuthLib)
+# WaybackAuthLib (https://github.com/florianreuth/WaybackAuthLib)
 waybackauthlib = "1.1.0"
 
 [libraries]

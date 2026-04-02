@@ -113,35 +113,26 @@ java {
 }
 
 // Handle transitive dependencies for jar-in-jar
-// Based on implementation from BaseProject by FlorianMichael/EnZaXD
-// Source: https://github.com/FlorianMichael/BaseProject/blob/main/src/main/kotlin/de/florianmichael/baseproject/Fabric.kt
+// Based on implementation from BaseProject by florianreuth/EnZaXD
+// Source: https://github.com/florianreuth/BaseProject/blob/main/src/main/kotlin/de/florianreuth/baseproject/Fabric.kt
 // Licensed under Apache License 2.0
-// TODO(26.1)
-/*afterEvaluate {
-    val jijConfig = configurations.findByName("jij") ?: return@afterEvaluate
-
-    // Dependencies to exclude from jar-in-jar
-    val excluded = setOf(
-        "org.slf4j",    // Logging provided by Minecraft
-        "jsr305"        // Compile time annotations only
-    )
-
-    jijConfig.incoming.resolutionResult.allDependencies.forEach { dep ->
-        val requested = dep.requested.displayName
-
-        if (excluded.any { requested.contains(it) }) return@forEach
-
-        val compileOnlyDep = dependencies.create(requested) {
-            isTransitive = false
+val jijExcluded = setOf("org.slf4j", "jsr305")
+listOf("jij", "implementation", "include").forEach { configName ->
+    configurations.named(configName).configure {
+        defaultDependencies {
+            configurations.getByName("jij").incoming.resolutionResult.allComponents
+                .mapNotNull { it.id as? ModuleComponentIdentifier }
+                .forEach { id ->
+                    val notation = "${id.group}:${id.module}:${id.version}"
+                    if (jijExcluded.none { notation.contains(it) }) {
+                        add(project.dependencies.create(notation) {
+                            isTransitive = false
+                        })
+                    }
+                }
         }
-
-        val implDep = dependencies.create(compileOnlyDep)
-
-        dependencies.add("compileOnly", compileOnlyDep)
-        dependencies.add("implementation", implDep)
-        dependencies.add("include", compileOnlyDep)
     }
-}*/
+}
 
 loom {
     accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")
