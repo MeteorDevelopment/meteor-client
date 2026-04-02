@@ -24,14 +24,14 @@ public class MeshUniforms {
     private static final DynamicUniformStorage<Data> STORAGE = new DynamicUniformStorage<>("Meteor - Mesh UBO", SIZE, 16);
 
     public static void flipFrame() {
-        STORAGE.clear();
+        STORAGE.endFrame();
     }
 
     public static GpuBufferSlice write(Matrix4f proj, Matrix4f modelView) {
         DATA.proj = proj;
         DATA.modelView = modelView;
 
-        return STORAGE.write(DATA);
+        return STORAGE.writeUniform(DATA);
     }
 
     private static final class Data implements DynamicUniformStorage.DynamicUniform {

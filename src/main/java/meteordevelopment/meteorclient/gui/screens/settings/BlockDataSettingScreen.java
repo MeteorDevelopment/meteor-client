@@ -16,10 +16,10 @@ import meteordevelopment.meteorclient.utils.misc.IChangeable;
 import meteordevelopment.meteorclient.utils.misc.ICopyable;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Names;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -41,7 +41,7 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
 
     @Override
     protected WWidget getValueWidget(Block block) {
-        return theme.itemWithLabel(block.asItem().getDefaultStack(), Names.get(block));
+        return theme.itemWithLabel(block.asItem().getDefaultInstance(), Names.get(block));
     }
 
     @Override
@@ -69,7 +69,7 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
     protected String[] getValueNames(Block block) {
         return new String[]{
             Names.get(block),
-            BuiltInRegistries.BLOCK.getId(block).toString()
+            BuiltInRegistries.BLOCK.getKey(block).toString()
         };
     }
 }

@@ -46,7 +46,7 @@ public class MeshBuilder {
     public MeshBuilder(VertexFormat format, VertexFormat.Mode drawMode) {
         this.format = format;
         primitiveVerticesSize = format.getVertexSize();
-        primitiveIndicesCount = drawMode.firstVertexCount;
+        primitiveIndicesCount = drawMode.primitiveLength;
     }
 
     public MeshBuilder(VertexFormat format, VertexFormat.Mode drawMode, int vertexCount, int indexCount) {
@@ -64,7 +64,7 @@ public class MeshBuilder {
         building = true;
 
         if (Utils.rendering3D) {
-            Vec3 camera = mc.gameRenderer.getCamera().getCameraPos();
+            Vec3 camera = mc.gameRenderer.getMainCamera().position();
 
             cameraX = camera.x;
             cameraZ = camera.z;

@@ -15,11 +15,11 @@ import meteordevelopment.meteorclient.commands.arguments.RegistryEntryReferenceA
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.function.ToIntFunction;
 
@@ -96,9 +96,9 @@ public class EnchantCommand extends Command {
     private void all(boolean onlyPossible, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        mc.getNetworkHandler().getRegistryManager().getOptional(Registries.ENCHANTMENT).ifPresent(registry -> {
-            registry.streamEntries().forEach(enchantment -> {
-                if (!onlyPossible || enchantment.value().isAcceptableItem(itemStack)) {
+        mc.getConnection().registryAccess().lookup(Registries.ENCHANTMENT).ifPresent(registry -> {
+            registry.listElements().forEach(enchantment -> {
+                if (!onlyPossible || enchantment.value().isSupportedItem(itemStack)) {
                     Utils.addEnchantment(itemStack, enchantment, level.applyAsInt(enchantment.value()));
                 }
             });
@@ -122,8 +122,8 @@ public class EnchantCommand extends Command {
     }
 
     private ItemStack getItemStack() {
-        ItemStack itemStack = mc.player.getMainHandStack();
-        if (itemStack == null) itemStack = mc.player.getOffHandStack();
+        ItemStack itemStack = mc.player.getMainHandItem();
+        if (itemStack == null) itemStack = mc.player.getOffhandItem();
         return itemStack.isEmpty() ? null : itemStack;
     }
 }

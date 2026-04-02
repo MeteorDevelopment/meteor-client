@@ -12,8 +12,8 @@ import meteordevelopment.meteorclient.utils.network.FailedHttpResponse;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadUtils;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -36,7 +36,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
     }
 
     public Friend(Player player) {
-        this(player.getName().getString(), player.getUuid());
+        this(player.getName().getString(), player.getUUID());
     }
 
     public Friend(String name) {
@@ -92,7 +92,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
         if (id != null) tag.putString("id", UndashedUuid.toString(id));

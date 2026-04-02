@@ -34,24 +34,24 @@ public class TimeChanger extends Module {
 
     @Override
     public void onActivate() {
-        oldTime = mc.world.getTime();
+        oldTime = mc.level.getGameTime();
     }
 
     @Override
     public void onDeactivate() {
-        mc.world.getLevelProperties().setTimeOfDay(oldTime);
+        mc.level.getLevelData().setDayTime(oldTime);
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.packet instanceof ClientboundSetTimePacket) {
-            oldTime = ((ClientboundSetTimePacket) event.packet).timeOfDay();
+        if (event.packet instanceof ClientboundSetTimePacket packet) {
+            oldTime = packet.dayTime();
             event.cancel();
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        mc.world.getLevelProperties().setTimeOfDay(time.get().longValue());
+        mc.level.getLevelData().setDayTime(time.get().longValue());
     }
 }

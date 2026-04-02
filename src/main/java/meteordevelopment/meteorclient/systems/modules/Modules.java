@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.ActiveModulesChangedEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
@@ -40,8 +40,8 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -167,7 +167,7 @@ public class Modules extends System<Modules> {
                 }
             }
 
-            modules.put(new Pair<>(module, title), score);
+            modules.put(new Tuple<>(module, title), score);
         }
 
         List<Tuple<Module, String>> l = new ArrayList<>(modules.keySet());
@@ -229,7 +229,7 @@ public class Modules extends System<Modules> {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private void onKeyBinding(KeyEvent event) {
+    private void onKeyBinding(KeyInputEvent event) {
         if (event.action == KeyAction.Release && onBinding(true, event.key(), event.modifiers())) event.cancel();
     }
 
@@ -263,7 +263,7 @@ public class Modules extends System<Modules> {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onKey(KeyEvent event) {
+    private void onKey(KeyInputEvent event) {
         if (event.action == KeyAction.Repeat) return;
         onAction(true, event.key(), event.modifiers(), event.action == KeyAction.Press);
     }
@@ -275,7 +275,7 @@ public class Modules extends System<Modules> {
     }
 
     private void onAction(boolean isKey, int value, int modifiers, boolean isPress) {
-        if (mc.currentScreen != null || Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
+        if (mc.screen != null || Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
 
         for (Module module : moduleInstances.values()) {
             if (module.keybind.matches(isKey, value, modifiers) && (isPress || (module.toggleOnBindRelease && module.isActive()))) {
@@ -333,9 +333,9 @@ public class Modules extends System<Modules> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
-        ListTag modulesTag = new NbtList();
+        ListTag modulesTag = new ListTag();
         for (Module module : getAll()) {
             CompoundTag moduleTag = module.toTag();
             if (moduleTag != null) modulesTag.add(moduleTag);
@@ -352,7 +352,7 @@ public class Modules extends System<Modules> {
         ListTag modulesTag = tag.getListOrEmpty("modules");
         for (Tag moduleTagI : modulesTag) {
             CompoundTag moduleTag = (CompoundTag) moduleTagI;
-            Module module = get(moduleTag.getString("name", ""));
+            Module module = get(moduleTag.getStringOr("name", ""));
             if (module != null) module.fromTag(moduleTag);
         }
 

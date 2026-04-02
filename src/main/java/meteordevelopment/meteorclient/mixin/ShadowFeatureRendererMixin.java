@@ -16,9 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ShadowFeatureRenderer.class)
 public abstract class ShadowFeatureRendererMixin {
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void meteor$onRender(SubmitNodeCollection queue, MultiBufferSource.BufferSource vertexConsumers, CallbackInfo info) {
-        if (queue.getShadowPiecesCommands().isEmpty()) {
-            info.cancel();
+    private void meteor$onRender(SubmitNodeCollection queue, MultiBufferSource.BufferSource vertexConsumers, CallbackInfo ci) {
+        if (queue.getShadowSubmits().isEmpty()) {
+            ci.cancel();
         }
     }
 }

@@ -9,8 +9,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.IGetter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -116,7 +116,7 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
         save(tag);
@@ -157,9 +157,9 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         name = name.trim();
 
         Identifier id;
-        if (name.contains(":")) id = Identifier.of(name);
-        else id = Identifier.of("minecraft", name);
-        if (registry.containsId(id)) return registry.get(id);
+        if (name.contains(":")) id = Identifier.parse(name);
+        else id = Identifier.withDefaultNamespace(name);
+        if (registry.containsKey(id)) return registry.getValue(id);
 
         return null;
     }

@@ -44,7 +44,7 @@ public class BoolSetting extends Setting<Boolean> {
 
     @Override
     public Boolean load(CompoundTag tag) {
-        set(tag.getBoolean("value", false));
+        set(tag.getBooleanOr("value", false));
 
         return get();
     }

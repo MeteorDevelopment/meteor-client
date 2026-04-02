@@ -21,8 +21,8 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 
@@ -52,9 +52,9 @@ public class Marker extends Module {
     public CompoundTag toTag() {
         CompoundTag tag = super.toTag();
 
-        ListTag list = new NbtList();
+        ListTag list = new ListTag();
         for (BaseMarker marker : markers) {
-            CompoundTag mTag = new NbtCompound();
+            CompoundTag mTag = new CompoundTag();
             mTag.putString("type", marker.getTypeName());
             mTag.put("marker", marker.toTag());
 
@@ -75,7 +75,7 @@ public class Marker extends Module {
         for (Tag tagII : list) {
             CompoundTag tagI = (CompoundTag) tagII;
 
-            String type = tagI.getString("type", "");
+            String type = tagI.getStringOr("type", "");
             BaseMarker marker = factory.createMarker(type);
 
             if (marker != null) {

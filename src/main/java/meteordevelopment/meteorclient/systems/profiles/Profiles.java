@@ -83,7 +83,7 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
         tag.put("profiles", NbtUtils.listToTag(profiles));
         return tag;
     }

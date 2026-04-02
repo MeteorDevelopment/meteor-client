@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.inventory.MenuType;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.inventory.MenuType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ public class ScreenHandlerListSetting extends Setting<List<MenuType<?>>> {
 
         try {
             for (String value : values) {
-                MenuType<?> handler = parseId(BuiltInRegistries.SCREEN_HANDLER, value);
+                MenuType<?> handler = parseId(BuiltInRegistries.MENU, value);
                 if (handler != null) handlers.add(handler);
             }
         } catch (Exception ignored) {
@@ -51,15 +51,15 @@ public class ScreenHandlerListSetting extends Setting<List<MenuType<?>>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return BuiltInRegistries.SCREEN_HANDLER.getIds();
+        return BuiltInRegistries.MENU.keySet();
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        ListTag valueTag = new NbtList();
+        ListTag valueTag = new ListTag();
         for (MenuType<?> type : get()) {
-            Identifier id = BuiltInRegistries.SCREEN_HANDLER.getId(type);
-            if (id != null) valueTag.add(StringTag.of(id.toString()));
+            Identifier id = BuiltInRegistries.MENU.getKey(type);
+            if (id != null) valueTag.add(StringTag.valueOf(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -72,7 +72,7 @@ public class ScreenHandlerListSetting extends Setting<List<MenuType<?>>> {
 
         ListTag valueTag = tag.getListOrEmpty("value");
         for (Tag tagI : valueTag) {
-            MenuType<?> type = BuiltInRegistries.SCREEN_HANDLER.get(Identifier.of(tagI.asString().orElse("")));
+            MenuType<?> type = BuiltInRegistries.MENU.getValue(Identifier.parse(tagI.asString().orElse("")));
             if (type != null) get().add(type);
         }
 

@@ -58,7 +58,7 @@ public class MicrosoftLogin {
 
         startServer();
         String url = "https://login.live.com/oauth20_authorize.srf?client_id=" + CLIENT_ID + "&response_type=code&redirect_uri=http://127.0.0.1:" + PORT + "&scope=XboxLive.signin%20offline_access&prompt=select_account";
-        Util.getOperatingSystem().open(url);
+        Util.getPlatform().openUri(url);
 
         return url;
     }
@@ -143,8 +143,8 @@ public class MicrosoftLogin {
 
             boolean ok = false;
             for (Tuple<String, String> pair : query) {
-                if (pair.getLeft().equals("code")) {
-                    handleCode(pair.getRight());
+                if (pair.getA().equals("code")) {
+                    handleCode(pair.getB());
 
                     ok = true;
                     break;
@@ -207,7 +207,7 @@ public class MicrosoftLogin {
             }
 
             if (!name.isEmpty()) {
-                query.add(new Pair<>(urlDecode(name.toString()), urlDecode(value.toString())));
+                query.add(new Tuple<>(urlDecode(name.toString()), urlDecode(value.toString())));
             }
         }
 

@@ -14,15 +14,15 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.Fireworks;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.component.Fireworks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +74,7 @@ public class ElytraBoost extends Module {
 
     @EventHandler
     private void onInteractItem(InteractItemEvent event) {
-        ItemStack itemStack = mc.player.getStackInHand(event.hand);
+        ItemStack itemStack = mc.player.getItemInHand(event.hand);
 
         if (itemStack.getItem() instanceof FireworkRocketItem && dontConsumeFirework.get()) {
             event.toReturn = InteractionResult.PASS;
@@ -91,15 +91,15 @@ public class ElytraBoost extends Module {
     private void boost() {
         if (!Utils.canUpdate()) return;
 
-        if (mc.player.isGliding() && mc.currentScreen == null) {
-            ItemStack itemStack = Items.FIREWORK_ROCKET.getDefaultStack();
-            itemStack.set(DataComponents.FIREWORKS, new FireworksComponent(fireworkLevel.get(), itemStack.get(DataComponents.FIREWORKS).explosions()));
+        if (mc.player.isFallFlying() && mc.screen == null) {
+            ItemStack itemStack = Items.FIREWORK_ROCKET.getDefaultInstance();
+            itemStack.set(DataComponents.FIREWORKS, new Fireworks(fireworkLevel.get(), itemStack.get(DataComponents.FIREWORKS).explosions()));
 
-            FireworkRocketEntity entity = new FireworkRocketEntity(mc.world, itemStack, mc.player);
+            FireworkRocketEntity entity = new FireworkRocketEntity(mc.level, itemStack, mc.player);
             fireworks.add(entity);
             if (playSound.get())
-                mc.world.playSoundFromEntity(mc.player, entity, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundSource.AMBIENT, 3.0F, 1.0F);
-            mc.world.addEntity(entity);
+                mc.level.playSound(mc.player, entity, SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.AMBIENT, 3.0F, 1.0F);
+            mc.level.addEntity(entity);
         }
     }
 

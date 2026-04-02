@@ -15,11 +15,11 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.item.ItemArgument;
-import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.network.chat.Component;
 
 public class DropCommand extends Command {
     private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(Component.literal("Can't drop items while in spectator."));
@@ -32,7 +32,7 @@ public class DropCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         // Main Hand
-        builder.then(literal("hand").executes(context -> drop(player -> player.dropSelectedItem(true))));
+        builder.then(literal("hand").executes(context -> drop(player -> player.drop(true))));
 
         // Offhand
         builder.then(literal("offhand").executes(context -> drop(player -> InvUtils.drop().slotOffhand())));
@@ -53,23 +53,23 @@ public class DropCommand extends Command {
 
         // Hotbar and main inv
         builder.then(literal("all").executes(context -> drop(player -> {
-            for (int i = 0; i < player.getInventory().size(); i++) {
+            for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
                 InvUtils.drop().slot(i);
             }
-            if (!mc.player.getOffHandStack().isEmpty()) InvUtils.drop().slotOffhand();
+            if (!mc.player.getOffhandItem().isEmpty()) InvUtils.drop().slotOffhand();
         })));
 
         // Armor
         builder.then(literal("armor").executes(context -> drop(player -> {
             for (EquipmentSlot equipmentSlot : EquipmentSlotGroup.ARMOR) {
                 if (equipmentSlot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
-                    InvUtils.drop().slotArmor(equipmentSlot.getEntitySlotId());
+                    InvUtils.drop().slotArmor(equipmentSlot.getIndex());
                 }
             }
         })));
 
         // Specific item
-        builder.then(argument("item", ItemArgument.itemStack(REGISTRY_ACCESS))
+        builder.then(argument("item", ItemArgument.item(REGISTRY_ACCESS))
             .executes(context -> drop(player -> {
                 dropItem(player, context, Integer.MAX_VALUE);
             }))
@@ -82,11 +82,11 @@ public class DropCommand extends Command {
     }
 
     private void dropItem(LocalPlayer player, CommandContext<SharedSuggestionProvider> context, int amount) throws CommandSyntaxException {
-        ItemStack stack = ItemArgument.getItemStackArgument(context, "item").createStack(1, false);
+        ItemStack stack = ItemArgument.getItem(context, "item").createItemStack(1, false);
         if (stack == null || stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
 
-        for (int i = 0; i < player.getInventory().size() && amount > 0; i++) {
-            ItemStack invStack = player.getInventory().getStack(i);
+        for (int i = 0; i < player.getInventory().getContainerSize() && amount > 0; i++) {
+            ItemStack invStack = player.getInventory().getItem(i);
             if (invStack.isEmpty() || stack.getItem() != invStack.getItem()) continue;
 
             int dropCount = Math.min(amount, invStack.getCount());

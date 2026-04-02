@@ -17,27 +17,29 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.*;
-import net.minecraft.world.level.block.state.properties.Half;
-import net.minecraft.world.level.block.state.properties.SlabType;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.effect.MobEffectUtil;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.level.LightLayer;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectUtil;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -89,11 +91,11 @@ public class BlockUtils {
         if (slot < 0 || slot > 8) return false;
 
         Block toPlace = Blocks.OBSIDIAN;
-        ItemStack i = hand == InteractionHand.MAIN_HAND ? mc.player.getInventory().getStack(slot) : mc.player.getInventory().getStack(SlotUtils.OFFHAND);
+        ItemStack i = hand == InteractionHand.MAIN_HAND ? mc.player.getInventory().getItem(slot) : mc.player.getInventory().getItem(SlotUtils.OFFHAND);
         if (i.getItem() instanceof BlockItem blockItem) toPlace = blockItem.getBlock();
         if (!canPlaceBlock(blockPos, checkEntities, toPlace)) return false;
 
-        Vec3 hitPos = Vec3.ofCenter(blockPos);
+        Vec3 hitPos = Vec3.atCenterOf(blockPos);
 
         BlockPos neighbour;
         Direction side = getPlaceSide(blockPos);
@@ -102,8 +104,8 @@ public class BlockUtils {
             side = Direction.UP;
             neighbour = blockPos;
         } else {
-            neighbour = blockPos.offset(side);
-            hitPos = hitPos.add(side.getOffsetX() * 0.5, side.getOffsetY() * 0.5, side.getOffsetZ() * 0.5);
+            neighbour = blockPos.relative(side);
+            hitPos = hitPos.add(side.getStepX() * 0.5, side.getStepY() * 0.5, side.getStepZ() * 0.5);
         }
 
         BlockHitResult bhr = new BlockHitResult(hitPos, side.getOpposite(), neighbour, false);
@@ -129,30 +131,30 @@ public class BlockUtils {
     }
 
     public static void interact(BlockHitResult blockHitResult, InteractionHand hand, boolean swing) {
-        boolean wasSneaking = mc.player.isSneaking();
-        mc.player.setSneaking(false);
+        boolean wasSneaking = mc.player.isShiftKeyDown();
+        mc.player.setShiftKeyDown(false);
 
-        InteractionResult result = mc.interactionManager.interactBlock(mc.player, hand, blockHitResult);
+        InteractionResult result = mc.gameMode.useItemOn(mc.player, hand, blockHitResult);
 
-        if (result.isAccepted()) {
-            if (swing) mc.player.swingHand(hand);
-            else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
+        if (result.consumesAction()) {
+            if (swing) mc.player.swing(hand);
+            else mc.getConnection().send(new ServerboundSwingPacket(hand));
         }
 
-        mc.player.setSneaking(wasSneaking);
+        mc.player.setShiftKeyDown(wasSneaking);
     }
 
     public static boolean canPlaceBlock(BlockPos blockPos, boolean checkEntities, Block block) {
         if (blockPos == null) return false;
 
         // Check y level
-        if (!Level.isValid(blockPos)) return false;
+        if (!Level.isInSpawnableBounds(blockPos)) return false;
 
         // Check if current block is replaceable
-        if (!mc.world.getBlockState(blockPos).isReplaceable()) return false;
+        if (!mc.level.getBlockState(blockPos).canBeReplaced()) return false;
 
         // Check if intersects entities
-        return !checkEntities || mc.world.canPlace(block.getDefaultState(), blockPos, ShapeContext.absent());
+        return !checkEntities || mc.level.isUnobstructed(block.defaultBlockState(), blockPos, CollisionContext.empty());
     }
 
     public static boolean canPlace(BlockPos blockPos, boolean checkEntities) {
@@ -164,13 +166,13 @@ public class BlockUtils {
     }
 
     public static Direction getPlaceSide(BlockPos blockPos) {
-        Vec3 lookVec = blockPos.toCenterPos().subtract(mc.player.getEyePos());
+        Vec3 lookVec = blockPos.getCenter().subtract(mc.player.getEyePosition());
         double bestRelevancy = -Double.MAX_VALUE;
         Direction bestSide = null;
 
         for (Direction side : Direction.values()) {
-            BlockPos neighbor = blockPos.offset(side);
-            BlockState state = mc.world.getBlockState(neighbor);
+            BlockPos neighbor = blockPos.relative(side);
+            BlockState state = mc.level.getBlockState(neighbor);
 
             // Check if neighbour isn't empty
             if (state.isAir() || isClickable(state.getBlock())) continue;
@@ -178,7 +180,7 @@ public class BlockUtils {
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;
 
-            double relevancy = side.getAxis().choose(lookVec.getX(), lookVec.getY(), lookVec.getZ()) * side.getDirection().offset();
+            double relevancy = side.getAxis().choose(lookVec.x(), lookVec.y(), lookVec.z()) * side.getAxisDirection().getStep();
             if (relevancy > bestRelevancy) {
                 bestRelevancy = relevancy;
                 bestSide = side;
@@ -189,7 +191,7 @@ public class BlockUtils {
     }
 
     public static Direction getClosestPlaceSide(BlockPos blockPos) {
-        return getClosestPlaceSide(blockPos, mc.player.getEyePos());
+        return getClosestPlaceSide(blockPos, mc.player.getEyePosition());
     }
 
     public static Direction getClosestPlaceSide(BlockPos blockPos, Vec3 pos) {
@@ -197,8 +199,8 @@ public class BlockUtils {
         double closestDistance = Double.MAX_VALUE;
 
         for (Direction side : Direction.values()) {
-            BlockPos neighbor = blockPos.offset(side);
-            BlockState state = mc.world.getBlockState(neighbor);
+            BlockPos neighbor = blockPos.relative(side);
+            BlockState state = mc.level.getBlockState(neighbor);
 
             // Check if neighbour isn't empty
             if (state.isAir() || isClickable(state.getBlock())) continue;
@@ -206,7 +208,7 @@ public class BlockUtils {
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;
 
-            double distance = pos.squaredDistanceTo(neighbor.getX(), neighbor.getY(), neighbor.getZ());
+            double distance = pos.distanceToSqr(neighbor.getX(), neighbor.getY(), neighbor.getZ());
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closestSide = side;
@@ -227,7 +229,7 @@ public class BlockUtils {
     private static void onTickPost(TickEvent.Post event) {
         if (!breakingThisTick && breaking) {
             breaking = false;
-            if (mc.interactionManager != null) mc.interactionManager.cancelBlockBreaking();
+            if (mc.gameMode != null) mc.gameMode.stopDestroyBlock();
         }
     }
 
@@ -235,7 +237,7 @@ public class BlockUtils {
      * Needs to be used in {@link TickEvent.Pre}
      */
     public static boolean breakBlock(BlockPos blockPos, boolean swing) {
-        if (!canBreak(blockPos, mc.world.getBlockState(blockPos))) return false;
+        if (!canBreak(blockPos, mc.level.getBlockState(blockPos))) return false;
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field, and we don't want it to change when it has been stored in a field somewhere
         BlockPos pos = blockPos instanceof BlockPos.MutableBlockPos ? new BlockPos(blockPos) : blockPos;
@@ -246,12 +248,12 @@ public class BlockUtils {
             return true;
         }
 
-        if (mc.interactionManager.isBreakingBlock())
-            mc.interactionManager.updateBlockBreakingProgress(pos, getDirection(blockPos));
-        else mc.interactionManager.attackBlock(pos, getDirection(blockPos));
+        if (mc.gameMode.isDestroying())
+            mc.gameMode.continueDestroyBlock(pos, getDirection(blockPos));
+        else mc.gameMode.startDestroyBlock(pos, getDirection(blockPos));
 
-        if (swing) mc.player.swingHand(InteractionHand.MAIN_HAND);
-        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(InteractionHand.MAIN_HAND));
+        if (swing) mc.player.swing(InteractionHand.MAIN_HAND);
+        else mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
 
         breaking = true;
         breakingThisTick = true;
@@ -260,12 +262,12 @@ public class BlockUtils {
     }
 
     public static boolean canBreak(BlockPos blockPos, BlockState state) {
-        if (!mc.player.isCreative() && state.getHardness(mc.world, blockPos) < 0) return false;
-        return state.getOutlineShape(mc.world, blockPos) != Shapes.empty();
+        if (!mc.player.isCreative() && state.getDestroySpeed(mc.level, blockPos) < 0) return false;
+        return state.getShape(mc.level, blockPos) != Shapes.empty();
     }
 
     public static boolean canBreak(BlockPos blockPos) {
-        return canBreak(blockPos, mc.world.getBlockState(blockPos));
+        return canBreak(blockPos, mc.level.getBlockState(blockPos));
     }
 
     public static boolean canInstaBreak(BlockPos blockPos, float breakSpeed) {
@@ -273,18 +275,18 @@ public class BlockUtils {
     }
 
     public static boolean canInstaBreak(BlockPos blockPos) {
-        BlockState state = mc.world.getBlockState(blockPos);
-        return canInstaBreak(blockPos, mc.player.getBlockBreakingSpeed(state));
+        BlockState state = mc.level.getBlockState(blockPos);
+        return canInstaBreak(blockPos, mc.player.getDestroySpeed(state));
     }
 
     public static float calcBlockBreakingDelta2(BlockPos blockPos, float breakSpeed) {
-        BlockState state = mc.world.getBlockState(blockPos);
-        float f = state.getHardness(mc.world, blockPos);
+        BlockState state = mc.level.getBlockState(blockPos);
+        float f = state.getDestroySpeed(mc.level, blockPos);
         if (f == -1.0F) {
             return 0.0F;
         } else {
-            int i = mc.player.canHarvest(state) ? 30 : 100;
-            return breakSpeed / f / (float) i;
+            int i = mc.player.hasCorrectToolForDrops(state) ? 30 : 100;
+            return breakSpeed / f / i;
         }
     }
 
@@ -298,24 +300,24 @@ public class BlockUtils {
             || block instanceof GrindstoneBlock
             || block instanceof StonecutterBlock
             || block instanceof ButtonBlock
-            || block instanceof AbstractPressurePlateBlock
-            || block instanceof BlockWithEntity
+            || block instanceof BasePressurePlateBlock
+            || block instanceof BaseEntityBlock
             || block instanceof BedBlock
             || block instanceof FenceGateBlock
             || block instanceof DoorBlock
             || block instanceof NoteBlock
-            || block instanceof TrapdoorBlock;
+            || block instanceof TrapDoorBlock;
     }
 
 
     public static MobSpawn isValidMobSpawn(BlockPos blockPos, BlockState blockState, int spawnLightLimit) {
-        boolean snow = blockState.getBlock() instanceof SnowBlock && blockState.get(SnowBlock.LAYERS) == 1;
+        boolean snow = blockState.getBlock() instanceof SnowLayerBlock && blockState.getValue(SnowLayerBlock.LAYERS) == 1;
         if (!blockState.isAir() && !snow) return MobSpawn.Never;
 
-        if (!isValidSpawnBlock(mc.world.getBlockState(blockPos.down()))) return MobSpawn.Never;
+        if (!isValidSpawnBlock(mc.level.getBlockState(blockPos.below()))) return MobSpawn.Never;
 
-        if (mc.world.getLightLevel(LightLayer.BLOCK, blockPos) > spawnLightLimit) return MobSpawn.Never;
-        else if (mc.world.getLightLevel(LightLayer.SKY, blockPos) > spawnLightLimit) return MobSpawn.Potential;
+        if (mc.level.getBrightness(LightLayer.BLOCK, blockPos) > spawnLightLimit) return MobSpawn.Never;
+        else if (mc.level.getBrightness(LightLayer.SKY, blockPos) > spawnLightLimit) return MobSpawn.Potential;
 
         return MobSpawn.Always;
     }
@@ -329,23 +331,23 @@ public class BlockUtils {
             || block instanceof ScaffoldingBlock) return false;
 
         if (block == Blocks.SOUL_SAND || block == Blocks.MUD) return true;
-        if (block instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
-        if (block instanceof StairsBlock && blockState.get(StairsBlock.HALF) == Half.TOP) return true;
+        if (block instanceof SlabBlock && blockState.getValue(SlabBlock.TYPE) == SlabType.TOP) return true;
+        if (block instanceof StairBlock && blockState.getValue(StairBlock.HALF) == Half.TOP) return true;
 
-        return blockState.isOpaqueFullCube();
+        return blockState.isSolidRender();
     }
 
     // Finds the best block direction to get when interacting with the block.
     public static Direction getDirection(BlockPos pos) {
         double eyePos = mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose());
-        VoxelShape outline = mc.world.getBlockState(pos).getCollisionShape(mc.world, pos);
+        VoxelShape outline = mc.level.getBlockState(pos).getCollisionShape(mc.level, pos);
 
-        if (eyePos > pos.getY() + outline.getMax(Direction.Axis.Y) && mc.world.getBlockState(pos.up()).isReplaceable()) {
+        if (eyePos > pos.getY() + outline.max(Direction.Axis.Y) && mc.level.getBlockState(pos.above()).canBeReplaced()) {
             return Direction.UP;
-        } else if (eyePos < pos.getY() + outline.getMin(Direction.Axis.Y) && mc.world.getBlockState(pos.down()).isReplaceable()) {
+        } else if (eyePos < pos.getY() + outline.min(Direction.Axis.Y) && mc.level.getBlockState(pos.below()).canBeReplaced()) {
             return Direction.DOWN;
         } else {
-            BlockPos difference = pos.subtract(mc.player.getBlockPos());
+            BlockPos difference = pos.subtract(mc.player.blockPosition());
 
             if (Math.abs(difference.getX()) > Math.abs(difference.getZ())) {
                 return difference.getX() > 0 ? Direction.WEST : Direction.EAST;
@@ -365,40 +367,41 @@ public class BlockUtils {
 
     public static boolean isExposed(BlockPos blockPos) {
         for (Direction direction : Direction.values()) {
-            if (!mc.world.getBlockState(EXPOSED_POS.get().set(blockPos, direction)).isOpaqueFullCube()) return true;
+            if (!mc.level.getBlockState(EXPOSED_POS.get().setWithOffset(blockPos, direction)).isSolidRender())
+                return true;
         }
 
         return false;
     }
 
     public static double getBreakDelta(int slot, BlockState state) {
-        float hardness = state.getHardness(null, null);
+        float hardness = state.getDestroySpeed(null, null);
         if (hardness == -1) return 0;
         else {
-            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.getInventory().getMainStacks().get(slot).isSuitableFor(state) ? 30 : 100);
+            return getDestroySpeed(slot, state) / hardness / (!state.requiresCorrectToolForDrops() || mc.player.getInventory().getNonEquipmentItems().get(slot).isCorrectToolForDrops(state) ? 30 : 100);
         }
     }
 
     /**
-     * @see net.minecraft.entity.player.PlayerEntity#getBlockBreakingSpeed(BlockState)
+     * @see net.minecraft.world.entity.player.Player#getDestroySpeed(BlockState)
      */
-    private static double getBlockBreakingSpeed(int slot, BlockState block) {
-        double speed = mc.player.getInventory().getMainStacks().get(slot).getMiningSpeedMultiplier(block);
+    private static double getDestroySpeed(int slot, BlockState block) {
+        double speed = mc.player.getInventory().getNonEquipmentItems().get(slot).getDestroySpeed(block);
 
         if (speed > 1) {
-            ItemStack tool = mc.player.getInventory().getStack(slot);
+            ItemStack tool = mc.player.getInventory().getItem(slot);
 
             int efficiency = Utils.getEnchantmentLevel(tool, Enchantments.EFFICIENCY);
 
             if (efficiency > 0 && !tool.isEmpty()) speed += efficiency * efficiency + 1;
         }
 
-        if (MobEffectUtil.hasHaste(mc.player)) {
-            speed *= 1 + (MobEffectUtil.getHasteAmplifier(mc.player) + 1) * 0.2F;
+        if (MobEffectUtil.hasDigSpeed(mc.player)) {
+            speed *= 1 + (MobEffectUtil.getDigSpeedAmplification(mc.player) + 1) * 0.2F;
         }
 
-        if (mc.player.hasStatusEffect(MobEffects.MINING_FATIGUE)) {
-            float k = switch (mc.player.getStatusEffect(MobEffects.MINING_FATIGUE).getAmplifier()) {
+        if (mc.player.hasEffect(MobEffects.MINING_FATIGUE)) {
+            float k = switch (mc.player.getEffect(MobEffects.MINING_FATIGUE).getAmplifier()) {
                 case 0 -> 0.3F;
                 case 1 -> 0.09F;
                 case 2 -> 0.0027F;
@@ -408,11 +411,11 @@ public class BlockUtils {
             speed *= k;
         }
 
-        if (mc.player.isSubmergedIn(FluidTags.WATER)) {
+        if (mc.player.isEyeInFluid(FluidTags.WATER)) {
             speed *= mc.player.getAttributeValue(Attributes.SUBMERGED_MINING_SPEED);
         }
 
-        if (!mc.player.isOnGround()) {
+        if (!mc.player.onGround()) {
             speed /= 5.0F;
         }
 
@@ -420,7 +423,7 @@ public class BlockUtils {
     }
 
     /**
-     * Mutates a {@link BlockPos.Mutable} around an origin
+     * Mutates a {@link BlockPos.MutableBlockPos} around an origin
      */
     public static BlockPos.MutableBlockPos mutateAround(BlockPos.MutableBlockPos mutable, BlockPos origin, int xOffset, int yOffset, int zOffset) {
         return mutable.set(origin.getX() + xOffset, origin.getY() + yOffset, origin.getZ() + zOffset);

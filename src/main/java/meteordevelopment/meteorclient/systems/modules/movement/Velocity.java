@@ -1,4 +1,3 @@
-// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -9,7 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientboundSetEntityMotionPacketAccessor;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -142,22 +141,22 @@ public class Velocity extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (!sinking.get()) return;
-        if (mc.options.jumpKey.isPressed() || mc.options.sneakKey.isPressed()) return;
+        if (mc.options.keyJump.isDown() || mc.options.keyShift.isDown()) return;
 
-        if ((mc.player.isTouchingWater() || mc.player.isInLava()) && mc.player.getVelocity().y < 0) {
-            ((IVec3d) mc.player.getVelocity()).meteor$setY(0);
+        if ((mc.player.isInWater() || mc.player.isInLava()) && mc.player.getDeltaMovement().y < 0) {
+            ((IVec3) mc.player.getDeltaMovement()).meteor$setY(0);
         }
     }
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
         if (knockback.get() && event.packet instanceof ClientboundSetEntityMotionPacket packet
-            && packet.getEntityId() == mc.player.getId()) {
-            double velX = (packet.getVelocity().getX() - mc.player.getVelocity().x) * knockbackHorizontal.get();
-            double velY = (packet.getVelocity().getY() - mc.player.getVelocity().y) * knockbackVertical.get();
-            double velZ = (packet.getVelocity().getZ() - mc.player.getVelocity().z) * knockbackHorizontal.get();
-            ((EntityVelocityUpdateS2CPacketAccessor) packet).meteor$setVelocity(
-                new Vec3d(velX + mc.player.getVelocity().x, velY + mc.player.getVelocity().y, velZ + mc.player.getVelocity().z)
+            && packet.getId() == mc.player.getId()) {
+            double velX = (packet.getMovement().x() - mc.player.getDeltaMovement().x) * knockbackHorizontal.get();
+            double velY = (packet.getMovement().y() - mc.player.getDeltaMovement().y) * knockbackVertical.get();
+            double velZ = (packet.getMovement().z() - mc.player.getDeltaMovement().z) * knockbackHorizontal.get();
+            ((ClientboundSetEntityMotionPacketAccessor) packet).meteor$setMovement(
+                new Vec3(velX + mc.player.getDeltaMovement().x, velY + mc.player.getDeltaMovement().y, velZ + mc.player.getDeltaMovement().z)
             );
         }
     }

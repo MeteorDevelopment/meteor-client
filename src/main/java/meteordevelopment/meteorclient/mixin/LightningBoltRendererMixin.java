@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.entity.LightningBoltRenderer;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,10 +28,10 @@ public abstract class LightningBoltRendererMixin {
         if (ambience.isActive() && ambience.changeLightningColor.get()) {
             Color color = ambience.lightningColor.get();
 
-            vertexConsumer.vertex(matrix4f, f + (bl ? o : -o), (float) (i * 16), g + (bl2 ? o : -o)).color(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
-            vertexConsumer.vertex(matrix4f, h + (bl ? n : -n), (float) ((i + 1) * 16), j + (bl2 ? n : -n)).color(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
-            vertexConsumer.vertex(matrix4f, h + (bl3 ? n : -n), (float) ((i + 1) * 16), j + (bl4 ? n : -n)).color(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
-            vertexConsumer.vertex(matrix4f, f + (bl3 ? o : -o), (float) (i * 16), g + (bl4 ? o : -o)).color(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
+            vertexConsumer.addVertex(matrix4f, f + (bl ? o : -o), (float) (i * 16), g + (bl2 ? o : -o)).setColor(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
+            vertexConsumer.addVertex(matrix4f, h + (bl ? n : -n), (float) ((i + 1) * 16), j + (bl2 ? n : -n)).setColor(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
+            vertexConsumer.addVertex(matrix4f, h + (bl3 ? n : -n), (float) ((i + 1) * 16), j + (bl4 ? n : -n)).setColor(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
+            vertexConsumer.addVertex(matrix4f, f + (bl3 ? o : -o), (float) (i * 16), g + (bl4 ? o : -o)).setColor(color.r / 255f, color.g / 255f, color.b / 255f, 0.3F);
 
             ci.cancel();
         }

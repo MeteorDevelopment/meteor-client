@@ -10,9 +10,9 @@ import meteordevelopment.meteorclient.gui.screens.settings.base.DynamicRegistryL
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.Names;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.Set;
 
@@ -30,7 +30,7 @@ public class EnchantmentListSettingScreen extends DynamicRegistryListSettingScre
     protected String[] getValueNames(ResourceKey<Enchantment> value) {
         return new String[]{
             Names.get(value),
-            value.getValue().toString()
+            value.identifier().toString()
         };
     }
 }

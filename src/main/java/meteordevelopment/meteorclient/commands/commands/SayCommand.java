@@ -1,4 +1,3 @@
-// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -13,11 +12,11 @@ import meteordevelopment.meteorclient.mixin.ClientPacketListenerAccessor;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.util.Crypt;
 import net.minecraft.network.chat.LastSeenMessagesTracker;
-import net.minecraft.network.chat.SignedMessageBody;
 import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.chat.SignedMessageBody;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
+import net.minecraft.util.Crypt;
 import org.meteordev.starscript.Script;
 
 import java.time.Instant;
@@ -38,11 +37,11 @@ public class SayCommand extends Command {
 
                 if (message != null) {
                     Instant instant = Instant.now();
-                    long l = Crypt.SaltSupplier.nextLong();
-                    ClientPacketListener handler = mc.getNetworkHandler();
-                    LastSeenMessagesTracker.Update lastSeenMessages = ((ClientPacketListenerAccessor) handler).meteor$getLastSeenMessages().collect();
-                    MessageSignature messageSignatureData = ((ClientPlayNetworkHandlerAccessor) handler).meteor$getMessagePacker().pack(new MessageBody(message, instant, l, lastSeenMessages.lastSeen()));
-                    handler.sendPacket(new ChatMessageC2SPacket(message, instant, l, messageSignatureData, lastSeenMessages.update()));
+                    long l = Crypt.SaltSupplier.getLong();
+                    ClientPacketListener handler = mc.getConnection();
+                    LastSeenMessagesTracker.Update lastSeenMessages = ((ClientPacketListenerAccessor) handler).meteor$getLastSeenMessages().generateAndApplyUpdate();
+                    MessageSignature messageSignatureData = ((ClientPacketListenerAccessor) handler).meteor$getSignedMessageEncoder().pack(new SignedMessageBody(message, instant, l, lastSeenMessages.lastSeen()));
+                    handler.send(new ServerboundChatPacket(message, instant, l, messageSignatureData, lastSeenMessages.update()));
                 }
             }
 

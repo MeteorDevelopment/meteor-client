@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.settings;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.utils.network.PacketUtils;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 
 import java.util.ArrayList;
@@ -74,9 +74,9 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        ListTag valueTag = new NbtList();
+        ListTag valueTag = new ListTag();
         for (Class<? extends Packet<?>> packet : get()) {
-            valueTag.add(StringTag.of(PacketUtils.getName(packet)));
+            valueTag.add(StringTag.valueOf(PacketUtils.getName(packet)));
         }
         tag.put("value", valueTag);
 

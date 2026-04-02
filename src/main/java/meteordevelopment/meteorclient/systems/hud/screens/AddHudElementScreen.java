@@ -106,7 +106,7 @@ public class AddHudElementScreen extends WindowScreen {
         if (object == null) return;
         if (object instanceof HudElementInfo<?>.Preset preset) {
             Hud.get().add(preset, x, y);
-            close();
+            onClose();
         } else {
             HudElementInfo<?> info = (HudElementInfo<?>) object;
 
@@ -117,7 +117,7 @@ public class AddHudElementScreen extends WindowScreen {
                 mc.setScreen(screen);
             } else {
                 Hud.get().add(info, x, y);
-                close();
+                onClose();
             }
         }
     }

@@ -13,16 +13,16 @@ import meteordevelopment.meteorclient.mixin.MinecraftAccessor;
 import meteordevelopment.meteorclient.mixin.SkinManagerAccessor;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
+import net.minecraft.client.User;
 import net.minecraft.client.gui.screens.social.PlayerSocialManager;
 import net.minecraft.client.multiplayer.ProfileKeyPairManager;
-import net.minecraft.client.User;
-import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
-import net.minecraft.client.resources.SkinManager;
+import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.client.renderer.texture.SkinTextureDownloader;
+import net.minecraft.client.resources.SkinManager;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.SignatureValidator;
 import net.minecraft.server.Services;
+import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.Util;
 
 import java.nio.file.Path;
@@ -45,7 +45,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public abstract boolean fetchInfo();
 
     public boolean login() {
-        YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(mc.getNetworkProxy());
+        YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(mc.getProxy());
         applyLoginEnvironment(authenticationService);
 
         return true;
@@ -68,28 +68,28 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         MinecraftAccessor mca = (MinecraftAccessor) mc;
         mca.meteor$setUser(session);
 
-        YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(mc.getNetworkProxy());
+        YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(mc.getProxy());
 
         UserApiService apiService = yggdrasilAuthenticationService.createUserApiService(session.getAccessToken());
         mca.meteor$setUserApiService(apiService);
-        mca.meteor$setPlayerSocialManager(new SocialInteractionsManager(mc, apiService));
-        mca.meteor$setProfileKeyPairManager(ProfileKeyPairManager.create(apiService, session, mc.runDirectory.toPath()));
-        mca.meteor$setReportingContext(ReportingContext.create(ReportEnvironment.ofIntegratedServer(), apiService));
-        mca.meteor$setProfileFuture(CompletableFuture.supplyAsync(() -> mc.getApiServices().sessionService().fetchProfile(mc.getSession().getUuidOrNull(), true), Util.getIoWorkerExecutor()));
+        mca.meteor$setPlayerSocialManager(new PlayerSocialManager(mc, apiService));
+        mca.meteor$setProfileKeyPairManager(ProfileKeyPairManager.create(apiService, session, mc.gameDirectory.toPath()));
+        mca.meteor$setReportingContext(ReportingContext.create(ReportEnvironment.local(), apiService));
+        mca.meteor$setProfileFuture(CompletableFuture.supplyAsync(() -> mc.services().sessionService().fetchProfile(mc.getUser().getProfileId(), true), Util.ioPool()));
     }
 
     public static void applyLoginEnvironment(YggdrasilAuthenticationService authService) {
         MinecraftAccessor mca = (MinecraftAccessor) mc;
-        SignatureValidator.create(authService.getServicesKeySet(), ServicesKeyType.PROFILE_KEY);
-        SkinManager.TextureCache skinCache = ((SkinManagerAccessor) mc.getSkinProvider()).meteor$getSkinTextures();
+        SignatureValidator.from(authService.getServicesKeySet(), ServicesKeyType.PROFILE_KEY);
+        SkinManager.TextureCache skinCache = ((SkinManagerAccessor) mc.getSkinManager()).meteor$getSkinTextures();
         Path skinCachePath = ((FileCacheAccessor) skinCache).meteor$getRoot();
-        mca.meteor$setServices(Services.create(authService, mc.runDirectory));
-        mca.meteor$setSkinManager(new PlayerSkinProvider(skinCachePath, mc.getApiServices(), new PlayerSkinTextureDownloader(mc.getNetworkProxy(), mc.getTextureManager(), mc), mc));
+        mca.meteor$setServices(Services.create(authService, mc.gameDirectory));
+        mca.meteor$setSkinManager(new SkinManager(skinCachePath, mc.services(), new SkinTextureDownloader(mc.getProxy(), mc.getTextureManager(), mc), mc));
     }
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("type", type.name());
         tag.putString("name", name);

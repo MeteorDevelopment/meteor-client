@@ -18,9 +18,9 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin {
-    @WrapOperation(method = "handleStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;pullEntity(Lnet/minecraft/world/entity/Entity;)V"))
+    @WrapOperation(method = "handleEntityEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;pullEntity(Lnet/minecraft/world/entity/Entity;)V"))
     private void preventFishingRodPull(FishingHook instance, Entity entity, Operation<Void> original) {
-        if (!instance.getEntityWorld().isClient() || entity != mc.player) original.call(instance, entity);
+        if (!instance.level().isClientSide() || entity != mc.player) original.call(instance, entity);
 
         Velocity velocity = Modules.get().get(Velocity.class);
         if (!velocity.isActive() || !velocity.fishing.get()) original.call(instance, entity);

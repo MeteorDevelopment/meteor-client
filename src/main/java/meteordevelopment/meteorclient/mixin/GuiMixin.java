@@ -14,12 +14,12 @@ import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.Objective;
-import net.minecraft.util.profiling.Profiler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,23 +38,23 @@ public abstract class GuiMixin {
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
         ((IGameRenderer) mc.gameRenderer).meteor$flushGuiState();
-        context.createNewRootLayer();
+        context.nextStratum();
 
         Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
 
         Utils.unscaledProjection();
 
-        MeteorClient.EVENT_BUS.post(Render2DEvent.get(context, context.getScaledWindowWidth(), context.getScaledWindowWidth(), tickCounter.getTickProgress(true)));
+        MeteorClient.EVENT_BUS.post(Render2DEvent.get(context, context.guiWidth(), context.guiWidth(), tickCounter.getGameTimeDeltaPartialTick(true)));
 
-        context.createNewRootLayer();
+        context.nextStratum();
         Utils.scaledProjection();
 
         Profiler.get().pop();
     }
 
     @Inject(method = "renderEffects", at = @At("HEAD"), cancellable = true)
-    private void onRenderStatusEffectOverlay(CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noPotionIcons()) info.cancel();
+    private void onRenderStatusEffectOverlay(CallbackInfo ci) {
+        if (Modules.get().get(NoRender.class).noPotionIcons()) ci.cancel();
     }
 
     @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
@@ -113,9 +113,9 @@ public abstract class GuiMixin {
     }
 
     @Inject(method = "onDisconnected", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;clearMessages(Z)V"), cancellable = true)
-    private void onClear(CallbackInfo info) {
+    private void onClear(CallbackInfo ci) {
         if (Modules.get().get(BetterChat.class).keepHistory()) {
-            info.cancel();
+            ci.cancel();
         }
     }
 

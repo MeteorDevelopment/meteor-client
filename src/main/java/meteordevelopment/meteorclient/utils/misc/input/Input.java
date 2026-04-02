@@ -1,4 +1,3 @@
-// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -32,7 +31,7 @@ public class Input {
     }
 
     public static int getKey(KeyMapping bind) {
-        return ((KeyBindingAccessor) bind).meteor$getKey().getCode();
+        return ((KeyMappingAccessor) bind).meteor$getKey().getValue();
     }
 
     public static void setKeyState(KeyMapping bind, boolean pressed) {
@@ -57,7 +56,7 @@ public class Input {
 
     public static void setCursorStyle(CursorStyle style) {
         if (lastCursorStyle != style) {
-            GLFW.glfwSetCursor(mc.getWindow().getHandle(), style.getGlfwCursor());
+            GLFW.glfwSetCursor(mc.getWindow().handle(), style.getGlfwCursor());
             lastCursorStyle = style;
         }
     }

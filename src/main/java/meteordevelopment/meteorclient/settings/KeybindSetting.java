@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.gui.widgets.WKeybind;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
@@ -30,7 +30,7 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private void onKeyBinding(KeyEvent event) {
+    private void onKeyBinding(KeyInputEvent event) {
         if (widget == null) return;
         if (event.action == KeyAction.Press && event.key() == GLFW.GLFW_KEY_ESCAPE && widget.onClear()) event.cancel();
         else if (event.action == KeyAction.Release && widget.onAction(true, event.key(), event.modifiers()))
@@ -44,7 +44,7 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onKey(KeyEvent event) {
+    private void onKey(KeyInputEvent event) {
         if (event.action == KeyAction.Release && get().matches(event.input) && (module == null || module.isActive()) && action != null) {
             action.run();
         }

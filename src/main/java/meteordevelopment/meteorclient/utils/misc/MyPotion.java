@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
-import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.core.Holder;
 
 public enum MyPotion {
     Swiftness(Potions.SWIFTNESS, Items.NETHER_WART, Items.SUGAR),
@@ -70,7 +70,7 @@ public enum MyPotion {
     public final Item[] ingredients;
 
     MyPotion(Holder<Potion> potion, Item... ingredients) {
-        this.potion = PotionContents.createStack(Items.POTION, potion);
+        this.potion = PotionContents.createItemStack(Items.POTION, potion);
         this.ingredients = ingredients;
     }
 }

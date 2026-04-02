@@ -57,7 +57,7 @@ public class Vector3dSetting extends Setting<Vector3d> {
 
     @Override
     protected CompoundTag save(CompoundTag tag) {
-        CompoundTag valueTag = new NbtCompound();
+        CompoundTag valueTag = new CompoundTag();
         valueTag.putDouble("x", get().x);
         valueTag.putDouble("y", get().y);
         valueTag.putDouble("z", get().z);
@@ -73,7 +73,7 @@ public class Vector3dSetting extends Setting<Vector3d> {
 
         CompoundTag valueTag = tag.getCompound("value").get();
 
-        set(valueTag.getDouble("x", 0.0), valueTag.getDouble("y", 0.0), valueTag.getDouble("z", 0.0));
+        set(valueTag.getDoubleOr("x", 0.0), valueTag.getDoubleOr("y", 0.0), valueTag.getDoubleOr("z", 0.0));
 
         return get();
     }

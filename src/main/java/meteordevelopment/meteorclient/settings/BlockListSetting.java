@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.world.level.block.Block;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,14 +56,14 @@ public class BlockListSetting extends Setting<List<Block>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return BuiltInRegistries.BLOCK.getIds();
+        return BuiltInRegistries.BLOCK.keySet();
     }
 
     @Override
     protected CompoundTag save(CompoundTag tag) {
-        ListTag valueTag = new NbtList();
+        ListTag valueTag = new ListTag();
         for (Block block : get()) {
-            valueTag.add(StringTag.of(BuiltInRegistries.BLOCK.getId(block).toString()));
+            valueTag.add(StringTag.valueOf(BuiltInRegistries.BLOCK.getKey(block).toString()));
         }
         tag.put("value", valueTag);
 
@@ -76,7 +76,7 @@ public class BlockListSetting extends Setting<List<Block>> {
 
         ListTag valueTag = tag.getListOrEmpty("value");
         for (Tag tagI : valueTag) {
-            Block block = BuiltInRegistries.BLOCK.get(Identifier.of(tagI.asString().orElse("")));
+            Block block = BuiltInRegistries.BLOCK.getValue(Identifier.parse(tagI.asString().orElse("")));
 
             if (filter == null || filter.test(block)) get().add(block);
         }

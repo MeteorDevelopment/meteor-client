@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.world.item.Item;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,15 +58,15 @@ public class ItemListSetting extends Setting<List<Item>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return BuiltInRegistries.ITEM.getIds();
+        return BuiltInRegistries.ITEM.keySet();
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        ListTag valueTag = new NbtList();
+        ListTag valueTag = new ListTag();
         for (Item item : get()) {
             if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item)))
-                valueTag.add(StringTag.of(BuiltInRegistries.ITEM.getId(item).toString()));
+                valueTag.add(StringTag.valueOf(BuiltInRegistries.ITEM.getKey(item).toString()));
         }
         tag.put("value", valueTag);
 
@@ -79,7 +79,7 @@ public class ItemListSetting extends Setting<List<Item>> {
 
         ListTag valueTag = tag.getListOrEmpty("value");
         for (Tag tagI : valueTag) {
-            Item item = BuiltInRegistries.ITEM.get(Identifier.of(tagI.asString().orElse("")));
+            Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(tagI.asString().orElse("")));
 
             if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) get().add(item);
         }

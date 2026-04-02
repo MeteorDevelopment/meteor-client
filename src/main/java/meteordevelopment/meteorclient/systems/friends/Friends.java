@@ -11,9 +11,9 @@ import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -96,7 +96,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.put("friends", NbtUtils.listToTag(friends));
 
@@ -111,10 +111,10 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
             CompoundTag friendTag = (CompoundTag) itemTag;
             if (!friendTag.contains("name")) continue;
 
-            String name = friendTag.getString("name", "");
+            String name = friendTag.getStringOr("name", "");
             if (get(name) != null) continue;
 
-            String uuid = friendTag.getString("id", "");
+            String uuid = friendTag.getStringOr("id", "");
             Friend friend = !uuid.isBlank()
                 ? new Friend(name, UndashedUuid.fromStringLenient(uuid))
                 : new Friend(name);

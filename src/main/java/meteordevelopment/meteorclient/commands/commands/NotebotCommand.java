@@ -18,12 +18,12 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class NotebotCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(literal("help").executes(ctx -> {
-            Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Notebot-Guide");
+            Util.getPlatform().openUri("https://github.com/MeteorDevelopment/meteor-client/wiki/Notebot-Guide");
             return SINGLE_SUCCESS;
         }));
 
@@ -144,7 +144,7 @@ public class NotebotCommand extends Command {
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof ClientboundSoundPacket sound && sound.getSound().value().id().getPath().contains("note_block")) {
+        if (event.packet instanceof ClientboundSoundPacket sound && sound.getSound().value().location().getPath().contains("note_block")) {
             if (ticks == -1) ticks = 0;
             List<Note> notes = song.computeIfAbsent(ticks, tick -> new ArrayList<>());
             var note = getNote(sound);
@@ -212,7 +212,7 @@ public class NotebotCommand extends Command {
     }
 
     private NoteBlockInstrument getInstrumentFromSound(SoundEvent sound) {
-        String path = sound.id().getPath();
+        String path = sound.location().getPath();
         if (path.contains("harp"))
             return NoteBlockInstrument.HARP;
         else if (path.contains("basedrum"))

@@ -15,10 +15,10 @@ import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
@@ -89,7 +89,7 @@ public class VoidESP extends Module {
         .build()
     );
 
-    private final BlockPos.MutableBlockPos blockPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 
     private final Pool<Void> voidHolePool = new Pool<>(Void::new);
     private final List<Void> voidHoles = new ArrayList<>();
@@ -101,20 +101,20 @@ public class VoidESP extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         voidHoles.clear();
-        if (mc.world.getDimensionEntry() == BuiltinDimensionTypes.THE_END) return;
+        if (mc.level.dimensionTypeRegistration() == BuiltinDimensionTypes.END) return;
 
-        int px = mc.player.getBlockPos().getX();
-        int pz = mc.player.getBlockPos().getZ();
+        int px = mc.player.blockPosition().getX();
+        int pz = mc.player.blockPosition().getZ();
         int radius = horizontalRadius.get();
 
         for (int x = px - radius; x <= px + radius; x++) {
             for (int z = pz - radius; z <= pz + radius; z++) {
-                blockPos.set(x, mc.world.getBottomY(), z);
+                blockPos.set(x, mc.level.getMinY(), z);
                 if (isHole(blockPos, false))
-                    voidHoles.add(voidHolePool.get().set(blockPos.set(x, mc.world.getBottomY(), z), false));
+                    voidHoles.add(voidHolePool.get().set(blockPos.set(x, mc.level.getMinY(), z), false));
 
                 // Check for nether roof
-                if (netherRoof.get() && mc.world.getDimensionEntry() == BuiltinDimensionTypes.THE_NETHER) {
+                if (netherRoof.get() && mc.level.dimensionTypeRegistration() == BuiltinDimensionTypes.NETHER) {
                     blockPos.set(x, 127, z);
                     if (isHole(blockPos, true)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, 127, z), true));
                 }
@@ -128,7 +128,7 @@ public class VoidESP extends Module {
     }
 
     private boolean isBlockWrong(BlockPos blockPos) {
-        ChunkAccess chunk = mc.world.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, false);
+        ChunkAccess chunk = mc.level.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, false);
         if (chunk == null) return true;
 
         Block block = chunk.getBlockState(blockPos).getBlock();
@@ -139,7 +139,7 @@ public class VoidESP extends Module {
 
     private boolean isHole(BlockPos.MutableBlockPos blockPos, boolean nether) {
         for (int i = 0; i < holeHeight.get(); i++) {
-            blockPos.setY(nether ? 127 - i : mc.world.getBottomY() + i);
+            blockPos.setY(nether ? 127 - i : mc.level.getMinY() + i);
             if (isBlockWrong(blockPos)) return false;
         }
 
@@ -158,7 +158,7 @@ public class VoidESP extends Module {
             excludeDir = 0;
 
             for (Direction side : SIDES) {
-                blockPos.set(x + side.getOffsetX(), y, z + side.getOffsetZ());
+                blockPos.set(x + side.getStepX(), y, z + side.getStepZ());
                 if (isHole(blockPos, nether)) excludeDir |= Dir.get(side);
             }
 

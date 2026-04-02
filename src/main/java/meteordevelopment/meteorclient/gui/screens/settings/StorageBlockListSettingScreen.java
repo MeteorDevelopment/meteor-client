@@ -11,10 +11,10 @@ import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSe
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.StorageBlockListSetting;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 import java.util.List;
 import java.util.Map;
@@ -50,14 +50,14 @@ public class StorageBlockListSettingScreen extends CollectionListSettingScreen<B
     @Override
     protected WWidget getValueWidget(BlockEntityType<?> value) {
         BlockEntityTypeInfo info = BLOCK_ENTITY_TYPE_INFO_MAP.getOrDefault(value, UNKNOWN);
-        return theme.itemWithLabel(info.item().getDefaultStack(), info.name());
+        return theme.itemWithLabel(info.item().getDefaultInstance(), info.name());
     }
 
     @Override
     protected String[] getValueNames(BlockEntityType<?> value) {
         return new String[]{
             BLOCK_ENTITY_TYPE_INFO_MAP.getOrDefault(value, UNKNOWN).name(),
-            BuiltInRegistries.BLOCK_ENTITY_TYPE.getId(value).toString()
+            BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(value).toString()
         };
     }
 

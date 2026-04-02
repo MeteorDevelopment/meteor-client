@@ -13,15 +13,15 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.protocol.common.custom.BrandPayload;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
-import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
+import net.minecraft.network.protocol.common.custom.BrandPayload;
 import net.minecraft.resources.Identifier;
 import org.apache.commons.lang3.Strings;
 
@@ -85,7 +85,7 @@ public class ServerSpoof extends Module {
         if (!isActive()) return;
 
         if (event.packet instanceof ServerboundCustomPayloadPacket) {
-            Identifier id = ((ServerboundCustomPayloadPacket) event.packet).payload().getId().id();
+            Identifier id = ((ServerboundCustomPayloadPacket) event.packet).payload().type().id();
 
             if (blockChannels.get()) {
                 for (String channel : channels.get()) {
@@ -96,8 +96,8 @@ public class ServerSpoof extends Module {
                 }
             }
 
-            if (spoofBrand.get() && id.equals(BrandPayload.ID.id())) {
-                ServerboundCustomPayloadPacket spoofedPacket = new CustomPayloadC2SPacket(new BrandCustomPayload(brand.get()));
+            if (spoofBrand.get() && id.equals(BrandPayload.TYPE.id())) {
+                ServerboundCustomPayloadPacket spoofedPacket = new ServerboundCustomPayloadPacket(new BrandPayload(brand.get()));
 
                 event.sendSilently(spoofedPacket);
                 event.cancel();
@@ -114,34 +114,34 @@ public class ServerSpoof extends Module {
         if (!(event.packet instanceof ClientboundResourcePackPushPacket packet)) return;
 
         event.cancel();
-        event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ServerboundResourcePackPacket.Action.ACCEPTED));
-        event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ServerboundResourcePackPacket.Action.DOWNLOADED));
-        event.connection.send(new ResourcePackStatusC2SPacket(packet.id(), ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED));
+        event.connection.send(new ServerboundResourcePackPacket(packet.id(), ServerboundResourcePackPacket.Action.ACCEPTED));
+        event.connection.send(new ServerboundResourcePackPacket(packet.id(), ServerboundResourcePackPacket.Action.DOWNLOADED));
+        event.connection.send(new ServerboundResourcePackPacket(packet.id(), ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED));
 
-        msg = MutableComponent.literal("This server has ");
+        msg = Component.literal("This server has ");
         msg.append(packet.required() ? "a required " : "an optional ").append("resource pack. ");
 
-        MutableComponent link = MutableComponent.literal("[Open URL]");
+        MutableComponent link = Component.literal("[Open URL]");
         link.setStyle(link.getStyle()
             .withColor(ChatFormatting.BLUE)
-            .withUnderline(true)
+            .withUnderlined(true)
             .withClickEvent(new ClickEvent.OpenUrl(URI.create(packet.url())))
-            .withHoverEvent(new HoverEvent.ShowText(MutableComponent.literal("Click to open the pack url")))
+            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to open the pack url")))
         );
 
-        MutableComponent acceptance = MutableComponent.literal("[Accept Pack]");
+        MutableComponent acceptance = Component.literal("[Accept Pack]");
         acceptance.setStyle(acceptance.getStyle()
             .withColor(ChatFormatting.DARK_GREEN)
-            .withUnderline(true)
+            .withUnderlined(true)
             .withClickEvent(new RunnableClickEvent(() -> {
                 URL url = getParsedResourcePackUrl(packet.url());
                 if (url == null) error("Invalid resource pack URL: " + packet.url());
                 else {
                     silentAcceptResourcePack = true;
-                    mc.getServerResourcePackProvider().addResourcePack(packet.id(), url, packet.hash());
+                    mc.getDownloadedPackSource().pushPack(packet.id(), url, packet.hash());
                 }
             }))
-            .withHoverEvent(new HoverEvent.ShowText(MutableComponent.literal("Click to accept and apply the pack.")))
+            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to accept and apply the pack.")))
         );
 
         msg.append(link).append(" ");

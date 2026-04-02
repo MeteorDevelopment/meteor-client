@@ -41,12 +41,12 @@ public class AntiAnchor extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.world.getBlockState(mc.player.getBlockPos().up(2)).getBlock() == Blocks.RESPAWN_ANCHOR
-            && mc.world.getBlockState(mc.player.getBlockPos().up()).getBlock() == Blocks.AIR) {
+        if (mc.level.getBlockState(mc.player.blockPosition().above(2)).getBlock() == Blocks.RESPAWN_ANCHOR
+            && mc.level.getBlockState(mc.player.blockPosition().above()).getBlock() == Blocks.AIR) {
 
             BlockUtils.place(
-                mc.player.getBlockPos().add(0, 1, 0),
-                InvUtils.findInHotbar(itemStack -> Block.getBlockFromItem(itemStack.getItem()) instanceof SlabBlock),
+                mc.player.blockPosition().offset(0, 1, 0),
+                InvUtils.findInHotbar(itemStack -> Block.byItem(itemStack.getItem()) instanceof SlabBlock),
                 rotate.get(),
                 15,
                 swing.get(),

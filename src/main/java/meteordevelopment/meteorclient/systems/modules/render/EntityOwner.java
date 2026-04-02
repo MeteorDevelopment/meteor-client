@@ -61,7 +61,7 @@ public class EntityOwner extends Module {
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        for (Entity entity : mc.world.getEntities()) {
+        for (Entity entity : mc.level.entitiesForRendering()) {
             @Nullable EntityReference<LivingEntity> owner;
 
             if (entity instanceof TamableAnimal tameable) owner = tameable.getOwnerReference();
@@ -103,10 +103,10 @@ public class EntityOwner extends Module {
 
     private String getOwnerName(EntityReference<LivingEntity> owner) {
         // Check if the player is online
-        @Nullable LivingEntity ownerEntity = EntityReference.resolve(owner, mc.world, LivingEntity.class);
+        @Nullable LivingEntity ownerEntity = EntityReference.get(owner, mc.level, LivingEntity.class);
         if (ownerEntity instanceof Player playerEntity) return playerEntity.getName().getString();
 
-        UUID uuid = owner.getUuid();
+        UUID uuid = owner.getUUID();
 
         // Check cache
         String name = uuidToName.get(uuid);

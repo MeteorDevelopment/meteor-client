@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class MBlockPos {
-    private static final BlockPos.MutableBlockPos POS = new BlockPos.Mutable();
+    private static final BlockPos.MutableBlockPos POS = new BlockPos.MutableBlockPos();
 
     public int x, y, z;
 
@@ -64,7 +64,7 @@ public class MBlockPos {
     }
 
     public BlockState getState() {
-        return mc.world.getBlockState(getBlockPos());
+        return mc.level.getBlockState(getBlockPos());
     }
 
     @Override

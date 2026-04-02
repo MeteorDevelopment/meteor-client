@@ -9,9 +9,9 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import net.minecraft.client.MouseHandler;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -57,8 +57,8 @@ public abstract class WContainer extends WWidget {
         for (Cell<?> cell : cells) {
             cell.move(deltaX, deltaY);
 
-            MouseHandler mouse = mc.mouse;
-            cell.widget().mouseMoved(mouse.getX(), mouse.getY(), mouse.getX(), mouse.getY());
+            MouseHandler mouse = mc.mouseHandler;
+            cell.widget().mouseMoved(mouse.xpos(), mouse.ypos(), mouse.xpos(), mouse.ypos());
         }
     }
 

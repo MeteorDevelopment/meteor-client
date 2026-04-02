@@ -33,9 +33,9 @@ public class DownloadQueueMixin {
     @Final
     private Path cacheDir;
 
-    @ModifyExpressionValue(method = "lambda$runDownload$0", at = @At(value = "INVOKE", target = "Ljava/nio/file/Path;resolve(Ljava/lang/String;)Ljava/nio/file/Path;"))
+    @ModifyExpressionValue(method = "method_55485", at = @At(value = "INVOKE", target = "Ljava/nio/file/Path;resolve(Ljava/lang/String;)Ljava/nio/file/Path;"))
     private Path hookResolve(Path original, @Local(argsOnly = true) UUID id) {
-        UUID accountId = mc.getSession().getUuidOrNull();
+        UUID accountId = mc.getUser().getProfileId();
         if (accountId == null) {
             MeteorClient.LOG.warn("Failed to change resource pack download directory because the account id is null.");
             return original;

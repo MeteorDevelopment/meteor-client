@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -25,17 +25,17 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.DecoratedPotBlock;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DecoratedPotBlock;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -64,7 +64,7 @@ public class InventoryTweaks extends Module {
         .defaultValue(true)
         .onChanged(v -> {
             if (v || !Utils.canUpdate()) return;
-            mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
+            mc.player.connection.send(new ServerboundContainerClosePacket(mc.player.inventoryMenu.containerId));
             invOpened = false;
         })
         .build()
@@ -174,7 +174,7 @@ public class InventoryTweaks extends Module {
     public final Setting<List<MenuType<?>>> stealScreens = sgStealDump.add(new ScreenHandlerListSetting.Builder()
         .name("steal-screens")
         .description("Select the screens to display buttons and auto steal.")
-        .defaultValue(List.of(MenuType.GENERIC_9X3, MenuType.GENERIC_9X6))
+        .defaultValue(List.of(MenuType.GENERIC_9x3, MenuType.GENERIC_9x6))
         .build()
     );
 
@@ -286,14 +286,14 @@ public class InventoryTweaks extends Module {
         sorter = null;
 
         if (invOpened) {
-            mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
+            mc.player.connection.send(new ServerboundContainerClosePacket(mc.player.inventoryMenu.containerId));
         }
     }
 
     // Sorting and armour swapping
 
     @EventHandler
-    private void onKey(KeyEvent event) {
+    private void onKey(KeyInputEvent event) {
         if (event.action != KeyAction.Press) return;
 
         if (sortingKey.get().matches(event.input)) {
@@ -311,10 +311,10 @@ public class InventoryTweaks extends Module {
     }
 
     private boolean sort() {
-        if (!sortingEnabled.get() || !(mc.currentScreen instanceof AbstractContainerScreen<?> screen) || sorter != null || (mc.player.isCreative() && disableInCreative.get()))
+        if (!sortingEnabled.get() || !(mc.screen instanceof AbstractContainerScreen<?> screen) || sorter != null || (mc.player.isCreative() && disableInCreative.get()))
             return false;
 
-        if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+        if (!mc.player.containerMenu.getCarried().isEmpty()) {
             FindItemResult empty = InvUtils.findEmpty();
             if (!empty.found()) InvUtils.click().slot(-999);
             else InvUtils.click().slot(empty.slot());
@@ -342,14 +342,14 @@ public class InventoryTweaks extends Module {
     @EventHandler
     private void onTickPost(TickEvent.Post event) {
         // Auto Drop
-        if (!Utils.canUpdate() || mc.currentScreen instanceof AbstractContainerScreen<?> || autoDropItems.get().isEmpty())
+        if (!Utils.canUpdate() || mc.screen instanceof AbstractContainerScreen<?> || autoDropItems.get().isEmpty())
             return;
 
-        for (int i = autoDropExcludeHotbar.get() ? 9 : 0; i < mc.player.getInventory().size(); i++) {
-            ItemStack itemStack = mc.player.getInventory().getStack(i);
+        for (int i = autoDropExcludeHotbar.get() ? 9 : 0; i < mc.player.getInventory().getContainerSize(); i++) {
+            ItemStack itemStack = mc.player.getInventory().getItem(i);
 
             if (autoDropItems.get().contains(itemStack.getItem())) {
-                if ((!autoDropOnlyFullStacks.get() || itemStack.getCount() == itemStack.getMaxCount()) &&
+                if ((!autoDropOnlyFullStacks.get() || itemStack.getCount() == itemStack.getMaxStackSize()) &&
                     !(autoDropExcludeEquipped.get() && SlotUtils.isArmor(i))) InvUtils.drop().slot(i);
             }
         }
@@ -368,7 +368,7 @@ public class InventoryTweaks extends Module {
         if (!antiItemFrame.get() || antiDropOverrideBind.get().isPressed()) return;
         if (!(event.entity instanceof ItemFrame)) return;
 
-        Item item = mc.player.getStackInHand(event.hand).getItem();
+        Item item = mc.player.getItemInHand(event.hand).getItem();
         if (antiDropItems.get().contains(item)) event.cancel();
     }
 
@@ -376,10 +376,10 @@ public class InventoryTweaks extends Module {
     private void onInteractBlock(InteractBlockEvent event) {
         if (!antiItemFrame.get() || antiDropOverrideBind.get().isPressed()) return;
         if (event.hand != InteractionHand.MAIN_HAND) return;
-        Block block = mc.world.getBlockState(event.result.getBlockPos()).getBlock();
+        Block block = mc.level.getBlockState(event.result.getBlockPos()).getBlock();
         if (!(block instanceof DecoratedPotBlock)) return;
 
-        Item item = mc.player.getStackInHand(event.hand).getItem();
+        Item item = mc.player.getItemInHand(event.hand).getItem();
         if (antiDropItems.get().contains(item)) event.cancel();
     }
 
@@ -389,7 +389,7 @@ public class InventoryTweaks extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (!xCarry.get() || !(event.packet instanceof ServerboundContainerClosePacket packet)) return;
 
-        if (packet.getSyncId() == mc.player.playerScreenHandler.syncId) {
+        if (packet.getContainerId() == mc.player.inventoryMenu.containerId) {
             invOpened = true;
             event.cancel();
         }
@@ -411,12 +411,12 @@ public class InventoryTweaks extends Module {
     private void moveSlots(AbstractContainerMenu handler, int start, int end, boolean steal) {
         boolean initial = autoStealInitDelay.get() != 0;
         for (int i = start; i < end; i++) {
-            if (!handler.getSlot(i).hasStack()) continue;
+            if (!handler.getSlot(i).hasItem()) continue;
 
             // Exit if user closes screen or exit world
-            if (mc.currentScreen == null || !Utils.canUpdate()) break;
+            if (mc.screen == null || !Utils.canUpdate()) break;
 
-            Item item = handler.getSlot(i).getStack().getItem();
+            Item item = handler.getSlot(i).getItem().getItem();
             if (steal) {
                 if (stealFilter.get() == ListMode.Whitelist && !stealItems.get().contains(item))
                     continue;
@@ -443,12 +443,12 @@ public class InventoryTweaks extends Module {
             }
 
             // Exit if user closes screen or exit world
-            if (mc.currentScreen == null || !Utils.canUpdate()) break;
+            if (mc.screen == null || !Utils.canUpdate()) break;
 
             if (steal && stealDrop.get()) {
                 if (dropBackwards.get()) {
                     int iCopy = i;
-                    Rotations.rotate(mc.player.getYaw() - 180, mc.player.getPitch(), () -> InvUtils.drop().slotId(iCopy));
+                    Rotations.rotate(mc.player.getYRot() - 180, mc.player.getXRot(), () -> InvUtils.drop().slotId(iCopy));
                 }
             } else InvUtils.shiftClick().slotId(i);
         }
@@ -489,8 +489,8 @@ public class InventoryTweaks extends Module {
 
     @EventHandler
     private void onInventory(InventoryEvent event) {
-        AbstractContainerMenu handler = mc.player.currentScreenHandler;
-        if (canSteal(handler) && event.packet.syncId() == handler.syncId) {
+        AbstractContainerMenu handler = mc.player.containerMenu;
+        if (canSteal(handler) && event.packet.containerId() == handler.containerId) {
             if (autoSteal.get()) {
                 steal(handler);
             } else if (autoDump.get()) {

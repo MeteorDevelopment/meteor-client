@@ -13,9 +13,9 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,9 +45,9 @@ public class StringListSetting extends Setting<List<String>> {
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        ListTag valueTag = new NbtList();
+        ListTag valueTag = new ListTag();
         for (int i = 0; i < this.value.size(); i++) {
-            valueTag.add(i, StringTag.of(get().get(i)));
+            valueTag.add(i, StringTag.valueOf(get().get(i)));
         }
         tag.put("value", valueTag);
 

@@ -15,15 +15,15 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.data.registries.VanillaRegistries;
-import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
 public abstract class Command {
-    protected static CommandBuildContext REGISTRY_ACCESS = Commands.createRegistryAccess(VanillaRegistries.createWrapperLookup());
+    protected static CommandBuildContext REGISTRY_ACCESS = Commands.createValidationContext(VanillaRegistries.createLookup());
     protected static final int SINGLE_SUCCESS = com.mojang.brigadier.Command.SINGLE_SUCCESS;
     protected static final Minecraft mc = MeteorClient.mc;
 

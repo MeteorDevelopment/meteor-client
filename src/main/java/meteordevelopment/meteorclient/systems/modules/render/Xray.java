@@ -18,13 +18,13 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.Shapes;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ public class Xray extends Module {
         .description("Which blocks to show x-rayed.")
         .defaultValue(ORES)
         .onChanged(v -> {
-            if (isActive()) mc.worldRenderer.reload();
+            if (isActive()) mc.levelRenderer.allChanged();
         })
         .build()
     );
@@ -50,7 +50,7 @@ public class Xray extends Module {
         .range(0, 255)
         .sliderMax(255)
         .onChanged(onChanged -> {
-            if (isActive()) mc.worldRenderer.reload();
+            if (isActive()) mc.levelRenderer.allChanged();
         })
         .build()
     );
@@ -60,7 +60,7 @@ public class Xray extends Module {
         .description("Show only exposed ores.")
         .defaultValue(false)
         .onChanged(onChanged -> {
-            if (isActive()) mc.worldRenderer.reload();
+            if (isActive()) mc.levelRenderer.allChanged();
         })
         .build());
 
@@ -70,12 +70,12 @@ public class Xray extends Module {
 
     @Override
     public void onActivate() {
-        mc.worldRenderer.reload();
+        mc.levelRenderer.allChanged();
     }
 
     @Override
     public void onDeactivate() {
-        mc.worldRenderer.reload();
+        mc.levelRenderer.allChanged();
     }
 
     @Override
@@ -88,7 +88,7 @@ public class Xray extends Module {
 
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
-        if (isBlocked(event.blockEntityState.blockState.getBlock(), event.blockEntityState.pos)) event.cancel();
+        if (isBlocked(event.blockEntityState.blockState.getBlock(), event.blockEntityState.blockPos)) event.cancel();
     }
 
     @EventHandler
@@ -103,9 +103,9 @@ public class Xray extends Module {
 
     public boolean modifyDrawSide(BlockState state, BlockGetter view, BlockPos pos, Direction facing, boolean returns) {
         if (!returns && !isBlocked(state.getBlock(), pos)) {
-            BlockPos adjPos = pos.offset(facing);
+            BlockPos adjPos = pos.relative(facing);
             BlockState adjState = view.getBlockState(adjPos);
-            return adjState.getCullingFace(facing.getOpposite()) != Shapes.fullCube() || adjState.getBlock() != state.getBlock() || !adjState.isOpaqueFullCube() || isBlocked(adjState.getBlock(), adjPos);
+            return adjState.getFaceOcclusionShape(facing.getOpposite()) != Shapes.block() || adjState.getBlock() != state.getBlock() || !adjState.isSolidRender() || isBlocked(adjState.getBlock(), adjPos);
         }
 
         return returns;

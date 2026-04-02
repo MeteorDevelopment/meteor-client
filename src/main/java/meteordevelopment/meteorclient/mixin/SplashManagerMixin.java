@@ -32,7 +32,7 @@ public abstract class SplashManagerMixin {
         if (Config.get() == null || !Config.get().titleScreenSplashes.get()) return;
 
         if (override)
-            cir.setReturnValue(new SplashTextRenderer(Component.literal(meteorSplashes.get(random.nextInt(meteorSplashes.size())))));
+            cir.setReturnValue(new SplashRenderer(Component.literal(meteorSplashes.get(random.nextInt(meteorSplashes.size())))));
         override = !override;
     }
 

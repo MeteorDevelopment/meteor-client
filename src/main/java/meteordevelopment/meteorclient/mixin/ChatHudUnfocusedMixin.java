@@ -8,12 +8,12 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
-import net.minecraft.client.gui.TextAlignment;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.ActiveTextCollector.Parameters;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.client.gui.TextAlignment;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.FormattedCharSequence;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,20 +33,20 @@ public class ChatHudUnfocusedMixin {
     private GuiGraphics graphics;
 
     // Offset text to make room for player heads
-    @ModifyArg(method = "text", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/ActiveTextCollector;accept(Lnet/minecraft/client/gui/TextAlignment;IILnet/minecraft/client/gui/ActiveTextCollector$Parameters;Lnet/minecraft/util/FormattedCharSequence;)V"), index = 1)
+    @ModifyArg(method = "handleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/ActiveTextCollector;accept(Lnet/minecraft/client/gui/TextAlignment;IILnet/minecraft/client/gui/ActiveTextCollector$Parameters;Lnet/minecraft/util/FormattedCharSequence;)V"), index = 1)
     private int modifyX(int x) {
         return getBetterChat().modifyChatWidth(x);
     }
 
     // Player Heads for unfocused chat - draw before text
-    @ModifyReceiver(method = "text", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/ActiveTextCollector;accept(Lnet/minecraft/client/gui/TextAlignment;IILnet/minecraft/client/gui/ActiveTextCollector$Parameters;Lnet/minecraft/util/FormattedCharSequence;)V"))
+    @ModifyReceiver(method = "handleMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/ActiveTextCollector;accept(Lnet/minecraft/client/gui/TextAlignment;IILnet/minecraft/client/gui/ActiveTextCollector$Parameters;Lnet/minecraft/util/FormattedCharSequence;)V"))
     private ActiveTextCollector onRender_beforeDrawText(ActiveTextCollector instance, TextAlignment alignment, int x, int y, Parameters transformation, FormattedCharSequence orderedText) {
-        getBetterChat().beforeDrawMessage(graphics, y, ARGB.getWhite(transformation.opacity()));
+        getBetterChat().beforeDrawMessage(graphics, y, ARGB.white(transformation.opacity()));
         return instance;
     }
 
     // Clean up after drawing
-    @Inject(method = "text", at = @At("TAIL"))
+    @Inject(method = "handleMessage", at = @At("TAIL"))
     private void onRender_afterDrawText(int y, float f, FormattedCharSequence orderedText, CallbackInfoReturnable<Boolean> cir) {
         getBetterChat().afterDrawMessage();
     }

@@ -1,4 +1,3 @@
-// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -16,11 +15,11 @@ import meteordevelopment.meteorclient.mixin.MapTextureManagerAccessor;
 import net.minecraft.client.resources.MapTextureManager;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.MapItem;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
@@ -72,14 +71,14 @@ public class SaveMapCommand extends Command {
         File path = getPath();
         if (path == null) throw OOPS.create();
 
-        MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.gameRenderer.getClient().getMapTextureManager();
-        MapTextureManager.MapInstance texture = textureManager.meteor$invokeGetMapTexture(map.get(DataComponents.MAP_ID), state);
-        if (texture.texture.getImage() == null) throw OOPS.create();
+        MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.gameRenderer.getMinecraft().getMapTextureManager();
+        MapTextureManager.MapInstance texture = textureManager.meteor$invokeGetOrCreateMapInstance(map.get(DataComponents.MAP_ID), state);
+        if (texture.texture.getPixels() == null) throw OOPS.create();
 
         try {
-            if (scale == 128) texture.texture.getImage().writeTo(path);
+            if (scale == 128) texture.texture.getPixels().writeToFile(path);
             else {
-                int[] data = texture.texture.getImage().makePixelArray();
+                int[] data = texture.texture.getPixels().makePixelArray();
                 BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
                 image.setRGB(0, 0, image.getWidth(), image.getHeight(), data, 0, 128);
 
@@ -98,7 +97,7 @@ public class SaveMapCommand extends Command {
         ItemStack map = getMap();
         if (map == null) return null;
 
-        return MapItem.getMapState(map.get(DataComponents.MAP_ID), mc.world);
+        return MapItem.getSavedData(map.get(DataComponents.MAP_ID), mc.level);
     }
 
     private @Nullable File getPath() {
@@ -110,10 +109,10 @@ public class SaveMapCommand extends Command {
     }
 
     private @Nullable ItemStack getMap() {
-        ItemStack itemStack = mc.player.getMainHandStack();
+        ItemStack itemStack = mc.player.getMainHandItem();
         if (itemStack.getItem() == Items.FILLED_MAP) return itemStack;
 
-        itemStack = mc.player.getOffHandStack();
+        itemStack = mc.player.getOffhandItem();
         if (itemStack.getItem() == Items.FILLED_MAP) return itemStack;
 
         return null;

@@ -23,7 +23,7 @@ public class YesNoPrompt extends Prompt<YesNoPrompt> {
     }
 
     public static YesNoPrompt create() {
-        return new YesNoPrompt(GuiThemes.get(), mc.currentScreen);
+        return new YesNoPrompt(GuiThemes.get(), mc.screen);
     }
 
     public static YesNoPrompt create(GuiTheme theme, Screen parent) {
@@ -46,14 +46,14 @@ public class YesNoPrompt extends Prompt<YesNoPrompt> {
         yesButton.action = () -> {
             dontShowAgain(screen);
             onYes.run();
-            screen.close();
+            screen.onClose();
         };
 
         WButton noButton = screen.list.add(theme.button("No")).expandX().widget();
         noButton.action = () -> {
             dontShowAgain(screen);
             onNo.run();
-            screen.close();
+            screen.onClose();
         };
     }
 }

@@ -5,26 +5,26 @@
 
 package meteordevelopment.meteorclient.utils;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.SubmitNodeCollection;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.SubmitNodeStorage;
-import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
@@ -40,8 +40,8 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
     }
 
     @Override
-    public SubmitNodeCollection getBatchingQueue(int i) {
-        return batchingQueues.computeIfAbsent(i, order -> new OutlineBatchingRenderCommandQueue(this));
+    public SubmitNodeCollection order(int i) {
+        return submitsPerOrder.computeIfAbsent(i, order -> new OutlineBatchingRenderCommandQueue(this));
     }
 
     private class OutlineBatchingRenderCommandQueue extends SubmitNodeCollection {
@@ -50,23 +50,23 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
         }
 
         @Override
-        public void submitShadowPieces(PoseStack matrices, float shadowRadius, List<EntityRenderState.ShadowPiece> shadowPieces) {
+        public void submitShadow(PoseStack poseStack, float shadowRadius, List<EntityRenderState.ShadowPiece> shadowPieces) {
         }
 
         @Override
-        public void submitLabel(PoseStack matrices, @Nullable Vec3 nameLabelPos, int y, FormattedCharSequence label, boolean notSneaking, int light, double squaredDistanceToCamera, CameraRenderState cameraState) {
+        public void submitNameTag(PoseStack poseStack, @Nullable Vec3 vec3, int i, Component component, boolean bl, int j, double d, CameraRenderState cameraRenderState) {
         }
 
         @Override
-        public void submitText(PoseStack matrices, float x, float y, FormattedCharSequence text, boolean dropShadow, Font.DisplayMode layerType, int light, int color, int backgroundColor, int outlineColor) {
+        public void submitText(PoseStack poseStack, float x, float y, FormattedCharSequence text, boolean dropShadow, Font.DisplayMode layerType, int light, int color, int backgroundColor, int outlineColor) {
         }
 
         @Override
-        public void submitFire(PoseStack matrices, EntityRenderState renderState, Quaternionf rotation) {
+        public void submitFlame(PoseStack poseStack, EntityRenderState entityRenderState, Quaternionf quaternionf) {
         }
 
         @Override
-        public void submitLeash(PoseStack matrices, EntityRenderState.LeashState leashData) {
+        public void submitLeash(PoseStack poseStack, EntityRenderState.LeashState leashState) {
         }
 
         @Override
@@ -88,12 +88,12 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
         }
 
         @Override
-        public void submitBlockStateModel(PoseStack matrices, RenderType renderLayer, BlockStateModel model, float r, float g, float b, int light, int overlay, int outlineColor) {
+        public void submitBlockModel(PoseStack matrices, RenderType renderLayer, BlockStateModel model, float r, float g, float b, int light, int overlay, int outlineColor) {
             r = Color.toRGBAR(color) / 255f;
             g = Color.toRGBAG(color) / 255f;
             b = Color.toRGBAB(color) / 255f;
 
-            super.submitBlockStateModel(matrices, renderLayer, model, r, g, b, light, overlay, outlineColor);
+            super.submitBlockModel(matrices, renderLayer, model, r, g, b, light, overlay, outlineColor);
         }
 
         @Override
@@ -106,11 +106,11 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
         }
 
         @Override
-        public void submitCustom(PoseStack matrices, RenderType renderLayer, Custom customRenderer) {
+        public void submitCustomGeometry(PoseStack poseStack, RenderType renderType, CustomGeometryRenderer customGeometryRenderer) {
         }
 
         @Override
-        public void submitCustom(LayeredCustom customRenderer) {
+        public void submitParticleGroup(ParticleGroupRenderer particleGroupRenderer) {
         }
     }
 }

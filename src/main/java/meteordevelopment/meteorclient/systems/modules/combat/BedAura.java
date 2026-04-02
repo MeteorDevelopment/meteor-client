@@ -24,17 +24,17 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.meteorclient.utils.world.CardinalDirection;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BedItem;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BedItem;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.level.Level;
 
 public class BedAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -208,7 +208,7 @@ public class BedAura extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         // Check if beds can explode here
-        if (mc.world.getRegistryKey() == Level.OVERWORLD) {
+        if (mc.level.dimension() == Level.OVERWORLD) {
             error("You can't blow up beds in this dimension, disabling.");
             toggle();
             return;
@@ -257,22 +257,22 @@ public class BedAura extends Module {
 
             for (CardinalDirection dir : CardinalDirection.values()) {
                 if (strictDirection.get()
-                    && dir.toDirection() != mc.player.getHorizontalFacing()
-                    && dir.toDirection().getOpposite() != mc.player.getHorizontalFacing()) continue;
+                    && dir.toDirection() != mc.player.getDirection()
+                    && dir.toDirection().getOpposite() != mc.player.getDirection()) continue;
 
-                BlockPos centerPos = target.getBlockPos().up(i);
+                BlockPos centerPos = target.blockPosition().above(i);
 
-                float headSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos));
-                float offsetSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos.offset(dir.toDirection())));
+                float headSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3(centerPos));
+                float offsetSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3(centerPos.relative(dir.toDirection())));
 
-                if (mc.world.getBlockState(centerPos).isReplaceable()
-                    && BlockUtils.canPlace(centerPos.offset(dir.toDirection()))
-                    && DamageUtils.bedDamage(target, Utils.vec3d(centerPos)) >= minDamage.get()
+                if (mc.level.getBlockState(centerPos).canBeReplaced()
+                    && BlockUtils.canPlace(centerPos.relative(dir.toDirection()))
+                    && DamageUtils.bedDamage(target, Utils.vec3(centerPos)) >= minDamage.get()
                     && offsetSelfDamage < maxSelfDamage.get()
                     && headSelfDamage < maxSelfDamage.get()
                     && (!antiSuicide.get() || PlayerUtils.getTotalHealth() - headSelfDamage > 0)
                     && (!antiSuicide.get() || PlayerUtils.getTotalHealth() - offsetSelfDamage > 0)) {
-                    return centerPos.offset((direction = dir).toDirection());
+                    return centerPos.relative((direction = dir).toDirection());
                 }
             }
         }
@@ -281,11 +281,11 @@ public class BedAura extends Module {
     }
 
     private BlockPos findBreak() {
-        for (BedBlockEntity blockEntity : Utils.blockEntities()) {
+        for (BlockEntity blockEntity : Utils.blockEntities()) {
             if (!(blockEntity instanceof BedBlockEntity)) continue;
 
-            BlockPos bedPos = blockEntity.getPos();
-            Vec3 bedVec = Utils.vec3d(bedPos);
+            BlockPos bedPos = blockEntity.getBlockPos();
+            Vec3 bedVec = Utils.vec3(bedPos);
 
             if (PlayerUtils.isWithinReach(bedVec)
                 && DamageUtils.bedDamage(target, bedVec) >= minDamage.get()
@@ -323,14 +323,14 @@ public class BedAura extends Module {
         if (pos == null) return;
         breakPos = null;
 
-        if (!(mc.world.getBlockState(pos).getBlock() instanceof BedBlock)) return;
+        if (!(mc.level.getBlockState(pos).getBlock() instanceof BedBlock)) return;
 
-        boolean wasSneaking = mc.player.isSneaking();
-        if (wasSneaking) mc.player.setSneaking(false);
+        boolean wasSneaking = mc.player.isShiftKeyDown();
+        if (wasSneaking) mc.player.setShiftKeyDown(false);
 
-        mc.interactionManager.interactBlock(mc.player, InteractionHand.OFF_HAND, new BlockHitResult(Vec3.ofCenter(pos), Direction.UP, pos, false));
+        mc.gameMode.useItemOn(mc.player, InteractionHand.OFF_HAND, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
 
-        mc.player.setSneaking(wasSneaking);
+        mc.player.setShiftKeyDown(wasSneaking);
     }
 
     @EventHandler

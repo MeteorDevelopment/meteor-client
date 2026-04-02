@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.utils.entity.fakeplayer;
 
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.mixin.AbstractClientPlayerAccessor;
-import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,19 +30,19 @@ public class FakePlayerEntity extends RemotePlayer {
      */
     public boolean noHit;
 
-    public FakePlayerEntity(RemotePlayer player, String name, float health, boolean copyInv) {
-        super(mc.world, new GameProfile(UUID.randomUUID(), name));
+    public FakePlayerEntity(Player player, String name, float health, boolean copyInv) {
+        super(mc.level, new GameProfile(UUID.randomUUID(), name));
 
-        copyPositionAndRotation(player);
+        copyPosition(player);
 
-        lastYaw = getYaw();
-        lastPitch = getPitch();
-        headYaw = player.headYaw;
-        lastHeadYaw = headYaw;
-        bodyYaw = player.bodyYaw;
-        lastBodyYaw = bodyYaw;
+        yRotO = getYRot();
+        xRotO = getXRot();
+        yHeadRot = player.yHeadRot;
+        yHeadRotO = yHeadRot;
+        yBodyRot = player.yBodyRot;
+        yBodyRotO = yBodyRot;
 
-        getAttributes().setFrom(player.getAttributes());
+        getAttributes().assignAllValues(player.getAttributes());
         setPose(player.getPose());
 
         if (health <= 20) {
@@ -52,26 +52,26 @@ public class FakePlayerEntity extends RemotePlayer {
             setAbsorptionAmount(health - 20);
         }
 
-        if (copyInv) getInventory().clone(player.getInventory());
+        if (copyInv) getInventory().replaceWith(player.getInventory());
     }
 
     public void spawn() {
         unsetRemoved();
-        mc.world.addEntity(this);
+        mc.level.addEntity(this);
     }
 
     public void despawn() {
-        mc.world.removeEntity(getId(), RemovalReason.DISCARDED);
+        mc.level.removeEntity(getId(), RemovalReason.DISCARDED);
         setRemoved(RemovalReason.DISCARDED);
     }
 
     @Nullable
     @Override
-    protected PlayerInfo getPlayerListEntry() {
-        PlayerInfo entry = super.getPlayerListEntry();
+    protected PlayerInfo getPlayerInfo() {
+        PlayerInfo entry = super.getPlayerInfo();
 
         if (entry == null) {
-            ((AbstractClientPlayerAccessor) this).meteor$setPlayerInfo(mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid()));
+            ((AbstractClientPlayerAccessor) this).meteor$setPlayerInfo(mc.getConnection().getPlayerInfo(mc.player.getUUID()));
         }
 
         return entry;

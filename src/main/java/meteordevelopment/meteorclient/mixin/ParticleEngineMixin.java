@@ -25,13 +25,13 @@ public abstract class ParticleEngineMixin {
     protected abstract <T extends ParticleOptions> Particle makeParticle(T parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ);
 
     @Inject(method = "createParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)Lnet/minecraft/client/particle/Particle;", at = @At("HEAD"), cancellable = true)
-    private void onAddParticle(ParticleOptions parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<Particle> info) {
+    private void onCreateParticle(ParticleOptions parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<Particle> cir) {
         ParticleEvent event = MeteorClient.EVENT_BUS.post(ParticleEvent.get(parameters));
 
         if (event.isCancelled()) {
             if (parameters.getType() == ParticleTypes.FLASH)
-                info.setReturnValue(makeParticle(parameters, x, y, z, velocityX, velocityY, velocityZ));
-            else info.cancel();
+                cir.setReturnValue(makeParticle(parameters, x, y, z, velocityX, velocityY, velocityZ));
+            else cir.cancel();
         }
     }
 }

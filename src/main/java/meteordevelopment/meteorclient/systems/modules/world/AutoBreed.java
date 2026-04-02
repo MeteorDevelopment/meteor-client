@@ -12,13 +12,14 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.EntityHitResult;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 public class AutoBreed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -88,21 +89,21 @@ public class AutoBreed extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (Entity entity : mc.world.getEntities()) {
+        for (Entity entity : mc.level.entitiesForRendering()) {
             if (!(entity instanceof Animal animal)) continue;
 
             if (!entities.get().contains(animal.getType())
                 || !isCorrectAge(animal)
                 || animalsFed.containsKey(animal)
                 || !PlayerUtils.isWithin(animal, range.get())
-                || !animal.isBreedingItem(hand.get() == InteractionHand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack()))
+                || !animal.isFood(hand.get() == InteractionHand.MAIN_HAND ? mc.player.getMainHandItem() : mc.player.getOffhandItem()))
                 continue;
 
             Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> {
                 EntityHitResult location = new EntityHitResult(animal, animal.getBoundingBox().getCenter());
-                mc.interactionManager.interactEntityAtLocation(mc.player, animal, location, hand.get());
-                mc.interactionManager.interactEntity(mc.player, animal, hand.get());
-                mc.player.swingHand(hand.get());
+                mc.gameMode.interactAt(mc.player, animal, location, hand.get());
+                mc.gameMode.interact(mc.player, animal, hand.get());
+                mc.player.swing(hand.get());
                 animalsFed.putLast(animal, tickCounter);
             });
             break;

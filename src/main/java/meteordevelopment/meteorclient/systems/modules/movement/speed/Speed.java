@@ -17,8 +17,8 @@ import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Vanil
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.entity.MoverType;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.world.entity.MoverType;
 
 public class Speed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -142,10 +142,10 @@ public class Speed extends Module {
     }
 
     private boolean stopSpeed() {
-        if (mc.player.isGliding() || mc.player.isClimbing() || mc.player.getVehicle() != null) return true;
-        if (!whenSneaking.get() && mc.player.isSneaking()) return true;
-        if (vanillaOnGround.get() && !mc.player.isOnGround() && speedMode.get() == SpeedModes.Vanilla) return true;
-        return !inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava());
+        if (mc.player.isFallFlying() || mc.player.onClimbable() || mc.player.getVehicle() != null) return true;
+        if (!whenSneaking.get() && mc.player.isShiftKeyDown()) return true;
+        if (vanillaOnGround.get() && !mc.player.onGround() && speedMode.get() == SpeedModes.Vanilla) return true;
+        return !inLiquids.get() && (mc.player.isInWater() || mc.player.isInLava());
     }
 
     @Override

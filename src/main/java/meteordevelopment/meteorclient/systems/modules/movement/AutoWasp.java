@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.BlockBehaviourAccessor;
 import meteordevelopment.meteorclient.mixin.DirectionAccessor;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -17,15 +17,15 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
-import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
-import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
@@ -94,7 +94,7 @@ public class AutoWasp extends Module {
         if (target == null || target.isRemoved()) {
             target = (Player) TargetUtils.get(entity -> {
                 if (!(entity instanceof Player player) || entity == mc.player) return false;
-                if (player.isDead() || player.getHealth() <= 0) return false;
+                if (player.isDeadOrDying() || player.getHealth() <= 0) return false;
                 return !onlyFriends.get() || Friends.get().get(player) != null;
             }, SortPriority.LowestDistance);
 
@@ -123,23 +123,23 @@ public class AutoWasp extends Module {
                 case CHOOSE_NEW_TARGET -> onActivate();
                 case TOGGLE -> toggle();
                 case DISCONNECT ->
-                    mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Component.literal("%s[%sAuto Wasp%s] Lost target.".formatted(ChatFormatting.GRAY, ChatFormatting.BLUE, ChatFormatting.GRAY))));
+                    mc.player.connection.handleDisconnect(new ClientboundDisconnectPacket(Component.literal("%s[%sAuto Wasp%s] Lost target.".formatted(ChatFormatting.GRAY, ChatFormatting.BLUE, ChatFormatting.GRAY))));
             }
 
             if (!isActive()) return;
         }
 
-        if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).contains(DataComponents.GLIDER))) return;
+        if (!(mc.player.getItemBySlot(EquipmentSlot.CHEST).has(DataComponents.GLIDER))) return;
 
         if (incrementJumpTimer) {
             jumpTimer++;
         }
 
-        if (!mc.player.isGliding()) {
+        if (!mc.player.isFallFlying()) {
             if (!incrementJumpTimer) incrementJumpTimer = true;
 
-            if (mc.player.isOnGround() && incrementJumpTimer) {
-                mc.player.jump();
+            if (mc.player.onGround() && incrementJumpTimer) {
+                mc.player.jumpFromGround();
                 return;
             }
 
@@ -147,7 +147,7 @@ public class AutoWasp extends Module {
                 jumpTimer = 0;
                 mc.player.setJumping(false);
                 mc.player.setSprinting(true);
-                mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
+                mc.getConnection().send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
             }
         } else {
             incrementJumpTimer = false;
@@ -157,31 +157,31 @@ public class AutoWasp extends Module {
 
     @EventHandler
     private void onMove(PlayerMoveEvent event) {
-        if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).contains(DataComponents.GLIDER))) return;
-        if (!mc.player.isGliding()) return;
+        if (!(mc.player.getItemBySlot(EquipmentSlot.CHEST).has(DataComponents.GLIDER))) return;
+        if (!mc.player.isFallFlying()) return;
 
         double xVel = 0, yVel = 0, zVel = 0;
 
-        Vec3d targetPos = target.getEntityPos().add(offset.get().x, offset.get().y, offset.get().z);
+        Vec3 targetPos = target.position().add(offset.get().x, offset.get().y, offset.get().z);
 
-        if (predictMovement.get()) targetPos.add(Player.adjustMovementForCollisions(target, target.getVelocity(),
-            target.getBoundingBox(), mc.world, mc.world.getEntityCollisions(target, target.getBoundingBox().stretch(target.getVelocity()))));
+        if (predictMovement.get()) targetPos.add(Player.collideBoundingBox(target, target.getDeltaMovement(),
+            target.getBoundingBox(), mc.level, mc.level.getEntityCollisions(target, target.getBoundingBox().expandTowards(target.getDeltaMovement()))));
 
         if (avoidLanding.get()) {
-            double d = target.getBoundingBox().getLengthX() / 2; // x length = z length for players
+            double d = target.getBoundingBox().getXsize() / 2; // x length = z length for players
 
             //get the block pos of the block underneath the corner of the targets bounding box
             for (Direction dir : DirectionAccessor.meteor$getHorizontal()) {
-                BlockPos pos = BlockPos.ofFloored(targetPos.offset(dir, d).offset(dir.rotateYClockwise(), d)).down();
-                if (((BlockBehaviourAccessor) mc.world.getBlockState(pos).getBlock()).meteor$isHasCollision() && Math.abs(targetPos.getY() - (pos.getY() + 1)) <= 0.25) {
-                    targetPos = new Vec3d(targetPos.x, pos.getY() + 1.25, targetPos.z);
+                BlockPos pos = BlockPos.containing(targetPos.relative(dir, d).relative(dir.getClockWise(), d)).below();
+                if (((BlockBehaviourAccessor) mc.level.getBlockState(pos).getBlock()).meteor$isHasCollision() && Math.abs(targetPos.y() - (pos.getY() + 1)) <= 0.25) {
+                    targetPos = new Vec3(targetPos.x, pos.getY() + 1.25, targetPos.z);
                     break;
                 }
             }
         }
 
-        double xDist = targetPos.getX() - mc.player.getX();
-        double zDist = targetPos.getZ() - mc.player.getZ();
+        double xDist = targetPos.x() - mc.player.getX();
+        double zDist = targetPos.z() - mc.player.getZ();
 
         double absX = Math.abs(xDist);
         double absZ = Math.abs(zDist);
@@ -203,13 +203,13 @@ public class AutoWasp extends Module {
             if (diag != 0) zVel *= (absZ * diag);
         }
 
-        double yDist = targetPos.getY() - mc.player.getY();
+        double yDist = targetPos.y() - mc.player.getY();
         if (Math.abs(yDist) > 1.0E-5F) {
             if (Math.abs(yDist) < verticalSpeed.get()) yVel = yDist;
             else yVel = verticalSpeed.get() * Math.signum(yDist);
         }
 
-        ((IVec3d) event.movement).meteor$set(xVel, yVel, zVel);
+        ((IVec3) event.movement).meteor$set(xVel, yVel, zVel);
     }
 
     public enum Action {

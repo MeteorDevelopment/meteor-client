@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
@@ -52,15 +52,15 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return BuiltInRegistries.PARTICLE_TYPE.getIds();
+        return BuiltInRegistries.PARTICLE_TYPE.keySet();
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        ListTag valueTag = new NbtList();
+        ListTag valueTag = new ListTag();
         for (ParticleType<?> particleType : get()) {
-            Identifier id = BuiltInRegistries.PARTICLE_TYPE.getId(particleType);
-            if (id != null) valueTag.add(StringTag.of(id.toString()));
+            Identifier id = BuiltInRegistries.PARTICLE_TYPE.getKey(particleType);
+            if (id != null) valueTag.add(StringTag.valueOf(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -73,7 +73,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
 
         ListTag valueTag = tag.getListOrEmpty("value");
         for (Tag tagI : valueTag) {
-            ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.get(Identifier.of(tagI.asString().orElse("")));
+            ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.getValue(Identifier.parse(tagI.asString().orElse("")));
             if (particleType != null) get().add(particleType);
         }
 

@@ -11,12 +11,12 @@ import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
 
 public class CommandsCommand extends Command {
     public CommandsCommand() {
@@ -28,7 +28,7 @@ public class CommandsCommand extends Command {
         builder.executes(context -> {
             ChatUtils.info("--- Commands ((highlight)%d(default)) ---", Commands.COMMANDS.size());
 
-            MutableComponent commands = MutableComponent.literal("");
+            MutableComponent commands = Component.literal("");
             Commands.COMMANDS.forEach(command -> commands.append(getCommandText(command)));
             ChatUtils.sendMsg(commands);
 
@@ -38,11 +38,11 @@ public class CommandsCommand extends Command {
 
     private MutableComponent getCommandText(Command command) {
         // Hover tooltip
-        MutableComponent tooltip = MutableComponent.literal("");
+        MutableComponent tooltip = Component.literal("");
 
-        tooltip.append(MutableComponent.literal(Utils.nameToTitle(command.getName())).formatted(ChatFormatting.BLUE, ChatFormatting.BOLD)).append("\n");
+        tooltip.append(Component.literal(Utils.nameToTitle(command.getName())).withStyle(ChatFormatting.BLUE, ChatFormatting.BOLD)).append("\n");
 
-        MutableComponent aliases = MutableComponent.literal(Config.get().prefix.get() + command.getName());
+        MutableComponent aliases = Component.literal(Config.get().prefix.get() + command.getName());
         if (!command.getAliases().isEmpty()) {
             aliases.append(", ");
             for (String alias : command.getAliases()) {
@@ -51,14 +51,14 @@ public class CommandsCommand extends Command {
                 if (!alias.equals(command.getAliases().getLast())) aliases.append(", ");
             }
         }
-        tooltip.append(aliases.formatted(ChatFormatting.GRAY)).append("\n\n");
+        tooltip.append(aliases.withStyle(ChatFormatting.GRAY)).append("\n\n");
 
-        tooltip.append(MutableComponent.literal(command.getDescription()).formatted(ChatFormatting.WHITE));
+        tooltip.append(Component.literal(command.getDescription()).withStyle(ChatFormatting.WHITE));
 
         // Text
-        MutableComponent text = MutableComponent.literal(Utils.nameToTitle(command.getName()));
+        MutableComponent text = Component.literal(Utils.nameToTitle(command.getName()));
         if (command != Commands.COMMANDS.getLast())
-            text.append(MutableComponent.literal(", ").formatted(ChatFormatting.GRAY));
+            text.append(Component.literal(", ").withStyle(ChatFormatting.GRAY));
         text.setStyle(text
             .getStyle()
             .withHoverEvent(new HoverEvent.ShowText(tooltip))

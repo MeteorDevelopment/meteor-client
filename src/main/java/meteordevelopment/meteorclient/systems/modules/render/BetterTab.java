@@ -13,11 +13,11 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.level.GameType;
 
 public class BetterTab extends Module {
@@ -83,12 +83,12 @@ public class BetterTab extends Module {
         super(Categories.Render, "better-tab", "Various improvements to the tab list.");
     }
 
-    public MutableComponent getPlayerName(PlayerInfo playerListEntry) {
-        MutableComponent name;
+    public Component getPlayerName(PlayerInfo playerListEntry) {
+        Component name;
         Color color = null;
 
-        name = playerListEntry.getDisplayName();
-        if (name == null) name = MutableComponent.literal(playerListEntry.getProfile().name());
+        name = playerListEntry.getTabListDisplayName();
+        if (name == null) name = Component.literal(playerListEntry.getProfile().name());
 
         if (playerListEntry.getProfile().id().toString().equals(mc.player.getGameProfile().id().toString()) && self.get()) {
             color = selfColor.get();
@@ -104,7 +104,7 @@ public class BetterTab extends Module {
                 if (format.isColor()) nameString = nameString.replace(format.toString(), "");
             }
 
-            name = MutableComponent.literal(nameString).setStyle(name.getStyle().withColor(TextColor.fromRgb(color.getPacked())));
+            name = Component.literal(nameString).setStyle(name.getStyle().withColor(TextColor.fromRgb(color.getPacked())));
         }
 
         if (gamemode.get()) {
@@ -118,7 +118,7 @@ public class BetterTab extends Module {
                     case ADVENTURE -> "A";
                 };
             }
-            MutableComponent text = MutableComponent.literal("");
+            MutableComponent text = Component.literal("");
             text.append(name);
             text.append(" [" + gmText + "]");
             name = text;

@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.systems.macros;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
@@ -58,7 +58,7 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onKey(KeyEvent event) {
+    private void onKey(KeyInputEvent event) {
         if (event.action == KeyAction.Release) return;
 
         for (Macro macro : macros) {
@@ -86,7 +86,7 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
         tag.put("macros", NbtUtils.listToTag(macros));
         return tag;
     }

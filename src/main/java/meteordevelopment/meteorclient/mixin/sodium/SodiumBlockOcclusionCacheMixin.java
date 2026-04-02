@@ -9,10 +9,10 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.pipeline.BlockOcclusionCache;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -31,7 +31,7 @@ public abstract class SodiumBlockOcclusionCacheMixin {
     @Unique private Xray xray;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void onInit(CallbackInfo info) {
+    private void onInit(CallbackInfo ci) {
         xray = Modules.get().get(Xray.class);
     }
     // For More Culling compatibility - runs before More Culling's inject to force-render whitelisted Xray blocks
@@ -45,7 +45,7 @@ public abstract class SodiumBlockOcclusionCacheMixin {
     @ModifyReturnValue(method = "shouldDrawSide", at = @At("RETURN"))
     private boolean shouldDrawSide(boolean original, Direction facing) {
         if (xray.isActive()) {
-            return xray.modifyDrawSide(state, level, pos, facing, original);
+            return xray.modifyDrawSide(selfBlockState, level, selfPos, facing, original);
         }
 
         return original;

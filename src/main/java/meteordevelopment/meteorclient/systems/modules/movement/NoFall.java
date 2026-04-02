@@ -8,8 +8,8 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ServerboundMovePlayerPacketAccessor;
-import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IServerboundMovePlayerPacket;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
@@ -26,19 +26,19 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MaceItem;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.attribute.EnvironmentAttributes;
 
 import java.util.function.Predicate;
 
@@ -115,16 +115,16 @@ public class NoFall extends Module {
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (mc.player == null) return;
-        if (pauseOnMace.get() && mc.player.getMainHandStack().getItem() instanceof MaceItem) return;
-        if (mc.player.getAbilities().creativeMode
-            || !(event.packet instanceof PlayerMoveC2SPacket)
+        if (pauseOnMace.get() && mc.player.getMainHandItem().getItem() instanceof MaceItem) return;
+        if (mc.player.getAbilities().instabuild
+            || !(event.packet instanceof ServerboundMovePlayerPacket)
             || mode.get() != Mode.Packet
-            || ((IPlayerMoveC2SPacket) event.packet).meteor$getTag() == 1337) return;
+            || ((IServerboundMovePlayerPacket) event.packet).meteor$getTag() == 1337) return;
 
 
         if (!Modules.get().isActive(Flight.class)) {
-            if (mc.player.isGliding()) return;
-            if (mc.player.getVelocity().y > -0.5) return;
+            if (mc.player.isFallFlying()) return;
+            if (mc.player.getDeltaMovement().y > -0.5) return;
             ((ServerboundMovePlayerPacketAccessor) event.packet).meteor$setOnGround(true);
         } else {
             ((ServerboundMovePlayerPacketAccessor) event.packet).meteor$setOnGround(true);
@@ -140,8 +140,8 @@ public class NoFall extends Module {
             timer = 0;
         }
 
-        if (mc.player.getAbilities().creativeMode) return;
-        if (pauseOnMace.get() && mc.player.getMainHandStack().getItem() instanceof MaceItem) return;
+        if (mc.player.getAbilities().instabuild) return;
+        if (pauseOnMace.get() && mc.player.getMainHandItem().getItem() instanceof MaceItem) return;
 
         // Airplace mode
         if (mode.get() == Mode.AirPlace) {
@@ -151,21 +151,21 @@ public class NoFall extends Module {
             // Center and place block
             if (anchor.get()) PlayerUtils.centerPlayer();
 
-            Rotations.rotate(mc.player.getYaw(), 90, Integer.MAX_VALUE, () -> {
-                double preY = mc.player.getVelocity().y;
-                ((IVec3d) mc.player.getVelocity()).meteor$setY(0);
+            Rotations.rotate(mc.player.getYRot(), 90, Integer.MAX_VALUE, () -> {
+                double preY = mc.player.getDeltaMovement().y;
+                ((IVec3) mc.player.getDeltaMovement()).meteor$setY(0);
 
-                BlockUtils.place(mc.player.getBlockPos().down(), InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem), false, 0, true);
+                BlockUtils.place(mc.player.blockPosition().below(), InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem), false, 0, true);
 
-                ((IVec3d) mc.player.getVelocity()).meteor$setY(preY);
+                ((IVec3) mc.player.getDeltaMovement()).meteor$setY(preY);
             });
         }
 
         // Bucket mode
         else if (mode.get() == Mode.Place) {
-            PlacedItem placedItem1 = mc.world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.WATER_EVAPORATES_GAMEPLAY) && placedItem.get() == PlacedItem.Bucket ? PlacedItem.PowderSnow : placedItem.get();
+            PlacedItem placedItem1 = mc.level.environmentAttributes().getDimensionValue(EnvironmentAttributes.WATER_EVAPORATES) && placedItem.get() == PlacedItem.Bucket ? PlacedItem.PowderSnow : placedItem.get();
             if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
-                BlockItem item = placedItem1.item;
+                Item item = placedItem1.item;
 
                 // Place
                 FindItemResult findItemResult = InvUtils.findInHotbar(item);
@@ -175,11 +175,11 @@ public class NoFall extends Module {
                 if (anchor.get()) PlayerUtils.centerPlayer();
 
                 // Check if there is a block within 5 blocks
-                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getEntityPos(), mc.player.getEntityPos().subtract(0, 5, 0), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
+                BlockHitResult result = mc.level.clip(new ClipContext(mc.player.position(), mc.player.position().subtract(0, 5, 0), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player));
 
                 // Place
-                if (result != null && result.getType() == BlockHitResult.Type.BLOCK) {
-                    targetPos = result.getBlockPos().up();
+                if (result != null && result.getType() == HitResult.Type.BLOCK) {
+                    targetPos = result.getBlockPos().above();
                     if (placedItem1 == PlacedItem.Bucket)
                         useItem(findItemResult, true, targetPos, true);
                     else {
@@ -191,10 +191,10 @@ public class NoFall extends Module {
             // Remove placed
             if (placedWater) {
                 timer++;
-                if (mc.player.getBlockStateAtPos().getBlock() == placedItem1.block) {
+                if (mc.player.getInBlockState().getBlock() == placedItem1.block) {
                     useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos, true);
-                } else if (mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock() == Blocks.POWDER_SNOW && mc.player.fallDistance == 0 && placedItem1.block == Blocks.POWDER_SNOW) { //check if the powder snow block is still there and the player is on the ground
-                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos.down(), true);
+                } else if (mc.level.getBlockState(mc.player.blockPosition().below()).getBlock() == Blocks.POWDER_SNOW && mc.player.fallDistance == 0 && placedItem1.block == Blocks.POWDER_SNOW) { //check if the powder snow block is still there and the player is on the ground
+                    useItem(InvUtils.findInHotbar(Items.BUCKET), false, targetPos.below(), true);
                 }
             }
         }
@@ -204,16 +204,16 @@ public class NoFall extends Module {
         return isActive() && antiBounce.get();
     }
 
-    private void useItem(FindItemResult item, boolean placedWater, BlockPos blockPos, boolean interactItem) {
+    private void useItem(FindItemResult item, boolean placedWater, BlockPos blockPos, boolean useItem) {
         if (!item.found()) return;
 
-        if (interactItem) {
+        if (useItem) {
             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 10, true, () -> {
                 if (item.isOffhand()) {
-                    mc.interactionManager.interactItem(mc.player, InteractionHand.OFF_HAND);
+                    mc.gameMode.useItem(mc.player, InteractionHand.OFF_HAND);
                 } else {
                     InvUtils.swap(item.slot(), true);
-                    mc.interactionManager.interactItem(mc.player, InteractionHand.MAIN_HAND);
+                    mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
                     InvUtils.swapBack();
                 }
             });
@@ -242,10 +242,10 @@ public class NoFall extends Module {
         Cobweb(Items.COBWEB, Blocks.COBWEB),
         SlimeBlock(Items.SLIME_BLOCK, Blocks.SLIME_BLOCK);
 
-        private final BlockItem item;
+        private final Item item;
         private final Block block;
 
-        PlacedItem(BlockItem item, Block block) {
+        PlacedItem(Item item, Block block) {
             this.item = item;
             this.block = block;
         }

@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.EntityMoveEvent;
 import meteordevelopment.meteorclient.events.entity.player.JumpVelocityMultiplierEvent;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
-import meteordevelopment.meteorclient.mixin.PlayerAccessor;
 import meteordevelopment.meteorclient.mixininterface.ICamera;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
@@ -24,13 +23,13 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,14 +41,10 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-// TODO(Ravel): can not resolve target class net.minecraft.world.entity.Entity
-// TODO(Ravel): can not resolve target class Entity
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @ModifyExpressionValue(method = "updateMovementInFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;getFlow(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/Vec3;"))
-    private Vec3 updateMovementInFluidFluidStateGetVelocity(Vec3 vec) {
+    @ModifyExpressionValue(method = "updateFluidHeightAndDoFluidPushing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;getFlow(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 updateFluidHeightAndDoFluidPushingFluidStateGetVelocity(Vec3 vec) {
         if ((Object) this != mc.player) return vec;
 
         Velocity velocity = Modules.get().get(Velocity.class);
@@ -60,42 +55,24 @@ public abstract class EntityMixin {
         return vec;
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @Inject(method = "isTouchingWater", at = @At(value = "HEAD"), cancellable = true)
-    private void isTouchingWater(CallbackInfoReturnable<Boolean> info) {
+    @Inject(method = "isInWater", at = @At(value = "HEAD"), cancellable = true)
+    private void isInWater(CallbackInfoReturnable<Boolean> cir) {
         if ((Object) this != mc.player) return;
 
-        if (Modules.get().get(Flight.class).isActive()) info.setReturnValue(false);
-        if (Modules.get().get(NoSlow.class).fluidDrag()) info.setReturnValue(false);
+        if (Modules.get().get(Flight.class).isActive()) cir.setReturnValue(false);
+        if (Modules.get().get(NoSlow.class).fluidDrag()) cir.setReturnValue(false);
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
     @Inject(method = "isInLava", at = @At(value = "HEAD"), cancellable = true)
-    private void isInLava(CallbackInfoReturnable<Boolean> info) {
+    private void isInLava(CallbackInfoReturnable<Boolean> cir) {
         if ((Object) this != mc.player) return;
 
-        if (Modules.get().get(Flight.class).isActive()) info.setReturnValue(false);
-        if (Modules.get().get(NoSlow.class).fluidDrag()) info.setReturnValue(false);
+        if (Modules.get().get(Flight.class).isActive()) cir.setReturnValue(false);
+        if (Modules.get().get(NoSlow.class).fluidDrag()) cir.setReturnValue(false);
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @Inject(method = "onBubbleColumnSurfaceCollision", at = @At("HEAD"))
-    private void onBubbleColumnSurfaceCollision(CallbackInfo info) {
-        if ((Object) this != mc.player) return;
-
-        Jesus jesus = Modules.get().get(Jesus.class);
-        if (jesus.isActive()) {
-            jesus.isInBubbleColumn = true;
-        }
-    }
-
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @Inject(method = "onBubbleColumnCollision", at = @At("HEAD"))
-    private void onBubbleColumnCollision(CallbackInfo info) {
+    @Inject(method = "onAboveBubbleColumn", at = @At("HEAD"))
+    private void onAboveBubbleColumn(CallbackInfo ci) {
         if ((Object) this != mc.player) return;
 
         Jesus jesus = Modules.get().get(Jesus.class);
@@ -104,8 +81,16 @@ public abstract class EntityMixin {
         }
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
+    @Inject(method = "onInsideBubbleColumn", at = @At("HEAD"))
+    private void onInsideBubbleColumn(CallbackInfo ci) {
+        if ((Object) this != mc.player) return;
+
+        Jesus jesus = Modules.get().get(Jesus.class);
+        if (jesus.isActive()) {
+            jesus.isInBubbleColumn = true;
+        }
+    }
+
     @ModifyExpressionValue(method = "updateSwimming", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;isUnderWater()Z"))
     private boolean isSubmergedInWater(boolean submerged) {
         if ((Object) this != mc.player) return submerged;
@@ -115,9 +100,7 @@ public abstract class EntityMixin {
         return submerged;
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @ModifyArgs(method = "pushAwayFrom(Lnet/minecraft/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;push(DDD)V"))
+    @ModifyArgs(method = "push(Lnet/minecraft/world/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;push(DDD)V"))
     private void onPushAwayFrom(Args args, Entity entity) {
         Velocity velocity = Modules.get().get(Velocity.class);
 
@@ -134,10 +117,8 @@ public abstract class EntityMixin {
         }
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @ModifyReturnValue(method = "getJumpVelocityMultiplier", at = @At("RETURN"))
-    private float onGetJumpVelocityMultiplier(float original) {
+    @ModifyReturnValue(method = "getBlockJumpFactor", at = @At("RETURN"))
+    private float onGetBlockJumpFactor(float original) {
         if ((Object) this == mc.player) {
             JumpVelocityMultiplierEvent event = MeteorClient.EVENT_BUS.post(JumpVelocityMultiplierEvent.get());
             return (original * event.multiplier);
@@ -146,10 +127,8 @@ public abstract class EntityMixin {
         return original;
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
     @Inject(method = "move", at = @At("HEAD"))
-    private void onMove(MoverType type, Vec3 movement, CallbackInfo info) {
+    private void onMove(MoverType type, Vec3 movement, CallbackInfo ci) {
         if ((Object) this == mc.player) {
             MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(type, movement));
         } else {
@@ -157,10 +136,8 @@ public abstract class EntityMixin {
         }
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @ModifyExpressionValue(method = "getVelocityMultiplier", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getBlock()Lnet/minecraft/world/level/block/Block;"))
-    private Block modifyVelocityMultiplierBlock(Block original) {
+    @ModifyExpressionValue(method = "getBlockSpeedFactor", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getBlock()Lnet/minecraft/world/level/block/Block;"))
+    private Block modifyBlockSpeedFactor(Block original) {
         if ((Object) this != mc.player) return original;
 
         if (original == Blocks.SOUL_SAND && Modules.get().get(NoSlow.class).soulSand()) return Blocks.STONE;
@@ -168,9 +145,7 @@ public abstract class EntityMixin {
         return original;
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @ModifyReturnValue(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("RETURN"))
+    @ModifyReturnValue(method = "isInvisibleTo", at = @At("RETURN"))
     private boolean isInvisibleToCanceller(boolean original) {
         if (!Utils.canUpdate()) return original;
         ESP esp = Modules.get().get(ESP.class);
@@ -179,61 +154,47 @@ public abstract class EntityMixin {
         return original;
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)
-    private void isGlowing(CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(NoRender.class).noGlowing()) info.setReturnValue(false);
+    @Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)
+    private void isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
+        if (Modules.get().get(NoRender.class).noGlowing()) cir.setReturnValue(false);
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)
-    private void onGetTargetingMargin(CallbackInfoReturnable<Float> info) {
+    @Inject(method = "getPickRadius", at = @At("HEAD"), cancellable = true)
+    private void onGetPickRadius(CallbackInfoReturnable<Float> cir) {
         double v = Modules.get().get(Hitboxes.class).getEntityValue((Entity) (Object) this);
-        if (v != 0) info.setReturnValue((float) v);
+        if (v != 0) cir.setReturnValue((float) v);
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
     @Inject(method = "isInvisibleTo", at = @At("HEAD"), cancellable = true)
-    private void onIsInvisibleTo(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-        if (player == null) info.setReturnValue(false);
+    private void onIsInvisibleTo(Player player, CallbackInfoReturnable<Boolean> cir) {
+        if (player == null) cir.setReturnValue(false);
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
     @Inject(method = "getPose", at = @At("HEAD"), cancellable = true)
-    private void getPoseHook(CallbackInfoReturnable<Pose> info) {
+    private void getPoseHook(CallbackInfoReturnable<Pose> cir) {
         if ((Object) this != mc.player) return;
 
         if (Modules.get().get(ElytraFly.class).canPacketEfly()) {
-            info.setReturnValue(Pose.GLIDING);
+            cir.setReturnValue(Pose.FALL_FLYING);
         }
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
     @ModifyReturnValue(method = "getPose", at = @At("RETURN"))
     private Pose modifyGetPose(Pose original) {
         if ((Object) this != mc.player) return original;
 
-        if (original == Pose.CROUCHING && !mc.player.isSneaking() && ((PlayerAccessor) mc.player).meteor$canChangeIntoPose(Pose.STANDING))
+        if (original == Pose.CROUCHING && !mc.player.isShiftKeyDown() && ((PlayerAccessor) mc.player).meteor$canChangeIntoPose(Pose.STANDING))
             return Pose.STANDING;
         return original;
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @ModifyReturnValue(method = "bypassesLandingEffects", at = @At("RETURN"))
+    @ModifyReturnValue(method = "isSuppressingBounce", at = @At("RETURN"))
     private boolean cancelBounce(boolean original) {
         return Modules.get().get(NoFall.class).cancelBounce() || original;
     }
 
-    // TODO(Ravel): no target class
-// TODO(Ravel): no target class
-    @Inject(method = "changeLookDirection", at = @At("HEAD"), cancellable = true)
-    private void updateChangeLookDirection(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
+    @Inject(method = "turn", at = @At("HEAD"), cancellable = true)
+    private void updateTurn(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
         if ((Object) this != mc.player) return;
 
         Freecam freecam = Modules.get().get(Freecam.class);
@@ -243,8 +204,8 @@ public abstract class EntityMixin {
             freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
             ci.cancel();
         } else if (Modules.get().isActive(HighwayBuilder.class)) {
-            Camera camera = mc.gameRenderer.getCamera();
-            ((ICamera) camera).meteor$setRot(camera.getYaw() + cursorDeltaX * 0.15, camera.getPitch() + cursorDeltaY * 0.15);
+            Camera camera = mc.gameRenderer.getMainCamera();
+            ((ICamera) camera).meteor$setRot(camera.yRot() + cursorDeltaX * 0.15, camera.xRot() + cursorDeltaY * 0.15);
             ci.cancel();
         } else if (freeLook.cameraMode()) {
             freeLook.cameraYaw += (float) (cursorDeltaX / freeLook.sensitivity.get().floatValue());

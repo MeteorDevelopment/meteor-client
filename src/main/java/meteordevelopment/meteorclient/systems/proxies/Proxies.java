@@ -212,7 +212,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.put("settings", settings.toTag());
         tag.put("proxies", NbtUtils.listToTag(proxies));

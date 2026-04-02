@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,8 +75,8 @@ public class Config extends System<Config> {
         .name("custom-window-title")
         .description("Show custom text in the window title.")
         .defaultValue(false)
-        .onModuleActivated(setting -> mc.updateWindowTitle())
-        .onChanged(value -> mc.updateWindowTitle())
+        .onModuleActivated(setting -> mc.updateTitle())
+        .onChanged(value -> mc.updateTitle())
         .build()
     );
 
@@ -85,7 +85,7 @@ public class Config extends System<Config> {
         .description("The text it displays in the window title.")
         .visible(customWindowTitle::get)
         .defaultValue("Minecraft {mc_version} - {meteor.name} {meteor.version}")
-        .onChanged(value -> mc.updateWindowTitle())
+        .onChanged(value -> mc.updateTitle())
         .build()
     );
 
@@ -178,7 +178,7 @@ public class Config extends System<Config> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("version", MeteorClient.VERSION.toString());
         tag.put("settings", settings.toTag());
@@ -196,8 +196,8 @@ public class Config extends System<Config> {
     }
 
     private ListTag listToTag(List<String> list) {
-        ListTag nbt = new NbtList();
-        for (String item : list) nbt.add(StringTag.of(item));
+        ListTag nbt = new ListTag();
+        for (String item : list) nbt.add(StringTag.valueOf(item));
         return nbt;
     }
 

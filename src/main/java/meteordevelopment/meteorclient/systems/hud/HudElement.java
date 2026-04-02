@@ -115,7 +115,7 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", info.name);
         tag.putBoolean("active", active);

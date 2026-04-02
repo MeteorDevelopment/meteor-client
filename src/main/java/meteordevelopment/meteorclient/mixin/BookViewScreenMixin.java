@@ -9,17 +9,17 @@ import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.screens.EditBookTitleAndAuthorScreen;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -48,14 +48,14 @@ public abstract class BookViewScreenMixin extends Screen {
     }
 
     @Inject(method = "init", at = @At("TAIL"))
-    private void onInit(CallbackInfo info) {
-        addDrawableChild(
+    private void onInit(CallbackInfo ci) {
+        addRenderableWidget(
             new Button.Builder(Component.literal("Copy"), button -> {
-                ListTag listTag = new NbtList();
+                ListTag listTag = new ListTag();
                 for (int i = 0; i < bookAccess.getPageCount(); i++)
-                    listTag.add(StringTag.of(bookAccess.getPage(i).getString()));
+                    listTag.add(StringTag.valueOf(bookAccess.getPage(i).getString()));
 
-                CompoundTag tag = new NbtCompound();
+                CompoundTag tag = new CompoundTag();
                 tag.put("pages", listTag);
                 tag.putInt("currentPage", currentPage);
 
@@ -76,20 +76,20 @@ public abstract class BookViewScreenMixin extends Screen {
                 if (size > available) {
                     ChatUtils.error("Could not copy to clipboard: Out of memory.");
                 } else {
-                    GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), encoded);
+                    GLFW.glfwSetClipboardString(mc.getWindow().handle(), encoded);
                 }
             })
-                .position(4, 4)
+                .pos(4, 4)
                 .size(120, 20)
                 .build()
         );
 
         // Edit title & author
-        ItemStack itemStack = mc.player.getMainHandStack();
+        ItemStack itemStack = mc.player.getMainHandItem();
         InteractionHand hand = InteractionHand.MAIN_HAND;
 
         if (itemStack.getItem() != Items.WRITTEN_BOOK) {
-            itemStack = mc.player.getOffHandStack();
+            itemStack = mc.player.getOffhandItem();
             hand = InteractionHand.OFF_HAND;
         }
         if (itemStack.getItem() != Items.WRITTEN_BOOK) return;
@@ -97,11 +97,11 @@ public abstract class BookViewScreenMixin extends Screen {
         ItemStack book = itemStack; // Fuck you Java
         InteractionHand hand2 = hand; // Honestly
 
-        addDrawableChild(
+        addRenderableWidget(
             new Button.Builder(Component.literal("Edit title & author"), button -> {
                 mc.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2));
             })
-                .position(4, 4 + 20 + 2)
+                .pos(4, 4 + 20 + 2)
                 .size(120, 20)
                 .build()
         );

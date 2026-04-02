@@ -8,12 +8,11 @@ package meteordevelopment.meteorclient.utils.misc;
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.PreInit;
-import net.minecraft.client.multiplayer.CommonListenerCookie;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.CommonListenerCookie;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.world.Difficulty;
@@ -39,19 +38,19 @@ public class FakeClientPlayer {
     }
 
     public static RemotePlayer getPlayer() {
-        UUID id = mc.getSession().getUuidOrNull();
+        UUID id = mc.getUser().getProfileId();
 
         if (player == null || (!id.equals(lastId))) {
             if (world == null) {
-                world = new ClientWorld(
-                    new ClientPlayNetworkHandler(mc, new ClientConnection(PacketFlow.CLIENTBOUND), new ClientConnectionState(
+                world = new ClientLevel(
+                    new ClientPacketListener(mc, new Connection(PacketFlow.CLIENTBOUND), new CommonListenerCookie(
                         null,
-                        new GameProfile(mc.getSession().getUuidOrNull(), mc.getSession().getUsername()),
-                        null,
-                        null,
+                        new GameProfile(mc.getUser().getProfileId(), mc.getUser().getName()),
                         null,
                         null,
-                        mc.getCurrentServerEntry(),
+                        null,
+                        null,
+                        mc.getCurrentServer(),
                         null,
                         null,
                         null,
@@ -60,9 +59,9 @@ public class FakeClientPlayer {
                         null,
                         false)
                     ),
-                    new ClientLevel.Properties(Difficulty.NORMAL, false, false),
-                    world.getRegistryKey(),
-                    world.getDimensionEntry(),
+                    new ClientLevel.ClientLevelData(Difficulty.NORMAL, false, false),
+                    world.dimension(),
+                    world.dimensionTypeRegistration(),
                     1,
                     1,
                     null,
@@ -72,7 +71,7 @@ public class FakeClientPlayer {
                 );
             }
 
-            player = new OtherClientPlayerEntity(world, new GameProfile(id, mc.getSession().getUsername()));
+            player = new RemotePlayer(world, new GameProfile(id, mc.getUser().getName()));
 
             lastId = id;
             needsNewEntry = true;
@@ -83,7 +82,7 @@ public class FakeClientPlayer {
 
     public static PlayerInfo getPlayerListEntry() {
         if (playerListEntry == null || needsNewEntry) {
-            playerListEntry = new PlayerListEntry(new GameProfile(lastId, mc.getSession().getUsername()), false);
+            playerListEntry = new PlayerInfo(new GameProfile(lastId, mc.getUser().getName()), false);
             needsNewEntry = false;
         }
 

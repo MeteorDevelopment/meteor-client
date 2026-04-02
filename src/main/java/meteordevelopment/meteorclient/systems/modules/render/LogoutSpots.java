@@ -107,11 +107,11 @@ public class LogoutSpots extends Module {
 
     @Override
     public void onActivate() {
-        lastPlayerList.addAll(mc.getNetworkHandler().getPlayerList());
+        lastPlayerList.addAll(mc.getConnection().getOnlinePlayers());
         updateLastPlayers();
 
         timer = 10;
-        lastDimension = mc.world.getDimension();
+        lastDimension = mc.level.dimensionType();
     }
 
     @Override
@@ -122,8 +122,8 @@ public class LogoutSpots extends Module {
 
     private void updateLastPlayers() {
         lastPlayers.clear();
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof Player) lastPlayers.add((Player) entity);
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            if (entity instanceof Player player) lastPlayers.add(player);
         }
     }
 
@@ -133,7 +133,7 @@ public class LogoutSpots extends Module {
             int toRemove = -1;
 
             for (int i = 0; i < players.size(); i++) {
-                if (players.get(i).uuid.equals(event.entity.getUuid())) {
+                if (players.get(i).uuid.equals(event.entity.getUUID())) {
                     toRemove = i;
                     break;
                 }
@@ -147,20 +147,20 @@ public class LogoutSpots extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.getNetworkHandler().getPlayerList().size() != lastPlayerList.size()) {
+        if (mc.getConnection().getOnlinePlayers().size() != lastPlayerList.size()) {
             for (PlayerInfo entry : lastPlayerList) {
-                if (mc.getNetworkHandler().getPlayerList().stream().anyMatch(playerListEntry -> playerListEntry.getProfile().equals(entry.getProfile())))
+                if (mc.getConnection().getOnlinePlayers().stream().anyMatch(playerListEntry -> playerListEntry.getProfile().equals(entry.getProfile())))
                     continue;
 
                 for (Player player : lastPlayers) {
-                    if (player.getUuid().equals(entry.getProfile().id())) {
+                    if (player.getUUID().equals(entry.getProfile().id())) {
                         add(new Entry(player));
                     }
                 }
             }
 
             lastPlayerList.clear();
-            lastPlayerList.addAll(mc.getNetworkHandler().getPlayerList());
+            lastPlayerList.addAll(mc.getConnection().getOnlinePlayers());
             updateLastPlayers();
         }
 
@@ -171,7 +171,7 @@ public class LogoutSpots extends Module {
             timer--;
         }
 
-        DimensionType dimension = mc.world.getDimension();
+        DimensionType dimension = mc.level.dimensionType();
         if (dimension != lastDimension) players.clear();
         lastDimension = dimension;
     }
@@ -208,16 +208,16 @@ public class LogoutSpots extends Module {
         public final String healthText;
 
         public Entry(Player entity) {
-            halfWidth = entity.getWidth() / 2;
+            halfWidth = entity.getBbWidth() / 2;
             x = entity.getX() - halfWidth;
             y = entity.getY();
             z = entity.getZ() - halfWidth;
 
-            xWidth = entity.getBoundingBox().getLengthX();
-            zWidth = entity.getBoundingBox().getLengthZ();
-            height = entity.getBoundingBox().getLengthY();
+            xWidth = entity.getBoundingBox().getXsize();
+            zWidth = entity.getBoundingBox().getZsize();
+            height = entity.getBoundingBox().getYsize();
 
-            uuid = entity.getUuid();
+            uuid = entity.getUUID();
             name = entity.getName().getString();
             health = Math.round(entity.getHealth() + entity.getAbsorptionAmount());
             maxHealth = Math.round(entity.getMaxHealth() + entity.getAbsorptionAmount());
@@ -233,7 +233,7 @@ public class LogoutSpots extends Module {
         }
 
         public void render2D() {
-            if (!PlayerUtils.isWithinCamera(x, y, z, mc.options.getViewDistance().getValue() * 16)) return;
+            if (!PlayerUtils.isWithinCamera(x, y, z, mc.options.renderDistance().get() * 16)) return;
 
             TextRenderer text = TextRenderer.get();
             double scale = LogoutSpots.this.scale.get();

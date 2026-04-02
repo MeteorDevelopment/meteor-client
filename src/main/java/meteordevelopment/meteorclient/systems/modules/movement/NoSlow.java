@@ -162,7 +162,7 @@ public class NoSlow extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (web.get() == WebMode.Timer) {
-            if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.COBWEB && !mc.player.isOnGround()) {
+            if (mc.level.getBlockState(mc.player.blockPosition()).getBlock() == Blocks.COBWEB && !mc.player.onGround()) {
                 resetTimer = false;
                 Modules.get().get(Timer.class).setOverride(webTimer.get());
             } else if (!resetTimer) {

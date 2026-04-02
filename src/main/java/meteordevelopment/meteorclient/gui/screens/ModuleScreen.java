@@ -157,7 +157,7 @@ public class ModuleScreen extends WindowScreen {
 
     @Override
     public boolean toClipboard() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", module.name);
 
@@ -171,7 +171,7 @@ public class ModuleScreen extends WindowScreen {
     public boolean fromClipboard() {
         CompoundTag tag = NbtUtils.fromClipboard();
         if (tag == null) return false;
-        if (!tag.getString("name", "").equals(module.name)) return false;
+        if (!tag.getStringOr("name", "").equals(module.name)) return false;
 
         Optional<CompoundTag> settings = tag.getCompound("settings");
 

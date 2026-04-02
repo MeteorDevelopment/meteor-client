@@ -40,7 +40,7 @@ public class GuiThemes {
             try {
                 CompoundTag tag = NbtIo.read(FILE.toPath());
 
-                if (tag != null) select(tag.getString("currentTheme", ""));
+                if (tag != null) select(tag.getStringOr("currentTheme", ""));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -129,7 +129,7 @@ public class GuiThemes {
 
     private static void saveGlobal() {
         try {
-            CompoundTag tag = new NbtCompound();
+            CompoundTag tag = new CompoundTag();
             tag.putString("currentTheme", get().name);
 
             FOLDER.mkdirs();

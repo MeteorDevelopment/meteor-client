@@ -115,10 +115,10 @@ public class CompassHud extends HudElement {
         double x = this.x + (getWidth() / 2.0);
         double y = this.y + (getHeight() / 2.0);
 
-        double pitch = isInEditor() ? 120 : Mth.clamp(mc.player.getPitch() + 30, -90, 90);
+        double pitch = isInEditor() ? 120 : Mth.clamp(mc.player.getXRot() + 30, -90, 90);
         pitch = Math.toRadians(pitch);
 
-        double yaw = isInEditor() ? 180 : Mth.wrapDegrees(mc.player.getYaw());
+        double yaw = isInEditor() ? 180 : Mth.wrapDegrees(mc.player.getYRot());
         yaw = Math.toRadians(yaw);
 
         for (Direction direction : Direction.values()) {

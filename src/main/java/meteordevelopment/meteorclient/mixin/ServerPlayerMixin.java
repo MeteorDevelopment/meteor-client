@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.mixin;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
 import meteordevelopment.meteorclient.systems.modules.movement.Scaffold;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,9 +23,9 @@ public abstract class ServerPlayerMixin extends LivingEntity {
         super(entityType, world);
     }
 
-    @Inject(method = "jump", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "jumpFromGround", at = @At("HEAD"), cancellable = true)
     public void dontJump(CallbackInfo ci) {
-        if (!getEntityWorld().isClient()) return;
+        if (!level().isClientSide()) return;
 
         Anchor module = Modules.get().get(Anchor.class);
         if (module.isActive() && module.cancelJump) ci.cancel();

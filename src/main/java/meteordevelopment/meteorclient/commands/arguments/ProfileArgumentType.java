@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static net.minecraft.command.CommandSource.suggestMatching;
+import static net.minecraft.commands.SharedSuggestionProvider.suggest;
 
 public class ProfileArgumentType implements ArgumentType<String> {
     private static final ProfileArgumentType INSTANCE = new ProfileArgumentType();
@@ -51,7 +51,7 @@ public class ProfileArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return suggestMatching(Streams.stream(Profiles.get()).map(profile -> profile.name.get()), builder);
+        return suggest(Streams.stream(Profiles.get()).map(profile -> profile.name.get()), builder);
     }
 
     @Override

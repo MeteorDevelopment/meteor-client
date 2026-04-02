@@ -7,17 +7,17 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterBeacons;
-import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.BeaconScreen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.BeaconScreen;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.core.Holder;
 import net.minecraft.world.inventory.BeaconMenu;
-import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,19 +39,19 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Ljava/util/List;clear()V", shift = At.Shift.AFTER), cancellable = true)
     private void changeButtons(CallbackInfo ci) {
         if (!Modules.get().get(BetterBeacons.class).isActive()) return;
-        List<Holder<MobEffect>> effects = BeaconBlockEntity.EFFECTS_BY_LEVEL.stream().flatMap(Collection::stream).toList();
-        if (Minecraft.getInstance().currentScreen instanceof BeaconScreen beaconScreen) {
-            addBeaconButton(beaconScreen.new DoneButtonWidget(this.x + 164, this.y + 107));
-            addBeaconButton(beaconScreen.new CancelButtonWidget(this.x + 190, this.y + 107));
+        List<Holder<MobEffect>> effects = BeaconBlockEntity.BEACON_EFFECTS.stream().flatMap(Collection::stream).toList();
+        if (Minecraft.getInstance().screen instanceof BeaconScreen beaconScreen) {
+            addBeaconButton(beaconScreen.new BeaconConfirmButton(this.leftPos + 164, this.topPos + 107));
+            addBeaconButton(beaconScreen.new BeaconCancelButton(this.leftPos + 190, this.topPos + 107));
 
             for (int x = 0; x < 3; x++) {
                 for (int y = 0; y < 2; y++) {
                     Holder<MobEffect> effect = effects.get(x * 2 + y);
-                    int xMin = this.x + x * 25;
-                    int yMin = this.y + y * 25;
-                    addBeaconButton(beaconScreen.new EffectButtonWidget(xMin + 27, yMin + 32, effect, true, -1));
-                    BeaconScreen.BeaconPowerButton secondaryWidget = beaconScreen.new EffectButtonWidget(xMin + 133, yMin + 32, effect, false, 3);
-                    if (getScreenHandler().getProperties() != 4) secondaryWidget.active = false;
+                    int xMin = this.leftPos + x * 25;
+                    int yMin = this.topPos + y * 25;
+                    addBeaconButton(beaconScreen.new BeaconPowerButton(xMin + 27, yMin + 32, effect, true, -1));
+                    BeaconScreen.BeaconPowerButton secondaryWidget = beaconScreen.new BeaconPowerButton(xMin + 133, yMin + 32, effect, false, 3);
+                    if (getMenu().getLevels() != 4) secondaryWidget.active = false;
                     addBeaconButton(secondaryWidget);
                 }
             }
@@ -59,10 +59,10 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
         ci.cancel();
     }
 
-    @Inject(method = "drawBackground", at = @At("TAIL"))
-    private void onDrawBackground(GuiGraphics context, float delta, int mouseX, int mouseY, CallbackInfo ci) {
+    @Inject(method = "renderBg", at = @At("TAIL"))
+    private void onRenderBg(GuiGraphics context, float delta, int mouseX, int mouseY, CallbackInfo ci) {
         if (!Modules.get().get(BetterBeacons.class).isActive()) return;
         //this will clear the background from useless pyramid graphics
-        context.fill(x + 10, y + 7, x + 220, y + 98, 0xFF212121);
+        context.fill(leftPos + 10, topPos + 7, leftPos + 220, topPos + 98, 0xFF212121);
     }
 }

@@ -13,8 +13,8 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.systems.modules.player.AntiHunger;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.world.phys.Vec3;
 
 public class DamageCommand extends Command {
@@ -46,7 +46,7 @@ public class DamageCommand extends Command {
         boolean antiHunger = Modules.get().isActive(AntiHunger.class);
         if (antiHunger) Modules.get().get(AntiHunger.class).toggle();
 
-        Vec3 pos = mc.player.getEntityPos();
+        Vec3 pos = mc.player.position();
 
         for (int i = 0; i < 80; i++) {
             sendPositionPacket(pos.x, pos.y + amount + 2.1, pos.z, false);
@@ -60,6 +60,6 @@ public class DamageCommand extends Command {
     }
 
     private void sendPositionPacket(double x, double y, double z, boolean onGround) {
-        mc.player.networkHandler.sendPacket(new ServerboundMovePlayerPacket.PositionAndOnGround(x, y, z, onGround, mc.player.horizontalCollision));
+        mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(x, y, z, onGround, mc.player.horizontalCollision));
     }
 }

@@ -25,6 +25,6 @@ public class ProjectileUtilMixin {
         double v = Modules.get().get(Hitboxes.class).getEntityValue(entity2);
         if (v == 0) return original;
 
-        return original.expand(v);
+        return original.inflate(v);
     }
 }

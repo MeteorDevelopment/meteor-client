@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.movement.speed.modes;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.SpeedMode;
@@ -22,12 +22,12 @@ public class Vanilla extends SpeedMode {
 
     @Override
     public void onMove(PlayerMoveEvent event) {
-        Vec3d vel = PlayerUtils.getHorizontalVelocity(settings.vanillaSpeed.get());
-        double velX = vel.getX();
-        double velZ = vel.getZ();
+        Vec3 vel = PlayerUtils.getHorizontalVelocity(settings.vanillaSpeed.get());
+        double velX = vel.x();
+        double velZ = vel.z();
 
-        if (mc.player.hasStatusEffect(MobEffects.SPEED)) {
-            double value = (mc.player.getStatusEffect(MobEffects.SPEED).getAmplifier() + 1) * 0.205;
+        if (mc.player.hasEffect(MobEffects.SPEED)) {
+            double value = (mc.player.getEffect(MobEffects.SPEED).getAmplifier() + 1) * 0.205;
             velX += velX * value;
             velZ += velZ * value;
         }
@@ -38,6 +38,6 @@ public class Vanilla extends SpeedMode {
             velZ = anchor.deltaZ;
         }
 
-        ((IVec3d) event.movement).meteor$set(velX, event.movement.y, velZ);
+        ((IVec3) event.movement).meteor$set(velX, event.movement.y, velZ);
     }
 }

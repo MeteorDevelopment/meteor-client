@@ -21,13 +21,13 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
-import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 
 public class AutoCity extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -156,7 +156,7 @@ public class AutoCity extends Module {
         }
 
         if (support.get()) {
-            BlockPos supportPos = targetPos.down();
+            BlockPos supportPos = targetPos.below();
             if (!(PlayerUtils.squaredDistanceTo(supportPos) > Math.pow(placeRange.get(), 2))) {
                 BlockUtils.place(supportPos, InvUtils.findInHotbar(Items.OBSIDIAN), rotate.get(), 0, true);
             }
@@ -199,7 +199,7 @@ public class AutoCity extends Module {
                 toggle();
                 return;
             }
-            progress += BlockUtils.getBreakDelta(pick.slot(), mc.world.getBlockState(targetPos));
+            progress += BlockUtils.getBreakDelta(pick.slot(), mc.level.getBlockState(targetPos));
             if (progress < 1.0f) return;
         }
 
@@ -213,11 +213,11 @@ public class AutoCity extends Module {
 
         Direction direction = BlockUtils.getDirection(targetPos);
         if (!done)
-            mc.interactionManager.sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, targetPos, direction, sequence));
-        mc.interactionManager.sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, targetPos, direction, sequence));
+            mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, targetPos, direction, sequence));
+        mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, targetPos, direction, sequence));
 
-        if (swingHand.get()) mc.player.swingHand(InteractionHand.MAIN_HAND);
-        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(InteractionHand.MAIN_HAND));
+        if (swingHand.get()) mc.player.swing(InteractionHand.MAIN_HAND);
+        else mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
 
         if (switchMode.get() == SwitchMode.Silent) InvUtils.swapBack();
     }

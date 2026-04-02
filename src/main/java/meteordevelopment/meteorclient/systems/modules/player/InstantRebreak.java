@@ -16,12 +16,12 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
-import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionHand;
 
 public class InstantRebreak extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -80,7 +80,7 @@ public class InstantRebreak extends Module {
         .build()
     );
 
-    public final BlockPos.MutableBlockPos blockPos = new BlockPos.Mutable(0, Integer.MIN_VALUE, 0);
+    public final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos(0, Integer.MIN_VALUE, 0);
     private int ticks;
     private Direction direction;
 
@@ -110,7 +110,7 @@ public class InstantRebreak extends Module {
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), this::sendPacket);
                 else sendPacket();
 
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(InteractionHand.MAIN_HAND));
+                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
             }
         } else {
             ticks++;
@@ -118,15 +118,15 @@ public class InstantRebreak extends Module {
     }
 
     public void sendPacket() {
-        mc.interactionManager.sendSequencedPacket(mc.world, (sequence) ->
-            new PlayerActionC2SPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction == null ? Direction.UP : direction, sequence)
+        mc.gameMode.startPrediction(mc.level, sequence ->
+            new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction == null ? Direction.UP : direction, sequence)
         );
     }
 
     public boolean shouldMine() {
-        if (mc.world.isOutOfHeightLimit(blockPos) || !BlockUtils.canBreak(blockPos)) return false;
+        if (mc.level.isOutsideBuildHeight(blockPos) || !BlockUtils.canBreak(blockPos)) return false;
 
-        return !pick.get() || mc.player.getMainHandStack().isIn(ItemTags.PICKAXES);
+        return !pick.get() || mc.player.getMainHandItem().is(ItemTags.PICKAXES);
     }
 
     @EventHandler

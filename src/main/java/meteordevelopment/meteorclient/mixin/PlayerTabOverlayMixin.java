@@ -37,10 +37,10 @@ public abstract class PlayerTabOverlayMixin {
     }
 
     @Inject(method = "getNameForDisplay", at = @At("HEAD"), cancellable = true)
-    public void getPlayerName(PlayerInfo playerListEntry, CallbackInfoReturnable<Component> info) {
+    public void getNameForDisplay(PlayerInfo playerListEntry, CallbackInfoReturnable<Component> cir) {
         BetterTab betterTab = Modules.get().get(BetterTab.class);
 
-        if (betterTab.isActive()) info.setReturnValue(betterTab.getPlayerName(playerListEntry));
+        if (betterTab.isActive()) cir.setReturnValue(betterTab.getPlayerName(playerListEntry));
     }
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"), index = 0)
@@ -67,18 +67,18 @@ public abstract class PlayerTabOverlayMixin {
     }
 
     @Inject(method = "renderPingIcon", at = @At("HEAD"), cancellable = true)
-    private void onRenderLatencyIcon(GuiGraphics context, int width, int x, int y, PlayerInfo entry, CallbackInfo ci) {
+    private void onRenderPingIcon(GuiGraphics context, int width, int x, int y, PlayerInfo entry, CallbackInfo ci) {
         BetterTab betterTab = Modules.get().get(BetterTab.class);
 
         if (betterTab.isActive() && betterTab.accurateLatency.get()) {
             Minecraft mc = Minecraft.getInstance();
-            Font textRenderer = mc.textRenderer;
+            Font font = mc.font;
 
             int latency = Mth.clamp(entry.getLatency(), 0, 9999);
             int color = latency < 150 ? 0xFF00E970 :
                 latency < 300 ? 0xFFE7D020 : 0xFFD74238;
             String text = latency + "ms";
-            context.drawTextWithShadow(textRenderer, text, x + width - textRenderer.getWidth(text), y, color);
+            context.drawString(font, text, x + width - font.width(text), y, color);
             ci.cancel();
         }
     }

@@ -68,7 +68,7 @@ public class CommandArgumentType implements ArgumentType<Command> {
             suggestions.add(c.getName());
             suggestions.addAll(c.getAliases());
         }
-        return SharedSuggestionProvider.suggestMatching(suggestions, builder);
+        return SharedSuggestionProvider.suggest(suggestions, builder);
     }
 
     @Override

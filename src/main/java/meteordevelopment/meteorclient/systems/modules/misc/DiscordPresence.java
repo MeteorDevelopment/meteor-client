@@ -23,15 +23,15 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screens.WinScreen;
-import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.ManageServerScreen;
-import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.client.gui.screens.DirectJoinServerScreen;
+import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
-import net.minecraft.client.gui.screen.option.*;
+import net.minecraft.client.gui.screens.options.*;
+import net.minecraft.client.gui.screens.options.controls.ControlsScreen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
-import net.minecraft.client.gui.screen.world.*;
+import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import net.minecraft.client.gui.screens.worldselection.EditGameRulesScreen;
+import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
+import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.Util;
@@ -132,20 +132,20 @@ public class DiscordPresence extends Module {
      */
     public static void registerCustomState(String packageName, String state) {
         for (var pair : customStates) {
-            if (pair.getLeft().equals(packageName)) {
-                pair.setRight(state);
+            if (pair.getA().equals(packageName)) {
+                pair.setB(state);
                 return;
             }
         }
 
-        customStates.add(new Pair<>(packageName, state));
+        customStates.add(new Tuple<>(packageName, state));
     }
 
     /**
      * The package name must match exactly to the one provided through {@link #registerCustomState(String, String)}.
      */
     public static void unregisterCustomState(String packageName) {
-        customStates.removeIf(pair -> pair.getLeft().equals(packageName));
+        customStates.removeIf(pair -> pair.getA().equals(packageName));
     }
 
     @Override
@@ -247,28 +247,28 @@ public class DiscordPresence extends Module {
             if (!lastWasInMainMenu) {
                 rpc.setDetails(MeteorClient.NAME + " " + (MeteorClient.BUILD_NUMBER.isEmpty() ? MeteorClient.VERSION : MeteorClient.VERSION + " " + MeteorClient.BUILD_NUMBER));
 
-                if (mc.currentScreen instanceof TitleScreen) rpc.setState("Looking at title screen");
-                else if (mc.currentScreen instanceof SelectWorldScreen) rpc.setState("Selecting world");
-                else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen)
+                if (mc.screen instanceof TitleScreen) rpc.setState("Looking at title screen");
+                else if (mc.screen instanceof SelectWorldScreen) rpc.setState("Selecting world");
+                else if (mc.screen instanceof CreateWorldScreen || mc.screen instanceof EditGameRulesScreen)
                     rpc.setState("Creating world");
-                else if (mc.currentScreen instanceof EditWorldScreen) rpc.setState("Editing world");
-                else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.setState("Loading world");
-                else if (mc.currentScreen instanceof JoinMultiplayerScreen) rpc.setState("Selecting server");
-                else if (mc.currentScreen instanceof ManageServerScreen) rpc.setState("Adding server");
-                else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectJoinServerScreen)
+                else if (mc.screen instanceof EditWorldScreen) rpc.setState("Editing world");
+                else if (mc.screen instanceof LevelLoadingScreen) rpc.setState("Loading world");
+                else if (mc.screen instanceof JoinMultiplayerScreen) rpc.setState("Selecting server");
+                else if (mc.screen instanceof ManageServerScreen) rpc.setState("Adding server");
+                else if (mc.screen instanceof ConnectScreen || mc.screen instanceof DirectJoinServerScreen)
                     rpc.setState("Connecting to server");
-                else if (mc.currentScreen instanceof WidgetScreen) rpc.setState("Browsing Meteor's GUI");
-                else if (mc.currentScreen instanceof OptionsScreen || mc.currentScreen instanceof SkinOptionsScreen || mc.currentScreen instanceof SoundOptionsScreen || mc.currentScreen instanceof VideoOptionsScreen || mc.currentScreen instanceof ControlsOptionsScreen || mc.currentScreen instanceof LanguageOptionsScreen || mc.currentScreen instanceof ChatOptionsScreen || mc.currentScreen instanceof PackSelectionScreen || mc.currentScreen instanceof AccessibilityOptionsScreen)
+                else if (mc.screen instanceof WidgetScreen) rpc.setState("Browsing Meteor's GUI");
+                else if (mc.screen instanceof OptionsScreen || mc.screen instanceof SkinCustomizationScreen || mc.screen instanceof SoundOptionsScreen || mc.screen instanceof VideoSettingsScreen || mc.screen instanceof ControlsScreen || mc.screen instanceof LanguageSelectScreen || mc.screen instanceof ChatOptionsScreen || mc.screen instanceof PackSelectionScreen || mc.screen instanceof AccessibilityOptionsScreen)
                     rpc.setState("Changing options");
-                else if (mc.currentScreen instanceof WinScreen) rpc.setState("Reading credits");
-                else if (mc.currentScreen instanceof RealmsScreen) rpc.setState("Browsing Realms");
+                else if (mc.screen instanceof WinScreen) rpc.setState("Reading credits");
+                else if (mc.screen instanceof RealmsScreen) rpc.setState("Browsing Realms");
                 else {
                     boolean setState = false;
-                    if (mc.currentScreen != null) {
-                        String className = mc.currentScreen.getClass().getName();
+                    if (mc.screen != null) {
+                        String className = mc.screen.getClass().getName();
                         for (var pair : customStates) {
-                            if (className.startsWith(pair.getLeft())) {
-                                rpc.setState(pair.getRight());
+                            if (className.startsWith(pair.getA())) {
+                                rpc.setState(pair.getB());
                                 setState = true;
                                 break;
                             }
@@ -295,7 +295,7 @@ public class DiscordPresence extends Module {
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WButton help = theme.button("Open documentation.");
-        help.action = () -> Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Starscript");
+        help.action = () -> Util.getPlatform().openUri("https://github.com/MeteorDevelopment/meteor-client/wiki/Starscript");
 
         return help;
     }

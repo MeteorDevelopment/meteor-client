@@ -6,10 +6,10 @@
 package meteordevelopment.meteorclient.renderer;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 
@@ -33,13 +33,13 @@ public class Renderer3D {
 
     public void render(PoseStack matrices) {
         MeshRenderer.begin()
-            .attachments(Minecraft.getInstance().getFramebuffer())
+            .attachments(Minecraft.getInstance().getMainRenderTarget())
             .pipeline(linesPipeline)
             .mesh(lines, matrices)
             .end();
 
         MeshRenderer.begin()
-            .attachments(Minecraft.getInstance().getFramebuffer())
+            .attachments(Minecraft.getInstance().getMainRenderTarget())
             .pipeline(trianglesPipeline)
             .mesh(triangles, matrices)
             .end();

@@ -11,9 +11,9 @@ import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
 import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,7 +28,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
     @ModifyReturnValue(method = "getTooltipLines", at = @At("RETURN"))
-    private List<Component> onGetTooltip(List<Component> original) {
+    private List<Component> onGetTooltipLines(List<Component> original) {
         if (Utils.canUpdate()) {
             ItemStackTooltipEvent event = MeteorClient.EVENT_BUS.post(new ItemStackTooltipEvent((ItemStack) (Object) this, original));
             return event.list();
@@ -38,14 +38,14 @@ public abstract class ItemStackMixin {
     }
 
     @Inject(method = "finishUsingItem", at = @At("HEAD"))
-    private void onFinishUsing(Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> info) {
+    private void onFinishUsingItem(Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
         if (user == mc.player) {
             MeteorClient.EVENT_BUS.post(FinishUsingItemEvent.get((ItemStack) (Object) this));
         }
     }
 
     @Inject(method = "releaseUsing", at = @At("HEAD"))
-    private void onStoppedUsing(Level world, LivingEntity user, int remainingUseTicks, CallbackInfo info) {
+    private void onReleaseUsing(Level world, LivingEntity user, int remainingUseTicks, CallbackInfo ci) {
         if (user == mc.player) {
             MeteorClient.EVENT_BUS.post(StoppedUsingItemEvent.get((ItemStack) (Object) this));
         }

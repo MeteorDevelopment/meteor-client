@@ -8,18 +8,18 @@ package meteordevelopment.meteorclient.gui.screens;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.BundleContents;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
+import net.minecraft.world.item.component.BundleContents;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
  * i couldn't figure out how to add proper outer borders for the GUI without adding custom textures.
  */
 public class ContainerInventoryScreen extends Screen {
-    private static final Identifier SLOT_TEXTURE = Identifier.ofVanilla("container/slot");
+    private static final Identifier SLOT_TEXTURE = Identifier.withDefaultNamespace("container/slot");
     private static final int SLOT_SIZE = 18;
     private static final int SCREEN_WIDTH = 176;
 
@@ -45,14 +45,14 @@ public class ContainerInventoryScreen extends Screen {
     private int playerY;
 
     public ContainerInventoryScreen(ItemStack containerItem) {
-        super(containerItem.getName());
+        super(containerItem.getHoverName());
         this.playerInventory = mc.player.getInventory();
 
         this.containerItems = new ArrayList<>();
         if (containerItem.getItem() instanceof BundleItem) {
             BundleContents bundleContents = containerItem.get(DataComponents.BUNDLE_CONTENTS);
             if (bundleContents != null) {
-                bundleContents.iterate().forEach(containerItems::add);
+                bundleContents.items().forEach(containerItems::add);
             }
         } else {
             ItemStack[] tempItems = new ItemStack[64];
@@ -60,7 +60,7 @@ public class ContainerInventoryScreen extends Screen {
             Collections.addAll(containerItems, tempItems);
         }
 
-        this.containerRows = Math.max(1, Mth.ceilDiv(containerItems.size(), 9));
+        this.containerRows = Math.max(1, Mth.positiveCeilDiv(containerItems.size(), 9));
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ContainerInventoryScreen extends Screen {
         for (int row = 0; row < containerRows + 4; row++) {
             for (int col = 0; col < 9; col++) {
                 int slotY = row < containerRows ? baseY + row * SLOT_SIZE : playerY + (row - containerRows) * SLOT_SIZE;
-                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE, baseX + col * SLOT_SIZE, slotY, SLOT_SIZE, SLOT_SIZE);
+                context.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_TEXTURE, baseX + col * SLOT_SIZE, slotY, SLOT_SIZE, SLOT_SIZE);
             }
         }
 
@@ -92,8 +92,8 @@ public class ContainerInventoryScreen extends Screen {
             if (!item.isEmpty()) {
                 int itemX = baseX + (i % 9) * SLOT_SIZE + 1;
                 int itemY = baseY + (i / 9) * SLOT_SIZE + 1;
-                context.drawItem(item, itemX, itemY);
-                context.drawStackOverlay(textRenderer, item, itemX, itemY);
+                context.renderItem(item, itemX, itemY);
+                context.renderItemDecorations(font, item, itemX, itemY);
             }
         }
 
@@ -101,29 +101,29 @@ public class ContainerInventoryScreen extends Screen {
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 9; col++) {
                 int slotIndex = row < 3 ? 9 + row * 9 + col : col;
-                ItemStack item = playerInventory.getStack(slotIndex);
+                ItemStack item = playerInventory.getItem(slotIndex);
                 if (!item.isEmpty()) {
                     int itemX = baseX + col * SLOT_SIZE + 1;
                     int itemY = playerY + row * SLOT_SIZE + 1;
-                    context.drawItem(item, itemX, itemY);
-                    context.drawStackOverlay(textRenderer, item, itemX, itemY);
+                    context.renderItem(item, itemX, itemY);
+                    context.renderItemDecorations(font, item, itemX, itemY);
                 }
             }
         }
 
         // drawing title headers
-        context.getMatrices().pushMatrix();
-        context.getMatrices().translate((float) x, (float) y);
-        if (textRenderer != null) {
-            context.drawText(textRenderer, title, 8, 6, -12566464, false);
-            context.drawText(textRenderer, playerInventory.getDisplayName(), 8, 18 + containerRows * SLOT_SIZE + 10, -12566464, false);
+        context.pose().pushMatrix();
+        context.pose().translate((float) x, (float) y);
+        if (font != null) {
+            context.drawString(font, title, 8, 6, -12566464, false);
+            context.drawString(font, playerInventory.getDisplayName(), 8, 18 + containerRows * SLOT_SIZE + 10, -12566464, false);
         }
-        context.getMatrices().popMatrix();
+        context.pose().popMatrix();
 
         // drawing the tooltip
         ItemStack item = getSelectedItem(mouseX, mouseY);
         if (!item.isEmpty()) {
-            context.drawTooltip(textRenderer, getTooltipFromItem(mc, item), item.getTooltipData(), mouseX, mouseY);
+            context.setTooltipForNextFrame(font, getTooltipFromItem(mc, item), item.getTooltipImage(), mouseX, mouseY);
         }
     }
 
@@ -143,13 +143,13 @@ public class ContainerInventoryScreen extends Screen {
     public boolean keyPressed(KeyEvent input) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        ItemStack stack = getSelectedItem((int) mc.mouse.getScaledX(mc.getWindow()), (int) mc.mouse.getScaledY(mc.getWindow()));
+        ItemStack stack = getSelectedItem((int) mc.mouseHandler.getScaledXPos(mc.getWindow()), (int) mc.mouseHandler.getScaledYPos(mc.getWindow()));
         if (tooltips.shouldOpenContents(input)) {
             return tooltips.openContent(stack);
         }
 
-        if (input.key() == GLFW.GLFW_KEY_ESCAPE || mc.options.inventoryKey.matchesKey(input)) {
-            close();
+        if (input.key() == GLFW.GLFW_KEY_ESCAPE || mc.options.keyInventory.matches(input)) {
+            onClose();
             return true;
         }
 
@@ -170,7 +170,7 @@ public class ContainerInventoryScreen extends Screen {
         if (mouseY >= playerY && mouseY < playerY + 4 * SLOT_SIZE) {
             int row = (mouseY - playerY) / SLOT_SIZE;
             int slotIndex = row < 3 ? 9 + row * 9 + col : col;
-            return playerInventory.getStack(slotIndex);
+            return playerInventory.getItem(slotIndex);
         }
 
         return ItemStack.EMPTY;

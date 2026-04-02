@@ -15,9 +15,9 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -65,7 +65,7 @@ public class AutoSign extends Module {
             return;
         }
 
-        mc.player.networkHandler.sendPacket(queue.poll());
+        mc.player.connection.send(queue.poll());
 
         timer = 0;
     }
@@ -74,7 +74,7 @@ public class AutoSign extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof ServerboundSignUpdatePacket)) return;
 
-        text = ((ServerboundSignUpdatePacket) event.packet).getText();
+        text = ((ServerboundSignUpdatePacket) event.packet).getLines();
     }
 
     @EventHandler
@@ -83,7 +83,7 @@ public class AutoSign extends Module {
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).meteor$getSign();
 
-        queue.add(new UpdateSignC2SPacket(sign.getPos(), true, text[0], text[1], text[2], text[3]));
+        queue.add(new ServerboundSignUpdatePacket(sign.getBlockPos(), true, text[0], text[1], text[2], text[3]));
 
         event.cancel();
     }

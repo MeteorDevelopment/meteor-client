@@ -5,18 +5,17 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.gui.render.state.pip.GuiBannerResultRenderState;
-import com.mojang.blaze3d.platform.Lighting;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.MaterialSet;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.resources.model.ModelBakery;
 
 public class CustomBannerGuiElementRenderer extends PictureInPictureRenderer<CustomBannerGuiElementRenderState> {
     private final MaterialSet sprite;
@@ -27,21 +26,21 @@ public class CustomBannerGuiElementRenderer extends PictureInPictureRenderer<Cus
     }
 
     @Override
-    public Class<CustomBannerGuiElementRenderState> getElementClass() {
+    public Class<CustomBannerGuiElementRenderState> getRenderStateClass() {
         return CustomBannerGuiElementRenderState.class;
     }
 
-    protected void render(CustomBannerGuiElementRenderState state, PoseStack matrixStack) {
-        Minecraft.getInstance().gameRenderer.getDiffuseLighting().setShaderLights(Lighting.Entry.ITEMS_FLAT);
+    protected void renderToTexture(CustomBannerGuiElementRenderState state, PoseStack matrixStack) {
+        Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_FLAT);
         matrixStack.translate(0.0F, 0.25F, 0.0F);
-        FeatureRenderDispatcher renderDispatcher = Minecraft.getInstance().gameRenderer.getEntityRenderDispatcher();
-        SubmitNodeStorage orderedRenderCommandQueueImpl = renderDispatcher.getQueue();
-        BannerRenderer.renderCanvas(
+        FeatureRenderDispatcher renderDispatcher = Minecraft.getInstance().gameRenderer.getFeatureRenderDispatcher();
+        SubmitNodeStorage orderedRenderCommandQueueImpl = renderDispatcher.getSubmitNodeStorage();
+        BannerRenderer.submitPatterns(
             this.sprite,
             matrixStack,
             orderedRenderCommandQueueImpl,
             15728880,
-            OverlayTexture.DEFAULT_UV,
+            OverlayTexture.NO_OVERLAY,
             state.flag(),
             0.0F,
             ModelBakery.BANNER_BASE,
@@ -52,11 +51,11 @@ public class CustomBannerGuiElementRenderer extends PictureInPictureRenderer<Cus
             null,
             0
         );
-        renderDispatcher.render();
+        renderDispatcher.renderAllFeatures();
     }
 
     @Override
-    protected String getName() {
+    protected String getTextureLabel() {
         return "custom banner";
     }
 }

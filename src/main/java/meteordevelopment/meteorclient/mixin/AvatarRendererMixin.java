@@ -7,24 +7,23 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import com.mojang.blaze3d.vertex.PoseStack;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.entity.ClientAvatarEntity;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
-import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.world.entity.Avatar;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Avatar;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,8 +33,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(AvatarRenderer.class)
-public abstract class AvatarRendererMixin<AvatarlikeEntity extends ClientAvatarEntity & ClientAvatarEntity>
-    extends LivingEntityRenderer<AvatarlikeEntity, AvatarRenderState, PlayerModel> {
+public abstract class AvatarRendererMixin
+    extends LivingEntityRenderer<Avatar, AvatarRenderState, PlayerModel> {
     // Chams
 
     @Unique
@@ -46,22 +45,22 @@ public abstract class AvatarRendererMixin<AvatarlikeEntity extends ClientAvatarE
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init$chams(CallbackInfo info) {
+    private void init$chams(CallbackInfo ci) {
         chams = Modules.get().get(Chams.class);
     }
 
     // Chams - Player scale
 
     @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V", at = @At("RETURN"))
-    private void updateRenderState$scale(AvatarlikeEntity player, AvatarRenderState state, float f, CallbackInfo ci) {
+    private void updateRenderState$scale(Avatar player, AvatarRenderState state, float f, CallbackInfo ci) {
         if (!chams.isActive() || !chams.players.get()) return;
         if (chams.ignoreSelf.get() && player == mc.player) return;
 
         float v = chams.playersScale.get().floatValue();
-        state.baseScale *= v;
+        state.scale *= v;
 
-        if (state.nameLabelPos != null)
-            ((IVec3d) state.nameLabelPos).meteor$setY(state.nameLabelPos.y + (player.getHeight() * v - player.getHeight()));
+        if (state.nameTagAttachment != null)
+            ((IVec3) state.nameTagAttachment).meteor$setY(state.nameTagAttachment.y + (player.getBbHeight() * v - player.getBbHeight()));
     }
 
     // Chams - Hand Texture
@@ -91,11 +90,11 @@ public abstract class AvatarRendererMixin<AvatarlikeEntity extends ClientAvatarE
     // Rotations
 
     @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V", at = @At("RETURN"))
-    private void updateRenderState$rotations(AvatarlikeEntity player, AvatarRenderState state, float f, CallbackInfo info) {
+    private void extractRenderState$rotations(Avatar player, AvatarRenderState state, float f, CallbackInfo ci) {
         if (Rotations.rotating && player == mc.player) {
-            state.relativeHeadYaw = 0;
-            state.bodyYaw = Rotations.serverYaw;
-            state.pitch = Rotations.serverPitch;
+            state.yRot = 0;
+            state.bodyRot = Rotations.serverYaw;
+            state.xRot = Rotations.serverPitch;
         }
     }
 }

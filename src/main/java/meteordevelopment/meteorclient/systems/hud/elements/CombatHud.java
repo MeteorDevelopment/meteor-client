@@ -25,19 +25,19 @@ import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BedItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.core.Holder;
-import net.minecraft.tags.EnchantmentTags;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.util.Mth;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.joml.Matrix4fStack;
 
 import java.util.ArrayList;
@@ -263,8 +263,8 @@ public class CombatHud extends HudElement {
                 (int) (y + 10 * getScale()),
                 (int) (50 * getScale()),
                 (int) (60 * getScale()),
-                -Mth.wrapDegrees(playerEntity.lastYaw + (playerEntity.getYaw() - playerEntity.lastYaw) * mc.getRenderTickCounter().getTickProgress(true)),
-                -playerEntity.getPitch()
+                -Mth.wrapDegrees(playerEntity.yRotO + (playerEntity.getYRot() - playerEntity.yRotO) * mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)),
+                -playerEntity.getXRot()
             );
 
             // Moving pos to past player model
@@ -323,7 +323,7 @@ public class CombatHud extends HudElement {
                     for (int position = 5; position >= 0; position--) {
                         ItemStack itemStack = getItem(position);
 
-                        if (itemStack.isIn(ItemTags.SWORDS)
+                        if (itemStack.is(ItemTags.SWORDS)
                             || itemStack.getItem() == Items.END_CRYSTAL
                             || itemStack.getItem() == Items.RESPAWN_ANCHOR
                             || itemStack.getItem() instanceof BedItem) threat = true;
@@ -388,11 +388,11 @@ public class CombatHud extends HudElement {
 
                 armorY = (y / getScale()) + 18;
 
-                ItemEnchantments enchantments = EnchantmentHelper.getEnchantments(itemStack);
+                ItemEnchantments enchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack);
                 List<ObjectIntPair<Holder<Enchantment>>> enchantmentsToShow = new ArrayList<>();
 
-                for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.getEnchantmentEntries()) {
-                    if (entry.getKey().matches(displayedEnchantments.get()::contains)) {
+                for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+                    if (entry.getKey().is(displayedEnchantments.get()::contains)) {
                         enchantmentsToShow.add(new ObjectIntImmutablePair<>(entry.getKey(), entry.getIntValue()));
                     }
                 }
@@ -401,7 +401,7 @@ public class CombatHud extends HudElement {
                     String enchantName = Utils.getEnchantSimpleName(entry.left(), 3) + " " + entry.rightInt();
 
                     double enchX = (((x / getScale()) + position * 20) + 8) - (TextRenderer.get().getWidth(enchantName) / 2);
-                    TextRenderer.get().render(enchantName, enchX, armorY, entry.left().isIn(EnchantmentTags.CURSE) ? RED : enchantmentTextColor.get());
+                    TextRenderer.get().render(enchantName, enchX, armorY, entry.left().is(EnchantmentTags.CURSE) ? RED : enchantmentTextColor.get());
                     armorY += TextRenderer.get().getHeight();
                 }
                 slot--;
@@ -455,12 +455,12 @@ public class CombatHud extends HudElement {
     private ItemStack getItem(int i) {
         if (isInEditor()) {
             return switch (i) {
-                case 0 -> Items.NETHERITE_BOOTS.getDefaultStack();
-                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
-                case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
-                case 4 -> Items.TOTEM_OF_UNDYING.getDefaultStack();
-                case 5 -> Items.END_CRYSTAL.getDefaultStack();
+                case 0 -> Items.NETHERITE_BOOTS.getDefaultInstance();
+                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultInstance();
+                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultInstance();
+                case 3 -> Items.NETHERITE_HELMET.getDefaultInstance();
+                case 4 -> Items.TOTEM_OF_UNDYING.getDefaultInstance();
+                case 5 -> Items.END_CRYSTAL.getDefaultInstance();
                 default -> ItemStack.EMPTY;
             };
         }
@@ -468,12 +468,12 @@ public class CombatHud extends HudElement {
         if (playerEntity == null) return ItemStack.EMPTY;
 
         return switch (i) {
-            case 5 -> playerEntity.getMainHandStack();
-            case 4 -> playerEntity.getOffHandStack();
-            case 3 -> playerEntity.getEquippedStack(EquipmentSlot.HEAD);
-            case 2 -> playerEntity.getEquippedStack(EquipmentSlot.CHEST);
-            case 1 -> playerEntity.getEquippedStack(EquipmentSlot.LEGS);
-            case 0 -> playerEntity.getEquippedStack(EquipmentSlot.FEET);
+            case 5 -> playerEntity.getMainHandItem();
+            case 4 -> playerEntity.getOffhandItem();
+            case 3 -> playerEntity.getItemBySlot(EquipmentSlot.HEAD);
+            case 2 -> playerEntity.getItemBySlot(EquipmentSlot.CHEST);
+            case 1 -> playerEntity.getItemBySlot(EquipmentSlot.LEGS);
+            case 0 -> playerEntity.getItemBySlot(EquipmentSlot.FEET);
             default -> ItemStack.EMPTY;
         };
     }

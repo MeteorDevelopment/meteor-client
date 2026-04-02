@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.waypoints;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -20,7 +21,6 @@ import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -71,7 +71,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
             if (file.getName().endsWith(PNG)) {
                 try (FileInputStream inputStream = new FileInputStream(file)) {
                     String name = Strings.CS.removeEnd(file.getName(), PNG);
-                    AbstractTexture texture = new NativeImageBackedTexture(() -> name, NativeImage.read(inputStream));
+                    AbstractTexture texture = new DynamicTexture(() -> name, NativeImage.read(inputStream));
                     icons.put(name, texture);
                 } catch (Exception e) {
                     MeteorClient.LOG.error("Failed to read a waypoint icon", e);
@@ -174,7 +174,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
         tag.put("waypoints", NbtUtils.listToTag(waypoints));
         return tag;
     }

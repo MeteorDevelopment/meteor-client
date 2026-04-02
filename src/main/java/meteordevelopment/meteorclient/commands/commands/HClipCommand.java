@@ -21,14 +21,14 @@ public class HClipCommand extends Command {
     public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(argument("blocks", DoubleArgumentType.doubleArg()).executes(context -> {
             double blocks = context.getArgument("blocks", Double.class);
-            Vec3 forward = Vec3.fromPolar(0, mc.player.getYaw()).normalize();
+            Vec3 forward = Vec3.directionFromRotation(0, mc.player.getYRot()).normalize();
 
-            if (mc.player.hasVehicle()) {
+            if (mc.player.isPassenger()) {
                 Entity vehicle = mc.player.getVehicle();
-                vehicle.setPosition(vehicle.getX() + forward.x * blocks, vehicle.getY(), vehicle.getZ() + forward.z * blocks);
+                vehicle.setPos(vehicle.getX() + forward.x * blocks, vehicle.getY(), vehicle.getZ() + forward.z * blocks);
             }
 
-            mc.player.setPosition(mc.player.getX() + forward.x * blocks, mc.player.getY(), mc.player.getZ() + forward.z * blocks);
+            mc.player.setPos(mc.player.getX() + forward.x * blocks, mc.player.getY(), mc.player.getZ() + forward.z * blocks);
 
             return SINGLE_SUCCESS;
         }));

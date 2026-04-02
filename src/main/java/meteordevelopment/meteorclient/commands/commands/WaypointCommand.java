@@ -14,8 +14,8 @@ import meteordevelopment.meteorclient.commands.arguments.WaypointArgumentType;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 
 public class WaypointCommand extends Command {
@@ -83,7 +83,7 @@ public class WaypointCommand extends Command {
     private int addWaypoint(CommandContext<SharedSuggestionProvider> context, boolean withCoords) {
         if (mc.player == null) return -1;
 
-        BlockPos pos = withCoords ? BlockPosArgumentType.getBlockPos(context, "pos") : mc.player.getBlockPos().up(2);
+        BlockPos pos = withCoords ? BlockPosArgumentType.getBlockPos(context, "pos") : mc.player.blockPosition().above(2);
         Waypoint waypoint = new Waypoint.Builder()
             .name(StringArgumentType.getString(context, "waypoint"))
             .pos(pos)

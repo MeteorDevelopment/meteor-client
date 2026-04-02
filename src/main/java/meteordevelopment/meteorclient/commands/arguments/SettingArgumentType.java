@@ -63,6 +63,6 @@ public class SettingArgumentType implements ArgumentType<String> {
             .flatMap(sg -> Streams.stream(sg.iterator()))
             .map(setting -> setting.name);
 
-        return SharedSuggestionProvider.suggestMatching(stream, builder);
+        return SharedSuggestionProvider.suggest(stream, builder);
     }
 }

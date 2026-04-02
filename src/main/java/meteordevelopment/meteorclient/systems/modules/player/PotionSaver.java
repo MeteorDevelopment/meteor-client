@@ -16,7 +16,7 @@ import net.minecraft.world.effect.MobEffect;
 
 import java.util.List;
 
-import static net.minecraft.entity.effect.StatusEffects.*;
+import static net.minecraft.world.effect.MobEffects.*;
 
 public class PotionSaver extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -55,6 +55,6 @@ public class PotionSaver extends Module {
     }
 
     public boolean shouldFreeze(MobEffect effect) {
-        return isActive() && (!onlyWhenStationary.get() || !PlayerUtils.isMoving()) && !mc.player.getStatusEffects().isEmpty() && effects.get().contains(effect);
+        return isActive() && (!onlyWhenStationary.get() || !PlayerUtils.isMoving()) && !mc.player.getActiveEffects().isEmpty() && effects.get().contains(effect);
     }
 }

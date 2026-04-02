@@ -24,17 +24,17 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(TridentItem.class)
 public abstract class TridentItemMixin {
-    @Inject(method = "onStoppedUsing", at = @At("HEAD"))
-    private void onStoppedUsingHead(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks, CallbackInfoReturnable<Boolean> info) {
+    @Inject(method = "releaseUsing", at = @At("HEAD"))
+    private void onReleaseUsingHead(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks, CallbackInfoReturnable<Boolean> cir) {
         if (user == mc.player) Utils.isReleasingTrident = true;
     }
 
-    @Inject(method = "onStoppedUsing", at = @At("TAIL"))
-    private void onStoppedUsingTail(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks, CallbackInfoReturnable<Boolean> info) {
+    @Inject(method = "releaseUsing", at = @At("TAIL"))
+    private void onReleaseUsingTail(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks, CallbackInfoReturnable<Boolean> cir) {
         if (user == mc.player) Utils.isReleasingTrident = false;
     }
 
-    @ModifyArgs(method = "onStoppedUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;addVelocity(DDD)V"))
+    @ModifyArgs(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;push(DDD)V"))
     private void modifyVelocity(Args args) {
         TridentBoost tridentBoost = Modules.get().get(TridentBoost.class);
 
@@ -43,14 +43,14 @@ public abstract class TridentItemMixin {
         args.set(2, (double) args.get(2) * tridentBoost.getMultiplier());
     }
 
-    @ModifyExpressionValue(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isTouchingWaterOrRain()Z"))
+    @ModifyExpressionValue(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isInWaterOrRain()Z"))
     private boolean isInWaterUse(boolean original) {
         TridentBoost tridentBoost = Modules.get().get(TridentBoost.class);
 
         return tridentBoost.allowOutOfWater() || original;
     }
 
-    @ModifyExpressionValue(method = "onStoppedUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isTouchingWaterOrRain()Z"))
+    @ModifyExpressionValue(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isInWaterOrRain()Z"))
     private boolean isInWaterPostUse(boolean original) {
         TridentBoost tridentBoost = Modules.get().get(TridentBoost.class);
 

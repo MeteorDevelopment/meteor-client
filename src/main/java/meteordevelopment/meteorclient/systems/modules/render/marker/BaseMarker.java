@@ -93,7 +93,7 @@ public abstract class BaseMarker implements ISerializable<BaseMarker> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
         tag.put("settings", settings.toTag());
         return tag;
     }

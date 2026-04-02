@@ -30,7 +30,7 @@ public class GuiDebugRenderer {
         mesh.end();
 
         MeshRenderer.begin()
-            .attachments(Minecraft.getInstance().getFramebuffer())
+            .attachments(Minecraft.getInstance().getMainRenderTarget())
             .pipeline(MeteorRenderPipelines.WORLD_COLORED_LINES)
             .mesh(mesh)
             .end();

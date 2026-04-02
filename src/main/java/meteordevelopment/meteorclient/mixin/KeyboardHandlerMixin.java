@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.CharTypedEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.gui.GuiKeyEvents;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -43,13 +43,13 @@ public abstract class KeyboardHandlerMixin {
                 modifiers &= ~Input.getModifier(input.key());
             }
 
-            if (minecraft.currentScreen instanceof WidgetScreen && action == GLFW.GLFW_REPEAT) {
-                ((WidgetScreen) minecraft.currentScreen).keyRepeated(new KeyInput(input.key(), input.scancode(), modifiers));
+            if (minecraft.screen instanceof WidgetScreen && action == GLFW.GLFW_REPEAT) {
+                ((WidgetScreen) minecraft.screen).keyRepeated(new KeyEvent(input.key(), input.scancode(), modifiers));
             }
 
             if (GuiKeyEvents.canUseKeys) {
                 Input.setKeyState(input.key(), action != GLFW.GLFW_RELEASE);
-                if (MeteorClient.EVENT_BUS.post(KeyEvent.get(new KeyInput(input.key(), input.scancode(), modifiers), KeyAction.get(action))).isCancelled())
+                if (MeteorClient.EVENT_BUS.post(KeyInputEvent.get(new KeyEvent(input.key(), input.scancode(), modifiers), KeyAction.get(action))).isCancelled())
                     ci.cancel();
             }
         }
@@ -57,7 +57,7 @@ public abstract class KeyboardHandlerMixin {
 
     @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
     private void onChar(long window, CharacterEvent input, CallbackInfo ci) {
-        if (Utils.canUpdate() && !minecraft.isPaused() && (minecraft.currentScreen == null || minecraft.currentScreen instanceof WidgetScreen)) {
+        if (Utils.canUpdate() && !minecraft.isPaused() && (minecraft.screen == null || minecraft.screen instanceof WidgetScreen)) {
             if (MeteorClient.EVENT_BUS.post(CharTypedEvent.get((char) input.codepoint())).isCancelled()) ci.cancel();
         }
     }

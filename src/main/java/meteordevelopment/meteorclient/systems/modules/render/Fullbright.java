@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.LightLayer;
 
 public class Fullbright extends Module {
@@ -29,7 +29,7 @@ public class Fullbright extends Module {
         .onChanged(mode -> {
             if (isActive()) {
                 if (mode != Mode.Potion) disableNightVision();
-                if (mc.worldRenderer != null) mc.worldRenderer.reload();
+                if (mc.levelRenderer != null) mc.levelRenderer.allChanged();
             }
         })
         .build()
@@ -41,7 +41,7 @@ public class Fullbright extends Module {
         .defaultValue(LightLayer.BLOCK)
         .visible(() -> mode.get() == Mode.Luminance)
         .onChanged(integer -> {
-            if (mc.worldRenderer != null && isActive()) mc.worldRenderer.reload();
+            if (mc.levelRenderer != null && isActive()) mc.levelRenderer.allChanged();
         })
         .build()
     );
@@ -54,7 +54,7 @@ public class Fullbright extends Module {
         .range(0, 15)
         .sliderMax(15)
         .onChanged(integer -> {
-            if (mc.worldRenderer != null && isActive()) mc.worldRenderer.reload();
+            if (mc.levelRenderer != null && isActive()) mc.levelRenderer.allChanged();
         })
         .build()
     );
@@ -65,12 +65,12 @@ public class Fullbright extends Module {
 
     @Override
     public void onActivate() {
-        if (mode.get() == Mode.Luminance) mc.worldRenderer.reload();
+        if (mode.get() == Mode.Luminance) mc.levelRenderer.allChanged();
     }
 
     @Override
     public void onDeactivate() {
-        if (mode.get() == Mode.Luminance) mc.worldRenderer.reload();
+        if (mode.get() == Mode.Luminance) mc.levelRenderer.allChanged();
         else if (mode.get() == Mode.Potion) disableNightVision();
     }
 
@@ -86,19 +86,19 @@ public class Fullbright extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player == null || !mode.get().equals(Mode.Potion)) return;
-        if (mc.player.hasStatusEffect(BuiltInRegistries.STATUS_EFFECT.getEntry(MobEffects.NIGHT_VISION.value()))) {
-            MobEffectInstance instance = mc.player.getStatusEffect(BuiltInRegistries.STATUS_EFFECT.getEntry(MobEffects.NIGHT_VISION.value()));
+        if (mc.player.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(MobEffects.NIGHT_VISION.value()))) {
+            MobEffectInstance instance = mc.player.getEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(MobEffects.NIGHT_VISION.value()));
             if (instance != null && instance.getDuration() < 420)
                 ((MobEffectInstanceAccessor) instance).meteor$setDuration(420);
         } else {
-            mc.player.addStatusEffect(new StatusEffectInstance(BuiltInRegistries.STATUS_EFFECT.getEntry(MobEffects.NIGHT_VISION.value()), 420, 0));
+            mc.player.addEffect(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(MobEffects.NIGHT_VISION.value()), 420, 0));
         }
     }
 
     private void disableNightVision() {
         if (mc.player == null) return;
-        if (mc.player.hasStatusEffect(BuiltInRegistries.STATUS_EFFECT.getEntry(MobEffects.NIGHT_VISION.value()))) {
-            mc.player.removeStatusEffect(BuiltInRegistries.STATUS_EFFECT.getEntry(MobEffects.NIGHT_VISION.value()));
+        if (mc.player.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(MobEffects.NIGHT_VISION.value()))) {
+            mc.player.removeEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(MobEffects.NIGHT_VISION.value()));
         }
     }
 

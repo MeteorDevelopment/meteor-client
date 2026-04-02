@@ -28,7 +28,7 @@ public class SessionAccount extends Account<SessionAccount> implements TokenAcco
     public SessionAccount fromTag(CompoundTag tag) {
         super.fromTag(tag);
 
-        accessToken = tag.getString("token", "");
+        accessToken = tag.getStringOr("token", "");
         return this;
     }
 
@@ -67,7 +67,7 @@ public class SessionAccount extends Account<SessionAccount> implements TokenAcco
 
         super.login();
 
-        setSession(new Session(cache.username, UndashedUuid.fromStringLenient(cache.uuid), accessToken, Optional.empty(), Optional.empty()));
+        setSession(new User(cache.username, UndashedUuid.fromStringLenient(cache.uuid), accessToken, Optional.empty(), Optional.empty()));
         return true;
     }
 

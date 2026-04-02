@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.world.level.block.Block;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -34,19 +34,19 @@ public class BlockSetting extends Setting<Block> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return BuiltInRegistries.BLOCK.getIds();
+        return BuiltInRegistries.BLOCK.keySet();
     }
 
     @Override
     protected CompoundTag save(CompoundTag tag) {
-        tag.putString("value", BuiltInRegistries.BLOCK.getId(get()).toString());
+        tag.putString("value", BuiltInRegistries.BLOCK.getKey(get()).toString());
 
         return tag;
     }
 
     @Override
     protected Block load(CompoundTag tag) {
-        value = BuiltInRegistries.BLOCK.get(Identifier.of(tag.getString("value", "")));
+        value = BuiltInRegistries.BLOCK.getValue(Identifier.parse(tag.getStringOr("value", "")));
 
         if (filter != null && !filter.test(value)) {
             for (Block block : BuiltInRegistries.BLOCK) {

@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -58,12 +58,12 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
         tag.putBoolean("sectionExpanded", sectionExpanded);
 
-        ListTag settingsTag = new NbtList();
+        ListTag settingsTag = new ListTag();
         for (Setting<?> setting : this) {
             if (setting.wasChanged()) settingsTag.add(setting.toTag());
         }
@@ -74,13 +74,13 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
 
     @Override
     public SettingGroup fromTag(CompoundTag tag) {
-        sectionExpanded = tag.getBoolean("sectionExpanded", false);
+        sectionExpanded = tag.getBooleanOr("sectionExpanded", false);
 
         ListTag settingsTag = tag.getListOrEmpty("settings");
         for (Tag t : settingsTag) {
             CompoundTag settingTag = (CompoundTag) t;
 
-            Setting<?> setting = get(settingTag.getString("name", ""));
+            Setting<?> setting = get(settingTag.getStringOr("name", ""));
             if (setting != null) setting.fromTag(settingTag);
         }
 

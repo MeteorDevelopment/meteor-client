@@ -32,17 +32,17 @@ import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.NoteBlock;
-import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.NoteBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
@@ -321,10 +321,10 @@ public class Notebot extends Module {
                 Note note = entry.getKey();
                 BlockPos blockPos = entry.getValue();
 
-                BlockState state = mc.world.getBlockState(blockPos);
+                BlockState state = mc.level.getBlockState(blockPos);
                 if (state.getBlock() != Blocks.NOTE_BLOCK) continue;
 
-                int level = state.get(NoteBlock.NOTE);
+                int level = state.getValue(NoteBlock.NOTE);
 
                 double x1 = blockPos.getX();
                 double y1 = blockPos.getY();
@@ -365,7 +365,7 @@ public class Notebot extends Module {
         Vector3d pos = new Vector3d();
 
         for (BlockPos blockPos : noteBlockPositions.values()) {
-            BlockState state = mc.world.getBlockState(blockPos);
+            BlockState state = mc.level.getBlockState(blockPos);
             if (state.getBlock() != Blocks.NOTE_BLOCK) continue;
 
             double x = blockPos.getX() + 0.5;
@@ -376,7 +376,7 @@ public class Notebot extends Module {
 
             // Render level text logic
 
-            String levelText = String.valueOf(state.get(NoteBlock.NOTE));
+            String levelText = String.valueOf(state.getValue(NoteBlock.NOTE));
             String tuneHitsText = null;
             if (tuneHits.containsKey(blockPos)) {
                 tuneHitsText = " -" + tuneHits.get(blockPos);
@@ -449,7 +449,7 @@ public class Notebot extends Module {
 
             if (song.getNotesMap().containsKey(currentTick)) {
                 if (playingMode == PlayingMode.Preview) onTickPreview();
-                else if (mc.player.getAbilities().creativeMode) {
+                else if (mc.player.getAbilities().instabuild) {
                     error("You need to be in survival mode.");
                     stop();
                     return;
@@ -545,10 +545,10 @@ public class Notebot extends Module {
             int targetLevel = entry.getKey().getNoteLevel();
             BlockPos blockPos = entry.getValue();
 
-            BlockState blockState = mc.world.getBlockState(blockPos);
+            BlockState blockState = mc.level.getBlockState(blockPos);
             if (blockState.getBlock() != Blocks.NOTE_BLOCK) continue;
 
-            int currentLevel = blockState.get(NoteBlock.NOTE);
+            int currentLevel = blockState.getValue(NoteBlock.NOTE);
 
             if (targetLevel != currentLevel) {
                 tuneHits.put(blockPos, calcNumberOfHits(currentLevel, targetLevel));
@@ -570,8 +570,8 @@ public class Notebot extends Module {
         WButton alignCenter = table.add(theme.button("Align Center")).expandX().minWidth(100).widget();
         alignCenter.action = () -> {
             if (mc.player == null) return;
-            Vec3 pos = Vec3.ofBottomCenter(mc.player.getBlockPos());
-            mc.player.setPosition(pos.x, mc.player.getY(), pos.z);
+            Vec3 pos = Vec3.atBottomCenterOf(mc.player.blockPosition());
+            mc.player.setPos(pos.x, mc.player.getY(), pos.z);
         };
 
         table.row();
@@ -614,7 +614,7 @@ public class Notebot extends Module {
      */
     public void play() {
         if (mc.player == null) return;
-        if (mc.player.getAbilities().creativeMode && playingMode != PlayingMode.Preview) {
+        if (mc.player.getAbilities().instabuild && playingMode != PlayingMode.Preview) {
             error("You need to be in survival mode.");
         } else if (stage == Stage.Playing) {
             isPlaying = true;
@@ -764,23 +764,23 @@ public class Notebot extends Module {
      * Scans noteblocks nearby and adds them to the map
      */
     private void scanForNoteblocks() {
-        if (mc.interactionManager == null || mc.world == null || mc.player == null) return;
+        if (mc.gameMode == null || mc.level == null || mc.player == null) return;
         scannedNoteblocks.clear();
-        int min = (int) (-mc.player.getBlockInteractionRange()) - 2;
-        int max = (int) mc.player.getBlockInteractionRange() + 2;
+        int min = (int) (-mc.player.blockInteractionRange()) - 2;
+        int max = (int) mc.player.blockInteractionRange() + 2;
 
         // Scan for noteblocks horizontally
         // 6^3 kek
         for (int y = min; y < max; y++) {
             for (int x = min; x < max; x++) {
                 for (int z = min; z < max; z++) {
-                    BlockPos pos = mc.player.getBlockPos().add(x, y + 1, z);
+                    BlockPos pos = mc.player.blockPosition().offset(x, y + 1, z);
 
-                    BlockState blockState = mc.world.getBlockState(pos);
+                    BlockState blockState = mc.level.getBlockState(pos);
                     if (blockState.getBlock() != Blocks.NOTE_BLOCK) continue;
 
                     // Copied from ServerPlayNetworkHandler#onPlayerInteractBlock
-                    if (!mc.player.canInteractWithBlockAt(pos, 1)) continue;
+                    if (!mc.player.isWithinBlockInteractionRange(pos, 1)) continue;
 
                     if (!isValidScanSpot(pos)) continue;
 
@@ -794,9 +794,9 @@ public class Notebot extends Module {
     private void onTickPreview() {
         for (Note note : song.getNotesMap().get(currentTick)) {
             if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
-                mc.player.playSound(note.getInstrument().getSound().value(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
+                mc.player.playSound(note.getInstrument().getSoundEvent().value(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
             } else {
-                mc.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
+                mc.player.playSound(SoundEvents.NOTE_BLOCK_HARP.value(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
             }
         }
     }
@@ -829,12 +829,12 @@ public class Notebot extends Module {
     }
 
     private void tuneBlocks() {
-        if (mc.world == null || mc.player == null) {
+        if (mc.level == null || mc.player == null) {
             disableNotebot();
         }
 
         if (swingArm.get()) {
-            mc.player.swingHand(InteractionHand.MAIN_HAND);
+            mc.player.swing(InteractionHand.MAIN_HAND);
         }
 
         int iterations = 0;
@@ -869,7 +869,7 @@ public class Notebot extends Module {
 
     private void tuneNoteblockWithPackets(BlockPos pos) {
         // We don't need to raycast here. Server handles this packet fine
-        mc.interactionManager.sendSequencedPacket(mc.world, (sequence) -> new PlayerInteractBlockC2SPacket(InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.ofCenter(pos), Direction.DOWN, pos, false), sequence));
+        mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(pos), Direction.DOWN, pos, false), sequence));
 
         anyNoteblockTuned = true;
     }
@@ -904,7 +904,7 @@ public class Notebot extends Module {
 
             // Swing arm
             if (swingArm.get()) {
-                mc.player.swingHand(InteractionHand.MAIN_HAND);
+                mc.player.swing(InteractionHand.MAIN_HAND);
             }
 
             // Play notes
@@ -924,16 +924,16 @@ public class Notebot extends Module {
     }
 
     private void playRotate(BlockPos pos) {
-        if (mc.interactionManager == null) return;
+        if (mc.gameMode == null) return;
         try {
-            mc.interactionManager.sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, Direction.DOWN, sequence));
+            mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, Direction.DOWN, sequence));
         } catch (NullPointerException ignored) {
         }
     }
 
     private boolean isValidScanSpot(BlockPos pos) {
-        if (mc.world.getBlockState(pos).getBlock() != Blocks.NOTE_BLOCK) return false;
-        return mc.world.getBlockState(pos.up()).isAir();
+        if (mc.level.getBlockState(pos).getBlock() != Blocks.NOTE_BLOCK) return false;
+        return mc.level.getBlockState(pos.above()).isAir();
     }
 
     /**

@@ -94,12 +94,12 @@ public class BowAimbot extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (!PlayerUtils.isAlive() || !itemInHand()) return;
-        if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found())
+        if (!mc.player.getAbilities().instabuild && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found())
             return;
 
         target = TargetUtils.get(entity -> {
             if (entity == mc.player || entity == mc.getCameraEntity()) return false;
-            if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive())
+            if ((entity instanceof LivingEntity livingEntity && livingEntity.isDeadOrDying()) || !entity.isAlive())
                 return false;
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!entities.get().contains(entity.getType())) return false;
@@ -120,7 +120,7 @@ public class BowAimbot extends Module {
             return;
         }
 
-        if (mc.options.useKey.isPressed() && itemInHand()) {
+        if (mc.options.keyUse.isDown() && itemInHand()) {
             if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
                 PathManagers.get().pause();
                 wasPathing = true;
@@ -136,13 +136,13 @@ public class BowAimbot extends Module {
 
     private void aim() {
         // Velocity based on bow charge.
-        float velocity = BowItem.getPullProgress(mc.player.getItemUseTime());
+        float velocity = BowItem.getPowerForTime(mc.player.getTicksUsingItem());
 
         // Positions
-        Vec3 pos = target.getEntityPos();
+        Vec3 pos = target.position();
 
         double relativeX = pos.x - mc.player.getX();
-        double relativeY = pos.y + (target.getHeight() / 2) - mc.player.getEyeY();
+        double relativeY = pos.y + (target.getBbHeight() / 2) - mc.player.getEyeY();
         double relativeZ = pos.z - mc.player.getZ();
 
         // Calculate the pitch
@@ -156,7 +156,7 @@ public class BowAimbot extends Module {
         if (Float.isNaN(pitch)) {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
         } else {
-            Rotations.rotate(Rotations.getYaw(new Vec3d(pos.x, pos.y, pos.z)), pitch);
+            Rotations.rotate(Rotations.getYaw(new Vec3(pos.x, pos.y, pos.z)), pitch);
         }
     }
 

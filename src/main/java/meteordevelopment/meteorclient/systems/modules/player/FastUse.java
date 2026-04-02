@@ -29,7 +29,7 @@ public class FastUse extends Module {
         .build()
     );
 
-    private final Setting<List<BlockItem>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
         .name("items")
         .description("Which items should fast place work on in \"Some\" mode.")
         .visible(() -> mode.get() == Mode.Some)

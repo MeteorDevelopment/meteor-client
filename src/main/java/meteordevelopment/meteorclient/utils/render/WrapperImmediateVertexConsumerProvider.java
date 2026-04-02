@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import net.minecraft.client.renderer.rendertype.RenderType;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.rendertype.RenderType;
 
 import java.util.function.Supplier;
 
@@ -25,10 +25,10 @@ public class WrapperImmediateVertexConsumerProvider extends MultiBufferSource.Bu
     }
 
     @Override
-    public void draw() {
+    public void endBatch() {
     }
 
     @Override
-    public void draw(RenderType layer) {
+    public void endBatch(RenderType layer) {
     }
 }

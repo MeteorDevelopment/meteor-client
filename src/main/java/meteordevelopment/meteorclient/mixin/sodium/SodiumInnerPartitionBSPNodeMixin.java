@@ -17,9 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(targets = "net.caffeinemc.mods.sodium.client.render.chunk.translucent_sorting.bsp_tree.InnerPartitionBSPNode", remap = false)
 public class SodiumInnerPartitionBSPNodeMixin {
-    // TODO(Ravel): remapper for com.llamalad7.mixinextras.expression.Expression is not implemented
-// TODO(Ravel): remapper for com.llamalad7.mixinextras.expression.Expression is not implemented
-// https://github.com/LlamaLad7/MixinExtras/wiki/Expressions#things-to-watch-out-for
+    // https://github.com/LlamaLad7/MixinExtras/wiki/Expressions#things-to-watch-out-for
     // 'Be particularly careful when using == 0 or != 0'
     @Definition(id = "splitPlaneEdgeDot", local = @Local(type = float.class, name = "splitPlaneEdgeDot"))
     @Expression("splitPlaneEdgeDot == 0.0")

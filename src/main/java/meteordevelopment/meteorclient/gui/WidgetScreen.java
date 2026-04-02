@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui;
 
+import com.mojang.blaze3d.platform.MacosUtil;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.renderer.GuiDebugRenderer;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
@@ -17,12 +18,11 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CursorStyle;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-import com.mojang.blaze3d.platform.MacosUtil;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -67,7 +67,7 @@ public abstract class WidgetScreen extends Screen {
     public WidgetScreen(GuiTheme theme, String title) {
         super(Component.literal(title));
 
-        this.parent = mc.currentScreen;
+        this.parent = mc.screen;
         this.root = new WFullScreenRoot();
         this.theme = theme;
 
@@ -124,12 +124,12 @@ public abstract class WidgetScreen extends Screen {
 
         double mouseX = click.x();
         double mouseY = click.y();
-        double s = mc.getWindow().getScaleFactor();
+        double s = mc.getWindow().getGuiScale();
 
         mouseX *= s;
         mouseY *= s;
 
-        return root.mouseClicked(new Click(mouseX, mouseY, click.buttonInfo()), doubled);
+        return root.mouseClicked(new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()), doubled);
     }
 
     @Override
@@ -138,22 +138,22 @@ public abstract class WidgetScreen extends Screen {
 
         double mouseX = click.x();
         double mouseY = click.y();
-        double s = mc.getWindow().getScaleFactor();
+        double s = mc.getWindow().getGuiScale();
 
         mouseX *= s;
         mouseY *= s;
 
         if (debug && click.button() == GLFW_MOUSE_BUTTON_RIGHT)
-            DEBUG_RENDERER.mouseReleased(root, new Click(mouseX, mouseY, click.buttonInfo()), 0);
+            DEBUG_RENDERER.mouseReleased(root, new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()), 0);
 
-        return root.mouseReleased(new Click(mouseX, mouseY, click.buttonInfo()));
+        return root.mouseReleased(new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()));
     }
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
         if (locked) return;
 
-        double s = mc.getWindow().getScaleFactor();
+        double s = mc.getWindow().getGuiScale();
         mouseX *= s;
         mouseY *= s;
 
@@ -228,7 +228,7 @@ public abstract class WidgetScreen extends Screen {
             return true;
         }
 
-        boolean control = MacosUtil.IS_MAC ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
+        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
 
         return (control && input.key() == GLFW_KEY_C && toClipboard())
             || (control && input.key() == GLFW_KEY_V && fromClipboard());
@@ -249,13 +249,13 @@ public abstract class WidgetScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
-        if (this.client.world == null) {
-            this.renderPanoramaBackground(context, deltaTicks);
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, deltaTicks);
         }
     }
 
     public void renderCustom(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        int s = mc.getWindow().getScaleFactor();
+        int s = mc.getWindow().getGuiScale();
         mouseX *= s;
         mouseY *= s;
 
@@ -311,7 +311,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         if (!locked || lockedAllowClose) {
             closing = true;
         }
@@ -349,7 +349,7 @@ public abstract class WidgetScreen extends Screen {
         boolean preOnClose = onClose;
         onClose = true;
 
-        super.close();
+        super.onClose();
         removed();
 
         onClose = preOnClose;
@@ -380,7 +380,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
@@ -418,7 +418,7 @@ public abstract class WidgetScreen extends Screen {
                 calculateWidgetPositions();
 
                 valid = true;
-                mouseMoved(mc.mouse.getX(), mc.mouse.getY(), mc.mouse.getX(), mc.mouse.getY());
+                mouseMoved(mc.mouseHandler.xpos(), mc.mouseHandler.ypos(), mc.mouseHandler.xpos(), mc.mouseHandler.ypos());
             }
 
             return super.render(renderer, mouseX, mouseY, delta);

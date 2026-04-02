@@ -68,9 +68,9 @@ public class SettingValueArgumentType implements ArgumentType<String> {
     public static CompletableFuture<Suggestions> suggest(SuggestionsBuilder builder, @NotNull Setting<?> setting) {
         Iterable<Identifier> identifiers = setting.getIdentifierSuggestions();
         if (identifiers != null) {
-            return SharedSuggestionProvider.suggestIdentifiers(identifiers, builder);
+            return SharedSuggestionProvider.suggestResource(identifiers, builder);
         }
 
-        return SharedSuggestionProvider.suggestMatching(setting.getSuggestions(), builder);
+        return SharedSuggestionProvider.suggest(setting.getSuggestions(), builder);
     }
 }

@@ -12,13 +12,13 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.AbstractBannerBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.particles.ParticleTypes;
 
 import java.util.List;
 import java.util.Set;
@@ -262,7 +262,7 @@ public class NoRender extends Module {
         .name("cave-culling")
         .description("Disables Minecraft's cave culling algorithm.")
         .defaultValue(false)
-        .onChanged(b -> mc.worldRenderer.reload())
+        .onChanged(b -> mc.levelRenderer.allChanged())
         .build()
     );
 
@@ -311,11 +311,11 @@ public class NoRender extends Module {
         .name("texture-rotations")
         .description("Changes texture rotations and model offsets to use a constant value instead of the block position.")
         .defaultValue(false)
-        .onChanged(b -> mc.worldRenderer.reload())
+        .onChanged(b -> mc.levelRenderer.allChanged())
         .build()
     );
 
-    private final Setting<List<AbstractBannerBlock>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
+    private final Setting<List<Block>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
         .name("block-entities")
         .description("Block entities (chest, shulker block, etc.) to not render.")
         .filter(block -> block instanceof EntityBlock && !(block instanceof AbstractBannerBlock))
@@ -385,12 +385,12 @@ public class NoRender extends Module {
 
     @Override
     public void onActivate() {
-        if (noCaveCulling.get() || noTextureRotations.get()) mc.worldRenderer.reload();
+        if (noCaveCulling.get() || noTextureRotations.get()) mc.levelRenderer.allChanged();
     }
 
     @Override
     public void onDeactivate() {
-        if (noCaveCulling.get() || noTextureRotations.get()) mc.worldRenderer.reload();
+        if (noCaveCulling.get() || noTextureRotations.get()) mc.levelRenderer.allChanged();
     }
 
     // Overlay

@@ -184,8 +184,8 @@ public class PotionTimersHud extends HudElement {
 
         texts.clear();
 
-        for (MobEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
-            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType().value())) continue;
+        for (MobEffectInstance statusEffectInstance : mc.player.getActiveEffects()) {
+            if (hiddenEffects.get().contains(statusEffectInstance.getEffect().value())) continue;
             if (!showAmbient.get() && statusEffectInstance.isAmbient()) continue;
             String text = getString(statusEffectInstance);
             texts.add(new ObjectObjectImmutablePair<>(statusEffectInstance, text));
@@ -219,7 +219,7 @@ public class PotionTimersHud extends HudElement {
         for (Pair<MobEffectInstance, String> potionEffectEntry : texts) {
             Color color = switch (colorMode.get()) {
                 case Effect -> {
-                    int c = potionEffectEntry.left().getEffectType().value().getColor();
+                    int c = potionEffectEntry.left().getEffect().value().getColor();
                     yield new Color(c).a(255);
                 }
                 case Flat -> {
@@ -241,7 +241,7 @@ public class PotionTimersHud extends HudElement {
     }
 
     private String getString(MobEffectInstance statusEffectInstance) {
-        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffectType().value()), statusEffectInstance.getAmplifier() + 1, MobEffectUtil.getDurationText(statusEffectInstance, 1, mc.world.getTickManager().getTickRate()).getString());
+        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffect().value()), statusEffectInstance.getAmplifier() + 1, MobEffectUtil.formatDuration(statusEffectInstance, 1, mc.level.tickRateManager().tickrate()).getString());
     }
 
     private double getScale() {
@@ -249,8 +249,8 @@ public class PotionTimersHud extends HudElement {
     }
 
     private boolean hasNoVisibleEffects() {
-        for (MobEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
-            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType().value())) continue;
+        for (MobEffectInstance statusEffectInstance : mc.player.getActiveEffects()) {
+            if (hiddenEffects.get().contains(statusEffectInstance.getEffect().value())) continue;
             if (!showAmbient.get() && statusEffectInstance.isAmbient()) continue;
             return false;
         }

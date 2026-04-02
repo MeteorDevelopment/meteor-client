@@ -33,17 +33,17 @@ import meteordevelopment.meteorclient.utils.render.MeteorToast;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.block.entity.*;
-import net.minecraft.world.item.Items;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.phys.Vec3;
 
 import java.io.*;
@@ -204,7 +204,7 @@ public class StashFinder extends Module {
             if (!storageBlocks.get().contains(blockEntity.getType())) continue;
 
             if (!blockBlacklist.isEmpty()) {
-                BlockPos below = blockEntity.getPos().down();
+                BlockPos below = blockEntity.getBlockPos().below();
                 if (blockBlacklist.contains(event.chunk().getBlockState(below).getBlock())) continue;
             }
 
@@ -226,7 +226,7 @@ public class StashFinder extends Module {
 
             if (renderTracer.get()) {
                 double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                tracerPositions.put(chunk.chunkPos, new Vec3d(chunk.x, y, chunk.z));
+                tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, y, chunk.z));
             }
 
             saveJson();
@@ -237,12 +237,12 @@ public class StashFinder extends Module {
                     case Chat -> sendChatNotification(chunk);
                     case Toast -> {
                         MeteorToast toast = new MeteorToast.Builder(title).icon(Items.CHEST).text("Found Stash!").build();
-                        mc.getToastManager().add(toast);
+                        mc.getToastManager().addToast(toast);
                     }
                     case Both -> {
                         sendChatNotification(chunk);
                         MeteorToast toast = new MeteorToast.Builder(title).icon(Items.CHEST).text("Found Stash!").build();
-                        mc.getToastManager().add(toast);
+                        mc.getToastManager().addToast(toast);
                     }
                 }
             }
@@ -293,7 +293,7 @@ public class StashFinder extends Module {
             visible.action = () -> {
                 if (visible.checked) {
                     double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                    tracerPositions.put(chunk.chunkPos, new Vec3d(chunk.x, y, chunk.z));
+                    tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, y, chunk.z));
                 } else tracerPositions.remove(chunk.chunkPos);
             };
 
@@ -409,19 +409,19 @@ public class StashFinder extends Module {
     }
 
     private void sendChatNotification(Chunk chunk) {
-        MutableComponent coords = MutableComponent.literal(chunk.x + ", " + chunk.z)
+        MutableComponent coords = Component.literal(chunk.x + ", " + chunk.z)
             .setStyle(Style.EMPTY
                 .withColor(ChatFormatting.WHITE)
-                .withFormatting(ChatFormatting.UNDERLINE)
-                .withHoverEvent(new HoverEvent.ShowText(MutableComponent.literal("Path to stash")))
+                .applyFormat(ChatFormatting.UNDERLINE)
+                .withHoverEvent(new HoverEvent.ShowText(Component.literal("Path to stash")))
                 .withClickEvent(new RunnableClickEvent(() -> PathManagers.get().moveTo(new BlockPos(chunk.x, 0, chunk.z), true))));
 
-        MutableComponent message = MutableComponent.literal("Found stash at ")
-            .formatted(ChatFormatting.GRAY)
-            .append(MutableComponent.literal("[").formatted(ChatFormatting.GRAY))
+        MutableComponent message = Component.literal("Found stash at ")
+            .withStyle(ChatFormatting.GRAY)
+            .append(Component.literal("[").withStyle(ChatFormatting.GRAY))
             .append(coords)
-            .append(MutableComponent.literal("]").formatted(ChatFormatting.GRAY))
-            .append(MutableComponent.literal(".").formatted(ChatFormatting.GRAY));
+            .append(Component.literal("]").withStyle(ChatFormatting.GRAY))
+            .append(Component.literal(".").withStyle(ChatFormatting.GRAY));
 
         ChatUtils.sendMsg(message);
     }
@@ -457,8 +457,8 @@ public class StashFinder extends Module {
                 double z1 = pos.z - 0.5;
                 double z2 = pos.z + 0.5;
 
-                int bottomY = mc.world.getBottomY();
-                int topY = bottomY + mc.world.getDimension().height();
+                int bottomY = mc.level.getMinY();
+                int topY = bottomY + mc.level.dimensionType().height();
 
                 event.renderer.line(x1, bottomY, z1, x1, topY, z1, traceColumnColor.get());
                 event.renderer.line(x1, bottomY, z2, x1, topY, z2, traceColumnColor.get());

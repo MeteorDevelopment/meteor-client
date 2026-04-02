@@ -54,10 +54,10 @@ public abstract class CommandSuggestionsMixin {
             reader.setCursor(reader.getCursor() + length);
 
             if (this.currentParse == null) {
-                this.currentParse = Commands.DISPATCHER.parse(reader, mc.getNetworkHandler().getCommandSource());
+                this.currentParse = Commands.DISPATCHER.parse(reader, mc.getConnection().getSuggestionsProvider());
             }
 
-            int cursor = input.getCursor();
+            int cursor = input.getCursorPosition();
             if (cursor >= length && (this.suggestions == null || !this.keepSuggestions)) {
                 this.pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(this.currentParse, cursor);
                 this.pendingSuggestions.thenRun(() -> {

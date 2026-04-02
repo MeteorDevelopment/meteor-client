@@ -19,7 +19,7 @@ public abstract class BlockColorsMixin {
     // Ambience - Custom Foliage Color
 
     @ModifyArg(
-        method = "create",
+        method = "createDefault",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/client/color/block/BlockColors;register(Lnet/minecraft/client/color/block/BlockColor;[Lnet/minecraft/world/level/block/Block;)V",
@@ -32,7 +32,7 @@ public abstract class BlockColorsMixin {
     }
 
     @ModifyArg(
-        method = "create",
+        method = "createDefault",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/client/color/block/BlockColors;register(Lnet/minecraft/client/color/block/BlockColor;[Lnet/minecraft/world/level/block/Block;)V",

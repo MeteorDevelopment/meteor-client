@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
-import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -99,7 +99,7 @@ public class Capes {
     }
 
     public static Identifier get(Player player) {
-        String capeName = OWNERS.get(player.getUuid());
+        String capeName = OWNERS.get(player.getUUID());
         if (capeName != null) {
             Cape cape = TEXTURES.get(capeName);
             if (cape == null) return null;
@@ -172,7 +172,7 @@ public class Capes {
         }
 
         public void register() {
-            mc.getTextureManager().registerTexture(identifier, new NativeImageBackedTexture(null, img));
+            mc.getTextureManager().register(identifier, new DynamicTexture(null, img));
             img = null;
 
             downloading = false;

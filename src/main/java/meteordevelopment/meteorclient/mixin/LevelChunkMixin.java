@@ -7,9 +7,9 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +25,7 @@ public abstract class LevelChunkMixin {
     Level level;
 
     @Inject(method = "setBlockState", at = @At("TAIL"))
-    private void onSetBlockState(BlockPos pos, BlockState state, int flags, CallbackInfoReturnable<BlockState> info) {
-        if (level.isClient()) MeteorClient.EVENT_BUS.post(BlockUpdateEvent.get(pos, info.getReturnValue(), state));
+    private void onSetBlockState(BlockPos pos, BlockState state, int flags, CallbackInfoReturnable<BlockState> cir) {
+        if (level.isClientSide()) MeteorClient.EVENT_BUS.post(BlockUpdateEvent.get(pos, cir.getReturnValue(), state));
     }
 }

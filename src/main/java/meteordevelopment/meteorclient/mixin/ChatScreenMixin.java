@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
-import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.ChatScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,7 +21,7 @@ public abstract class ChatScreenMixin {
     protected EditBox input;
 
     @Inject(method = "init", at = @At(value = "RETURN"))
-    private void onInit(CallbackInfo info) {
+    private void onInit(CallbackInfo ci) {
         if (Modules.get().get(BetterChat.class).isInfiniteChatBox()) input.setMaxLength(Integer.MAX_VALUE);
     }
 }

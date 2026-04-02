@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.mixin;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,7 +31,7 @@ public class ItemBlockRenderTypesMixin {
     private static void onGetFluidLayer(FluidState state, CallbackInfoReturnable<ChunkSectionLayer> cir) {
         if (Modules.get() == null) return;
 
-        int alpha = Xray.getAlpha(state.getBlockState(), null);
+        int alpha = Xray.getAlpha(state.createLegacyBlock(), null);
         if (alpha > 0 && alpha < 255) {
             cir.setReturnValue(ChunkSectionLayer.TRANSLUCENT);
         } else {

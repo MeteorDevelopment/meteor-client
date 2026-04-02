@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 public class NoopOutlineVertexConsumerProvider extends OutlineBufferSource {
     public static final NoopOutlineVertexConsumerProvider INSTANCE = new NoopOutlineVertexConsumerProvider();
@@ -21,6 +21,6 @@ public class NoopOutlineVertexConsumerProvider extends OutlineBufferSource {
     }
 
     @Override
-    public void draw() {
+    public void endOutlineBatch() {
     }
 }

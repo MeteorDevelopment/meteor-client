@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.effect.MobEffect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ public class StatusEffectListSetting extends Setting<List<MobEffect>> {
 
         try {
             for (String value : values) {
-                MobEffect effect = parseId(BuiltInRegistries.STATUS_EFFECT, value);
+                MobEffect effect = parseId(BuiltInRegistries.MOB_EFFECT, value);
                 if (effect != null) effects.add(effect);
             }
         } catch (Exception ignored) {
@@ -51,16 +51,16 @@ public class StatusEffectListSetting extends Setting<List<MobEffect>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return BuiltInRegistries.STATUS_EFFECT.getIds();
+        return BuiltInRegistries.MOB_EFFECT.keySet();
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        ListTag valueTag = new NbtList();
+        ListTag valueTag = new ListTag();
 
         for (MobEffect effect : get()) {
-            Identifier id = BuiltInRegistries.STATUS_EFFECT.getId(effect);
-            if (id != null) valueTag.add(StringTag.of(id.toString()));
+            Identifier id = BuiltInRegistries.MOB_EFFECT.getKey(effect);
+            if (id != null) valueTag.add(StringTag.valueOf(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -72,7 +72,7 @@ public class StatusEffectListSetting extends Setting<List<MobEffect>> {
         get().clear();
 
         for (Tag tagI : tag.getListOrEmpty("value")) {
-            MobEffect effect = BuiltInRegistries.STATUS_EFFECT.get(Identifier.of(tagI.asString().orElse("")));
+            MobEffect effect = BuiltInRegistries.MOB_EFFECT.getValue(Identifier.parse(tagI.asString().orElse("")));
             if (effect != null) get().add(effect);
         }
 

@@ -16,23 +16,23 @@ import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.LodestoneTracker;
-import net.minecraft.world.item.component.MapDecorations;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.item.component.LodestoneTracker;
+import net.minecraft.world.item.component.MapDecorations;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -75,10 +75,10 @@ public class LocateCommand extends Command {
         // Overworld structures
 
         builder.then(literal("buried_treasure").executes(s -> {
-            ItemStack stack = mc.player.getInventory().getSelectedStack();
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
             if (stack.getItem() != Items.FILLED_MAP
                 || stack.get(DataComponents.ITEM_NAME) == null
-                || !stack.get(DataComponents.ITEM_NAME).getString().equals(MutableComponent.translatable("filled_map.buried_treasure").getString())) {
+                || !stack.get(DataComponents.ITEM_NAME).getString().equals(Component.translatable("filled_map.buried_treasure").getString())) {
                 error("You need to hold a (highlight)buried treasure map(default)!");
                 return SINGLE_SUCCESS;
             }
@@ -91,8 +91,8 @@ public class LocateCommand extends Command {
 
             for (MapDecorations.Entry decoration : mapDecorationsComponent.decorations().values()) {
                 if (decoration.type().value().assetId().toString().equals("minecraft:red_x")) {
-                    Vec3 coords = new Vec3d(decoration.x(), 62, decoration.z());
-                    MutableComponent text = MutableComponent.literal("Buried Treasure located at ");
+                    Vec3 coords = new Vec3(decoration.x(), 62, decoration.z());
+                    MutableComponent text = Component.literal("Buried Treasure located at ");
                     text.append(ChatUtils.formatCoords(coords));
                     text.append(".");
                     info(text);
@@ -105,10 +105,10 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("mansion").executes(s -> {
-            ItemStack stack = mc.player.getInventory().getSelectedStack();
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
             if (stack.getItem() != Items.FILLED_MAP
                 || stack.get(DataComponents.ITEM_NAME) == null
-                || !stack.get(DataComponents.ITEM_NAME).getString().equals(MutableComponent.translatable("filled_map.mansion").getString())) {
+                || !stack.get(DataComponents.ITEM_NAME).getString().equals(Component.translatable("filled_map.mansion").getString())) {
                 error("You need to hold a (highlight)woodland explorer map(default)!");
                 return SINGLE_SUCCESS;
             }
@@ -121,8 +121,8 @@ public class LocateCommand extends Command {
 
             for (MapDecorations.Entry decoration : mapDecorationsComponent.decorations().values()) {
                 if (decoration.type().value().assetId().toString().equals("minecraft:woodland_mansion")) {
-                    Vec3 coords = new Vec3d(decoration.x(), 62, decoration.z());
-                    MutableComponent text = MutableComponent.literal("Mansion located at ");
+                    Vec3 coords = new Vec3(decoration.x(), 62, decoration.z());
+                    MutableComponent text = Component.literal("Mansion located at ");
                     text.append(ChatUtils.formatCoords(coords));
                     text.append(".");
                     info(text);
@@ -135,10 +135,10 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("monument").executes(s -> {
-            ItemStack stack = mc.player.getInventory().getSelectedStack();
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
             if (stack.getItem() == Items.FILLED_MAP
                 && stack.get(DataComponents.ITEM_NAME) != null
-                && stack.get(DataComponents.ITEM_NAME).getString().equals(MutableComponent.translatable("filled_map.monument").getString())) {
+                && stack.get(DataComponents.ITEM_NAME).getString().equals(Component.translatable("filled_map.monument").getString())) {
 
                 MapDecorations mapDecorationsComponent = stack.get(DataComponents.MAP_DECORATIONS);
                 if (mapDecorationsComponent == null) {
@@ -148,8 +148,8 @@ public class LocateCommand extends Command {
 
                 for (MapDecorations.Entry decoration : mapDecorationsComponent.decorations().values()) {
                     if (decoration.type().value().assetId().toString().equals("minecraft:ocean_monument")) {
-                        Vec3 coords = new Vec3d(decoration.x(), 62, decoration.z());
-                        MutableComponent text = MutableComponent.literal("Monument located at ");
+                        Vec3 coords = new Vec3(decoration.x(), 62, decoration.z());
+                        MutableComponent text = Component.literal("Monument located at ");
                         text.append(ChatUtils.formatCoords(coords));
                         text.append(".");
                         info(text);
@@ -168,7 +168,7 @@ public class LocateCommand extends Command {
                     error("No monument found. Try using an (highlight)ocean explorer map(default) for more success.");
                     return SINGLE_SUCCESS;
                 }
-                MutableComponent text = MutableComponent.literal("Monument located at ");
+                MutableComponent text = Component.literal("Monument located at ");
                 text.append(ChatUtils.formatCoords(coords));
                 text.append(".");
                 info(text);
@@ -196,7 +196,7 @@ public class LocateCommand extends Command {
                     error("No stronghold found nearby. You can use (highlight)Ender Eyes(default) for more success.");
                     return SINGLE_SUCCESS;
                 }
-                MutableComponent text = MutableComponent.literal("Stronghold located at ");
+                MutableComponent text = Component.literal("Stronghold located at ");
                 text.append(ChatUtils.formatCoords(coords));
                 text.append(".");
                 info(text);
@@ -210,7 +210,7 @@ public class LocateCommand extends Command {
         // Nether structures
 
         builder.then(literal("nether_fortress").executes(s -> {
-            if (mc.world.getRegistryKey() != Level.NETHER) {
+            if (mc.level.dimension() != Level.NETHER) {
                 error("You need to be in the nether to locate a nether fortress.");
                 return SINGLE_SUCCESS;
             }
@@ -225,7 +225,7 @@ public class LocateCommand extends Command {
                 error("No nether fortress found.");
                 return SINGLE_SUCCESS;
             }
-            MutableComponent text = MutableComponent.literal("Fortress located at ");
+            MutableComponent text = Component.literal("Fortress located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
             info(text);
@@ -235,7 +235,7 @@ public class LocateCommand extends Command {
         // End structures
 
         builder.then(literal("end_city").executes(s -> {
-            if (mc.world.getRegistryKey() != Level.END) {
+            if (mc.level.dimension() != Level.END) {
                 error("You need to be in the end to locate an end city.");
                 return SINGLE_SUCCESS;
             }
@@ -250,7 +250,7 @@ public class LocateCommand extends Command {
                 error("No end city found.");
                 return SINGLE_SUCCESS;
             }
-            MutableComponent text = MutableComponent.literal("End city located at ");
+            MutableComponent text = Component.literal("End city located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
             info(text);
@@ -260,7 +260,7 @@ public class LocateCommand extends Command {
         // Misc structures
 
         builder.then(literal("lodestone").executes(s -> {
-            ItemStack stack = mc.player.getInventory().getSelectedStack();
+            ItemStack stack = mc.player.getInventory().getSelectedItem();
             if (stack.getItem() != Items.COMPASS) {
                 error("You need to hold a (highlight)lodestone(default) compass!");
                 return SINGLE_SUCCESS;
@@ -281,8 +281,8 @@ public class LocateCommand extends Command {
                 return SINGLE_SUCCESS;
             }
 
-            Vec3 coords = Vec3.of(lodestoneTrackerComponent.target().get().pos());
-            MutableComponent text = MutableComponent.literal("Lodestone located at ");
+            Vec3 coords = Vec3.atLowerCornerOf(lodestoneTrackerComponent.target().get().pos());
+            MutableComponent text = Component.literal("Lodestone located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
             info(text);
@@ -308,12 +308,12 @@ public class LocateCommand extends Command {
         if (posList.size() < 3) {
             warning("Only %d block(s) found. This search might be a false positive.", posList.size());
         }
-        return new Vec3d(posList.getFirst().getX(), posList.getFirst().getY(), posList.getFirst().getZ());
+        return new Vec3(posList.getFirst().getX(), posList.getFirst().getY(), posList.getFirst().getZ());
     }
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof ClientboundAddEntityPacket packet && packet.getEntityType() == EntityType.EYE_OF_ENDER) {
+        if (event.packet instanceof ClientboundAddEntityPacket packet && packet.getType() == EntityType.EYE_OF_ENDER) {
             firstPosition(packet.getX(), packet.getY(), packet.getZ());
         }
     }
@@ -326,7 +326,7 @@ public class LocateCommand extends Command {
     }
 
     private void firstPosition(double x, double y, double z) {
-        Vec3 pos = new Vec3d(x, y, z);
+        Vec3 pos = new Vec3(x, y, z);
         if (this.firstStart == null) {
             this.firstStart = pos;
         } else {
@@ -336,7 +336,7 @@ public class LocateCommand extends Command {
 
     private void lastPosition(double x, double y, double z) {
         info("%s Eye of Ender's trajectory saved.", (this.firstEnd == null) ? "First" : "Second");
-        Vec3 pos = new Vec3d(x, y, z);
+        Vec3 pos = new Vec3(x, y, z);
         if (this.firstEnd == null) {
             this.firstEnd = pos;
             info("Please throw the second Eye Of Ender from a different location.");
@@ -365,8 +365,8 @@ public class LocateCommand extends Command {
         }
 
         MeteorClient.EVENT_BUS.unsubscribe(this);
-        Vec3 coords = new Vec3d(intersection[0], 0, intersection[1]);
-        MutableComponent text = MutableComponent.literal("Stronghold roughly located at ");
+        Vec3 coords = new Vec3(intersection[0], 0, intersection[1]);
+        MutableComponent text = Component.literal("Stronghold roughly located at ");
         text.append(ChatUtils.formatCoords(coords));
         text.append(".");
         info(text);

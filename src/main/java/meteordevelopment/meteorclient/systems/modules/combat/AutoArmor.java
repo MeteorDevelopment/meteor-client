@@ -16,17 +16,17 @@ import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.core.Holder;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -113,12 +113,12 @@ public class AutoArmor extends Module {
         for (ArmorPiece armorPiece : armorPieces) armorPiece.reset();
 
         // Loop through items in inventory
-        for (int i = 0; i < mc.player.getInventory().getMainStacks().size(); i++) {
-            ItemStack itemStack = mc.player.getInventory().getStack(i);
+        for (int i = 0; i < mc.player.getInventory().getNonEquipmentItems().size(); i++) {
+            ItemStack itemStack = mc.player.getInventory().getItem(i);
             if (itemStack.isEmpty() || !isArmor(itemStack)) continue;
 
             // Check for durability if anti break is enabled
-            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) {
+            if (antiBreak.get() && itemStack.isDamageableItem() && itemStack.getMaxDamage() - itemStack.getDamageValue() <= 10) {
                 continue;
             }
 
@@ -145,7 +145,7 @@ public class AutoArmor extends Module {
 
     private boolean hasAvoidedEnchantment() {
         for (Holder<Enchantment> enchantment : enchantments.keySet()) {
-            if (enchantment.matches(avoidedEnchantments.get()::contains)) {
+            if (enchantment.is(avoidedEnchantments.get()::contains)) {
                 return true;
             }
         }
@@ -154,8 +154,8 @@ public class AutoArmor extends Module {
     }
 
     private int getItemSlotId(ItemStack itemStack) {
-        if (itemStack.contains(DataComponents.GLIDER)) return 2;
-        return itemStack.get(DataComponents.EQUIPPABLE).slot().getEntitySlotId();
+        if (itemStack.has(DataComponents.GLIDER)) return 2;
+        return itemStack.get(DataComponents.EQUIPPABLE).slot().getIndex();
     }
 
     private int getScore(ItemStack itemStack) {
@@ -178,11 +178,11 @@ public class AutoArmor extends Module {
         score += Utils.getEnchantmentLevel(enchantments, Enchantments.UNBREAKING);
         score += 2 * Utils.getEnchantmentLevel(enchantments, Enchantments.MENDING);
 
-        if (itemStack.contains(DataComponents.ATTRIBUTE_MODIFIERS)) {
+        if (itemStack.has(DataComponents.ATTRIBUTE_MODIFIERS)) {
             ItemAttributeModifiers component = itemStack.get(DataComponents.ATTRIBUTE_MODIFIERS);
             for (ItemAttributeModifiers.Entry modifier : component.modifiers()) {
                 if (modifier.attribute() == Attributes.ARMOR || modifier.attribute() == Attributes.ARMOR_TOUGHNESS) {
-                    double e = modifier.modifier().value();
+                    double e = modifier.modifier().amount();
 
                     score += (int) switch (modifier.modifier().operation()) {
                         case ADD_VALUE -> e;
@@ -208,8 +208,8 @@ public class AutoArmor extends Module {
     }
 
     private void moveToEmpty(int armorSlotId) {
-        for (int i = 0; i < mc.player.getInventory().getMainStacks().size(); i++) {
-            if (mc.player.getInventory().getStack(i).isEmpty()) {
+        for (int i = 0; i < mc.player.getInventory().getNonEquipmentItems().size(); i++) {
+            if (mc.player.getInventory().getItem(i).isEmpty()) {
                 InvUtils.move().fromArmor(armorSlotId).to(i);
 
                 // Apply delay
@@ -221,7 +221,7 @@ public class AutoArmor extends Module {
     }
 
     private boolean isArmor(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.FOOT_ARMOR) || itemStack.isIn(ItemTags.LEG_ARMOR) || itemStack.isIn(ItemTags.CHEST_ARMOR) || itemStack.isIn(ItemTags.HEAD_ARMOR);
+        return itemStack.is(ItemTags.FOOT_ARMOR) || itemStack.is(ItemTags.LEG_ARMOR) || itemStack.is(ItemTags.CHEST_ARMOR) || itemStack.is(ItemTags.HEAD_ARMOR);
     }
 
     public enum Protection {
@@ -270,7 +270,7 @@ public class AutoArmor extends Module {
         public void calculate() {
             if (cannotSwap()) return;
 
-            ItemStack itemStack = mc.player.getEquippedStack(slot);
+            ItemStack itemStack = mc.player.getItemBySlot(slot);
 
             // Check if the item is an elytra
             if ((ignoreElytra.get() || Modules.get().isActive(ChestSwap.class)) && itemStack.getItem() == Items.ELYTRA) {
@@ -293,7 +293,7 @@ public class AutoArmor extends Module {
 
             // Calculate durability
             if (!itemStack.isEmpty()) {
-                durability = itemStack.getMaxDamage() - itemStack.getDamage();
+                durability = itemStack.getMaxDamage() - itemStack.getDamageValue();
             }
         }
 
@@ -307,10 +307,10 @@ public class AutoArmor extends Module {
             if (cannotSwap() || score == Integer.MAX_VALUE) return;
 
             // Check if new score is better and swap if it is
-            if (bestScore > score) swap(bestSlot, slot.getEntitySlotId());
+            if (bestScore > score) swap(bestSlot, slot.getIndex());
             else if (antiBreak.get() && durability <= 10) {
                 // If no better piece has been found but current piece is broken find an empty slot and move it there
-                moveToEmpty(slot.getEntitySlotId());
+                moveToEmpty(slot.getIndex());
             }
         }
 
@@ -323,7 +323,7 @@ public class AutoArmor extends Module {
         }
 
         private int applyAntiBreakScore(int score, ItemStack itemStack) {
-            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) {
+            if (antiBreak.get() && itemStack.isDamageableItem() && itemStack.getMaxDamage() - itemStack.getDamageValue() <= 10) {
                 return -1;
             }
 

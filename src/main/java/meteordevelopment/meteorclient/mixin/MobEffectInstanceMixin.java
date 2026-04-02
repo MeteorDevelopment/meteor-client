@@ -17,11 +17,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MobEffectInstance.class)
 public abstract class MobEffectInstanceMixin {
     @Inject(method = "tickDownDuration", at = @At("HEAD"), cancellable = true)
-    private void tick(CallbackInfo info) {
+    private void tick(CallbackInfo ci) {
         if (!Utils.canUpdate()) return;
 
-        if (Modules.get().get(PotionSaver.class).shouldFreeze(((MobEffectInstance) (Object) this).getEffectType().value())) {
-            info.cancel();
+        if (Modules.get().get(PotionSaver.class).shouldFreeze(((MobEffectInstance) (Object) this).getEffect().value())) {
+            ci.cancel();
         }
     }
 }

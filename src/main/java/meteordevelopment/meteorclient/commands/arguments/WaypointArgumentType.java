@@ -62,7 +62,7 @@ public class WaypointArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return SharedSuggestionProvider.suggestMatching(getExamples(), builder);
+        return SharedSuggestionProvider.suggest(getExamples(), builder);
     }
 
     @Override

@@ -80,7 +80,7 @@ public class Commands {
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {
-        DISPATCHER.execute(message, mc.getNetworkHandler().getCommandSource());
+        DISPATCHER.execute(message, mc.getConnection().getSuggestionsProvider());
     }
 
     public static Command get(String name) {
@@ -94,8 +94,8 @@ public class Commands {
     }
 
     /**
-     * Argument types that rely on Minecraft registries access those registries through a {@link CommandRegistryAccess}
-     * object. Since dynamic registries are specific to each server, we need to make a new CommandRegistryAccess object
+     * Argument types that rely on Minecraft registries access those registries through a {@link CommandBuildContext}
+     * object. Since dynamic registries are specific to each server, we need to make a new CommandBuildContext object
      * every time we join a server.
      * <p>
      * The command tree and by extension the {@link CommandDispatcher} also have to be rebuilt because:
@@ -112,8 +112,8 @@ public class Commands {
      */
     @EventHandler
     private static void onJoin(GameJoinedEvent event) {
-        ClientPacketListener networkHandler = mc.getNetworkHandler();
-        Command.REGISTRY_ACCESS = CommandBuildContext.of(networkHandler.getRegistryManager(), networkHandler.getEnabledFeatures());
+        ClientPacketListener networkHandler = mc.getConnection();
+        Command.REGISTRY_ACCESS = CommandBuildContext.simple(networkHandler.registryAccess(), networkHandler.enabledFeatures());
 
         DISPATCHER = new CommandDispatcher<>();
         for (Command command : COMMANDS) {

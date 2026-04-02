@@ -8,13 +8,13 @@ package meteordevelopment.meteorclient.renderer;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.shaders.UniformType;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.commons.io.IOUtils;
 
@@ -225,7 +225,7 @@ public abstract class MeteorRenderPipelines {
             device.precompilePipeline(pipeline, (identifier, shaderType) -> {
                 var resource = resources.getResource(identifier).get();
 
-                try (var in = resource.getInputStream()) {
+                try (var in = resource.open()) {
                     return IOUtils.toString(in, StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     throw new RuntimeException(e);

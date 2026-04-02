@@ -24,12 +24,12 @@ public class EXPThrower extends Module {
         FindItemResult exp = InvUtils.findInHotbar(Items.EXPERIENCE_BOTTLE);
         if (!exp.found()) return;
 
-        Rotations.rotate(mc.player.getYaw(), 90, () -> {
+        Rotations.rotate(mc.player.getYRot(), 90, () -> {
             if (exp.getHand() != null) {
-                mc.interactionManager.interactItem(mc.player, exp.getHand());
+                mc.gameMode.useItem(mc.player, exp.getHand());
             } else {
                 InvUtils.swap(exp.slot(), true);
-                mc.interactionManager.interactItem(mc.player, exp.getHand());
+                mc.gameMode.useItem(mc.player, exp.getHand());
                 InvUtils.swapBack();
             }
         });

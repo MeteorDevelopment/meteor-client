@@ -21,14 +21,14 @@ public abstract class KeyboardInputMixin extends ClientInput {
     @Inject(method = "tick", at = @At("TAIL"))
     private void isPressed(CallbackInfo ci) {
         if (Modules.get().get(Sneak.class).doVanilla() || Modules.get().get(Freecam.class).staySneaking())
-            playerInput = new PlayerInput(
-                playerInput.forward(),
-                playerInput.backward(),
-                playerInput.left(),
-                playerInput.right(),
-                playerInput.jump(),
+            keyPresses = new Input(
+                keyPresses.forward(),
+                keyPresses.backward(),
+                keyPresses.left(),
+                keyPresses.right(),
+                keyPresses.jump(),
                 true,
-                playerInput.sprint()
+                keyPresses.sprint()
             );
     }
 }

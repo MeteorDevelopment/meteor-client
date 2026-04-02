@@ -33,9 +33,9 @@ public class Spider extends Module {
     private void onTick(TickEvent.Post event) {
         if (!mc.player.horizontalCollision) return;
 
-        Vec3 velocity = mc.player.getVelocity();
+        Vec3 velocity = mc.player.getDeltaMovement();
         if (velocity.y >= 0.2) return;
 
-        mc.player.setVelocity(velocity.x, speed.get(), velocity.z);
+        mc.player.setDeltaMovement(velocity.x, speed.get(), velocity.z);
     }
 }

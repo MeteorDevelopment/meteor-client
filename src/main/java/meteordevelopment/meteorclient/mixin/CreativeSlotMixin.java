@@ -18,12 +18,12 @@ public abstract class CreativeSlotMixin implements ISlot {
     Slot target;
 
     @Override
-    public int meteor$getId() {
-        return target.id;
+    public int meteor$getIndex() {
+        return target.index;
     }
 
     @Override
-    public int meteor$getIndex() {
-        return target.getIndex();
+    public int meteor$getSlot() {
+        return target.getContainerSlot();
     }
 }

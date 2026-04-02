@@ -16,10 +16,10 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.other.Snapper;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
@@ -69,7 +69,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        double s = mc.getWindow().getScaleFactor();
+        double s = mc.getWindow().getGuiScale();
 
         double mouseX = click.x();
         double mouseY = click.y();
@@ -100,7 +100,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
-        double s = mc.getWindow().getScaleFactor();
+        double s = mc.getWindow().getGuiScale();
 
         mouseX *= s;
         mouseY *= s;
@@ -118,7 +118,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent click) {
-        double s = mc.getWindow().getScaleFactor();
+        double s = mc.getWindow().getGuiScale();
 
         double mouseX = click.x();
         double mouseY = click.y();
@@ -282,7 +282,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        int s = mc.getWindow().getScaleFactor();
+        int s = mc.getWindow().getGuiScale();
 
         mouseX *= s;
         mouseY *= s;
@@ -362,7 +362,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     public static boolean isOpen() {
-        Screen s = mc.currentScreen;
+        Screen s = mc.screen;
         return s instanceof HudEditorScreen || s instanceof AddHudElementScreen || s instanceof HudElementPresetsScreen || s instanceof HudElementScreen || s instanceof HudTab.HudScreen;
     }
 

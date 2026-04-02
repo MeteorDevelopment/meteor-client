@@ -17,7 +17,7 @@ public class WindowConfig implements ISerializable<WindowConfig> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putBoolean("expanded", expanded);
         tag.putDouble("x", x);

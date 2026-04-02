@@ -41,7 +41,7 @@ public class TargetUtils {
     public static void getList(List<Entity> targetList, Predicate<Entity> isGood, SortPriority sortPriority, int maxCount) {
         targetList.clear();
 
-        for (Entity entity : mc.world.getEntities()) {
+        for (Entity entity : mc.level.entitiesForRendering()) {
             if (entity != null && isGood.test(entity)) targetList.add(entity);
         }
 
@@ -57,11 +57,11 @@ public class TargetUtils {
     }
 
     @Nullable
-    public static PlayerEntity getPlayerTarget(double range, SortPriority priority) {
+    public static Player getPlayerTarget(double range, SortPriority priority) {
         if (!Utils.canUpdate()) return null;
-        return (PlayerEntity) get(entity -> {
-            if (!(entity instanceof PlayerEntity player) || entity == mc.player) return false;
-            if (player.isDead() || player.getHealth() <= 0) return false;
+        return (Player) get(entity -> {
+            if (!(entity instanceof Player player) || entity == mc.player) return false;
+            if (player.isDeadOrDying() || player.getHealth() <= 0) return false;
             if (!PlayerUtils.isWithin(entity, range)) return false;
             if (!Friends.get().shouldAttack(player)) return false;
             if (entity instanceof FakePlayerEntity fakePlayer) return !fakePlayer.noHit;
@@ -69,8 +69,8 @@ public class TargetUtils {
         }, priority);
     }
 
-    public static boolean isBadTarget(PlayerEntity target, double range) {
+    public static boolean isBadTarget(Player target, double range) {
         if (target == null) return true;
-        return !PlayerUtils.isWithin(target, range) || !target.isAlive() || target.isDead() || target.getHealth() <= 0;
+        return !PlayerUtils.isWithin(target, range) || !target.isAlive() || target.isDeadOrDying() || target.getHealth() <= 0;
     }
 }

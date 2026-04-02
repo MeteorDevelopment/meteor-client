@@ -79,7 +79,7 @@ public class Blink extends Module {
             model.spawn();
         }
 
-        Utils.set(start, mc.player.getEntityPos());
+        Utils.set(start, mc.player.position());
     }
 
     @Override
@@ -90,7 +90,7 @@ public class Blink extends Module {
 
         if (cancelled) {
             mc.player.setPos(start.x, start.y, start.z);
-            mc.player.setVelocity(Vec3.ZERO);
+            mc.player.setDeltaMovement(Vec3.ZERO);
         }
 
         cancelled = false;
@@ -120,8 +120,8 @@ public class Blink extends Module {
 
         if (prev != null &&
             p.isOnGround() == prev.isOnGround() &&
-            p.getYaw(-1) == prev.getYaw(-1) &&
-            p.getPitch(-1) == prev.getPitch(-1) &&
+            p.getYRot(-1) == prev.getYRot(-1) &&
+            p.getXRot(-1) == prev.getXRot(-1) &&
             p.getX(-1) == prev.getX(-1) &&
             p.getY(-1) == prev.getY(-1) &&
             p.getZ(-1) == prev.getZ(-1)
@@ -150,7 +150,7 @@ public class Blink extends Module {
     private void dumpPackets(boolean send) {
         sending = true;
         synchronized (packets) {
-            if (send) packets.forEach(mc.player.networkHandler::sendPacket);
+            if (send) packets.forEach(mc.player.connection::send);
             packets.clear();
         }
         sending = false;

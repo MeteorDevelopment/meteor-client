@@ -21,6 +21,6 @@ public class EntityHitboxDebugRendererMixin {
         double v = Modules.get().get(Hitboxes.class).getEntityValue(entity);
         if (v == 0) return original;
 
-        return original.expand(v);
+        return original.inflate(v);
     }
 }

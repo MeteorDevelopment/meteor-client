@@ -25,7 +25,7 @@ public abstract class FireworkRocketEntityMixin {
     private int lifetime;
 
     @Inject(method = "tick", at = @At("TAIL"))
-    private void onTick(CallbackInfo info) {
+    private void onTick(CallbackInfo ci) {
         FireworkRocketEntity firework = ((FireworkRocketEntity) (Object) this);
 
         if (Modules.get().get(ElytraBoost.class).isFirework(firework) && this.life > this.lifetime) {
@@ -33,23 +33,23 @@ public abstract class FireworkRocketEntityMixin {
         }
     }
 
-    @Inject(method = "onEntityHit", at = @At("HEAD"), cancellable = true)
-    private void onEntityHit(EntityHitResult entityHitResult, CallbackInfo info) {
+    @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
+    private void onHitEntity(EntityHitResult entityHitResult, CallbackInfo ci) {
         FireworkRocketEntity firework = ((FireworkRocketEntity) (Object) this);
 
         if (Modules.get().get(ElytraBoost.class).isFirework(firework)) {
             firework.discard();
-            info.cancel();
+            ci.cancel();
         }
     }
 
-    @Inject(method = "onBlockHit", at = @At("HEAD"), cancellable = true)
-    private void onBlockHit(BlockHitResult blockHitResult, CallbackInfo info) {
+    @Inject(method = "onHitBlock", at = @At("HEAD"), cancellable = true)
+    private void onHitBlock(BlockHitResult blockHitResult, CallbackInfo ci) {
         FireworkRocketEntity firework = ((FireworkRocketEntity) (Object) this);
 
         if (Modules.get().get(ElytraBoost.class).isFirework(firework)) {
             firework.discard();
-            info.cancel();
+            ci.cancel();
         }
     }
 }

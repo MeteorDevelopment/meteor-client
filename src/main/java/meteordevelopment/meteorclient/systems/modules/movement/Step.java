@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -67,7 +67,7 @@ public class Step extends Module {
 
     @Override
     public void onActivate() {
-        prevStepHeight = mc.player.getStepHeight();
+        prevStepHeight = mc.player.maxUpStep();
 
         prevPathManagerStep = PathManagers.get().getSettings().getStep().get();
         PathManagers.get().getSettings().getStep().set(true);
@@ -75,18 +75,18 @@ public class Step extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isSneaking()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isSneaking());
+        boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isShiftKeyDown()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isShiftKeyDown());
         double height = getMaxSafeHeight();
         if (work && height > 0) {
-            mc.player.getAttributeInstance(Attributes.STEP_HEIGHT).setBaseValue(height);
+            mc.player.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(height);
         } else {
-            mc.player.getAttributeInstance(Attributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
+            mc.player.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
         }
     }
 
     @Override
     public void onDeactivate() {
-        mc.player.getAttributeInstance(Attributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
+        mc.player.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(prevStepHeight);
 
         PathManagers.get().getSettings().getStep().set(prevPathManagerStep);
     }
@@ -96,10 +96,10 @@ public class Step extends Module {
     }
 
     private double getExplosionDamage() {
-        OptionalDouble crystalDamage = Streams.stream(mc.world.getEntities())
-            .filter(entity -> entity instanceof EndCrystal)
+        OptionalDouble crystalDamage = Streams.stream(mc.level.entitiesForRendering())
+            .filter(EndCrystal.class::isInstance)
             .filter(Entity::isAlive)
-            .mapToDouble(entity -> DamageUtils.crystalDamage(mc.player, entity.getEntityPos()))
+            .mapToDouble(entity -> DamageUtils.crystalDamage(mc.player, entity.position()))
             .max();
         return crystalDamage.orElse(0.0);
     }
@@ -124,29 +124,29 @@ public class Step extends Module {
         // one block when holding a movement key because standing on the
         // near edge of that block is technically safe
 
-        Vec3d inputOffset = mc.player.getRotationVector();
-        Vec2 input = mc.player.input.getMovementInput();
-        ((IVec3d) inputOffset).meteor$setY(0);
-        inputOffset = inputOffset.normalize().multiply(1.2);
+        Vec3 inputOffset = mc.player.getLookAngle();
+        Vec2 input = mc.player.input.getMoveVector();
+        ((IVec3) inputOffset).meteor$setY(0);
+        inputOffset = inputOffset.normalize().scale(1.2);
         double zdot = inputOffset.z;
         double xdot = inputOffset.x;
-        inputOffset = new Vec3d(input.y * xdot + input.x * zdot, 0, input.x * xdot + input.y * zdot);
+        inputOffset = new Vec3(input.y * xdot + input.x * zdot, 0, input.x * xdot + input.y * zdot);
 
         for (int i = 1; i < max; i++) {
-            mc.player.setBoundingBox(initial.offset(0, i, 0));
+            mc.player.setBoundingBox(initial.move(0, i, 0));
             if (!isSaferThanWith(currentDamage)) {
                 mc.player.setBoundingBox(initial);
                 return h;
             }
 
-            mc.player.setBoundingBox(mc.player.getBoundingBox().offset(inputOffset));
+            mc.player.setBoundingBox(mc.player.getBoundingBox().move(inputOffset));
             if (!isSaferThanWith(currentDamage)) {
                 mc.player.setBoundingBox(initial);
                 return h;
             }
             h += 1;
         }
-        mc.player.setBoundingBox(initial.offset(0, max, 0));
+        mc.player.setBoundingBox(initial.move(0, max, 0));
 
         if (isSaferThanWith(currentDamage)) h = max;
 

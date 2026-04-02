@@ -10,14 +10,14 @@ import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderS
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.object.banner.BannerFlagModel;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.item.BannerItem;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -31,16 +31,16 @@ public class BannerTooltipComponent implements MeteorTooltipData, ClientTooltipC
      */
     public BannerTooltipComponent(ItemStack banner) {
         this.color = ((BannerItem) banner.getItem()).getColor();
-        this.patterns = banner.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.DEFAULT);
-        ModelPart modelPart = mc.getLoadedEntityModels().getModelPart(ModelLayers.STANDING_BANNER_FLAG);
-        this.bannerFlag = new BannerFlagBlockModel(modelPart);
+        this.patterns = banner.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+        ModelPart modelPart = mc.getEntityModels().bakeLayer(ModelLayers.STANDING_BANNER_FLAG);
+        this.bannerFlag = new BannerFlagModel(modelPart);
     }
 
     public BannerTooltipComponent(DyeColor color, BannerPatternLayers patterns) {
         this.color = color;
         this.patterns = patterns;
-        ModelPart modelPart = mc.getLoadedEntityModels().getModelPart(ModelLayers.STANDING_BANNER_FLAG);
-        this.bannerFlag = new BannerFlagBlockModel(modelPart);
+        ModelPart modelPart = mc.getEntityModels().bakeLayer(ModelLayers.STANDING_BANNER_FLAG);
+        this.bannerFlag = new BannerFlagModel(modelPart);
     }
 
     @Override
@@ -59,16 +59,16 @@ public class BannerTooltipComponent implements MeteorTooltipData, ClientTooltipC
     }
 
     @Override
-    public void drawItems(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
         var centerX = width / 2 - getWidth(null) / 2;
 
         GuiGraphicsAccessor contextAccessor = (GuiGraphicsAccessor) context;
 
-        contextAccessor.getGuiRenderState().addSpecialElement(new CustomBannerGuiElementRenderState(
+        contextAccessor.getGuiRenderState().submitPicturesInPictureState(new CustomBannerGuiElementRenderState(
             bannerFlag, color, patterns,
             centerX + x, y,
             centerX + x + getWidth(null), y + getHeight(null),
-            contextAccessor.getScissorStack().peekLast(),
+            contextAccessor.getScissorStack().peek(),
             16 * 2
         ));
     }

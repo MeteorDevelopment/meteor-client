@@ -21,7 +21,7 @@ public class OkPrompt extends Prompt<OkPrompt> {
     }
 
     public static OkPrompt create() {
-        return new OkPrompt(GuiThemes.get(), mc.currentScreen);
+        return new OkPrompt(GuiThemes.get(), mc.screen);
     }
 
     public static OkPrompt create(GuiTheme theme, Screen parent) {
@@ -39,7 +39,7 @@ public class OkPrompt extends Prompt<OkPrompt> {
         okButton.action = () -> {
             dontShowAgain(screen);
             onOk.run();
-            screen.close();
+            screen.onClose();
         };
     }
 }

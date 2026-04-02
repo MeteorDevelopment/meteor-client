@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.world.item.Item;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -34,19 +34,19 @@ public class ItemSetting extends Setting<Item> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return BuiltInRegistries.ITEM.getIds();
+        return BuiltInRegistries.ITEM.keySet();
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        tag.putString("value", BuiltInRegistries.ITEM.getId(get()).toString());
+        tag.putString("value", BuiltInRegistries.ITEM.getKey(get()).toString());
 
         return tag;
     }
 
     @Override
     public Item load(CompoundTag tag) {
-        value = BuiltInRegistries.ITEM.get(Identifier.of(tag.getString("value", "")));
+        value = BuiltInRegistries.ITEM.getValue(Identifier.parse(tag.getStringOr("value", "")));
 
         if (filter != null && !filter.test(value)) {
             for (Item item : BuiltInRegistries.ITEM) {

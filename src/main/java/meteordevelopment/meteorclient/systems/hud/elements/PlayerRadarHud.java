@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -144,7 +143,7 @@ public class PlayerRadarHud extends HudElement {
         double width = renderer.textWidth("Players:", shadow.get(), getScale());
         double height = renderer.textHeight(shadow.get(), getScale());
 
-        if (mc.world == null) {
+        if (mc.level == null) {
             setSize(width, height);
             return;
         }
@@ -173,7 +172,7 @@ public class PlayerRadarHud extends HudElement {
 
         renderer.text("Players:", x + border.get() + alignX(renderer.textWidth("Players:", shadow.get(), getScale()), alignment.get()), y, secondaryColor.get(), shadow.get(), getScale());
 
-        if (mc.world == null) return;
+        if (mc.level == null) return;
         double spaceWidth = renderer.textWidth(" ", shadow.get(), getScale());
 
         for (AbstractClientPlayer entity : getPlayers()) {
@@ -203,9 +202,9 @@ public class PlayerRadarHud extends HudElement {
 
     private List<AbstractClientPlayer> getPlayers() {
         players.clear();
-        players.addAll(mc.world.getPlayers());
+        players.addAll(mc.level.players());
         if (players.size() > limit.get()) players.subList(limit.get() - 1, players.size() - 1).clear();
-        players.sort(Comparator.comparingDouble(e -> e.squaredDistanceTo(mc.getCameraEntity())));
+        players.sort(Comparator.comparingDouble(e -> e.distanceToSqr(mc.getCameraEntity())));
 
         return players;
     }

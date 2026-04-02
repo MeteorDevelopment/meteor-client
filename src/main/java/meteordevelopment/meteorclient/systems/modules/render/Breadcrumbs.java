@@ -62,7 +62,7 @@ public class Breadcrumbs extends Module {
         section = sectionPool.get();
         section.set1();
 
-        lastDimension = mc.world.getDimension();
+        lastDimension = mc.level.dimensionType();
     }
 
     @Override
@@ -73,9 +73,9 @@ public class Breadcrumbs extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!mc.getNetworkHandler().isLoaded()) return;
+        if (!mc.getConnection().hasClientLoaded()) return;
 
-        if (lastDimension != mc.world.getDimension()) {
+        if (lastDimension != mc.level.dimensionType()) {
             sectionPool.freeAll(sections);
             sections.clear();
         }
@@ -93,7 +93,7 @@ public class Breadcrumbs extends Module {
             section.set1();
         }
 
-        lastDimension = mc.world.getDimension();
+        lastDimension = mc.level.dimensionType();
     }
 
     @EventHandler

@@ -40,7 +40,7 @@ public class NotebotSongArgumentType implements ArgumentType<Path> {
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         try (var suggestions = Files.list(MeteorClient.FOLDER.toPath().resolve("notebot"))) {
-            return SharedSuggestionProvider.suggestMatching(suggestions
+            return SharedSuggestionProvider.suggest(suggestions
                     .filter(SongDecoders::hasDecoder)
                     .map(path -> path.getFileName().toString()),
                 builder

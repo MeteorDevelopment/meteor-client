@@ -76,12 +76,12 @@ public class FastClimb extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (!timerMode.get() && climbing()) {
-            Vec3 velocity = mc.player.getVelocity();
-            mc.player.setVelocity(velocity.x, speed.get(), velocity.z);
+            Vec3 velocity = mc.player.getDeltaMovement();
+            mc.player.setDeltaMovement(velocity.x, speed.get(), velocity.z);
         }
     }
 
     private boolean climbing() {
-        return (mc.player.horizontalCollision || ((LivingEntityAccessor) mc.player).meteor$isJumping()) && (mc.player.isClimbing() || mc.player.getBlockStateAtPos().isOf(Blocks.POWDER_SNOW) && PowderSnowBlock.canWalkOnPowderSnow(mc.player));
+        return (mc.player.horizontalCollision || ((LivingEntityAccessor) mc.player).meteor$isJumping()) && (mc.player.onClimbable() || mc.player.getInBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(mc.player));
     }
 }

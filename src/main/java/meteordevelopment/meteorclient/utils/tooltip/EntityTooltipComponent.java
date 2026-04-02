@@ -39,16 +39,16 @@ public class EntityTooltipComponent implements MeteorTooltipData, ClientTooltipC
     }
 
     @Override
-    public void drawItems(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
-        var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).getAndUpdateRenderState(entity, 1);
+    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+        var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).createRenderState(entity, 1);
 
-        state.light = 15728880;
+        state.lightCoords = 15728880;
         state.shadowPieces.clear();
         state.outlineColor = 0;
 
-        state.bodyYaw = (float) (spin % 360);
-        state.relativeHeadYaw = 0;
-        state.pitch = 0;
+        state.bodyRot = (float) (spin % 360);
+        state.yRot = 0;
+        state.xRot = 0;
 
         x += (width - getWidth(null)) / 2;
         y += 4;
@@ -60,7 +60,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, ClientTooltipC
         Vector3f translation = new Vector3f(0, 0.1f, 0);
         Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
 
-        context.addEntity(state, scale, translation, rotation, null, x, y, x + width, y + height);
-        spin += 3 * mc.getRenderTickCounter().getDynamicDeltaTicks();
+        context.submitEntityRenderState(state, scale, translation, rotation, null, x, y, x + width, y + height);
+        spin += 3 * mc.getDeltaTracker().getGameTimeDeltaTicks();
     }
 }

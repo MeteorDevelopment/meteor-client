@@ -51,7 +51,7 @@ public class DoubleSetting extends Setting<Double> {
 
     @Override
     public Double load(CompoundTag tag) {
-        set(tag.getDouble("value", 0.0));
+        set(tag.getDoubleOr("value", 0.0));
 
         return get();
     }

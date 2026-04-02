@@ -8,12 +8,12 @@ package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 import java.util.List;
 
@@ -73,8 +73,8 @@ public class ESPChunk {
 
     public boolean shouldBeDeleted() {
         int viewDist = getRenderDistance() + 1;
-        int chunkX = SectionPos.getSectionCoord(mc.player.getBlockPos().getX());
-        int chunkZ = SectionPos.getSectionCoord(mc.player.getBlockPos().getZ());
+        int chunkX = SectionPos.posToSectionCoord(mc.player.blockPosition().getX());
+        int chunkZ = SectionPos.posToSectionCoord(mc.player.blockPosition().getZ());
 
         return x > chunkX + viewDist || x < chunkX - viewDist || z > chunkZ + viewDist || z < chunkZ - viewDist;
     }
@@ -90,13 +90,13 @@ public class ESPChunk {
         ESPChunk schunk = new ESPChunk(chunk.getPos().x, chunk.getPos().z);
         if (schunk.shouldBeDeleted()) return schunk;
 
-        BlockPos.MutableBlockPos blockPos = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 
-        for (int x = chunk.getPos().getStartX(); x <= chunk.getPos().getEndX(); x++) {
-            for (int z = chunk.getPos().getStartZ(); z <= chunk.getPos().getEndZ(); z++) {
-                int height = chunk.getHeightmap(Heightmap.Types.WORLD_SURFACE).get(x - chunk.getPos().getStartX(), z - chunk.getPos().getStartZ());
+        for (int x = chunk.getPos().getMinBlockX(); x <= chunk.getPos().getMaxBlockX(); x++) {
+            for (int z = chunk.getPos().getMinBlockZ(); z <= chunk.getPos().getMaxBlockZ(); z++) {
+                int height = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE).getFirstAvailable(x - chunk.getPos().getMinBlockX(), z - chunk.getPos().getMinBlockZ());
 
-                for (int y = mc.world.getBottomY(); y < height; y++) {
+                for (int y = mc.level.getMinY(); y < height; y++) {
                     blockPos.set(x, y, z);
                     BlockState bs = chunk.getBlockState(blockPos);
 

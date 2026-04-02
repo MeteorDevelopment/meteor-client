@@ -13,8 +13,8 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +44,7 @@ public class PlayerArgumentType implements ArgumentType<Player> {
         String argument = reader.readString();
         Player playerEntity = null;
 
-        for (Player p : mc.world.getPlayers()) {
+        for (Player p : mc.level.players()) {
             if (p.getName().getString().equalsIgnoreCase(argument)) {
                 playerEntity = p;
                 break;
@@ -57,7 +57,7 @@ public class PlayerArgumentType implements ArgumentType<Player> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return SharedSuggestionProvider.suggestMatching(mc.world.getPlayers().stream().map(abstractClientPlayerEntity -> abstractClientPlayerEntity.getName().getString()), builder);
+        return SharedSuggestionProvider.suggest(mc.level.players().stream().map(abstractClientPlayerEntity -> abstractClientPlayerEntity.getName().getString()), builder);
     }
 
     @Override

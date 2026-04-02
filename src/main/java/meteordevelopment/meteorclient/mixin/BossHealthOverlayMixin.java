@@ -26,8 +26,8 @@ import java.util.Iterator;
 @Mixin(BossHealthOverlay.class)
 public abstract class BossHealthOverlayMixin {
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void onRender(CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noBossBar()) info.cancel();
+    private void onRender(CallbackInfo ci) {
+        if (Modules.get().get(NoRender.class).noBossBar()) ci.cancel();
     }
 
     @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Ljava/util/Collection;iterator()Ljava/util/Iterator;"))

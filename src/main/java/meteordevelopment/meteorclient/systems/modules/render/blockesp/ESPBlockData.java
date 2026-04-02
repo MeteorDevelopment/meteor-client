@@ -14,8 +14,8 @@ import meteordevelopment.meteorclient.settings.IBlockData;
 import meteordevelopment.meteorclient.settings.IGeneric;
 import meteordevelopment.meteorclient.utils.misc.IChangeable;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.Block;
 
 public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlockData<ESPBlockData> {
     public ShapeMode shapeMode;
@@ -82,7 +82,7 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("shapeMode", shapeMode.name());
         tag.put("lineColor", lineColor.toTag());
@@ -98,14 +98,14 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
 
     @Override
     public ESPBlockData fromTag(CompoundTag tag) {
-        shapeMode = ShapeMode.valueOf(tag.getString("shapeMode", ""));
+        shapeMode = ShapeMode.valueOf(tag.getStringOr("shapeMode", ""));
         lineColor.fromTag(tag.getCompoundOrEmpty("lineColor"));
         sideColor.fromTag(tag.getCompoundOrEmpty("sideColor"));
 
-        tracer = tag.getBoolean("tracer", false);
+        tracer = tag.getBooleanOr("tracer", false);
         tracerColor.fromTag(tag.getCompoundOrEmpty("tracerColor"));
 
-        changed = tag.getBoolean("changed", false);
+        changed = tag.getBooleanOr("changed", false);
 
         return this;
     }

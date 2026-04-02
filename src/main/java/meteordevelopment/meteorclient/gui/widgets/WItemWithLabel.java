@@ -39,7 +39,7 @@ public class WItemWithLabel extends WHorizontalList {
         String str = "";
 
         if (itemStack.getItem() == Items.POTION) {
-            Iterator<MobEffectInstance> effects = itemStack.getItem().getComponents().get(DataComponents.POTION_CONTENTS).getEffects().iterator();
+            Iterator<MobEffectInstance> effects = itemStack.getItem().components().get(DataComponents.POTION_CONTENTS).getAllEffects().iterator();
             if (!effects.hasNext()) return str;
 
             str += " ";
@@ -47,7 +47,7 @@ public class WItemWithLabel extends WHorizontalList {
             MobEffectInstance effect = effects.next();
             if (effect.getAmplifier() > 0) str += "%d ".formatted(effect.getAmplifier() + 1);
 
-            str += "(%s)".formatted(MobEffectUtil.getDurationText(effect, 1, mc.world != null ? mc.world.getTickManager().getTickRate() : 20.0F).getString());
+            str += "(%s)".formatted(MobEffectUtil.formatDuration(effect, 1, mc.level != null ? mc.level.tickRateManager().tickrate() : 20.0F).getString());
         }
 
         return str;

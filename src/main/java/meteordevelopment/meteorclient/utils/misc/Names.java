@@ -10,25 +10,25 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.sounds.WeighedSoundEvents;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.StringUtil;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.block.Block;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -68,15 +68,15 @@ public class Names {
     }
 
     public static String get(MobEffect effect) {
-        return statusEffectNames.computeIfAbsent(effect, effect1 -> StringUtil.stripTextFormat(I18n.translate(effect1.getTranslationKey())));
+        return statusEffectNames.computeIfAbsent(effect, effect1 -> StringUtil.stripColor(I18n.get(effect1.getDescriptionId())));
     }
 
     public static String get(Item item) {
-        return itemNames.computeIfAbsent(item, item1 -> StringUtil.stripTextFormat(I18n.translate(item1.getTranslationKey())));
+        return itemNames.computeIfAbsent(item, item1 -> StringUtil.stripColor(I18n.get(item1.getDescriptionId())));
     }
 
     public static String get(Block block) {
-        return blockNames.computeIfAbsent(block, block1 -> StringUtil.stripTextFormat(I18n.translate(block1.getTranslationKey())));
+        return blockNames.computeIfAbsent(block, block1 -> StringUtil.stripColor(I18n.get(block1.getDescriptionId())));
     }
 
     /**
@@ -86,44 +86,44 @@ public class Names {
      */
     @SuppressWarnings("StringEquality")
     public static String get(ResourceKey<Enchantment> enchantment) {
-        return enchantmentKeyNames.computeIfAbsent(enchantment, enchantment1 -> Optional.ofNullable(Minecraft.getInstance().getNetworkHandler())
-            .map(ClientPacketListener::getRegistryManager)
-            .flatMap(registryManager -> registryManager.getOptional(Registries.ENCHANTMENT))
-            .flatMap(registry -> registry.getEntry(enchantment.getValue()))
+        return enchantmentKeyNames.computeIfAbsent(enchantment, enchantment1 -> Optional.ofNullable(Minecraft.getInstance().getConnection())
+            .map(ClientPacketListener::registryAccess)
+            .flatMap(registryManager -> registryManager.lookup(Registries.ENCHANTMENT))
+            .flatMap(registry -> registry.get(enchantment.identifier()))
             .map(Names::get)
             .orElseGet(() -> {
-                String key = "enchantment." + enchantment1.getValue().toTranslationKey();
-                String translated = I18n.translate(key);
-                return translated == key ? enchantment1.getValue().toString() : translated;
+                String key = "enchantment." + enchantment1.identifier().toLanguageKey();
+                String translated = I18n.get(key);
+                return translated == key ? enchantment1.identifier().toString() : translated;
             }));
     }
 
     public static String get(Holder<Enchantment> enchantment) {
-        return enchantmentEntryNames.computeIfAbsent(enchantment, enchantment1 -> StringUtil.stripTextFormat(enchantment.value().description().getString()));
+        return enchantmentEntryNames.computeIfAbsent(enchantment, enchantment1 -> StringUtil.stripColor(enchantment.value().description().getString()));
     }
 
     public static String get(EntityType<?> entityType) {
-        return entityTypeNames.computeIfAbsent(entityType, entityType1 -> StringUtil.stripTextFormat(I18n.translate(entityType1.getTranslationKey())));
+        return entityTypeNames.computeIfAbsent(entityType, entityType1 -> StringUtil.stripColor(I18n.get(entityType1.getDescriptionId())));
     }
 
     public static String get(ParticleType<?> type) {
         if (!(type instanceof ParticleOptions)) return "";
-        return particleTypesNames.computeIfAbsent(type, effect1 -> StringUtils.capitalize(BuiltInRegistries.PARTICLE_TYPE.getId(type).getPath().replace("_", " ")));
+        return particleTypesNames.computeIfAbsent(type, effect1 -> StringUtils.capitalize(BuiltInRegistries.PARTICLE_TYPE.getKey(type).getPath().replace("_", " ")));
     }
 
     public static String getSoundName(Identifier id) {
         return soundNames.computeIfAbsent(id, identifier -> {
-            WeighedSoundEvents soundSet = mc.getSoundManager().get(identifier);
+            WeighedSoundEvents soundSet = mc.getSoundManager().getSoundEvent(identifier);
             if (soundSet == null) return identifier.getPath();
 
             Component text = soundSet.getSubtitle();
             if (text == null) return identifier.getPath();
 
-            return StringUtil.stripTextFormat(text.getString());
+            return StringUtil.stripColor(text.getString());
         });
     }
 
     public static String get(ItemStack stack) {
-        return stack.getName().getString(); // pretty sure this is the same as it was
+        return stack.getHoverName().getString(); // pretty sure this is the same as it was
     }
 }

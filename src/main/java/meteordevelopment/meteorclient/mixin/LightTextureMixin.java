@@ -13,9 +13,9 @@ import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,16 +31,16 @@ public abstract class LightTextureMixin {
     private GpuTexture texture;
 
     @Inject(method = "updateLightTexture", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V", shift = At.Shift.AFTER), cancellable = true)
-    private void update$skip(float tickProgress, CallbackInfo ci, @Local ProfilerFiller profiler) {
+    private void updateLightTexture$skip(float tickProgress, CallbackInfo ci, @Local ProfilerFiller profiler) {
         if (Modules.get().get(Fullbright.class).getGamma() || Modules.get().isActive(Xray.class)) {
-            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(texture, ARGB.getArgb(255, 255, 255, 255));
+            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(texture, ARGB.color(255, 255, 255, 255));
             profiler.pop();
             ci.cancel();
         }
     }
 
     @Inject(method = "calculateDarknessScale", at = @At("HEAD"), cancellable = true)
-    private void getDarknessFactor(LivingEntity entity, float factor, float tickProgress, CallbackInfoReturnable<Float> info) {
-        if (Modules.get().get(NoRender.class).noDarkness()) info.setReturnValue(0.0f);
+    private void getDarknessFactor(LivingEntity entity, float factor, float tickProgress, CallbackInfoReturnable<Float> cir) {
+        if (Modules.get().get(NoRender.class).noDarkness()) cir.setReturnValue(0.0f);
     }
 }

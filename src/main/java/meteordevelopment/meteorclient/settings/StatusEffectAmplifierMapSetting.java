@@ -8,10 +8,10 @@ package meteordevelopment.meteorclient.settings;
 import it.unimi.dsi.fastutil.objects.Reference2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.effect.MobEffect;
 
 import java.util.function.Consumer;
 
@@ -36,7 +36,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Reference2IntMap<Mo
             for (String value : values) {
                 String[] split = value.split(" ");
 
-                MobEffect effect = parseId(BuiltInRegistries.STATUS_EFFECT, split[0]);
+                MobEffect effect = parseId(BuiltInRegistries.MOB_EFFECT, split[0]);
                 int level = Integer.parseInt(split[1]);
 
                 effects.put(effect, level);
@@ -54,9 +54,9 @@ public class StatusEffectAmplifierMapSetting extends Setting<Reference2IntMap<Mo
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        CompoundTag valueTag = new NbtCompound();
+        CompoundTag valueTag = new CompoundTag();
         for (MobEffect statusEffect : get().keySet()) {
-            Identifier id = BuiltInRegistries.STATUS_EFFECT.getId(statusEffect);
+            Identifier id = BuiltInRegistries.MOB_EFFECT.getKey(statusEffect);
             if (id != null) valueTag.putInt(id.toString(), get().getInt(statusEffect));
         }
         tag.put("value", valueTag);
@@ -65,9 +65,9 @@ public class StatusEffectAmplifierMapSetting extends Setting<Reference2IntMap<Mo
     }
 
     private static Reference2IntMap<MobEffect> createStatusEffectMap() {
-        Reference2IntMap<MobEffect> map = new Reference2IntArrayMap<>(BuiltInRegistries.STATUS_EFFECT.getIds().size());
+        Reference2IntMap<MobEffect> map = new Reference2IntArrayMap<>(BuiltInRegistries.MOB_EFFECT.keySet().size());
 
-        BuiltInRegistries.STATUS_EFFECT.forEach(potion -> map.put(potion, 0));
+        BuiltInRegistries.MOB_EFFECT.forEach(potion -> map.put(potion, 0));
 
         return map;
     }
@@ -77,9 +77,9 @@ public class StatusEffectAmplifierMapSetting extends Setting<Reference2IntMap<Mo
         get().clear();
 
         CompoundTag valueTag = tag.getCompoundOrEmpty("value");
-        for (String key : valueTag.getKeys()) {
-            MobEffect statusEffect = BuiltInRegistries.STATUS_EFFECT.get(Identifier.of(key));
-            if (statusEffect != null) get().put(statusEffect, valueTag.getInt(key, 0));
+        for (String key : valueTag.keySet()) {
+            MobEffect statusEffect = BuiltInRegistries.MOB_EFFECT.getValue(Identifier.parse(key));
+            if (statusEffect != null) get().put(statusEffect, valueTag.getIntOr(key, 0));
         }
 
         return get();

@@ -16,12 +16,12 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(LevelRenderer.BrightnessGetter.class)
 public interface BrightnessGetterMixin {
 
-    @ModifyVariable(method = "lambda$static$0", at = @At(value = "STORE"), ordinal = 0)
+    @ModifyVariable(method = "method_68890", at = @At(value = "STORE"), ordinal = 0)
     private static int getLightmapCoordinatesModifySkyLight(int sky) {
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightLayer.SKY), sky);
     }
 
-    @ModifyVariable(method = "lambda$static$0", at = @At(value = "STORE"), ordinal = 1)
+    @ModifyVariable(method = "method_68890", at = @At(value = "STORE"), ordinal = 1)
     private static int getLightmapCoordinatesModifyBlockLight(int sky) {
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightLayer.BLOCK), sky);
     }

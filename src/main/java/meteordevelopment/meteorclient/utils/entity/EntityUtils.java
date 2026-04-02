@@ -1,4 +1,3 @@
-// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
@@ -10,33 +9,28 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongBidirectionalIterator;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import meteordevelopment.meteorclient.mixin.*;
-import meteordevelopment.meteorclient.mixin.DirectionAccessor;
-import meteordevelopment.meteorclient.mixin.EntitySectionStorageAccessor;
-import meteordevelopment.meteorclient.mixin.LevelAccessor;
-import meteordevelopment.meteorclient.mixin.LevelEntityGetterAdapterAccessor;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.core.SectionPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.entity.LevelEntityGetter;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.entity.EntitySection;
 import net.minecraft.world.level.entity.EntitySectionStorage;
+import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.entity.LevelEntityGetterAdapter;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.AABB;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -44,7 +38,7 @@ import java.util.function.Predicate;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EntityUtils {
-    private static final BlockPos.MutableBlockPos testPos = new BlockPos.Mutable();
+    private static final BlockPos.MutableBlockPos testPos = new BlockPos.MutableBlockPos();
 
     private EntityUtils() {
     }
@@ -96,31 +90,31 @@ public class EntityUtils {
     }
 
     public static int getPing(Player player) {
-        if (mc.getNetworkHandler() == null) return 0;
+        if (mc.getConnection() == null) return 0;
 
-        PlayerInfo playerListEntry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
+        PlayerInfo playerListEntry = mc.getConnection().getPlayerInfo(player.getUUID());
         if (playerListEntry == null) return 0;
         return playerListEntry.getLatency();
     }
 
     public static GameType getGameMode(Player player) {
         if (player == null) return null;
-        PlayerInfo playerListEntry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
+        PlayerInfo playerListEntry = mc.getConnection().getPlayerInfo(player.getUUID());
         if (playerListEntry == null) return null;
         return playerListEntry.getGameMode();
     }
 
     @SuppressWarnings("deprecation") // Use of AbstractBlock.AbstractBlockState#blocksMovement
-    public static boolean isAboveWater(BlockEntity entity) {
-        BlockPos.MutableBlockPos blockPos = entity.getBlockPos().mutableCopy();
-        int bottom = mc.world.getBottomY();
+    public static boolean isAboveWater(Entity entity) {
+        BlockPos.MutableBlockPos blockPos = entity.blockPosition().mutable();
+        int bottom = mc.level.getMinY();
 
         while (blockPos.getY() > bottom) {
-            BlockState state = mc.world.getBlockState(blockPos);
+            BlockState state = mc.level.getBlockState(blockPos);
 
-            if (state.blocksMovement()) break;
+            if (state.blocksMotion()) break;
 
-            Fluid fluid = state.getFluidState().getFluid();
+            Fluid fluid = state.getFluidState().getType();
             if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) {
                 return true;
             }
@@ -131,18 +125,18 @@ public class EntityUtils {
         return false;
     }
 
-    public static boolean isInCobweb(BlockEntity entity) {
-        return mc.world.getStatesInBoxIfLoaded(entity.getBoundingBox()).anyMatch(state -> state.isOf(Blocks.COBWEB));
+    public static boolean isInCobweb(Entity entity) {
+        return mc.level.getBlockStatesIfLoaded(entity.getBoundingBox()).anyMatch(state -> state.is(Blocks.COBWEB));
     }
 
-    public static boolean isInRenderDistance(BlockEntity entity) {
+    public static boolean isInRenderDistance(Entity entity) {
         if (entity == null) return false;
         return isInRenderDistance(entity.getX(), entity.getZ());
     }
 
     public static boolean isInRenderDistance(BlockEntity entity) {
         if (entity == null) return false;
-        return isInRenderDistance(entity.getPos().getX(), entity.getPos().getZ());
+        return isInRenderDistance(entity.getBlockPos().getX(), entity.getBlockPos().getZ());
     }
 
     public static boolean isInRenderDistance(BlockPos pos) {
@@ -151,9 +145,9 @@ public class EntityUtils {
     }
 
     public static boolean isInRenderDistance(double posX, double posZ) {
-        double x = Math.abs(mc.gameRenderer.getCamera().getCameraPos().x - posX);
-        double z = Math.abs(mc.gameRenderer.getCamera().getCameraPos().z - posZ);
-        double d = (mc.options.getViewDistance().getValue() + 1) * 16;
+        double x = Math.abs(mc.gameRenderer.getMainCamera().position().x - posX);
+        double z = Math.abs(mc.gameRenderer.getMainCamera().position().z - posZ);
+        double d = (mc.options.renderDistance().get() + 1) * 16;
 
         return x < d && z < d;
     }
@@ -165,9 +159,9 @@ public class EntityUtils {
         Direction bestDirection = null;
 
         for (Direction direction : DirectionAccessor.meteor$getHorizontal()) {
-            testPos.set(player.getBlockPos().offset(direction));
+            testPos.set(player.blockPosition().relative(direction));
 
-            BlockBehaviour block = mc.world.getBlockState(testPos).getBlock();
+            BlockBehaviour block = mc.level.getBlockState(testPos).getBlock();
             if (block != Blocks.OBSIDIAN && block != Blocks.NETHERITE_BLOCK && block != Blocks.CRYING_OBSIDIAN
                 && block != Blocks.RESPAWN_ANCHOR && block != Blocks.ANCIENT_DEBRIS) continue;
 
@@ -179,16 +173,16 @@ public class EntityUtils {
         }
 
         if (bestDirection == null) return null;
-        return player.getBlockPos().offset(bestDirection);
+        return player.blockPosition().relative(bestDirection);
     }
 
-    public static String getName(BlockEntity entity) {
+    public static String getName(Entity entity) {
         if (entity == null) return null;
         if (entity instanceof Player) return entity.getName().getString();
-        return entity.getType().getName().getString();
+        return entity.getType().getDescription().getString();
     }
 
-    public static Color getColorFromDistance(BlockEntity entity) {
+    public static Color getColorFromDistance(Entity entity) {
         // Credit to Icy from Stackoverflow
         Color distanceColor = new Color(255, 255, 255);
         double distance = PlayerUtils.distanceToCamera(entity);
@@ -213,7 +207,7 @@ public class EntityUtils {
         return distanceColor;
     }
 
-    public static Color getColorFromHealth(BlockEntity entity, Color nonLivingEntityColor) {
+    public static Color getColorFromHealth(Entity entity, Color nonLivingEntityColor) {
         // For entities without health (items, pearls, etc.)
         if (!(entity instanceof LivingEntity living)) {
             return new Color(nonLivingEntityColor);
@@ -228,7 +222,7 @@ public class EntityUtils {
 
         double percent = health / maxHealth;
 
-        percent = Math.max(0.0, Math.min(1.0, percent));
+        percent = Math.clamp(percent, 0.0, 1.0);
 
         int r, g;
 
@@ -245,21 +239,21 @@ public class EntityUtils {
         return new Color(r, g, 0, 255);
     }
 
-    public static boolean intersectsWithEntity(AABB box, Predicate<BlockEntity> predicate) {
-        LevelEntityGetter<BlockEntity> entityLookup = ((LevelAccessor) mc.world).meteor$getEntityLookup();
+    public static boolean intersectsWithEntity(AABB box, Predicate<Entity> predicate) {
+        LevelEntityGetter<Entity> entityLookup = ((LevelAccessor) mc.level).meteor$getEntityLookup();
 
         // Fast implementation using SimpleEntityLookup that returns on the first intersecting entity
-        if (entityLookup instanceof LevelEntityGetterAdapter<BlockEntity> simpleEntityLookup) {
-            EntitySectionStorage<BlockEntity> cache = ((LevelEntityGetterAdapterAccessor) simpleEntityLookup).meteor$getSectionStorage();
+        if (entityLookup instanceof LevelEntityGetterAdapter<Entity> simpleEntityLookup) {
+            EntitySectionStorage<Entity> cache = ((LevelEntityGetterAdapterAccessor) simpleEntityLookup).meteor$getSectionStorage();
             LongSortedSet trackedPositions = ((EntitySectionStorageAccessor) cache).meteor$getSectionIds();
-            Long2ObjectMap<EntitySection<BlockEntity>> trackingSections = ((EntitySectionStorageAccessor) cache).meteor$getSections();
+            Long2ObjectMap<EntitySection<Entity>> trackingSections = ((EntitySectionStorageAccessor) cache).meteor$getSections();
 
-            int i = SectionPos.getSectionCoord(box.minX - 2);
-            int j = SectionPos.getSectionCoord(box.minY - 2);
-            int k = SectionPos.getSectionCoord(box.minZ - 2);
-            int l = SectionPos.getSectionCoord(box.maxX + 2);
-            int m = SectionPos.getSectionCoord(box.maxY + 2);
-            int n = SectionPos.getSectionCoord(box.maxZ + 2);
+            int i = SectionPos.posToSectionCoord(box.minX - 2);
+            int j = SectionPos.posToSectionCoord(box.minY - 2);
+            int k = SectionPos.posToSectionCoord(box.minZ - 2);
+            int l = SectionPos.posToSectionCoord(box.maxX + 2);
+            int m = SectionPos.posToSectionCoord(box.maxY + 2);
+            int n = SectionPos.posToSectionCoord(box.maxZ + 2);
 
             for (int o = i; o <= l; o++) {
                 long p = SectionPos.asLong(o, 0, 0);
@@ -268,14 +262,14 @@ public class EntityUtils {
 
                 while (longIterator.hasNext()) {
                     long r = longIterator.nextLong();
-                    int s = SectionPos.unpackY(r);
-                    int t = SectionPos.unpackZ(r);
+                    int s = SectionPos.y(r);
+                    int t = SectionPos.z(r);
 
                     if (s >= j && s <= m && t >= k && t <= n) {
-                        EntitySection<BlockEntity> entityTrackingSection = trackingSections.get(r);
+                        EntitySection<Entity> entityTrackingSection = trackingSections.get(r);
 
-                        if (entityTrackingSection != null && entityTrackingSection.getStatus().shouldTrack()) {
-                            for (BlockEntity entity : ((EntityTrackingSectionAccessor) entityTrackingSection).<BlockEntity>meteor$getCollection()) {
+                        if (entityTrackingSection != null && entityTrackingSection.getStatus().isAccessible()) {
+                            for (Entity entity : ((EntitySectionAccessor) entityTrackingSection).<Entity>meteor$getStorage()) {
                                 if (entity.getBoundingBox().intersects(box) && predicate.test(entity)) return true;
                             }
                         }
@@ -289,19 +283,19 @@ public class EntityUtils {
         // Slow implementation that loops every entity if for some reason the EntityLookup implementation is changed
         AtomicBoolean found = new AtomicBoolean(false);
 
-        entityLookup.forEachIntersects(box, entity -> {
+        entityLookup.get(box, entity -> {
             if (!found.get() && predicate.test(entity)) found.set(true);
         });
 
         return found.get();
     }
 
-    public static EntityType<?> getGroup(BlockEntity entity) {
+    public static EntityType<?> getGroup(Entity entity) {
         return entity.getType();
     }
 
     // Copied from ServerPlayNetworkHandler#isEntityOnAir
-    public static boolean isOnAir(BlockEntity entity) {
-        return entity.getEntityWorld().getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(BlockBehaviour.BlockStateBase::isAir);
+    public static boolean isOnAir(Entity entity) {
+        return entity.level().getBlockStates(entity.getBoundingBox().inflate(0.0625).expandTowards(0.0, -0.55, 0.0)).allMatch(BlockBehaviour.BlockStateBase::isAir);
     }
 }

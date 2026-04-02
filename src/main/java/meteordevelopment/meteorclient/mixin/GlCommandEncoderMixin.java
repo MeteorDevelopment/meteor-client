@@ -5,12 +5,12 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.mojang.blaze3d.opengl.GlCommandEncoder;
+import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
 import meteordevelopment.meteorclient.mixininterface.IGpuDevice;
 import meteordevelopment.meteorclient.mixininterface.IRenderPipeline;
-import com.mojang.blaze3d.opengl.GlDevice;
-import com.mojang.blaze3d.opengl.GlCommandEncoder;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,15 +27,14 @@ public abstract class GlCommandEncoderMixin {
     @Final
     private GlDevice device;
 
-    // TODO(Ravel): target method createRenderPass with the signature not found
     @SuppressWarnings("deprecation")
     @Inject(method = "createRenderPass(Ljava/util/function/Supplier;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalInt;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalDouble;)Lcom/mojang/blaze3d/systems/RenderPass;", at = @At("RETURN"))
-    private void createRenderPass$iGpuDevice(CallbackInfoReturnable<RenderPass> info) {
-        ((IGpuDevice) device).meteor$onCreateRenderPass(info.getReturnValue());
+    private void createRenderPass$iGpuDevice(CallbackInfoReturnable<RenderPass> cir) {
+        ((IGpuDevice) device).meteor$onCreateRenderPass(cir.getReturnValue());
     }
 
     @Inject(method = "applyPipelineState", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_polygonMode(II)V"))
-    private void setPipelineAndApplyState$lineSmooth(RenderPipeline pipeline, CallbackInfo info) {
+    private void setPipelineAndApplyState$lineSmooth(RenderPipeline pipeline, CallbackInfo ci) {
         if (((IRenderPipeline) pipeline).meteor$getLineSmooth()) {
             glEnable(GL_LINE_SMOOTH);
             glLineWidth(1);

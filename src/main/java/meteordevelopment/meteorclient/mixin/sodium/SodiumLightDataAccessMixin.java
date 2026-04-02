@@ -9,10 +9,10 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.caffeinemc.mods.sodium.client.model.light.data.LightDataAccess;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,7 +40,7 @@ public abstract class SodiumLightDataAccessMixin {
     private Fullbright fb;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void onInit(CallbackInfo info) {
+    private void onInit(CallbackInfo ci) {
         xray = Modules.get().get(Xray.class);
         fb = Modules.get().get(Fullbright.class);
     }

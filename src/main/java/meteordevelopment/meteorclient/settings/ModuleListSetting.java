@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.settings;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,8 +61,8 @@ public class ModuleListSetting extends Setting<List<Module>> {
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        ListTag modulesTag = new NbtList();
-        for (Module module : get()) modulesTag.add(StringTag.of(module.name));
+        ListTag modulesTag = new ListTag();
+        for (Module module : get()) modulesTag.add(StringTag.valueOf(module.name));
         tag.put("modules", modulesTag);
 
         return tag;

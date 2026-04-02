@@ -17,10 +17,10 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Predicate;
@@ -157,7 +157,7 @@ public class BaritonePathManager implements IPathManager {
             if (timer <= 0) {
                 timer = 20;
 
-                Vec3 pos = mc.player.getEntityPos();
+                Vec3 pos = mc.player.position();
                 float theta = (float) Math.toRadians(yaw);
 
                 x = (int) Math.floor(pos.x - (double) Mth.sin(theta) * 100);

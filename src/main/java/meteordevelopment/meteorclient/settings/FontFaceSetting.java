@@ -63,11 +63,11 @@ public class FontFaceSetting extends Setting<FontFace> {
 
     @Override
     protected FontFace load(CompoundTag tag) {
-        String family = tag.getString("family", "");
+        String family = tag.getStringOr("family", "");
         FontInfo.Type type;
 
         try {
-            type = FontInfo.Type.valueOf(tag.getString("type", ""));
+            type = FontInfo.Type.valueOf(tag.getStringOr("type", ""));
         } catch (IllegalArgumentException ignored) {
             set(Fonts.DEFAULT_FONT);
             return get();

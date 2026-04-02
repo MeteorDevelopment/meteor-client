@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -16,10 +16,10 @@ import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,13 +104,13 @@ public class PopChams extends Module {
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
         if (!(event.packet instanceof ClientboundEntityEventPacket p)) return;
-        if (p.getStatus() != EntityEvent.USE_TOTEM_OF_UNDYING) return;
+        if (p.getEventId() != EntityEvent.PROTECTED_FROM_DEATH) return;
 
-        Entity entity = p.getEntity(mc.world);
-        if (!(entity instanceof PlayerEntity player) || entity == mc.player) return;
+        Entity entity = p.getEntity(mc.level);
+        if (!(entity instanceof Player player) || entity == mc.player) return;
 
         synchronized (ghosts) {
-            if (onlyOne.get()) ghosts.removeIf(ghostPlayer -> ghostPlayer.uuid.equals(entity.getUuid()));
+            if (onlyOne.get()) ghosts.removeIf(ghostPlayer -> ghostPlayer.uuid.equals(entity.getUUID()));
 
             ghosts.add(new GhostPlayer(player));
         }
@@ -127,10 +127,10 @@ public class PopChams extends Module {
         private final UUID uuid;
         private double timer, scale = 1;
 
-        public GhostPlayer(PlayerEntity player) {
+        public GhostPlayer(Player player) {
             super(player, "ghost", 20, false);
 
-            uuid = player.getUuid();
+            uuid = player.getUUID();
         }
 
         public boolean render(Render3DEvent event) {
@@ -139,8 +139,8 @@ public class PopChams extends Module {
             if (timer > renderTime.get()) return true;
 
             // Y Modifier
-            lastRenderY = getY();
-            ((IVec3d) getEntityPos()).meteor$setY(getY() + yModifier.get() * event.frameTime);
+            yOld = getY();
+            ((IVec3) position()).meteor$setY(getY() + yModifier.get() * event.frameTime);
 
             // Scale Modifier
             scale += scaleModifier.get() * event.frameTime;

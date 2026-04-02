@@ -75,10 +75,10 @@ public class SelfWeb extends Module {
     private void placeWeb() {
         FindItemResult web = InvUtils.findInHotbar(Items.COBWEB);
 
-        BlockUtils.place(mc.player.getBlockPos(), web, rotate.get(), 0, false);
+        BlockUtils.place(mc.player.blockPosition(), web, rotate.get(), 0, false);
 
         if (doubles.get()) {
-            BlockUtils.place(mc.player.getBlockPos().add(0, 1, 0), web, rotate.get(), 0, false);
+            BlockUtils.place(mc.player.blockPosition().offset(0, 1, 0), web, rotate.get(), 0, false);
         }
 
         if (turnOff.get()) toggle();

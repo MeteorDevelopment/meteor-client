@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(VisGraph.class)
 public abstract class VisGraphMixin {
     @Inject(method = "setOpaque", at = @At("HEAD"), cancellable = true)
-    private void onMarkClosed(BlockPos pos, CallbackInfo info) {
+    private void onMarkClosed(BlockPos pos, CallbackInfo ci) {
         ChunkOcclusionEvent event = MeteorClient.EVENT_BUS.post(ChunkOcclusionEvent.get());
-        if (event.isCancelled()) info.cancel();
+        if (event.isCancelled()) ci.cancel();
     }
 }

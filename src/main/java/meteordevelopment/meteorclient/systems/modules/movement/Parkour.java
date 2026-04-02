@@ -36,17 +36,17 @@ public class Parkour extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!mc.player.isOnGround() || mc.options.jumpKey.isPressed()) return;
+        if (!mc.player.onGround() || mc.options.keyJump.isDown()) return;
 
-        if (mc.player.isSneaking() || mc.options.sneakKey.isPressed()) return;
+        if (mc.player.isShiftKeyDown() || mc.options.keyShift.isDown()) return;
 
         AABB box = mc.player.getBoundingBox();
-        AABB adjustedBox = box.offset(0, -0.5, 0).expand(-edgeDistance.get(), 0, -edgeDistance.get());
+        AABB adjustedBox = box.move(0, -0.5, 0).inflate(-edgeDistance.get(), 0, -edgeDistance.get());
 
-        Stream<VoxelShape> blockCollisions = Streams.stream(mc.world.getBlockCollisions(mc.player, adjustedBox));
+        Stream<VoxelShape> blockCollisions = Streams.stream(mc.level.getBlockCollisions(mc.player, adjustedBox));
 
         if (blockCollisions.findAny().isPresent()) return;
 
-        mc.player.jump();
+        mc.player.jumpFromGround();
     }
 }

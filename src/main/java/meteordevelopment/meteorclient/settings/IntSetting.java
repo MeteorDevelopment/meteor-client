@@ -47,7 +47,7 @@ public class IntSetting extends Setting<Integer> {
 
     @Override
     public Integer load(CompoundTag tag) {
-        set(tag.getInt("value", 0));
+        set(tag.getIntOr("value", 0));
 
         return get();
     }

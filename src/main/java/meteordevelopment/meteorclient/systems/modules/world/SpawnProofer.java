@@ -16,15 +16,15 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
 
 public class SpawnProofer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -107,7 +107,7 @@ public class SpawnProofer extends Module {
         if (timer < placeDelay.get()) return;
 
         // Find slot
-        boolean foundBlock = InvUtils.testInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        boolean foundBlock = InvUtils.testInHotbar(itemStack -> blocks.get().contains(Block.byItem(itemStack.getItem())));
         if (!foundBlock) {
             error("Found none of the chosen blocks in hotbar.");
             toggle();
@@ -142,7 +142,7 @@ public class SpawnProofer extends Module {
         if (spawns.isEmpty()) return;
 
         // Find slot
-        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.byItem(itemStack.getItem())));
         if (!block.found()) {
             error("Found none of the chosen blocks in hotbar.");
             toggle();
@@ -152,8 +152,8 @@ public class SpawnProofer extends Module {
         int placedCount = 0;
 
         // Sort blocks to use the lowest light level spawns first
-        if (isLightSource(Block.getBlockFromItem(mc.player.getInventory().getStack(block.slot()).getItem()))) {
-            spawns.sort(Comparator.comparingInt(blockPos -> mc.world.getLightLevel(blockPos)));
+        if (isLightSource(Block.byItem(mc.player.getInventory().getItem(block.slot()).getItem()))) {
+            spawns.sort(Comparator.comparingInt(blockPos -> mc.level.getMaxLocalRawBrightness(blockPos)));
             placedCount = blocksPerTick.get() - 1; // Force only one light source per tick to stop unnecessary placements
         }
 
@@ -170,11 +170,11 @@ public class SpawnProofer extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3 pos = blockPos.toCenterPos();
+        Vec3 pos = blockPos.getCenter();
         if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
 
-        ClipContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
-        BlockHitResult result = mc.world.raycast(raycastContext);
+        ClipContext raycastContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        BlockHitResult result = mc.level.clip(raycastContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !PlayerUtils.isWithin(pos, wallsRange.get());
 
@@ -188,17 +188,17 @@ public class SpawnProofer extends Module {
     private boolean isNonOpaqueBlock(Block block) {
         return block instanceof ButtonBlock ||
             block instanceof SlabBlock ||
-            block instanceof AbstractPressurePlateBlock ||
+            block instanceof BasePressurePlateBlock ||
             block instanceof TransparentBlock ||
-            block instanceof TripwireBlock ||
+            block instanceof TripWireBlock ||
             block instanceof CarpetBlock ||
             block instanceof LeverBlock ||
-            block instanceof AbstractRedstoneGateBlock ||
-            block instanceof AbstractRailBlock;
+            block instanceof DiodeBlock ||
+            block instanceof BaseRailBlock;
     }
 
     private boolean isLightSource(Block block) {
-        return block.getDefaultState().getLuminance() > 0;
+        return block.defaultBlockState().getLightEmission() > 0;
     }
 
     public enum Mode {

@@ -11,27 +11,21 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-// TODO(Ravel): can not resolve target class net.minecraft.world.inventory.Slot
-// TODO(Ravel): can not resolve target class Slot
 @Mixin(Slot.class)
 public abstract class SlotMixin implements ISlot {
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
     @Shadow
-    public int id;
-    // TODO(Ravel): Could not determine a single target
-// TODO(Ravel): Could not determine a single target
+    public int index;
     @Shadow
     @Final
-    private int index;
-
-    @Override
-    public int meteor$getId() {
-        return id;
-    }
+    private int slot;
 
     @Override
     public int meteor$getIndex() {
         return index;
+    }
+
+    @Override
+    public int meteor$getSlot() {
+        return slot;
     }
 }

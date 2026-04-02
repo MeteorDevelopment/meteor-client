@@ -7,16 +7,16 @@ package meteordevelopment.meteorclient.settings;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.lang.reflect.AccessFlag;
 import java.util.*;
@@ -42,10 +42,10 @@ public class EnchantmentListSetting extends Setting<Set<ResourceKey<Enchantment>
             String name = value.trim();
 
             Identifier id;
-            if (name.contains(":")) id = Identifier.of(name);
-            else id = Identifier.ofVanilla(name);
+            if (name.contains(":")) id = Identifier.parse(name);
+            else id = Identifier.withDefaultNamespace(name);
 
-            enchs.add(ResourceKey.of(Registries.ENCHANTMENT, id));
+            enchs.add(ResourceKey.create(Registries.ENCHANTMENT, id));
         }
 
         return enchs;
@@ -58,16 +58,16 @@ public class EnchantmentListSetting extends Setting<Set<ResourceKey<Enchantment>
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Optional.ofNullable(Minecraft.getInstance().getNetworkHandler())
-            .flatMap(networkHandler -> networkHandler.getRegistryManager().getOptional(Registries.ENCHANTMENT))
-            .map(Registry::getIds).orElse(Set.of());
+        return Optional.ofNullable(Minecraft.getInstance().getConnection())
+            .flatMap(networkHandler -> networkHandler.registryAccess().lookup(Registries.ENCHANTMENT))
+            .map(Registry::keySet).orElse(Set.of());
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        ListTag valueTag = new NbtList();
+        ListTag valueTag = new ListTag();
         for (ResourceKey<Enchantment> ench : get()) {
-            valueTag.add(StringTag.of(ench.getValue().toString()));
+            valueTag.add(StringTag.valueOf(ench.identifier().toString()));
         }
         tag.put("value", valueTag);
 
@@ -79,7 +79,7 @@ public class EnchantmentListSetting extends Setting<Set<ResourceKey<Enchantment>
         get().clear();
 
         for (Tag tagI : tag.getListOrEmpty("value")) {
-            get().add(ResourceKey.of(Registries.ENCHANTMENT, Identifier.of(tagI.asString().orElse(""))));
+            get().add(ResourceKey.create(Registries.ENCHANTMENT, Identifier.parse(tagI.asString().orElse(""))));
         }
 
         return get();
@@ -119,7 +119,7 @@ public class EnchantmentListSetting extends Setting<Set<ResourceKey<Enchantment>
                     }
                 }).filter(Objects::nonNull)
                 .map(ResourceKey.class::cast)
-                .filter(registryKey -> registryKey.getRegistryRef() == Registries.ENCHANTMENT)
+                .filter(registryKey -> registryKey.registryKey() == Registries.ENCHANTMENT)
                 .collect(Collectors.toSet());
         }
     }

@@ -11,11 +11,11 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
 
 import java.util.List;
 
@@ -37,16 +37,16 @@ public class BindsCommand extends Command {
             for (Module module : modules) {
                 HoverEvent hoverEvent = new HoverEvent.ShowText(getTooltip(module));
 
-                MutableComponent text = MutableComponent.literal(module.title).formatted(ChatFormatting.WHITE);
+                MutableComponent text = Component.literal(module.title).withStyle(ChatFormatting.WHITE);
                 text.setStyle(text.getStyle().withHoverEvent(hoverEvent));
 
-                MutableComponent sep = MutableComponent.literal(" - ");
+                MutableComponent sep = Component.literal(" - ");
                 sep.setStyle(sep.getStyle().withHoverEvent(hoverEvent));
-                text.append(sep.formatted(ChatFormatting.GRAY));
+                text.append(sep.withStyle(ChatFormatting.GRAY));
 
-                MutableComponent key = MutableComponent.literal(module.keybind.toString());
+                MutableComponent key = Component.literal(module.keybind.toString());
                 key.setStyle(key.getStyle().withHoverEvent(hoverEvent));
-                text.append(key.formatted(ChatFormatting.GRAY));
+                text.append(key.withStyle(ChatFormatting.GRAY));
 
                 ChatUtils.sendMsg(text);
             }
@@ -56,8 +56,8 @@ public class BindsCommand extends Command {
     }
 
     private MutableComponent getTooltip(Module module) {
-        MutableComponent tooltip = MutableComponent.literal(Utils.nameToTitle(module.title)).formatted(ChatFormatting.BLUE, ChatFormatting.BOLD).append("\n\n");
-        tooltip.append(MutableComponent.literal(module.description).formatted(ChatFormatting.WHITE));
+        MutableComponent tooltip = Component.literal(Utils.nameToTitle(module.title)).withStyle(ChatFormatting.BLUE, ChatFormatting.BOLD).append("\n\n");
+        tooltip.append(Component.literal(module.description).withStyle(ChatFormatting.WHITE));
         return tooltip;
     }
 }

@@ -34,11 +34,11 @@ public class NametagUtils {
         model.set(modelView);
         NametagUtils.projection.set(RenderUtils.projection);
 
-        Utils.set(camera, mc.gameRenderer.getCamera().getCameraPos());
+        Utils.set(camera, mc.gameRenderer.getMainCamera().position());
         cameraNegated.set(camera);
         cameraNegated.negate();
 
-        windowScale = mc.getWindow().calculateScaleFactor(1, false);
+        windowScale = mc.getWindow().calculateScale(1, false);
     }
 
     public static boolean to2D(Vector3d pos, double scale) {
@@ -66,17 +66,17 @@ public class NametagUtils {
         if (behind && !allowBehind) return false;
 
         toScreen(pmMat4);
-        double x = pmMat4.x * mc.getWindow().getFramebufferWidth();
-        double y = pmMat4.y * mc.getWindow().getFramebufferHeight();
+        double x = pmMat4.x * mc.getWindow().getWidth();
+        double y = pmMat4.y * mc.getWindow().getHeight();
 
         if (behind) {
-            x = mc.getWindow().getFramebufferWidth() - x;
-            y = mc.getWindow().getFramebufferHeight() - y;
+            x = mc.getWindow().getWidth() - x;
+            y = mc.getWindow().getHeight() - y;
         }
 
         if (Double.isInfinite(x) || Double.isInfinite(y)) return false;
 
-        pos.set(x / windowScale, mc.getWindow().getFramebufferHeight() - y / windowScale, allowBehind ? pmMat4.w : pmMat4.z);
+        pos.set(x / windowScale, mc.getWindow().getHeight() - y / windowScale, allowBehind ? pmMat4.w : pmMat4.z);
         return true;
     }
 
@@ -88,9 +88,9 @@ public class NametagUtils {
     public static void begin(Vector3d pos, GuiGraphics drawContext) {
         begin(pos);
 
-        Matrix3x2fStack matrices = drawContext.getMatrices();
+        Matrix3x2fStack matrices = drawContext.pose();
         matrices.pushMatrix();
-        matrices.scale(1.0f / mc.getWindow().getScaleFactor());
+        matrices.scale(1.0f / mc.getWindow().getGuiScale());
         matrices.translate((float) pos.x, (float) pos.y);
         matrices.scale((float) scale, (float) scale);
     }
@@ -107,7 +107,7 @@ public class NametagUtils {
 
     public static void end(GuiGraphics drawContext) {
         end();
-        drawContext.getMatrices().popMatrix();
+        drawContext.pose().popMatrix();
     }
 
     private static double getScale(Vector3d pos) {

@@ -11,18 +11,18 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.alchemy.PotionContents;
 
 import java.util.List;
 import java.util.Optional;
 
 public class StatusEffectListSettingScreen extends CollectionListSettingScreen<MobEffect> {
     public StatusEffectListSettingScreen(GuiTheme theme, Setting<List<MobEffect>> setting) {
-        super(theme, "Select Effects", setting, setting.get(), BuiltInRegistries.STATUS_EFFECT);
+        super(theme, "Select Effects", setting, setting.get(), BuiltInRegistries.MOB_EFFECT);
     }
 
     @Override
@@ -34,16 +34,16 @@ public class StatusEffectListSettingScreen extends CollectionListSettingScreen<M
     protected String[] getValueNames(MobEffect value) {
         return new String[]{
             Names.get(value),
-            BuiltInRegistries.STATUS_EFFECT.getId(value).toString()
+            BuiltInRegistries.MOB_EFFECT.getKey(value).toString()
         };
     }
 
     private ItemStack getPotionStack(MobEffect effect) {
-        ItemStack potion = Items.POTION.getDefaultStack();
+        ItemStack potion = Items.POTION.getDefaultInstance();
 
         potion.set(
             DataComponents.POTION_CONTENTS,
-            new PotionContentsComponent(
+            new PotionContents(
                 potion.get(DataComponents.POTION_CONTENTS).potion(),
                 Optional.of(effect.getColor()),
                 potion.get(DataComponents.POTION_CONTENTS).customEffects(),

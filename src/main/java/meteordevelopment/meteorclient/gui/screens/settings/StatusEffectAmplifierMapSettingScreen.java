@@ -14,10 +14,10 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
 import org.apache.commons.lang3.Strings;
 
 import java.util.ArrayList;
@@ -76,11 +76,11 @@ public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
     }
 
     private ItemStack getPotionStack(MobEffect effect) {
-        ItemStack potion = Items.POTION.getDefaultStack();
+        ItemStack potion = Items.POTION.getDefaultInstance();
 
         potion.set(
             DataComponents.POTION_CONTENTS,
-            new PotionContentsComponent(
+            new PotionContents(
                 potion.get(DataComponents.POTION_CONTENTS).potion(),
                 Optional.of(effect.getColor()),
                 potion.get(DataComponents.POTION_CONTENTS).customEffects(),

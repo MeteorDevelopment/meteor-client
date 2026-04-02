@@ -15,11 +15,7 @@ import net.minecraft.nbt.TagParser;
 import java.util.Collection;
 import java.util.List;
 
-// TODO(Ravel): ambiguous static import, members with name EXPECTED_COMPOUND have different new names
-//
-// TODO(Ravel): ambiguous static import, members with name EXPECTED_COMPOUND have different new names
-//
-import static net.minecraft.nbt.TagParser.EXPECTED_COMPOUND;
+import static net.minecraft.nbt.TagParser.ERROR_EXPECTED_COMPOUND;
 
 public class CompoundNbtTagArgumentType implements ArgumentType<CompoundTag> {
     private static final CompoundNbtTagArgumentType INSTANCE = new CompoundNbtTagArgumentType();
@@ -40,7 +36,7 @@ public class CompoundNbtTagArgumentType implements ArgumentType<CompoundTag> {
     public CompoundTag parse(StringReader reader) throws CommandSyntaxException {
         reader.skipWhitespace();
         if (!reader.canRead()) {
-            throw EXPECTED_COMPOUND.createWithContext(reader);
+            throw ERROR_EXPECTED_COMPOUND.createWithContext(reader);
         }
         StringBuilder b = new StringBuilder();
         int open = 0;
@@ -56,7 +52,7 @@ public class CompoundNbtTagArgumentType implements ArgumentType<CompoundTag> {
         }
         reader.expect('}');
         b.append('}');
-        return TagParser.readCompound(b.toString()
+        return TagParser.parseCompoundFully(b.toString()
             .replace("$", "§")
             .replace("§§", "$")
         );

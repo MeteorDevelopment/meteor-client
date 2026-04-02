@@ -7,19 +7,19 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.google.common.base.MoreObjects;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.ArmRenderEvent;
 import meteordevelopment.meteorclient.events.render.HeldItemRendererEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.InteractionHand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,13 +50,13 @@ public abstract class ItemInHandRendererMixin {
     @ModifyVariable(method = "renderHandsWithItems(FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/player/LocalPlayer;I)V", at = @At(value = "STORE", ordinal = 0), index = 6)
     private float modifySwing(float swingProgress) {
         HandView module = Modules.get().get(HandView.class);
-        InteractionHand hand = MoreObjects.firstNonNull(mc.player.preferredHand, InteractionHand.MAIN_HAND);
+        InteractionHand hand = MoreObjects.firstNonNull(mc.player.swingingArm, InteractionHand.MAIN_HAND);
 
         if (module.isActive()) {
-            if (hand == InteractionHand.OFF_HAND && !mc.player.getOffHandStack().isEmpty()) {
+            if (hand == InteractionHand.OFF_HAND && !mc.player.getOffhandItem().isEmpty()) {
                 return swingProgress + module.offSwing.get().floatValue();
             }
-            if (hand == InteractionHand.MAIN_HAND && !mc.player.getMainHandStack().isEmpty()) {
+            if (hand == InteractionHand.MAIN_HAND && !mc.player.getMainHandItem().isEmpty()) {
                 return swingProgress + module.mainSwing.get().floatValue();
             }
         }
@@ -71,15 +71,15 @@ public abstract class ItemInHandRendererMixin {
 
     @ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(FFF)F", ordinal = 2), index = 0)
     private float modifyEquipProgressMainhand(float value) {
-        float f = mc.player.getHandEquippingProgress(1f);
+        float f = mc.player.getItemSwapScale(1f);
         float modified = Modules.get().get(HandView.class).oldAnimations() ? 1 : f * f * f;
 
-        return (shouldInstantlyReplaceVisibleItem(mainHandItem, mc.player.getMainHandStack()) ? modified : 0) - mainHandHeight;
+        return (shouldInstantlyReplaceVisibleItem(mainHandItem, mc.player.getMainHandItem()) ? modified : 0) - mainHandHeight;
     }
 
     @ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(FFF)F", ordinal = 3), index = 0)
     private float modifyEquipProgressOffhand(float value) {
-        return (shouldInstantlyReplaceVisibleItem(offHandItem, mc.player.getOffHandStack()) ? 1 : 0) - offHandHeight;
+        return (shouldInstantlyReplaceVisibleItem(offHandItem, mc.player.getOffhandItem()) ? 1 : 0) - offHandHeight;
     }
 
     @Inject(method = "renderArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V", shift = At.Shift.BEFORE))
@@ -93,7 +93,7 @@ public abstract class ItemInHandRendererMixin {
     }
 
     @Inject(method = "applyEatTransform", at = @At(value = "INVOKE", target = "Ljava/lang/Math;pow(DD)D", shift = At.Shift.BEFORE), cancellable = true)
-    private void cancelTransformations(PoseStack matrices, float tickDelta, HumanoidArm arm, ItemStack stack, AbstractClientPlayer player, CallbackInfo ci) {
+    private void cancelTransformations(PoseStack matrices, float tickDelta, HumanoidArm arm, ItemStack stack, Player player, CallbackInfo ci) {
         if (Modules.get().get(HandView.class).disableFoodAnimation()) ci.cancel();
     }
 }

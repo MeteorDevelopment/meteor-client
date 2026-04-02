@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,15 +51,15 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return BuiltInRegistries.SOUND_EVENT.getIds();
+        return BuiltInRegistries.SOUND_EVENT.keySet();
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        ListTag valueTag = new NbtList();
+        ListTag valueTag = new ListTag();
         for (SoundEvent sound : get()) {
-            Identifier id = BuiltInRegistries.SOUND_EVENT.getId(sound);
-            if (id != null) valueTag.add(StringTag.of(id.toString()));
+            Identifier id = BuiltInRegistries.SOUND_EVENT.getKey(sound);
+            if (id != null) valueTag.add(StringTag.valueOf(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -71,7 +71,7 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
         get().clear();
 
         for (Tag tagI : tag.getListOrEmpty("value")) {
-            SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.get(Identifier.of(tagI.asString().orElse("")));
+            SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.getValue(Identifier.parse(tagI.asString().orElse("")));
             if (soundEvent != null) get().add(soundEvent);
         }
 

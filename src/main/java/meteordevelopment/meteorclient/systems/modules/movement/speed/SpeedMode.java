@@ -44,12 +44,12 @@ public class SpeedMode {
 
     protected double getDefaultSpeed() {
         double defaultSpeed = 0.2873;
-        if (mc.player.hasStatusEffect(MobEffects.SPEED)) {
-            int amplifier = mc.player.getStatusEffect(MobEffects.SPEED).getAmplifier();
+        if (mc.player.hasEffect(MobEffects.SPEED)) {
+            int amplifier = mc.player.getEffect(MobEffects.SPEED).getAmplifier();
             defaultSpeed *= 1.0 + 0.2 * (amplifier + 1);
         }
-        if (mc.player.hasStatusEffect(MobEffects.SLOWNESS)) {
-            int amplifier = mc.player.getStatusEffect(MobEffects.SLOWNESS).getAmplifier();
+        if (mc.player.hasEffect(MobEffects.SLOWNESS)) {
+            int amplifier = mc.player.getEffect(MobEffects.SLOWNESS).getAmplifier();
             defaultSpeed /= 1.0 + 0.2 * (amplifier + 1);
         }
         return defaultSpeed;
@@ -62,7 +62,7 @@ public class SpeedMode {
     }
 
     protected double getHop(double height) {
-        MobEffectInstance jumpBoost = mc.player.hasStatusEffect(MobEffects.JUMP_BOOST) ? mc.player.getStatusEffect(MobEffects.JUMP_BOOST) : null;
+        MobEffectInstance jumpBoost = mc.player.hasEffect(MobEffects.JUMP_BOOST) ? mc.player.getEffect(MobEffects.JUMP_BOOST) : null;
         if (jumpBoost != null) height += (jumpBoost.getAmplifier() + 1) * 0.1f;
         return height;
     }

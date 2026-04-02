@@ -29,9 +29,9 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -355,12 +355,12 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
         tag.put("settings", settings.toTag());
 
-        CompoundTag configs = new NbtCompound();
+        CompoundTag configs = new CompoundTag();
         for (String id : windowConfigs.keySet()) {
             configs.put(id, windowConfigs.get(id).toTag());
         }
@@ -374,7 +374,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         tag.getCompound("settings").ifPresent(settings::fromTag);
 
         tag.getCompound("windowConfigs").ifPresent(configs -> {
-            for (String id : configs.getKeys()) {
+            for (String id : configs.keySet()) {
                 windowConfigs.put(id, new WindowConfig().fromTag(configs.getCompound(id).get()));
             }
         });

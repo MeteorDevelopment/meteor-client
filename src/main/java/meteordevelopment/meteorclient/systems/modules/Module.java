@@ -17,11 +17,11 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -155,7 +155,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     @Override
     public CompoundTag toTag() {
         if (!serialize) return null;
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
         tag.put("keybind", keybind.toTag());
@@ -172,15 +172,15 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public Module fromTag(CompoundTag tag) {
         // General
         keybind.fromTag(tag.getCompoundOrEmpty("keybind"));
-        toggleOnBindRelease = tag.getBoolean("toggleOnKeyRelease", false);
-        chatFeedback = !tag.contains("chatFeedback") || tag.getBoolean("chatFeedback", false);
-        favorite = tag.getBoolean("favorite", false);
+        toggleOnBindRelease = tag.getBooleanOr("toggleOnKeyRelease", false);
+        chatFeedback = !tag.contains("chatFeedback") || tag.getBooleanOr("chatFeedback", false);
+        favorite = tag.getBooleanOr("favorite", false);
 
         // Settings
         Tag settingsTag = tag.get("settings");
         if (settingsTag instanceof CompoundTag) settings.fromTag((CompoundTag) settingsTag);
 
-        boolean active = tag.getBoolean("active", false);
+        boolean active = tag.getBooleanOr("active", false);
         if (active != isActive()) toggle();
 
         return this;

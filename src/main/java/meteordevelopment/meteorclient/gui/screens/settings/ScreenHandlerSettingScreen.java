@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ScreenHandlerSettingScreen extends CollectionListSettingScreen<MenuType<?>> {
     public ScreenHandlerSettingScreen(GuiTheme theme, Setting<List<MenuType<?>>> setting) {
-        super(theme, "Select Screen Handlers", setting, setting.get(), BuiltInRegistries.SCREEN_HANDLER);
+        super(theme, "Select Screen Handlers", setting, setting.get(), BuiltInRegistries.MENU);
     }
 
     @Override
@@ -32,6 +32,6 @@ public class ScreenHandlerSettingScreen extends CollectionListSettingScreen<Menu
     }
 
     private static String getName(MenuType<?> type) {
-        return BuiltInRegistries.SCREEN_HANDLER.getId(type).toString();
+        return BuiltInRegistries.MENU.getKey(type).toString();
     }
 }

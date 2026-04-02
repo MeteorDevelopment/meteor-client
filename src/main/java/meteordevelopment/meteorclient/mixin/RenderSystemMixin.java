@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import meteordevelopment.meteorclient.mixin.MinecraftAccessor;
 import meteordevelopment.meteorclient.renderer.MeshUniforms;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
@@ -23,7 +22,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 @Mixin(RenderSystem.class)
 public abstract class RenderSystemMixin {
     @Inject(method = "flipFrame", at = @At("TAIL"))
-    private static void meteor$flipFrame(CallbackInfo info) {
+    private static void meteor$flipFrame(CallbackInfo ci) {
         MeshUniforms.flipFrame();
         PostProcessShader.flipFrame();
         ChamsShader.flipFrame();

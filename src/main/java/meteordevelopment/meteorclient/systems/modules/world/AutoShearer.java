@@ -17,10 +17,10 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.EntityHitResult;
 
 public class AutoShearer extends Module {
@@ -64,11 +64,11 @@ public class AutoShearer extends Module {
     private void onTick(TickEvent.Pre event) {
         entity = null;
 
-        for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof Sheep) || ((Sheep) entity).isSheared() || ((Sheep) entity).isBaby() || !PlayerUtils.isWithin(entity, distance.get()))
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            if (!(entity instanceof Sheep sheep) || sheep.isSheared() || sheep.isBaby() || !PlayerUtils.isWithin(entity, distance.get()))
                 continue;
 
-            FindItemResult findShear = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.SHEARS && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
+            FindItemResult findShear = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.SHEARS && (!antiBreak.get() || itemStack.getDamageValue() < itemStack.getMaxDamage() - 1));
             if (!InvUtils.swap(findShear.slot(), true)) return;
 
             this.hand = findShear.getHand();
@@ -84,8 +84,8 @@ public class AutoShearer extends Module {
 
     private void interact() {
         EntityHitResult location = new EntityHitResult(entity, entity.getBoundingBox().getCenter());
-        mc.interactionManager.interactEntityAtLocation(mc.player, entity, location, hand);
-        mc.interactionManager.interactEntity(mc.player, entity, hand);
+        mc.gameMode.interactAt(mc.player, entity, location, hand);
+        mc.gameMode.interact(mc.player, entity, hand);
         InvUtils.swapBack();
     }
 }

@@ -7,19 +7,18 @@ package meteordevelopment.meteorclient.utils.render;
 
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.network.chat.Style;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,9 +27,9 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class MeteorToast implements Toast {
     private static final int TITLE_COLOR = Color.fromRGBA(145, 61, 226, 255);
     private static final int TEXT_COLOR = Color.fromRGBA(220, 220, 220, 255);
-    private static final Identifier TEXTURE = Identifier.of("toast/advancement");
+    private static final Identifier TEXTURE = Identifier.parse("toast/advancement");
     private static final long DEFAULT_DURATION = 6000;
-    private static final SimpleSoundInstance DEFAULT_SOUND = SimpleSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_CHIME.value(), 1.2f, 1);
+    private static final SimpleSoundInstance DEFAULT_SOUND = SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_CHIME.value(), 1.2f, 1);
 
     // Toast fields
     private final @NotNull Component title;
@@ -71,7 +70,7 @@ public class MeteorToast implements Toast {
         }
 
         public Builder icon(@Nullable Item item) {
-            this.icon = item != null ? item.getDefaultStack() : null;
+            this.icon = item != null ? item.getDefaultInstance() : null;
             return this;
         }
 
@@ -91,7 +90,7 @@ public class MeteorToast implements Toast {
     }
 
     @Override
-    public Visibility getVisibility() {
+    public Visibility getWantedVisibility() {
         return this.visibility;
     }
 
@@ -108,19 +107,19 @@ public class MeteorToast implements Toast {
     }
 
     @Override
-    public void draw(GuiGraphics context, Font textRenderer, long startTime) {
-        context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, getWidth(), getHeight());
+    public void render(GuiGraphics context, Font textRenderer, long startTime) {
+        context.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, width(), height());
 
         int textX = icon != null ? 28 : 12;
         int titleY = 12;
 
         if (text != null) {
-            context.drawText(textRenderer, text, textX, 18, TEXT_COLOR, false);
+            context.drawString(textRenderer, text, textX, 18, TEXT_COLOR, false);
             titleY = 7;
         }
 
-        context.drawText(textRenderer, title, textX, titleY, TITLE_COLOR, false);
+        context.drawString(textRenderer, title, textX, titleY, TITLE_COLOR, false);
 
-        if (icon != null) context.drawItem(icon, 8, 8);
+        if (icon != null) context.renderItem(icon, 8, 8);
     }
 }

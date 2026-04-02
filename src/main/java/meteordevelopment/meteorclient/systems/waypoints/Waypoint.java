@@ -13,10 +13,10 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.BlockPos;
 
 import java.util.Map;
 import java.util.Objects;
@@ -79,7 +79,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     public Setting<BlockPos> pos = sgPosition.add(new BlockPosSetting.Builder()
         .name("location")
         .description("The location of the waypoint.")
-        .defaultValue(BlockPos.ORIGIN)
+        .defaultValue(BlockPos.ZERO)
         .build()
     );
 
@@ -128,7 +128,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     public Waypoint(Tag tag) {
         CompoundTag nbt = (CompoundTag) tag;
 
-        uuid = nbt.get("uuid", UUIDUtil.INT_STREAM_CODEC).orElse(UUID.randomUUID());
+        uuid = nbt.read("uuid", UUIDUtil.CODEC).orElse(UUID.randomUUID());
         createdAt = System.currentTimeMillis();
 
         fromTag(nbt);
@@ -143,7 +143,7 @@ public class Waypoint implements ISerializable<Waypoint> {
 
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, size, size, color.get());
-        Renderer2D.TEXTURE.render(texture.getGlTextureView(), texture.getSampler());
+        Renderer2D.TEXTURE.render(texture.getTextureView(), texture.getSampler());
 
         color.get().a = preA;
     }
@@ -180,7 +180,7 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public static class Builder {
         private String name = "", icon = "";
-        private BlockPos pos = BlockPos.ORIGIN;
+        private BlockPos pos = BlockPos.ZERO;
         private Dimension dimension = Dimension.Overworld;
 
         public Builder name(String name) {
@@ -217,9 +217,9 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
-        tag.put("uuid", UUIDUtil.INT_STREAM_CODEC, uuid);
+        tag.store("uuid", UUIDUtil.CODEC, uuid);
         tag.put("settings", settings.toTag());
 
         return tag;

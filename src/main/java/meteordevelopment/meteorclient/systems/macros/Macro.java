@@ -57,7 +57,7 @@ public class Macro implements ISerializable<Macro> {
     }
 
     public boolean onAction(boolean isKey, int value, int modifiers) {
-        if (!keybind.get().matches(isKey, value, modifiers) || mc.currentScreen != null) return false;
+        if (!keybind.get().matches(isKey, value, modifiers) || mc.screen != null) return false;
         return onAction();
     }
 
@@ -86,7 +86,7 @@ public class Macro implements ISerializable<Macro> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.put("settings", settings.toTag());
 

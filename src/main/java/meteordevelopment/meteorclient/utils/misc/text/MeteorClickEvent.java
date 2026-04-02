@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * This class does nothing except ensure that {@link ClickEvent}'s containing Meteor Client commands can only be executed if they come from the client.
  *
- * @see ScreenMixin#onHandleBasicClickEvent(ClickEvent, Minecraft, Screen, CallbackInfo)
+ * @see ScreenMixin#onDefaultHandleClickEvent(ClickEvent, Minecraft, Screen, CallbackInfo)
  */
 public class MeteorClickEvent implements ClickEvent {
     public final String value;
@@ -24,7 +24,7 @@ public class MeteorClickEvent implements ClickEvent {
     }
 
     @Override
-    public Action getAction() {
+    public Action action() {
         return Action.RUN_COMMAND;
     }
 }

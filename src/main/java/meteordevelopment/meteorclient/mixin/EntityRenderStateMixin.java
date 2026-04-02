@@ -12,8 +12,6 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-// TODO(Ravel): can not resolve target class net.minecraft.client.renderer.entity.state.EntityRenderState
-// TODO(Ravel): can not resolve target class EntityRenderState
 @Mixin(EntityRenderState.class)
 public abstract class EntityRenderStateMixin implements IEntityRenderState {
     @Unique

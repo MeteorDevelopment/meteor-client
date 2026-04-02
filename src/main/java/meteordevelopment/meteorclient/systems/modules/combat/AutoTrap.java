@@ -22,20 +22,16 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.Vec3;
 
-import java.util.Set;
-import java.util.LinkedHashSet;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Comparator;
+import java.util.*;
 
 public class AutoTrap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -207,7 +203,7 @@ public class AutoTrap extends Module {
         }
 
         // Grab blocks from hotbar
-        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.byItem(itemStack.getItem())));
         if (!block.found()) return;
 
         // Find target to trap
@@ -257,47 +253,47 @@ public class AutoTrap extends Module {
         double epsilon = 1e-5;
         AABB box = target.getBoundingBox();
         List<BlockPos> corners = new ArrayList<>();
-        corners.add(BlockPos.ofFloored(box.minX, box.minY, box.minZ));
-        corners.add(BlockPos.ofFloored(box.minX, box.minY, box.maxZ - epsilon));
-        corners.add(BlockPos.ofFloored(box.maxX - epsilon, box.minY, box.minZ));
-        corners.add(BlockPos.ofFloored(box.maxX - epsilon, box.minY, box.maxZ - epsilon));
+        corners.add(BlockPos.containing(box.minX, box.minY, box.minZ));
+        corners.add(BlockPos.containing(box.minX, box.minY, box.maxZ - epsilon));
+        corners.add(BlockPos.containing(box.maxX - epsilon, box.minY, box.minZ));
+        corners.add(BlockPos.containing(box.maxX - epsilon, box.minY, box.maxZ - epsilon));
 
         // Add our place positions based on blocks our target is overlapping
         Set<BlockPos> overlappedPositions = new LinkedHashSet<>(corners); // Remove duplicate entries
         for (BlockPos targetPos : overlappedPositions) {
             switch (topPlacement.get()) {
                 case Full -> {
-                    add(targetPos.add(0, 2, 0));
-                    add(targetPos.add(1, 1, 0));
-                    add(targetPos.add(-1, 1, 0));
-                    add(targetPos.add(0, 1, 1));
-                    add(targetPos.add(0, 1, -1));
+                    add(targetPos.offset(0, 2, 0));
+                    add(targetPos.offset(1, 1, 0));
+                    add(targetPos.offset(-1, 1, 0));
+                    add(targetPos.offset(0, 1, 1));
+                    add(targetPos.offset(0, 1, -1));
                 }
                 case Face -> {
-                    add(targetPos.add(1, 1, 0));
-                    add(targetPos.add(-1, 1, 0));
-                    add(targetPos.add(0, 1, 1));
-                    add(targetPos.add(0, 1, -1));
+                    add(targetPos.offset(1, 1, 0));
+                    add(targetPos.offset(-1, 1, 0));
+                    add(targetPos.offset(0, 1, 1));
+                    add(targetPos.offset(0, 1, -1));
                 }
-                case Top -> add(targetPos.add(0, 2, 0));
+                case Top -> add(targetPos.offset(0, 2, 0));
             }
 
             switch (bottomPlacement.get()) {
                 case Platform -> {
-                    add(targetPos.add(0, -1, 0));
-                    add(targetPos.add(1, -1, 0));
-                    add(targetPos.add(-1, -1, 0));
-                    add(targetPos.add(0, -1, 1));
-                    add(targetPos.add(0, -1, -1));
+                    add(targetPos.offset(0, -1, 0));
+                    add(targetPos.offset(1, -1, 0));
+                    add(targetPos.offset(-1, -1, 0));
+                    add(targetPos.offset(0, -1, 1));
+                    add(targetPos.offset(0, -1, -1));
                 }
                 case Full -> {
-                    add(targetPos.add(0, -1, 0));
-                    add(targetPos.add(1, 0, 0));
-                    add(targetPos.add(-1, 0, 0));
-                    add(targetPos.add(0, 0, -1));
-                    add(targetPos.add(0, 0, 1));
+                    add(targetPos.offset(0, -1, 0));
+                    add(targetPos.offset(1, 0, 0));
+                    add(targetPos.offset(-1, 0, 0));
+                    add(targetPos.offset(0, 0, -1));
+                    add(targetPos.offset(0, 0, 1));
                 }
-                case Single -> add(targetPos.add(0, -1, 0));
+                case Single -> add(targetPos.offset(0, -1, 0));
             }
         }
 
@@ -321,11 +317,11 @@ public class AutoTrap extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3 pos = blockPos.toCenterPos();
+        Vec3 pos = blockPos.getCenter();
         if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
 
-        ClipContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
-        BlockHitResult result = mc.world.raycast(raycastContext);
+        ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        BlockHitResult result = mc.level.clip(clipContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !PlayerUtils.isWithin(pos, placeWallsRange.get());
 

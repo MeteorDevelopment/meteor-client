@@ -10,19 +10,19 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.render.ItemHighlight;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,7 +49,7 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
     protected abstract Slot getHoveredSlot(double xPosition, double yPosition);
 
     @Shadow
-    public abstract T getScreenHandler();
+    public abstract T getMenu();
 
     @Shadow
     private boolean doubleclick;
@@ -58,27 +58,27 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
     protected abstract void slotClicked(Slot slot, int invSlot, int clickData, ClickType actionType);
 
     @Shadow
-    public abstract void close();
+    public abstract void onClose();
 
     public AbstractContainerScreenMixin(Component title) {
         super(title);
     }
 
     @Inject(method = "init", at = @At("TAIL"))
-    private void onInit(CallbackInfo info) {
+    private void onInit(CallbackInfo ci) {
         InventoryTweaks invTweaks = Modules.get().get(InventoryTweaks.class);
 
-        if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getScreenHandler())) {
-            addDrawableChild(
-                new Button.Builder(Component.literal("Steal"), button -> invTweaks.steal(getScreenHandler()))
-                    .position(leftPos, topPos - 22)
+        if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getMenu())) {
+            addRenderableWidget(
+                new Button.Builder(Component.literal("Steal"), button -> invTweaks.steal(getMenu()))
+                    .pos(leftPos, topPos - 22)
                     .size(40, 20)
                     .build()
             );
 
-            addDrawableChild(
-                new Button.Builder(Component.literal("Dump"), button -> invTweaks.dump(getScreenHandler()))
-                    .position(leftPos + 42, topPos - 22)
+            addRenderableWidget(
+                new Button.Builder(Component.literal("Dump"), button -> invTweaks.dump(getMenu()))
+                    .pos(leftPos + 42, topPos - 22)
                     .size(40, 20)
                     .build()
             );
@@ -92,8 +92,8 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
             return;
 
         Slot slot = getHoveredSlot(click.x(), click.y());
-        if (slot != null && slot.hasStack() && mc.isShiftPressed())
-            slotClicked(slot, slot.id, click.button(), ClickType.QUICK_MOVE);
+        if (slot != null && slot.hasItem() && mc.hasShiftDown())
+            slotClicked(slot, slot.index, click.button(), ClickType.QUICK_MOVE);
     }
 
     // Middle click open
@@ -101,8 +101,8 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
     private void mouseClicked(MouseButtonEvent click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.shouldOpenContents(click) && hoveredSlot != null && !hoveredSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
-            if (tooltips.openContent(hoveredSlot.getStack())) {
+        if (tooltips.shouldOpenContents(click) && hoveredSlot != null && !hoveredSlot.getItem().isEmpty() && getMenu().getCarried().isEmpty()) {
+            if (tooltips.openContent(hoveredSlot.getItem())) {
                 cir.setReturnValue(true);
             }
         }
@@ -113,8 +113,8 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
     private void keyPressed(KeyEvent input, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.shouldOpenContents(input) && hoveredSlot != null && !hoveredSlot.getStack().isEmpty() && getScreenHandler().getCursorStack().isEmpty()) {
-            if (tooltips.openContent(hoveredSlot.getStack())) {
+        if (tooltips.shouldOpenContents(input) && hoveredSlot != null && !hoveredSlot.getItem().isEmpty() && getMenu().getCarried().isEmpty()) {
+            if (tooltips.openContent(hoveredSlot.getItem())) {
                 cir.setReturnValue(true);
             }
         }
@@ -122,15 +122,15 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
 
     // Item Highlight
     @Inject(method = "renderSlot", at = @At("HEAD"))
-    private void onDrawSlot(GuiGraphics context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
-        int color = Modules.get().get(ItemHighlight.class).getColor(slot.getStack());
+    private void onRenderSlot(GuiGraphics context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+        int color = Modules.get().get(ItemHighlight.class).getColor(slot.getItem());
         if (color != -1) context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, color);
     }
 
     @ModifyReturnValue(method = "showTooltipWithItemInHand", at = @At("RETURN"))
-    private boolean isTooltipSticky(boolean original, ItemStack item) {
-        if (item.getTooltipData().orElse(null) instanceof ClientTooltipComponent component) {
-            return original || component.isSticky();
+    private boolean showTooltipWithItemInHand(boolean original, ItemStack item) {
+        if (item.getTooltipImage().orElse(null) instanceof ClientTooltipComponent component) {
+            return original || component.showTooltipWithItemInHand();
         }
 
         return original;

@@ -35,7 +35,7 @@ public class ParticleTypeListSettingScreen extends CollectionListSettingScreen<P
     protected String[] getValueNames(ParticleType<?> value) {
         return new String[]{
             Names.get(value),
-            BuiltInRegistries.PARTICLE_TYPE.getId(value).toString()
+            BuiltInRegistries.PARTICLE_TYPE.getKey(value).toString()
         };
     }
 }

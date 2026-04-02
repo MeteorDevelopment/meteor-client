@@ -93,7 +93,7 @@ public class ColorSettingScreen extends WindowScreen {
         WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
 
         WButton backButton = bottomList.add(theme.button("Back")).expandX().widget();
-        backButton.action = this::close;
+        backButton.action = this::onClose;
 
         WButton copyButton = bottomList.add(theme.button(GuiRenderer.COPY)).widget();
         copyButton.action = this::toClipboard;
@@ -366,7 +366,7 @@ public class ColorSettingScreen extends WindowScreen {
     @Override
     public boolean fromClipboard() {
         if (!NbtUtils.fromClipboard(setting.get())) {
-            String clipboard = mc.keyboard.getClipboard().trim();
+            String clipboard = mc.keyboardHandler.getClipboard().trim();
             SettingColor parsed;
 
             parsed = parseRGBA(clipboard);

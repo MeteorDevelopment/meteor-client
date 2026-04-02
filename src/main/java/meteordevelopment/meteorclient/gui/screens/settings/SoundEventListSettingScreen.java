@@ -22,14 +22,14 @@ public class SoundEventListSettingScreen extends CollectionListSettingScreen<Sou
 
     @Override
     protected WWidget getValueWidget(SoundEvent value) {
-        return theme.label(value.id().getPath());
+        return theme.label(value.location().getPath());
     }
 
     @Override
     protected String[] getValueNames(SoundEvent value) {
         return new String[]{
-            value.id().toString(),
-            I18n.translate("subtitles." + value.id().getPath())
+            value.location().toString(),
+            I18n.get("subtitles." + value.location().getPath())
         };
     }
 }

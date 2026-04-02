@@ -12,8 +12,8 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -155,9 +155,9 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
-        ListTag groupsTag = new NbtList();
+        ListTag groupsTag = new ListTag();
         for (SettingGroup group : groups) {
             if (group.wasChanged()) groupsTag.add(group.toTag());
         }
@@ -175,7 +175,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         for (Tag t : groupsTag) {
             CompoundTag groupTag = (CompoundTag) t;
 
-            SettingGroup sg = getGroup(groupTag.getString("name", ""));
+            SettingGroup sg = getGroup(groupTag.getStringOr("name", ""));
             if (sg != null) sg.fromTag(groupTag);
         }
 

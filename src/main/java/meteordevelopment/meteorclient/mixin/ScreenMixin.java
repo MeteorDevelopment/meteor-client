@@ -28,18 +28,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
-import static net.minecraft.client.util.InputUtil.*;
+import static org.lwjgl.glfw.GLFW.*;
 
-@Mixin(value = ChatScreen.class, priority = 500) // needs to be before baritone
+@Mixin(value = Screen.class, priority = 500) // needs to be before baritone
 public abstract class ScreenMixin {
-    @Inject(method = "renderInGameBackground", at = @At("HEAD"), cancellable = true)
-    private void onRenderInGameBackground(CallbackInfo info) {
+    @Inject(method = "renderTransparentBackground", at = @At("HEAD"), cancellable = true)
+    private void onRenderTransparentBackground(CallbackInfo ci) {
         if (Utils.canUpdate() && Modules.get().get(NoRender.class).noGuiBackground())
-            info.cancel();
+            ci.cancel();
     }
 
-    @Inject(method = "handleBasicClickEvent", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", remap = false), cancellable = true)
-    private static void onHandleBasicClickEvent(ClickEvent clickEvent, Minecraft client, ChatScreen screen, CallbackInfo ci) {
+    @Inject(method = "defaultHandleClickEvent", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", remap = false), cancellable = true)
+    private static void onDefaultHandleClickEvent(ClickEvent clickEvent, Minecraft minecraft, Screen screen, CallbackInfo ci) {
         if (clickEvent instanceof RunnableClickEvent runnableClickEvent) {
             runnableClickEvent.runnable.run();
             ci.cancel();

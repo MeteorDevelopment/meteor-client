@@ -6,15 +6,15 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
 import meteordevelopment.meteorclient.utils.network.Capes;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -24,7 +24,7 @@ public abstract class CapeLayerMixin {
     private ClientAsset.Texture modifyCapeTexture(ClientAsset.Texture original, PoseStack matrices, SubmitNodeCollector entityRenderCommandQueue, int i, AvatarRenderState state, float f, float g) {
         if (((IEntityRenderState) state).meteor$getEntity() instanceof Player player) {
             Identifier id = Capes.get(player);
-            return id == null ? original : new ClientAsset.TextureAssetInfo(id, id);
+            return id == null ? original : new ClientAsset.ResourceTexture(id, id);
         }
 
         return original;

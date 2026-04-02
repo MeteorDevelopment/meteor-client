@@ -12,9 +12,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.level.block.AnvilBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
+import net.minecraft.world.level.block.AnvilBlock;
 
 public class SelfAnvil extends Module {
     public SelfAnvil() {
@@ -28,7 +27,7 @@ public class SelfAnvil extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (BlockUtils.place(mc.player.getBlockPos().add(0, 2, 0), InvUtils.findInHotbar(itemStack -> AnvilBlock.getBlockFromItem(itemStack.getItem()) instanceof AnvilBlock), 0)) {
+        if (BlockUtils.place(mc.player.blockPosition().offset(0, 2, 0), InvUtils.findInHotbar(itemStack -> AnvilBlock.byItem(itemStack.getItem()) instanceof AnvilBlock), 0)) {
             toggle();
         }
     }

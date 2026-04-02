@@ -58,7 +58,7 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.put("accounts", NbtUtils.listToTag(accounts));
 
@@ -71,7 +71,7 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
             CompoundTag t = (CompoundTag) tag1;
             if (!t.contains("type")) return null;
 
-            AccountType type = AccountType.valueOf(t.getString("type", ""));
+            AccountType type = AccountType.valueOf(t.getStringOr("type", ""));
 
             try {
                 return switch (type) {

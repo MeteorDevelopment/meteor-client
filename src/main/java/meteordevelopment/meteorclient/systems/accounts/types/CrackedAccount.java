@@ -27,7 +27,7 @@ public class CrackedAccount extends Account<CrackedAccount> {
     public boolean login() {
         super.login();
 
-        setSession(new Session(name, UUIDUtil.getOfflinePlayerUuid(name), "", Optional.empty(), Optional.empty()));
+        setSession(new User(name, UUIDUtil.createOfflinePlayerUUID(name), "", Optional.empty(), Optional.empty()));
         return true;
     }
 

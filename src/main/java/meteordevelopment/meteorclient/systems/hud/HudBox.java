@@ -138,7 +138,7 @@ public class HudBox implements ISerializable<HudBox> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putString("x-anchor", xAnchor.name());
         tag.putString("y-anchor", yAnchor.name());

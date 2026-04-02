@@ -21,11 +21,11 @@ public abstract class BiomeColorsMixin {
      * @author Walaryne
      */
     @Inject(method = "getAverageWaterColor", at = @At("HEAD"), cancellable = true)
-    private static void onGetWaterColor(BlockAndTintGetter world, BlockPos pos, CallbackInfoReturnable<Integer> info) {
+    private static void onGetWaterColor(BlockAndTintGetter world, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customWaterColor.get()) {
-            info.setReturnValue(ambience.waterColor.get().getPacked());
+            cir.setReturnValue(ambience.waterColor.get().getPacked());
         }
     }
 
@@ -33,11 +33,11 @@ public abstract class BiomeColorsMixin {
      * @author Walaryne
      */
     @Inject(method = "getAverageFoliageColor", at = @At("HEAD"), cancellable = true)
-    private static void onGetFoliageColor(BlockAndTintGetter world, BlockPos pos, CallbackInfoReturnable<Integer> info) {
+    private static void onGetFoliageColor(BlockAndTintGetter world, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customFoliageColor.get()) {
-            info.setReturnValue(ambience.foliageColor.get().getPacked());
+            cir.setReturnValue(ambience.foliageColor.get().getPacked());
         }
     }
 
@@ -45,11 +45,11 @@ public abstract class BiomeColorsMixin {
      * @author Walaryne
      */
     @Inject(method = "getAverageGrassColor", at = @At("HEAD"), cancellable = true)
-    private static void onGetGrassColor(BlockAndTintGetter world, BlockPos pos, CallbackInfoReturnable<Integer> info) {
+    private static void onGetGrassColor(BlockAndTintGetter world, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customGrassColor.get()) {
-            info.setReturnValue(ambience.grassColor.get().getPacked());
+            cir.setReturnValue(ambience.grassColor.get().getPacked());
         }
     }
 }

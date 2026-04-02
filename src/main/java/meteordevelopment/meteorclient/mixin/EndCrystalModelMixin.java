@@ -23,14 +23,14 @@ public abstract class EndCrystalModelMixin {
         Chams module = Modules.get().get(Chams.class);
         if (!module.isActive() || !module.crystals.get()) return original;
 
-        float g = Mth.sin(state.age * 0.2F) / 2.0F + 0.5F;
+        float g = Mth.sin(state.ageInTicks * 0.2F) / 2.0F + 0.5F;
         g = (g * g + g) * 0.4F * module.crystalsBounce.get().floatValue();
         return g - 1.4F;
     }
 
     // Chams - Rotation speed
 
-    @ModifyExpressionValue(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;age:F", ordinal = 0))
+    @ModifyExpressionValue(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;ageInTicks:F", ordinal = 0))
     private float modifySpeed(float original) {
         Chams module = Modules.get().get(Chams.class);
         if (!module.isActive() || !module.crystals.get()) return original;
