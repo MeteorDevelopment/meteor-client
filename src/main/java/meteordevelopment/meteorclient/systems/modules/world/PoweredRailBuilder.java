@@ -1,7 +1,7 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.GoalXZ;
+import baritone.api.pathing.goals.GoalBlock;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -169,6 +169,24 @@ public class PoweredRailBuilder extends Module {
         .name("use-baritone")
         .description("Uses Baritone to walk to the next built slice.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> stopOnDeath = sgGeneral.add(new BoolSetting.Builder()
+        .name("stop-on-death")
+        .description("Stops the module and cancels Baritone when you die.")
+        .defaultValue(true)
+        .visible(useBaritone::get)
+        .build()
+    );
+
+    private final Setting<Integer> pathIdleTimeout = sgGeneral.add(new IntSetting.Builder()
+        .name("path-idle-timeout")
+        .description("Ticks with an active Baritone goal but no movement before recovery steps farther back.")
+        .defaultValue(40)
+        .range(5, 200)
+        .sliderRange(10, 100)
+        .visible(useBaritone::get)
         .build()
     );
 
@@ -421,7 +439,11 @@ public class PoweredRailBuilder extends Module {
     private int step;
     private BlockPos lastGoal;
     private int fallingStableTicks;
-    
+    private int pathIdleTicks;
+    private Vec3d lastPathPlayerPos;
+    private boolean recovering;
+    private int recoveryResumeStep;
+    private int recoveryAttempts;
 
     public PoweredRailBuilder() {
         super(Categories.World, "powered-rail-builder", "Builds a configurable tunnel with rails, shell, and configurable power placement.");
@@ -444,7 +466,11 @@ public class PoweredRailBuilder extends Module {
         step = 0;
         lastGoal = null;
         fallingStableTicks = 0;
-        
+        pathIdleTicks = 0;
+        lastPathPlayerPos = null;
+        recovering = false;
+        recoveryResumeStep = 0;
+        recoveryAttempts = 0;
 
         if (powerLateralOffset.get() == 0 && powerVerticalOffset.get() == 0) {
             error("Power source cannot occupy the same position as the rail.");
@@ -473,7 +499,23 @@ public class PoweredRailBuilder extends Module {
 
     @Override
     public void onDeactivate() {
+        stopBaritone();
+    }
+
+    private void stopBaritone() {
         lastGoal = null;
+        pathIdleTicks = 0;
+        lastPathPlayerPos = null;
+
+        if (!useBaritone.get()) return;
+
+        try {
+            var baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+            baritone.getPathingBehavior().cancelEverything();
+            baritone.getCustomGoalProcess().setGoal(null);
+        } catch (Throwable ignored) {
+            // Ignore API differences across Baritone branches.
+        }
     }
 
     private boolean shouldPauseForOtherModules() {
@@ -483,20 +525,112 @@ public class PoweredRailBuilder extends Module {
     }
 
     private void pausePathingForOtherModules() {
-        if (!useBaritone.get()) return;
+        stopBaritone();
+    }
 
-        try {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-        } catch (Throwable ignored) {
-            // Fallback: do nothing if the API surface differs in this branch.
+    private void resetPathIdle() {
+        pathIdleTicks = 0;
+        lastPathPlayerPos = mc.player != null ? mc.player.getEntityPos() : null;
+    }
+
+    private void setBaritoneGoal(BlockPos goal) {
+        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
+            .setGoalAndPath(new GoalBlock(goal.getX(), goal.getY(), goal.getZ()));
+
+        lastGoal = goal.toImmutable();
+        resetPathIdle();
+    }
+
+    private void tickPathIdle() {
+        if (lastGoal == null || mc.player == null) {
+            pathIdleTicks = 0;
+            lastPathPlayerPos = null;
+            return;
         }
 
-        lastGoal = null;
+        Vec3d currentPos = mc.player.getEntityPos();
+
+        if (lastPathPlayerPos != null && currentPos.squaredDistanceTo(lastPathPlayerPos) <= 0.01) {
+            pathIdleTicks++;
+        } else {
+            pathIdleTicks = 0;
+            lastPathPlayerPos = currentPos;
+        }
+    }
+
+    private int getRecoveryBacktrackCap() {
+        return ((getHeightValue() + 1) * 7) + 2;
+    }
+
+    private BlockPos getRecoveryTargetPos() {
+        return origin.offset(forward, Math.max(0, recoveryResumeStep + 1));
+    }
+
+    private void startRecovery() {
+        if (!useBaritone.get()) {
+            error("Recovery requires Baritone.");
+            toggle();
+            return;
+        }
+
+        stopBaritone();
+        recovering = true;
+        recoveryResumeStep = step - 1;
+        recoveryAttempts = 0;
+
+        warning("Baritone stalled. Starting recovery.");
+    }
+
+    private void stepRecoveryFartherBack() {
+        stopBaritone();
+        recoveryResumeStep--;
+        recoveryAttempts++;
+    }
+
+    private void tickRecovery() {
+        int cap = getRecoveryBacktrackCap();
+
+        if (recoveryAttempts > cap) {
+            error("Recovery failed after %d backtrack attempts.", cap);
+            toggle();
+            return;
+        }
+
+        BlockPos target = getRecoveryTargetPos();
+
+        if (mc.player.getBlockPos().equals(target)) {
+            stopBaritone();
+
+            recovering = false;
+            step = Math.max(0, recoveryResumeStep);
+            updateStepPositions();
+            fallingStableTicks = 0;
+            state = initialState();
+
+            info("Recovery succeeded. Resuming from step %d.", step);
+            return;
+        }
+
+        if (lastGoal == null || !lastGoal.equals(target)) {
+            setBaritoneGoal(target);
+            return;
+        }
+
+        if (pathIdleTicks >= pathIdleTimeout.get()) {
+            stepRecoveryFartherBack();
+        }
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (!Utils.canUpdate()) return;
+        if (stopOnDeath.get() && mc.player != null) {
+            if (mc.player.isDead() || mc.player.getHealth() <= 0) {
+                warning("Player died. Stopping powered rail builder.");
+                toggle();
+                return;
+            }
+        }       
         if (state == State.Done) return;
 
         if (shouldPauseForOtherModules()) {
@@ -505,8 +639,22 @@ public class PoweredRailBuilder extends Module {
         }
 
         if (step >= length.get()) {
+            stopBaritone();
             info("Finished.");
             state = State.Done;
+            return;
+        }
+
+        tickPathIdle();
+
+        if (recovering) {
+            tickRecovery();
+            return;
+        }
+
+        if (lastGoal != null && pathIdleTicks >= pathIdleTimeout.get()) {
+            startRecovery();
+            tickRecovery();
             return;
         }
 
@@ -1015,24 +1163,23 @@ public class PoweredRailBuilder extends Module {
     private void tickMoveToNext() {
         BlockPos playerPos = mc.player.getBlockPos();
 
-        if (sameXZ(playerPos, walkPos)) {
-            lastGoal = null;
+        if (playerPos.equals(walkPos)) {
+            stopBaritone();
             state = State.Advance;
             return;
         }
 
         if (!useBaritone.get()) return;
 
-        if (lastGoal == null || !sameXZ(lastGoal, walkPos)) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
-                .setGoalAndPath(new GoalXZ(walkPos.getX(), walkPos.getZ()));
-            lastGoal = walkPos.toImmutable();
+        if (lastGoal == null || !lastGoal.equals(walkPos)) {
+            setBaritoneGoal(walkPos);
         }
     }
 
     private void tickAdvance() {
         step++;
         if (step >= length.get()) {
+            stopBaritone();
             info("Finished.");
             state = State.Done;
             return;
@@ -1243,10 +1390,8 @@ public class PoweredRailBuilder extends Module {
             return false;
         }
 
-        if (lastGoal == null || !sameXZ(lastGoal, anchor)) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
-                .setGoalAndPath(new GoalXZ(anchor.getX(), anchor.getZ()));
-            lastGoal = anchor.toImmutable();
+        if (lastGoal == null || !lastGoal.equals(anchor)) {
+            setBaritoneGoal(anchor);
         }
 
         return false;
@@ -1783,10 +1928,6 @@ public class PoweredRailBuilder extends Module {
 
         if (shouldUseShell()) positions.addAll(getShellPositions());
         return positions;
-    }
-
-    private boolean sameXZ(BlockPos a, BlockPos b) {
-        return a.getX() == b.getX() && a.getZ() == b.getZ();
     }
 
 
