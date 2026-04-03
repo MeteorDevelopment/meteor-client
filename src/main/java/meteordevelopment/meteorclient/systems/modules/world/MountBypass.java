@@ -6,11 +6,10 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.mixininterface.IServerboundInteractPacket;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
 
 public class MountBypass extends Module {
@@ -27,9 +26,7 @@ public class MountBypass extends Module {
             return;
         }
 
-        if (event.packet instanceof IServerboundInteractPacket packet) {
-            if (packet.meteor$getType() == ServerboundInteractPacket.ActionType.INTERACT_AT && packet.meteor$getEntity() instanceof AbstractChestedHorse)
-                event.cancel();
-        }
+        if (event.packet instanceof ServerboundAttackPacket(int entityId)
+            && mc.level.getEntity(entityId) instanceof AbstractChestedHorse) event.cancel();
     }
 }

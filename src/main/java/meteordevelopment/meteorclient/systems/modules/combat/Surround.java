@@ -27,7 +27,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.InteractionHand;
@@ -393,10 +393,10 @@ public class Surround extends Module {
             for (Entity crystal : mc.level.getEntities((Entity) null, box, entityPredicate)) {
                 if (rotate.get()) {
                     Rotations.rotate(Rotations.getPitch(crystal), Rotations.getYaw(crystal), () -> {
-                        mc.player.connection.send(ServerboundInteractPacket.createAttackPacket(crystal, mc.player.isShiftKeyDown()));
+                        mc.player.connection.send(new ServerboundAttackPacket(crystal.getId()));
                     });
                 } else {
-                    mc.player.connection.send(ServerboundInteractPacket.createAttackPacket(crystal, mc.player.isShiftKeyDown()));
+                    mc.player.connection.send(new ServerboundAttackPacket(crystal.getId()));
                 }
 
                 mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));

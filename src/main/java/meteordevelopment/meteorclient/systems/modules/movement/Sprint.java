@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IServerboundInteractPacket;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -17,7 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 
 public class Sprint extends Module {
@@ -79,8 +78,7 @@ public class Sprint extends Module {
     @EventHandler(priority = EventPriority.HIGH)
     private void onPacketSend(PacketEvent.Send event) {
         if (!unsprintOnHit.get()) return;
-        if (!(event.packet instanceof IServerboundInteractPacket packet)
-            || packet.meteor$getType() != ServerboundInteractPacket.ActionType.ATTACK) return;
+        if (!(event.packet instanceof ServerboundAttackPacket)) return;
 
         mc.getConnection().send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.STOP_SPRINTING));
         mc.player.setSprinting(false);
@@ -89,9 +87,7 @@ public class Sprint extends Module {
     @EventHandler
     private void onPacketSent(PacketEvent.Sent event) {
         if (!unsprintOnHit.get() || !keepSprint.get()) return;
-        if (!(event.packet instanceof IServerboundInteractPacket packet)
-            || packet.meteor$getType() != ServerboundInteractPacket.ActionType.ATTACK) return;
-
+        if (!(event.packet instanceof ServerboundAttackPacket)) return;
         if (!shouldSprint() || mc.player.isSprinting()) return;
 
         mc.getConnection().send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_SPRINTING));

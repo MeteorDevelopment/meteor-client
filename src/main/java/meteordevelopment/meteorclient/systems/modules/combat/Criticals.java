@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IServerboundInteractPacket;
 import meteordevelopment.meteorclient.mixininterface.IServerboundMovePlayerPacket;
 import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.settings.*;
@@ -17,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
@@ -84,7 +84,7 @@ public class Criticals extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof IServerboundInteractPacket packet && packet.meteor$getType() == ServerboundInteractPacket.ActionType.ATTACK) {
+        if (event.packet instanceof ServerboundAttackPacket(int entityId)) {
             if (mace.get() && mc.player.getMainHandItem().getItem() instanceof MaceItem) {
                 if (mc.player.isFallFlying()) return;
 
@@ -94,7 +94,7 @@ public class Criticals extends Module {
             } else {
                 if (skipCrit()) return;
 
-                Entity entity = packet.meteor$getEntity();
+                Entity entity = mc.level.getEntity(entityId);
 
                 if (!(entity instanceof LivingEntity) || (entity != Modules.get().get(KillAura.class).getTarget() && ka.get()))
                     return;

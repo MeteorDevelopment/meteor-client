@@ -869,7 +869,7 @@ public class CrystalAura extends Module {
 
     private void attackCrystal(Entity entity) {
         // Attack
-        mc.player.connection.send(ServerboundInteractPacket.createAttackPacket(entity, mc.player.isShiftKeyDown()));
+        mc.player.connection.send(new ServerboundAttackPacket(entity.getId()));
 
         InteractionHand hand = InvUtils.findInHotbar(Items.END_CRYSTAL).getHand();
         if (hand == null) hand = InteractionHand.MAIN_HAND;
