@@ -539,7 +539,9 @@ public class MeteorStarscript {
 
     private static Value baritoneDistanceToGoal() {
         Goal goal = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().getGoal();
-        return Value.number((goal != null && mc.player != null) ? goal.heuristic(mc.player.blockPosition()) : 0);
+        /*return Value.number((goal != null && mc.player != null) ? goal.heuristic(mc.player.blockPosition()) : 0);*/
+        // TODO(Baritone)
+        return Value.number(0);
     }
 
     private static Value posString(boolean opposite, boolean camera) {

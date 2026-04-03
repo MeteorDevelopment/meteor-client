@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.pathing;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.Goal;
-import baritone.api.pathing.goals.GoalGetToBlock;
 import baritone.api.pathing.goals.GoalXZ;
 import baritone.api.process.IBaritoneProcess;
 import baritone.api.process.PathingCommand;
@@ -76,7 +75,8 @@ public class BaritonePathManager implements IPathManager {
             return;
         }
 
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(pos));
+        /*BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(pos));*/
+        // TODO(Baritone)
     }
 
     @Override
@@ -87,12 +87,14 @@ public class BaritonePathManager implements IPathManager {
 
     @Override
     public void mine(Block... blocks) {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(blocks);
+        /*BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(blocks);*/
+        // TODO(Baritone)
     }
 
     @Override
     public void follow(Predicate<Entity> entity) {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity);
+        /*BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity);*/
+        // TODO(Baritone)
     }
 
     @Override
