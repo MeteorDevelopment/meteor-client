@@ -37,7 +37,7 @@ public class ClickTP extends Module {
         if (!mc.options.keyUse.isDown()) return;
 
         if (mc.hitResult != null) {
-            if (mc.hitResult.getType() == HitResult.Type.ENTITY && mc.player.interactOn(((EntityHitResult) mc.hitResult).getEntity(), InteractionHand.MAIN_HAND) != InteractionResult.PASS)
+            if (mc.hitResult.getType() == HitResult.Type.ENTITY && mc.player.interactOn(((EntityHitResult) mc.hitResult).getEntity(), InteractionHand.MAIN_HAND, mc.hitResult.getLocation()) != InteractionResult.PASS)
                 return;
             if (mc.hitResult.getType() == HitResult.Type.BLOCK && mc.player.getMainHandItem().getItem() instanceof BlockItem)
                 return;

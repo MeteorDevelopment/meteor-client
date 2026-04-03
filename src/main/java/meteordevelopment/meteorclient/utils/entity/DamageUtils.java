@@ -202,17 +202,17 @@ public class DamageUtils {
         }
 
         int baneOfArthropods = Utils.getEnchantmentLevel(enchantments, Enchantments.BANE_OF_ARTHROPODS);
-        if (baneOfArthropods > 0 && target.getType().is(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS)) {
+        if (baneOfArthropods > 0 && target.typeHolder().is(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS)) {
             enchantDamage += 2.5f * baneOfArthropods;
         }
 
         int impaling = Utils.getEnchantmentLevel(enchantments, Enchantments.IMPALING);
-        if (impaling > 0 && target.getType().is(EntityTypeTags.SENSITIVE_TO_IMPALING)) {
+        if (impaling > 0 && target.typeHolder().is(EntityTypeTags.SENSITIVE_TO_IMPALING)) {
             enchantDamage += 2.5f * impaling;
         }
 
         int smite = Utils.getEnchantmentLevel(enchantments, Enchantments.SMITE);
-        if (smite > 0 && target.getType().is(EntityTypeTags.SENSITIVE_TO_SMITE)) {
+        if (smite > 0 && target.typeHolder().is(EntityTypeTags.SENSITIVE_TO_SMITE)) {
             enchantDamage += 2.5f * smite;
         }
 

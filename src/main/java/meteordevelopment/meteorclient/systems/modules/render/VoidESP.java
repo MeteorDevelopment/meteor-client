@@ -101,7 +101,7 @@ public class VoidESP extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         voidHoles.clear();
-        if (mc.level.dimensionTypeRegistration() == BuiltinDimensionTypes.END) return;
+        if (mc.level.dimensionTypeRegistration().is(BuiltinDimensionTypes.END)) return;
 
         int px = mc.player.blockPosition().getX();
         int pz = mc.player.blockPosition().getZ();
@@ -114,7 +114,7 @@ public class VoidESP extends Module {
                     voidHoles.add(voidHolePool.get().set(blockPos.set(x, mc.level.getMinY(), z), false));
 
                 // Check for nether roof
-                if (netherRoof.get() && mc.level.dimensionTypeRegistration() == BuiltinDimensionTypes.NETHER) {
+                if (netherRoof.get() && mc.level.dimensionTypeRegistration().is(BuiltinDimensionTypes.NETHER)) {
                     blockPos.set(x, 127, z);
                     if (isHole(blockPos, true)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, 127, z), true));
                 }

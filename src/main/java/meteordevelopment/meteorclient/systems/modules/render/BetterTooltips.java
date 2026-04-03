@@ -403,7 +403,7 @@ public class BetterTooltips extends Module {
         }
 
         counts.keySet().stream().sorted(Comparator.comparingInt(value -> -counts.getInt(value))).limit(5).forEach(item -> {
-            MutableComponent mutableText = item.getName().plainCopy();
+            MutableComponent mutableText = item.components().get(DataComponents.ITEM_NAME).plainCopy();
             mutableText.append(Component.literal(" x").append(String.valueOf(counts.getInt(item))).withStyle(ChatFormatting.GRAY));
             textConsumer.accept(mutableText);
         });
