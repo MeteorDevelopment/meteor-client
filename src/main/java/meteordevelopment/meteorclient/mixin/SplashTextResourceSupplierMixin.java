@@ -44,7 +44,10 @@ public abstract class SplashTextResourceSupplierMixin {
                 "§6MineGame159 §fbased god",
                 "§4meteorclient.com",
                 "§4Meteor on Crack!",
-                "§6Meteor on Crack!"
+                "§6Meteor on Crack!",
+                "§fSo §4many §foptions!",
+                "Meteor is the best!",
+                "§4discord.gg/bBGQZvd"
         );
     }
 
