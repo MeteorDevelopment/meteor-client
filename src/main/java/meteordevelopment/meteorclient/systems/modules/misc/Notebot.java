@@ -927,7 +927,7 @@ public class Notebot extends Module {
         if (mc.gameMode == null) return;
         try {
             mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, Direction.DOWN, sequence));
-        } catch (NullPointerException ignored) {
+        } catch (NullPointerException _) {
         }
     }
 

@@ -77,7 +77,7 @@ public class EntityTypeListSetting extends Setting<Set<EntityType<?>>> {
                     }
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return entities;

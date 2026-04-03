@@ -56,9 +56,9 @@ public abstract class CameraMixin implements ICamera {
     }
 
     @Inject(method = "getMaxZoom", at = @At("HEAD"), cancellable = true)
-    private void onGetMaxZoom(float desiredCameraDistance, CallbackInfoReturnable<Float> cir) {
+    private void onGetMaxZoom(float cameraDist, CallbackInfoReturnable<Float> cir) {
         if (Modules.get().get(CameraTweaks.class).clip()) {
-            cir.setReturnValue(desiredCameraDistance);
+            cir.setReturnValue(cameraDist);
         }
     }
 

@@ -121,9 +121,9 @@ public class Proxy implements ISerializable<Proxy> {
                 latency = Duration.between(before, Instant.now()).toMillis();
                 return 1;
             }
-        } catch (SocketTimeoutException e) {
+        } catch (SocketTimeoutException _) {
             timeout = true;
-        } catch (IOException ignored) {
+        } catch (IOException _) {
         }
 
         try {
@@ -133,9 +133,9 @@ public class Proxy implements ISerializable<Proxy> {
                 latency = Duration.between(before, Instant.now()).toMillis();
                 return 1;
             }
-        } catch (SocketTimeoutException e) {
+        } catch (SocketTimeoutException _) {
             timeout = true;
-        } catch (IOException ignored) {
+        } catch (IOException _) {
         }
 
         status = Status.DEAD;

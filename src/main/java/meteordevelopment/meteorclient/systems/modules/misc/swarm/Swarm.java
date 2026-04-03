@@ -102,7 +102,7 @@ public class Swarm extends Module {
                 worker.disconnect();
                 worker = null;
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
     }
 

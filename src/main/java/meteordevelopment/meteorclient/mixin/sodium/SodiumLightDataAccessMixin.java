@@ -46,13 +46,13 @@ public abstract class SodiumLightDataAccessMixin {
     }
 
     @ModifyVariable(method = "compute", at = @At(value = "TAIL"), name = "bl")
-    private int compute_modifyBL(int light) {
+    private int compute_modifyBL(int bl) {
         if (xray.isActive()) {
             BlockState state = level.getBlockState(pos);
             if (!xray.isBlocked(state.getBlock(), pos)) return FULL_LIGHT;
         }
 
-        return light;
+        return bl;
     }
 
     // fullbright

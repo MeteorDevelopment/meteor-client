@@ -24,7 +24,7 @@ public class BlockPosSetting extends Setting<BlockPos> {
         BlockPos bp = null;
         try {
             bp = new BlockPos(Integer.parseInt(values.get(0)), Integer.parseInt(values.get(1)), Integer.parseInt(values.get(2)));
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
         }
         return bp;
     }

@@ -110,10 +110,10 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
 
     // Keyboard input for middle click open
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void keyPressed(KeyEvent input, CallbackInfoReturnable<Boolean> cir) {
+    private void keyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.shouldOpenContents(input) && hoveredSlot != null && !hoveredSlot.getItem().isEmpty() && getMenu().getCarried().isEmpty()) {
+        if (tooltips.shouldOpenContents(event) && hoveredSlot != null && !hoveredSlot.getItem().isEmpty() && getMenu().getCarried().isEmpty()) {
             if (tooltips.openContent(hoveredSlot.getItem())) {
                 cir.setReturnValue(true);
             }

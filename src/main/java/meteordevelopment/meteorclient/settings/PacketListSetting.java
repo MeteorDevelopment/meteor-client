@@ -44,7 +44,7 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
                 Class<? extends Packet<?>> packet = PacketUtils.getPacket(value.trim());
                 if (packet != null && (filter == null || filter.test(packet))) packets.add(packet);
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return packets;

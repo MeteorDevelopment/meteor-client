@@ -249,7 +249,7 @@ public class BookBot extends Module {
 
                 // Write the file string to a book
                 writeBook(file.toString().chars().iterator());
-            } catch (IOException ignored) {
+            } catch (IOException _) {
                 error("Failed to read the file.");
             }
         }

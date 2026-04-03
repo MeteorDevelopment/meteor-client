@@ -263,7 +263,7 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
             this.a = a;
 
             return true;
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
             return false;
         }
     }

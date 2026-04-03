@@ -28,7 +28,7 @@ public class FontFaceSetting extends Setting<FontFace> {
             if (family.getName().replace(" ", "").equals(split[0])) {
                 try {
                     return family.get(FontInfo.Type.valueOf(split[1]));
-                } catch (IllegalArgumentException ignored) {
+                } catch (IllegalArgumentException _) {
                     return null;
                 }
             }
@@ -68,7 +68,7 @@ public class FontFaceSetting extends Setting<FontFace> {
 
         try {
             type = FontInfo.Type.valueOf(tag.getStringOr("type", ""));
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException _) {
             set(Fonts.DEFAULT_FONT);
             return get();
         }

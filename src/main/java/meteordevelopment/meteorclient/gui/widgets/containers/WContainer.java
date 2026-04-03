@@ -160,7 +160,7 @@ public abstract class WContainer extends WWidget {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().mouseClicked(click, doubled)) return true;
             }
-        } catch (ConcurrentModificationException ignored) {
+        } catch (ConcurrentModificationException _) {
         }
 
         return super.mouseClicked(click, doubled);
@@ -172,7 +172,7 @@ public abstract class WContainer extends WWidget {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().mouseReleased(click)) return true;
             }
-        } catch (ConcurrentModificationException ignored) {
+        } catch (ConcurrentModificationException _) {
         }
 
         return super.mouseReleased(click);
@@ -184,7 +184,7 @@ public abstract class WContainer extends WWidget {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget())) cell.widget().mouseMoved(mouseX, mouseY, lastMouseX, lastMouseY);
             }
-        } catch (ConcurrentModificationException ignored) {
+        } catch (ConcurrentModificationException _) {
         }
 
         super.mouseMoved(mouseX, mouseY, lastMouseX, lastMouseY);
@@ -196,7 +196,7 @@ public abstract class WContainer extends WWidget {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().mouseScrolled(amount)) return true;
             }
-        } catch (ConcurrentModificationException ignored) {
+        } catch (ConcurrentModificationException _) {
         }
 
         return super.mouseScrolled(amount);
@@ -208,7 +208,7 @@ public abstract class WContainer extends WWidget {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().keyPressed(input)) return true;
             }
-        } catch (ConcurrentModificationException ignored) {
+        } catch (ConcurrentModificationException _) {
         }
 
         return onKeyPressed(input);
@@ -220,7 +220,7 @@ public abstract class WContainer extends WWidget {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().keyRepeated(input)) return true;
             }
-        } catch (ConcurrentModificationException ignored) {
+        } catch (ConcurrentModificationException _) {
         }
 
         return onKeyRepeated(input);
@@ -232,7 +232,7 @@ public abstract class WContainer extends WWidget {
             for (Cell<?> cell : cells) {
                 if (propagateEvents(cell.widget()) && cell.widget().charTyped(input)) return true;
             }
-        } catch (ConcurrentModificationException ignored) {
+        } catch (ConcurrentModificationException _) {
         }
 
         return super.charTyped(input);

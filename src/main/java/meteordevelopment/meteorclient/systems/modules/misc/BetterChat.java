@@ -450,7 +450,7 @@ public class BetterChat extends Module {
         try {
             Matcher m = TIMESTAMP_REGEX.matcher(text);
             if (m.find()) startOffset = m.end() + 1;
-        } catch (IllegalStateException ignored) {
+        } catch (IllegalStateException _) {
         }
 
         for (CustomHeadEntry entry : CUSTOM_HEAD_ENTRIES) {

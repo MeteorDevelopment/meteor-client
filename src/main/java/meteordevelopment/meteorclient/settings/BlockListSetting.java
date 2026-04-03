@@ -43,7 +43,7 @@ public class BlockListSetting extends Setting<List<Block>> {
                 Block block = parseId(BuiltInRegistries.BLOCK, value);
                 if (block != null && (filter == null || filter.test(block))) blocks.add(block);
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return blocks;

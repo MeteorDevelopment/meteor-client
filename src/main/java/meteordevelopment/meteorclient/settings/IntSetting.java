@@ -28,7 +28,7 @@ public class IntSetting extends Setting<Integer> {
     protected Integer parseImpl(String str) {
         try {
             return Integer.parseInt(str.trim());
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
             return null;
         }
     }

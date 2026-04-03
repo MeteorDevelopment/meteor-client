@@ -58,7 +58,7 @@ public abstract class DynamicRegistryListSettingScreen<T> extends CollectionList
             try {
                 Identifier id = entry.contains(":") ? Identifier.parse(entry) : Identifier.withDefaultNamespace(entry);
                 addValue(ResourceKey.create(registryKey, id));
-            } catch (IdentifierException ignored) {
+            } catch (IdentifierException _) {
             }
         };
     }

@@ -45,40 +45,39 @@ public class SlotUtils {
      * to translate slot indices to the ids for each handled screen.
      *
      * @see <a href="https://minecraft.wiki/w/Java_Edition_protocol/Inventory">the minecraft.wiki page</a> for every slot id
-     * @see MultiPlayerGameMode#handleInventoryMouseClick(int, int, int, ClickType, Player)
-     * @see AbstractContainerMenu#doClick(int, int, ClickType, Player)
+     * @see MultiPlayerGameMode#handleContainerInput(int, int, int, ContainerInput, Player)
+     * @see AbstractContainerMenu#doClick(int, int, ContainerInput, Player)
      * @see Slot#index
      */
     public static int indexToId(int i) {
         if (mc.player == null) return -1;
         AbstractContainerMenu handler = mc.player.containerMenu;
 
-        if (handler instanceof InventoryMenu) return survivalInventory(i);
-        if (handler instanceof CreativeModeInventoryScreen.ItemPickerMenu) return creativeInventory(i);
-        if (handler instanceof ChestMenu chestMenu)
-            return genericContainer(i, chestMenu.getRowCount());
-        if (handler instanceof CraftingMenu) return craftingTable(i);
-        if (handler instanceof FurnaceMenu) return furnace(i);
-        if (handler instanceof BlastFurnaceMenu) return furnace(i);
-        if (handler instanceof SmokerMenu) return furnace(i);
-        if (handler instanceof DispenserMenu) return generic3x3(i);
-        if (handler instanceof EnchantmentMenu) return enchantmentTable(i);
-        if (handler instanceof BrewingStandMenu) return brewingStand(i);
-        if (handler instanceof MerchantMenu) return villager(i);
-        if (handler instanceof BeaconMenu) return beacon(i);
-        if (handler instanceof AnvilMenu) return anvil(i);
-        if (handler instanceof HopperMenu) return hopper(i);
-        if (handler instanceof ShulkerBoxMenu) return genericContainer(i, 3);
-        if (handler instanceof HorseInventoryMenu) return horse(handler, i);
-        if (handler instanceof CartographyTableMenu) return cartographyTable(i);
-        if (handler instanceof GrindstoneMenu) return grindstone(i);
-        if (handler instanceof LecternMenu) return lectern();
-        if (handler instanceof LoomMenu) return loom(i);
-        if (handler instanceof StonecutterMenu) return stonecutter(i);
-        if (handler instanceof CrafterMenu) return crafter(i);
-        if (handler instanceof SmithingMenu) return smithingTable(i);
+        return switch (handler) {
+            case InventoryMenu _ -> survivalInventory(i);
+            case CreativeModeInventoryScreen.ItemPickerMenu _ -> creativeInventory(i);
+            case ChestMenu chestMenu -> genericContainer(i, chestMenu.getRowCount());
+            case CraftingMenu _ -> craftingTable(i);
+            case FurnaceMenu _, BlastFurnaceMenu _, SmokerMenu _ -> furnace(i);
+            case DispenserMenu _ -> generic3x3(i);
+            case EnchantmentMenu _ -> enchantmentTable(i);
+            case BrewingStandMenu _ -> brewingStand(i);
+            case MerchantMenu _ -> villager(i);
+            case BeaconMenu _ -> beacon(i);
+            case AnvilMenu _ -> anvil(i);
+            case HopperMenu _ -> hopper(i);
+            case ShulkerBoxMenu _ -> genericContainer(i, 3);
+            case HorseInventoryMenu _ -> horse(handler, i);
+            case CartographyTableMenu _ -> cartographyTable(i);
+            case GrindstoneMenu _ -> grindstone(i);
+            case LecternMenu _ -> lectern();
+            case LoomMenu _ -> loom(i);
+            case StonecutterMenu _ -> stonecutter(i);
+            case CrafterMenu _ -> crafter(i);
+            case SmithingMenu _ -> smithingTable(i);
+            default -> -1;
+        };
 
-        return -1;
     }
 
     private static int survivalInventory(int i) {

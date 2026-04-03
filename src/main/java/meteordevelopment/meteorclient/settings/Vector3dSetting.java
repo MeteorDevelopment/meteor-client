@@ -45,7 +45,7 @@ public class Vector3dSetting extends Setting<Vector3d> {
         try {
             String[] strs = str.split(" ");
             return new Vector3d(Double.parseDouble(strs[0]), Double.parseDouble(strs[1]), Double.parseDouble(strs[2]));
-        } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
+        } catch (IndexOutOfBoundsException | NumberFormatException _) {
             return null;
         }
     }

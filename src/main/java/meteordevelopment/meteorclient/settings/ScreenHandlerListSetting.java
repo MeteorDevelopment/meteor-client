@@ -38,7 +38,7 @@ public class ScreenHandlerListSetting extends Setting<List<MenuType<?>>> {
                 MenuType<?> handler = parseId(BuiltInRegistries.MENU, value);
                 if (handler != null) handlers.add(handler);
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return handlers;

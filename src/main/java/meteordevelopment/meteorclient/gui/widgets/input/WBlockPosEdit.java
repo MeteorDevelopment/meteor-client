@@ -105,7 +105,7 @@ public class WBlockPosEdit extends WHorizontalList {
         if (good && validate) {
             try {
                 Integer.parseInt(text + c);
-            } catch (NumberFormatException ignored) {
+            } catch (NumberFormatException _) {
                 good = false;
             }
         }
@@ -132,7 +132,7 @@ public class WBlockPosEdit extends WHorizontalList {
             else {
                 try {
                     set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException _) {
                 }
             }
             newValueCheck();
@@ -144,7 +144,7 @@ public class WBlockPosEdit extends WHorizontalList {
             else {
                 try {
                     set(new BlockPos(value.getX(), Integer.parseInt(textBoxY.get()), value.getZ()));
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException _) {
                 }
             }
             newValueCheck();
@@ -156,7 +156,7 @@ public class WBlockPosEdit extends WHorizontalList {
             else {
                 try {
                     set(new BlockPos(value.getX(), value.getY(), Integer.parseInt(textBoxZ.get())));
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException _) {
                 }
             }
             newValueCheck();

@@ -39,7 +39,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
                 ParticleType<?> particleType = parseId(BuiltInRegistries.PARTICLE_TYPE, value);
                 if (particleType instanceof ParticleOptions) particleTypes.add(particleType);
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return particleTypes;

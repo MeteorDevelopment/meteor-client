@@ -153,7 +153,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
                     executor.execute(() -> {
                         try {
                             check(toCheck, checked);
-                        } catch (InterruptedException ignored) {
+                        } catch (InterruptedException _) {
                         }
                     });
                 }
@@ -162,7 +162,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
                     executor.shutdown();
                     //noinspection ResultOfMethodCallIgnored
                     executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-                } catch (InterruptedException ignored) {
+                } catch (InterruptedException _) {
                 }
 
                 refreshing = false;

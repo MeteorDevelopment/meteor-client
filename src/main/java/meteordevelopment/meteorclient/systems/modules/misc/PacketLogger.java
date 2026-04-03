@@ -251,7 +251,7 @@ public class PacketLogger extends Module {
             try {
                 fileWriter.flush();
                 fileWriter.close();
-            } catch (IOException ignored) {
+            } catch (IOException _) {
                 // Safe to ignore on close or rotation
             }
             fileWriter = null;
@@ -271,7 +271,7 @@ public class PacketLogger extends Module {
                 if (!name.startsWith("packets-") || !name.endsWith(".log")) continue;
                 try {
                     logFiles.add(new LogFileEntry(p, Files.size(p), Files.getLastModifiedTime(p).toMillis()));
-                } catch (IOException ignored) {
+                } catch (IOException _) {
                     // Skip files that can't be accessed
                 }
             }

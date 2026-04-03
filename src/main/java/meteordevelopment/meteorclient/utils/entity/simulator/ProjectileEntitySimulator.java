@@ -102,7 +102,7 @@ public class ProjectileEntitySimulator {
         Item item = itemStack.getItem();
 
         switch (item) {
-            case BowItem ignored -> {
+            case BowItem _ -> {
                 if (!(user instanceof LivingEntity livingEntity)) return false;
                 float charge = BowItem.getPowerForTime(livingEntity.getTicksUsingItem());
 
@@ -113,7 +113,7 @@ public class ProjectileEntitySimulator {
 
                 set(user, angleOffset, accurate, tickDelta, ARROW.withPower(charge * 3));
             }
-            case CrossbowItem ignored -> {
+            case CrossbowItem _ -> {
                 ChargedProjectiles projectilesComponent = itemStack.get(DataComponents.CHARGED_PROJECTILES);
                 if (projectilesComponent == null) return false;
 
@@ -124,15 +124,15 @@ public class ProjectileEntitySimulator {
 
                 this.pierceLevel = projectilesComponent.contains(Items.FIREWORK_ROCKET) ? 0 : Utils.getEnchantmentLevel(itemStack, Enchantments.PIERCING);
             }
-            case WindChargeItem ignored -> set(user, angleOffset, accurate, tickDelta, WIND_CHARGE);
-            case TridentItem ignored -> set(user, angleOffset, accurate, tickDelta, TRIDENT);
-            case SnowballItem ignored -> set(user, angleOffset, accurate, tickDelta, SNOWBALL);
-            case EggItem ignored -> set(user, angleOffset, accurate, tickDelta, EGG);
-            case EnderpearlItem ignored -> set(user, angleOffset, accurate, tickDelta, ENDER_PEARL);
-            case ExperienceBottleItem ignored -> set(user, angleOffset, accurate, tickDelta, EXPERIENCE_BOTTLE);
-            case SplashPotionItem ignored -> set(user, angleOffset, accurate, tickDelta, SPLASH_POTION);
-            case LingeringPotionItem ignored -> set(user, angleOffset, accurate, tickDelta, LINGERING_POTION);
-            case FishingRodItem ignored -> setFishingBobber(user, tickDelta, FISHING_BOBBER);
+            case WindChargeItem _ -> set(user, angleOffset, accurate, tickDelta, WIND_CHARGE);
+            case TridentItem _ -> set(user, angleOffset, accurate, tickDelta, TRIDENT);
+            case SnowballItem _ -> set(user, angleOffset, accurate, tickDelta, SNOWBALL);
+            case EggItem _ -> set(user, angleOffset, accurate, tickDelta, EGG);
+            case EnderpearlItem _ -> set(user, angleOffset, accurate, tickDelta, ENDER_PEARL);
+            case ExperienceBottleItem _ -> set(user, angleOffset, accurate, tickDelta, EXPERIENCE_BOTTLE);
+            case SplashPotionItem _ -> set(user, angleOffset, accurate, tickDelta, SPLASH_POTION);
+            case LingeringPotionItem _ -> set(user, angleOffset, accurate, tickDelta, LINGERING_POTION);
+            case FishingRodItem _ -> setFishingBobber(user, tickDelta, FISHING_BOBBER);
             default -> {
                 return false;
             }
@@ -344,7 +344,7 @@ public class ProjectileEntitySimulator {
     }
 
     /**
-     * {@link net.minecraft.world.entity.projectile.ProjectileUtil#getHitResult(Vec3, Entity, java.util.function.Predicate, Vec3, net.minecraft.world.Level, float, ClipContext.Block)}
+     * {@link net.minecraft.world.entity.projectile.ProjectileUtil#getHitResult(Vec3, Entity, java.util.function.Predicate, Vec3, net.minecraft.world.level.Level, float, ClipContext.Block)}
      * <p>
      * Vanilla checks from the current to the next position, while we check from the previous to the current positions.
      * This solves the issue of the collision check from the starting position not working properly - otherwise, the
@@ -363,7 +363,7 @@ public class ProjectileEntitySimulator {
             ((IVec3) pos3d).meteor$set(blockCollision.getLocation());
         }
 
-        /** {@link AbstractArrow#stepMoveAndHit(BlockHitResult)} */
+        /// {@link AbstractArrow#stepMoveAndHit(BlockHitResult)}
         if (simulatingEntity instanceof AbstractArrow) {
             Collection<EntityHitResult> entityCollisions = ProjectileUtil.getManyEntityHitResult(
                 mc.level,

@@ -40,7 +40,7 @@ public class ItemListSetting extends Setting<List<Item>> {
                 Item item = parseId(BuiltInRegistries.ITEM, value);
                 if (item != null && (filter == null || filter.test(item))) items.add(item);
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return items;

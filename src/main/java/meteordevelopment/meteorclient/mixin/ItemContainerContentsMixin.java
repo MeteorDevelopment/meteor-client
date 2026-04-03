@@ -30,7 +30,7 @@ public abstract class ItemContainerContentsMixin {
     private NonNullList<ItemStack> items;
 
     @Inject(method = "addToTooltip", at = @At("HEAD"), cancellable = true)
-    private void onAddToTooltip(Item.TooltipContext context, Consumer<Component> textConsumer, TooltipFlag type, DataComponentGetter components, CallbackInfo ci) {
+    private void onAddToTooltip(Item.TooltipContext context, Consumer<Component> consumer, TooltipFlag flag, DataComponentGetter components, CallbackInfo ci) {
         if (Modules.get() == null) return;
 
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
@@ -38,7 +38,7 @@ public abstract class ItemContainerContentsMixin {
             if (tooltips.previewShulkers()) ci.cancel();
             else if (tooltips.shulkerCompactTooltip()) {
                 ci.cancel();
-                tooltips.applyCompactShulkerTooltip(items, textConsumer);
+                tooltips.applyCompactShulkerTooltip(items, consumer);
             }
         }
     }

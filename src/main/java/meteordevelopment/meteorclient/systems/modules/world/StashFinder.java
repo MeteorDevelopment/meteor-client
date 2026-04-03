@@ -208,13 +208,17 @@ public class StashFinder extends Module {
                 if (blockBlacklist.contains(event.chunk().getBlockState(below).getBlock())) continue;
             }
 
-            if (blockEntity instanceof ChestBlockEntity) chunk.chests++;
-            else if (blockEntity instanceof BarrelBlockEntity) chunk.barrels++;
-            else if (blockEntity instanceof ShulkerBoxBlockEntity) chunk.shulkers++;
-            else if (blockEntity instanceof EnderChestBlockEntity) chunk.enderChests++;
-            else if (blockEntity instanceof AbstractFurnaceBlockEntity) chunk.furnaces++;
-            else if (blockEntity instanceof DispenserBlockEntity) chunk.dispensersDroppers++;
-            else if (blockEntity instanceof HopperBlockEntity) chunk.hoppers++;
+            switch (blockEntity) {
+                case ChestBlockEntity _ -> chunk.chests++;
+                case BarrelBlockEntity _ -> chunk.barrels++;
+                case ShulkerBoxBlockEntity _ -> chunk.shulkers++;
+                case EnderChestBlockEntity _ -> chunk.enderChests++;
+                case AbstractFurnaceBlockEntity _ -> chunk.furnaces++;
+                case DispenserBlockEntity _ -> chunk.dispensersDroppers++;
+                case HopperBlockEntity _ -> chunk.hoppers++;
+                default -> {
+                }
+            }
         }
 
         if (chunk.getTotal() >= minimumStorageCount.get()) {
@@ -334,7 +338,7 @@ public class StashFinder extends Module {
                 for (Chunk chunk : chunks) chunk.calculatePos();
 
                 loaded = true;
-            } catch (Exception ignored) {
+            } catch (Exception _) {
                 if (chunks == null) chunks = new ArrayList<>();
             }
         }
@@ -362,7 +366,7 @@ public class StashFinder extends Module {
                 }
 
                 reader.close();
-            } catch (Exception ignored) {
+            } catch (Exception _) {
                 if (chunks == null) chunks = new ArrayList<>();
             }
         }

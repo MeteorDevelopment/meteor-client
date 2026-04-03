@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * @see ClientPacketListenerMixin#onPlayerPositionLookHead(ClientboundPlayerPositionPacket, CallbackInfo, LocalFloatRef, LocalFloatRef)
+ * @see ClientPacketListenerMixin#onHandleMovePlayerHead(ClientboundPlayerPositionPacket, CallbackInfo, LocalFloatRef, LocalFloatRef)
  */
 public class NoRotate extends Module {
     public NoRotate() {

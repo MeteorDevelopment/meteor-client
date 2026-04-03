@@ -1546,7 +1546,7 @@ public class HighwayBuilder extends Module {
 
                 switch (blockState.getBlock()) {
                     // if we have placed a shulker box there should be items inside we want
-                    case ShulkerBoxBlock ignored -> {
+                    case ShulkerBoxBlock _ -> {
                         if (b.mc.screen instanceof ShulkerBoxScreen screen) {
                             // wait for the screen to be properly loaded
                             if (screen.getMenu().containerId != b.containerId) return;
@@ -1569,7 +1569,7 @@ public class HighwayBuilder extends Module {
                     }
 
                     // we are either pulling items themselves, or shulkers containing items from your ec
-                    case EnderChestBlock ignored -> {
+                    case EnderChestBlock _ -> {
                         if (b.mc.screen instanceof ContainerScreen screen) {
                             // wait for the screen to be properly loaded
                             if (screen.getMenu().containerId != b.containerId) return;
@@ -1607,7 +1607,7 @@ public class HighwayBuilder extends Module {
                     }
 
                     // handling when there is no container there
-                    case AirBlock ignored -> {
+                    case AirBlock _ -> {
                         // indicates we have just broken a container
                         if (breakContainer) {
                             breakContainer = false;

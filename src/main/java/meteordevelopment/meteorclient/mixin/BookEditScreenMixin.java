@@ -81,7 +81,7 @@ public abstract class BookEditScreenMixin extends Screen {
                 byte[] bytes;
                 try {
                     bytes = Base64.getDecoder().decode(clipboard);
-                } catch (IllegalArgumentException ignored) {
+                } catch (IllegalArgumentException _) {
                     return;
                 }
                 DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));

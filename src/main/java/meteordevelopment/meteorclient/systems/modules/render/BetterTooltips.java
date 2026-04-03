@@ -302,11 +302,11 @@ public class BetterTooltips extends Module {
                         ByteCountDataOutput.INSTANCE.reset();
 
                         event.appendEnd(Component.literal(count).withStyle(ChatFormatting.DARK_GRAY));
-                    } catch (Exception e) {
+                    } catch (Exception _) {
                         event.appendEnd(Component.literal("Error getting bytes.").withStyle(ChatFormatting.RED));
                     }
                 }
-                case DataResult.Error<Tag> ignored ->
+                case DataResult.Error<Tag> _ ->
                     event.appendEnd(Component.literal("Error getting bytes.").withStyle(ChatFormatting.RED));
                 default -> throw new MatchException(null, null);
             }

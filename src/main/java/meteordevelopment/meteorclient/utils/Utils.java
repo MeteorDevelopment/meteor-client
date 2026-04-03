@@ -610,7 +610,7 @@ public class Utils {
 
         try {
             port = Integer.parseInt(full.substring(full.lastIndexOf(':') + 1, full.length() - 1));
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
             port = -1;
         }
 

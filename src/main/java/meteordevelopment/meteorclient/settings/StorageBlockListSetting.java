@@ -69,7 +69,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
                 BlockEntityType<?> block = parseId(BuiltInRegistries.BLOCK_ENTITY_TYPE, value);
                 if (block != null) blocks.add(block);
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return blocks;

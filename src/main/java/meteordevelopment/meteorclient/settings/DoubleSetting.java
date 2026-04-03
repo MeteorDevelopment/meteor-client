@@ -32,7 +32,7 @@ public class DoubleSetting extends Setting<Double> {
     protected Double parseImpl(String str) {
         try {
             return Double.parseDouble(str.trim());
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
             return null;
         }
     }

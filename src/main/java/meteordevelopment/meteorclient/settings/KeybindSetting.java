@@ -69,7 +69,7 @@ public class KeybindSetting extends Setting<Keybind> {
     protected Keybind parseImpl(String str) {
         try {
             return Keybind.fromKey(Integer.parseInt(str.trim()));
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
             return null;
         }
     }

@@ -38,7 +38,7 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
                 SoundEvent sound = parseId(BuiltInRegistries.SOUND_EVENT, value);
                 if (sound != null) sounds.add(sound);
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return sounds;

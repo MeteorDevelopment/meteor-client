@@ -38,7 +38,7 @@ public class StatusEffectListSetting extends Setting<List<MobEffect>> {
                 MobEffect effect = parseId(BuiltInRegistries.MOB_EFFECT, value);
                 if (effect != null) effects.add(effect);
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
         }
 
         return effects;

@@ -482,7 +482,7 @@ public class InventoryTweaks extends Module {
     public boolean canSteal(AbstractContainerMenu handler) {
         try {
             return (stealScreens.get().contains(handler.getType()));
-        } catch (UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException _) {
             return false;
         }
     }

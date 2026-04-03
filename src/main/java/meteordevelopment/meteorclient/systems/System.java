@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.systems;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.files.StreamUtils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
+import net.minecraft.ReportedException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.ReportedException;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -58,7 +58,7 @@ public abstract class System<T> implements ISerializable<T> {
 
             try {
                 Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-            } catch (AtomicMoveNotSupportedException e) {
+            } catch (AtomicMoveNotSupportedException _) {
                 StreamUtils.copy(tempFile, file);
             }
 
@@ -88,7 +88,7 @@ public abstract class System<T> implements ISerializable<T> {
 
                     try {
                         Files.move(file.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-                    } catch (AtomicMoveNotSupportedException ex) {
+                    } catch (AtomicMoveNotSupportedException _) {
                         StreamUtils.copy(file, backup);
                     }
 

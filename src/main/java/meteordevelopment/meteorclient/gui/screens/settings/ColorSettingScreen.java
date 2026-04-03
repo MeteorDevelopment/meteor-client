@@ -396,7 +396,7 @@ public class ColorSettingScreen extends WindowScreen {
         try {
             color = new SettingColor(Integer.parseInt(rgba[0]), Integer.parseInt(rgba[1]), Integer.parseInt(rgba[2]));
             if (rgba.length == 4) color.a = Integer.parseInt(rgba[3]);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             return null;
         }
 
@@ -412,7 +412,7 @@ public class ColorSettingScreen extends WindowScreen {
         try {
             color = new SettingColor(Integer.parseInt(hex.substring(0, 2), 16), Integer.parseInt(hex.substring(2, 4), 16), Integer.parseInt(hex.substring(4, 6), 16));
             if (hex.length() == 8) color.a = Integer.parseInt(hex.substring(6, 8), 16);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             return null;
         }
 

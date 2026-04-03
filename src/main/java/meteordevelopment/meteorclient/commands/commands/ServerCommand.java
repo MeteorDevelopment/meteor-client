@@ -113,7 +113,7 @@ public class ServerCommand extends Command {
         String ipv4 = "";
         try {
             ipv4 = InetAddress.getByName(server.ip).getHostAddress();
-        } catch (UnknownHostException ignored) {
+        } catch (UnknownHostException _) {
         }
 
         MutableComponent ipText;

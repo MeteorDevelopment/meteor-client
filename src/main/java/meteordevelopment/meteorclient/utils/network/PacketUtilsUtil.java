@@ -23,7 +23,7 @@ public class PacketUtilsUtil {
     private PacketUtilsUtil() {
     }
 
-    public static void main(String[] args) {
+    static void main() {
         try {
             init();
         } catch (IOException e) {
@@ -31,7 +31,7 @@ public class PacketUtilsUtil {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     public static void init() throws IOException {
         Comparator<Class<?>> cmp = Comparator
             .<Class<?>, String>comparing(Class::getSimpleName)

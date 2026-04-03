@@ -46,7 +46,7 @@ public class SettingValueArgumentType implements ArgumentType<String> {
 
         try {
             setting = SettingArgumentType.get(context);
-        } catch (CommandSyntaxException ignored) {
+        } catch (CommandSyntaxException _) {
             return Suggestions.empty();
         }
 
@@ -58,7 +58,7 @@ public class SettingValueArgumentType implements ArgumentType<String> {
 
         try {
             setting = SettingArgumentType.get(context, settings);
-        } catch (CommandSyntaxException ignored) {
+        } catch (CommandSyntaxException _) {
             return Suggestions.empty();
         }
 
