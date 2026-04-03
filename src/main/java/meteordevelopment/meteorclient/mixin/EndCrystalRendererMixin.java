@@ -56,13 +56,13 @@ public abstract class EndCrystalRendererMixin {
     // Chams - Color
 
     @WrapWithCondition(method = "submit(Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/resources/Identifier;IIILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V"))
-    private <S> boolean render$color(SubmitNodeCollector instance, Model<? super S> model, Object o, PoseStack poseStack, Identifier identifier, int lightCoords, int overlayCoords, int outlineColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+    private <S> boolean render$color(SubmitNodeCollector instance, Model<? super S> model, S state, PoseStack poseStack, Identifier identifier, int lightCoords, int overlayCoords, int outlineColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
         if (chams.isActive() && chams.crystals.get()) {
             var renderType = RenderTypes.entityTranslucent((chams.isActive() && chams.crystals.get() && !chams.crystalsTexture.get()) ? Chams.BLANK : END_CRYSTAL_LOCATION);
 
             instance.submitModel(
                 model,
-                (S) o,
+                state,
                 poseStack,
                 renderType,
                 lightCoords,
