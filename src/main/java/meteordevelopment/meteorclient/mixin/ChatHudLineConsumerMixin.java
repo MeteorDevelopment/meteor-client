@@ -17,11 +17,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(targets = "net.minecraft.client.gui.components.ChatComponent$1", remap = false)
-public class ChatHudLineConsumerMixin {
+public abstract class ChatHudLineConsumerMixin {
     // Player Heads, also draw immediately when line is set
     @Inject(method = "accept", at = @At("HEAD"))
-    private void setLine(GuiMessage.Line visible, int i, float f, CallbackInfo ci) {
-        Modules.get().get(BetterChat.class).line = visible;
+    private void setLine(GuiMessage.Line line, int lineIndex, float alpha, CallbackInfo ci) {
+        Modules.get().get(BetterChat.class).line = line;
     }
 
     // No Message Signature Indicator

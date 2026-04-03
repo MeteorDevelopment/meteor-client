@@ -159,7 +159,7 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
     }
 
     @Inject(method = "sendChat", at = @At("HEAD"), cancellable = true)
-    private void onSendChatMessage(String message, CallbackInfo ci, @Local(argsOnly = true) LocalRef<String> messageRef) {
+    private void onSendChatMessage(String message, CallbackInfo ci, @Local(argsOnly = true, name = "content") LocalRef<String> messageRef) {
         if (!message.startsWith(Config.get().prefix.get()) && !(BaritoneUtils.IS_AVAILABLE && message.startsWith(BaritoneUtils.getPrefix()))) {
             SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(message));
 

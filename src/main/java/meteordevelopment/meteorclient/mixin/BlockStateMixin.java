@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(BlockState.class)
@@ -24,8 +25,8 @@ public abstract class BlockStateMixin extends BlockBehaviour.BlockStateBase {
     }
 
     @Override
-    public InteractionResult useWithoutItem(Level world, Player player, BlockHitResult hit) {
+    public @NonNull InteractionResult useWithoutItem(@NonNull Level level, @NonNull Player player, @NonNull BlockHitResult hitResult) {
         MeteorClient.EVENT_BUS.post(BlockActivateEvent.get((BlockState) (Object) this));
-        return super.useWithoutItem(world, player, hit);
+        return super.useWithoutItem(level, player, hitResult);
     }
 }

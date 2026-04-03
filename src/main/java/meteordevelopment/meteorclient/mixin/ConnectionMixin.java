@@ -45,7 +45,7 @@ import java.util.Iterator;
 public abstract class ConnectionMixin {
     @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;genericsFtw(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;)V", shift = At.Shift.BEFORE), cancellable = true)
-    private void onHandlePacket(ChannelHandlerContext channelHandlerContext, Packet<?> packet, CallbackInfo ci) {
+    private void onHandlePacket(ChannelHandlerContext ctx, Packet<?> packet, CallbackInfo ci) {
         if (packet instanceof ClientboundBundlePacket bundle) {
             for (Iterator<Packet<? super ClientGamePacketListener>> it = bundle.subPackets().iterator(); it.hasNext(); ) {
                 if (MeteorClient.EVENT_BUS.post(new PacketEvent.Receive(it.next(), (Connection) (Object) this)).isCancelled())
@@ -56,44 +56,44 @@ public abstract class ConnectionMixin {
     }
 
     @Inject(method = "disconnect(Lnet/minecraft/network/chat/Component;)V", at = @At("HEAD"))
-    private void disconnect(Component disconnectReason, CallbackInfo ci) {
+    private void disconnect(Component reason, CallbackInfo ci) {
         if (Modules.get().get(HighwayBuilder.class).isActive()) {
             MutableComponent text = Component.literal("%n%n%s[%sHighway Builder%s] Statistics:%n".formatted(ChatFormatting.GRAY, ChatFormatting.BLUE, ChatFormatting.GRAY));
             text.append(Modules.get().get(HighwayBuilder.class).getStatsText());
 
-            ((MutableComponent) disconnectReason).append(text);
+            ((MutableComponent) reason).append(text);
         }
     }
 
     @Inject(method = "connect(Ljava/net/InetSocketAddress;Lnet/minecraft/server/network/EventLoopGroupHolder;Lnet/minecraft/network/Connection;)Lio/netty/channel/ChannelFuture;", at = @At("HEAD"))
-    private static void onConnect(InetSocketAddress address, EventLoopGroupHolder backend, Connection connection, CallbackInfoReturnable<ChannelFuture> cir) {
+    private static void onConnect(InetSocketAddress address, EventLoopGroupHolder eventLoopGroupHolder, Connection connection, CallbackInfoReturnable<ChannelFuture> cir) {
         MeteorClient.EVENT_BUS.post(ServerConnectEndEvent.get(address));
     }
 
     @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;)V", cancellable = true)
-    private void onSendPacketHead(Packet<?> packet, @Nullable ChannelFutureListener channelFutureListener, CallbackInfo ci) {
+    private void onSendPacketHead(Packet<?> packet, @Nullable ChannelFutureListener listener, CallbackInfo ci) {
         if (MeteorClient.EVENT_BUS.post(new PacketEvent.Send(packet, (Connection) (Object) this)).isCancelled()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;)V", at = @At("TAIL"))
-    private void onSendPacketTail(Packet<?> packet, @Nullable ChannelFutureListener channelFutureListener, CallbackInfo ci) {
+    private void onSendPacketTail(Packet<?> packet, @Nullable ChannelFutureListener listener, CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(new PacketEvent.Sent(packet, (Connection) (Object) this));
     }
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
-    private void exceptionCaught(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci) {
+    private void exceptionCaught(ChannelHandlerContext ctx, Throwable cause, CallbackInfo ci) {
         AntiPacketKick apk = Modules.get().get(AntiPacketKick.class);
-        if (!(throwable instanceof TimeoutException) && !(throwable instanceof SkipPacketEncoderException) && apk.catchExceptions()) {
-            if (apk.logExceptions.get()) apk.warning("Caught exception: %s", throwable);
+        if (!(cause instanceof TimeoutException) && !(cause instanceof SkipPacketEncoderException) && apk.catchExceptions()) {
+            if (apk.logExceptions.get()) apk.warning("Caught exception: %s", cause);
             ci.cancel();
         }
     }
 
     @Inject(method = "configureSerialization", at = @At("RETURN"))
-    private static void onAddHandlers(ChannelPipeline pipeline, PacketFlow side, boolean local, BandwidthDebugMonitor packetSizeLogger, CallbackInfo ci) {
-        if (side != PacketFlow.CLIENTBOUND || local) return;
+    private static void onAddHandlers(ChannelPipeline pipeline, PacketFlow inboundDirection, boolean local, BandwidthDebugMonitor monitor, CallbackInfo ci) {
+        if (inboundDirection != PacketFlow.CLIENTBOUND || local) return;
 
         Proxy proxy = Proxies.get().getEnabled();
         if (proxy == null) return;

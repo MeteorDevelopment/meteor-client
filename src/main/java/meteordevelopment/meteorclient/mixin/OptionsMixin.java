@@ -33,15 +33,15 @@ public abstract class OptionsMixin {
     public KeyMapping[] keyMappings;
 
     @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;keyMappings:[Lnet/minecraft/client/KeyMapping;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
-    private void onInitAfterKeysAll(Minecraft client, File optionsFile, CallbackInfo ci) {
+    private void onInitAfterKeysAll(Minecraft minecraft, File workingDirectory, CallbackInfo ci) {
         keyMappings = KeyBinds.apply(keyMappings);
     }
 
     @Inject(method = "setCameraType", at = @At("HEAD"), cancellable = true)
-    private void setPerspective(CameraType perspective, CallbackInfo ci) {
+    private void setPerspective(CameraType cameraType, CallbackInfo ci) {
         if (Modules.get() == null) return; // nothing is loaded yet, shouldersurfing compat
 
-        ChangePerspectiveEvent event = MeteorClient.EVENT_BUS.post(ChangePerspectiveEvent.get(perspective));
+        ChangePerspectiveEvent event = MeteorClient.EVENT_BUS.post(ChangePerspectiveEvent.get(cameraType));
 
         if (event.isCancelled()) ci.cancel();
 

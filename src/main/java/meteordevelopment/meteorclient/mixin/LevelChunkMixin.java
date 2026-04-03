@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class LevelChunkMixin {
     @Shadow
     @Final
-    Level level;
+    private Level level;
 
     @Inject(method = "setBlockState", at = @At("TAIL"))
     private void onSetBlockState(BlockPos pos, BlockState state, int flags, CallbackInfoReturnable<BlockState> cir) {

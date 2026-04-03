@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ArmorStandRenderer.class)
-public class ArmorStandRendererMixin {
+public abstract class ArmorStandRendererMixin {
     @Unique
     private static ESP esp;
 

@@ -54,9 +54,9 @@ public abstract class PlayerMixin extends LivingEntity {
     }
 
     @Inject(method = "drop", at = @At("HEAD"), cancellable = true)
-    private void onDropItem(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir) {
-        if (level().isClientSide() && !stack.isEmpty()) {
-            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack)).isCancelled()) cir.setReturnValue(null);
+    private void onDropItem(ItemStack itemStack, boolean thrownFromHand, CallbackInfoReturnable<ItemEntity> cir) {
+        if (level().isClientSide() && !itemStack.isEmpty()) {
+            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(itemStack)).isCancelled()) cir.setReturnValue(null);
         }
     }
 
@@ -71,11 +71,11 @@ public abstract class PlayerMixin extends LivingEntity {
     }
 
     @ModifyReturnValue(method = "getDestroySpeed", at = @At(value = "RETURN"))
-    public float onGetBlockBreakingSpeed(float breakSpeed, BlockState block) {
+    public float onGetBlockBreakingSpeed(float breakSpeed, BlockState state) {
         if (!level().isClientSide()) return breakSpeed;
 
         SpeedMine speedMine = Modules.get().get(SpeedMine.class);
-        if (!speedMine.isActive() || speedMine.mode.get() != SpeedMine.Mode.Normal || !speedMine.filter(block.getBlock()))
+        if (!speedMine.isActive() || speedMine.mode.get() != SpeedMine.Mode.Normal || !speedMine.filter(state.getBlock()))
             return breakSpeed;
 
         float breakSpeedMod = (float) (breakSpeed * speedMine.modifier.get());

@@ -79,7 +79,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
     // Chams - Player texture
 
     @ModifyReturnValue(method = "getRenderType", at = @At("RETURN"))
-    private RenderType getRenderPlayer(RenderType original, S state, boolean showBody, boolean translucent, boolean showOutline) {
+    private RenderType getRenderPlayer(RenderType original, S state, boolean isBodyVisible, boolean forceTransparent, boolean appearGlowing) {
         if (!chams.isActive() || !(((IEntityRenderState) state).meteor$getEntity() instanceof Player player))
             return original;
 
@@ -107,7 +107,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
     }
 
     @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("TAIL"))
-    private void render$Tail(S state, PoseStack matrixStack, SubmitNodeCollector orderedRenderCommandQueue, CameraRenderState arg, CallbackInfo ci) {
+    private void render$Tail(S state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, CallbackInfo ci) {
         Entity entity = ((IEntityRenderState) state).meteor$getEntity();
         if (!(entity instanceof LivingEntity livingEntity)) return;
 

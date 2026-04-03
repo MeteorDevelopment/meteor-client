@@ -22,15 +22,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class ParticleEngineMixin {
     @Shadow
     @Nullable
-    protected abstract <T extends ParticleOptions> Particle makeParticle(T parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ);
+    protected abstract <T extends ParticleOptions> Particle makeParticle(T options, double x, double y, double z, double xa, double ya, double za);
 
     @Inject(method = "createParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)Lnet/minecraft/client/particle/Particle;", at = @At("HEAD"), cancellable = true)
-    private void onCreateParticle(ParticleOptions parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<Particle> cir) {
-        ParticleEvent event = MeteorClient.EVENT_BUS.post(ParticleEvent.get(parameters));
+    private void onCreateParticle(ParticleOptions options, double x, double y, double z, double xa, double ya, double za, CallbackInfoReturnable<Particle> cir) {
+        ParticleEvent event = MeteorClient.EVENT_BUS.post(ParticleEvent.get(options));
 
         if (event.isCancelled()) {
-            if (parameters.getType() == ParticleTypes.FLASH)
-                cir.setReturnValue(makeParticle(parameters, x, y, z, velocityX, velocityY, velocityZ));
+            if (options.getType() == ParticleTypes.FLASH)
+                cir.setReturnValue(makeParticle(options, x, y, z, xa, ya, za));
             else cir.cancel();
         }
     }

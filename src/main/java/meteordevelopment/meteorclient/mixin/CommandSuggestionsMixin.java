@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.SharedSuggestionProvider;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,22 +32,22 @@ public abstract class CommandSuggestionsMixin {
     private ParseResults<SharedSuggestionProvider> currentParse;
     @Shadow
     @Final
-    EditBox input;
+    private EditBox input;
     @Shadow
-    boolean keepSuggestions;
+    private boolean keepSuggestions;
     @Shadow
     private CompletableFuture<Suggestions> pendingSuggestions;
     @Shadow
     private CommandSuggestions.SuggestionsList suggestions;
 
     @Shadow
-    protected abstract void updateUsageInfo();
+    protected abstract void updateUsageInfo(final ParseResults<ClientSuggestionProvider> currentParse, final Suggestions suggestions);
 
     @Inject(method = "updateCommandInfo",
         at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z", remap = false),
         cancellable = true
     )
-    public void onRefresh(CallbackInfo ci, @Local StringReader reader) {
+    public void onRefresh(CallbackInfo ci, @Local(name = "reader") StringReader reader) {
         String prefix = Config.get().prefix.get();
         int length = prefix.length();
 
@@ -62,7 +63,7 @@ public abstract class CommandSuggestionsMixin {
                 this.pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(this.currentParse, cursor);
                 this.pendingSuggestions.thenRun(() -> {
                     if (this.pendingSuggestions.isDone()) {
-                        this.updateUsageInfo();
+                        /*this.updateUsageInfo();*/
                     }
                 });
             }

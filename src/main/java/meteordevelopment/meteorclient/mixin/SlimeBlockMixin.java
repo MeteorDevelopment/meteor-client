@@ -22,7 +22,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 @Mixin(SlimeBlock.class)
 public abstract class SlimeBlockMixin {
     @Inject(method = "stepOn", at = @At("HEAD"), cancellable = true)
-    private void onStepOn(Level world, BlockPos pos, BlockState state, Entity entity, CallbackInfo ci) {
+    private void onStepOn(Level level, BlockPos pos, BlockState onState, Entity entity, CallbackInfo ci) {
         if (Modules.get().get(NoSlow.class).slimeBlock() && entity == mc.player) ci.cancel();
     }
 }

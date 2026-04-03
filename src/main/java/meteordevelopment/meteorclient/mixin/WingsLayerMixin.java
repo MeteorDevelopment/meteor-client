@@ -27,7 +27,7 @@ public abstract class WingsLayerMixin<S extends HumanoidRenderState, M extends E
     }
 
     @ModifyExpressionValue(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/HumanoidRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/layers/WingsLayer;getPlayerElytraTexture(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)Lnet/minecraft/resources/Identifier;"))
-    private Identifier modifyCapeTexture(Identifier original, PoseStack matrices, SubmitNodeCollector entityRenderCommandQueue, int i, S state, float f, float g) {
+    private Identifier modifyCapeTexture(Identifier original, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, S state, float yRot, float xRot) {
         if (((IEntityRenderState) state).meteor$getEntity() instanceof Player player) {
             Identifier id = Capes.get(player);
             return id == null ? original : id;

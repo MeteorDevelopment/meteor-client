@@ -6,12 +6,12 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.client.renderer.MapRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,7 +28,7 @@ public abstract class MapRendererMixin {
     }
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void onDraw(MapRenderState state, PoseStack matrices, SubmitNodeCollector queue, boolean skipRenderingDecorations, int light, CallbackInfo ci) {
+    private void onDraw(MapRenderState mapRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, boolean showOnlyFrame, int lightCoords, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noMapContents()) ci.cancel();
     }
 }

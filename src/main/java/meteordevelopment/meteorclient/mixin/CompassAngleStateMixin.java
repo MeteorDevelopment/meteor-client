@@ -28,9 +28,9 @@ public abstract class CompassAngleStateMixin {
     }
 
     @ModifyReturnValue(method = "getAngleFromEntityToPos(Lnet/minecraft/world/entity/ItemOwner;Lnet/minecraft/core/BlockPos;)D", at = @At("RETURN"))
-    private static double modifyGetAngleTo(double original, ItemOwner from, BlockPos to) {
+    private static double modifyGetAngleTo(double original, ItemOwner owner, BlockPos position) {
         if (Modules.get().isActive(Freecam.class)) {
-            Vec3 vec3d = Vec3.atCenterOf(to);
+            Vec3 vec3d = Vec3.atCenterOf(position);
             Camera camera = mc.gameRenderer.getMainCamera();
             return Math.atan2(vec3d.z() - camera.position().z, vec3d.x() - camera.position().x) / (float) (Math.PI * 2);
         }

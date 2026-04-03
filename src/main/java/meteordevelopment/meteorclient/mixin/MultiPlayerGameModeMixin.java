@@ -53,58 +53,58 @@ public abstract class MultiPlayerGameModeMixin implements IMultiPlayerGameMode {
     public abstract boolean destroyBlock(BlockPos pos);
 
     @Shadow
-    public abstract void startPrediction(ClientLevel world, PredictiveAction packetCreator);
+    public abstract void startPrediction(ClientLevel level, PredictiveAction predictiveAction);
 
     @Inject(method = "handleContainerInput", at = @At("HEAD"), cancellable = true)
-    private void onHandleInventoryMouseClick(int containerId, int slotNum, int buttonNum, ContainerInput containerInput, Player player, CallbackInfo info) {
+    private void onHandleInventoryMouseClick(int containerId, int slotNum, int buttonNum, ContainerInput containerInput, Player player, CallbackInfo ci) {
         if (containerInput == ContainerInput.THROW && slotNum >= 0 && slotNum < player.containerMenu.slots.size()) {
             if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.containerMenu.slots.get(slotNum).getItem())).isCancelled())
-                info.cancel();
+                ci.cancel();
         } else if (slotNum == -999) {
             // Clicking outside of inventory
             if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.containerMenu.getCarried())).isCancelled())
-                info.cancel();
+                ci.cancel();
         }
     }
 
     @Inject(method = "startDestroyBlock", at = @At("HEAD"), cancellable = true)
-    private void onStartDestroyBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
-        if (MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(blockPos, direction)).isCancelled()) cir.cancel();
+    private void onStartDestroyBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+        if (MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(pos, direction)).isCancelled()) cir.cancel();
         else {
             SpeedMine sm = Modules.get().get(SpeedMine.class);
-            BlockState state = mc.level.getBlockState(blockPos);
+            BlockState state = mc.level.getBlockState(pos);
 
             if (!sm.instamine() || !sm.filter(state.getBlock())) return;
 
-            if (state.getDestroyProgress(mc.player, mc.level, blockPos) > 0.5f) {
-                destroyBlock(blockPos);
-                startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction, sequence));
-                startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction, sequence));
+            if (state.getDestroyProgress(mc.player, mc.level, pos) > 0.5f) {
+                destroyBlock(pos);
+                startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence));
+                startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, pos, direction, sequence));
                 cir.setReturnValue(true);
             }
         }
     }
 
     @Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true)
-    public void useItemOn(LocalPlayer player, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> cir) {
-        if (MeteorClient.EVENT_BUS.post(InteractBlockEvent.get(player.getMainHandItem().isEmpty() ? InteractionHand.OFF_HAND : hand, hitResult)).isCancelled())
+    public void useItemOn(LocalPlayer player, InteractionHand hand, BlockHitResult blockHit, CallbackInfoReturnable<InteractionResult> cir) {
+        if (MeteorClient.EVENT_BUS.post(InteractBlockEvent.get(player.getMainHandItem().isEmpty() ? InteractionHand.OFF_HAND : hand, blockHit)).isCancelled())
             cir.setReturnValue(InteractionResult.FAIL);
     }
 
     @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
-    private void onAttack(Player player, Entity target, CallbackInfo ci) {
-        if (MeteorClient.EVENT_BUS.post(AttackEntityEvent.get(target)).isCancelled()) ci.cancel();
+    private void onAttack(Player player, Entity entity, CallbackInfo ci) {
+        if (MeteorClient.EVENT_BUS.post(AttackEntityEvent.get(entity)).isCancelled()) ci.cancel();
     }
 
     @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
-    private void onInteract(Player player, Entity entity, EntityHitResult hitResult, InteractionHand hand, CallbackInfoReturnable<InteractionResult> info) {
+    private void onInteract(Player player, Entity entity, EntityHitResult hitResult, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         if (MeteorClient.EVENT_BUS.post(InteractEntityEvent.get(entity, hand)).isCancelled())
-            info.setReturnValue(InteractionResult.FAIL);
+            cir.setReturnValue(InteractionResult.FAIL);
     }
 
     @Inject(method = "handleCreativeModeItemDrop", at = @At("HEAD"), cancellable = true)
-    private void onHandleCreativeModeItemDrop(ItemStack stack, CallbackInfo ci) {
-        if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack)).isCancelled()) ci.cancel();
+    private void onHandleCreativeModeItemDrop(ItemStack clicked, CallbackInfo ci) {
+        if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(clicked)).isCancelled()) ci.cancel();
     }
 
     @Redirect(method = "continueDestroyBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;destroyDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
@@ -136,8 +136,8 @@ public abstract class MultiPlayerGameModeMixin implements IMultiPlayerGameMode {
     }
 
     @Inject(method = "destroyBlock", at = @At("HEAD"), cancellable = true)
-    private void onDestroyBlock(BlockPos blockPos, CallbackInfoReturnable<Boolean> cir) {
-        if (MeteorClient.EVENT_BUS.post(BreakBlockEvent.get(blockPos)).isCancelled()) cir.setReturnValue(false);
+    private void onDestroyBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        if (MeteorClient.EVENT_BUS.post(BreakBlockEvent.get(pos)).isCancelled()) cir.setReturnValue(false);
     }
 
     @Inject(method = "useItem", at = @At("HEAD"), cancellable = true)

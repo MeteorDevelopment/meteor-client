@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class CreativeSlotMixin implements ISlot {
     @Shadow
     @Final
-    Slot target;
+    private Slot target;
 
     @Override
     public int meteor$getIndex() {

@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = "net.minecraft.client.gui.components.ChatComponent$DrawingFocusedGraphicsAccess", remap = false)
-public class ChatHudInteractableMixin {
+public abstract class ChatHudInteractableMixin {
     @Unique
     private static BetterChat betterChat;
 
@@ -43,7 +43,7 @@ public class ChatHudInteractableMixin {
     }
 
     @Inject(method = "handleMessage", at = @At("TAIL"))
-    private void onRender_afterDrawTextWithShadow(int y, float f, FormattedCharSequence text, CallbackInfoReturnable<Boolean> cir) {
+    private void onRender_afterDrawTextWithShadow(int textTop, float opacity, FormattedCharSequence message, CallbackInfoReturnable<Boolean> cir) {
         getBetterChat().afterDrawMessage();
     }
 

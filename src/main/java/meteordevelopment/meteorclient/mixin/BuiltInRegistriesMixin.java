@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 @Mixin(BuiltInRegistries.class)
 public abstract class BuiltInRegistriesMixin {
     @Redirect(method = "internalRegister(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/core/WritableRegistry;Lnet/minecraft/core/registries/BuiltInRegistries$RegistryBootstrap;)Lnet/minecraft/core/WritableRegistry;", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/Bootstrap;checkBootstrapCalled(Ljava/util/function/Supplier;)V"))
-    private static void ignoreBootstrap(Supplier<String> callerGetter) {
+    private static void ignoreBootstrap(Supplier<String> location) {
         // nothing
     }
 }

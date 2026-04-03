@@ -87,21 +87,21 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
 
     // Inventory Tweaks
     @Inject(method = "mouseDragged", at = @At("TAIL"))
-    private void onMouseDragged(MouseButtonEvent click, double offsetX, double offsetY, CallbackInfoReturnable<Boolean> cir) {
-        if (click.button() != GLFW_MOUSE_BUTTON_LEFT || doubleclick || !Modules.get().get(InventoryTweaks.class).mouseDragItemMove())
+    private void onMouseDragged(MouseButtonEvent event, double dx, double dy, CallbackInfoReturnable<Boolean> cir) {
+        if (event.button() != GLFW_MOUSE_BUTTON_LEFT || doubleclick || !Modules.get().get(InventoryTweaks.class).mouseDragItemMove())
             return;
 
-        Slot slot = getHoveredSlot(click.x(), click.y());
+        Slot slot = getHoveredSlot(event.x(), event.y());
         if (slot != null && slot.hasItem() && mc.hasShiftDown())
-            slotClicked(slot, slot.index, click.button(), ContainerInput.QUICK_MOVE);
+            slotClicked(slot, slot.index, event.button(), ContainerInput.QUICK_MOVE);
     }
 
     // Middle click open
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void mouseClicked(MouseButtonEvent click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
+    private void mouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
 
-        if (tooltips.shouldOpenContents(click) && hoveredSlot != null && !hoveredSlot.getItem().isEmpty() && getMenu().getCarried().isEmpty()) {
+        if (tooltips.shouldOpenContents(event) && hoveredSlot != null && !hoveredSlot.getItem().isEmpty() && getMenu().getCarried().isEmpty()) {
             if (tooltips.openContent(hoveredSlot.getItem())) {
                 cir.setReturnValue(true);
             }

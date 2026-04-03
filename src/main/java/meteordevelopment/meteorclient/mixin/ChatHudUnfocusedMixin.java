@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = "net.minecraft.client.gui.components.ChatComponent$DrawingBackgroundGraphicsAccess", remap = false)
-public class ChatHudUnfocusedMixin {
+public abstract class ChatHudUnfocusedMixin {
     @Unique
     private static BetterChat betterChat;
 
@@ -47,7 +47,7 @@ public class ChatHudUnfocusedMixin {
 
     // Clean up after drawing
     @Inject(method = "handleMessage", at = @At("TAIL"))
-    private void onRender_afterDrawText(int y, float f, FormattedCharSequence orderedText, CallbackInfoReturnable<Boolean> cir) {
+    private void onRender_afterDrawText(int textTop, float opacity, FormattedCharSequence message, CallbackInfoReturnable<Boolean> cir) {
         getBetterChat().afterDrawMessage();
     }
 

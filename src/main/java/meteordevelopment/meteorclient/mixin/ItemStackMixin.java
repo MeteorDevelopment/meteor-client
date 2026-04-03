@@ -38,15 +38,15 @@ public abstract class ItemStackMixin {
     }
 
     @Inject(method = "finishUsingItem", at = @At("HEAD"))
-    private void onFinishUsingItem(Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (user == mc.player) {
+    private void onFinishUsingItem(Level level, LivingEntity livingEntity, CallbackInfoReturnable<ItemStack> cir) {
+        if (livingEntity == mc.player) {
             MeteorClient.EVENT_BUS.post(FinishUsingItemEvent.get((ItemStack) (Object) this));
         }
     }
 
     @Inject(method = "releaseUsing", at = @At("HEAD"))
-    private void onReleaseUsing(Level world, LivingEntity user, int remainingUseTicks, CallbackInfo ci) {
-        if (user == mc.player) {
+    private void onReleaseUsing(Level level, LivingEntity entity, int remainingTime, CallbackInfo ci) {
+        if (entity == mc.player) {
             MeteorClient.EVENT_BUS.post(StoppedUsingItemEvent.get((ItemStack) (Object) this));
         }
     }

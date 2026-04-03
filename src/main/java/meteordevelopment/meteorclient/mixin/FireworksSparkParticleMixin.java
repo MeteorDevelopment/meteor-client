@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(FireworkParticles.Starter.class)
 public abstract class FireworksSparkParticleMixin {
     @Inject(method = "createParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/FireworkParticles$SparkParticle;setTrail(Z)V"), cancellable = true)
-    private void onAddExplosion(double x, double y, double z, double velocityX, double velocityY, double velocityZ, IntList colors, IntList targetColors, boolean trail, boolean flicker, CallbackInfo ci, @Local FireworkParticles.SparkParticle explosion) {
-        if (explosion == null) ci.cancel();
+    private void onAddExplosion(double x, double y, double z, double xa, double ya, double za, IntList rgbColors, IntList fadeColors, boolean trail, boolean twinkle, CallbackInfo ci, @Local(name = "sparkParticle") FireworkParticles.SparkParticle sparkParticle) {
+        if (sparkParticle == null) ci.cancel();
     }
 }

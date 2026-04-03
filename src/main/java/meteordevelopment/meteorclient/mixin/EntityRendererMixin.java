@@ -57,7 +57,7 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
     }
 
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
-    private void shouldRender(T entity, Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
+    private void shouldRender(T entity, Frustum culler, double camX, double camY, double camZ, CallbackInfoReturnable<Boolean> cir) {
         if (noRender.noEntity(entity)) cir.setReturnValue(false);
         if (noRender.noFallingBlocks() && entity instanceof FallingBlockEntity) cir.setReturnValue(false);
     }
@@ -83,7 +83,7 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
     }
 
     @Inject(method = "extractRenderState", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/state/EntityRenderState;outlineColor:I", shift = At.Shift.AFTER, opcode = Opcodes.PUTFIELD))
-    private void onGetOutlineColor(T entity, S state, float tickProgress, CallbackInfo ci) {
+    private void onGetOutlineColor(T entity, S state, float partialTicks, CallbackInfo ci) {
         if (esp.isGlow() && !esp.shouldSkip(entity)) {
             Color color = esp.getColor(entity);
 
@@ -93,10 +93,10 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
     }
 
     @Inject(method = "finalizeRenderState(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/entity/state/EntityRenderState;)V", at = @At("HEAD"), cancellable = true)
-    private void updateShadow(Entity entity, EntityRenderState renderState, CallbackInfo ci) {
+    private void updateShadow(Entity entity, EntityRenderState state, CallbackInfo ci) {
         if (noRender.noDeadEntities() &&
             entity instanceof LivingEntity &&
-            renderState instanceof LivingEntityRenderState livingEntityRenderState &&
+            state instanceof LivingEntityRenderState livingEntityRenderState &&
             livingEntityRenderState.deathTime > 0) {
             ci.cancel();
         }

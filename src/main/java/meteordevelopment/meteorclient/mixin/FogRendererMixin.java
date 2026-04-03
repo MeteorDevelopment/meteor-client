@@ -17,16 +17,16 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(FogRenderer.class)
 public abstract class FogRendererMixin {
-    @ModifyVariable(method = "updateBuffer(Ljava/nio/ByteBuffer;ILorg/joml/Vector4f;FFFFFF)V", at = @At("HEAD"), argsOnly = true)
-    private Vector4f modifyFogDistance(Vector4f original) {
-        if (Modules.get() == null) return original;
+    @ModifyVariable(method = "updateBuffer(Ljava/nio/ByteBuffer;ILorg/joml/Vector4f;FFFFFF)V", at = @At("HEAD"), argsOnly = true, name = "fogColor")
+    private Vector4f modifyFogDistance(Vector4f fogColor) {
+        if (Modules.get() == null) return fogColor;
 
         Ambience ambience = Modules.get().get(Ambience.class);
         if (ambience.isActive() && ambience.customFogColor.get()) {
             return ambience.fogColor.get().getVec4f();
         }
 
-        return original;
+        return fogColor;
     }
 
     @ModifyExpressionValue(method = "getBuffer", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/fog/FogRenderer;fogEnabled:Z"))

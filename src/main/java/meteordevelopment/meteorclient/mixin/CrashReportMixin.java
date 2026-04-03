@@ -23,11 +23,11 @@ import java.util.List;
 @Mixin(CrashReport.class)
 public abstract class CrashReportMixin {
     @Inject(method = "getDetails(Ljava/lang/StringBuilder;)V", at = @At("TAIL"))
-    private void onAddDetails(StringBuilder sb, CallbackInfo ci) {
-        sb.append("\n\n-- Meteor Client --\n\n");
-        sb.append("Version: ").append(MeteorClient.VERSION).append("\n");
+    private void onAddDetails(StringBuilder builder, CallbackInfo ci) {
+        builder.append("\n\n-- Meteor Client --\n\n");
+        builder.append("Version: ").append(MeteorClient.VERSION).append("\n");
         if (!MeteorClient.BUILD_NUMBER.isEmpty()) {
-            sb.append("Build: ").append(MeteorClient.BUILD_NUMBER).append("\n");
+            builder.append("Build: ").append(MeteorClient.BUILD_NUMBER).append("\n");
         }
 
         if (Modules.get() != null) {
@@ -41,17 +41,17 @@ public abstract class CrashReportMixin {
 
                     if (!modulesActive) {
                         modulesActive = true;
-                        sb.append("\n[[ Active Modules ]]\n");
+                        builder.append("\n[[ Active Modules ]]\n");
                     }
 
                     if (!categoryActive) {
                         categoryActive = true;
-                        sb.append("\n[")
+                        builder.append("\n[")
                             .append(category)
                             .append("]:\n");
                     }
 
-                    sb.append(module.name).append("\n");
+                    builder.append(module.name).append("\n");
                 }
 
             }
@@ -65,16 +65,16 @@ public abstract class CrashReportMixin {
 
                 if (!hudActive) {
                     hudActive = true;
-                    sb.append("\n[[ Active Hud Elements ]]\n");
+                    builder.append("\n[[ Active Hud Elements ]]\n");
                 }
 
-                if (!(element instanceof TextHud textHud)) sb.append(element.info.name).append("\n");
+                if (!(element instanceof TextHud textHud)) builder.append(element.info.name).append("\n");
                 else {
-                    sb.append("Text\n{")
+                    builder.append("Text\n{")
                         .append(textHud.text.get())
                         .append("}\n");
                     if (textHud.shown.get() != TextHud.Shown.Always) {
-                        sb.append("(")
+                        builder.append("(")
                             .append(textHud.shown.get())
                             .append(textHud.condition.get())
                             .append(")\n");

@@ -48,7 +48,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
     }
 
     @Inject(method = "drop", at = @At("HEAD"), cancellable = true)
-    private void onDrop(boolean dropEntireStack, CallbackInfoReturnable<Boolean> cir) {
+    private void onDrop(boolean all, CallbackInfoReturnable<Boolean> cir) {
         if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(getMainHandItem())).isCancelled())
             cir.setReturnValue(false);
     }
@@ -79,7 +79,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
     }
 
     @Inject(method = "moveTowardsClosestSpace", at = @At("HEAD"), cancellable = true)
-    private void onMoveTowardsClosestSpace(double x, double d, CallbackInfo ci) {
+    private void onMoveTowardsClosestSpace(double x, double z, CallbackInfo ci) {
         Velocity velocity = Modules.get().get(Velocity.class);
         if (velocity.isActive() && velocity.blocks.get()) {
             ci.cancel();
@@ -119,12 +119,12 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
     }
 
     @ModifyReturnValue(method = "pick", at = @At("RETURN"))
-    private static HitResult onUpdateTargetedEntity(HitResult original, @Local HitResult hitResult) {
+    private static HitResult onUpdateTargetedEntity(HitResult original, @Local(name = "blockHitResult") HitResult blockHitResult) {
         if (original instanceof EntityHitResult ehr) {
-            if (Modules.get().get(NoMiningTrace.class).canWork(ehr.getEntity()) && hitResult.getType() == HitResult.Type.BLOCK) {
-                return hitResult;
+            if (Modules.get().get(NoMiningTrace.class).canWork(ehr.getEntity()) && blockHitResult.getType() == HitResult.Type.BLOCK) {
+                return blockHitResult;
             } else if (ehr.getEntity() instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) {
-                return hitResult;
+                return blockHitResult;
             }
         }
 
@@ -132,11 +132,11 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
     }
 
     @ModifyExpressionValue(method = "pick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;pick(DFZ)Lnet/minecraft/world/phys/HitResult;"))
-    private static HitResult modifyRaycastResult(HitResult original, Entity entity, double blockInteractionRange, double entityInteractionRange, float tickProgress, @Local(ordinal = 0, argsOnly = true) double maxDistance) {
+    private static HitResult modifyPick(HitResult original, @Local(argsOnly = true, name = "cameraEntity") Entity cameraEntity, @Local(argsOnly = true, name = "partialTicks") float partialTicks, @Local(name = "maxDistance") double maxDistance) {
         if (!Modules.get().isActive(LiquidInteract.class)) return original;
         if (original.getType() != HitResult.Type.MISS) return original;
 
-        return entity.pick(maxDistance, tickProgress, true);
+        return cameraEntity.pick(maxDistance, partialTicks, true);
     }
 
     // Sprint

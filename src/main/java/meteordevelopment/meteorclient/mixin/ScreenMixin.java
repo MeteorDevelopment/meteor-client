@@ -32,18 +32,18 @@ import static org.lwjgl.glfw.GLFW.*;
 
 @Mixin(value = Screen.class, priority = 500) // needs to be before baritone
 public abstract class ScreenMixin {
-    @Inject(method = "renderTransparentBackground", at = @At("HEAD"), cancellable = true)
-    private void onRenderTransparentBackground(CallbackInfo ci) {
+    @Inject(method = "extractTransparentBackground", at = @At("HEAD"), cancellable = true)
+    private void onExtractTransparentBackground(CallbackInfo ci) {
         if (Utils.canUpdate() && Modules.get().get(NoRender.class).noGuiBackground())
             ci.cancel();
     }
 
     @Inject(method = "defaultHandleClickEvent", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;error(Ljava/lang/String;Ljava/lang/Object;)V", remap = false), cancellable = true)
-    private static void onDefaultHandleClickEvent(ClickEvent clickEvent, Minecraft minecraft, Screen screen, CallbackInfo ci) {
-        if (clickEvent instanceof RunnableClickEvent runnableClickEvent) {
+    private static void onDefaultHandleClickEvent(ClickEvent event, Minecraft minecraft, Screen activeScreen, CallbackInfo ci) {
+        if (event instanceof RunnableClickEvent runnableClickEvent) {
             runnableClickEvent.runnable.run();
             ci.cancel();
-        } else if (clickEvent instanceof MeteorClickEvent meteorClickEvent && meteorClickEvent.value.startsWith(Config.get().prefix.get())) {
+        } else if (event instanceof MeteorClickEvent meteorClickEvent && meteorClickEvent.value.startsWith(Config.get().prefix.get())) {
             try {
                 Commands.dispatch(meteorClickEvent.value.substring(Config.get().prefix.get().length()));
             } catch (CommandSyntaxException e) {
@@ -55,11 +55,11 @@ public abstract class ScreenMixin {
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void onKeyPressed(KeyEvent input, CallbackInfoReturnable<Boolean> cir) {
+    private void onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
         if ((Object) (this) instanceof ChatScreen) return;
         GUIMove guiMove = Modules.get().get(GUIMove.class);
         List<Integer> arrows = List.of(GLFW_KEY_RIGHT, GLFW_KEY_LEFT, GLFW_KEY_DOWN, GLFW_KEY_UP);
-        if ((guiMove.disableArrows() && arrows.contains(input.key())) || (guiMove.disableSpace() && input.key() == GLFW_KEY_SPACE)) {
+        if ((guiMove.disableArrows() && arrows.contains(event.key())) || (guiMove.disableSpace() && event.key() == GLFW_KEY_SPACE)) {
             cir.setReturnValue(true);
         }
     }

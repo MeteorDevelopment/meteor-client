@@ -28,13 +28,13 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
  * @see <a href="https://github.com/CCBlueX/LiquidBounce/blob/nextgen/src/main/java/net/ccbluex/liquidbounce/injection/mixins/minecraft/util/MixinDownloader.java">MixinDownloader.java</a>
  */
 @Mixin(DownloadQueue.class)
-public class DownloadQueueMixin {
+public abstract class DownloadQueueMixin {
     @Shadow
     @Final
     private Path cacheDir;
 
-    @ModifyExpressionValue(method = "method_55485", at = @At(value = "INVOKE", target = "Ljava/nio/file/Path;resolve(Ljava/lang/String;)Ljava/nio/file/Path;"))
-    private Path hookResolve(Path original, @Local(argsOnly = true) UUID id) {
+    @ModifyExpressionValue(method = "lambda$runDownload$0", at = @At(value = "INVOKE", target = "Ljava/nio/file/Path;resolve(Ljava/lang/String;)Ljava/nio/file/Path;"))
+    private Path hookResolve(Path original, @Local(argsOnly = true, name = "id") UUID id) {
         UUID accountId = mc.getUser().getProfileId();
         if (accountId == null) {
             MeteorClient.LOG.warn("Failed to change resource pack download directory because the account id is null.");

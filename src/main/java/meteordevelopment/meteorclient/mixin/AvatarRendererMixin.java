@@ -52,21 +52,21 @@ public abstract class AvatarRendererMixin
     // Chams - Player scale
 
     @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V", at = @At("RETURN"))
-    private void updateRenderState$scale(Avatar player, AvatarRenderState state, float f, CallbackInfo ci) {
+    private void updateRenderState$scale(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
         if (!chams.isActive() || !chams.players.get()) return;
-        if (chams.ignoreSelf.get() && player == mc.player) return;
+        if (chams.ignoreSelf.get() && entity == mc.player) return;
 
         float v = chams.playersScale.get().floatValue();
         state.scale *= v;
 
         if (state.nameTagAttachment != null)
-            ((IVec3) state.nameTagAttachment).meteor$setY(state.nameTagAttachment.y + (player.getBbHeight() * v - player.getBbHeight()));
+            ((IVec3) state.nameTagAttachment).meteor$setY(state.nameTagAttachment.y + (entity.getBbHeight() * v - entity.getBbHeight()));
     }
 
     // Chams - Hand Texture
 
     @ModifyExpressionValue(method = "renderHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;entityTranslucent(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;"))
-    private RenderType renderArm$texture(RenderType original, PoseStack matrixStack, SubmitNodeCollector entityRenderCommandQueue, int light, Identifier skinTexture, ModelPart modelPart, boolean sleeveVisible) {
+    private RenderType renderArm$texture(RenderType original, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, Identifier skinTexture, ModelPart arm, boolean hasSleeve) {
         if (chams.isActive() && chams.hand.get()) {
             Identifier texture = chams.handTexture.get() ? skinTexture : Chams.BLANK;
             return RenderTypes.entityTranslucent(texture);
@@ -90,8 +90,8 @@ public abstract class AvatarRendererMixin
     // Rotations
 
     @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V", at = @At("RETURN"))
-    private void extractRenderState$rotations(Avatar player, AvatarRenderState state, float f, CallbackInfo ci) {
-        if (Rotations.rotating && player == mc.player) {
+    private void extractRenderState$rotations(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
+        if (Rotations.rotating && entity == mc.player) {
             state.yRot = 0;
             state.bodyRot = Rotations.serverYaw;
             state.xRot = Rotations.serverPitch;

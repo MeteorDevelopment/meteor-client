@@ -37,15 +37,15 @@ public abstract class MouseHandlerMixin {
     private Minecraft minecraft;
 
     @Inject(method = "onButton", at = @At("HEAD"), cancellable = true)
-    private void onMouseButton(long window, MouseButtonInfo mouseInput, int action, CallbackInfo ci) {
-        Input.setButtonState(mouseInput.button(), action != GLFW_RELEASE);
+    private void onMouseButton(long handle, MouseButtonInfo rawButtonInfo, int action, CallbackInfo ci) {
+        Input.setButtonState(rawButtonInfo.button(), action != GLFW_RELEASE);
 
-        MouseButtonEvent click = new MouseButtonEvent(getScaledXPos(minecraft.getWindow()), getScaledYPos(minecraft.getWindow()), mouseInput);
+        MouseButtonEvent click = new MouseButtonEvent(getScaledXPos(minecraft.getWindow()), getScaledYPos(minecraft.getWindow()), rawButtonInfo);
         if (MeteorClient.EVENT_BUS.post(MouseClickEvent.get(click, KeyAction.get(action))).isCancelled()) ci.cancel();
     }
 
     @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
-    private void onMouseScroll(long window, double horizontal, double vertical, CallbackInfo ci) {
-        if (MeteorClient.EVENT_BUS.post(MouseScrollEvent.get(vertical)).isCancelled()) ci.cancel();
+    private void onMouseScroll(long handle, double xoffset, double yoffset, CallbackInfo ci) {
+        if (MeteorClient.EVENT_BUS.post(MouseScrollEvent.get(yoffset)).isCancelled()) ci.cancel();
     }
 }

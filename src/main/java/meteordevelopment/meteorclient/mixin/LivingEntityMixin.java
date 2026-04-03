@@ -45,21 +45,21 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @ModifyReturnValue(method = "canStandOnFluid", at = @At("RETURN"))
-    private boolean onCanWalkOnFluid(boolean original, FluidState fluidState) {
+    private boolean onCanWalkOnFluid(boolean original, FluidState fluid) {
         if ((Object) this != mc.player) return original;
-        CanWalkOnFluidEvent event = MeteorClient.EVENT_BUS.post(CanWalkOnFluidEvent.get(fluidState));
+        CanWalkOnFluidEvent event = MeteorClient.EVENT_BUS.post(CanWalkOnFluidEvent.get(fluid));
 
         return event.walkOnFluid;
     }
 
     @Inject(method = "spawnItemParticles", at = @At("HEAD"), cancellable = true)
-    private void spawnItemParticles(ItemStack stack, int count, CallbackInfo ci) {
+    private void spawnItemParticles(ItemStack itemStack, int count, CallbackInfo ci) {
         NoRender noRender = Modules.get().get(NoRender.class);
-        if (noRender.noEatParticles() && stack.getComponents().has(DataComponents.FOOD)) ci.cancel();
+        if (noRender.noEatParticles() && itemStack.getComponents().has(DataComponents.FOOD)) ci.cancel();
     }
 
     @Inject(method = "onEquipItem", at = @At("HEAD"), cancellable = true)
-    private void onEquipStack(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo ci) {
+    private void onEquipStack(EquipmentSlot slot, ItemStack oldStack, ItemStack stack, CallbackInfo ci) {
         if ((Object) this != mc.player) return;
 
         if (Modules.get().get(OffhandCrash.class).isAntiCrash()) {

@@ -58,7 +58,7 @@ public abstract class GuiMixin {
     }
 
     @Inject(method = "extractPortalOverlay", at = @At("HEAD"), cancellable = true)
-    private void onExtractPortalOverlay(GuiGraphicsExtractor graphics, float nauseaStrength, CallbackInfo ci) {
+    private void onExtractPortalOverlay(GuiGraphicsExtractor graphics, float alpha, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noPortalOverlay()) ci.cancel();
     }
 
@@ -83,7 +83,7 @@ public abstract class GuiMixin {
     }
 
     @Inject(method = "extractScoreboardSidebar", at = @At("HEAD"), cancellable = true)
-    private void onExtractScoreboardSidebar(GuiGraphicsExtractor graphics, DeltaTracker tickCounter, CallbackInfo ci) {
+    private void onExtractScoreboardSidebar(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noScoreboard()) ci.cancel();
     }
 
@@ -120,7 +120,7 @@ public abstract class GuiMixin {
     }
 
     @Inject(method = "extractConfusionOverlay", at = @At("HEAD"), cancellable = true)
-    private void onExtractNausea(GuiGraphicsExtractor graphics, float distortionStrength, CallbackInfo ci) {
+    private void onExtractNausea(GuiGraphicsExtractor graphics, float strength, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noNausea()) ci.cancel();
     }
 }

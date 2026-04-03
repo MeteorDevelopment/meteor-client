@@ -18,10 +18,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Optional;
 
 @Mixin(BundleItem.class)
-public class BundleItemMixin {
+public abstract class BundleItemMixin {
     @Inject(method = "getTooltipImage", at = @At("HEAD"), cancellable = true)
-    private void onGetTooltipImage(ItemStack stack, CallbackInfoReturnable<Optional<TooltipComponent>> cir) {
-        TooltipDataEvent event = MeteorClient.EVENT_BUS.post(TooltipDataEvent.get(stack));
+    private void onGetTooltipImage(ItemStack bundle, CallbackInfoReturnable<Optional<TooltipComponent>> cir) {
+        TooltipDataEvent event = MeteorClient.EVENT_BUS.post(TooltipDataEvent.get(bundle));
         if (event.tooltipData != null) {
             cir.setReturnValue(Optional.of(event.tooltipData));
         }

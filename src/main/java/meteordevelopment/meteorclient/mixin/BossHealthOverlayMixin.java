@@ -25,24 +25,24 @@ import java.util.Iterator;
 
 @Mixin(BossHealthOverlay.class)
 public abstract class BossHealthOverlayMixin {
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "extractRenderState", at = @At("HEAD"), cancellable = true)
     private void onRender(CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noBossBar()) ci.cancel();
     }
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Ljava/util/Collection;iterator()Ljava/util/Iterator;"))
+    @ModifyExpressionValue(method = "extractRenderState", at = @At(value = "INVOKE", target = "Ljava/util/Collection;iterator()Ljava/util/Iterator;"))
     public Iterator<LerpingBossEvent> modifyBossBarIterator(Iterator<LerpingBossEvent> original) {
         RenderBossBarEvent.BossIterator event = MeteorClient.EVENT_BUS.post(RenderBossBarEvent.BossIterator.get(original));
         return event.iterator;
     }
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/LerpingBossEvent;getName()Lnet/minecraft/network/chat/Component;"))
-    public Component modifyBossBarName(Component original, @Local LerpingBossEvent clientBossBar) {
-        RenderBossBarEvent.BossText event = MeteorClient.EVENT_BUS.post(RenderBossBarEvent.BossText.get(clientBossBar, original));
-        return event.name;
+    @ModifyExpressionValue(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/LerpingBossEvent;getName()Lnet/minecraft/network/chat/Component;"))
+    public Component modifyBossBarName(Component original, @Local(name = "event") LerpingBossEvent event) {
+        RenderBossBarEvent.BossText bossTextEvent = MeteorClient.EVENT_BUS.post(RenderBossBarEvent.BossText.get(event, original));
+        return bossTextEvent.name;
     }
 
-    @ModifyConstant(method = "render", constant = @Constant(intValue = 9, ordinal = 1))
+    @ModifyConstant(method = "extractRenderState", constant = @Constant(intValue = 9, ordinal = 1))
     public int modifySpacingConstant(int j) {
         RenderBossBarEvent.BossSpacing event = MeteorClient.EVENT_BUS.post(RenderBossBarEvent.BossSpacing.get(j));
         return event.spacing;

@@ -32,33 +32,33 @@ public abstract class KeyboardHandlerMixin {
     private Minecraft minecraft;
 
     @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
-    public void onKey(long window, int action, KeyEvent input, CallbackInfo ci) {
-        int modifiers = input.modifiers();
-        if (input.key() != GLFW.GLFW_KEY_UNKNOWN) {
+    public void onKey(long handle, int action, KeyEvent event, CallbackInfo ci) {
+        int modifiers = event.modifiers();
+        if (event.key() != GLFW.GLFW_KEY_UNKNOWN) {
             // on Linux/X11 the modifier is not active when the key is pressed and still active when the key is released
             // https://github.com/glfw/glfw/issues/1630
             if (action == GLFW.GLFW_PRESS) {
-                modifiers |= Input.getModifier(input.key());
+                modifiers |= Input.getModifier(event.key());
             } else if (action == GLFW.GLFW_RELEASE) {
-                modifiers &= ~Input.getModifier(input.key());
+                modifiers &= ~Input.getModifier(event.key());
             }
 
             if (minecraft.screen instanceof WidgetScreen && action == GLFW.GLFW_REPEAT) {
-                ((WidgetScreen) minecraft.screen).keyRepeated(new KeyEvent(input.key(), input.scancode(), modifiers));
+                ((WidgetScreen) minecraft.screen).keyRepeated(new KeyEvent(event.key(), event.scancode(), modifiers));
             }
 
             if (GuiKeyEvents.canUseKeys) {
-                Input.setKeyState(input.key(), action != GLFW.GLFW_RELEASE);
-                if (MeteorClient.EVENT_BUS.post(KeyInputEvent.get(new KeyEvent(input.key(), input.scancode(), modifiers), KeyAction.get(action))).isCancelled())
+                Input.setKeyState(event.key(), action != GLFW.GLFW_RELEASE);
+                if (MeteorClient.EVENT_BUS.post(KeyInputEvent.get(new KeyEvent(event.key(), event.scancode(), modifiers), KeyAction.get(action))).isCancelled())
                     ci.cancel();
             }
         }
     }
 
     @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
-    private void onChar(long window, CharacterEvent input, CallbackInfo ci) {
+    private void onChar(long handle, CharacterEvent event, CallbackInfo ci) {
         if (Utils.canUpdate() && !minecraft.isPaused() && (minecraft.screen == null || minecraft.screen instanceof WidgetScreen)) {
-            if (MeteorClient.EVENT_BUS.post(CharTypedEvent.get((char) input.codepoint())).isCancelled()) ci.cancel();
+            if (MeteorClient.EVENT_BUS.post(CharTypedEvent.get((char) event.codepoint())).isCancelled()) ci.cancel();
         }
     }
 }

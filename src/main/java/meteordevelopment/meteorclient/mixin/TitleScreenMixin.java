@@ -26,7 +26,7 @@ public abstract class TitleScreenMixin extends Screen {
     }
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
-    private void onExtractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    private void onExtractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
         if (Config.get().titleScreenCredits.get()) TitleScreenCredits.render(graphics);
     }
 

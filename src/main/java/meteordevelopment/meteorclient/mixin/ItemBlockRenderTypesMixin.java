@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ItemBlockRenderTypes.class)
-public class ItemBlockRenderTypesMixin {
+public abstract class ItemBlockRenderTypesMixin {
     @Inject(method = "getChunkRenderType", at = @At("HEAD"), cancellable = true)
     private static void onGetBlockLayer(BlockState state, CallbackInfoReturnable<ChunkSectionLayer> cir) {
         if (Modules.get() == null) return;

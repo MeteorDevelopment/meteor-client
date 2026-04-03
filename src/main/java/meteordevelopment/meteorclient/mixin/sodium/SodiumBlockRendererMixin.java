@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BlockRenderer.class, remap = false)
-public class SodiumBlockRendererMixin {
+public abstract class SodiumBlockRendererMixin {
     @Unique
     private int xrayAlpha;
 

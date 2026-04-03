@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BlockBehaviour.class)
 public abstract class BlockBehaviourMixin {
     @Inject(method = "getShadeBrightness", at = @At("HEAD"), cancellable = true)
-    private void onGetAmbientOcclusionLightLevel(BlockState state, BlockGetter world, BlockPos pos, CallbackInfoReturnable<Float> cir) {
+    private void onGetAmbientOcclusionLightLevel(BlockState state, BlockGetter level, BlockPos pos, CallbackInfoReturnable<Float> cir) {
         AmbientOcclusionEvent event = MeteorClient.EVENT_BUS.post(AmbientOcclusionEvent.get());
 
         if (event.lightLevel != -1) cir.setReturnValue(event.lightLevel);

@@ -37,9 +37,9 @@ public abstract class ClientLevelMixin {
     }
 
     @Inject(method = "removeEntity", at = @At("HEAD"))
-    private void onRemoveEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo ci) {
-        if (getEntity(entityId) != null)
-            MeteorClient.EVENT_BUS.post(EntityRemovedEvent.get(getEntity(entityId)));
+    private void onRemoveEntity(int id, Entity.RemovalReason reason, CallbackInfo ci) {
+        if (getEntity(id) != null)
+            MeteorClient.EVENT_BUS.post(EntityRemovedEvent.get(getEntity(id)));
     }
 
     @ModifyArgs(method = "animateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;doAnimateTick(IIIILnet/minecraft/util/RandomSource;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos$MutableBlockPos;)V"))
@@ -50,12 +50,12 @@ public abstract class ClientLevelMixin {
     }
 
     @Inject(method = "addDestroyBlockEffect", at = @At("HEAD"), cancellable = true)
-    private void onAddDestroyBlockEffect(BlockPos blockPos, BlockState state, CallbackInfo ci) {
+    private void onAddDestroyBlockEffect(BlockPos pos, BlockState blockState, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noBlockBreakParticles()) ci.cancel();
     }
 
     @Inject(method = "addBreakingBlockEffect", at = @At("HEAD"), cancellable = true)
-    private void onAddBlockBreakingParticles(BlockPos blockPos, Direction direction, CallbackInfo ci) {
+    private void onAddBlockBreakingParticles(BlockPos pos, Direction direction, CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noBlockBreakParticles()) ci.cancel();
     }
 }

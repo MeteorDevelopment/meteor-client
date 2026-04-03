@@ -23,7 +23,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 @Mixin(SweetBerryBushBlock.class)
 public abstract class SweetBerryBushBlockMixin {
     @Inject(method = "entityInside", at = @At("HEAD"), cancellable = true)
-    private void onEntityCollision(BlockState blockState, Level level, BlockPos blockPos, Entity entity, InsideBlockEffectApplier insideBlockEffectApplier, boolean bl, CallbackInfo info) {
-        if (entity == mc.player && Modules.get().get(NoSlow.class).berryBush()) info.cancel();
+    private void onEntityCollision(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise, CallbackInfo ci) {
+        if (entity == mc.player && Modules.get().get(NoSlow.class).berryBush()) ci.cancel();
     }
 }

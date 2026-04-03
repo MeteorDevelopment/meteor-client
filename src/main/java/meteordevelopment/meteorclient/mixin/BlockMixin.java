@@ -45,7 +45,7 @@ public abstract class BlockMixin extends BlockBehaviour implements ItemLike {
 
     // For More Culling compatibility - runs before More Culling's inject to force-render whitelisted Xray blocks
     @Inject(method = "shouldRenderFace", at = @At("HEAD"), cancellable = true)
-    private static void meteor$forceXrayFace(BlockState state, BlockState sideState, Direction side, CallbackInfoReturnable<Boolean> cir) {
+    private static void meteor$forceXrayFace(BlockState state, BlockState neighborState, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         Modules modules = Modules.get();
         if (modules == null) return;
 

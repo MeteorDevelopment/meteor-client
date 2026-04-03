@@ -16,7 +16,7 @@ public abstract class CapabilityTrackerMixin implements ICapabilityTracker {
     private boolean enabled;
 
     @Shadow
-    public abstract void setEnabled(boolean state);
+    public abstract void setEnabled(boolean enabled);
 
     @Override
     public boolean meteor$get() {

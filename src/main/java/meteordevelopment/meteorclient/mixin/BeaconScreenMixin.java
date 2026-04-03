@@ -30,7 +30,7 @@ import java.util.List;
 @Mixin(BeaconScreen.class)
 public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMenu> {
     @Shadow
-    protected abstract <T extends AbstractWidget> void addBeaconButton(T button);
+    protected abstract <T extends AbstractWidget> void addBeaconButton(T beaconButton);
 
     public BeaconScreenMixin(BeaconMenu handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
@@ -60,7 +60,7 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     }
 
     @Inject(method = "extractBackground", at = @At("TAIL"))
-    private void onExtractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo info) {
+    private void onExtractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
         if (!Modules.get().get(BetterBeacons.class).isActive()) return;
         //this will clear the background from useless pyramid graphics
         graphics.fill(leftPos + 10, topPos + 7, leftPos + 220, topPos + 98, 0xFF212121);

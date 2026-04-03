@@ -105,7 +105,7 @@ public abstract class MinecraftMixin implements IMinecraft {
     private RenderTarget mainRenderTarget;
 
     @Shadow
-    protected abstract void continueAttack(boolean breaking);
+    protected abstract void continueAttack(boolean down);
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
@@ -146,7 +146,7 @@ public abstract class MinecraftMixin implements IMinecraft {
     }
 
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At("HEAD"))
-    private void onDisconnect(Screen screen, boolean transferring, boolean stopSound, CallbackInfo ci) {
+    private void onDisconnect(Screen screen, boolean keepResourcePacks, boolean stopSound, CallbackInfo ci) {
         if (level != null) {
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
         }
@@ -191,10 +191,10 @@ public abstract class MinecraftMixin implements IMinecraft {
     }
 
     @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isItemEnabled(Lnet/minecraft/world/flag/FeatureFlagSet;)Z"))
-    private void onStartUseItemHand(CallbackInfo ci, @Local ItemStack itemStack) {
+    private void onStartUseItemHand(CallbackInfo ci, @Local(name = "heldItem") ItemStack heldItem) {
         FastUse fastUse = Modules.get().get(FastUse.class);
         if (fastUse.isActive()) {
-            rightClickDelay = fastUse.getItemUseCooldown(itemStack);
+            rightClickDelay = fastUse.getItemUseCooldown(heldItem);
         }
     }
 
@@ -240,8 +240,8 @@ public abstract class MinecraftMixin implements IMinecraft {
         return !b.isActive() || !b.drawingBow;
     }
 
-    @Inject(method = "resizeDisplay", at = @At("TAIL"))
-    private void onResizeDisplay(CallbackInfo ci) {
+    @Inject(method = "resizeGui", at = @At("TAIL"))
+    private void onResizeGui(CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(ResolutionChangedEvent.get());
     }
 
@@ -309,8 +309,8 @@ public abstract class MinecraftMixin implements IMinecraft {
     }
 
     @WrapWithCondition(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;continueAttack(Z)V"))
-    private boolean wrapHandleBlockBreaking(Minecraft instance, boolean breaking) {
-        isBreaking = breaking;
+    private boolean wrapHandleBlockBreaking(Minecraft instance, boolean down) {
+        isBreaking = down;
         return !Modules.get().get(InventoryTweaks.class).frameInput();
     }
 

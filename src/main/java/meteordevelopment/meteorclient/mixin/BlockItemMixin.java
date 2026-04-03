@@ -25,29 +25,28 @@ public abstract class BlockItemMixin {
     protected abstract BlockState getPlacementState(BlockPlaceContext context);
 
     @Inject(method = "placeBlock(Lnet/minecraft/world/item/context/BlockPlaceContext;Lnet/minecraft/world/level/block/state/BlockState;)Z", at = @At("HEAD"), cancellable = true)
-    private void onPlace(BlockPlaceContext context, BlockState state, CallbackInfoReturnable<Boolean> cir) {
+    private void onPlace(BlockPlaceContext context, BlockState placementState, CallbackInfoReturnable<Boolean> cir) {
         if (!context.getLevel().isClientSide()) return;
 
-        if (MeteorClient.EVENT_BUS.post(PlaceBlockEvent.get(context.getClickedPos(), state.getBlock())).isCancelled()) {
+        if (MeteorClient.EVENT_BUS.post(PlaceBlockEvent.get(context.getClickedPos(), placementState.getBlock())).isCancelled()) {
             cir.setReturnValue(true);
         }
     }
 
     @ModifyVariable(
         method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;",
-        ordinal = 1,
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/state/BlockState;is(Lnet/minecraft/world/level/block/Block;)Z"
-        )
-    )
-    private BlockState modifyState(BlockState state, BlockPlaceContext context) {
+            target = "Lnet/minecraft/world/level/block/state/BlockState;is(Ljava/lang/Object;)Z"
+        ),
+        name = "placedState")
+    private BlockState modifyState(BlockState placedState, BlockPlaceContext placeContext) {
         var noGhostBlocks = Modules.get().get(NoGhostBlocks.class);
 
         if (noGhostBlocks.isActive() && noGhostBlocks.placing.get()) {
-            return getPlacementState(context);
+            return getPlacementState(placeContext);
         }
 
-        return state;
+        return placedState;
     }
 }

@@ -34,7 +34,7 @@ public abstract class FireworkRocketEntityMixin {
     }
 
     @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
-    private void onHitEntity(EntityHitResult entityHitResult, CallbackInfo ci) {
+    private void onHitEntity(EntityHitResult hitResult, CallbackInfo ci) {
         FireworkRocketEntity firework = ((FireworkRocketEntity) (Object) this);
 
         if (Modules.get().get(ElytraBoost.class).isFirework(firework)) {
@@ -44,7 +44,7 @@ public abstract class FireworkRocketEntityMixin {
     }
 
     @Inject(method = "onHitBlock", at = @At("HEAD"), cancellable = true)
-    private void onHitBlock(BlockHitResult blockHitResult, CallbackInfo ci) {
+    private void onHitBlock(BlockHitResult hitResult, CallbackInfo ci) {
         FireworkRocketEntity firework = ((FireworkRocketEntity) (Object) this);
 
         if (Modules.get().get(ElytraBoost.class).isFirework(firework)) {

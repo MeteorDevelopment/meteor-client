@@ -6,13 +6,11 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.MixinPlugin;
-import meteordevelopment.meteorclient.events.render.GetFovEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
@@ -84,10 +82,10 @@ public abstract class GameRendererMixin implements IGameRenderer {
     private final PoseStack matrices = new PoseStack();
 
     @Shadow
-    protected abstract void bobView(PoseStack matrices, float tickDelta);
+    protected abstract void bobView(final CameraRenderState cameraState, final PoseStack poseStack);
 
     @Shadow
-    protected abstract void bobHurt(PoseStack matrices, float tickDelta);
+    protected abstract void bobHurt(final CameraRenderState cameraState, final PoseStack poseStack);
 
     @Shadow
     @Final
@@ -105,7 +103,7 @@ public abstract class GameRendererMixin implements IGameRenderer {
     @Final
     GuiRenderState guiRenderState;
 
-    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/gui/render/state/GuiRenderState;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;Ljava/util/List;)V"))
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/renderer/state/gui/GuiRenderState;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;Ljava/util/List;)V"))
     private List<PictureInPictureRenderer<?>> meteor$addSpecialRenderers(List<PictureInPictureRenderer<?>> list) {
         list = new ArrayList<>(list);
         list.add(new CustomBannerGuiElementRenderer(renderBuffers.bufferSource(), minecraft.getAtlasManager()));
@@ -114,7 +112,7 @@ public abstract class GameRendererMixin implements IGameRenderer {
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = {"ldc=hand"}))
-    private void onRenderLevel(DeltaTracker tickCounter, CallbackInfo ci, @Local(ordinal = 0) Matrix4f projection, @Local(ordinal = 1) Matrix4f position, @Local(ordinal = 0) float tickDelta, @Local PoseStack matrixStack) {
+    private void onRenderLevel(DeltaTracker tickCounter, CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projection, @Local(ordinal = 1) Matrix4f position, @Local(name = "worldPartialTicks") float tickDelta, @Local(name = "bobStack") PoseStack matrixStack) {
         if (!Utils.canUpdate()) return;
 
         Profiler.get().push(MeteorClient.MOD_ID + "_render");
@@ -167,7 +165,7 @@ public abstract class GameRendererMixin implements IGameRenderer {
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;render(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V", shift = At.Shift.AFTER))
-    private void onRenderGui(DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
+    private void onRenderGui(DeltaTracker deltaTracker, boolean advanceGameTime, CallbackInfo ci) {
         if (minecraft.screen instanceof WidgetScreen widgetScreen) {
             guiRenderState.reset();
             var mouseX = (int) minecraft.mouseHandler.getScaledXPos(minecraft.getWindow());
@@ -175,7 +173,7 @@ public abstract class GameRendererMixin implements IGameRenderer {
 
             var context = new GuiGraphicsExtractor(minecraft, guiRenderState, mouseX, mouseY);
 
-            widgetScreen.renderCustom(context, mouseX, mouseY, tickCounter.getGameTimeDeltaTicks());
+            widgetScreen.renderCustom(context, mouseX, mouseY, deltaTracker.getGameTimeDeltaTicks());
 
             RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(minecraft.getMainRenderTarget().getDepthTexture(), 1.0);
             meteor$flushGuiState();
@@ -183,8 +181,8 @@ public abstract class GameRendererMixin implements IGameRenderer {
     }
 
     @Inject(method = "displayItemActivation", at = @At("HEAD"), cancellable = true)
-    private void onDisplayItemActivation(ItemStack floatingItem, CallbackInfo ci) {
-        if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
+    private void onDisplayItemActivation(ItemStack itemStack, CallbackInfo ci) {
+        if (itemStack.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
             ci.cancel();
         }
     }
@@ -192,11 +190,6 @@ public abstract class GameRendererMixin implements IGameRenderer {
     @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F", ordinal = 0))
     private float applyCameraTransformationsMathHelperLerpProxy(float original) {
         return Modules.get().get(NoRender.class).noNausea() ? 0 : original;
-    }
-
-    @ModifyReturnValue(method = "getFov", at = @At("RETURN"))
-    private float modifyFov(float original) {
-        return MeteorClient.EVENT_BUS.post(GetFovEvent.get(original)).fov;
     }
 
     // Freecam
@@ -254,9 +247,9 @@ public abstract class GameRendererMixin implements IGameRenderer {
     }
 
     @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)
-    private void renderItemInHand(CameraRenderState cameraState, float deltaPartialTick, Matrix4fc modelViewMatrix, CallbackInfo info) {
+    private void renderItemInHand(CameraRenderState cameraState, float deltaPartialTick, Matrix4fc modelViewMatrix, CallbackInfo ci) {
         if (!Modules.get().get(Freecam.class).renderHands() || !Modules.get().get(Zoom.class).renderHands()) {
-            info.cancel();
+            ci.cancel();
         }
     }
 

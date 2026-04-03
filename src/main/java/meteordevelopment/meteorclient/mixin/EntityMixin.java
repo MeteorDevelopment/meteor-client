@@ -128,11 +128,11 @@ public abstract class EntityMixin {
     }
 
     @Inject(method = "move", at = @At("HEAD"))
-    private void onMove(MoverType type, Vec3 movement, CallbackInfo ci) {
+    private void onMove(MoverType moverType, Vec3 delta, CallbackInfo ci) {
         if ((Object) this == mc.player) {
-            MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(type, movement));
+            MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(moverType, delta));
         } else {
-            MeteorClient.EVENT_BUS.post(EntityMoveEvent.get((Entity) (Object) this, movement));
+            MeteorClient.EVENT_BUS.post(EntityMoveEvent.get((Entity) (Object) this, delta));
         }
     }
 
@@ -194,22 +194,22 @@ public abstract class EntityMixin {
     }
 
     @Inject(method = "turn", at = @At("HEAD"), cancellable = true)
-    private void updateTurn(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
+    private void updateTurn(double xo, double yo, CallbackInfo ci) {
         if ((Object) this != mc.player) return;
 
         Freecam freecam = Modules.get().get(Freecam.class);
         FreeLook freeLook = Modules.get().get(FreeLook.class);
 
         if (freecam.isActive()) {
-            freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
+            freecam.changeLookDirection(xo * 0.15, yo * 0.15);
             ci.cancel();
         } else if (Modules.get().isActive(HighwayBuilder.class)) {
             Camera camera = mc.gameRenderer.getMainCamera();
-            ((ICamera) camera).meteor$setRot(camera.yRot() + cursorDeltaX * 0.15, camera.xRot() + cursorDeltaY * 0.15);
+            ((ICamera) camera).meteor$setRot(camera.yRot() + xo * 0.15, camera.xRot() + yo * 0.15);
             ci.cancel();
         } else if (freeLook.cameraMode()) {
-            freeLook.cameraYaw += (float) (cursorDeltaX / freeLook.sensitivity.get().floatValue());
-            freeLook.cameraPitch += (float) (cursorDeltaY / freeLook.sensitivity.get().floatValue());
+            freeLook.cameraYaw += (float) (xo / freeLook.sensitivity.get().floatValue());
+            freeLook.cameraPitch += (float) (yo / freeLook.sensitivity.get().floatValue());
 
             if (Math.abs(freeLook.cameraPitch) > 90.0F)
                 freeLook.cameraPitch = freeLook.cameraPitch > 0.0F ? 90.0F : -90.0F;

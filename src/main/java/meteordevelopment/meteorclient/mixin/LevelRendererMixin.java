@@ -50,7 +50,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Function;
 
@@ -66,13 +65,13 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
     // if a world exists, meteor is initialised
     @Inject(method = "setLevel", at = @At("TAIL"))
-    private void onSetLevel(ClientLevel world, CallbackInfo ci) {
+    private void onSetLevel(ClientLevel level, CallbackInfo ci) {
         esp = Modules.get().get(ESP.class);
         noRender = Modules.get().get(NoRender.class);
     }
 
     @Inject(method = "checkPoseStack", at = @At("HEAD"), cancellable = true)
-    private void onCheckPoseStack(PoseStack matrixStack, CallbackInfo ci) {
+    private void onCheckPoseStack(PoseStack poseStack, CallbackInfo ci) {
         ci.cancel();
     }
 
@@ -108,9 +107,10 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
         return true;
     }
 
-    @Inject(method = "doesMobEffectBlockSky", at = @At("HEAD"), cancellable = true)
-    private void hasBlindnessOrDarkness(Camera camera, CallbackInfoReturnable<Boolean> cir) {
-        if (noRender.noBlindness() || noRender.noDarkness()) cir.setReturnValue(null);
+    @ModifyExpressionValue(method = "addSkyPass", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;doesMobEffectBlockSky:Z"))
+    private boolean modifyMobEffectBlocksSky(boolean original) {
+        if (noRender.noBlindness() || noRender.noDarkness()) return false;
+        return original;
     }
 
     // Entity Shaders
@@ -144,7 +144,7 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
             );
         }
 
-        draw(levelRenderState, poseStack, PostProcessShaders.CHAMS, entity -> Color.WHITE);
+        draw(levelRenderState, poseStack, PostProcessShaders.CHAMS, _ -> Color.WHITE);
         draw(levelRenderState, poseStack, PostProcessShaders.ENTITY_OUTLINE, entity -> esp.getColor(entity));
     }
 
@@ -215,9 +215,9 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
     // BreakIndicators
 
     @Inject(method = "extractBlockDestroyAnimation", at = @At("HEAD"), cancellable = true)
-    private void onExtractBlockDestroyAnimation(CallbackInfo info) {
+    private void onExtractBlockDestroyAnimation(CallbackInfo ci) {
         if (Modules.get().isActive(BreakIndicators.class) || Modules.get().get(NoRender.class).noBlockBreakOverlay()) {
-            info.cancel();
+            ci.cancel();
         }
     }
 

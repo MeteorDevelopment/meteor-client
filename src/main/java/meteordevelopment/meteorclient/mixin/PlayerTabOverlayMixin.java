@@ -37,10 +37,10 @@ public abstract class PlayerTabOverlayMixin {
     }
 
     @Inject(method = "getNameForDisplay", at = @At("HEAD"), cancellable = true)
-    public void getNameForDisplay(PlayerInfo playerListEntry, CallbackInfoReturnable<Component> cir) {
+    public void getNameForDisplay(PlayerInfo info, CallbackInfoReturnable<Component> cir) {
         BetterTab betterTab = Modules.get().get(BetterTab.class);
 
-        if (betterTab.isActive()) cir.setReturnValue(betterTab.getPlayerName(playerListEntry));
+        if (betterTab.isActive()) cir.setReturnValue(betterTab.getPlayerName(info));
     }
 
     @ModifyArg(method = "extractRenderState", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"), index = 0)
@@ -51,23 +51,23 @@ public abstract class PlayerTabOverlayMixin {
     }
 
     @Inject(method = "extractRenderState", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I", shift = At.Shift.BEFORE))
-    private void modifyHeight(CallbackInfo ci, @Local(ordinal = 5) LocalIntRef o, @Local(ordinal = 6) LocalIntRef p) {
+    private void modifyHeight(CallbackInfo ci, @Local(name = "rows") LocalIntRef rows, @Local(name = "cols") LocalIntRef cols) {
         BetterTab module = Modules.get().get(BetterTab.class);
         if (!module.isActive()) return;
 
-        int newO;
-        int newP = 1;
-        int totalPlayers = newO = this.getPlayerInfos().size();
-        while (newO > module.tabHeight.get()) {
-            newO = (totalPlayers + ++newP - 1) / newP;
+        int newRows;
+        int newCols = 1;
+        int totalPlayers = newRows = this.getPlayerInfos().size();
+        while (newRows > module.tabHeight.get()) {
+            newRows = (totalPlayers + ++newCols - 1) / newCols;
         }
 
-        o.set(newO);
-        p.set(newP);
+        rows.set(newRows);
+        cols.set(newCols);
     }
 
     @Inject(method = "extractPingIcon", at = @At("HEAD"), cancellable = true)
-    private void onExtractPingIcon(GuiGraphicsExtractor graphics, int slotWidth, int x, int y, PlayerInfo info, CallbackInfo ci) {
+    private void onExtractPingIcon(GuiGraphicsExtractor graphics, int slotWidth, int xo, int yo, PlayerInfo info, CallbackInfo ci) {
         BetterTab betterTab = Modules.get().get(BetterTab.class);
 
         if (betterTab.isActive() && betterTab.accurateLatency.get()) {
@@ -78,7 +78,7 @@ public abstract class PlayerTabOverlayMixin {
             int color = latency < 150 ? 0xFF00E970 :
                 latency < 300 ? 0xFFE7D020 : 0xFFD74238;
             String text = latency + "ms";
-            graphics.text(font, text, x + slotWidth - font.width(text), y, color);
+            graphics.text(font, text, xo + slotWidth - font.width(text), yo, color);
             ci.cancel();
         }
     }

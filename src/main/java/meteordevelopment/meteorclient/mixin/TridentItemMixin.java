@@ -25,13 +25,13 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 @Mixin(TridentItem.class)
 public abstract class TridentItemMixin {
     @Inject(method = "releaseUsing", at = @At("HEAD"))
-    private void onReleaseUsingHead(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks, CallbackInfoReturnable<Boolean> cir) {
-        if (user == mc.player) Utils.isReleasingTrident = true;
+    private void onReleaseUsingHead(ItemStack itemStack, Level level, LivingEntity entity, int remainingTime, CallbackInfoReturnable<Boolean> cir) {
+        if (entity == mc.player) Utils.isReleasingTrident = true;
     }
 
     @Inject(method = "releaseUsing", at = @At("TAIL"))
-    private void onReleaseUsingTail(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks, CallbackInfoReturnable<Boolean> cir) {
-        if (user == mc.player) Utils.isReleasingTrident = false;
+    private void onReleaseUsingTail(ItemStack itemStack, Level level, LivingEntity entity, int remainingTime, CallbackInfoReturnable<Boolean> cir) {
+        if (entity == mc.player) Utils.isReleasingTrident = false;
     }
 
     @ModifyArgs(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;push(DDD)V"))
