@@ -103,8 +103,9 @@ sourceSets {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt()))
+    }
 
     if (System.getenv("CI")?.toBoolean() == true) {
         withSourcesJar()
@@ -147,6 +148,7 @@ tasks {
             "version" to project.version,
             "build_number" to buildNumber,
             "commit" to commit,
+            "jdk_version" to libs.versions.jdk.get(),
             "minecraft_version" to libs.versions.minecraft.get(),
             "loader_version" to libs.versions.fabric.loader.get()
         )
