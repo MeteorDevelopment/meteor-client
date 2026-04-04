@@ -331,7 +331,7 @@ public class KillAura extends Module {
             FindItemResult weaponResult = new FindItemResult(mc.player.getInventory().getSelectedSlot(), -1);
             if (attackWhenHolding.get() == AttackItems.Weapons) weaponResult = InvUtils.find(this::acceptableWeapon, 0, 8);
 
-            if (shouldShieldBreak()) {
+            if (shouldShieldBreakDelayed()) {
                 FindItemResult axeResult = InvUtils.find(itemStack -> itemStack.getItem() instanceof AxeItem, 0, 8);
                 if (axeResult.found()) weaponResult = axeResult;
             }
@@ -517,5 +517,77 @@ public class KillAura extends Module {
         Baby,
         Adult,
         Both
+        
+   // =========================
+// AAA DROP-IN EXTENSION BLOCK
+// =========================
+
+// NEW: Shield Break Delay (ticks)
+private final Setting<Integer> shieldDelay = sgGeneral.add(new IntSetting.Builder()
+    .name("shield-delay")
+    .description("Wait this many ticks after a shield appears before attempting to break it.")
+    .defaultValue(0)
+    .min(0)
+    .sliderMax(20)
+    .visible(() -> shieldMode.get() == ShieldMode.Break)
+    .build()
+);
+
+// NEW: Range Chance slider (0–100%)
+private final Setting<Integer> rangeChance = sgTargeting.add(new IntSetting.Builder()
+    .name("range-chance")
+    .description("Chance (0–100%) that KillAura will switch to Range 2.")
+    .defaultValue(0)
+    .min(0)
+    .max(100)
+    .sliderRange(0, 100)
+    .build()
+);
+
+// NEW: Range 2 slider
+private final Setting<Double> range2 = sgTargeting.add(new DoubleSetting.Builder()
+    .name("range-2")
+    .description("The alternate range used when Range Chance succeeds.")
+    .defaultValue(3.0)
+    .min(0)
+    .sliderMax(6)
+    .build()
+);
+
+// NEW: Range Chance + Range 2 logic
+private double getEffectiveRange() {
+    int chance = rangeChance.get();
+
+    if (chance <= 0) return range.get();
+
+    if (Math.random() * 100 <= chance) {
+        return range2.get();
     }
+
+    return range.get();
+}
+
+// NEW: Shield break timing logic
+private int shieldTimer = 0;
+
+private boolean shouldShieldBreakDelayed() {
+    for (Entity target : targets) {
+        if (target instanceof PlayerEntity player) {
+            if (player.isBlocking() && shieldMode.get() == ShieldMode.Break) {
+
+                if (shieldDelay.get() == 0) return true;
+
+                if (shieldTimer < shieldDelay.get()) {
+                    shieldTimer++;
+                    return false;
+                }
+
+                return true;
+            }
+        }
+    }
+
+    shieldTimer = 0;
+    return false;
+ }
 }
