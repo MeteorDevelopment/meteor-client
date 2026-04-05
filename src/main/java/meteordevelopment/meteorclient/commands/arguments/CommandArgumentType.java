@@ -14,8 +14,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.Commands;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class CommandArgumentType implements ArgumentType<Command> {
     private static final CommandArgumentType INSTANCE = new CommandArgumentType();
-    private static final DynamicCommandExceptionType NO_SUCH_COMMAND = new DynamicCommandExceptionType(name -> Text.literal("Command with name " + name + " doesn't exist."));
+    private static final DynamicCommandExceptionType NO_SUCH_COMMAND = new DynamicCommandExceptionType(name -> Component.literal("Command with name " + name + " doesn't exist."));
     private static final Collection<String> EXAMPLES = Commands.COMMANDS.stream().limit(3).map(Command::getName).collect(Collectors.toList());
 
     private CommandArgumentType() {
@@ -68,7 +68,7 @@ public class CommandArgumentType implements ArgumentType<Command> {
             suggestions.add(c.getName());
             suggestions.addAll(c.getAliases());
         }
-        return CommandSource.suggestMatching(suggestions, builder);
+        return SharedSuggestionProvider.suggest(suggestions, builder);
     }
 
     @Override

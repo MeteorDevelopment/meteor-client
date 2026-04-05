@@ -12,17 +12,17 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class StringListSetting extends Setting<List<String>>{
+public class StringListSetting extends Setting<List<String>> {
     public final Class<? extends WTextBox.Renderer> renderer;
     public final CharFilter filter;
 
@@ -44,10 +44,10 @@ public class StringListSetting extends Setting<List<String>>{
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
-        NbtList valueTag = new NbtList();
+    public CompoundTag save(CompoundTag tag) {
+        ListTag valueTag = new ListTag();
         for (int i = 0; i < this.value.size(); i++) {
-            valueTag.add(i, NbtString.of(get().get(i)));
+            valueTag.add(i, StringTag.valueOf(get().get(i)));
         }
         tag.put("value", valueTag);
 
@@ -55,11 +55,11 @@ public class StringListSetting extends Setting<List<String>>{
     }
 
     @Override
-    public List<String> load(NbtCompound tag) {
+    public List<String> load(CompoundTag tag) {
         get().clear();
 
-        NbtList valueTag = tag.getListOrEmpty("value");
-        for (NbtElement tagI : valueTag) {
+        ListTag valueTag = tag.getListOrEmpty("value");
+        for (Tag tagI : valueTag) {
             get().add(tagI.asString().orElse(""));
         }
 

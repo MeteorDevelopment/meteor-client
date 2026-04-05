@@ -13,8 +13,8 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -70,9 +70,11 @@ public class Profile implements ISerializable<Profile> {
         .build()
     );
 
-    public Profile() {}
-    public Profile(NbtElement tag) {
-        fromTag((NbtCompound) tag);
+    public Profile() {
+    }
+
+    public Profile(Tag tag) {
+        fromTag((CompoundTag) tag);
     }
 
     public void load() {
@@ -106,8 +108,8 @@ public class Profile implements ISerializable<Profile> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.put("settings", settings.toTag());
 
@@ -115,7 +117,7 @@ public class Profile implements ISerializable<Profile> {
     }
 
     @Override
-    public Profile fromTag(NbtCompound tag) {
+    public Profile fromTag(CompoundTag tag) {
         if (tag.contains("settings")) {
             settings.fromTag(tag.getCompoundOrEmpty("settings"));
         }

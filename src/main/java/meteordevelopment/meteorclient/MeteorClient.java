@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient;
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
@@ -35,9 +35,9 @@ import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -55,7 +55,7 @@ public class MeteorClient implements ClientModInitializer {
     public static MeteorClient INSTANCE;
     public static MeteorAddon ADDON;
 
-    public static MinecraftClient mc;
+    public static Minecraft mc;
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
     public static final Logger LOG;
@@ -84,7 +84,7 @@ public class MeteorClient implements ClientModInitializer {
         }
 
         // Global minecraft client accessor
-        mc = MinecraftClient.getInstance();
+        mc = Minecraft.getInstance();
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             LOG.info("Force loading mixins");
@@ -149,14 +149,14 @@ public class MeteorClient implements ClientModInitializer {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.currentScreen == null && mc.getOverlay() == null && KeyBinds.OPEN_COMMANDS.wasPressed()) {
+        if (mc.screen == null && mc.getOverlay() == null && KeyBinds.OPEN_COMMANDS.consumeClick()) {
             mc.setScreen(new ChatScreen(Config.get().prefix.get(), true));
         }
     }
 
     @EventHandler
-    private void onKey(KeyEvent event) {
-        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesKey(event.input)) {
+    private void onKey(KeyInputEvent event) {
+        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matches(event.input)) {
             toggleGui();
         }
     }
@@ -169,7 +169,7 @@ public class MeteorClient implements ClientModInitializer {
     }
 
     private void toggleGui() {
-        if (Utils.canCloseGui()) mc.currentScreen.close();
+        if (Utils.canCloseGui()) mc.screen.onClose();
         else if (Utils.canOpenGui()) Tabs.get().getFirst().openScreen(GuiThemes.get());
     }
 
@@ -180,21 +180,21 @@ public class MeteorClient implements ClientModInitializer {
     @EventHandler(priority = EventPriority.LOWEST)
     private void onOpenScreen(OpenScreenEvent event) {
         if (event.screen instanceof WidgetScreen) {
-            if (!wasWidgetScreen) wasHudHiddenRoot = mc.options.hudHidden;
+            if (!wasWidgetScreen) wasHudHiddenRoot = mc.options.hideGui;
             if (GuiThemes.get().hideHUD() || wasHudHiddenRoot) {
                 // Always show the MC HUD in the HUD editor screen since people like
                 // to align some items with the hotbar or chat
-                mc.options.hudHidden = !(event.screen instanceof HudEditorScreen);
+                mc.options.hideGui = !(event.screen instanceof HudEditorScreen);
             }
         } else {
-            if (wasWidgetScreen) mc.options.hudHidden = wasHudHiddenRoot;
-            wasHudHiddenRoot = mc.options.hudHidden;
+            if (wasWidgetScreen) mc.options.hideGui = wasHudHiddenRoot;
+            wasHudHiddenRoot = mc.options.hideGui;
         }
 
         wasWidgetScreen = event.screen instanceof WidgetScreen;
     }
 
     public static Identifier identifier(String path) {
-        return Identifier.of(MeteorClient.MOD_ID, path);
+        return Identifier.fromNamespaceAndPath(MeteorClient.MOD_ID, path);
     }
 }

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.widgets.input;
 
+import com.mojang.blaze3d.platform.MacosUtil;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import meteordevelopment.meteorclient.gui.GuiKeyEvents;
@@ -14,11 +15,10 @@ import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.util.MacWindowUtil;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -63,7 +63,8 @@ public abstract class WTextBox extends WWidget {
 
         try {
             this.renderer = renderer != null ? renderer.getDeclaredConstructor().newInstance() : DEFAULT_RENDERER;
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
@@ -107,7 +108,7 @@ public abstract class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onMouseClicked(Click click, boolean doubled) {
+    public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
         if (mouseOver) {
             if (click.button() == GLFW_MOUSE_BUTTON_RIGHT) {
                 if (!text.isEmpty()) {
@@ -118,8 +119,7 @@ public abstract class WTextBox extends WWidget {
 
                     runAction();
                 }
-            }
-            else if (click.button() == GLFW_MOUSE_BUTTON_LEFT) {
+            } else if (click.button() == GLFW_MOUSE_BUTTON_LEFT) {
                 selecting = true;
 
                 double overflowWidth = getOverflowWidthForRender();
@@ -200,12 +200,10 @@ public abstract class WTextBox extends WWidget {
             if (best < selectionStart) {
                 selectionStart = best - countToNextSpace(true, best);
                 cursor = selectionStart;
-            }
-            else if (best > selectionEnd) {
+            } else if (best > selectionEnd) {
                 selectionEnd = best + countToNextSpace(false, best);
                 cursor = selectionEnd;
-            }
-            else {
+            } else {
                 if (cursor == selectionStart) {
                     int nextRight = countToNextSpace(false);
                     if (best > cursor + nextRight) {
@@ -214,8 +212,7 @@ public abstract class WTextBox extends WWidget {
                             cursor = selectionEnd;
                         }
                     }
-                }
-                else if (cursor == selectionEnd) {
+                } else if (cursor == selectionEnd) {
                     int nextLeft = countToNextSpace(true);
                     if (best < cursor - nextLeft) {
                         selectionEnd = cursor = cursor - nextLeft - 1;
@@ -226,14 +223,13 @@ public abstract class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onMouseReleased(Click click) {
+    public boolean onMouseReleased(MouseButtonEvent click) {
         selecting = false;
         doubleClick = false;
 
         if (selectionStart < preSelectionCursor && preSelectionCursor == selectionEnd) {
             cursor = selectionStart;
-        }
-        else if (selectionEnd > preSelectionCursor && preSelectionCursor == selectionStart) {
+        } else if (selectionEnd > preSelectionCursor && preSelectionCursor == selectionStart) {
             cursor = selectionEnd;
         }
 
@@ -241,40 +237,35 @@ public abstract class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onKeyPressed(KeyInput input) {
+    public boolean onKeyPressed(KeyEvent input) {
         if (!focused) return false;
 
-        boolean control = MacWindowUtil.IS_MAC ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
+        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
 
         if (control && input.key() == GLFW_KEY_C) {
             if (cursor != selectionStart || cursor != selectionEnd) {
-                mc.keyboard.setClipboard(text.substring(selectionStart, selectionEnd));
+                mc.keyboardHandler.setClipboard(text.substring(selectionStart, selectionEnd));
             }
             return true;
-        }
-        else if (control && input.key() == GLFW_KEY_X) {
+        } else if (control && input.key() == GLFW_KEY_X) {
             if (cursor != selectionStart || cursor != selectionEnd) {
-                mc.keyboard.setClipboard(text.substring(selectionStart, selectionEnd));
+                mc.keyboardHandler.setClipboard(text.substring(selectionStart, selectionEnd));
                 clearSelection();
             }
 
             return true;
-        }
-        else if (control && input.key() == GLFW_KEY_A) {
+        } else if (control && input.key() == GLFW_KEY_A) {
             cursor = text.length();
             selectionStart = 0;
             selectionEnd = cursor;
-        }
-        else if (input.modifiers() == ((MacWindowUtil.IS_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL) | GLFW_MOD_SHIFT) && input.key() == GLFW_KEY_A) {
+        } else if (input.modifiers() == ((MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL) | GLFW_MOD_SHIFT) && input.key() == GLFW_KEY_A) {
             resetSelection();
-        }
-        else if (input.key() == GLFW_KEY_ENTER || input.key() == GLFW_KEY_KP_ENTER) {
+        } else if (input.key() == GLFW_KEY_ENTER || input.key() == GLFW_KEY_KP_ENTER) {
             setFocused(false);
 
             if (actionOnUnfocused != null) actionOnUnfocused.run();
             return true;
-        }
-        else if (input.key() == GLFW_KEY_TAB && completionsW != null) {
+        } else if (input.key() == GLFW_KEY_TAB && completionsW != null) {
             String completion = ((ICompletionItem) completionsW.cells.get(getSelectedCompletion()).widget()).getCompletion();
 
             StringBuilder sb = new StringBuilder(text.length() + completion.length() + 1);
@@ -305,19 +296,19 @@ public abstract class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onKeyRepeated(KeyInput input) {
+    public boolean onKeyRepeated(KeyEvent input) {
         if (!focused) return false;
 
-        boolean control = MacWindowUtil.IS_MAC ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
+        boolean control = MacosUtil.IS_MACOS ? input.modifiers() == GLFW_MOD_SUPER : input.modifiers() == GLFW_MOD_CONTROL;
         boolean shift = input.modifiers() == GLFW_MOD_SHIFT;
-        boolean controlShift = input.modifiers() == ((SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacWindowUtil.IS_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL) | GLFW_MOD_SHIFT);
+        boolean controlShift = input.modifiers() == ((SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL) | GLFW_MOD_SHIFT);
         boolean altShift = input.modifiers() == ((SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT) | GLFW_MOD_SHIFT);
 
         if (control && input.key() == GLFW_KEY_V) {
             clearSelection();
 
             String preText = text;
-            String clipboard = mc.keyboard.getClipboard();
+            String clipboard = mc.keyboardHandler.getClipboard();
             int addedChars = 0;
 
             StringBuilder sb = new StringBuilder(text.length() + clipboard.length());
@@ -337,51 +328,46 @@ public abstract class WTextBox extends WWidget {
 
             if (!text.equals(preText)) runAction();
             return true;
-        }
-        else if (input.key() == GLFW_KEY_BACKSPACE) {
+        } else if (input.key() == GLFW_KEY_BACKSPACE) {
             if (cursor > 0 && cursor == selectionStart && cursor == selectionEnd) {
                 String preText = text;
 
-                int count = (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacWindowUtil.IS_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL))
+                int count = (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL))
                     ? cursor
                     : (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT))
-                    ? countToNextSpace(true)
-                    : 1;
+                      ? countToNextSpace(true)
+                      : 1;
 
                 text = text.substring(0, cursor - count) + text.substring(cursor);
                 cursor -= count;
                 resetSelection();
 
                 if (!text.equals(preText)) runAction();
-            }
-            else if (cursor != selectionStart || cursor != selectionEnd) {
+            } else if (cursor != selectionStart || cursor != selectionEnd) {
                 clearSelection();
             }
 
             return true;
-        }
-        else if (input.key() == GLFW_KEY_DELETE) {
+        } else if (input.key() == GLFW_KEY_DELETE) {
             if (cursor == selectionStart && cursor == selectionEnd) {
                 if (cursor < text.length()) {
                     String preText = text;
 
-                    int count = input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacWindowUtil.IS_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)
+                    int count = input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)
                         ? text.length() - cursor
                         : (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT))
-                        ? countToNextSpace(false)
-                        : 1;
+                          ? countToNextSpace(false)
+                          : 1;
 
                     text = text.substring(0, cursor) + text.substring(cursor + count);
 
                     if (!text.equals(preText)) runAction();
                 }
-            }
-            else {
+            } else {
                 clearSelection();
             }
             return true;
-        }
-        else if (input.key() == GLFW_KEY_LEFT) {
+        } else if (input.key() == GLFW_KEY_LEFT) {
             if (cursor > 0) {
                 // sets the cursor to just after the next leftmost space
                 if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT)) {
@@ -389,7 +375,7 @@ public abstract class WTextBox extends WWidget {
                     resetSelection();
                 }
                 // sets the cursor to the beginning of the text box
-                else if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacWindowUtil.IS_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
+                else if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
                     cursor = 0;
                     resetSelection();
                 }
@@ -402,8 +388,7 @@ public abstract class WTextBox extends WWidget {
                             selectionEnd = selectionStart;
                             selectionStart = cursor;
                         }
-                    }
-                    else {
+                    } else {
                         cursor -= countToNextSpace(true);
                         selectionStart = cursor;
                     }
@@ -421,8 +406,7 @@ public abstract class WTextBox extends WWidget {
                 else if (shift) {
                     if (cursor == selectionEnd && cursor != selectionStart) {
                         selectionEnd = cursor - 1;
-                    }
-                    else {
+                    } else {
                         selectionStart = cursor - 1;
                     }
 
@@ -432,8 +416,7 @@ public abstract class WTextBox extends WWidget {
                 else {
                     if (cursor == selectionEnd && cursor != selectionStart) {
                         cursor = selectionStart;
-                    }
-                    else {
+                    } else {
                         cursor--;
                     }
 
@@ -441,16 +424,14 @@ public abstract class WTextBox extends WWidget {
                 }
 
                 cursorChanged();
-            }
-            else if (selectionStart != selectionEnd && selectionStart == 0 && input.modifiers() == 0) {
+            } else if (selectionStart != selectionEnd && selectionStart == 0 && input.modifiers() == 0) {
                 cursor = 0;
                 resetSelection();
                 cursorChanged();
             }
 
             return true;
-        }
-        else if (input.key() == GLFW_KEY_RIGHT) {
+        } else if (input.key() == GLFW_KEY_RIGHT) {
             if (cursor < text.length()) {
                 // sets the cursor to just before the next rightmost space
                 if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT)) {
@@ -458,7 +439,7 @@ public abstract class WTextBox extends WWidget {
                     resetSelection();
                 }
                 // sets the cursor to the end of the text box
-                else if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacWindowUtil.IS_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
+                else if (input.modifiers() == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MacosUtil.IS_MACOS ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
                     cursor = text.length();
                     resetSelection();
                 }
@@ -471,8 +452,7 @@ public abstract class WTextBox extends WWidget {
                             selectionStart = selectionEnd;
                             selectionEnd = cursor;
                         }
-                    }
-                    else {
+                    } else {
                         cursor += countToNextSpace(false);
                         selectionEnd = cursor;
                     }
@@ -489,8 +469,7 @@ public abstract class WTextBox extends WWidget {
                 else if (shift) {
                     if (cursor == selectionStart && cursor != selectionEnd) {
                         selectionStart = cursor + 1;
-                    }
-                    else {
+                    } else {
                         selectionEnd = cursor + 1;
                     }
 
@@ -500,8 +479,7 @@ public abstract class WTextBox extends WWidget {
                 else {
                     if (cursor == selectionStart && cursor != selectionEnd) {
                         cursor = selectionEnd;
-                    }
-                    else {
+                    } else {
                         cursor++;
                     }
 
@@ -509,16 +487,14 @@ public abstract class WTextBox extends WWidget {
                 }
 
                 cursorChanged();
-            }
-            else if (selectionStart != selectionEnd && selectionEnd == text.length() && input.modifiers() == 0) {
+            } else if (selectionStart != selectionEnd && selectionEnd == text.length() && input.modifiers() == 0) {
                 cursor = text.length();
                 resetSelection();
                 cursorChanged();
             }
 
             return true;
-        }
-        else if (input.key() == GLFW_KEY_DOWN && completionsW != null) {
+        } else if (input.key() == GLFW_KEY_DOWN && completionsW != null) {
             int currentI = getSelectedCompletion();
 
             if (currentI == Math.min(5, completions.size() - 1)) {
@@ -526,15 +502,13 @@ public abstract class WTextBox extends WWidget {
                     completionsStart++;
                     createCompletions(completionsStart + currentI);
                 }
-            }
-            else {
+            } else {
                 ((ICompletionItem) completionsW.cells.get(currentI).widget()).setSelected(false);
                 ((ICompletionItem) completionsW.cells.get(currentI + 1).widget()).setSelected(true);
             }
 
             return true;
-        }
-        else if (input.key() == GLFW_KEY_UP && completionsW != null) {
+        } else if (input.key() == GLFW_KEY_UP && completionsW != null) {
             int currentI = getSelectedCompletion();
 
             if (currentI == 0) {
@@ -542,8 +516,7 @@ public abstract class WTextBox extends WWidget {
                     completionsStart--;
                     createCompletions(completionsStart + currentI);
                 }
-            }
-            else {
+            } else {
                 ((ICompletionItem) completionsW.cells.get(currentI).widget()).setSelected(false);
                 ((ICompletionItem) completionsW.cells.get(currentI - 1).widget()).setSelected(true);
             }
@@ -566,13 +539,13 @@ public abstract class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onCharTyped(CharInput input) {
+    public boolean onCharTyped(CharacterEvent input) {
         if (!focused) return false;
 
         if (filter.filter(text, input.codepoint())) {
             clearSelection();
 
-            text = text.substring(0, cursor) + input.asString() + text.substring(cursor);
+            text = text.substring(0, cursor) + input.codepointAsString() + text.substring(cursor);
 
             cursor++;
             resetSelection();
@@ -671,7 +644,7 @@ public abstract class WTextBox extends WWidget {
             textStart += cursor - (textStart + maxTextWidth());
         }
 
-        textStart = MathHelper.clamp(textStart, 0, Math.max(textWidth() - maxTextWidth(), 0));
+        textStart = Mth.clamp(textStart, 0, Math.max(textWidth() - maxTextWidth(), 0));
 
         onCursorChanged();
 
@@ -681,7 +654,9 @@ public abstract class WTextBox extends WWidget {
         completionsW = null;
         if (completions != null && !completions.isEmpty()) createCompletions(0);
     }
-    protected void onCursorChanged() {}
+
+    protected void onCursorChanged() {
+    }
 
     private void createCompletions(int selected) {
         completionsW = createCompletionsRootWidget();
@@ -697,7 +672,7 @@ public abstract class WTextBox extends WWidget {
         }
 
         completionsW.calculateSize();
-        completionsW.x = Math.min(Math.max(x - pad() * 2 + getTextWidth(cursor) - getOverflowWidthForRender(), x), x + width - completionsW.width);
+        completionsW.x = Math.clamp(x - pad() * 2 + getTextWidth(cursor) - getOverflowWidthForRender(), x, x + width - completionsW.width);
         completionsW.y = y + height;
         completionsW.calculateWidgetPositions();
     }
@@ -726,7 +701,7 @@ public abstract class WTextBox extends WWidget {
     public void set(String text) {
         this.text = text;
 
-        cursor = MathHelper.clamp(cursor, 0, text.length());
+        cursor = Mth.clamp(cursor, 0, text.length());
         selectionStart = cursor;
         selectionEnd = cursor;
 

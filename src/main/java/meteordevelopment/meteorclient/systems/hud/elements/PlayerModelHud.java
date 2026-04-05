@@ -12,8 +12,8 @@ import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -113,20 +113,19 @@ public class PlayerModelHud extends HudElement {
     @Override
     public void render(HudRenderer renderer) {
         renderer.post(() -> {
-            PlayerEntity player = mc.player;
+            Player player = mc.player;
             if (player == null) return;
 
             float offsetYaw = centerOrientation.get() == CenterOrientation.North ? 180 : 0;
-            float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.lastYaw + (player.getYaw() - player.lastYaw) * mc.getRenderTickCounter().getTickProgress(true) + offsetYaw) : (float) customYaw.get();
-            float pitch = copyPitch.get() ? player.getPitch() : (float) customPitch.get();
+            float yaw = copyYaw.get() ? Mth.wrapDegrees(player.yRotO + (player.getYRot() - player.yRotO) * mc.getDeltaTracker().getGameTimeDeltaPartialTick(true) + offsetYaw) : (float) customYaw.get();
+            float pitch = copyPitch.get() ? player.getXRot() : (float) customPitch.get();
 
             renderer.entity(player, x, y, getWidth(), getHeight(), -yaw, -pitch);
         });
 
         if (background.get()) {
             renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
-        }
-        else if (mc.player == null) {
+        } else if (mc.player == null) {
             renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
             renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
             renderer.line(x + getWidth(), y, x, y + getHeight(), Color.GRAY);

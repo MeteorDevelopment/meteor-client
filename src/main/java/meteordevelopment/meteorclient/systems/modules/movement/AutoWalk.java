@@ -6,10 +6,10 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.pathing.NopPathManager;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -23,8 +23,8 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public class AutoWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -99,16 +99,16 @@ public class AutoWalk extends Module {
     @EventHandler(priority = EventPriority.HIGH)
     private void onTick(TickEvent.Pre event) {
         if (mode.get() == Mode.Simple) {
-            if (disableOnY.get() && mc.player.lastY != mc.player.getY()) {
+            if (disableOnY.get() && mc.player.yo != mc.player.getY()) {
                 toggle();
                 return;
             }
 
             switch (direction.get()) {
-                case Forwards -> mc.options.forwardKey.setPressed(true);
-                case Backwards -> mc.options.backKey.setPressed(true);
-                case Left -> mc.options.leftKey.setPressed(true);
-                case Right -> mc.options.rightKey.setPressed(true);
+                case Forwards -> mc.options.keyUp.setDown(true);
+                case Backwards -> mc.options.keyDown.setDown(true);
+                case Left -> mc.options.keyLeft.setDown(true);
+                case Right -> mc.options.keyRight.setDown(true);
             }
         } else {
             if (PathManagers.get() instanceof NopPathManager) {
@@ -120,7 +120,7 @@ public class AutoWalk extends Module {
 
     private void onMovement() {
         if (!disableOnInput.get()) return;
-        if (mc.currentScreen != null) {
+        if (mc.screen != null) {
             GUIMove guiMove = Modules.get().get(GUIMove.class);
             if (!guiMove.isActive()) return;
             if (guiMove.skip()) return;
@@ -129,11 +129,11 @@ public class AutoWalk extends Module {
     }
 
     @EventHandler
-    private void onKey(KeyEvent event) {
+    private void onKey(KeyInputEvent event) {
         if (isMovementKey(event.input) && event.action == KeyAction.Press) onMovement();
     }
 
-     @EventHandler
+    @EventHandler
     private void onMouseClick(MouseClickEvent event) {
         if (isMovementButton(event.click) && event.action == KeyAction.Press) onMovement();
     }
@@ -143,39 +143,39 @@ public class AutoWalk extends Module {
         if (mode.get() == Mode.Simple && waitForChunks.get()) {
             int chunkX = (int) ((mc.player.getX() + event.movement.x * 2) / 16);
             int chunkZ = (int) ((mc.player.getZ() + event.movement.z * 2) / 16);
-            if (!mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) {
-                ((IVec3d) event.movement).meteor$set(0, event.movement.y, 0);
+            if (!mc.level.getChunkSource().hasChunk(chunkX, chunkZ)) {
+                ((IVec3) event.movement).meteor$set(0, event.movement.y, 0);
             }
         }
     }
 
     private void unpress() {
-        mc.options.forwardKey.setPressed(false);
-        mc.options.backKey.setPressed(false);
-        mc.options.leftKey.setPressed(false);
-        mc.options.rightKey.setPressed(false);
+        mc.options.keyUp.setDown(false);
+        mc.options.keyDown.setDown(false);
+        mc.options.keyLeft.setDown(false);
+        mc.options.keyRight.setDown(false);
     }
 
-    private boolean isMovementKey(KeyInput input) {
-        return mc.options.forwardKey.matchesKey(input)
-            || mc.options.backKey.matchesKey(input)
-            || mc.options.leftKey.matchesKey(input)
-            || mc.options.rightKey.matchesKey(input)
-            || mc.options.sneakKey.matchesKey(input)
-            || mc.options.jumpKey.matchesKey(input);
+    private boolean isMovementKey(KeyEvent input) {
+        return mc.options.keyUp.matches(input)
+            || mc.options.keyDown.matches(input)
+            || mc.options.keyLeft.matches(input)
+            || mc.options.keyRight.matches(input)
+            || mc.options.keyShift.matches(input)
+            || mc.options.keyJump.matches(input);
     }
 
-    private boolean isMovementButton(Click click) {
-        return mc.options.forwardKey.matchesMouse(click)
-            || mc.options.backKey.matchesMouse(click)
-            || mc.options.leftKey.matchesMouse(click)
-            || mc.options.rightKey.matchesMouse(click)
-            || mc.options.sneakKey.matchesMouse(click)
-            || mc.options.jumpKey.matchesMouse(click);
+    private boolean isMovementButton(MouseButtonEvent click) {
+        return mc.options.keyUp.matchesMouse(click)
+            || mc.options.keyDown.matchesMouse(click)
+            || mc.options.keyLeft.matchesMouse(click)
+            || mc.options.keyRight.matchesMouse(click)
+            || mc.options.keyShift.matchesMouse(click)
+            || mc.options.keyJump.matchesMouse(click);
     }
 
     private void createGoal() {
-        PathManagers.get().moveInDirection(mc.player.getYaw());
+        PathManagers.get().moveInDirection(mc.player.getYRot());
     }
 
     public enum Mode {

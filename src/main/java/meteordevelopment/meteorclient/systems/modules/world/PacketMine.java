@@ -22,13 +22,13 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,7 +140,7 @@ public class PacketMine extends Module {
         blocks.clear();
 
         if (shouldUpdateSlot) {
-            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().getSelectedSlot()));
+            mc.player.connection.send(new ServerboundSetCarriedItemPacket(mc.player.getInventory().getSelectedSlot()));
             shouldUpdateSlot = false;
         }
     }
@@ -170,7 +170,7 @@ public class PacketMine extends Module {
         blocks.removeIf(MyBlock::shouldRemove);
 
         if (shouldUpdateSlot) {
-            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().getSelectedSlot()));
+            mc.player.connection.send(new ServerboundSetCarriedItemPacket(mc.player.getInventory().getSelectedSlot()));
             shouldUpdateSlot = false;
             swapped = false;
         }
@@ -182,7 +182,7 @@ public class PacketMine extends Module {
             if (block.isReady() && !swapped && autoSwitch.get() && (!mc.player.isUsingItem() || !notOnUse.get())) {
                 FindItemResult slot = InvUtils.findFastestTool(block.blockState);
                 if (!slot.found() || mc.player.getInventory().getSelectedSlot() == slot.slot()) return;
-                mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot.slot()));
+                mc.player.connection.send(new ServerboundSetCarriedItemPacket(slot.slot()));
                 swapped = true;
                 shouldUpdateSlot = true;
             }
@@ -213,7 +213,7 @@ public class PacketMine extends Module {
         public MyBlock set(StartBreakingBlockEvent event) {
             this.blockPos = event.blockPos;
             this.direction = event.direction;
-            this.blockState = mc.world.getBlockState(blockPos);
+            this.blockState = mc.level.getBlockState(blockPos);
             this.block = blockState.getBlock();
             this.timer = delay.get();
             this.mining = false;
@@ -222,9 +222,9 @@ public class PacketMine extends Module {
         }
 
         public boolean shouldRemove() {
-            boolean broken = mc.world.getBlockState(blockPos).getBlock() != block;
-            boolean timeout = progress() > 2 && (mc.player.age - startTime > 50);
-            boolean distance = Utils.distance(mc.player.getEyePos().x, mc.player.getEyePos().y, mc.player.getEyePos().z, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.player.getBlockInteractionRange();
+            boolean broken = mc.level.getBlockState(blockPos).getBlock() != block;
+            boolean timeout = progress() > 2 && (mc.player.tickCount - startTime > 50);
+            boolean distance = Utils.distance(mc.player.getEyePosition().x, mc.player.getEyePosition().y, mc.player.getEyePosition().z, blockPos.getX() + direction.getStepX(), blockPos.getY() + direction.getStepY(), blockPos.getZ() + direction.getStepZ()) > mc.player.blockInteractionRange();
 
             return broken || timeout || distance;
         }
@@ -237,33 +237,34 @@ public class PacketMine extends Module {
             if (!mining) return 0;
 
             FindItemResult fir = InvUtils.findFastestTool(blockState);
-            return BlockUtils.getBreakDelta(fir.found() ? fir.slot() : mc.player.getInventory().getSelectedSlot(), blockState) * ((mc.player.age - startTime) + 1);
+            return BlockUtils.getBreakDelta(fir.found() ? fir.slot() : mc.player.getInventory().getSelectedSlot(), blockState) * ((mc.player.tickCount - startTime) + 1);
         }
 
         public void mine() {
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::sendMinePackets);
+            if (rotate.get())
+                Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::sendMinePackets);
             else sendMinePackets();
         }
 
         private void sendMinePackets() {
             if (timer <= 0) {
                 if (!mining) {
-                    mc.interactionManager.sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction, sequence));
-                    mc.interactionManager.sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction, sequence));
+                    mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction, sequence));
+                    mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction, sequence));
 
                     mining = true;
-                    startTime = mc.player.age;
+                    startTime = mc.player.tickCount;
                 }
-            }
-            else {
+            } else {
                 timer--;
             }
 
-            if (mining && obscureBreakingProgress.get()) mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, blockPos, direction));
+            if (mining && obscureBreakingProgress.get())
+                mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, blockPos, direction));
         }
 
         public void render(Render3DEvent event) {
-            VoxelShape shape = mc.world.getBlockState(blockPos).getOutlineShape(mc.world, blockPos);
+            VoxelShape shape = mc.level.getBlockState(blockPos).getShape(mc.level, blockPos);
 
             double x1 = blockPos.getX();
             double y1 = blockPos.getY();
@@ -273,12 +274,12 @@ public class PacketMine extends Module {
             double z2 = blockPos.getZ() + 1;
 
             if (!shape.isEmpty()) {
-                x1 = blockPos.getX() + shape.getMin(Direction.Axis.X);
-                y1 = blockPos.getY() + shape.getMin(Direction.Axis.Y);
-                z1 = blockPos.getZ() + shape.getMin(Direction.Axis.Z);
-                x2 = blockPos.getX() + shape.getMax(Direction.Axis.X);
-                y2 = blockPos.getY() + shape.getMax(Direction.Axis.Y);
-                z2 = blockPos.getZ() + shape.getMax(Direction.Axis.Z);
+                x1 = blockPos.getX() + shape.min(Direction.Axis.X);
+                y1 = blockPos.getY() + shape.min(Direction.Axis.Y);
+                z1 = blockPos.getZ() + shape.min(Direction.Axis.Z);
+                x2 = blockPos.getX() + shape.max(Direction.Axis.X);
+                y2 = blockPos.getY() + shape.max(Direction.Axis.Y);
+                z2 = blockPos.getZ() + shape.max(Direction.Axis.Z);
             }
 
             if (isReady()) {

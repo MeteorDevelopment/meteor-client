@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.irisshaders.iris.api.v0.IrisApi;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class WallHack extends Module {
         .sliderMax(255)
         .onChanged(onChanged -> {
             if (this.isActive()) {
-                mc.worldRenderer.reload();
+                mc.levelRenderer.allChanged();
             }
         })
         .build()
@@ -40,7 +40,7 @@ public class WallHack extends Module {
         .description("What blocks should be targeted for Wall Hack.")
         .defaultValue()
         .onChanged(onChanged -> {
-            if (isActive()) mc.worldRenderer.reload();
+            if (isActive()) mc.levelRenderer.allChanged();
         })
         .build()
     );
@@ -58,12 +58,12 @@ public class WallHack extends Module {
 
     @Override
     public void onActivate() {
-        mc.worldRenderer.reload();
+        mc.levelRenderer.allChanged();
     }
 
     @Override
     public void onDeactivate() {
-        mc.worldRenderer.reload();
+        mc.levelRenderer.allChanged();
     }
 
     @Override

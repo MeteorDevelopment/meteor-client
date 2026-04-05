@@ -17,7 +17,7 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,10 +63,11 @@ public class AddHudElementScreen extends WindowScreen {
             if (info.hasPresets() && !searchBar.get().isEmpty()) {
                 for (HudElementInfo<?>.Preset preset : info.presets) {
                     String title = info.title + "  -  " + preset.title;
-                    if (Utils.searchTextDefault(title, searchBar.get(), false)) grouped.computeIfAbsent(info.group, hudGroup -> new ArrayList<>()).add(new Item(title, info.description, preset));
+                    if (Utils.searchTextDefault(title, searchBar.get(), false))
+                        grouped.computeIfAbsent(info.group, hudGroup -> new ArrayList<>()).add(new Item(title, info.description, preset));
                 }
-            }
-            else if (Utils.searchTextDefault(info.title, searchBar.get(), false)) grouped.computeIfAbsent(info.group, hudGroup -> new ArrayList<>()).add(new Item(info.title, info.description, info));
+            } else if (Utils.searchTextDefault(info.title, searchBar.get(), false))
+                grouped.computeIfAbsent(info.group, hudGroup -> new ArrayList<>()).add(new Item(info.title, info.description, info));
         }
 
         // Create widgets
@@ -84,15 +85,13 @@ public class AddHudElementScreen extends WindowScreen {
                     add.action = () -> runObject(preset);
 
                     if (firstObject == null) firstObject = preset;
-                }
-                else {
+                } else {
                     HudElementInfo<?> info = (HudElementInfo<?>) item.object;
 
                     if (info.hasPresets()) {
                         WButton open = l.add(theme.button(" > ")).expandCellX().right().widget();
                         open.action = () -> runObject(info);
-                    }
-                    else {
+                    } else {
                         WPlus add = l.add(theme.plus()).expandCellX().right().widget();
                         add.action = () -> runObject(info);
                     }
@@ -107,9 +106,8 @@ public class AddHudElementScreen extends WindowScreen {
         if (object == null) return;
         if (object instanceof HudElementInfo<?>.Preset preset) {
             Hud.get().add(preset, x, y);
-            close();
-        }
-        else {
+            onClose();
+        } else {
             HudElementInfo<?> info = (HudElementInfo<?>) object;
 
             if (info.hasPresets()) {
@@ -117,18 +115,18 @@ public class AddHudElementScreen extends WindowScreen {
                 screen.parent = parent;
 
                 mc.setScreen(screen);
-            }
-            else {
+            } else {
                 Hud.get().add(info, x, y);
-                close();
+                onClose();
             }
         }
     }
 
     @Override
-    protected void onRenderBefore(DrawContext drawContext, float delta) {
-        HudEditorScreen.renderElements(drawContext);
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, float delta) {
+        HudEditorScreen.renderElements(graphics);
     }
 
-    private record Item(String title, String description, Object object) {}
+    private record Item(String title, String description, Object object) {
+    }
 }

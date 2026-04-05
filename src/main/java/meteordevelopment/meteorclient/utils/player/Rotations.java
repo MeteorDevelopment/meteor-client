@@ -13,11 +13,11 @@ import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,11 +117,11 @@ public class Rotations {
     }
 
     private static void setClientRotation(Rotation rotation) {
-        preYaw = mc.player.getYaw();
-        prePitch = mc.player.getPitch();
+        preYaw = mc.player.getYRot();
+        prePitch = mc.player.getXRot();
 
-        mc.player.setYaw((float) rotation.yaw);
-        mc.player.setPitch((float) rotation.pitch);
+        mc.player.setYRot((float) rotation.yaw);
+        mc.player.setXRot((float) rotation.pitch);
     }
 
     @EventHandler
@@ -155,8 +155,8 @@ public class Rotations {
     }
 
     private static void resetPreRotation() {
-        mc.player.setYaw(preYaw);
-        mc.player.setPitch(prePitch);
+        mc.player.setYRot(preYaw);
+        mc.player.setXRot(prePitch);
     }
 
     @EventHandler
@@ -165,27 +165,27 @@ public class Rotations {
     }
 
     public static double getYaw(Entity entity) {
-        return mc.player.getYaw() + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(entity.getZ() - mc.player.getZ(), entity.getX() - mc.player.getX())) - 90f - mc.player.getYaw());
+        return mc.player.getYRot() + Mth.wrapDegrees((float) Math.toDegrees(Math.atan2(entity.getZ() - mc.player.getZ(), entity.getX() - mc.player.getX())) - 90f - mc.player.getYRot());
     }
 
-    public static double getYaw(Vec3d pos) {
-        return mc.player.getYaw() + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(pos.getZ() - mc.player.getZ(), pos.getX() - mc.player.getX())) - 90f - mc.player.getYaw());
+    public static double getYaw(Vec3 pos) {
+        return mc.player.getYRot() + Mth.wrapDegrees((float) Math.toDegrees(Math.atan2(pos.z() - mc.player.getZ(), pos.x() - mc.player.getX())) - 90f - mc.player.getYRot());
     }
 
-    public static double getPitch(Vec3d pos) {
-        double diffX = pos.getX() - mc.player.getX();
-        double diffY = pos.getY() - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
-        double diffZ = pos.getZ() - mc.player.getZ();
+    public static double getPitch(Vec3 pos) {
+        double diffX = pos.x() - mc.player.getX();
+        double diffY = pos.y() - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
+        double diffZ = pos.z() - mc.player.getZ();
 
         double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
-        return mc.player.getPitch() + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.getPitch());
+        return mc.player.getXRot() + Mth.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.getXRot());
     }
 
     public static double getPitch(Entity entity, Target target) {
         double y;
         if (target == Target.Head) y = entity.getEyeY();
-        else if (target == Target.Body) y = entity.getY() + entity.getHeight() / 2;
+        else if (target == Target.Body) y = entity.getY() + entity.getBbHeight() / 2;
         else y = entity.getY();
 
         double diffX = entity.getX() - mc.player.getX();
@@ -194,7 +194,7 @@ public class Rotations {
 
         double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
-        return mc.player.getPitch() + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.getPitch());
+        return mc.player.getXRot() + Mth.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.getXRot());
     }
 
     public static double getPitch(Entity entity) {
@@ -202,7 +202,7 @@ public class Rotations {
     }
 
     public static double getYaw(BlockPos pos) {
-        return mc.player.getYaw() + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(pos.getZ() + 0.5 - mc.player.getZ(), pos.getX() + 0.5 - mc.player.getX())) - 90f - mc.player.getYaw());
+        return mc.player.getYRot() + Mth.wrapDegrees((float) Math.toDegrees(Math.atan2(pos.getZ() + 0.5 - mc.player.getZ(), pos.getX() + 0.5 - mc.player.getX())) - 90f - mc.player.getYRot());
     }
 
     public static double getPitch(BlockPos pos) {
@@ -212,7 +212,7 @@ public class Rotations {
 
         double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
-        return mc.player.getPitch() + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.getPitch());
+        return mc.player.getXRot() + Mth.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.getXRot());
     }
 
     public static void setCamRotation(double yaw, double pitch) {
@@ -236,7 +236,7 @@ public class Rotations {
         }
 
         public void sendPacket() {
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround((float) yaw, (float) pitch, mc.player.isOnGround(), mc.player.horizontalCollision));
+            mc.getConnection().send(new ServerboundMovePlayerPacket.Rot((float) yaw, (float) pitch, mc.player.onGround(), mc.player.horizontalCollision));
             runCallback();
         }
 

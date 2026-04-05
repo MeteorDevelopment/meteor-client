@@ -8,13 +8,13 @@ package meteordevelopment.meteorclient.utils.player;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.command.argument.EntityAnchorArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 
@@ -28,7 +28,7 @@ public class PathFinder {
     private PathBlock currentPathBlock;
 
     public PathBlock getNextPathBlock() {
-        PathBlock nextBlock = new PathBlock(BlockPos.ofFloored(getNextStraightPos()));
+        PathBlock nextBlock = new PathBlock(BlockPos.containing(getNextStraightPos()));
         if (isSolidFloor(nextBlock.blockPos) && isAirAbove(nextBlock.blockPos)) {
             return nextBlock;
         } else if (!isSolidFloor(nextBlock.blockPos) && isAirAbove(nextBlock.blockPos)) {
@@ -56,11 +56,11 @@ public class PathFinder {
         return getBlockStateAtPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ()).isAir();
     }
 
-    public Vec3d getNextStraightPos() {
-        Vec3d nextPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+    public Vec3 getNextStraightPos() {
+        Vec3 nextPos = new Vec3(mc.player.getX(), mc.player.getY(), mc.player.getZ());
         double multiplier = 1.0;
-        while (nextPos == mc.player.getEntityPos()) {
-            nextPos = new Vec3d((int) (mc.player.getX() + multiplier * Math.cos(Math.toRadians(mc.player.getYaw()))), (int) (mc.player.getY()), (int) (mc.player.getZ() + multiplier * Math.sin(Math.toRadians(mc.player.getYaw()))));
+        while (nextPos == mc.player.position()) {
+            nextPos = new Vec3((int) (mc.player.getX() + multiplier * Math.cos(Math.toRadians(mc.player.getYRot()))), (int) (mc.player.getY()), (int) (mc.player.getZ() + multiplier * Math.sin(Math.toRadians(mc.player.getYRot()))));
             multiplier += .1;
         }
         return nextPos;
@@ -68,8 +68,8 @@ public class PathFinder {
 
     public int getYawToTarget() {
         if (target == null || mc.player == null) return Integer.MAX_VALUE;
-        Vec3d tPos = target.getEntityPos();
-        Vec3d pPos = mc.player.getEntityPos();
+        Vec3 tPos = target.position();
+        Vec3 pPos = mc.player.position();
         int yaw;
         int direction = getDirection();
         double tan = (tPos.z - pPos.z) / (tPos.x - pPos.x);
@@ -83,8 +83,8 @@ public class PathFinder {
 
     public int getDirection() {
         if (target == null || mc.player == null) return 0;
-        Vec3d targetPos = target.getEntityPos();
-        Vec3d playerPos = mc.player.getEntityPos();
+        Vec3 targetPos = target.position();
+        Vec3 playerPos = mc.player.position();
         if (targetPos.x == playerPos.x && targetPos.z > playerPos.z)
             return SOUTH;
         if (targetPos.x == playerPos.x && targetPos.z < playerPos.z)
@@ -97,20 +97,20 @@ public class PathFinder {
     }
 
     public BlockState getBlockStateAtPos(BlockPos pos) {
-        if (mc.world != null)
-            return mc.world.getBlockState(pos);
+        if (mc.level != null)
+            return mc.level.getBlockState(pos);
         return null;
     }
 
     public BlockState getBlockStateAtPos(int x, int y, int z) {
-        if (mc.world != null)
-            return mc.world.getBlockState(new BlockPos(x, y, z));
+        if (mc.level != null)
+            return mc.level.getBlockState(new BlockPos(x, y, z));
         return null;
     }
 
     public Block getBlockAtPos(BlockPos pos) {
-        if (mc.world != null)
-            return mc.world.getBlockState(pos).getBlock();
+        if (mc.level != null)
+            return mc.level.getBlockState(pos).getBlock();
         return null;
     }
 
@@ -128,7 +128,7 @@ public class PathFinder {
 
     public void lookAtDestination(PathBlock pathBlock) {
         if (mc.player != null) {
-            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(pathBlock.blockPos.getX(), pathBlock.blockPos.getY() + mc.player.getStandingEyeHeight(), pathBlock.blockPos.getZ()));
+            mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(pathBlock.blockPos.getX(), pathBlock.blockPos.getY() + mc.player.getEyeHeight(), pathBlock.blockPos.getZ()));
         }
     }
 
@@ -137,14 +137,14 @@ public class PathFinder {
         if (target != null && mc.player != null) {
             if (!PlayerUtils.isWithin(target, 3)) {
                 if (currentPathBlock == null) currentPathBlock = getNextPathBlock();
-                if (mc.player.getEntityPos().squaredDistanceTo(new Vec3d(currentPathBlock.blockPos.getX(), currentPathBlock.blockPos.getY(), currentPathBlock.blockPos.getZ())) < .01)
+                if (mc.player.position().distanceToSqr(new Vec3(currentPathBlock.blockPos.getX(), currentPathBlock.blockPos.getY(), currentPathBlock.blockPos.getZ())) < .01)
                     currentPathBlock = getNextPathBlock();
                 lookAtDestination(currentPathBlock);
-                if (!mc.options.forwardKey.isPressed())
-                    mc.options.forwardKey.setPressed(true);
+                if (!mc.options.keyUp.isDown())
+                    mc.options.keyUp.setDown(true);
             } else {
-                if (mc.options.forwardKey.isPressed())
-                    mc.options.forwardKey.setPressed(false);
+                if (mc.options.keyUp.isDown())
+                    mc.options.keyUp.setDown(false);
                 path.clear();
                 currentPathBlock = null;
             }
@@ -160,7 +160,7 @@ public class PathFinder {
     public void disable() {
         target = null;
         path.clear();
-        if (mc.options.forwardKey.isPressed()) mc.options.forwardKey.setPressed(false);
+        if (mc.options.keyUp.isDown()) mc.options.keyUp.setDown(false);
         MeteorClient.EVENT_BUS.unsubscribe(this);
     }
 

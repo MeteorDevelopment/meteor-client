@@ -13,8 +13,8 @@ import meteordevelopment.meteorclient.commands.arguments.PlayerListEntryArgument
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.Formatting;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.ChatFormatting;
 
 public class FriendsCommand extends Command {
     public FriendsCommand() {
@@ -22,7 +22,7 @@ public class FriendsCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(literal("add")
             .then(argument("player", PlayerListEntryArgumentType.create())
                 .executes(context -> {
@@ -30,9 +30,8 @@ public class FriendsCommand extends Command {
                     Friend friend = new Friend(profile.name(), profile.id());
 
                     if (Friends.get().add(friend)) {
-                        ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, "Added (highlight)%s (default)to friends.".formatted(friend.getName()));
-                    }
-                    else error("Already friends with that player.");
+                        ChatUtils.sendMsg(friend.hashCode(), ChatFormatting.GRAY, "Added (highlight)%s (default)to friends.".formatted(friend.getName()));
+                    } else error("Already friends with that player.");
 
                     return SINGLE_SUCCESS;
                 })
@@ -49,9 +48,8 @@ public class FriendsCommand extends Command {
                     }
 
                     if (Friends.get().remove(friend)) {
-                        ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, "Removed (highlight)%s (default)from friends.".formatted(friend.getName()));
-                    }
-                    else error("Failed to remove that friend.");
+                        ChatUtils.sendMsg(friend.hashCode(), ChatFormatting.GRAY, "Removed (highlight)%s (default)from friends.".formatted(friend.getName()));
+                    } else error("Failed to remove that friend.");
 
                     return SINGLE_SUCCESS;
                 })

@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements;
 
-import meteordevelopment.meteorclient.mixin.WorldRendererAccessor;
+import meteordevelopment.meteorclient.mixin.LevelRendererAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
@@ -13,10 +13,10 @@ import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
@@ -105,20 +105,20 @@ public class HoleHud extends HudElement {
 
     private Direction get(Facing dir) {
         if (isInEditor()) return Direction.DOWN;
-        return Direction.fromHorizontalDegrees(MathHelper.wrapDegrees(mc.player.getYaw() + dir.offset));
+        return Direction.fromYRot(Mth.wrapDegrees(mc.player.getYRot() + dir.offset));
     }
 
     private void drawBlock(HudRenderer renderer, Direction dir, double x, double y) {
-        Block block = dir == Direction.DOWN ? Blocks.OBSIDIAN : mc.world.getBlockState(mc.player.getBlockPos().offset(dir)).getBlock();
+        Block block = dir == Direction.DOWN ? Blocks.OBSIDIAN : mc.level.getBlockState(mc.player.blockPosition().relative(dir)).getBlock();
         if (!safe.get().contains(block)) return;
 
-        renderer.item(block.asItem().getDefaultStack(), (int) x, (int) y, getScale(), false);
+        renderer.item(block.asItem().getDefaultInstance(), (int) x, (int) y, getScale(), false);
 
         if (dir == Direction.DOWN) return;
 
-        ((WorldRendererAccessor) mc.worldRenderer).meteor$getBlockBreakingInfos().values().forEach(info -> {
-            if (info.getPos().equals(mc.player.getBlockPos().offset(dir))) {
-                renderBreaking(renderer, x, y, info.getStage() / 9f);
+        ((LevelRendererAccessor) mc.levelRenderer).meteor$getDestroyingBlocks().values().forEach(info -> {
+            if (info.getPos().equals(mc.player.blockPosition().relative(dir))) {
+                renderBreaking(renderer, x, y, info.getProgress() / 9f);
             }
         });
     }

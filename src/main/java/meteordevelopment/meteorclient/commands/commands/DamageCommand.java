@@ -12,20 +12,20 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.systems.modules.player.AntiHunger;
-import net.minecraft.command.CommandSource;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.phys.Vec3;
 
 public class DamageCommand extends Command {
-    private final static SimpleCommandExceptionType INVULNERABLE = new SimpleCommandExceptionType(Text.literal("You are invulnerable."));
+    private final static SimpleCommandExceptionType INVULNERABLE = new SimpleCommandExceptionType(Component.literal("You are invulnerable."));
 
     public DamageCommand() {
         super("damage", "Damages self", "dmg");
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(argument("damage", IntegerArgumentType.integer(1, 7)).executes(context -> {
             int amount = IntegerArgumentType.getInteger(context, "damage");
 
@@ -46,9 +46,9 @@ public class DamageCommand extends Command {
         boolean antiHunger = Modules.get().isActive(AntiHunger.class);
         if (antiHunger) Modules.get().get(AntiHunger.class).toggle();
 
-        Vec3d pos = mc.player.getEntityPos();
+        Vec3 pos = mc.player.position();
 
-        for(int i = 0; i < 80; i++) {
+        for (int i = 0; i < 80; i++) {
             sendPositionPacket(pos.x, pos.y + amount + 2.1, pos.z, false);
             sendPositionPacket(pos.x, pos.y + 0.05, pos.z, false);
         }
@@ -60,6 +60,6 @@ public class DamageCommand extends Command {
     }
 
     private void sendPositionPacket(double x, double y, double z, boolean onGround) {
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, onGround, mc.player.horizontalCollision));
+        mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(x, y, z, onGround, mc.player.horizontalCollision));
     }
 }

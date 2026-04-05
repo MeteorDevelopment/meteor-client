@@ -14,8 +14,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.systems.macros.Macro;
 import meteordevelopment.meteorclient.systems.macros.Macros;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class MacroArgumentType implements ArgumentType<Macro> {
     private static final MacroArgumentType INSTANCE = new MacroArgumentType();
-    private static final DynamicCommandExceptionType NO_SUCH_MACRO = new DynamicCommandExceptionType(name -> Text.literal("Macro with name " + name + " doesn't exist."));
+    private static final DynamicCommandExceptionType NO_SUCH_MACRO = new DynamicCommandExceptionType(name -> Component.literal("Macro with name " + name + " doesn't exist."));
 
     public static MacroArgumentType create() {
         return INSTANCE;
@@ -33,7 +33,8 @@ public class MacroArgumentType implements ArgumentType<Macro> {
         return context.getArgument("macro", Macro.class);
     }
 
-    private MacroArgumentType() {}
+    private MacroArgumentType() {
+    }
 
     @Override
     public Macro parse(StringReader reader) throws CommandSyntaxException {
@@ -46,7 +47,7 @@ public class MacroArgumentType implements ArgumentType<Macro> {
 
     @Override
     public CompletableFuture<Suggestions> listSuggestions(CommandContext context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(Macros.get().getAll().stream().map(macro -> {
+        return SharedSuggestionProvider.suggest(Macros.get().getAll().stream().map(macro -> {
             String name = macro.name.get();
             if (name.contains(" ")) {
                 name = "\"" + name.replace("\"", "\\\"") + "\"";

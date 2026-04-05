@@ -49,8 +49,11 @@
     }
   },
   "depends": {
-    "java": ">=21",
-    "minecraft": ["${minecraft_version}"],
+    "java": ">=${jdk_version}",
+    "minecraft": [
+      "26.1",
+      "${minecraft_version}"
+    ],
     "fabricloader": ">=${loader_version}"
   },
   "breaks": {

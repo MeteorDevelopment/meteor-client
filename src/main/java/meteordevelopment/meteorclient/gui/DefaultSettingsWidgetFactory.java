@@ -25,7 +25,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.elements.keyboard.KeyboardHud;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.resources.language.I18n;
 import org.apache.commons.lang3.Strings;
 
 import java.util.ArrayList;
@@ -251,17 +251,17 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void blockW(WTable table, BlockSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
 
-        WItem item = list.add(theme.item(setting.get().asItem().getDefaultStack())).widget();
+        WItem item = list.add(theme.item(setting.get().asItem().getDefaultInstance())).widget();
 
         WButton select = list.add(theme.button("Select")).widget();
         select.action = () -> {
             BlockSettingScreen screen = new BlockSettingScreen(theme, setting);
-            screen.onClosed(() -> item.set(setting.get().asItem().getDefaultStack()));
+            screen.onClosed(() -> item.set(setting.get().asItem().getDefaultInstance()));
 
             mc.setScreen(screen);
         };
 
-        reset(table, setting, () -> item.set(setting.get().asItem().getDefaultStack()));
+        reset(table, setting, () -> item.set(setting.get().asItem().getDefaultInstance()));
     }
 
     private void blockPosW(WTable table, BlockPosSetting setting) {
@@ -281,17 +281,17 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void itemW(WTable table, ItemSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
 
-        WItem item = list.add(theme.item(setting.get().asItem().getDefaultStack())).widget();
+        WItem item = list.add(theme.item(setting.get().asItem().getDefaultInstance())).widget();
 
         WButton select = list.add(theme.button("Select")).widget();
         select.action = () -> {
             ItemSettingScreen screen = new ItemSettingScreen(theme, setting);
-            screen.onClosed(() -> item.set(setting.get().getDefaultStack()));
+            screen.onClosed(() -> item.set(setting.get().getDefaultInstance()));
 
             mc.setScreen(screen);
         };
 
-        reset(table, setting, () -> item.set(setting.get().getDefaultStack()));
+        reset(table, setting, () -> item.set(setting.get().getDefaultInstance()));
     }
 
     private void itemListW(WTable table, ItemListSetting setting) {
@@ -347,17 +347,17 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
     private void potionW(WTable table, PotionSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
-        WItemWithLabel item = list.add(theme.itemWithLabel(setting.get().potion, I18n.translate(setting.get().potion.getItem().getTranslationKey()))).widget();
+        WItemWithLabel item = list.add(theme.itemWithLabel(setting.get().potion(), I18n.get(setting.get().potion().getItem().getDescriptionId()))).widget();
 
         WButton button = list.add(theme.button("Select")).expandCellX().widget();
         button.action = () -> {
             WidgetScreen screen = new PotionSettingScreen(theme, setting);
-            screen.onClosed(() -> item.set(setting.get().potion));
+            screen.onClosed(() -> item.set(setting.get().potion()));
 
             mc.setScreen(screen);
         };
 
-        reset(list, setting, () -> item.set(setting.get().potion));
+        reset(list, setting, () -> item.set(setting.get().potion()));
     }
 
     private void fontW(WTable table, FontFaceSetting setting) {

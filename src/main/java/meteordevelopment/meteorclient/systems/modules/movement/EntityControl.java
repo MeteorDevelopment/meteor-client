@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 import meteordevelopment.meteorclient.events.entity.EntityMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -16,13 +16,13 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.JumpingMount;
-import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.PlayerRideableJumping;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +34,9 @@ public class EntityControl extends Module {
     private final SettingGroup sgFlight = settings.createGroup("Flight");
 
     List<EntityType<?>> list = new ArrayList<>();
+
     {
-        Registries.ENTITY_TYPE.forEach(entityType -> {
+        BuiltInRegistries.ENTITY_TYPE.forEach(entityType -> {
             if (EntityUtils.isRideable(entityType) && entityType != EntityType.MINECART && entityType != EntityType.LLAMA && entityType != EntityType.TRADER_LLAMA) {
                 list.add(entityType);
             }
@@ -173,9 +174,9 @@ public class EntityControl extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (sentPacket && mc.player.getVehicle() != null) {
-            VehicleMoveC2SPacket packet = VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle());
-            ((IVec3d) packet.position()).meteor$setY(lastPacketY);
-            mc.getNetworkHandler().sendPacket(packet);
+            ServerboundMoveVehiclePacket packet = ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle());
+            ((IVec3) packet.position()).meteor$setY(lastPacketY);
+            mc.getConnection().send(packet);
             sentPacket = false;
         }
 
@@ -187,13 +188,13 @@ public class EntityControl extends Module {
         Entity entity = event.entity;
         if (event.entity.getControllingPassenger() != mc.player || !entities.get().contains(entity.getType())) return;
 
-        double velX = entity.getVelocity().x;
-        double velY = entity.getVelocity().y;
-        double velZ = entity.getVelocity().z;
+        double velX = entity.getDeltaMovement().x;
+        double velY = entity.getDeltaMovement().y;
+        double velZ = entity.getDeltaMovement().z;
 
         // Horizontal movement
-        if (speed.get() && (!onlyOnGround.get() || entity.isOnGround() || entity.isFlyingVehicle()) && (inWater.get() || !entity.isTouchingWater())) {
-            Vec3d vel = PlayerUtils.getHorizontalVelocity(horizontalSpeed.get());
+        if (speed.get() && (!onlyOnGround.get() || entity.onGround() || entity.isFlyingVehicle()) && (inWater.get() || !entity.isInWater())) {
+            Vec3 vel = PlayerUtils.getHorizontalVelocity(horizontalSpeed.get());
             velX = vel.x;
             velZ = vel.z;
         }
@@ -201,22 +202,22 @@ public class EntityControl extends Module {
         // Vertical movement
         if (flight.get()) {
             velY = 0;
-            if (Input.isPressed(mc.options.jumpKey)) velY += verticalSpeed.get() / 20;
-            if (Input.isPressed(mc.options.sprintKey)) velY -= verticalSpeed.get() / 20;
+            if (Input.isPressed(mc.options.keyJump)) velY += verticalSpeed.get() / 20;
+            if (Input.isPressed(mc.options.keySprint)) velY -= verticalSpeed.get() / 20;
             else velY -= fallSpeed.get() / 20;
         }
 
-        if (lockYaw.get()) entity.setYaw(mc.player.getYaw());
-        ((IVec3d) event.movement).meteor$set(velX, velY, velZ);
+        if (lockYaw.get()) entity.setYRot(mc.player.getYRot());
+        ((IVec3) event.movement).meteor$set(velX, velY, velZ);
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof VehicleMoveC2SPacket packet) || !antiKick.get()) return;
+        if (!(event.packet instanceof ServerboundMoveVehiclePacket packet) || !antiKick.get()) return;
 
         double currentY = packet.position().y;
         if (delayLeft <= 0 && !sentPacket && shouldFlyDown(currentY) && EntityUtils.isOnAir(mc.player.getVehicle()) && !mc.player.getVehicle().isFlyingVehicle()) {
-            ((IVec3d) packet.position()).meteor$setY(lastPacketY - 0.03130D);
+            ((IVec3) packet.position()).meteor$setY(lastPacketY - 0.03130D);
             sentPacket = true;
             delayLeft = delay.get();
         }
@@ -226,7 +227,7 @@ public class EntityControl extends Module {
 
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (event.packet instanceof VehicleMoveS2CPacket && cancelServerPackets.get()) {
+        if (event.packet instanceof ClientboundMoveVehiclePacket && cancelServerPackets.get()) {
             event.cancel();
         }
     }
@@ -245,7 +246,7 @@ public class EntityControl extends Module {
     }
 
     public boolean cancelJump() {
-        if (!(mc.player.getVehicle() instanceof JumpingMount)) return false;
+        if (!(mc.player.getVehicle() instanceof PlayerRideableJumping)) return false;
         return isActive() && entities.get().contains(mc.player.getVehicle().getType()) && flight.get();
     }
 }

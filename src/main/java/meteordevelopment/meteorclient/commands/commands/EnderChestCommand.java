@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.command.CommandSource;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class EnderChestCommand extends Command {
     public EnderChestCommand() {
@@ -18,9 +18,9 @@ public class EnderChestCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.executes(context -> {
-            Utils.openContainer(Items.ENDER_CHEST.getDefaultStack(), new ItemStack[27], true);
+            Utils.openContainer(Items.ENDER_CHEST.getDefaultInstance(), new ItemStack[27], true);
             return SINGLE_SUCCESS;
         });
     }

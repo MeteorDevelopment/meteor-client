@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -17,8 +17,8 @@ import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.world.effect.MobEffects;
 
 public class LongJump extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -136,7 +136,7 @@ public class LongJump extends Module {
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.packet instanceof PlayerPositionLookS2CPacket && disableOnRubberband.get()) {
+        if (event.packet instanceof ClientboundPlayerPositionPacket && disableOnRubberband.get()) {
             info("Rubberband detected! Disabling...");
             toggle();
         }
@@ -149,49 +149,47 @@ public class LongJump extends Module {
         }
         switch (jumpMode.get()) {
             case Vanilla -> {
-                if (PlayerUtils.isMoving() && mc.options.jumpKey.isPressed()) {
+                if (PlayerUtils.isMoving() && mc.options.keyJump.isDown()) {
                     double dir = getDir();
 
                     double xDir = Math.cos(Math.toRadians(dir + 90));
                     double zDir = Math.sin(Math.toRadians(dir + 90));
 
-                    if (!mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, mc.player.getVelocity().y, 0.0)) || mc.player.verticalCollision) {
-                        ((IVec3d) event.movement).meteor$setXZ(xDir * 0.29F, zDir * 0.29F);
+                    if (!mc.level.noCollision(mc.player.getBoundingBox().move(0.0, mc.player.getDeltaMovement().y, 0.0)) || mc.player.verticalCollision) {
+                        ((IVec3) event.movement).meteor$setXZ(xDir * 0.29F, zDir * 0.29F);
                     }
-                    if ((event.movement.getY() == .33319999363422365)) {
-                        ((IVec3d) event.movement).meteor$setXZ(xDir * vanillaBoostFactor.get(), zDir * vanillaBoostFactor.get());
+                    if ((event.movement.y() == .33319999363422365)) {
+                        ((IVec3) event.movement).meteor$setXZ(xDir * vanillaBoostFactor.get(), zDir * vanillaBoostFactor.get());
                     }
                 }
             }
             case Burst -> {
-                if (stage != 0 && !mc.player.isOnGround() && autoDisable.get()) jumping = true;
+                if (stage != 0 && !mc.player.onGround() && autoDisable.get()) jumping = true;
                 if (jumping && (mc.player.getY() - (int) mc.player.getY() < 0.01)) {
                     jumping = false;
                     toggle();
                     info("Disabling after jump.");
                 }
 
-                if (onlyOnGround.get() && !mc.player.isOnGround() && stage == 0) return;
+                if (onlyOnGround.get() && !mc.player.onGround() && stage == 0) return;
 
-                double xDist = mc.player.getX() - mc.player.lastX;
-                double zDist = mc.player.getZ() - mc.player.lastZ;
+                double xDist = mc.player.getX() - mc.player.xo;
+                double zDist = mc.player.getZ() - mc.player.zo;
                 double lastDist = Math.sqrt((xDist * xDist) + (zDist * zDist));
 
-                if (PlayerUtils.isMoving() && (!onJump.get() || mc.options.jumpKey.isPressed()) && !mc.player.isInLava() && !mc.player.isTouchingWater()) {
+                if (PlayerUtils.isMoving() && (!onJump.get() || mc.options.keyJump.isDown()) && !mc.player.isInLava() && !mc.player.isInWater()) {
                     if (stage == 0) moveSpeed = getMoveSpeed() * burstInitialSpeed.get();
                     else if (stage == 1) {
-                         ((IVec3d) event.movement).meteor$setY(0.42);
-                         moveSpeed *= burstBoostFactor.get();
-                    }
-                    else if (stage == 2) {
+                        ((IVec3) event.movement).meteor$setY(0.42);
+                        moveSpeed *= burstBoostFactor.get();
+                    } else if (stage == 2) {
                         final double difference = lastDist - getMoveSpeed();
                         moveSpeed = lastDist - difference;
-                    }
-                    else moveSpeed = lastDist - lastDist / 159;
+                    } else moveSpeed = lastDist - lastDist / 159;
 
                     setMoveSpeed(event, moveSpeed = Math.max(getMoveSpeed(), moveSpeed));
-                    if (!mc.player.verticalCollision && !mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, mc.player.getVelocity().y, 0.0)) && !mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, -0.4, 0.0))) {
-                        ((IVec3d) event.movement).meteor$setY(-0.001);
+                    if (!mc.player.verticalCollision && !mc.level.noCollision(mc.player.getBoundingBox().move(0.0, mc.player.getDeltaMovement().y, 0.0)) && !mc.level.noCollision(mc.player.getBoundingBox().move(0.0, -0.4, 0.0))) {
+                        ((IVec3) event.movement).meteor$setY(-0.001);
                     }
 
                     stage++;
@@ -205,35 +203,34 @@ public class LongJump extends Module {
         if (Utils.canUpdate() && jumpMode.get() == JumpMode.Glide) {
             if (!PlayerUtils.isMoving()) return;
 
-            float yaw = mc.player.getYaw() + 90;
-            double forward = ((mc.player.forwardSpeed != 0) ? ((mc.player.forwardSpeed > 0) ? 1 : -1) : 0);
+            float yaw = mc.player.getYRot() + 90;
+            double forward = ((mc.player.zza != 0) ? ((mc.player.zza > 0) ? 1 : -1) : 0);
             float[] motion = {0.4206065F, 0.4179245F, 0.41525924F, 0.41261F, 0.409978F, 0.407361F, 0.404761F, 0.402178F, 0.399611F, 0.39706F, 0.394525F, 0.392F, 0.3894F, 0.38644F, 0.383655F, 0.381105F, 0.37867F, 0.37625F, 0.37384F, 0.37145F, 0.369F, 0.3666F, 0.3642F, 0.3618F, 0.35945F, 0.357F, 0.354F, 0.351F, 0.348F, 0.345F, 0.342F, 0.339F, 0.336F, 0.333F, 0.33F, 0.327F, 0.324F, 0.321F, 0.318F, 0.315F, 0.312F, 0.309F, 0.307F, 0.305F, 0.303F, 0.3F, 0.297F, 0.295F, 0.293F, 0.291F, 0.289F, 0.287F, 0.285F, 0.283F, 0.281F, 0.279F, 0.277F, 0.275F, 0.273F, 0.271F, 0.269F, 0.267F, 0.265F, 0.263F, 0.261F, 0.259F, 0.257F, 0.255F, 0.253F, 0.251F, 0.249F, 0.247F, 0.245F, 0.243F, 0.241F, 0.239F, 0.237F};
             float[] glide = {0.3425F, 0.5445F, 0.65425F, 0.685F, 0.675F, 0.2F, 0.895F, 0.719F, 0.76F};
 
             final double cos = Math.cos(Math.toRadians(yaw));
             final double sin = Math.sin(Math.toRadians(yaw));
 
-            if (!mc.player.verticalCollision && !mc.player.isOnGround()) {
+            if (!mc.player.verticalCollision && !mc.player.onGround()) {
                 jumped = true;
                 airTicks += 1;
                 groundTicks = -5;
 
-                double velocityY = mc.player.getVelocity().y;
+                double velocityY = mc.player.getDeltaMovement().y;
 
-                if (airTicks - 6 >= 0 && airTicks - 6 < glide.length) updateY(velocityY * glide[(airTicks - 6)] * glideMultiplier.get());
+                if (airTicks - 6 >= 0 && airTicks - 6 < glide.length)
+                    updateY(velocityY * glide[(airTicks - 6)] * glideMultiplier.get());
 
                 if (velocityY < -0.2 && velocityY > -0.24) updateY(velocityY * 0.7 * glideMultiplier.get());
                 else if (velocityY < -0.25 && velocityY > -0.32) updateY(velocityY * 0.8 * glideMultiplier.get());
                 else if (velocityY < -0.35 && velocityY > -0.8) updateY(velocityY * 0.98 * glideMultiplier.get());
 
                 if (airTicks - 1 >= 0 && airTicks - 1 < motion.length) {
-                    mc.player.setVelocity((forward * motion[(airTicks - 1)] * 3 * cos) * glideMultiplier.get(), mc.player.getVelocity().y, (forward * motion[(airTicks - 1)] * 3 * sin) * glideMultiplier.get());
+                    mc.player.setDeltaMovement((forward * motion[(airTicks - 1)] * 3 * cos) * glideMultiplier.get(), mc.player.getDeltaMovement().y, (forward * motion[(airTicks - 1)] * 3 * sin) * glideMultiplier.get());
+                } else {
+                    mc.player.setDeltaMovement(0, mc.player.getDeltaMovement().y, 0);
                 }
-                else {
-                    mc.player.setVelocity(0, mc.player.getVelocity().y, 0);
-                }
-            }
-            else {
+            } else {
                 if (autoDisable.get() && jumped) {
                     jumped = false;
                     toggle();
@@ -242,29 +239,28 @@ public class LongJump extends Module {
                 airTicks = 0;
                 groundTicks += 1;
                 if (groundTicks <= 2) {
-                    mc.player.setVelocity(forward * 0.009999999776482582 * cos * glideMultiplier.get(), mc.player.getVelocity().y, forward * 0.009999999776482582 * sin * glideMultiplier.get());
-                }
-                else {
-                    mc.player.setVelocity(forward * 0.30000001192092896  * cos * glideMultiplier.get(), 0.42399999499320984, forward * 0.30000001192092896 * sin * glideMultiplier.get());
+                    mc.player.setDeltaMovement(forward * 0.009999999776482582 * cos * glideMultiplier.get(), mc.player.getDeltaMovement().y, forward * 0.009999999776482582 * sin * glideMultiplier.get());
+                } else {
+                    mc.player.setDeltaMovement(forward * 0.30000001192092896 * cos * glideMultiplier.get(), 0.42399999499320984, forward * 0.30000001192092896 * sin * glideMultiplier.get());
                 }
             }
         }
     }
 
     private void updateY(double amount) {
-        mc.player.setVelocity(mc.player.getVelocity().x, amount, mc.player.getVelocity().z);
+        mc.player.setDeltaMovement(mc.player.getDeltaMovement().x, amount, mc.player.getDeltaMovement().z);
     }
 
     private double getDir() {
         double dir = 0;
 
         if (Utils.canUpdate()) {
-            dir = mc.player.getYaw() + ((mc.player.forwardSpeed < 0) ? 180 : 0);
+            dir = mc.player.getYRot() + ((mc.player.zza < 0) ? 180 : 0);
 
-            if (mc.player.sidewaysSpeed > 0) {
-                dir += -90F * ((mc.player.forwardSpeed < 0) ? -0.5F : ((mc.player.forwardSpeed > 0) ? 0.5F : 1F));
-            } else if (mc.player.sidewaysSpeed < 0) {
-                dir += 90F * ((mc.player.forwardSpeed < 0) ? -0.5F : ((mc.player.forwardSpeed > 0) ? 0.5F : 1F));
+            if (mc.player.xxa > 0) {
+                dir += -90F * ((mc.player.zza < 0) ? -0.5F : ((mc.player.zza > 0) ? 0.5F : 1F));
+            } else if (mc.player.xxa < 0) {
+                dir += 90F * ((mc.player.zza < 0) ? -0.5F : ((mc.player.zza > 0) ? 0.5F : 1F));
             }
         }
         return dir;
@@ -272,21 +268,20 @@ public class LongJump extends Module {
 
     private double getMoveSpeed() {
         double base = 0.2873;
-        if (mc.player.hasStatusEffect(StatusEffects.SPEED)) {
-            base *= 1.0 + 0.2 * (mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier() + 1);
+        if (mc.player.hasEffect(MobEffects.SPEED)) {
+            base *= 1.0 + 0.2 * (mc.player.getEffect(MobEffects.SPEED).getAmplifier() + 1);
         }
         return base;
     }
 
     private void setMoveSpeed(PlayerMoveEvent event, double speed) {
-        double forward = mc.player.forwardSpeed;
-        double strafe = mc.player.sidewaysSpeed;
-        float yaw = mc.player.getYaw();
+        double forward = mc.player.zza;
+        double strafe = mc.player.xxa;
+        float yaw = mc.player.getYRot();
 
         if (!PlayerUtils.isMoving()) {
-            ((IVec3d) event.movement).meteor$setXZ(0, 0);
-        }
-        else {
+            ((IVec3) event.movement).meteor$setXZ(0, 0);
+        } else {
             if (forward != 0) {
                 if (strafe > 0) yaw += ((forward > 0) ? -45 : 45);
                 else if (strafe < 0) yaw += ((forward > 0) ? 45 : -45);
@@ -298,7 +293,7 @@ public class LongJump extends Module {
 
         double cos = Math.cos(Math.toRadians(yaw + 90));
         double sin = Math.sin(Math.toRadians(yaw + 90));
-        ((IVec3d) event.movement).meteor$setXZ((forward * speed * cos) + (strafe * speed * sin), (forward * speed * sin) + (strafe * speed * cos));
+        ((IVec3) event.movement).meteor$setXZ((forward * speed * cos) + (strafe * speed * sin), (forward * speed * sin) + (strafe * speed * cos));
     }
 
     public enum JumpMode {

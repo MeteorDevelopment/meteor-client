@@ -22,10 +22,10 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Vec2f;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
 import org.joml.Vector2f;
 import org.joml.Vector3d;
 
@@ -86,7 +86,7 @@ public class Tracers extends Module {
         .name("target")
         .description("What part of the entity to target.")
         .defaultValue(Target.Body)
-        .visible(() ->  style.get() == TracerStyle.Lines)
+        .visible(() -> style.get() == TracerStyle.Lines)
         .build()
     );
 
@@ -94,7 +94,7 @@ public class Tracers extends Module {
         .name("stem")
         .description("Draw a line through the center of the tracer target.")
         .defaultValue(true)
-        .visible(() ->  style.get() == TracerStyle.Lines)
+        .visible(() -> style.get() == TracerStyle.Lines)
         .build()
     );
 
@@ -113,7 +113,7 @@ public class Tracers extends Module {
         .defaultValue(200)
         .min(0)
         .sliderMax(500)
-        .visible(() ->  style.get() == TracerStyle.Offscreen)
+        .visible(() -> style.get() == TracerStyle.Offscreen)
         .build()
     );
 
@@ -123,7 +123,7 @@ public class Tracers extends Module {
         .defaultValue(10)
         .min(2)
         .sliderMax(50)
-        .visible(() ->  style.get() == TracerStyle.Offscreen)
+        .visible(() -> style.get() == TracerStyle.Offscreen)
         .build()
     );
 
@@ -131,7 +131,7 @@ public class Tracers extends Module {
         .name("blink-offscreen")
         .description("Make offscreen Blink.")
         .defaultValue(true)
-        .visible(() ->  style.get() == TracerStyle.Offscreen)
+        .visible(() -> style.get() == TracerStyle.Offscreen)
         .build()
     );
 
@@ -141,7 +141,7 @@ public class Tracers extends Module {
         .defaultValue(4)
         .min(1)
         .sliderMax(15)
-        .visible(() ->  style.get() == TracerStyle.Offscreen && blinkOffscreen.get())
+        .visible(() -> style.get() == TracerStyle.Offscreen && blinkOffscreen.get())
         .build()
     );
 
@@ -218,23 +218,20 @@ public class Tracers extends Module {
     }
 
     private boolean shouldBeIgnored(Entity entity) {
-        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType()) || (ignoreSelf.get() && entity == mc.player) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity);
+        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType()) || (ignoreSelf.get() && entity == mc.player) || (ignoreFriends.get() && entity instanceof Player && Friends.get().isFriend((Player) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity);
     }
 
     private Color getEntityColor(Entity entity) {
         Color color;
 
         if (distance.get()) {
-            if (friendOverride.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
+            if (friendOverride.get() && entity instanceof Player && Friends.get().isFriend((Player) entity)) {
                 color = Config.get().friendColor.get();
-            }
-            else color = EntityUtils.getColorFromDistance(entity);
-        }
-        else if (entity instanceof PlayerEntity) {
-            color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
-        }
-        else {
-            color = switch (entity.getType().getSpawnGroup()) {
+            } else color = EntityUtils.getColorFromDistance(entity);
+        } else if (entity instanceof Player) {
+            color = PlayerUtils.getPlayerColor(((Player) entity), playersColor.get());
+        } else {
+            color = switch (entity.getType().getCategory()) {
                 case CREATURE -> animalsColor.get();
                 case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
                 case MONSTER -> monstersColor.get();
@@ -248,17 +245,17 @@ public class Tracers extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.options.hudHidden || style.get() == TracerStyle.Offscreen) return;
+        if (mc.options.hideGui || style.get() == TracerStyle.Offscreen) return;
         count = 0;
 
-        for (Entity entity : mc.world.getEntities()) {
+        for (Entity entity : mc.level.entitiesForRendering()) {
             if (shouldBeIgnored(entity)) continue;
 
             Color color = getEntityColor(entity);
 
-            double x = entity.lastX + (entity.getX() - entity.lastX) * event.tickDelta;
-            double y = entity.lastY + (entity.getY() - entity.lastY) * event.tickDelta;
-            double z = entity.lastZ + (entity.getZ() - entity.lastZ) * event.tickDelta;
+            double x = entity.xo + (entity.getX() - entity.xo) * event.tickDelta;
+            double y = entity.yo + (entity.getY() - entity.yo) * event.tickDelta;
+            double z = entity.zo + (entity.getZ() - entity.zo) * event.tickDelta;
 
             double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
             if (target.get() == Target.Head) y += height;
@@ -273,12 +270,12 @@ public class Tracers extends Module {
 
     @EventHandler
     public void onRender2D(Render2DEvent event) {
-        if (mc.options.hudHidden || style.get() != TracerStyle.Offscreen) return;
+        if (mc.options.hideGui || style.get() != TracerStyle.Offscreen) return;
         count = 0;
 
         Renderer2D.COLOR.begin();
 
-        for (Entity entity : mc.world.getEntities()) {
+        for (Entity entity : mc.level.entitiesForRendering()) {
             if (shouldBeIgnored(entity)) continue;
 
             Color color = getEntityColor(entity);
@@ -286,15 +283,15 @@ public class Tracers extends Module {
             if (blinkOffscreen.get())
                 color.a = (int) (color.a * getAlpha());
 
-            Vec2f screenCenter = new Vec2f(mc.getWindow().getFramebufferWidth() / 2.f, mc.getWindow().getFramebufferHeight() / 2.f);
+            Vec2 screenCenter = new Vec2(mc.getWindow().getWidth() / 2.f, mc.getWindow().getHeight() / 2.f);
 
-            Vector3d projection = new Vector3d(entity.lastX, entity.lastY, entity.lastZ);
+            Vector3d projection = new Vector3d(entity.xo, entity.yo, entity.zo);
             boolean projSucceeded = NametagUtils.to2D(projection, 1, false, false);
 
-            if (projSucceeded && projection.x > 0.f && projection.x < mc.getWindow().getFramebufferWidth() && projection.y > 0.f && projection.y < mc.getWindow().getFramebufferHeight())
+            if (projSucceeded && projection.x > 0.f && projection.x < mc.getWindow().getWidth() && projection.y > 0.f && projection.y < mc.getWindow().getHeight())
                 continue;
 
-            projection = new Vector3d(entity.lastX, entity.lastY, entity.lastZ);
+            projection = new Vector3d(entity.xo, entity.yo, entity.zo);
             NametagUtils.to2D(projection, 1, false, true);
 
             Vector2f angle = vectorAngles(new Vector3d(screenCenter.x - projection.x, screenCenter.y - projection.y, 0));
@@ -331,9 +328,9 @@ public class Tracers extends Module {
     private void rotateTriangle(Vector2f[] points, float ang) {
         Vector2f triangleCenter = new Vector2f(0, 0);
         triangleCenter.add(points[0]).add(points[1]).add(points[2]).div(3.f);
-        float theta = (float)Math.toRadians(ang);
-        float cos = (float)Math.cos(theta);
-        float sin = (float)Math.sin(theta);
+        float theta = (float) Math.toRadians(ang);
+        float cos = (float) Math.cos(theta);
+        float sin = (float) Math.sin(theta);
         for (int i = 0; i < 3; i++) {
             Vector2f point = new Vector2f(points[i].x, points[i].y).sub(triangleCenter);
 
@@ -354,12 +351,12 @@ public class Tracers extends Module {
             else
                 pitch = 90;
         } else {
-            yaw = (float)(Math.atan2(forward.y, forward.x) * 180 / Math.PI);
+            yaw = (float) (Math.atan2(forward.y, forward.x) * 180 / Math.PI);
             if (yaw < 0)
                 yaw += 360;
 
-            tmp = (float)Math.sqrt(forward.x * forward.x + forward.y * forward.y);
-            pitch = (float)(Math.atan2(-forward.z, tmp) * 180 / Math.PI);
+            tmp = (float) Math.sqrt(forward.x * forward.x + forward.y * forward.y);
+            pitch = (float) (Math.atan2(-forward.z, tmp) * 180 / Math.PI);
             if (pitch < 0)
                 pitch += 360;
         }

@@ -5,33 +5,34 @@
 
 package meteordevelopment.meteorclient.utils;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.block.MovingBlockRenderState;
-import net.minecraft.client.render.command.BatchingRenderCommandQueue;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueueImpl;
-import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.render.model.BlockStateModel;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.SubmitNodeCollection;
+import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.block.MovingBlockRenderState;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
 import java.util.List;
 
-public class OutlineRenderCommandQueue extends OrderedRenderCommandQueueImpl {
+public class OutlineRenderCommandQueue extends SubmitNodeStorage {
     private int color;
     private int[] tints;
 
@@ -40,77 +41,73 @@ public class OutlineRenderCommandQueue extends OrderedRenderCommandQueueImpl {
     }
 
     @Override
-    public BatchingRenderCommandQueue getBatchingQueue(int i) {
-        return batchingQueues.computeIfAbsent(i, order -> new OutlineBatchingRenderCommandQueue(this));
+    public SubmitNodeCollection order(int i) {
+        return submitsPerOrder.computeIfAbsent(i, order -> new OutlineBatchingRenderCommandQueue(this));
     }
 
-    private class OutlineBatchingRenderCommandQueue extends BatchingRenderCommandQueue {
-        public OutlineBatchingRenderCommandQueue(OrderedRenderCommandQueueImpl orderedQueueImpl) {
+    private class OutlineBatchingRenderCommandQueue extends SubmitNodeCollection {
+        public OutlineBatchingRenderCommandQueue(SubmitNodeStorage orderedQueueImpl) {
             super(orderedQueueImpl);
         }
 
         @Override
-        public void submitShadowPieces(MatrixStack matrices, float shadowRadius, List<EntityRenderState.ShadowPiece> shadowPieces) {
+        public void submitShadow(PoseStack poseStack, float shadowRadius, List<EntityRenderState.ShadowPiece> shadowPieces) {
         }
 
         @Override
-        public void submitLabel(MatrixStack matrices, @Nullable Vec3d nameLabelPos, int y, Text label, boolean notSneaking, int light, double squaredDistanceToCamera, CameraRenderState cameraState) {
+        public void submitNameTag(PoseStack poseStack, @Nullable Vec3 vec3, int i, Component component, boolean bl, int j, double d, CameraRenderState cameraRenderState) {
         }
 
         @Override
-        public void submitText(MatrixStack matrices, float x, float y, OrderedText text, boolean dropShadow, TextRenderer.TextLayerType layerType, int light, int color, int backgroundColor, int outlineColor) {
+        public void submitText(PoseStack poseStack, float x, float y, FormattedCharSequence text, boolean dropShadow, Font.DisplayMode layerType, int light, int color, int backgroundColor, int outlineColor) {
         }
 
         @Override
-        public void submitFire(MatrixStack matrices, EntityRenderState renderState, Quaternionf rotation) {
+        public void submitFlame(PoseStack poseStack, EntityRenderState entityRenderState, Quaternionf quaternionf) {
         }
 
         @Override
-        public void submitLeash(MatrixStack matrices, EntityRenderState.LeashData leashData) {
+        public void submitLeash(PoseStack poseStack, EntityRenderState.LeashState leashState) {
         }
 
         @Override
-        public <S> void submitModel(Model<? super S> model, S state, MatrixStack matrices, RenderLayer renderLayer, int light, int overlay, int tintedColor, @Nullable Sprite sprite, int outlineColor, @Nullable ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay) {
+        public <S> void submitModel(Model<? super S> model, S state, PoseStack matrices, RenderType renderLayer, int light, int overlay, int tintedColor, @Nullable TextureAtlasSprite sprite, int outlineColor, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
             super.submitModel(model, state, matrices, renderLayer, light, overlay, color, sprite, 0, crumblingOverlay);
         }
 
         @Override
-        public void submitModelPart(ModelPart part, MatrixStack matrices, RenderLayer renderLayer, int light, int overlay, @Nullable Sprite sprite, boolean sheeted, boolean hasGlint, int tintedColor, @Nullable ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay, int i) {
+        public void submitModelPart(ModelPart part, PoseStack matrices, RenderType renderLayer, int light, int overlay, @Nullable TextureAtlasSprite sprite, boolean sheeted, boolean hasGlint, int tintedColor, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay, int i) {
             super.submitModelPart(part, matrices, renderLayer, light, overlay, sprite, sheeted, hasGlint, color, crumblingOverlay, i);
         }
 
         @Override
-        public void submitBlock(MatrixStack matrices, BlockState state, int light, int overlay, int outlineColor) {
+        public void submitMovingBlock(PoseStack matrices, MovingBlockRenderState state) {
         }
 
         @Override
-        public void submitMovingBlock(MatrixStack matrices, MovingBlockRenderState state) {
+        public void submitBlockModel(PoseStack poseStack, RenderType renderType, List<BlockStateModelPart> modelParts, int[] tintLayers, int lightCoords, int overlayCoords, int outlineColor) {
+            super.submitBlockModel(poseStack, renderType, modelParts, tintLayers, lightCoords, overlayCoords, outlineColor);
         }
 
         @Override
-        public void submitBlockStateModel(MatrixStack matrices, RenderLayer renderLayer, BlockStateModel model, float r, float g, float b, int light, int overlay, int outlineColor) {
-            r = Color.toRGBAR(color) / 255f;
-            g = Color.toRGBAG(color) / 255f;
-            b = Color.toRGBAB(color) / 255f;
-
-            super.submitBlockStateModel(matrices, renderLayer, model, r, g, b, light, overlay, outlineColor);
+        public void submitBreakingBlockModel(PoseStack poseStack, BlockStateModel model, long seed, int progress) {
         }
 
         @Override
-        public void submitItem(MatrixStack matrices, ItemDisplayContext displayContext, int light, int overlay, int outlineColors, int[] tintLayers, List<BakedQuad> quads, RenderLayer renderLayer, ItemRenderState.Glint glintType) {
+        public void submitItem(PoseStack poseStack, ItemDisplayContext displayContext, int lightCoords, int overlayCoords, int outlineColor, int[] tintLayers, List<BakedQuad> quads, ItemStackRenderState.FoilType foilType) {
             if (tints == null || tints[0] != color) {
-                tints = new int[] { color, color, color, color };
+                tints = new int[]{color, color, color, color};
             }
 
-            super.submitItem(matrices, displayContext, light, overlay, outlineColors, tints, quads, renderLayer, glintType);
+            super.submitItem(poseStack, displayContext, lightCoords, overlayCoords, outlineColor, tintLayers, quads, foilType);
         }
 
         @Override
-        public void submitCustom(MatrixStack matrices, RenderLayer renderLayer, Custom customRenderer) {
+        public void submitCustomGeometry(PoseStack poseStack, RenderType renderType, CustomGeometryRenderer customGeometryRenderer) {
         }
 
         @Override
-        public void submitCustom(LayeredCustom customRenderer) {
+        public void submitParticleGroup(ParticleGroupRenderer particleGroupRenderer) {
         }
     }
 }

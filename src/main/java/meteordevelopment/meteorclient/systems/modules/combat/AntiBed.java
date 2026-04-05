@@ -16,13 +16,13 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BedBlock;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.BedBlock;
 
 public class AntiBed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -66,9 +66,9 @@ public class AntiBed extends Module {
         if (onlyInHole.get() && !PlayerUtils.isInHole(true)) return;
 
         // Checking for and maybe breaking bed
-        BlockPos head = mc.player.getBlockPos().up();
+        BlockPos head = mc.player.blockPosition().above();
 
-        if (mc.world.getBlockState(head).getBlock() instanceof BedBlock && !breaking) {
+        if (mc.level.getBlockState(head).getBlock() instanceof BedBlock && !breaking) {
             Rotations.rotate(Rotations.getYaw(head), Rotations.getPitch(head), 50, () -> sendMinePackets(head));
             breaking = true;
         } else if (breaking) {
@@ -77,24 +77,24 @@ public class AntiBed extends Module {
         }
 
         // String placement
-        if (placeStringTop.get()) place(mc.player.getBlockPos().up(2));
-        if (placeStringMiddle.get()) place(mc.player.getBlockPos().up(1));
-        if (placeStringBottom.get()) place(mc.player.getBlockPos());
+        if (placeStringTop.get()) place(mc.player.blockPosition().above(2));
+        if (placeStringMiddle.get()) place(mc.player.blockPosition().above(1));
+        if (placeStringBottom.get()) place(mc.player.blockPosition());
     }
 
     private void place(BlockPos blockPos) {
-        if (mc.world.getBlockState(blockPos).getBlock().asItem() != Items.STRING) {
+        if (mc.level.getBlockState(blockPos).getBlock().asItem() != Items.STRING) {
             BlockUtils.place(blockPos, InvUtils.findInHotbar(Items.STRING), 50, false);
         }
     }
 
     private void sendMinePackets(BlockPos blockPos) {
-        mc.interactionManager.sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, Direction.UP, sequence));
-        mc.interactionManager.sendSequencedPacket(mc.world, (sequence) -> new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, Direction.UP, sequence));
+        mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, Direction.UP, sequence));
+        mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, Direction.UP, sequence));
     }
 
     private void sendStopPackets(BlockPos blockPos) {
-        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, blockPos, Direction.UP));
-        mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, blockPos, Direction.UP));
+        mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
     }
 }

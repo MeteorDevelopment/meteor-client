@@ -7,13 +7,13 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.AutoReconnect;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.DirectionalLayoutWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,26 +28,28 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public abstract class DisconnectedScreenMixin extends Screen {
     @Shadow
     @Final
-    private DirectionalLayoutWidget grid;
-    @Unique private ButtonWidget reconnectBtn;
-    @Unique private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
+    private LinearLayout layout;
+    @Unique
+    private Button reconnectBtn;
+    @Unique
+    private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
 
-    protected DisconnectedScreenMixin(Text title) {
+    protected DisconnectedScreenMixin(Component title) {
         super(title);
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/DirectionalLayoutWidget;refreshPositions()V", shift = At.Shift.BEFORE))
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;arrangeElements()V", shift = At.Shift.BEFORE))
     private void addButtons(CallbackInfo ci) {
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
 
         if (autoReconnect.lastServerConnection != null && !autoReconnect.button.get()) {
-            reconnectBtn = new ButtonWidget.Builder(Text.literal(getText()), button -> tryConnecting()).build();
-            grid.add(reconnectBtn);
+            reconnectBtn = new Button.Builder(Component.literal(getText()), button -> tryConnecting()).build();
+            layout.addChild(reconnectBtn);
 
-            grid.add(
-                new ButtonWidget.Builder(Text.literal("Toggle Auto Reconnect"), button -> {
+            layout.addChild(
+                new Button.Builder(Component.literal("Toggle Auto Reconnect"), button -> {
                     autoReconnect.toggle();
-                    reconnectBtn.setMessage(Text.literal(getText()));
+                    reconnectBtn.setMessage(Component.literal(getText()));
                     time = autoReconnect.time.get() * 20;
                 }).build()
             );
@@ -62,8 +64,8 @@ public abstract class DisconnectedScreenMixin extends Screen {
         if (time <= 0) {
             tryConnecting();
         } else {
-            time--;
-            if (reconnectBtn != null) reconnectBtn.setMessage(Text.literal(getText()));
+            time -= 1;
+            if (reconnectBtn != null) reconnectBtn.setMessage(Component.literal(getText()));
         }
     }
 
@@ -77,6 +79,6 @@ public abstract class DisconnectedScreenMixin extends Screen {
     @Unique
     private void tryConnecting() {
         var lastServer = Modules.get().get(AutoReconnect.class).lastServerConnection;
-        ConnectScreen.connect(new TitleScreen(), mc, lastServer.left(), lastServer.right(), false, null);
+        ConnectScreen.startConnecting(new TitleScreen(), mc, lastServer.left(), lastServer.right(), false, null);
     }
 }

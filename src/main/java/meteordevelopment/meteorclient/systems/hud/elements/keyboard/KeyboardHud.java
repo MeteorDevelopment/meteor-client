@@ -5,11 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements.keyboard;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
@@ -18,7 +19,7 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
-import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
+import meteordevelopment.meteorclient.mixin.KeyMappingAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
@@ -31,13 +32,12 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -222,7 +222,7 @@ public class KeyboardHud extends HudElement {
             boolean pressed = key.isPressed;
             float target = pressed ? 1 : 0;
 
-            float tickDelta = MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
+            float tickDelta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks();
             float frameDelta = (float) (tickDelta / 20 / fadeTime.get()) * (pressed ? 1 : -1);
             key.delta = Math.clamp(key.delta + frameDelta, 0, 1);
 
@@ -239,15 +239,15 @@ public class KeyboardHud extends HudElement {
                 java.awt.Color.RGBtoHSB(c2.r, c2.g, c2.b, hsb1);
 
                 int rgb = java.awt.Color.HSBtoRGB(
-                    MathHelper.lerp(key.delta, hsb1[0], hsb2[0]),
-                    MathHelper.lerp(key.delta, hsb1[1], hsb2[1]),
-                    MathHelper.lerp(key.delta, hsb1[2], hsb2[2])
+                    Mth.lerp(key.delta, hsb1[0], hsb2[0]),
+                    Mth.lerp(key.delta, hsb1[1], hsb2[1]),
+                    Mth.lerp(key.delta, hsb1[2], hsb2[2])
                 );
 
                 out.r = Color.toRGBAR(rgb);
                 out.g = Color.toRGBAG(rgb);
                 out.b = Color.toRGBAB(rgb);
-                out.a = MathHelper.lerp(key.delta, pressedColor.get().a, unpressedColor.get().a);
+                out.a = Mth.lerpInt(key.delta, pressedColor.get().a, unpressedColor.get().a);
             }
         } else {
             out.set(key.isPressed ? pressedColor.get() : unpressedColor.get());
@@ -258,7 +258,7 @@ public class KeyboardHud extends HudElement {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onKey(KeyEvent event) {
+    private void onKey(KeyInputEvent event) {
         for (Key key : keys) {
             if (key.matches(event.input.key(), event.input.scancode(), true)) {
                 key.update(event.action);
@@ -293,25 +293,25 @@ public class KeyboardHud extends HudElement {
 
         switch (preset) {
             case Movement -> {
-                keys.add(l.key(mc.options.forwardKey, l.ux(1), 0).setShowCps(showCps.get()));
-                keys.add(l.key(mc.options.leftKey, 0, l.y(1)).setShowCps(showCps.get()));
-                keys.add(l.key(mc.options.backKey, l.ux(1), l.y(1)).setShowCps(showCps.get()));
-                keys.add(l.key(mc.options.rightKey, l.ux(2), l.y(1)).setShowCps(showCps.get()));
-                keys.add(l.key(mc.options.sneakKey, 0, l.y(2)).setShowCps(showCps.get()));
-                keys.add(l.key(mc.options.jumpKey, l.ux(1), l.y(2), KeyDimensions.UNIT_2U).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keyUp, l.ux(1), 0).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keyLeft, 0, l.y(1)).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keyDown, l.ux(1), l.y(1)).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keyRight, l.ux(2), l.y(1)).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keyShift, 0, l.y(2)).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keyJump, l.ux(1), l.y(2), KeyDimensions.UNIT_2U).setShowCps(showCps.get()));
             }
             case Clicks -> {
-                keys.add(l.key(mc.options.attackKey, "LMB", 0, 0).setShowCps(showCps.get()));
-                keys.add(l.key(mc.options.useKey, "RMB", l.ux(1), 0).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keyAttack, "LMB", 0, 0).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keyUse, "RMB", l.ux(1), 0).setShowCps(showCps.get()));
             }
             case Actions -> {
-                keys.add(l.key(mc.options.dropKey, 0, 0).setShowCps(showCps.get()));
-                keys.add(l.key(mc.options.swapHandsKey, l.ux(1), 0).setShowCps(showCps.get()));
-                keys.add(l.key(mc.options.inventoryKey, l.ux(2), 0).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keyDrop, 0, 0).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keySwapOffhand, l.ux(1), 0).setShowCps(showCps.get()));
+                keys.add(l.key(mc.options.keyInventory, l.ux(2), 0).setShowCps(showCps.get()));
             }
             case Hotbar -> {
                 for (int i = 0; i < 9; i++) {
-                    keys.add(l.key(mc.options.hotbarKeys[i], l.ux(i), 0).setShowCps(showCps.get()));
+                    keys.add(l.key(mc.options.keyHotbarSlots[i], l.ux(i), 0).setShowCps(showCps.get()));
                 }
             }
             case Keyboard -> {
@@ -566,10 +566,10 @@ public class KeyboardHud extends HudElement {
         double s = scale.get();
 
         // because of a meteor bug, the modules search field swallows inputs
-        InputUtil.Key guiKey = ((KeyBindingAccessor) KeyBinds.OPEN_GUI).meteor$getKey();
+        InputConstants.Key guiKey = ((KeyMappingAccessor) KeyBinds.OPEN_GUI).meteor$getKey();
 
         for (Key key : keys) {
-            if (key.matches(guiKey.getCode(), guiKey.getCode(), guiKey.getCategory() != InputUtil.Type.MOUSE)) {
+            if (key.matches(guiKey.getValue(), guiKey.getValue(), guiKey.getType() != InputConstants.Type.MOUSE)) {
                 if (key.isPressed != key.isNativelyPressed()) {
                     key.update(key.isPressed ? KeyAction.Release : KeyAction.Press);
                 }
@@ -657,7 +657,7 @@ public class KeyboardHud extends HudElement {
 
     public static class Key {
         public String name = "";
-        public KeyBinding binding;
+        public KeyMapping binding;
         public Keybind keybind;
         public double x, y, width, height;
         public boolean showCps = false;
@@ -672,17 +672,17 @@ public class KeyboardHud extends HudElement {
             this.height = 40;
         }
 
-        public Key(NbtCompound compound) {
+        public Key(CompoundTag compound) {
             this.keybind = Keybind.none().fromTag(compound.getCompoundOrEmpty("key"));
-            this.name = compound.getString("name", "");
-            this.x = compound.getDouble("x", 0);
-            this.y = compound.getDouble("y", 0);
-            this.width = compound.getDouble("width", 60);
-            this.height = compound.getDouble("height", 60);
-            this.showCps = compound.getBoolean("showCps", false);
+            this.name = compound.getStringOr("name", "");
+            this.x = compound.getDoubleOr("x", 0);
+            this.y = compound.getDoubleOr("y", 0);
+            this.width = compound.getDoubleOr("width", 60);
+            this.height = compound.getDoubleOr("height", 60);
+            this.showCps = compound.getBooleanOr("showCps", false);
         }
 
-        Key(KeyBinding binding, String name, double x, double y, double width, double height) {
+        Key(KeyMapping binding, String name, double x, double y, double width, double height) {
             this.binding = binding;
             this.name = name;
             this.x = x;
@@ -708,7 +708,7 @@ public class KeyboardHud extends HudElement {
         public String getName() {
             if (name != null && !name.isEmpty()) return name;
             if (keybind != null) return getShortName(keybind.toString());
-            if (binding != null) return getShortName(binding.getBoundKeyLocalizedText().getString());
+            if (binding != null) return getShortName(binding.getTranslatedKeyMessage().getString());
             return "?";
         }
 
@@ -716,11 +716,11 @@ public class KeyboardHud extends HudElement {
             if (keybind != null) {
                 return keybind.isKey() == key && keybind.getValue() == input;
             } else {
-                InputUtil.Key inputKey = ((KeyBindingAccessor) binding).meteor$getKey();
-                boolean isKey = inputKey.getCategory() != InputUtil.Type.MOUSE;
-                return isKey == key && inputKey.getCategory() == InputUtil.Type.SCANCODE
-                    ? scancode == inputKey.getCode()
-                    : input == inputKey.getCode();
+                InputConstants.Key inputKey = ((KeyMappingAccessor) binding).meteor$getKey();
+                boolean isKey = inputKey.getType() != InputConstants.Type.MOUSE;
+                return isKey == key && inputKey.getType() == InputConstants.Type.SCANCODE
+                    ? scancode == inputKey.getValue()
+                    : input == inputKey.getValue();
             }
         }
 
@@ -736,14 +736,14 @@ public class KeyboardHud extends HudElement {
         }
 
         public boolean isNativelyPressed() {
-            long window = mc.getWindow().getHandle();
+            long window = mc.getWindow().handle();
             if (keybind != null) {
                 if (!keybind.isSet()) return false;
                 return keybind.isKey()
                     ? GLFW.glfwGetKey(window, keybind.getValue()) != GLFW.GLFW_RELEASE
                     : GLFW.glfwGetMouseButton(window, keybind.getValue()) != GLFW.GLFW_RELEASE;
             } else {
-                int key = ((KeyBindingAccessor) binding).meteor$getKey().getCode();
+                int key = ((KeyMappingAccessor) binding).meteor$getKey().getValue();
                 return key >= 0 && key < 8
                     ? GLFW.glfwGetMouseButton(window, key) != GLFW.GLFW_RELEASE
                     : GLFW.glfwGetKey(window, key) != GLFW.GLFW_RELEASE;
@@ -754,8 +754,8 @@ public class KeyboardHud extends HudElement {
             return rollingCps.get();
         }
 
-        public NbtCompound serialize() {
-            NbtCompound compound = new NbtCompound();
+        public CompoundTag serialize() {
+            CompoundTag compound = new CompoundTag();
             compound.put("key", keybind.toTag());
             compound.putString("name", name);
             compound.putDouble("x", x);
@@ -873,8 +873,8 @@ public class KeyboardHud extends HudElement {
         }
 
         @Override
-        protected NbtCompound save(NbtCompound tag) {
-            NbtList valueTag = new NbtList();
+        protected CompoundTag save(CompoundTag tag) {
+            ListTag valueTag = new ListTag();
             for (Key key : get()) {
                 valueTag.add(key.serialize());
             }
@@ -884,11 +884,11 @@ public class KeyboardHud extends HudElement {
         }
 
         @Override
-        protected List<Key> load(NbtCompound tag) {
+        protected List<Key> load(CompoundTag tag) {
             get().clear();
 
-            for (NbtElement tagI : tag.getListOrEmpty("value")) {
-                tagI.asCompound().ifPresent(nbtCompound -> get().add(new Key(nbtCompound)));
+            for (Tag tagI : tag.getListOrEmpty("value")) {
+                tagI.asCompound().ifPresent(CompoundTag -> get().add(new Key(CompoundTag)));
             }
 
             return get();
@@ -1017,7 +1017,7 @@ public class KeyboardHud extends HudElement {
 
             WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
             edit.action = () -> {
-                WidgetScreen screen = (WidgetScreen) mc.currentScreen;
+                WidgetScreen screen = (WidgetScreen) mc.screen;
                 mc.setScreen(new CustomKeySettingScreen(theme, setting, key, screen));
             };
 

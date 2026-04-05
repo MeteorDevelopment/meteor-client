@@ -21,7 +21,7 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.XAnchor;
 import meteordevelopment.meteorclient.systems.hud.YAnchor;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
@@ -113,7 +113,7 @@ public class HudElementScreen extends WindowScreen {
         WMinus remove = bottomList.add(theme.minus()).expandCellX().right().widget();
         remove.action = () -> {
             element.remove();
-            close();
+            onClose();
         };
     }
 
@@ -129,8 +129,8 @@ public class HudElementScreen extends WindowScreen {
     }
 
     @Override
-    protected void onRenderBefore(DrawContext drawContext, float delta) {
-        HudEditorScreen.renderElements(drawContext);
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, float delta) {
+        HudEditorScreen.renderElements(graphics);
     }
 
     @Override

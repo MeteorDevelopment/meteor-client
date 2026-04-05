@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 
 public class VClipCommand extends Command {
     public VClipCommand() {
@@ -18,7 +18,7 @@ public class VClipCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(argument("blocks", DoubleArgumentType.doubleArg()).executes(context -> {
 
             double blocks = context.getArgument("blocks", Double.class);
@@ -36,24 +36,24 @@ public class VClipCommand extends Command {
                 packetsRequired = 1;
             }
 
-            if (mc.player.hasVehicle()) {
+            if (mc.player.isPassenger()) {
                 // Vehicle version
                 // For each 10 blocks, send a vehicle move packet with no delta
                 for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                    mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
+                    mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle()));
                 }
                 // Now send the final vehicle move packet
-                mc.player.getVehicle().setPosition(mc.player.getVehicle().getX(), mc.player.getVehicle().getY() + blocks, mc.player.getVehicle().getZ());
-                mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
+                mc.player.getVehicle().setPos(mc.player.getVehicle().getX(), mc.player.getVehicle().getY() + blocks, mc.player.getVehicle().getZ());
+                mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle()));
             } else {
                 // No vehicle version
                 // For each 10 blocks, send a player move packet with no delta
                 for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
+                    mc.player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(true, mc.player.horizontalCollision));
                 }
                 // Now send the final player move packet
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), true, mc.player.horizontalCollision));
-                mc.player.setPosition(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
+                mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), true, mc.player.horizontalCollision));
+                mc.player.setPos(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
             }
 
             return SINGLE_SUCCESS;

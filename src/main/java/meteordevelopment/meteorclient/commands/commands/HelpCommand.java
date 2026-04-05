@@ -11,10 +11,10 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.commands.arguments.CommandArgumentType;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.util.Map;
 
@@ -24,7 +24,7 @@ public class HelpCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(argument("command", CommandArgumentType.create()).executes(context -> {
             showHelp(CommandArgumentType.get(context));
             return SINGLE_SUCCESS;
@@ -37,38 +37,38 @@ public class HelpCommand extends Command {
     }
 
     private void showHelp(Command cmd) {
-        MutableText msg = Text.literal("");
-        msg.append(Text.literal("Help for ").formatted(Formatting.GRAY).append(Text.literal(cmd.getName()).formatted(Formatting.YELLOW)));
-        msg.append(Text.literal("\n ")).append(Text.literal("Description: ").formatted(Formatting.GRAY).append(Text.literal(cmd.getDescription()).formatted(Formatting.WHITE)));
+        MutableComponent msg = Component.literal("");
+        msg.append(Component.literal("Help for ").withStyle(ChatFormatting.GRAY).append(Component.literal(cmd.getName()).withStyle(ChatFormatting.YELLOW)));
+        msg.append(Component.literal("\n ")).append(Component.literal("Description: ").withStyle(ChatFormatting.GRAY).append(Component.literal(cmd.getDescription()).withStyle(ChatFormatting.WHITE)));
 
         if (!cmd.getAliases().isEmpty()) {
-            msg.append(Text.literal("\n ")).append(Text.literal("Aliases: ").formatted(Formatting.GRAY));
-            msg.append(Text.literal(String.join(", ", cmd.getAliases())).formatted(Formatting.AQUA));
+            msg.append(Component.literal("\n ")).append(Component.literal("Aliases: ").withStyle(ChatFormatting.GRAY));
+            msg.append(Component.literal(String.join(", ", cmd.getAliases())).withStyle(ChatFormatting.AQUA));
         }
 
         msg.append(getUsageText(cmd));
         ChatUtils.sendMsg(msg);
     }
 
-    private MutableText getUsageText(Command cmd) {
-        CommandSource source = mc.getNetworkHandler().getCommandSource();
-        CommandNode<CommandSource> root = Commands.DISPATCHER.getRoot();
-        CommandNode<CommandSource> node = root.getChild(cmd.getName());
+    private MutableComponent getUsageText(Command cmd) {
+        SharedSuggestionProvider source = mc.getConnection().getSuggestionsProvider();
+        CommandNode<SharedSuggestionProvider> root = Commands.DISPATCHER.getRoot();
+        CommandNode<SharedSuggestionProvider> node = root.getChild(cmd.getName());
 
-        MutableText usagesText = Text.literal("");
+        MutableComponent usagesText = Component.literal("");
 
         if (node != null) {
-            Map<CommandNode<CommandSource>, String> usages = Commands.DISPATCHER.getSmartUsage(node, source);
+            Map<CommandNode<SharedSuggestionProvider>, String> usages = Commands.DISPATCHER.getSmartUsage(node, source);
 
             for (String usage : usages.values()) {
-                usagesText.append(Text.literal("\n " + cmd + " ").formatted(Formatting.GREEN)).append(Text.literal(usage).formatted(Formatting.GREEN));
+                usagesText.append(Component.literal("\n " + cmd + " ").withStyle(ChatFormatting.GREEN)).append(Component.literal(usage).withStyle(ChatFormatting.GREEN));
             }
         }
 
         if (usagesText.getString().isEmpty()) {
-            usagesText.append(Text.literal("\n " + cmd).formatted(Formatting.GREEN));
+            usagesText.append(Component.literal("\n " + cmd).withStyle(ChatFormatting.GREEN));
         }
 
-        return Text.literal("\n Usage:").formatted(Formatting.GRAY).append(usagesText);
+        return Component.literal("\n Usage:").withStyle(ChatFormatting.GRAY).append(usagesText);
     }
 }

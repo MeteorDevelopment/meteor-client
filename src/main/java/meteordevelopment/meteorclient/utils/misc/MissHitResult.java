@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class MissHitResult extends HitResult {
     public static final MissHitResult INSTANCE = new MissHitResult();
 
     private MissHitResult() {
-        super(new Vec3d(0, 0, 0));
+        super(new Vec3(0, 0, 0));
     }
 
     @Override

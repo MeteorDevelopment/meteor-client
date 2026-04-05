@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleType;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,10 +36,11 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
 
         try {
             for (String value : values) {
-                ParticleType<?> particleType = parseId(Registries.PARTICLE_TYPE, value);
-                if (particleType instanceof ParticleEffect) particleTypes.add(particleType);
+                ParticleType<?> particleType = parseId(BuiltInRegistries.PARTICLE_TYPE, value);
+                if (particleType instanceof ParticleOptions) particleTypes.add(particleType);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception _) {
+        }
 
         return particleTypes;
     }
@@ -51,15 +52,15 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.PARTICLE_TYPE.getIds();
+        return BuiltInRegistries.PARTICLE_TYPE.keySet();
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
-        NbtList valueTag = new NbtList();
+    public CompoundTag save(CompoundTag tag) {
+        ListTag valueTag = new ListTag();
         for (ParticleType<?> particleType : get()) {
-            Identifier id = Registries.PARTICLE_TYPE.getId(particleType);
-            if (id != null) valueTag.add(NbtString.of(id.toString()));
+            Identifier id = BuiltInRegistries.PARTICLE_TYPE.getKey(particleType);
+            if (id != null) valueTag.add(StringTag.valueOf(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -67,12 +68,12 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     }
 
     @Override
-    public List<ParticleType<?>> load(NbtCompound tag) {
+    public List<ParticleType<?>> load(CompoundTag tag) {
         get().clear();
 
-        NbtList valueTag = tag.getListOrEmpty("value");
-        for (NbtElement tagI : valueTag) {
-            ParticleType<?> particleType = Registries.PARTICLE_TYPE.get(Identifier.of(tagI.asString().orElse("")));
+        ListTag valueTag = tag.getListOrEmpty("value");
+        for (Tag tagI : valueTag) {
+            ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.getValue(Identifier.parse(tagI.asString().orElse("")));
             if (particleType != null) get().add(particleType);
         }
 

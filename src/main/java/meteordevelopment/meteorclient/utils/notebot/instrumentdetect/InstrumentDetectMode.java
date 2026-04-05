@@ -5,12 +5,12 @@
 
 package meteordevelopment.meteorclient.utils.notebot.instrumentdetect;
 
-import net.minecraft.block.NoteBlock;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.block.NoteBlock;
 
 public enum InstrumentDetectMode {
-    BlockState(((noteBlock, blockPos) -> noteBlock.get(NoteBlock.INSTRUMENT))),
-    BelowBlock(((noteBlock, blockPos) -> MinecraftClient.getInstance().world.getBlockState(blockPos.down()).getInstrument()));
+    BlockState(((noteBlock, blockPos) -> noteBlock.getValue(NoteBlock.INSTRUMENT))),
+    BelowBlock(((noteBlock, blockPos) -> Minecraft.getInstance().level.getBlockState(blockPos.below()).instrument()));
 
     private final InstrumentDetectFunction instrumentDetectFunction;
 

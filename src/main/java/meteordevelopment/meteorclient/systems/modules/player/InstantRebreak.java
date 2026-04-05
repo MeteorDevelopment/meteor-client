@@ -16,12 +16,12 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionHand;
 
 public class InstantRebreak extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -80,7 +80,7 @@ public class InstantRebreak extends Module {
         .build()
     );
 
-    public final BlockPos.Mutable blockPos = new BlockPos.Mutable(0, Integer.MIN_VALUE, 0);
+    public final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos(0, Integer.MIN_VALUE, 0);
     private int ticks;
     private Direction direction;
 
@@ -106,10 +106,11 @@ public class InstantRebreak extends Module {
             ticks = 0;
 
             if (shouldMine()) {
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), this::sendPacket);
+                if (rotate.get())
+                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), this::sendPacket);
                 else sendPacket();
 
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
             }
         } else {
             ticks++;
@@ -117,15 +118,15 @@ public class InstantRebreak extends Module {
     }
 
     public void sendPacket() {
-        mc.interactionManager.sendSequencedPacket(mc.world, (sequence) ->
-            new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction == null ? Direction.UP : direction, sequence)
+        mc.gameMode.startPrediction(mc.level, sequence ->
+            new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction == null ? Direction.UP : direction, sequence)
         );
     }
 
     public boolean shouldMine() {
-        if (mc.world.isOutOfHeightLimit(blockPos) || !BlockUtils.canBreak(blockPos)) return false;
+        if (mc.level.isOutsideBuildHeight(blockPos) || !BlockUtils.canBreak(blockPos)) return false;
 
-        return !pick.get() || mc.player.getMainHandStack().isIn(ItemTags.PICKAXES);
+        return !pick.get() || mc.player.getMainHandItem().is(ItemTags.PICKAXES);
     }
 
     @EventHandler

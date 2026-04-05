@@ -34,10 +34,16 @@ public class Scissor {
     }
 
     public void push() {
-        ((IGpuDevice) RenderSystem.getDevice()).meteor$pushScissor(x, getWindowHeight() - y - height, width, height);
+        Object device = RenderSystem.getDevice();
+        if (device instanceof IGpuDevice gpuDevice) {
+            gpuDevice.meteor$pushScissor(x, getWindowHeight() - y - height, width, height);
+        }
     }
 
     public void pop() {
-        ((IGpuDevice) RenderSystem.getDevice()).meteor$popScissor();
+        Object device = RenderSystem.getDevice();
+        if (device instanceof IGpuDevice gpuDevice) {
+            gpuDevice.meteor$popScissor();
+        }
     }
 }
