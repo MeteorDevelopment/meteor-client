@@ -13,7 +13,7 @@ loom = "1.14-SNAPSHOT"
 # Baritone (https://github.com/MeteorDevelopment/baritone)
 baritone = "1.21.10-SNAPSHOT"
 # Sodium (https://github.com/CaffeineMC/sodium-fabric)
-sodium = "mc1.21.11-0.8.0-fabric"
+sodium = "mc1.21.11-0.8.7-fabric"
 # Lithium (https://github.com/CaffeineMC/lithium-fabric)
 lithium = "mc1.21.11-0.21.3-fabric"
 # Iris (https://github.com/IrisShaders/Iris)
