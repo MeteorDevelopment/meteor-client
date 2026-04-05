@@ -83,6 +83,7 @@
     "EndCrystalModelMixin",
     "EndCrystalRendererMixin",
     "EntityAccessor",
+    "EntityFluidInteractionMixin",
     "EntityHitboxDebugRendererMixin",
     "EntityMixin",
     "EntityRenderDispatcherMixin",

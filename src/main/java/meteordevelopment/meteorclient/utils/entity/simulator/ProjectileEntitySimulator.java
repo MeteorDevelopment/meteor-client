@@ -313,7 +313,7 @@ public class ProjectileEntitySimulator {
     }
 
     /**
-     * {@link net.minecraft.world.entity.Entity#updateFluidHeightAndDoFluidPushing(TagKey, double)}
+     * {@link net.minecraft.world.entity.EntityFluidInteraction#update(Entity, boolean)}
      */
     public void tickIsTouchingWater() {
         AABB box = dimensions.makeBoundingBox(pos.x, pos.y, pos.z).deflate(0.001);

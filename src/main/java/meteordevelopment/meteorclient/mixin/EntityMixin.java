@@ -43,18 +43,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @ModifyExpressionValue(method = "updateFluidHeightAndDoFluidPushing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;getFlow(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/Vec3;"))
-    private Vec3 updateFluidHeightAndDoFluidPushingFluidStateGetVelocity(Vec3 vec) {
-        if ((Object) this != mc.player) return vec;
-
-        Velocity velocity = Modules.get().get(Velocity.class);
-        if (velocity.isActive() && velocity.liquids.get()) {
-            vec = vec.multiply(velocity.getHorizontal(velocity.liquidsHorizontal), velocity.getVertical(velocity.liquidsVertical), velocity.getHorizontal(velocity.liquidsHorizontal));
-        }
-
-        return vec;
-    }
-
     @Inject(method = "isInWater", at = @At(value = "HEAD"), cancellable = true)
     private void isInWater(CallbackInfoReturnable<Boolean> cir) {
         if ((Object) this != mc.player) return;
