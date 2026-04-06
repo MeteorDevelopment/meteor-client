@@ -59,6 +59,13 @@ public class HandView extends Module {
         .defaultValue(SwingMode.None)
         .build()
     );
+    
+    public final Setting<Boolean> swordSlash = sgGeneral.add(new BoolSetting.Builder()
+    	.name("sword-slash")
+    	.description("Replaces the sword swing animation with the offhand idle animation.")
+    	.defaultValue(false)
+    	.build()
+    );
 
     public final Setting<Integer> swingSpeed = sgGeneral.add(new IntSetting.Builder()
         .name("swing-speed")
@@ -229,6 +236,10 @@ public class HandView extends Module {
 
     public boolean disableFoodAnimation() {
         return isActive() && disableFoodAnimation.get();
+    }
+    
+    public boolean swordSlash() {
+        return isActive() && swordSlash.get();
     }
 
     public enum SwingMode {
