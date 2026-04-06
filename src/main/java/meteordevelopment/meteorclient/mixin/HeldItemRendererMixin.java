@@ -20,6 +20,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
+import net.minecraft.registry.tag.ItemTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -53,6 +54,9 @@ public abstract class HeldItemRendererMixin {
         Hand hand = MoreObjects.firstNonNull(mc.player.preferredHand, Hand.MAIN_HAND);
 
         if (module.isActive()) {
+            if (module.swordSlash() && hand == Hand.MAIN_HAND && mc.player.getMainHandStack().isIn(ItemTags.SWORDS)) {
+                return 0f;
+            }
             if (hand == Hand.OFF_HAND && !mc.player.getOffHandStack().isEmpty()) {
                 return swingProgress + module.offSwing.get().floatValue();
             }
@@ -63,7 +67,6 @@ public abstract class HeldItemRendererMixin {
 
         return swingProgress;
     }
-
     @ModifyReturnValue(method = "shouldSkipHandAnimationOnSwap", at = @At("RETURN"))
     private boolean modifySkipSwapAnimation(boolean original) {
         return original || Modules.get().get(HandView.class).skipSwapping();
