@@ -56,6 +56,7 @@ import net.minecraft.world.level.saveddata.maps.MapId;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
@@ -393,14 +394,19 @@ public class BetterTooltips extends Module {
         }
     }
 
-    public void applyCompactShulkerTooltip(List<ItemStack> stacks, Consumer<Component> textConsumer) {
+    public void applyCompactShulkerTooltip(List<Optional<ItemStackTemplate>> stacks, Consumer<Component> textConsumer) {
         Object2IntMap<Item> counts = new Object2IntOpenHashMap<>();
 
-        for (ItemStack item : stacks) {
-            if (item.isEmpty()) continue;
+        for (var opt : stacks) {
+            if (opt.isEmpty()) continue;
 
-            int count = counts.getInt(item.getItem());
-            counts.put(item.getItem(), count + item.getCount());
+            var stackItem = opt.get().item().value();
+            var stackCount = opt.get().count();
+
+            if (stackCount == 0) continue;
+
+            int count = counts.getInt(stackItem);
+            counts.put(stackItem, count + stackCount);
         }
 
         counts.keySet().stream().sorted(Comparator.comparingInt(value -> -counts.getInt(value))).limit(5).forEach(item -> {

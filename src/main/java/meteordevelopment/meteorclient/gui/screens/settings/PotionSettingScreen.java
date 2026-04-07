@@ -27,7 +27,8 @@ public class PotionSettingScreen extends WindowScreen {
         WTable table = add(theme.table()).expandX().widget();
 
         for (MyPotion potion : MyPotion.values()) {
-            table.add(theme.itemWithLabel(potion.potion, I18n.get(potion.potion.getItem().getDescriptionId())));
+            var stack = potion.potion.get();
+            table.add(theme.itemWithLabel(stack, I18n.get(stack.getItem().getDescriptionId())));
 
             WButton select = table.add(theme.button("Select")).widget();
             select.action = () -> {

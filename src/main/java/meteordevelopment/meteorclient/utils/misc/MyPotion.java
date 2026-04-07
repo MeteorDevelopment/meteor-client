@@ -13,6 +13,8 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 
+import java.util.function.Supplier;
+
 public enum MyPotion {
     Swiftness(Potions.SWIFTNESS, Items.NETHER_WART, Items.SUGAR),
     SwiftnessLong(Potions.LONG_SWIFTNESS, Items.NETHER_WART, Items.SUGAR, Items.REDSTONE),
@@ -66,11 +68,11 @@ public enum MyPotion {
     Weakness(Potions.WEAKNESS, Items.FERMENTED_SPIDER_EYE),
     WeaknessLong(Potions.LONG_WEAKNESS, Items.FERMENTED_SPIDER_EYE, Items.REDSTONE);
 
-    public final ItemStack potion;
+    public final Supplier<ItemStack> potion;
     public final Item[] ingredients;
 
     MyPotion(Holder<Potion> potion, Item... ingredients) {
-        this.potion = PotionContents.createItemStack(Items.POTION, potion);
+        this.potion = () -> PotionContents.createItemStack(Items.POTION, potion);
         this.ingredients = ingredients;
     }
 }

@@ -102,7 +102,8 @@ public abstract class GameRendererMixin implements IGameRenderer {
         return List.of(list.toArray(new PictureInPictureRenderer<?>[0]));
     }
 
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = {"ldc=hand"}))
+    // TODO(26.1)
+    /*@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = {"ldc=hand"}))
     private void onRenderLevel(DeltaTracker tickCounter, CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projection, @Local(ordinal = 1) Matrix4f position, @Local(name = "worldPartialTicks") float tickDelta, @Local(name = "bobStack") PoseStack matrixStack) {
         if (!Utils.canUpdate()) return;
 
@@ -148,7 +149,7 @@ public abstract class GameRendererMixin implements IGameRenderer {
         RenderSystem.getModelViewStack().popMatrix();
 
         Profiler.get().pop();
-    }
+    }*/
 
     @Inject(method = "renderLevel", at = @At("TAIL"))
     private void onRenderLevelTail(CallbackInfo ci) {

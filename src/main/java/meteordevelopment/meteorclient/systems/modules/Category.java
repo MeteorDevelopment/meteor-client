@@ -8,15 +8,17 @@ package meteordevelopment.meteorclient.systems.modules;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import java.util.function.Supplier;
+
 public class Category {
     public final String name;
-    public final ItemStack icon;
+    public final Supplier<ItemStack> icon;
     private final int nameHash;
 
-    public Category(String name, ItemStack icon) {
+    public Category(String name, Supplier<ItemStack> icon) {
         this.name = name;
         this.nameHash = name.hashCode();
-        this.icon = icon == null ? Items.AIR.getDefaultInstance() : icon;
+        this.icon = icon == null ? Items.AIR::getDefaultInstance : icon;
     }
 
     public Category(String name) {

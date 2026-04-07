@@ -16,9 +16,7 @@ import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class AutoReplenish extends Module {
@@ -86,8 +84,6 @@ public class AutoReplenish extends Module {
 
     public AutoReplenish() {
         super(Categories.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
-
-        Arrays.fill(items, Items.AIR.getDefaultInstance());
     }
 
     @Override

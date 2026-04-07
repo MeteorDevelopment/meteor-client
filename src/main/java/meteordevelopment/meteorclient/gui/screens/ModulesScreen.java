@@ -66,7 +66,7 @@ public class ModulesScreen extends TabScreen {
         w.spacing = 0;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(category.icon)).pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(category.icon.get())).pad(2);
         }
 
         c.add(w);

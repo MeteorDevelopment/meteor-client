@@ -346,18 +346,20 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private void potionW(WTable table, PotionSetting setting) {
+        var potion = setting.get().potion.get();
+
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
-        WItemWithLabel item = list.add(theme.itemWithLabel(setting.get().potion, I18n.get(setting.get().potion.getItem().getDescriptionId()))).widget();
+        WItemWithLabel item = list.add(theme.itemWithLabel(potion, I18n.get(potion.getItem().getDescriptionId()))).widget();
 
         WButton button = list.add(theme.button("Select")).expandCellX().widget();
         button.action = () -> {
             WidgetScreen screen = new PotionSettingScreen(theme, setting);
-            screen.onClosed(() -> item.set(setting.get().potion));
+            screen.onClosed(() -> item.set(potion));
 
             mc.setScreen(screen);
         };
 
-        reset(list, setting, () -> item.set(setting.get().potion));
+        reset(list, setting, () -> item.set(potion));
     }
 
     private void fontW(WTable table, FontFaceSetting setting) {

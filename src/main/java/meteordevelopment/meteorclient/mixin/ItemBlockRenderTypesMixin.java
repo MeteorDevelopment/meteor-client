@@ -16,9 +16,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ItemBlockRenderTypes.class)
+// TODO(26.1)
+//@Mixin(ItemBlockRenderTypes.class)
 public abstract class ItemBlockRenderTypesMixin {
-    @Inject(method = "getChunkRenderType", at = @At("HEAD"), cancellable = true)
+    /*@Inject(method = "getChunkRenderType", at = @At("HEAD"), cancellable = true)
     private static void onGetBlockLayer(BlockState state, CallbackInfoReturnable<ChunkSectionLayer> cir) {
         if (Modules.get() == null) return;
 
@@ -40,5 +41,5 @@ public abstract class ItemBlockRenderTypesMixin {
                 cir.setReturnValue(ChunkSectionLayer.TRANSLUCENT);
             }
         }
-    }
+    }*/
 }

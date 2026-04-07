@@ -298,8 +298,7 @@ public class ElytraFly extends Module {
         .name("replace-durability")
         .description("The durability threshold your elytra will be replaced at.")
         .defaultValue(2)
-        .range(1, Items.ELYTRA.components().getOrDefault(DataComponents.MAX_DAMAGE, 432) - 1)
-        .sliderRange(1, Items.ELYTRA.components().getOrDefault(DataComponents.MAX_DAMAGE, 432) - 1)
+        .sliderRange(1, 500)
         .visible(replace::get)
         .build()
     );

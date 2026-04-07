@@ -35,7 +35,6 @@ import net.minecraft.client.renderer.Projection;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -268,8 +267,7 @@ public class Utils {
         DataComponentMap components = itemStack.getComponents();
 
         if (components.has(DataComponents.CONTAINER)) {
-            ItemContainerContentsAccessor container = ((ItemContainerContentsAccessor) (Object) components.get(DataComponents.CONTAINER));
-            NonNullList<ItemStack> stacks = container.meteor$getItems();
+            var stacks = components.get(DataComponents.CONTAINER).allItemsCopyStream().collect(Collectors.toUnmodifiableList());
 
             for (int i = 0; i < stacks.size(); i++) {
                 if (i >= 0 && i < items.length) items[i] = stacks.get(i);
@@ -317,8 +315,12 @@ public class Utils {
     }
 
     public static boolean hasItems(ItemStack itemStack) {
-        ItemContainerContentsAccessor container = ((ItemContainerContentsAccessor) (Object) itemStack.get(DataComponents.CONTAINER));
-        if (container != null && !container.meteor$getItems().isEmpty()) return true;
+        var container = itemStack.get(DataComponents.CONTAINER);
+
+        if (container != null) {
+            var items = container.nonEmptyItems().iterator();
+            if (items.hasNext()) return true;
+        }
 
         TypedEntityData<BlockEntityType<?>> blockEntityData = itemStack.get(DataComponents.BLOCK_ENTITY_DATA);
         return blockEntityData != null && blockEntityData.contains("Items");
@@ -532,9 +534,7 @@ public class Utils {
     }
 
     public static boolean canOpenGui() {
-        if (canUpdate()) return mc.screen == null;
-
-        return mc.screen instanceof TitleScreen || mc.screen instanceof JoinMultiplayerScreen || mc.screen instanceof SelectWorldScreen;
+        return canUpdate() && mc.screen == null;
     }
 
     public static boolean canCloseGui() {
