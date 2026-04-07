@@ -29,8 +29,8 @@ import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -50,6 +50,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.item.component.SuspiciousStewEffects.Entry;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.level.saveddata.maps.MapId;
 
@@ -473,8 +474,12 @@ public class BetterTooltips extends Module {
     }
 
     private BannerTooltipComponent createBannerFromBannerPatternItem(ItemStack item) {
-        // I can't imagine getting the banner pattern from a banner pattern item would fail without some serious messing around
-        BannerPatternLayers component = new BannerPatternLayers.Builder().add(mc.player.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN).getOrThrow(item.get(DataComponents.PROVIDES_BANNER_PATTERNS)).get(0), DyeColor.WHITE).build();
+        HolderSet<BannerPattern> providedPatterns = item.get(DataComponents.PROVIDES_BANNER_PATTERNS);
+        if (providedPatterns == null || providedPatterns.size() == 0) {
+            return new BannerTooltipComponent(DyeColor.GRAY, BannerPatternLayers.EMPTY);
+        }
+
+        BannerPatternLayers component = new BannerPatternLayers.Builder().add(providedPatterns.get(0), DyeColor.WHITE).build();
         return new BannerTooltipComponent(DyeColor.GRAY, component);
     }
 
