@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.PlayerArgumentType;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 
 public class InventoryCommand extends Command {
     public InventoryCommand() {
@@ -18,7 +18,7 @@ public class InventoryCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(argument("player", PlayerArgumentType.create()).executes(context -> {
             Utils.screenToOpen = new InventoryScreen(PlayerArgumentType.get(context));
             return SINGLE_SUCCESS;

@@ -13,8 +13,8 @@ import meteordevelopment.meteorclient.commands.arguments.PlayerListEntryArgument
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 
 public class FriendsCommand extends Command {
     public FriendsCommand() {
@@ -22,7 +22,7 @@ public class FriendsCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(literal("add")
             .then(argument("player", PlayerListEntryArgumentType.create())
                 .executes(context -> {

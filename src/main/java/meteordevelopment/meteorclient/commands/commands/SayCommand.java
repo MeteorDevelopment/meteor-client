@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.mixin.ClientPacketListenerAccessor;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.network.chat.LastSeenMessagesTracker;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.SignedMessageBody;
@@ -27,7 +27,7 @@ public class SayCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(argument("message", StringArgumentType.greedyString()).executes(context -> {
             String msg = context.getArgument("message", String.class);
             Script script = MeteorStarscript.compile(msg);

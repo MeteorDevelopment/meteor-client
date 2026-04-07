@@ -11,9 +11,9 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.PlayerArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.AutoWasp;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 
 public class WaspCommand extends Command {
     private static final SimpleCommandExceptionType CANT_WASP_SELF = new SimpleCommandExceptionType(Component.literal("You cannot target yourself!"));
@@ -23,7 +23,7 @@ public class WaspCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         AutoWasp wasp = Modules.get().get(AutoWasp.class);
 
         builder.then(literal("reset").executes(context -> {

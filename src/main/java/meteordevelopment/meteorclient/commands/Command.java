@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.network.chat.Component;
 
@@ -40,26 +40,26 @@ public abstract class Command {
     }
 
     // Helper methods to painlessly infer the CommandSource generic type argument
-    protected static <T> RequiredArgumentBuilder<SharedSuggestionProvider, T> argument(final String name, final ArgumentType<T> type) {
+    protected static <T> RequiredArgumentBuilder<ClientSuggestionProvider, T> argument(final String name, final ArgumentType<T> type) {
         return RequiredArgumentBuilder.argument(name, type);
     }
 
-    protected static LiteralArgumentBuilder<SharedSuggestionProvider> literal(final String name) {
+    protected static LiteralArgumentBuilder<ClientSuggestionProvider> literal(final String name) {
         return LiteralArgumentBuilder.literal(name);
     }
 
-    public final void registerTo(CommandDispatcher<SharedSuggestionProvider> dispatcher) {
+    public final void registerTo(CommandDispatcher<ClientSuggestionProvider> dispatcher) {
         register(dispatcher, name);
         for (String alias : aliases) register(dispatcher, alias);
     }
 
-    public void register(CommandDispatcher<SharedSuggestionProvider> dispatcher, String name) {
-        LiteralArgumentBuilder<SharedSuggestionProvider> builder = LiteralArgumentBuilder.literal(name);
+    public void register(CommandDispatcher<ClientSuggestionProvider> dispatcher, String name) {
+        LiteralArgumentBuilder<ClientSuggestionProvider> builder = LiteralArgumentBuilder.literal(name);
         build(builder);
         dispatcher.register(builder);
     }
 
-    public abstract void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder);
+    public abstract void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder);
 
     public String getName() {
         return name;

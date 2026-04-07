@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.commands.arguments.MacroArgumentType;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.macros.Macro;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.arguments.TimeArgument;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class MacroCommand extends Command {
     List<ScheduledMacro> scheduledMacros = new ArrayList<>();
 
     @Override
-    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder
             .then(literal("clear")
                 .executes(context -> {

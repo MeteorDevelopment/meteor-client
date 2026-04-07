@@ -12,8 +12,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -30,7 +30,7 @@ public class DropCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         // Main Hand
         builder.then(literal("hand").executes(context -> drop(player -> player.drop(true))));
 
@@ -81,7 +81,7 @@ public class DropCommand extends Command {
         );
     }
 
-    private void dropItem(LocalPlayer player, CommandContext<SharedSuggestionProvider> context, int amount) throws CommandSyntaxException {
+    private void dropItem(LocalPlayer player, CommandContext<ClientSuggestionProvider> context, int amount) throws CommandSyntaxException {
         ItemStack stack = ItemArgument.getItem(context, "item").createItemStack(1);
         if (stack == null || stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
 

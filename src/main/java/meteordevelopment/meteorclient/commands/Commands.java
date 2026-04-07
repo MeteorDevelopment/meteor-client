@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
 
@@ -25,7 +26,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Commands {
     public static final List<Command> COMMANDS = new ArrayList<>();
-    public static CommandDispatcher<SharedSuggestionProvider> DISPATCHER = new CommandDispatcher<>();
+    public static CommandDispatcher<ClientSuggestionProvider> DISPATCHER = new CommandDispatcher<>();
 
     @PostInit(dependencies = PathManagers.class)
     public static void init() {

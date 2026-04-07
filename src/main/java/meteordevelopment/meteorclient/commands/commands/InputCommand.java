@@ -14,8 +14,8 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.KeyMappingAccessor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ public class InputCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         for (Pair<KeyMapping, String> keyBinding : holdKeys) {
             builder.then(literal(keyBinding.getSecond())
                 .executes(context -> {

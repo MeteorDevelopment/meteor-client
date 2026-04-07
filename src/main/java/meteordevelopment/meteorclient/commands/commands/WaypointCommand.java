@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.core.BlockPos;
 
 public class WaypointCommand extends Command {
@@ -24,7 +24,7 @@ public class WaypointCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(literal("list").executes(context -> {
             if (Waypoints.get().isEmpty()) error("No created waypoints.");
             else {
@@ -80,7 +80,7 @@ public class WaypointCommand extends Command {
         return "X: " + waypoint.pos.get().getX() + ", Y: " + waypoint.pos.get().getY() + ", Z: " + waypoint.pos.get().getZ();
     }
 
-    private int addWaypoint(CommandContext<SharedSuggestionProvider> context, boolean withCoords) {
+    private int addWaypoint(CommandContext<ClientSuggestionProvider> context, boolean withCoords) {
         if (mc.player == null) return -1;
 
         BlockPos pos = withCoords ? BlockPosArgumentType.getBlockPos(context, "pos") : mc.player.blockPosition().above(2);

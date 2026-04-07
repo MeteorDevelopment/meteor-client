@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.commands.arguments.CommandArgumentType;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -24,7 +25,7 @@ public class HelpCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(argument("command", CommandArgumentType.create()).executes(context -> {
             showHelp(CommandArgumentType.get(context));
             return SINGLE_SUCCESS;
@@ -51,14 +52,14 @@ public class HelpCommand extends Command {
     }
 
     private MutableComponent getUsageText(Command cmd) {
-        SharedSuggestionProvider source = mc.getConnection().getSuggestionsProvider();
-        CommandNode<SharedSuggestionProvider> root = Commands.DISPATCHER.getRoot();
-        CommandNode<SharedSuggestionProvider> node = root.getChild(cmd.getName());
+        ClientSuggestionProvider source = mc.getConnection().getSuggestionsProvider();
+        CommandNode<ClientSuggestionProvider> root = Commands.DISPATCHER.getRoot();
+        CommandNode<ClientSuggestionProvider> node = root.getChild(cmd.getName());
 
         MutableComponent usagesText = Component.literal("");
 
         if (node != null) {
-            Map<CommandNode<SharedSuggestionProvider>, String> usages = Commands.DISPATCHER.getSmartUsage(node, source);
+            Map<CommandNode<ClientSuggestionProvider>, String> usages = Commands.DISPATCHER.getSmartUsage(node, source);
 
             for (String usage : usages.values()) {
                 usagesText.append(Component.literal("\n " + cmd + " ").withStyle(ChatFormatting.GREEN)).append(Component.literal(usage).withStyle(ChatFormatting.GREEN));

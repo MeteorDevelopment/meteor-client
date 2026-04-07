@@ -15,6 +15,7 @@ import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.SharedSuggestionProvider;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,19 +30,23 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 @Mixin(CommandSuggestions.class)
 public abstract class CommandSuggestionsMixin {
     @Shadow
-    private ParseResults<SharedSuggestionProvider> currentParse;
+    private @Nullable ParseResults<ClientSuggestionProvider> currentParse;
+
     @Shadow
     @Final
     private EditBox input;
-    @Shadow
-    private boolean keepSuggestions;
-    @Shadow
-    private CompletableFuture<Suggestions> pendingSuggestions;
+
     @Shadow
     private CommandSuggestions.SuggestionsList suggestions;
 
     @Shadow
-    protected abstract void updateUsageInfo(final ParseResults<ClientSuggestionProvider> currentParse, final Suggestions suggestions);
+    private boolean keepSuggestions;
+
+    @Shadow
+    private @Nullable CompletableFuture<Suggestions> pendingSuggestions;
+
+    @Shadow
+    protected abstract void updateUsageInfo(ParseResults<ClientSuggestionProvider> currentParse, Suggestions suggestions);
 
     @Inject(method = "updateCommandInfo",
         at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z", remap = false),
@@ -61,9 +66,9 @@ public abstract class CommandSuggestionsMixin {
             int cursor = input.getCursorPosition();
             if (cursor >= length && (this.suggestions == null || !this.keepSuggestions)) {
                 this.pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(this.currentParse, cursor);
-                this.pendingSuggestions.thenRun(() -> {
+                this.pendingSuggestions.thenAccept(suggestionResult -> {
                     if (this.pendingSuggestions.isDone()) {
-                        /*this.updateUsageInfo();*/
+                        this.updateUsageInfo(this.currentParse, suggestionResult);
                     }
                 });
             }

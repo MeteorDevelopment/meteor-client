@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.RegistryEntryReferenceArgumentType;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -32,7 +32,7 @@ public class EnchantCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(literal("one").then(argument("enchantment", RegistryEntryReferenceArgumentType.enchantment())
             .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
                 one(context, enchantment -> context.getArgument("level", Integer.class));
@@ -84,7 +84,7 @@ public class EnchantCommand extends Command {
         })));
     }
 
-    private void one(CommandContext<SharedSuggestionProvider> context, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
+    private void one(CommandContext<ClientSuggestionProvider> context, ToIntFunction<Enchantment> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
         Holder.Reference<Enchantment> enchantment = RegistryEntryReferenceArgumentType.getEnchantment(context, "enchantment");
