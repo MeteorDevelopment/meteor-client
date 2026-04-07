@@ -25,11 +25,11 @@ import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class OutlineRenderCommandQueue extends SubmitNodeStorage {
@@ -86,11 +86,7 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
 
         @Override
         public void submitBlockModel(PoseStack poseStack, RenderType renderType, List<BlockStateModelPart> modelParts, int[] tintLayers, int lightCoords, int overlayCoords, int outlineColor) {
-            // TODO(26.1)
-            r = Color.toRGBAR(color) / 255f;
-            g = Color.toRGBAG(color) / 255f;
-            b = Color.toRGBAB(color) / 255f;
-
+            Arrays.fill(tintLayers, color);
             super.submitBlockModel(poseStack, renderType, modelParts, tintLayers, lightCoords, overlayCoords, outlineColor);
         }
 
