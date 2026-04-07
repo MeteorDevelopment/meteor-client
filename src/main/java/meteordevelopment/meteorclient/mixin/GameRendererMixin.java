@@ -15,14 +15,12 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IGameRenderer;
-import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.render.Zoom;
-import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderer;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
@@ -36,10 +34,9 @@ import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.fog.FogRenderer;
-import net.minecraft.client.renderer.state.gui.GuiRenderState;
+import net.minecraft.client.renderer.state.GameRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.profiling.Profiler;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.joml.Matrix4f;
@@ -61,12 +58,6 @@ public abstract class GameRendererMixin implements IGameRenderer {
     @Shadow
     @Final
     private Minecraft minecraft;
-
-    @Shadow
-    public abstract void pick(float tickDelta);
-
-    @Shadow
-    public abstract void resetData();
 
     @Shadow
     @Final
@@ -101,7 +92,7 @@ public abstract class GameRendererMixin implements IGameRenderer {
 
     @Shadow
     @Final
-    GuiRenderState guiRenderState;
+    private GameRenderState gameRenderState;
 
     @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/renderer/state/gui/GuiRenderState;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;Ljava/util/List;)V"))
     private List<PictureInPictureRenderer<?>> meteor$addSpecialRenderers(List<PictureInPictureRenderer<?>> list) {
@@ -167,11 +158,11 @@ public abstract class GameRendererMixin implements IGameRenderer {
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/render/GuiRenderer;render(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V", shift = At.Shift.AFTER))
     private void onRenderGui(DeltaTracker deltaTracker, boolean advanceGameTime, CallbackInfo ci) {
         if (minecraft.screen instanceof WidgetScreen widgetScreen) {
-            guiRenderState.reset();
+            gameRenderState.guiRenderState.reset();
             var mouseX = (int) minecraft.mouseHandler.getScaledXPos(minecraft.getWindow());
             var mouseY = (int) minecraft.mouseHandler.getScaledYPos(minecraft.getWindow());
 
-            var context = new GuiGraphicsExtractor(minecraft, guiRenderState, mouseX, mouseY);
+            var context = new GuiGraphicsExtractor(minecraft, gameRenderState.guiRenderState, mouseX, mouseY);
 
             widgetScreen.renderCustom(context, mouseX, mouseY, deltaTracker.getGameTimeDeltaTicks());
 
@@ -190,60 +181,6 @@ public abstract class GameRendererMixin implements IGameRenderer {
     @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F", ordinal = 0))
     private float applyCameraTransformationsMathHelperLerpProxy(float original) {
         return Modules.get().get(NoRender.class).noNausea() ? 0 : original;
-    }
-
-    // Freecam
-
-    @Unique
-    private boolean freecamSet = false;
-
-    @Inject(method = "pick", at = @At("HEAD"), cancellable = true)
-    private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo ci) {
-        Freecam freecam = Modules.get().get(Freecam.class);
-        boolean highwayBuilder = Modules.get().isActive(HighwayBuilder.class);
-
-        if ((freecam.isActive() || highwayBuilder) && minecraft.getCameraEntity() != null && !freecamSet) {
-            ci.cancel();
-            Entity cameraE = minecraft.getCameraEntity();
-
-            double x = cameraE.getX();
-            double y = cameraE.getY();
-            double z = cameraE.getZ();
-            double lastX = cameraE.xo;
-            double lastY = cameraE.yo;
-            double lastZ = cameraE.zo;
-            float yaw = cameraE.getYRot();
-            float pitch = cameraE.getXRot();
-            float lastYaw = cameraE.yRotO;
-            float lastPitch = cameraE.xRotO;
-
-            if (highwayBuilder) {
-                cameraE.setYRot(mainCamera.yRot());
-                cameraE.setXRot(mainCamera.xRot());
-            } else {
-                ((IVec3) cameraE.position()).meteor$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
-                cameraE.xo = freecam.prevPos.x;
-                cameraE.yo = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
-                cameraE.zo = freecam.prevPos.z;
-                cameraE.setYRot(freecam.yaw);
-                cameraE.setXRot(freecam.pitch);
-                cameraE.yRotO = freecam.lastYaw;
-                cameraE.xRotO = freecam.lastPitch;
-            }
-
-            freecamSet = true;
-            pick(tickDelta);
-            freecamSet = false;
-
-            ((IVec3) cameraE.position()).meteor$set(x, y, z);
-            cameraE.xo = lastX;
-            cameraE.yo = lastY;
-            cameraE.zo = lastZ;
-            cameraE.setYRot(yaw);
-            cameraE.setXRot(pitch);
-            cameraE.yRotO = lastYaw;
-            cameraE.xRotO = lastPitch;
-        }
     }
 
     @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)

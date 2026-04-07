@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraft;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
@@ -31,6 +32,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.player.Multitask;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CPSUtils;
@@ -44,6 +46,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -106,6 +109,19 @@ public abstract class MinecraftMixin implements IMinecraft {
 
     @Shadow
     protected abstract void continueAttack(boolean down);
+
+    @Unique
+    private boolean freecamSet = false;
+
+    @Final
+    @Shadow
+    public GameRenderer gameRenderer;
+
+    @Shadow
+    protected abstract void pick(float partialTicks);
+
+    @Shadow
+    public abstract Entity getCameraEntity();
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
@@ -332,5 +348,55 @@ public abstract class MinecraftMixin implements IMinecraft {
     @Override
     public void meteor$setFramebuffer(RenderTarget framebuffer) {
         this.mainRenderTarget = framebuffer;
+    }
+
+    // Freecam
+    @Inject(method = "pick", at = @At("HEAD"), cancellable = true)
+    private void updateTargetedEntityInvoke(float partialTicks, CallbackInfo ci) {
+        Freecam freecam = Modules.get().get(Freecam.class);
+        boolean highwayBuilder = Modules.get().isActive(HighwayBuilder.class);
+
+        if ((freecam.isActive() || highwayBuilder) && this.getCameraEntity() != null && !freecamSet) {
+            ci.cancel();
+            Entity cameraE = this.getCameraEntity();
+
+            double x = cameraE.getX();
+            double y = cameraE.getY();
+            double z = cameraE.getZ();
+            double lastX = cameraE.xo;
+            double lastY = cameraE.yo;
+            double lastZ = cameraE.zo;
+            float yaw = cameraE.getYRot();
+            float pitch = cameraE.getXRot();
+            float lastYaw = cameraE.yRotO;
+            float lastPitch = cameraE.xRotO;
+
+            if (highwayBuilder) {
+                cameraE.setYRot(this.gameRenderer.getMainCamera().yRot());
+                cameraE.setXRot(this.gameRenderer.getMainCamera().xRot());
+            } else {
+                ((IVec3) cameraE.position()).meteor$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
+                cameraE.xo = freecam.prevPos.x;
+                cameraE.yo = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
+                cameraE.zo = freecam.prevPos.z;
+                cameraE.setYRot(freecam.yaw);
+                cameraE.setXRot(freecam.pitch);
+                cameraE.yRotO = freecam.lastYaw;
+                cameraE.xRotO = freecam.lastPitch;
+            }
+
+            freecamSet = true;
+            pick(partialTicks);
+            freecamSet = false;
+
+            ((IVec3) cameraE.position()).meteor$set(x, y, z);
+            cameraE.xo = lastX;
+            cameraE.yo = lastY;
+            cameraE.zo = lastZ;
+            cameraE.setYRot(yaw);
+            cameraE.setXRot(pitch);
+            cameraE.yRotO = lastYaw;
+            cameraE.xRotO = lastPitch;
+        }
     }
 }
