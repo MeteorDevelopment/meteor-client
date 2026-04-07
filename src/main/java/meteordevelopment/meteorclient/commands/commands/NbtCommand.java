@@ -30,9 +30,9 @@ import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.commands.data.DataAccessor;
 import net.minecraft.server.commands.data.EntityDataAccessor;
-import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -64,7 +64,9 @@ public class NbtCommand extends Command {
                 DataComponentMap newComponents = ComponentMapArgumentType.getComponentMap(ctx, "component");
 
                 DataComponentMap testComponents = DataComponentMap.composite(itemComponents, newComponents);
-                DataResult<Unit> dataResult = ItemStack.validateComponents(testComponents);
+                ItemStack testStack = stack.copy();
+                testStack.applyComponents(testComponents);
+                DataResult<ItemStack> dataResult = ItemStack.validateStrict(testStack);
                 dataResult.getOrThrow(MALFORMED_ITEM_EXCEPTION::create);
 
                 stack.applyComponents(testComponents);
@@ -82,11 +84,13 @@ public class NbtCommand extends Command {
                 DataComponentMap components = ComponentMapArgumentType.getComponentMap(ctx, "component");
                 PatchedDataComponentMap stackComponents = (PatchedDataComponentMap) stack.getComponents();
 
-                DataResult<Unit> dataResult = ItemStack.validateComponents(components);
+                ItemStack testStack = stack.copy();
+                testStack.applyComponents(components);
+                DataResult<ItemStack> dataResult = ItemStack.validateStrict(testStack);
                 dataResult.getOrThrow(MALFORMED_ITEM_EXCEPTION::create);
 
                 DataComponentPatch.Builder changesBuilder = DataComponentPatch.builder();
-                Set<DataComponentType<?>> types = stackComponents.keySet();
+                Set<DataComponentType<?>> types = new HashSet<>(stackComponents.keySet());
 
                 //set changes
                 for (TypedDataComponent<?> entry : components) {
