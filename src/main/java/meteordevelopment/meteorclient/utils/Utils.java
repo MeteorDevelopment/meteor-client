@@ -28,9 +28,6 @@ import meteordevelopment.meteorclient.utils.world.ChunkIterator;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.ResourceLoadStateTracker;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
-import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.renderer.Projection;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.core.BlockPos;
@@ -267,7 +264,7 @@ public class Utils {
         DataComponentMap components = itemStack.getComponents();
 
         if (components.has(DataComponents.CONTAINER)) {
-            var stacks = components.get(DataComponents.CONTAINER).allItemsCopyStream().collect(Collectors.toUnmodifiableList());
+            var stacks = components.get(DataComponents.CONTAINER).allItemsCopyStream().toList();
 
             for (int i = 0; i < stacks.size(); i++) {
                 if (i >= 0 && i < items.length) items[i] = stacks.get(i);
@@ -289,7 +286,7 @@ public class Utils {
                     switch (ItemStackWithSlot.CODEC.parse(mc.player.registryAccess().createSerializationContext(NbtOps.INSTANCE), compound.get())) {
                         case DataResult.Success<ItemStackWithSlot> success ->
                             items[slot.get()] = success.value().stack();
-                        case DataResult.Error<ItemStackWithSlot> ignored -> items[slot.get()] = ItemStack.EMPTY;
+                        case DataResult.Error<ItemStackWithSlot> _ -> items[slot.get()] = ItemStack.EMPTY;
                         default -> throw new MatchException(null, null);
                     }
                 }

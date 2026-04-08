@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.commands.arguments.ModuleArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
-import net.minecraft.commands.SharedSuggestionProvider;
 
 public class BindCommand extends Command {
     public BindCommand() {

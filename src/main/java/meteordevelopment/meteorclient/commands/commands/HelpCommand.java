@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.commands.arguments.CommandArgumentType;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 

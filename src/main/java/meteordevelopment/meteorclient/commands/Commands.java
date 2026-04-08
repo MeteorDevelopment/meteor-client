@@ -16,7 +16,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.ArrayList;
 import java.util.Comparator;

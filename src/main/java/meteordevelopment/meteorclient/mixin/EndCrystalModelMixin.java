@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import net.minecraft.client.model.object.crystal.EndCrystalModel;
 import net.minecraft.client.renderer.entity.state.EndCrystalRenderState;
 import net.minecraft.util.Mth;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -30,7 +31,7 @@ public abstract class EndCrystalModelMixin {
 
     // Chams - Rotation speed
 
-    @ModifyExpressionValue(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;ageInTicks:F", ordinal = 0))
+    @ModifyExpressionValue(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/entity/state/EndCrystalRenderState;ageInTicks:F", ordinal = 0, opcode = Opcodes.GETFIELD))
     private float modifySpeed(float original) {
         Chams module = Modules.get().get(Chams.class);
         if (!module.isActive() || !module.crystals.get()) return original;

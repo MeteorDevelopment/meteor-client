@@ -107,7 +107,7 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
         return true;
     }
 
-    @ModifyExpressionValue(method = "addSkyPass", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;doesMobEffectBlockSky:Z"))
+    @ModifyExpressionValue(method = "addSkyPass", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;doesMobEffectBlockSky:Z", opcode = Opcodes.GETFIELD))
     private boolean modifyMobEffectBlocksSky(boolean original) {
         if (noRender.noBlindness() || noRender.noDarkness()) return false;
         return original;

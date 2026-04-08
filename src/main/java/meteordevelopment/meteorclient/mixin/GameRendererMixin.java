@@ -104,7 +104,7 @@ public abstract class GameRendererMixin implements IGameRenderer {
     }
 
     @Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = {"ldc=hand"}))
-    private void onRenderLevel(DeltaTracker tickCounter, CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projection, @Local(name = "modelViewMatrix") Matrix4fc position, @Local(name = "worldPartialTicks") float tickDelta, @Local(name = "bobStack") PoseStack matrixStack) {
+    private void onRenderLevel(DeltaTracker deltaTracker, CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projectionMatrix, @Local(name = "modelViewMatrix") Matrix4fc modelViewMatrix, @Local(name = "worldPartialTicks") float worldPartialTicks, @Local(name = "bobStack") PoseStack bobStack) {
         if (!Utils.canUpdate()) return;
 
         Profiler.get().push(MeteorClient.MOD_ID + "_render");
@@ -115,11 +115,11 @@ public abstract class GameRendererMixin implements IGameRenderer {
             renderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES, MeteorRenderPipelines.WORLD_COLORED);
         if (depthRenderer == null)
             depthRenderer = new Renderer3D(MeteorRenderPipelines.WORLD_COLORED_LINES_DEPTH, MeteorRenderPipelines.WORLD_COLORED_DEPTH);
-        Render3DEvent event = Render3DEvent.get(matrixStack, renderer, depthRenderer, tickDelta, mainCamera.position().x, mainCamera.position().y, mainCamera.position().z);
+        Render3DEvent event = Render3DEvent.get(bobStack, renderer, depthRenderer, worldPartialTicks, mainCamera.position().x, mainCamera.position().y, mainCamera.position().z);
 
         // Update model view matrix
 
-        RenderSystem.getModelViewStack().pushMatrix().mul(position);
+        RenderSystem.getModelViewStack().pushMatrix().mul(modelViewMatrix);
 
         matrices.pushPose();
         bobHurt(this.gameRenderState.levelRenderState.cameraRenderState, matrices);
@@ -133,17 +133,17 @@ public abstract class GameRendererMixin implements IGameRenderer {
 
         // Call utility classes (apply bob correction when Iris shaders are active)
 
-        Matrix4fc correctedPosition = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(position).mul(inverseBob) : position;
-        RenderUtils.updateScreenCenter(projection, correctedPosition);
-        NametagUtils.onRender(position);
+        Matrix4fc correctedPosition = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(modelViewMatrix).mul(inverseBob) : modelViewMatrix;
+        RenderUtils.updateScreenCenter(projectionMatrix, correctedPosition);
+        NametagUtils.onRender(modelViewMatrix);
 
         // Render
 
         renderer.begin();
         depthRenderer.begin();
         MeteorClient.EVENT_BUS.post(event);
-        renderer.render(matrixStack);
-        depthRenderer.render(matrixStack);
+        renderer.render(bobStack);
+        depthRenderer.render(bobStack);
 
         // Revert model view matrix
 

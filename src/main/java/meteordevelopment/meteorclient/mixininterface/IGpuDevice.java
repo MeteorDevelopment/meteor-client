@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderPassBackend;
 
 public interface IGpuDevice {
