@@ -65,6 +65,7 @@
     "CommandSuggestionsMixin",
     "CompassAngleStateMixin",
     "ComponentMixin",
+    "CompressionDecoderMixin",
     "ConnectionAccessor",
     "ConnectionMixin",
     "ConnectScreenMixin",
