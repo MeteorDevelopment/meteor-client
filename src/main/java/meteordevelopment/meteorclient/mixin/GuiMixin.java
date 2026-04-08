@@ -6,52 +6,24 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.render.Render2DEvent;
-import meteordevelopment.meteorclient.mixininterface.IGameRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.Objective;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 @Mixin(Gui.class)
 public abstract class GuiMixin {
-    @Shadow
-    public abstract void onDisconnected();
-
-    @Inject(method = "extractRenderState", at = @At("TAIL"))
-    private void onExtractRenderState(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        ((IGameRenderer) mc.gameRenderer).meteor$flushGuiState();
-        graphics.nextStratum();
-
-        Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
-
-        Utils.unscaledProjection();
-
-        MeteorClient.EVENT_BUS.post(Render2DEvent.get(graphics, graphics.guiWidth(), graphics.guiWidth(), deltaTracker.getGameTimeDeltaPartialTick(true)));
-
-        graphics.nextStratum();
-        Utils.scaledProjection();
-
-        Profiler.get().pop();
-    }
-
     @Inject(method = "extractEffects", at = @At("HEAD"), cancellable = true)
     private void onExtractStatusEffectOverlay(CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noPotionIcons()) ci.cancel();

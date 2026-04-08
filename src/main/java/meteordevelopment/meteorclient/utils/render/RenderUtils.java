@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3x2fStack;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Vector4f;
 
 import java.util.List;
@@ -70,7 +71,7 @@ public class RenderUtils {
         drawItem(graphics, itemStack, x, y, scale, overlay, null, true);
     }
 
-    public static void updateScreenCenter(Matrix4f projection, Matrix4f view) {
+    public static void updateScreenCenter(Matrix4fc projection, Matrix4fc view) {
         RenderUtils.projection.set(projection);
 
         Matrix4f invProjection = new Matrix4f(projection).invert();

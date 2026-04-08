@@ -30,7 +30,7 @@ public class NametagUtils {
     private NametagUtils() {
     }
 
-    public static void onRender(Matrix4f modelView) {
+    public static void onRender(Matrix4fc modelView) {
         model.set(modelView);
         NametagUtils.projection.set(RenderUtils.projection);
 

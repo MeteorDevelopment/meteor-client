@@ -97,13 +97,13 @@ public abstract class CameraMixin implements ICamera {
         }
     }
 
+    @ModifyReturnValue(method = "calculateFov", at = @At("RETURN"))
+    private float modifyFov(float original) {
+        return MeteorClient.EVENT_BUS.post(GetFovEvent.get(original)).fov;
+    }
+
     @Override
     public void meteor$setRot(double yaw, double pitch) {
         setRotation((float) yaw, (float) Mth.clamp(pitch, -90, 90));
-    }
-
-    @ModifyReturnValue(method = "getFov", at = @At("RETURN"))
-    private float modifyFov(float original) {
-        return MeteorClient.EVENT_BUS.post(GetFovEvent.get(original)).fov;
     }
 }

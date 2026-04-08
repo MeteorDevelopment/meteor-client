@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import com.mojang.blaze3d.systems.RenderPass;
-import meteordevelopment.meteorclient.mixininterface.IGpuDevice;
 import com.mojang.blaze3d.opengl.GlDevice;
+import com.mojang.blaze3d.systems.RenderPassBackend;
+import meteordevelopment.meteorclient.mixininterface.IGpuDevice;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -42,9 +42,9 @@ public abstract class GlDeviceMixin implements IGpuDevice {
 
     @Deprecated
     @Override
-    public void meteor$onCreateRenderPass(RenderPass pass) {
+    public void meteor$onCreateRenderPass(RenderPassBackend backend) {
         if (set) {
-            pass.enableScissor(x, y, width, height);
+            backend.enableScissor(x, y, width, height);
         }
     }
 }

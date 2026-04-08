@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.GpuDeviceBackend;
-import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.blaze3d.systems.RenderPassBackend;
 import meteordevelopment.meteorclient.mixininterface.IGpuDevice;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,7 +31,7 @@ public abstract class GpuDeviceMixin implements IGpuDevice {
 
     @SuppressWarnings("deprecation")
     @Override
-    public void meteor$onCreateRenderPass(RenderPass pass) {
-        ((IGpuDevice) backend).meteor$onCreateRenderPass(pass);
+    public void meteor$onCreateRenderPass(RenderPassBackend backend) {
+        ((IGpuDevice) this.backend).meteor$onCreateRenderPass(backend);
     }
 }

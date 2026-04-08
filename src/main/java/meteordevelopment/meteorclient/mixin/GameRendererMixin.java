@@ -11,6 +11,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.MixinPlugin;
+import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
@@ -102,9 +103,8 @@ public abstract class GameRendererMixin implements IGameRenderer {
         return List.of(list.toArray(new PictureInPictureRenderer<?>[0]));
     }
 
-    // TODO(26.1)
-    /*@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = {"ldc=hand"}))
-    private void onRenderLevel(DeltaTracker tickCounter, CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projection, @Local(ordinal = 1) Matrix4f position, @Local(name = "worldPartialTicks") float tickDelta, @Local(name = "bobStack") PoseStack matrixStack) {
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = {"ldc=hand"}))
+    private void onRenderLevel(DeltaTracker tickCounter, CallbackInfo ci, @Local(name = "projectionMatrix") Matrix4f projection, @Local(name = "modelViewMatrix") Matrix4fc position, @Local(name = "worldPartialTicks") float tickDelta, @Local(name = "bobStack") PoseStack matrixStack) {
         if (!Utils.canUpdate()) return;
 
         Profiler.get().push(MeteorClient.MOD_ID + "_render");
@@ -122,9 +122,10 @@ public abstract class GameRendererMixin implements IGameRenderer {
         RenderSystem.getModelViewStack().pushMatrix().mul(position);
 
         matrices.pushPose();
-        bobHurt(matrices, mainCamera.getCameraEntityPartialTicks(tickCounter));
-        if (minecraft.options.bobView().get())
-            bobView(matrices, mainCamera.getCameraEntityPartialTicks(tickCounter));
+        bobHurt(this.gameRenderState.levelRenderState.cameraRenderState, matrices);
+        if (minecraft.options.bobView().get()) {
+            bobView(this.gameRenderState.levelRenderState.cameraRenderState, matrices);
+        }
 
         Matrix4f inverseBob = new Matrix4f(matrices.last().pose()).invert();
         RenderSystem.getModelViewStack().mul(inverseBob);
@@ -132,7 +133,7 @@ public abstract class GameRendererMixin implements IGameRenderer {
 
         // Call utility classes (apply bob correction when Iris shaders are active)
 
-        Matrix4f correctedPosition = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(position).mul(inverseBob) : position;
+        Matrix4fc correctedPosition = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(position).mul(inverseBob) : position;
         RenderUtils.updateScreenCenter(projection, correctedPosition);
         NametagUtils.onRender(position);
 
@@ -149,7 +150,23 @@ public abstract class GameRendererMixin implements IGameRenderer {
         RenderSystem.getModelViewStack().popMatrix();
 
         Profiler.get().pop();
-    }*/
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V", args = "ldc=hand"))
+    private void onRender2D(DeltaTracker deltaTracker, boolean advanceGameTime, CallbackInfo ci) {
+        if (!Utils.canUpdate()) return;
+
+        Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
+
+        Utils.unscaledProjection();
+
+        GuiGraphicsExtractor graphics = new GuiGraphicsExtractor(MeteorClient.mc, this.gameRenderState.guiRenderState, 0, 0);
+        MeteorClient.EVENT_BUS.post(Render2DEvent.get(graphics, graphics.guiWidth(), graphics.guiWidth(), deltaTracker.getGameTimeDeltaPartialTick(true)));
+
+        Utils.scaledProjection();
+
+        Profiler.get().pop();
+    }
 
     @Inject(method = "renderLevel", at = @At("TAIL"))
     private void onRenderLevelTail(CallbackInfo ci) {
