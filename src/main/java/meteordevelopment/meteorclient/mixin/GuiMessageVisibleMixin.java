@@ -30,7 +30,7 @@ public abstract class GuiMessageVisibleMixin implements IGuiMessageVisible {
     public String meteor$getText() {
         StringBuilder sb = new StringBuilder();
 
-        content.accept((index, style, codePoint) -> {
+        content.accept((_, _, codePoint) -> {
             sb.appendCodePoint(codePoint);
             return true;
         });

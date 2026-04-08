@@ -92,7 +92,7 @@ public class Bounce extends ElytraFlightMode {
 
     @Override
     public void onPacketSend(PacketEvent.Send event) {
-        if (event.packet instanceof ServerboundPlayerCommandPacket && ((ServerboundPlayerCommandPacket) event.packet).getAction().equals(ServerboundPlayerCommandPacket.Action.START_FALL_FLYING) && !elytraFly.sprint.get()) {
+        if (event.packet instanceof ServerboundPlayerCommandPacket playerCommandPacket && playerCommandPacket.getAction().equals(ServerboundPlayerCommandPacket.Action.START_FALL_FLYING) && !elytraFly.sprint.get()) {
             mc.player.setSprinting(true);
         }
     }

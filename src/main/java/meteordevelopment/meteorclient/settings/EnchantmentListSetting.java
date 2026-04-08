@@ -114,7 +114,7 @@ public class EnchantmentListSetting extends Setting<Set<ResourceKey<Enchantment>
                 .map(field -> {
                     try {
                         return field.get(null);
-                    } catch (IllegalAccessException e) {
+                    } catch (IllegalAccessException _) {
                         return null;
                     }
                 }).filter(Objects::nonNull)

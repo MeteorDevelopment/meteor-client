@@ -34,7 +34,7 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
 
     @Override
     protected Map<Block, T> parseImpl(String str) {
-        return new HashMap<>(0);
+        return HashMap.newHashMap(0);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
         private IGetter<T> defaultData;
 
         public Builder() {
-            super(new HashMap<>(0));
+            super(HashMap.newHashMap(0));
         }
 
         public Builder<T> defaultData(IGetter<T> defaultData) {

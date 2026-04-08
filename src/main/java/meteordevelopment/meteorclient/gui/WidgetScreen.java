@@ -358,8 +358,8 @@ public abstract class WidgetScreen extends Screen {
     private void loopWidgets(WWidget widget, Consumer<WWidget> action) {
         action.accept(widget);
 
-        if (widget instanceof WContainer) {
-            for (Cell<?> cell : ((WContainer) widget).cells) loopWidgets(cell.widget(), action);
+        if (widget instanceof WContainer wContainer) {
+            for (Cell<?> cell : wContainer.cells) loopWidgets(cell.widget(), action);
         }
     }
 

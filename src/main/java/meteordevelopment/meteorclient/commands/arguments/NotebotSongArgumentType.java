@@ -45,7 +45,7 @@ public class NotebotSongArgumentType implements ArgumentType<Path> {
                     .map(path -> path.getFileName().toString()),
                 builder
             );
-        } catch (IOException e) {
+        } catch (IOException _) {
             return Suggestions.empty();
         }
     }

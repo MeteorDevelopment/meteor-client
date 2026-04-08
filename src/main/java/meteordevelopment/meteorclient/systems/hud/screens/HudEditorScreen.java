@@ -358,7 +358,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
             x += incX * 2;
             y += incY * 2;
 
-        } while (!(x >= destX) || !(y >= destY));
+        } while (x < destX || y < destY);
     }
 
     public static boolean isOpen() {

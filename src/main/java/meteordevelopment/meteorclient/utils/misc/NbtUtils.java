@@ -33,12 +33,12 @@ public class NbtUtils {
 
     public static <K, V extends ISerializable<?>> CompoundTag mapToTag(Map<K, V> map) {
         CompoundTag tag = new CompoundTag();
-        for (K key : map.keySet()) tag.put(key.toString(), map.get(key).toTag());
+        for (var entry : map.entrySet()) tag.put(entry.getKey().toString(), entry.getValue().toTag());
         return tag;
     }
 
     public static <K, V> Map<K, V> mapFromTag(CompoundTag tag, ToKey<K> toKey, ToValue<V> toValue) {
-        Map<K, V> map = new HashMap<>(tag.size());
+        Map<K, V> map = HashMap.newHashMap(tag.size());
         for (String key : tag.keySet()) map.put(toKey.toKey(key), toValue.toValue(tag.get(key)));
         return map;
     }

@@ -24,6 +24,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -164,7 +165,7 @@ public class AutoWasp extends Module {
 
         Vec3 targetPos = target.position().add(offset.get().x, offset.get().y, offset.get().z);
 
-        if (predictMovement.get()) targetPos.add(Player.collideBoundingBox(target, target.getDeltaMovement(),
+        if (predictMovement.get()) targetPos.add(Entity.collideBoundingBox(target, target.getDeltaMovement(),
             target.getBoundingBox(), mc.level, mc.level.getEntityCollisions(target, target.getBoundingBox().expandTowards(target.getDeltaMovement()))));
 
         if (avoidLanding.get()) {

@@ -20,7 +20,7 @@ public abstract class AsmTransformer {
 
     protected MethodNode getMethod(ClassNode klass, MethodInfo methodInfo) {
         for (MethodNode method : klass.methods) {
-            if (methodInfo.equals(method)) return method;
+            if (methodInfo.matches(method)) return method;
         }
 
         return null;

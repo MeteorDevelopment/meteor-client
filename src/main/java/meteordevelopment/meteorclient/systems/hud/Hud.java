@@ -47,7 +47,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         .name("custom-font")
         .description("Text will use custom font.")
         .defaultValue(true)
-        .onChanged(aBoolean -> {
+        .onChanged(_ -> {
             for (HudElement element : elements) element.onFontChanged();
         })
         .build()

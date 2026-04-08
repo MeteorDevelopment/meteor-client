@@ -157,7 +157,7 @@ public class AutoCity extends Module {
 
         if (support.get()) {
             BlockPos supportPos = targetPos.below();
-            if (!(PlayerUtils.squaredDistanceTo(supportPos) > Math.pow(placeRange.get(), 2))) {
+            if (PlayerUtils.squaredDistanceTo(supportPos) <= Math.pow(placeRange.get(), 2)) {
                 BlockUtils.place(supportPos, InvUtils.findInHotbar(Items.OBSIDIAN), rotate.get(), 0, true);
             }
         }
@@ -213,8 +213,8 @@ public class AutoCity extends Module {
 
         Direction direction = BlockUtils.getDirection(targetPos);
         if (!done)
-            mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, targetPos, direction, sequence));
-        mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, targetPos, direction, sequence));
+            mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, targetPos, direction, sequence));
+        mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, targetPos, direction, sequence));
 
         if (swingHand.get()) mc.player.swing(InteractionHand.MAIN_HAND);
         else mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));

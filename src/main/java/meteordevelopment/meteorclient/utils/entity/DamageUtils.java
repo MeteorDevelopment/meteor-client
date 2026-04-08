@@ -43,6 +43,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -167,7 +168,7 @@ public class DamageUtils {
 
     public static float getAttackDamage(LivingEntity attacker, Entity target, ItemStack weapon) {
         AttributeInstance original = attacker.getAttribute(Attributes.ATTACK_DAMAGE);
-        AttributeInstance copy = new AttributeInstance(Attributes.ATTACK_DAMAGE, o -> {
+        AttributeInstance copy = new AttributeInstance(Attributes.ATTACK_DAMAGE, _ -> {
         });
 
         copy.setBaseValue(original.getBaseValue());
@@ -255,7 +256,7 @@ public class DamageUtils {
 
         // Under the surface
         BlockHitResult raycastResult = mc.level.clip(new ClipContext(entity.position(), new Vec3(entity.getX(), mc.level.getMinY(), entity.getZ()), ClipContext.Block.COLLIDER, ClipContext.Fluid.WATER, entity));
-        if (raycastResult.getType() == BlockHitResult.Type.MISS) return 0;
+        if (raycastResult.getType() == HitResult.Type.MISS) return 0;
 
         return fallDamageReductions(entity, raycastResult.getBlockPos().getY());
     }

@@ -1035,7 +1035,7 @@ public class CrystalAura extends Module {
         // Place
         if (supportBlock == null) {
             // Place crystal
-            mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundUseItemOnPacket(hand, result, sequence));
+            mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundUseItemOnPacket(hand, result, sequence));
 
             if (swingMode.get().client()) mc.player.swing(hand);
             if (swingMode.get().packet()) mc.getConnection().send(new ServerboundSwingPacket(hand));
@@ -1139,12 +1139,12 @@ public class CrystalAura extends Module {
 
     private boolean shouldPause(PauseMode process) {
         if (mc.player.isUsingItem() || mc.options.keyUse.isDown()) {
-            if (pauseOnUse.get().equals(process)) return true;
+            if (pauseOnUse.get().matches(process)) return true;
         }
 
         if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1.0f) return true;
         for (Module module : pauseModules.get()) if (module.isActive()) return true;
-        if (pauseOnMine.get().equals(process) && mc.gameMode.isDestroying()) return true;
+        if (pauseOnMine.get().matches(process) && mc.gameMode.isDestroying()) return true;
         return (EntityUtils.getTotalHealth(mc.player) <= pauseHealth.get());
     }
 
@@ -1361,7 +1361,7 @@ public class CrystalAura extends Module {
         Break,
         None;
 
-        public boolean equals(PauseMode process) {
+        public boolean matches(PauseMode process) {
             return this == process || this == PauseMode.Both;
         }
     }

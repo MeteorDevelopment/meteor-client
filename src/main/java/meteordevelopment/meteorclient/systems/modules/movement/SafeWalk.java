@@ -18,6 +18,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class SafeWalk extends Module {
@@ -94,7 +95,7 @@ public class SafeWalk extends Module {
                 if (mc.player.getBlockY() - surface < fallDistance.get()) return;
             } else {
                 BlockHitResult raycastResult = mc.level.clip(new ClipContext(mc.player.position(), new Vec3(mc.player.getX(), mc.level.getMinY(), mc.player.getZ()), ClipContext.Block.COLLIDER, ClipContext.Fluid.WATER, mc.player));
-                if (raycastResult.getType() != BlockHitResult.Type.MISS) {
+                if (raycastResult.getType() != HitResult.Type.MISS) {
                     if ((int) (mc.player.getY() - raycastResult.getBlockPos().above().getY()) < fallDistance.get())
                         return;
                 }

@@ -506,12 +506,12 @@ public class Nuker extends Module {
             interacted.add(blockPos);
         } else if (packetMine.get()) {
             // Packet mine mode
-            mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos), sequence));
+            mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos), sequence));
 
             if (swing.get()) mc.player.swing(InteractionHand.MAIN_HAND);
             else mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
 
-            mc.gameMode.startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos), sequence));
+            mc.gameMode.startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, blockPos, BlockUtils.getDirection(blockPos), sequence));
         } else {
             // Legit mine mode
             BlockUtils.breakBlock(blockPos, swing.get());
@@ -532,7 +532,7 @@ public class Nuker extends Module {
         if (!selectBlockBind.get().isPressed() || mc.screen != null) return;
 
         HitResult hitResult = mc.hitResult;
-        if (hitResult == null || hitResult.getType() != BlockHitResult.Type.BLOCK) return;
+        if (hitResult == null || hitResult.getType() != HitResult.Type.BLOCK) return;
 
         BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
         Block targetBlock = mc.level.getBlockState(pos).getBlock();

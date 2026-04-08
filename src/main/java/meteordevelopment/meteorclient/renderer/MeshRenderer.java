@@ -167,12 +167,12 @@ public class MeshRenderer {
                 pass.setPipeline(pipeline);
                 pass.setUniform("MeshData", meshData);
 
-                for (var name : uniforms.keySet()) {
-                    pass.setUniform(name, uniforms.get(name));
+                for (var entry : uniforms.entrySet()) {
+                    pass.setUniform(entry.getKey(), entry.getValue());
                 }
 
-                for (var name : samplers.keySet()) {
-                    pass.bindTexture(name, samplers.get(name).getA(), samplers.get(name).getB());
+                for (var entry : samplers.entrySet()) {
+                    pass.bindTexture(entry.getKey(), entry.getValue().getA(), entry.getValue().getB());
                 }
 
                 pass.setVertexBuffer(0, vertexBuffer);

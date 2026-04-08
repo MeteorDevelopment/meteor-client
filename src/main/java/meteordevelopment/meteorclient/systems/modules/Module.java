@@ -178,7 +178,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
         // Settings
         Tag settingsTag = tag.get("settings");
-        if (settingsTag instanceof CompoundTag) settings.fromTag((CompoundTag) settingsTag);
+        if (settingsTag instanceof CompoundTag compoundTag) settings.fromTag(compoundTag);
 
         boolean active = tag.getBooleanOr("active", false);
         if (active != isActive()) toggle();

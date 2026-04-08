@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class EChestFarmer extends Module {
@@ -121,7 +122,7 @@ public class EChestFarmer extends Module {
     private void onTick(TickEvent.Pre event) {
         // Finding target pos
         if (target == null) {
-            if (mc.hitResult == null || mc.hitResult.getType() != BlockHitResult.Type.BLOCK) return;
+            if (mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.BLOCK) return;
 
             BlockPos pos = ((BlockHitResult) mc.hitResult).getBlockPos().above();
             BlockState state = mc.level.getBlockState(pos);

@@ -62,7 +62,7 @@ public class ClickTP extends Module {
 
         BlockHitResult hitResult = mc.level.clip(context);
 
-        if (hitResult.getType() == BlockHitResult.Type.BLOCK) {
+        if (hitResult.getType() == HitResult.Type.BLOCK) {
             BlockPos pos = hitResult.getBlockPos();
             Direction side = hitResult.getDirection();
 

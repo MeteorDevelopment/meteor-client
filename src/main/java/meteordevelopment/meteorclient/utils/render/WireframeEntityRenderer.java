@@ -99,14 +99,7 @@ public class WireframeEntityRenderer {
                 return NoopVertexConsumer.INSTANCE;
             }
 
-            MyVertexConsumer vertexConsumer = buffers.get(layer);
-
-            if (vertexConsumer == null) {
-                vertexConsumer = new MyVertexConsumer();
-                buffers.put(layer, vertexConsumer);
-            }
-
-            return vertexConsumer;
+            return buffers.computeIfAbsent(layer, _ -> new MyVertexConsumer());
         }
 
         @Override

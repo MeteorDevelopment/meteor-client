@@ -177,7 +177,7 @@ public class NotebotCommand extends Command {
 
             file.close();
             info("Song saved.");
-        } catch (IOException e) {
+        } catch (IOException _) {
             info("Couldn't create the file.");
             MeteorClient.EVENT_BUS.unsubscribe(this);
         }

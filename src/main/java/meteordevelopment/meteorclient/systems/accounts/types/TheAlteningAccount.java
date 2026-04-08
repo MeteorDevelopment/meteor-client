@@ -45,10 +45,10 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
             cache.loadHead();
 
             return true;
-        } catch (InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException _) {
             MeteorClient.LOG.error("Invalid TheAltening credentials.");
             return false;
-        } catch (Exception e) {
+        } catch (Exception _) {
             MeteorClient.LOG.error("Failed to fetch info for TheAltening account!");
             return false;
         }
@@ -62,7 +62,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
         try {
             setSession(new User(auth.getCurrentProfile().name(), auth.getCurrentProfile().id(), auth.getAccessToken(), Optional.empty(), Optional.empty()));
             return true;
-        } catch (Exception e) {
+        } catch (Exception _) {
             MeteorClient.LOG.error("Failed to login with TheAltening.");
             return false;
         }

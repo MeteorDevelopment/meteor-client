@@ -86,13 +86,11 @@ public final class SortingHelper {
     }
 
     private static <T> List<T> createList(Iterable<?> iterable) {
-        if (iterable instanceof IdMap<?> indexed) {
-            return new ObjectArrayList<>(indexed.size());
-        } else if (iterable instanceof Collection<?> collection) {
-            return new ObjectArrayList<>(collection.size());
-        } else {
-            return new ObjectArrayList<>();
-        }
+        return switch (iterable) {
+            case IdMap<?> indexed -> new ObjectArrayList<>(indexed.size());
+            case Collection<?> collection -> new ObjectArrayList<>(collection.size());
+            default -> new ObjectArrayList<>();
+        };
     }
 
     @SuppressWarnings("unchecked")

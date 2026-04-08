@@ -64,10 +64,13 @@ public class EntityOwner extends Module {
         for (Entity entity : mc.level.entitiesForRendering()) {
             @Nullable EntityReference<LivingEntity> owner;
 
-            if (entity instanceof TamableAnimal tameable) owner = tameable.getOwnerReference();
-            else if (entity instanceof ThrownEnderpearl pearl)
-                owner = EntityReference.of((LivingEntity) pearl.getOwner());
-            else continue;
+            switch (entity) {
+                case TamableAnimal tameable -> owner = tameable.getOwnerReference();
+                case ThrownEnderpearl pearl -> owner = EntityReference.of((LivingEntity) pearl.getOwner());
+                default -> {
+                    continue;
+                }
+            }
 
             if (owner != null) {
                 Utils.set(pos, entity, event.tickDelta);

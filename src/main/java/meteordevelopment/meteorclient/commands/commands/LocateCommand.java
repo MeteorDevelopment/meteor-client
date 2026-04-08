@@ -72,7 +72,7 @@ public class LocateCommand extends Command {
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         // Overworld structures
 
-        builder.then(literal("buried_treasure").executes(s -> {
+        builder.then(literal("buried_treasure").executes(_ -> {
             ItemStack stack = mc.player.getInventory().getSelectedItem();
             if (stack.getItem() != Items.FILLED_MAP
                 || stack.get(DataComponents.ITEM_NAME) == null
@@ -102,7 +102,7 @@ public class LocateCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("mansion").executes(s -> {
+        builder.then(literal("mansion").executes(_ -> {
             ItemStack stack = mc.player.getInventory().getSelectedItem();
             if (stack.getItem() != Items.FILLED_MAP
                 || stack.get(DataComponents.ITEM_NAME) == null
@@ -132,7 +132,7 @@ public class LocateCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("monument").executes(s -> {
+        builder.then(literal("monument").executes(_ -> {
             ItemStack stack = mc.player.getInventory().getSelectedItem();
             if (stack.getItem() == Items.FILLED_MAP
                 && stack.get(DataComponents.ITEM_NAME) != null
@@ -177,7 +177,7 @@ public class LocateCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("stronghold").executes(s -> {
+        builder.then(literal("stronghold").executes(_ -> {
             boolean foundEye = InvUtils.testInHotbar(Items.ENDER_EYE);
 
             if (foundEye) {
@@ -207,7 +207,7 @@ public class LocateCommand extends Command {
 
         // Nether structures
 
-        builder.then(literal("nether_fortress").executes(s -> {
+        builder.then(literal("nether_fortress").executes(_ -> {
             if (mc.level.dimension() != Level.NETHER) {
                 error("You need to be in the nether to locate a nether fortress.");
                 return SINGLE_SUCCESS;
@@ -232,7 +232,7 @@ public class LocateCommand extends Command {
 
         // End structures
 
-        builder.then(literal("end_city").executes(s -> {
+        builder.then(literal("end_city").executes(_ -> {
             if (mc.level.dimension() != Level.END) {
                 error("You need to be in the end to locate an end city.");
                 return SINGLE_SUCCESS;
@@ -257,7 +257,7 @@ public class LocateCommand extends Command {
 
         // Misc structures
 
-        builder.then(literal("lodestone").executes(s -> {
+        builder.then(literal("lodestone").executes(_ -> {
             ItemStack stack = mc.player.getInventory().getSelectedItem();
             if (stack.getItem() != Items.COMPASS) {
                 error("You need to hold a (highlight)lodestone(default) compass!");
@@ -287,7 +287,7 @@ public class LocateCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("cancel").executes(s -> {
+        builder.then(literal("cancel").executes(_ -> {
             cancel();
             return SINGLE_SUCCESS;
         }));

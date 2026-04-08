@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BlockSelection extends Module {
@@ -69,7 +70,7 @@ public class BlockSelection extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.hitResult == null || !(mc.hitResult instanceof BlockHitResult result) || result.getType() == BlockHitResult.Type.MISS)
+        if (mc.hitResult == null || !(mc.hitResult instanceof BlockHitResult result) || result.getType() == HitResult.Type.MISS)
             return;
 
         if (hideInside.get() && result.isInside()) return;
@@ -83,14 +84,17 @@ public class BlockSelection extends Module {
         AABB box = shape.bounds();
 
         if (oneSide.get()) {
-            if (side == Direction.UP || side == Direction.DOWN) {
-                event.renderer.sideHorizontal(bp.getX() + box.minX, bp.getY() + (side == Direction.DOWN ? box.minY : box.maxY), bp.getZ() + box.minZ, bp.getX() + box.maxX, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get());
-            } else if (side == Direction.SOUTH || side == Direction.NORTH) {
-                double z = side == Direction.NORTH ? box.minZ : box.maxZ;
-                event.renderer.sideVertical(bp.getX() + box.minX, bp.getY() + box.minY, bp.getZ() + z, bp.getX() + box.maxX, bp.getY() + box.maxY, bp.getZ() + z, sideColor.get(), lineColor.get(), shapeMode.get());
-            } else {
-                double x = side == Direction.WEST ? box.minX : box.maxX;
-                event.renderer.sideVertical(bp.getX() + x, bp.getY() + box.minY, bp.getZ() + box.minZ, bp.getX() + x, bp.getY() + box.maxY, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get());
+            switch (side) {
+                case Direction.UP, Direction.DOWN ->
+                    event.renderer.sideHorizontal(bp.getX() + box.minX, bp.getY() + (side == Direction.DOWN ? box.minY : box.maxY), bp.getZ() + box.minZ, bp.getX() + box.maxX, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get());
+                case Direction.SOUTH, Direction.NORTH -> {
+                    double z = side == Direction.NORTH ? box.minZ : box.maxZ;
+                    event.renderer.sideVertical(bp.getX() + box.minX, bp.getY() + box.minY, bp.getZ() + z, bp.getX() + box.maxX, bp.getY() + box.maxY, bp.getZ() + z, sideColor.get(), lineColor.get(), shapeMode.get());
+                }
+                case Direction.EAST, Direction.WEST -> {
+                    double x = side == Direction.WEST ? box.minX : box.maxX;
+                    event.renderer.sideVertical(bp.getX() + x, bp.getY() + box.minY, bp.getZ() + box.minZ, bp.getX() + x, bp.getY() + box.maxY, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get());
+                }
             }
         } else {
             if (advanced.get()) {

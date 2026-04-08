@@ -84,8 +84,8 @@ public class ServerSpoof extends Module {
     private void onPacketSend(PacketEvent.Send event) {
         if (!isActive()) return;
 
-        if (event.packet instanceof ServerboundCustomPayloadPacket) {
-            Identifier id = ((ServerboundCustomPayloadPacket) event.packet).payload().type().id();
+        if (event.packet instanceof ServerboundCustomPayloadPacket customPayloadPacket) {
+            Identifier id = customPayloadPacket.payload().type().id();
 
             if (blockChannels.get()) {
                 for (String channel : channels.get()) {
@@ -161,7 +161,7 @@ public class ServerSpoof extends Module {
             URL uRL = new URI(url).toURL();
             String string = uRL.getProtocol();
             return !"http".equals(string) && !"https".equals(string) ? null : uRL;
-        } catch (MalformedURLException | URISyntaxException var3) {
+        } catch (MalformedURLException | URISyntaxException _) {
             return null;
         }
     }

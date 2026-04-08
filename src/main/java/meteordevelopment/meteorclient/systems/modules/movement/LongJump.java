@@ -178,14 +178,18 @@ public class LongJump extends Module {
                 double lastDist = Math.sqrt((xDist * xDist) + (zDist * zDist));
 
                 if (PlayerUtils.isMoving() && (!onJump.get() || mc.options.keyJump.isDown()) && !mc.player.isInLava() && !mc.player.isInWater()) {
-                    if (stage == 0) moveSpeed = getMoveSpeed() * burstInitialSpeed.get();
-                    else if (stage == 1) {
-                        ((IVec3) event.movement).meteor$setY(0.42);
-                        moveSpeed *= burstBoostFactor.get();
-                    } else if (stage == 2) {
-                        final double difference = lastDist - getMoveSpeed();
-                        moveSpeed = lastDist - difference;
-                    } else moveSpeed = lastDist - lastDist / 159;
+                    switch (stage) {
+                        case 0 -> moveSpeed = getMoveSpeed() * burstInitialSpeed.get();
+                        case 1 -> {
+                            ((IVec3) event.movement).meteor$setY(0.42);
+                            moveSpeed *= burstBoostFactor.get();
+                        }
+                        case 2 -> {
+                            final double difference = lastDist - getMoveSpeed();
+                            moveSpeed = lastDist - difference;
+                        }
+                        default -> moveSpeed = lastDist - lastDist / 159;
+                    }
 
                     setMoveSpeed(event, moveSpeed = Math.max(getMoveSpeed(), moveSpeed));
                     if (!mc.player.verticalCollision && !mc.level.noCollision(mc.player.getBoundingBox().move(0.0, mc.player.getDeltaMovement().y, 0.0)) && !mc.level.noCollision(mc.player.getBoundingBox().move(0.0, -0.4, 0.0))) {

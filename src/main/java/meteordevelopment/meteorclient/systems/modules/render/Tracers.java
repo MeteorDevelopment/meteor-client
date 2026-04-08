@@ -218,18 +218,18 @@ public class Tracers extends Module {
     }
 
     private boolean shouldBeIgnored(Entity entity) {
-        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType()) || (ignoreSelf.get() && entity == mc.player) || (ignoreFriends.get() && entity instanceof Player && Friends.get().isFriend((Player) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity);
+        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType()) || (ignoreSelf.get() && entity == mc.player) || (ignoreFriends.get() && entity instanceof Player player && Friends.get().isFriend(player)) || (!showInvis.get() && entity.isInvisible()) || !EntityUtils.isInRenderDistance(entity);
     }
 
     private Color getEntityColor(Entity entity) {
         Color color;
 
         if (distance.get()) {
-            if (friendOverride.get() && entity instanceof Player && Friends.get().isFriend((Player) entity)) {
+            if (friendOverride.get() && entity instanceof Player player && Friends.get().isFriend(player)) {
                 color = Config.get().friendColor.get();
             } else color = EntityUtils.getColorFromDistance(entity);
-        } else if (entity instanceof Player) {
-            color = PlayerUtils.getPlayerColor(((Player) entity), playersColor.get());
+        } else if (entity instanceof Player player) {
+            color = PlayerUtils.getPlayerColor(player, playersColor.get());
         } else {
             color = switch (entity.getType().getCategory()) {
                 case CREATURE -> animalsColor.get();

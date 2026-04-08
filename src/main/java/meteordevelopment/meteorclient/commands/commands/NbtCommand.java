@@ -128,7 +128,7 @@ public class NbtCommand extends Command {
             }
 
             return SINGLE_SUCCESS;
-        }).suggests((ctx, suggestionsBuilder) -> {
+        }).suggests((_, suggestionsBuilder) -> {
             ItemStack stack = mc.player.getInventory().getSelectedItem();
             if (stack != ItemStack.EMPTY) {
                 DataComponentMap components = stack.getComponents();
@@ -161,7 +161,7 @@ public class NbtCommand extends Command {
                 if (!nbtElement.isEmpty()) {
                     text.append(" ").append(NbtUtils.toPrettyComponent(nbtElement.getFirst()));
                 }
-            } catch (CommandSyntaxException e) {
+            } catch (CommandSyntaxException _) {
                 text.append("{}");
             }
 
@@ -183,7 +183,7 @@ public class NbtCommand extends Command {
                     text.append(" ").append(NbtUtils.toPrettyComponent(nbtElement.getFirst()));
                     nbt = nbtElement.getFirst().toString();
                 }
-            } catch (CommandSyntaxException e) {
+            } catch (CommandSyntaxException _) {
                 text.append("{}");
             }
 

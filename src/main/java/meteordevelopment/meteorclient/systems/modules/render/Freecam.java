@@ -39,10 +39,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
@@ -341,7 +338,7 @@ public class Freecam extends Module {
         );
 
         BlockHitResult res = mc.level.clip(ctx);
-        if (res.getType() == BlockHitResult.Type.MISS) return null;
+        if (res.getType() == HitResult.Type.MISS) return null;
 
         // Don't move inside block
         return res.getBlockPos().offset(res.getDirection().getUnitVec3i());

@@ -23,6 +23,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.BasePressurePlateBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ButtonBlock;
 
 public class AutoAnvil extends Module {
@@ -126,14 +127,14 @@ public class AutoAnvil extends Module {
         }
 
         if (placeButton.get()) {
-            FindItemResult floorBlock = InvUtils.findInHotbar(itemStack -> BasePressurePlateBlock.byItem(itemStack.getItem()) instanceof BasePressurePlateBlock || BasePressurePlateBlock.byItem(itemStack.getItem()) instanceof ButtonBlock);
+            FindItemResult floorBlock = InvUtils.findInHotbar(itemStack -> Block.byItem(itemStack.getItem()) instanceof BasePressurePlateBlock || Block.byItem(itemStack.getItem()) instanceof ButtonBlock);
             BlockUtils.place(target.blockPosition(), floorBlock, rotate.get(), 0, false);
         }
 
         if (timer >= delay.get()) {
             timer = 0;
 
-            FindItemResult anvil = InvUtils.findInHotbar(itemStack -> BasePressurePlateBlock.byItem(itemStack.getItem()) instanceof AnvilBlock);
+            FindItemResult anvil = InvUtils.findInHotbar(itemStack -> Block.byItem(itemStack.getItem()) instanceof AnvilBlock);
             if (!anvil.found()) return;
 
             for (int i = height.get(); i > 1; i--) {

@@ -78,8 +78,8 @@ public abstract class MultiPlayerGameModeMixin implements IMultiPlayerGameMode {
 
             if (state.getDestroyProgress(mc.player, mc.level, pos) > 0.5f) {
                 destroyBlock(pos);
-                startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence));
-                startPrediction(mc.level, (sequence) -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, pos, direction, sequence));
+                startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence));
+                startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, pos, direction, sequence));
                 cir.setReturnValue(true);
             }
         }

@@ -19,7 +19,6 @@ import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class MacroArgumentType implements ArgumentType<Macro> {
     private static final MacroArgumentType INSTANCE = new MacroArgumentType();
@@ -59,6 +58,6 @@ public class MacroArgumentType implements ArgumentType<Macro> {
 
     @Override
     public Collection<String> getExamples() {
-        return Macros.get().getAll().stream().limit(3).map(macro -> macro.name.get()).collect(Collectors.toList());
+        return Macros.get().getAll().stream().limit(3).map(macro -> macro.name.get()).toList();
     }
 }

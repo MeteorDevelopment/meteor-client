@@ -18,9 +18,9 @@ public class FieldInfo {
             String ownerDot = owner.replace('/', '.');
 
             if (owner != null) this.owner = mappings.mapClassName("intermediary", ownerDot).replace('.', '/');
-            if (name != null && descriptor != null) this.name = mappings.mapFieldName("intermediary", ownerDot, name, descriptor.toString(false, false));
-        }
-        else {
+            if (name != null && descriptor != null)
+                this.name = mappings.mapFieldName("intermediary", ownerDot, name, descriptor.toString(false, false));
+        } else {
             this.owner = owner;
             this.name = name;
         }
@@ -28,7 +28,7 @@ public class FieldInfo {
         if (descriptor != null) this.descriptor = descriptor.toString(false, map);
     }
 
-    public boolean equals(FieldInsnNode insn) {
+    public boolean matches(FieldInsnNode insn) {
         return (owner == null || insn.owner.equals(owner)) && (name == null || insn.name.equals(name)) && (descriptor == null || insn.desc.equals(descriptor));
     }
 }

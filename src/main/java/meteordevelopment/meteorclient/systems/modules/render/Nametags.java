@@ -374,7 +374,7 @@ public class Nametags extends Module {
                 else if (type == EntityType.TNT) renderTntNametag(ticksToTime(((PrimedTnt) entity).getFuse()), shadow);
                 else if (type == EntityType.TNT_MINECART && ((MinecartTNT) entity).isPrimed())
                     renderTntNametag(ticksToTime(((MinecartTNT) entity).getFuse()), shadow);
-                else if (entity instanceof LivingEntity) renderGenericLivingNametag((LivingEntity) entity, shadow);
+                else if (entity instanceof LivingEntity livingEntity) renderGenericLivingNametag(livingEntity, shadow);
                 else renderGenericNametag(entity, shadow);
             }
         }

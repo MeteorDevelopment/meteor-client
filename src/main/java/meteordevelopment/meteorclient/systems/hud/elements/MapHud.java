@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.core.component.DataComponents;
@@ -135,8 +136,8 @@ public class MapHud extends HudElement {
         if (mapComponent == null || mapState == null) {
             if (HudEditorScreen.isOpen()) {
                 renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-                renderer.line(this.x, this.y, this.x + getWidth(), this.y + this.getHeight(), SettingColor.GRAY);
-                renderer.line(this.x + getWidth(), this.y, this.x, this.y + this.getHeight(), SettingColor.GRAY);
+                renderer.line(this.x, this.y, this.x + getWidth(), this.y + this.getHeight(), Color.GRAY);
+                renderer.line(this.x + getWidth(), this.y, this.x, this.y + this.getHeight(), Color.GRAY);
             }
 
             return;

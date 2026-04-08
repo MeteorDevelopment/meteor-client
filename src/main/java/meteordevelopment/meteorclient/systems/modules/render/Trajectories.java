@@ -332,7 +332,7 @@ public class Trajectories extends Module {
                     }
 
                     points.add(Utils.set(vec3s.get(), result.getLocation()));
-                } else if (result.getType() == BlockHitResult.Type.ENTITY) {
+                } else if (result.getType() == HitResult.Type.ENTITY) {
                     Entity entity = ((EntityHitResult) result).getEntity();
                     collidingEntities.add(entity);
 

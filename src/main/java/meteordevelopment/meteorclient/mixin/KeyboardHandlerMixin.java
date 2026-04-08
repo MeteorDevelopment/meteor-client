@@ -43,8 +43,8 @@ public abstract class KeyboardHandlerMixin {
                 modifiers &= ~Input.getModifier(event.key());
             }
 
-            if (minecraft.screen instanceof WidgetScreen && action == GLFW.GLFW_REPEAT) {
-                ((WidgetScreen) minecraft.screen).keyRepeated(new KeyEvent(event.key(), event.scancode(), modifiers));
+            if (minecraft.screen instanceof WidgetScreen widgetScreen && action == GLFW.GLFW_REPEAT) {
+                widgetScreen.keyRepeated(new KeyEvent(event.key(), event.scancode(), modifiers));
             }
 
             if (GuiKeyEvents.canUseKeys) {

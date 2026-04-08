@@ -95,7 +95,7 @@ public class SwarmCommand extends Command {
 
                 try {
                     info("Connected to (highlight)%s.", swarm.worker.getConnection());
-                } catch (NullPointerException e) {
+                } catch (NullPointerException _) {
                     error("Error connecting to swarm host.");
                     swarm.close();
                     swarm.toggle();

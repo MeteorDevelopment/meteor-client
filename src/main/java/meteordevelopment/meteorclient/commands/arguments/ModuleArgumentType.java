@@ -19,7 +19,6 @@ import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class ModuleArgumentType implements ArgumentType<Module> {
     private static final ModuleArgumentType INSTANCE = new ModuleArgumentType();
@@ -29,7 +28,7 @@ public class ModuleArgumentType implements ArgumentType<Module> {
         .stream()
         .limit(3)
         .map(module -> module.name)
-        .collect(Collectors.toList());
+        .toList();
 
     public static ModuleArgumentType create() {
         return INSTANCE;

@@ -9,9 +9,9 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.BaseWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WView;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public abstract class WWidget implements BaseWidget {
     public boolean visible = true;
@@ -166,7 +166,8 @@ public abstract class WWidget implements BaseWidget {
     }
 
     public WView getView() {
-        return this instanceof WView ? (WView) this : (parent != null ? parent.getView() : null);
+        if (this instanceof WView view) return view;
+        return parent != null ? parent.getView() : null;
     }
 
     public boolean isOver(double x, double y) {

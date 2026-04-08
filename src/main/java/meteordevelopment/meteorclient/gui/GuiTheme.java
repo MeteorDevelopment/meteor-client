@@ -361,8 +361,8 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         tag.put("settings", settings.toTag());
 
         CompoundTag configs = new CompoundTag();
-        for (String id : windowConfigs.keySet()) {
-            configs.put(id, windowConfigs.get(id).toTag());
+        for (var entry : windowConfigs.entrySet()) {
+            configs.put(entry.getKey(), entry.getValue().toTag());
         }
         tag.put("windowConfigs", configs);
 

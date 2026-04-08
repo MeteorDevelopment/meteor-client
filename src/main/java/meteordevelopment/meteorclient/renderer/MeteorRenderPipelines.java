@@ -211,7 +211,7 @@ public abstract class MeteorRenderPipelines {
         ResourceManager resources = Minecraft.getInstance().getResourceManager();
 
         for (RenderPipeline pipeline : PIPELINES) {
-            device.precompilePipeline(pipeline, (identifier, shaderType) -> {
+            device.precompilePipeline(pipeline, (identifier, _) -> {
                 var resource = resources.getResource(identifier).get();
 
                 try (var in = resource.open()) {

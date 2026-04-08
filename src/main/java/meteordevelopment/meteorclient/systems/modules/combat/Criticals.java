@@ -131,11 +131,11 @@ public class Criticals extends Module {
                     }
                 }
             }
-        } else if (event.packet instanceof ServerboundSwingPacket && mode.get() != Mode.Packet) {
+        } else if (event.packet instanceof ServerboundSwingPacket serverboundSwingPacket && mode.get() != Mode.Packet) {
             if (skipCrit()) return;
 
             if (sendPackets && swingPacket == null) {
-                swingPacket = (ServerboundSwingPacket) event.packet;
+                swingPacket = serverboundSwingPacket;
                 event.cancel();
             }
         }

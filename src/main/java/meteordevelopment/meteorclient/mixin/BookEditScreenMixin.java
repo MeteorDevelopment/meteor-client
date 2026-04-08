@@ -46,7 +46,7 @@ public abstract class BookEditScreenMixin extends Screen {
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
         addRenderableWidget(
-            new Button.Builder(Component.literal("Copy"), button -> {
+            new Button.Builder(Component.literal("Copy"), _ -> {
                 ListTag listTag = new ListTag();
                 pages.stream().map(StringTag::valueOf).forEach(listTag::add);
 
@@ -74,7 +74,7 @@ public abstract class BookEditScreenMixin extends Screen {
         );
 
         addRenderableWidget(
-            new Button.Builder(Component.literal("Paste"), button -> {
+            new Button.Builder(Component.literal("Paste"), _ -> {
                 String clipboard = GLFW.glfwGetClipboardString(mc.getWindow().handle());
                 if (clipboard == null) return;
 

@@ -89,7 +89,8 @@ public class Xray extends Module {
 
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
-        if (isBlocked(((BlockEntityRenderStateAccessor) event.blockEntityState).meteor$getBlockState().getBlock(), event.blockEntityState.blockPos)) event.cancel();
+        if (isBlocked(((BlockEntityRenderStateAccessor) event.blockEntityState).meteor$getBlockState().getBlock(), event.blockEntityState.blockPos))
+            event.cancel();
     }
 
     @EventHandler
@@ -130,7 +131,7 @@ public class Xray extends Module {
 
             return alpha;
         } else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
-            return ((MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse())) ? 0 : xray.opacity.get();
+            return (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) ? 0 : xray.opacity.get();
         }
 
         return -1;

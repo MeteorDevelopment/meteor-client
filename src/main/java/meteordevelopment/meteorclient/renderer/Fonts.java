@@ -76,8 +76,8 @@ public class Fonts {
             load(Fonts.DEFAULT_FONT);
         }
 
-        if (mc.screen instanceof WidgetScreen && Config.get().customFont.get()) {
-            ((WidgetScreen) mc.screen).invalidate();
+        if (mc.screen instanceof WidgetScreen widgetScreen && Config.get().customFont.get()) {
+            widgetScreen.invalidate();
         }
     }
 

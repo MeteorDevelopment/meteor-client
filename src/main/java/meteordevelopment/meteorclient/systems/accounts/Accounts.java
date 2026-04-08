@@ -80,7 +80,7 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
                     case TheAltening -> new TheAlteningAccount(null).fromTag(t);
                     case Session -> new SessionAccount(null).fromTag(t);
                 };
-            } catch (NbtException e) {
+            } catch (NbtException _) {
                 return null;
             }
         }));

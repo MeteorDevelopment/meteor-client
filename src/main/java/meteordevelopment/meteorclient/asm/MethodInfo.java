@@ -19,9 +19,9 @@ public class MethodInfo {
             String ownerDot = owner.replace('/', '.');
 
             if (owner != null) this.owner = mappings.mapClassName("intermediary", ownerDot).replace('.', '/');
-            if (name != null && descriptor != null) this.name = mappings.mapMethodName("intermediary", ownerDot, name, descriptor.toString(true, false));
-        }
-        else {
+            if (name != null && descriptor != null)
+                this.name = mappings.mapMethodName("intermediary", ownerDot, name, descriptor.toString(true, false));
+        } else {
             this.owner = owner;
             this.name = name;
         }
@@ -29,11 +29,11 @@ public class MethodInfo {
         if (descriptor != null) this.descriptor = descriptor.toString(true, map);
     }
 
-    public boolean equals(MethodNode method) {
+    public boolean matches(MethodNode method) {
         return (name == null || method.name.equals(name)) && (descriptor == null || method.desc.equals(descriptor));
     }
 
-    public boolean equals(MethodInsnNode insn) {
+    public boolean matches(MethodInsnNode insn) {
         return (owner == null || insn.owner.equals(owner)) && (name == null || insn.name.equals(name)) && (descriptor == null || insn.desc.equals(descriptor));
     }
 }

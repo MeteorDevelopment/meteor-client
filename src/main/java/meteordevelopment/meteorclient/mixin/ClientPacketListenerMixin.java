@@ -129,8 +129,8 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
         Entity itemEntity = minecraft.level.getEntity(packet.getItemId());
         Entity entity = minecraft.level.getEntity(packet.getPlayerId());
 
-        if (itemEntity instanceof ItemEntity && entity == minecraft.player) {
-            MeteorClient.EVENT_BUS.post(PickItemsEvent.get(((ItemEntity) itemEntity).getItem(), packet.getAmount()));
+        if (itemEntity instanceof ItemEntity item && entity == minecraft.player) {
+            MeteorClient.EVENT_BUS.post(PickItemsEvent.get(item.getItem(), packet.getAmount()));
         }
     }
 

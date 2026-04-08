@@ -28,7 +28,6 @@ import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.Tag;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
@@ -42,7 +41,6 @@ import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -155,7 +153,7 @@ public class ProfilesTab extends Tab {
             p.getFile().mkdirs();
 
             nbt.remove("name");
-            for (Map.Entry<String, Tag> entry : nbt.entrySet()) {
+            for (var entry : nbt.entrySet()) {
                 String filename = entry.getKey();
 
                 switch (filename) {

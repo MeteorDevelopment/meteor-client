@@ -206,8 +206,8 @@ public class Notifier extends Module {
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
         if (!event.entity.getUUID().equals(mc.player.getUUID()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Despawn) {
-            if (event.entity instanceof Player) {
-                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((Player) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
+            if (event.entity instanceof Player player) {
+                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(player)) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
                     ChatUtils.sendMsg(event.entity.getId() + 100, ChatFormatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getName().getString());
 
                     if (visualMakeSound.get())
@@ -230,8 +230,8 @@ public class Notifier extends Module {
     @EventHandler
     private void onEntityRemoved(EntityRemovedEvent event) {
         if (!event.entity.getUUID().equals(mc.player.getUUID()) && entities.get().contains(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Spawn) {
-            if (event.entity instanceof Player) {
-                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((Player) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
+            if (event.entity instanceof Player player) {
+                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(player)) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
                     ChatUtils.sendMsg(event.entity.getId() + 100, ChatFormatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getName().getString());
 
                     if (visualMakeSound.get())

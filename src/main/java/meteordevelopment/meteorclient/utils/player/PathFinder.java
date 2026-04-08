@@ -73,11 +73,13 @@ public class PathFinder {
         int yaw;
         int direction = getDirection();
         double tan = (tPos.z - pPos.z) / (tPos.x - pPos.x);
-        if (direction == QUAD_1)
-            yaw = (int) (Math.PI / 2 - Math.atan(tan));
-        else if (direction == QUAD_2)
-            yaw = (int) (-1 * Math.PI / 2 - Math.atan(tan));
-        else return direction;
+        switch (direction) {
+            case QUAD_1 -> yaw = (int) (Math.PI / 2 - Math.atan(tan));
+            case QUAD_2 -> yaw = (int) (-1 * Math.PI / 2 - Math.atan(tan));
+            default -> {
+                return direction;
+            }
+        }
         return yaw;
     }
 

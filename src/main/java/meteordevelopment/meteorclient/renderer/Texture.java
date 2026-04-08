@@ -87,7 +87,7 @@ public class Texture extends AbstractTexture {
 
                 return texture;
             }
-        } catch (IOException e) {
+        } catch (IOException _) {
             return null;
         }
     }

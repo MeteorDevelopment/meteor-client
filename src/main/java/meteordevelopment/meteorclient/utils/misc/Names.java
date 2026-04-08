@@ -42,11 +42,11 @@ public class Names {
     private static final Map<MobEffect, String> statusEffectNames = new Reference2ObjectOpenHashMap<>(16);
     private static final Map<Item, String> itemNames = new Reference2ObjectOpenHashMap<>(128);
     private static final Map<Block, String> blockNames = new Reference2ObjectOpenHashMap<>(128);
-    private static final Map<ResourceKey<Enchantment>, String> enchantmentKeyNames = new WeakHashMap<>(16);
+    private static final Map<ResourceKey<Enchantment>, String> enchantmentKeyNames = WeakHashMap.newWeakHashMap(16);
     private static final Map<Holder<Enchantment>, String> enchantmentEntryNames = new Reference2ObjectOpenHashMap<>(16);
     private static final Map<EntityType<?>, String> entityTypeNames = new Reference2ObjectOpenHashMap<>(64);
     private static final Map<ParticleType<?>, String> particleTypesNames = new Reference2ObjectOpenHashMap<>(64);
-    private static final Map<Identifier, String> soundNames = new HashMap<>(64);
+    private static final Map<Identifier, String> soundNames = HashMap.newHashMap(64);
 
     private Names() {
     }

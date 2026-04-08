@@ -327,7 +327,7 @@ public class Jesus extends Module {
 
     private boolean isLavaDangerous() {
         if (!dipIfFireResistant.get()) return true;
-        return !mc.player.hasEffect(MobEffects.FIRE_RESISTANCE) || (!(mc.player.getEffect(MobEffects.FIRE_RESISTANCE).getDuration() > (15 * 20 * mc.player.getAttributeValue(Attributes.BURNING_TIME))));
+        return !mc.player.hasEffect(MobEffects.FIRE_RESISTANCE) || (mc.player.getEffect(MobEffects.FIRE_RESISTANCE).getDuration() <= (15 * 20 * mc.player.getAttributeValue(Attributes.BURNING_TIME)));
     }
 
     private Tuple<Boolean, Boolean> isOverLiquid() {

@@ -26,28 +26,30 @@ public class Strafe extends SpeedMode {
     @Override
     public void onMove(PlayerMoveEvent event) {
         switch (stage) {
-            case 0: //Reset
+            case 0 -> { // Reset
                 if (PlayerUtils.isMoving()) {
-                    stage++;
+                    stage = 1;
                     speed = 1.18f * getDefaultSpeed() - 0.01;
                 }
-            case 1: //Jump
+            }
+            case 1 -> { // Jump
                 if (!PlayerUtils.isMoving() || !mc.player.onGround()) break;
 
                 ((IVec3) event.movement).meteor$setY(getHop(0.40123128));
                 speed *= settings.ncpSpeed.get();
-                stage++;
-                break;
-            case 2:
+                stage = 2;
+            }
+            case 2 -> { // Slowdown after jump
                 speed = distance - 0.76 * (distance - getDefaultSpeed());
-                stage++;
-                break; //Slowdown after jump
-            case 3: //Reset on collision or predict and update speed
-                if (!mc.level.noCollision(mc.player.getBoundingBox().move(0.0, mc.player.getDeltaMovement().y, 0.0)) || mc.player.verticalCollision && stage > 0) {
+                stage = 3;
+            }
+            case 3 -> { // Reset on collision or predict and update speed
+                if (!mc.level.noCollision(mc.player.getBoundingBox().move(0.0, mc.player.getDeltaMovement().y, 0.0))
+                    || mc.player.verticalCollision && stage > 0) {
                     stage = 0;
                 }
                 speed = distance - (distance / 159.0);
-                break;
+            }
         }
 
         speed = Math.max(speed, getDefaultSpeed());

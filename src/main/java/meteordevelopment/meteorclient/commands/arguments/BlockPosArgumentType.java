@@ -22,6 +22,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
@@ -101,7 +102,7 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
 
     public static <S> BlockPos getValidBlockPos(CommandContext<S> context, String name) throws CommandSyntaxException {
         BlockPos blockPos = getBlockPos(context, name);
-        if (!ClientLevel.isInSpawnableBounds(blockPos)) {
+        if (!Level.isInSpawnableBounds(blockPos)) {
             throw OUT_OF_BOUNDS_EXCEPTION.create();
         } else {
             return blockPos;
@@ -112,8 +113,9 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
         return stringReader.canRead() && stringReader.peek() == '^' ? LookingPosArgument.parse(stringReader) : DefaultPosArgument.parse(stringReader);
     }
 
+    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (!(context.getSource() instanceof SharedSuggestionProvider)) {
+        if (!(context.getSource() instanceof SharedSuggestionProvider sharedSuggestionProvider)) {
             return Suggestions.empty();
         } else {
             String string = builder.getRemaining();
@@ -121,13 +123,14 @@ public class BlockPosArgumentType implements ArgumentType<BlockPosArgumentType.P
             if (!string.isEmpty() && string.charAt(0) == '^') {
                 collection = Collections.singleton(SharedSuggestionProvider.TextCoordinates.DEFAULT_LOCAL);
             } else {
-                collection = ((SharedSuggestionProvider) context.getSource()).getRelevantCoordinates();
+                collection = sharedSuggestionProvider.getRelevantCoordinates();
             }
 
             return SharedSuggestionProvider.suggestCoordinates(string, collection, builder, Commands.createValidator(this::parse));
         }
     }
 
+    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

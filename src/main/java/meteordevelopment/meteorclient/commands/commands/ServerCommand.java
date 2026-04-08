@@ -248,7 +248,7 @@ public class ServerCommand extends Command {
 
                 printPlugins();
             }
-        } catch (Exception e) {
+        } catch (Exception _) {
             error("An error occurred while trying to find plugins.");
         }
     }

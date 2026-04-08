@@ -172,7 +172,7 @@ public class HoleESP extends Module {
         holes.clear();
 
         // Probe for holes
-        BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
+        BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, _) -> {
             if (!validHole(blockPos)) return;
 
             int bedrock = 0, obsidian = 0;

@@ -236,10 +236,10 @@ public class BetterChat extends Module {
         .build()
     );
 
-    private static final Pattern antiSpamRegex = Pattern.compile(" \\(([0-9]{1,9})\\)$");
+    private static final Pattern antiSpamRegex = Pattern.compile(" \\((\\d{1,9})\\)$");
     private static final Pattern antiClearRegex = Pattern.compile("\\n(\\n|\\s)+\\n");
-    private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}(?::[0-9]{2})?> )");
-    private static final Pattern usernameRegex = Pattern.compile("^(?:<[0-9]{2}:[0-9]{2}>\\s)?<(.*?)>.*");
+    private static final Pattern timestampRegex = Pattern.compile("^(<\\d{2}:\\d{2}(?::\\d{2})?> )");
+    private static final Pattern usernameRegex = Pattern.compile("^(?:<\\d{2}:\\d{2}>\\s)?<(.*?)>.*");
 
     private final Char2CharMap SMALL_CAPS = new Char2CharOpenHashMap();
     public final IntList lines = new IntArrayList();
@@ -533,7 +533,7 @@ public class BetterChat extends Module {
         for (int i = 0; i < regexFilters.get().size(); i++) {
             try {
                 filterRegexList.add(Pattern.compile(regexFilters.get().get(i)));
-            } catch (PatternSyntaxException e) {
+            } catch (PatternSyntaxException _) {
                 String removed = regexFilters.get().remove(i);
                 error("Removing Invalid regex: %s", removed);
             }

@@ -183,10 +183,11 @@ public class Rotations {
     }
 
     public static double getPitch(Entity entity, Target target) {
-        double y;
-        if (target == Target.Head) y = entity.getEyeY();
-        else if (target == Target.Body) y = entity.getY() + entity.getBbHeight() / 2;
-        else y = entity.getY();
+        double y = switch (target) {
+            case Head -> entity.getEyeY();
+            case Body -> entity.getY() + entity.getBbHeight() / 2;
+            case Feet -> entity.getY();
+        };
 
         double diffX = entity.getX() - mc.player.getX();
         double diffY = y - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
