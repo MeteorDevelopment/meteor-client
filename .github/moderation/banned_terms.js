@@ -8,6 +8,9 @@ const otherModTerms = [
     "optifabric",
     "optifine",
     "pojav",
+    "mojo",
+    "zalith",
+    "Amethyst",
     "tlauncher"
 ];
 
