@@ -21,7 +21,6 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.XAnchor;
 import meteordevelopment.meteorclient.systems.hud.YAnchor;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
@@ -126,11 +125,6 @@ public class HudElementScreen extends WindowScreen {
         }
 
         settings.tick(settingsC2, theme);
-    }
-
-    @Override
-    protected void onRenderBefore(GuiGraphicsExtractor graphics, float delta) {
-        HudEditorScreen.renderElements(graphics);
     }
 
     @Override

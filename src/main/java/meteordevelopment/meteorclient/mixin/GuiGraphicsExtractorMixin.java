@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 @Mixin(value = GuiGraphicsExtractor.class)
-public abstract class GuiGraphicsMixin {
+public abstract class GuiGraphicsExtractorMixin {
     @Inject(method = "setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;IILnet/minecraft/resources/Identifier;)V", at = @At(value = "INVOKE", target = "Ljava/util/Optional;ifPresent(Ljava/util/function/Consumer;)V", shift = At.Shift.BEFORE))
     private void onDrawTooltip(Font font, List<Component> texts, Optional<TooltipComponent> optionalImage, int xo, int yo, @Nullable Identifier style, CallbackInfo ci, @Local(name = "components") List<ClientTooltipComponent> components) {
         if (optionalImage.isPresent() && optionalImage.get() instanceof MeteorTooltipData meteorTooltipData)

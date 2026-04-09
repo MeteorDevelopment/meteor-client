@@ -271,7 +271,7 @@ public abstract class WidgetScreen extends Screen {
         // Apply projection without scaling
         Utils.unscaledProjection();
 
-        onRenderBefore(graphics, delta);
+        onRenderBefore(graphics, mouseX, mouseY, delta);
 
         RENDERER.theme = theme;
         theme.beforeRender();
@@ -301,7 +301,7 @@ public abstract class WidgetScreen extends Screen {
         }
     }
 
-    protected void onRenderBefore(GuiGraphicsExtractor graphics, float delta) {
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
     }
 
     @Override

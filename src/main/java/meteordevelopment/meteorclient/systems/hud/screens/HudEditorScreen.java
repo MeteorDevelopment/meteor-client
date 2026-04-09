@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.gui.tabs.builtin.HudTab;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
-import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.other.Snapper;
@@ -281,41 +280,15 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        int s = mc.getWindow().getGuiScale();
-
-        mouseX *= s;
-        mouseY *= s;
-
-        Utils.unscaledProjection();
-
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         boolean renderSplitLines = pressed && !selection.isEmpty() && moved;
         if (renderSplitLines || splitLinesAnimation > 0) renderSplitLines(renderSplitLines, delta / 20);
-        renderElements(graphics);
 
         Renderer2D.COLOR.begin();
         onRender(mouseX, mouseY);
         Renderer2D.COLOR.render();
 
-        Utils.scaledProjection();
         runAfterRenderTasks();
-    }
-
-    public static void renderElements(GuiGraphicsExtractor graphics) {
-        Hud hud = Hud.get();
-        boolean inactiveOnly = Utils.canUpdate() && hud.active;
-
-        HudRenderer.INSTANCE.begin(graphics);
-
-        for (HudElement element : hud) {
-            element.updatePos();
-
-            if (inactiveOnly) {
-                if (!element.isActive()) element.render(HudRenderer.INSTANCE);
-            } else element.render(HudRenderer.INSTANCE);
-        }
-
-        HudRenderer.INSTANCE.end();
     }
 
     private void renderSplitLines(boolean increment, double delta) {

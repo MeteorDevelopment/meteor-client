@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.Nullable;
 
 public class HudElementPresetsScreen extends WindowScreen {
@@ -68,10 +67,5 @@ public class HudElementPresetsScreen extends WindowScreen {
 
             if (firstPreset == null) firstPreset = preset;
         }
-    }
-
-    @Override
-    protected void onRenderBefore(GuiGraphicsExtractor graphics, float delta) {
-        HudEditorScreen.renderElements(graphics);
     }
 }

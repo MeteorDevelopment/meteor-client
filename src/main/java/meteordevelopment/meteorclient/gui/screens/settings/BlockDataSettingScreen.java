@@ -58,7 +58,7 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
     }
 
     @Override
-    protected void onRenderBefore(GuiGraphicsExtractor graphics, float delta) {
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         if (invalidate) {
             this.invalidateTable();
             invalidate = false;
