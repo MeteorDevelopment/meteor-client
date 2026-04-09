@@ -35,8 +35,7 @@ public class WTable extends WContainer {
             List<Cell<?>> row = new ArrayList<>();
             row.add(cell);
             rows.add(row);
-        }
-        else rows.get(rowI).add(cell);
+        } else rows.get(rowI).add(cell);
 
         return cell;
     }
@@ -51,7 +50,7 @@ public class WTable extends WContainer {
 
     public void removeRow(int i) {
         for (Cell<?> cell : rows.remove(i)) {
-            for (Iterator<Cell<?>> it = cells.iterator(); it.hasNext();) {
+            for (Iterator<Cell<?>> it = cells.iterator(); it.hasNext(); ) {
                 if (it.next() == cell) {
                     it.remove();
                     break;
@@ -177,7 +176,7 @@ public class WTable extends WContainer {
                 if (columnWidths.size() <= i) columnWidths.add(cellWidth);
                 else columnWidths.set(i, Math.max(columnWidths.getDouble(i), cellWidth));
 
-                if (cell.group != null) columnGroups.computeIfAbsent(cell.group, k -> new IntArrayList()).add(i);
+                if (cell.group != null) columnGroups.computeIfAbsent(cell.group, _ -> new IntArrayList()).add(i);
 
                 // Calculate row expandX count
                 if (cell.expandCellX) rowExpandXCount++;

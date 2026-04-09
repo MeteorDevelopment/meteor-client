@@ -23,14 +23,14 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.render.Camera;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.MovementType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Camera;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -43,36 +43,17 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @ModifyExpressionValue(method = "updateMovementInFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/fluid/FluidState;getVelocity(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/math/Vec3d;"))
-    private Vec3d updateMovementInFluidFluidStateGetVelocity(Vec3d vec) {
-        if ((Object) this != mc.player) return vec;
-
-        Velocity velocity = Modules.get().get(Velocity.class);
-        if (velocity.isActive() && velocity.liquids.get()) {
-            vec = vec.multiply(velocity.getHorizontal(velocity.liquidsHorizontal), velocity.getVertical(velocity.liquidsVertical), velocity.getHorizontal(velocity.liquidsHorizontal));
-        }
-
-        return vec;
-    }
-
-    @Inject(method = "isTouchingWater", at = @At(value = "HEAD"), cancellable = true)
-    private void isTouchingWater(CallbackInfoReturnable<Boolean> info) {
+    @Inject(method = {"isInWater", "isInLava"}, at = @At("HEAD"), cancellable = true)
+    private void onIsInFluid(CallbackInfoReturnable<Boolean> cir) {
         if ((Object) this != mc.player) return;
 
-        if (Modules.get().get(Flight.class).isActive()) info.setReturnValue(false);
-        if (Modules.get().get(NoSlow.class).fluidDrag()) info.setReturnValue(false);
+        Flight flight = Modules.get().get(Flight.class);
+        NoSlow noSlow = Modules.get().get(NoSlow.class);
+        if (flight.isActive() || noSlow.fluidDrag()) cir.setReturnValue(false);
     }
 
-    @Inject(method = "isInLava", at = @At(value = "HEAD"), cancellable = true)
-    private void isInLava(CallbackInfoReturnable<Boolean> info) {
-        if ((Object) this != mc.player) return;
-
-        if (Modules.get().get(Flight.class).isActive()) info.setReturnValue(false);
-        if (Modules.get().get(NoSlow.class).fluidDrag()) info.setReturnValue(false);
-    }
-
-    @Inject(method = "onBubbleColumnSurfaceCollision", at = @At("HEAD"))
-    private void onBubbleColumnSurfaceCollision(CallbackInfo info) {
+    @Inject(method = {"onAboveBubbleColumn", "onInsideBubbleColumn"}, at = @At("HEAD"))
+    private void onBubbleColumn(CallbackInfo ci) {
         if ((Object) this != mc.player) return;
 
         Jesus jesus = Modules.get().get(Jesus.class);
@@ -81,17 +62,7 @@ public abstract class EntityMixin {
         }
     }
 
-    @Inject(method = "onBubbleColumnCollision", at = @At("HEAD"))
-    private void onBubbleColumnCollision(CallbackInfo info) {
-        if ((Object) this != mc.player) return;
-
-        Jesus jesus = Modules.get().get(Jesus.class);
-        if (jesus.isActive()) {
-            jesus.isInBubbleColumn = true;
-        }
-    }
-
-    @ModifyExpressionValue(method = "updateSwimming", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSubmergedInWater()Z"))
+    @ModifyExpressionValue(method = "updateSwimming", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;isUnderWater()Z"))
     private boolean isSubmergedInWater(boolean submerged) {
         if ((Object) this != mc.player) return submerged;
 
@@ -100,7 +71,7 @@ public abstract class EntityMixin {
         return submerged;
     }
 
-    @ModifyArgs(method = "pushAwayFrom(Lnet/minecraft/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;addVelocity(DDD)V"))
+    @ModifyArgs(method = "push(Lnet/minecraft/world/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;push(DDD)V"))
     private void onPushAwayFrom(Args args, Entity entity) {
         Velocity velocity = Modules.get().get(Velocity.class);
 
@@ -117,8 +88,8 @@ public abstract class EntityMixin {
         }
     }
 
-    @ModifyReturnValue(method = "getJumpVelocityMultiplier", at = @At("RETURN"))
-    private float onGetJumpVelocityMultiplier(float original) {
+    @ModifyReturnValue(method = "getBlockJumpFactor", at = @At("RETURN"))
+    private float onGetBlockJumpFactor(float original) {
         if ((Object) this == mc.player) {
             JumpVelocityMultiplierEvent event = MeteorClient.EVENT_BUS.post(JumpVelocityMultiplierEvent.get());
             return (original * event.multiplier);
@@ -128,17 +99,16 @@ public abstract class EntityMixin {
     }
 
     @Inject(method = "move", at = @At("HEAD"))
-    private void onMove(MovementType type, Vec3d movement, CallbackInfo info) {
+    private void onMove(MoverType moverType, Vec3 delta, CallbackInfo ci) {
         if ((Object) this == mc.player) {
-            MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(type, movement));
-        }
-        else {
-            MeteorClient.EVENT_BUS.post(EntityMoveEvent.get((Entity) (Object) this, movement));
+            MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(moverType, delta));
+        } else {
+            MeteorClient.EVENT_BUS.post(EntityMoveEvent.get((Entity) (Object) this, delta));
         }
     }
 
-    @ModifyExpressionValue(method = "getVelocityMultiplier", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
-    private Block modifyVelocityMultiplierBlock(Block original) {
+    @ModifyExpressionValue(method = "getBlockSpeedFactor", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getBlock()Lnet/minecraft/world/level/block/Block;"))
+    private Block modifyBlockSpeedFactor(Block original) {
         if ((Object) this != mc.player) return original;
 
         if (original == Blocks.SOUL_SAND && Modules.get().get(NoSlow.class).soulSand()) return Blocks.STONE;
@@ -146,73 +116,74 @@ public abstract class EntityMixin {
         return original;
     }
 
-    @ModifyReturnValue(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("RETURN"))
+    @ModifyReturnValue(method = "isInvisibleTo", at = @At("RETURN"))
     private boolean isInvisibleToCanceller(boolean original) {
         if (!Utils.canUpdate()) return original;
         ESP esp = Modules.get().get(ESP.class);
-        if (Modules.get().get(NoRender.class).noInvisibility() || esp.isActive() && !esp.shouldSkip((Entity) (Object) this)) return false;
+        if (Modules.get().get(NoRender.class).noInvisibility() || esp.isActive() && !esp.shouldSkip((Entity) (Object) this))
+            return false;
         return original;
     }
 
-    @Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)
-    private void isGlowing(CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(NoRender.class).noGlowing()) info.setReturnValue(false);
+    @Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)
+    private void isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
+        if (Modules.get().get(NoRender.class).noGlowing()) cir.setReturnValue(false);
     }
 
-    @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)
-    private void onGetTargetingMargin(CallbackInfoReturnable<Float> info) {
+    @Inject(method = "getPickRadius", at = @At("HEAD"), cancellable = true)
+    private void onGetPickRadius(CallbackInfoReturnable<Float> cir) {
         double v = Modules.get().get(Hitboxes.class).getEntityValue((Entity) (Object) this);
-        if (v != 0) info.setReturnValue((float) v);
+        if (v != 0) cir.setReturnValue((float) v);
     }
 
     @Inject(method = "isInvisibleTo", at = @At("HEAD"), cancellable = true)
-    private void onIsInvisibleTo(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-        if (player == null) info.setReturnValue(false);
+    private void onIsInvisibleTo(Player player, CallbackInfoReturnable<Boolean> cir) {
+        if (player == null) cir.setReturnValue(false);
     }
 
     @Inject(method = "getPose", at = @At("HEAD"), cancellable = true)
-    private void getPoseHook(CallbackInfoReturnable<EntityPose> info) {
+    private void getPoseHook(CallbackInfoReturnable<Pose> cir) {
         if ((Object) this != mc.player) return;
 
         if (Modules.get().get(ElytraFly.class).canPacketEfly()) {
-            info.setReturnValue(EntityPose.GLIDING);
+            cir.setReturnValue(Pose.FALL_FLYING);
         }
     }
 
     @ModifyReturnValue(method = "getPose", at = @At("RETURN"))
-    private EntityPose modifyGetPose(EntityPose original) {
+    private Pose modifyGetPose(Pose original) {
         if ((Object) this != mc.player) return original;
 
-        if (original == EntityPose.CROUCHING && !mc.player.isSneaking() && ((PlayerEntityAccessor) mc.player).meteor$canChangeIntoPose(EntityPose.STANDING)) return EntityPose.STANDING;
+        if (original == Pose.CROUCHING && !mc.player.isShiftKeyDown() && ((PlayerAccessor) mc.player).meteor$canChangeIntoPose(Pose.STANDING))
+            return Pose.STANDING;
         return original;
     }
 
-    @ModifyReturnValue(method = "bypassesLandingEffects", at = @At("RETURN"))
+    @ModifyReturnValue(method = "isSuppressingBounce", at = @At("RETURN"))
     private boolean cancelBounce(boolean original) {
         return Modules.get().get(NoFall.class).cancelBounce() || original;
     }
 
-    @Inject(method = "changeLookDirection", at = @At("HEAD"), cancellable = true)
-    private void updateChangeLookDirection(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
+    @Inject(method = "turn", at = @At("HEAD"), cancellable = true)
+    private void updateTurn(double xo, double yo, CallbackInfo ci) {
         if ((Object) this != mc.player) return;
 
         Freecam freecam = Modules.get().get(Freecam.class);
         FreeLook freeLook = Modules.get().get(FreeLook.class);
 
         if (freecam.isActive()) {
-            freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
+            freecam.changeLookDirection(xo * 0.15, yo * 0.15);
             ci.cancel();
-        }
-        else if (Modules.get().isActive(HighwayBuilder.class)) {
-            Camera camera = mc.gameRenderer.getCamera();
-            ((ICamera) camera).meteor$setRot(camera.getYaw() + cursorDeltaX * 0.15, camera.getPitch() + cursorDeltaY * 0.15);
+        } else if (Modules.get().isActive(HighwayBuilder.class)) {
+            Camera camera = mc.gameRenderer.getMainCamera();
+            ((ICamera) camera).meteor$setRot(camera.yRot() + xo * 0.15, camera.xRot() + yo * 0.15);
             ci.cancel();
-        }
-        else if (freeLook.cameraMode()) {
-            freeLook.cameraYaw += (float) (cursorDeltaX / freeLook.sensitivity.get().floatValue());
-            freeLook.cameraPitch += (float) (cursorDeltaY / freeLook.sensitivity.get().floatValue());
+        } else if (freeLook.cameraMode()) {
+            freeLook.cameraYaw += (float) (xo / freeLook.sensitivity.get().floatValue());
+            freeLook.cameraPitch += (float) (yo / freeLook.sensitivity.get().floatValue());
 
-            if (Math.abs(freeLook.cameraPitch) > 90.0F) freeLook.cameraPitch = freeLook.cameraPitch > 0.0F ? 90.0F : -90.0F;
+            if (Math.abs(freeLook.cameraPitch) > 90.0F)
+                freeLook.cameraPitch = freeLook.cameraPitch > 0.0F ? 90.0F : -90.0F;
             ci.cancel();
         }
     }

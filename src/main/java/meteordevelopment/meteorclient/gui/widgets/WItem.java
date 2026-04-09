@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.gui.widgets;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class WItem extends WWidget {
     protected ItemStack itemStack;

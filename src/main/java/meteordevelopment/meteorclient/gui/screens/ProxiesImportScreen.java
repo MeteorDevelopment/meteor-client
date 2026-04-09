@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 public class ProxiesImportScreen extends WindowScreen {
 
     private final File file;
+
     public ProxiesImportScreen(GuiTheme theme, File file) {
         super(theme, "Import Proxies");
         this.file = file;
@@ -82,7 +83,7 @@ public class ProxiesImportScreen extends WindowScreen {
                         ProxyType type = ProxyType.parse(matcher.group(1));
                         if (type == null) {
                             if (matcher.group(1) != null && matcher.group(1).equals("socks")) type = ProxyType.Socks5;
-                            // if it has a password it's a socks5 proxy
+                                // if it has a password it's a socks5 proxy
                             else if (matcher.group("pass") != null) type = ProxyType.Socks5;
                             else type = ProxyType.Socks4;
                         }
@@ -104,8 +105,7 @@ public class ProxiesImportScreen extends WindowScreen {
                         if (proxies.add(proxy)) {
                             list.add(theme.label("Imported proxy: " + proxy.name.get()).color(Color.GREEN));
                             success++;
-                        }
-                        else {
+                        } else {
                             list.add(theme.label("Proxy already exists: " + proxy.name.get()).color(Color.ORANGE));
                             fail++;
                         }
@@ -125,10 +125,10 @@ public class ProxiesImportScreen extends WindowScreen {
         WButton refresh = add(theme.button("Check proxies")).expandX().widget();
         refresh.action = () -> {
             Proxies.get().checkProxies(false);
-            close();
+            onClose();
         };
 
         WButton btnBack = add(theme.button("Back")).expandX().widget();
-        btnBack.action = this::close;
+        btnBack.action = this::onClose;
     }
 }

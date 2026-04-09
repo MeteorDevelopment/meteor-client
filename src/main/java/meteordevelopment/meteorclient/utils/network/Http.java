@@ -102,7 +102,8 @@ public class Http {
         }
 
         public Request ignoreExceptions() {
-            exceptionHandler = e -> {};
+            exceptionHandler = _ -> {
+            };
             return this;
         }
 

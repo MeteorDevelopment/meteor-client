@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -52,7 +52,7 @@ public class FriendsTab extends Tab {
             // New
             WHorizontalList list = add(theme.horizontalList()).expandX().widget();
 
-            WTextBox nameW = list.add(theme.textBox("", (text, c) -> c != ' ')).expandX().widget();
+            WTextBox nameW = list.add(theme.textBox("", (_, c) -> c != ' ')).expandX().widget();
             nameW.setFocused(true);
 
             WPlus add = list.add(theme.plus()).widget();

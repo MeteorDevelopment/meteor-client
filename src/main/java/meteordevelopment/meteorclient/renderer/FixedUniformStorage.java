@@ -9,19 +9,19 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gl.DynamicUniformStorage;
-import net.minecraft.client.gl.MappableRingBuffer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.DynamicUniformStorage;
+import net.minecraft.client.renderer.MappableRingBuffer;
+import net.minecraft.util.Mth;
 
 import java.nio.ByteBuffer;
 
 /**
  * UBO storage with a constant size. Exceeding this size causes an {@link IndexOutOfBoundsException} to be thrown.
  *
- * @see DynamicUniformStorage
  * @author Crosby
+ * @see DynamicUniformStorage
  */
-public class FixedUniformStorage<T extends DynamicUniformStorage.Uploadable> {
+public class FixedUniformStorage<T extends DynamicUniformStorage.DynamicUniform> {
     private final MappableRingBuffer buffer;
     private final int blockSize;
     private final int capacity;
@@ -29,9 +29,9 @@ public class FixedUniformStorage<T extends DynamicUniformStorage.Uploadable> {
 
     public FixedUniformStorage(String name, int blockSize, int capacity) {
         GpuDevice gpuDevice = RenderSystem.getDevice();
-        this.blockSize = MathHelper.roundUpToMultiple(blockSize, gpuDevice.getUniformOffsetAlignment());
+        this.blockSize = Mth.roundToward(blockSize, gpuDevice.getUniformOffsetAlignment());
         this.capacity = capacity;
-        int alignedCapacity = MathHelper.smallestEncompassingPowerOfTwo(capacity);
+        int alignedCapacity = Mth.smallestEncompassingPowerOfTwo(capacity);
         this.size = 0;
         this.buffer = new MappableRingBuffer(() -> name + " x" + this.blockSize, 130, this.blockSize * alignedCapacity);
     }
@@ -41,7 +41,7 @@ public class FixedUniformStorage<T extends DynamicUniformStorage.Uploadable> {
             throw new IndexOutOfBoundsException(String.format("Index %s out of bounds for length %s", this.size, this.capacity));
         } else {
             int i = this.size * this.blockSize;
-            GpuBufferSlice slice = this.buffer.getBlocking().slice(i, this.blockSize);
+            GpuBufferSlice slice = this.buffer.currentBuffer().slice(i, this.blockSize);
 
             try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice()
                 .createCommandEncoder()
@@ -62,7 +62,7 @@ public class FixedUniformStorage<T extends DynamicUniformStorage.Uploadable> {
         } else {
             int i = this.size * this.blockSize;
             GpuBufferSlice[] gpuBufferSlices = new GpuBufferSlice[values.length];
-            GpuBuffer ubo = this.buffer.getBlocking();
+            GpuBuffer ubo = this.buffer.currentBuffer();
 
             try (GpuBuffer.MappedView mappedView = RenderSystem.getDevice()
                 .createCommandEncoder()

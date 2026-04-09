@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
-import meteordevelopment.meteorclient.mixin.WorldRendererAccessor;
+import meteordevelopment.meteorclient.mixin.LevelRendererAccessor;
+import meteordevelopment.meteorclient.mixin.MultiPlayerGameModeAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -18,11 +18,11 @@ import meteordevelopment.meteorclient.systems.modules.world.PacketMine;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.BlockBreakingInfo;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.BlockDestructionProgress;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.List;
 import java.util.Map;
@@ -95,34 +95,34 @@ public class BreakIndicators extends Module {
         if (!b.isActive()) return;
 
         if (b.normalMining != null) {
-            VoxelShape voxelShape = b.normalMining.blockState.getOutlineShape(mc.world, b.normalMining.blockPos);
+            VoxelShape voxelShape = b.normalMining.blockState.getShape(mc.level, b.normalMining.blockPos);
             if (voxelShape.isEmpty()) return;
 
             double normalised = Math.min(1, b.normalMining.progress());
-            renderBlock(event, voxelShape.getBoundingBox(), b.normalMining.blockPos, 1 - normalised, normalised);
+            renderBlock(event, voxelShape.bounds(), b.normalMining.blockPos, 1 - normalised, normalised);
         }
 
         if (b.packetMining != null) {
-            VoxelShape voxelShape = b.packetMining.blockState.getOutlineShape(mc.world, b.packetMining.blockPos);
+            VoxelShape voxelShape = b.packetMining.blockState.getShape(mc.level, b.packetMining.blockPos);
             if (voxelShape.isEmpty()) return;
 
             double normalised = Math.min(1, b.packetMining.progress());
-            renderBlock(event, voxelShape.getBoundingBox(), b.packetMining.blockPos, 1 - normalised, normalised);
+            renderBlock(event, voxelShape.bounds(), b.packetMining.blockPos, 1 - normalised, normalised);
         }
     }
 
     private void renderNormal(Render3DEvent event) {
-        Map<Integer, BlockBreakingInfo> blocks = ((WorldRendererAccessor) mc.worldRenderer).meteor$getBlockBreakingInfos();
+        Map<Integer, BlockDestructionProgress> blocks = ((LevelRendererAccessor) mc.levelRenderer).meteor$getDestroyingBlocks();
 
-        float ownBreakingStage = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).meteor$getBreakingProgress();
-        BlockPos ownBreakingPos = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).meteor$getCurrentBreakingBlockPos();
+        float ownBreakingStage = ((MultiPlayerGameModeAccessor) mc.gameMode).meteor$getBreakingProgress();
+        BlockPos ownBreakingPos = ((MultiPlayerGameModeAccessor) mc.gameMode).meteor$getCurrentBreakingBlockPos();
 
         if (ownBreakingPos != null && ownBreakingStage > 0) {
-            BlockState state = mc.world.getBlockState(ownBreakingPos);
-            VoxelShape shape = state.getOutlineShape(mc.world, ownBreakingPos);
+            BlockState state = mc.level.getBlockState(ownBreakingPos);
+            VoxelShape shape = state.getShape(mc.level, ownBreakingPos);
             if (shape == null || shape.isEmpty()) return;
 
-            Box orig = shape.getBoundingBox();
+            AABB orig = shape.bounds();
 
             double shrinkFactor = 1d - ownBreakingStage;
 
@@ -131,14 +131,14 @@ public class BreakIndicators extends Module {
 
         blocks.values().forEach(info -> {
             BlockPos pos = info.getPos();
-            int stage = info.getStage();
+            int stage = info.getProgress();
             if (pos.equals(ownBreakingPos)) return;
 
-            BlockState state = mc.world.getBlockState(pos);
-            VoxelShape shape = state.getOutlineShape(mc.world, pos);
+            BlockState state = mc.level.getBlockState(pos);
+            VoxelShape shape = state.getShape(mc.level, pos);
             if (shape == null || shape.isEmpty()) return;
 
-            Box orig = shape.getBoundingBox();
+            AABB orig = shape.bounds();
 
             double shrinkFactor = (9 - (stage + 1)) / 9d;
             double progress = 1d - shrinkFactor;
@@ -150,10 +150,10 @@ public class BreakIndicators extends Module {
     private void renderPacket(Render3DEvent event, List<PacketMine.MyBlock> blocks) {
         for (PacketMine.MyBlock block : blocks) {
             if (block.mining && block.progress() != Double.POSITIVE_INFINITY) {
-                VoxelShape shape = block.blockState.getOutlineShape(mc.world, block.blockPos);
+                VoxelShape shape = block.blockState.getShape(mc.level, block.blockPos);
                 if (shape == null || shape.isEmpty()) return;
 
-                Box orig = shape.getBoundingBox();
+                AABB orig = shape.bounds();
 
                 double progressNormalised = Math.min(1, block.progress());
                 double shrinkFactor = 1d - progressNormalised;
@@ -164,16 +164,16 @@ public class BreakIndicators extends Module {
         }
     }
 
-    private void renderBlock(Render3DEvent event, Box orig, BlockPos pos, double shrinkFactor, double progress) {
-        Box box = orig.shrink(
-            orig.getLengthX() * shrinkFactor,
-            orig.getLengthY() * shrinkFactor,
-            orig.getLengthZ() * shrinkFactor
+    private void renderBlock(Render3DEvent event, AABB orig, BlockPos pos, double shrinkFactor, double progress) {
+        AABB box = orig.deflate(
+            orig.getXsize() * shrinkFactor,
+            orig.getYsize() * shrinkFactor,
+            orig.getZsize() * shrinkFactor
         );
 
-        double xShrink = (orig.getLengthX() * shrinkFactor) / 2;
-        double yShrink = (orig.getLengthY() * shrinkFactor) / 2;
-        double zShrink = (orig.getLengthZ() * shrinkFactor) / 2;
+        double xShrink = (orig.getXsize() * shrinkFactor) / 2;
+        double yShrink = (orig.getYsize() * shrinkFactor) / 2;
+        double zShrink = (orig.getZsize() * shrinkFactor) / 2;
 
         double x1 = pos.getX() + box.minX + xShrink;
         double y1 = pos.getY() + box.minY + yShrink;

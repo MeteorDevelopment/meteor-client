@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 // TODO: Add outline and more modes
 public class CuboidMarker extends BaseMarker {
