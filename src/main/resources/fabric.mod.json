@@ -52,6 +52,7 @@
     "java": ">=${jdk_version}",
     "minecraft": [
       "26.1",
+      "26.1.1",
       "${minecraft_version}"
     ],
     "fabricloader": ">=${loader_version}"
