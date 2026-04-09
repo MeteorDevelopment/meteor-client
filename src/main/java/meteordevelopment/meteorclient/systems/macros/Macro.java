@@ -35,7 +35,7 @@ public class Macro implements ISerializable<Macro> {
     public Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("messages")
         .description("The messages for the macro to send.")
-        .onChanged(v -> dirty = true)
+        .onChanged(_ -> dirty = true)
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );

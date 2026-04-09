@@ -55,7 +55,7 @@ public class DiscordPresence extends Module {
         .name("line-1-messages")
         .description("Messages used for the first line.")
         .defaultValue("{player}", "{server}")
-        .onChanged(strings -> recompileLine1())
+        .onChanged(_ -> recompileLine1())
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );
@@ -82,7 +82,7 @@ public class DiscordPresence extends Module {
         .name("line-2-messages")
         .description("Messages used for the second line.")
         .defaultValue("Meteor on Crack!", "{round(server.tps, 1)} TPS", "Playing on {server.difficulty} difficulty.", "{server.player_count} Players online")
-        .onChanged(strings -> recompileLine2())
+        .onChanged(_ -> recompileLine2())
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );

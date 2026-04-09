@@ -75,8 +75,8 @@ public class Config extends System<Config> {
         .name("custom-window-title")
         .description("Show custom text in the window title.")
         .defaultValue(false)
-        .onModuleActivated(setting -> mc.updateTitle())
-        .onChanged(value -> mc.updateTitle())
+        .onModuleActivated(_ -> mc.updateTitle())
+        .onChanged(_ -> mc.updateTitle())
         .build()
     );
 
@@ -85,7 +85,7 @@ public class Config extends System<Config> {
         .description("The text it displays in the window title.")
         .visible(customWindowTitle::get)
         .defaultValue("Minecraft {mc_version} - {meteor.name} {meteor.version}")
-        .onChanged(value -> mc.updateTitle())
+        .onChanged(_ -> mc.updateTitle())
         .build()
     );
 

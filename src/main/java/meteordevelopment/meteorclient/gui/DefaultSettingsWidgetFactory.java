@@ -189,7 +189,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private void stringW(WTable table, StringSetting setting) {
-        CharFilter filter = setting.filter == null ? (text, c) -> true : setting.filter;
+        CharFilter filter = setting.filter == null ? (_, _) -> true : setting.filter;
         Cell<WTextBox> cell = table.add(theme.textBox(setting.get(), setting.placeholder, filter, setting.renderer));
         if (setting.wide) cell.minWidth(Utils.getWindowWidth() - Utils.getWindowWidth() / 4.0);
 

@@ -39,7 +39,7 @@ public class Sphere2dMarker extends BaseMarker {
     private final Setting<BlockPos> center = sgGeneral.add(new BlockPosSetting.Builder()
         .name("center")
         .description("Center of the sphere")
-        .onChanged(bp -> dirty = true)
+        .onChanged(_ -> dirty = true)
         .build()
     );
 
@@ -49,7 +49,7 @@ public class Sphere2dMarker extends BaseMarker {
         .defaultValue(20)
         .min(1)
         .noSlider()
-        .onChanged(r -> dirty = true)
+        .onChanged(_ -> dirty = true)
         .build()
     );
 
@@ -59,7 +59,7 @@ public class Sphere2dMarker extends BaseMarker {
         .defaultValue(0)
         .min(0)
         .noSlider()
-        .onChanged(l -> dirty = true)
+        .onChanged(_ -> dirty = true)
         .build()
     );
 

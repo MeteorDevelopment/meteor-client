@@ -26,7 +26,7 @@ public class BindsCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.executes(context -> {
+        builder.executes(_ -> {
             // Modules
             List<Module> modules = Modules.get().getAll().stream()
                 .filter(module -> module.keybind.isSet())

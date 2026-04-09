@@ -232,7 +232,7 @@ public class InventoryTweaks extends Module {
         .name("auto-steal")
         .description("Automatically removes all possible items when you open a container.")
         .defaultValue(false)
-        .onChanged(val -> checkAutoStealSettings())
+        .onChanged(_ -> checkAutoStealSettings())
         .build()
     );
 
@@ -240,7 +240,7 @@ public class InventoryTweaks extends Module {
         .name("auto-dump")
         .description("Automatically dumps all possible items when you open a container.")
         .defaultValue(false)
-        .onChanged(val -> checkAutoStealSettings())
+        .onChanged(_ -> checkAutoStealSettings())
         .build()
     );
 

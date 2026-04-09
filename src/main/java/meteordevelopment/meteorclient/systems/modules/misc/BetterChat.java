@@ -79,7 +79,7 @@ public class BetterChat extends Module {
         .description("Shows seconds in the chat message timestamps")
         .defaultValue(false)
         .visible(timestamps::get)
-        .onChanged(o -> updateDateFormat())
+        .onChanged(_ -> updateDateFormat())
         .build()
     );
 
@@ -141,7 +141,7 @@ public class BetterChat extends Module {
         .name("regex-filter")
         .description("Regex filter used for filtering chat messages.")
         .visible(filterRegex::get)
-        .onChanged(strings -> compileFilterRegexList())
+        .onChanged(_ -> compileFilterRegexList())
         .build()
     );
 

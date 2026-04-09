@@ -9,8 +9,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.block.NoteBlock;
 
 public enum InstrumentDetectMode {
-    BlockState(((noteBlock, blockPos) -> noteBlock.getValue(NoteBlock.INSTRUMENT))),
-    BelowBlock(((noteBlock, blockPos) -> Minecraft.getInstance().level.getBlockState(blockPos.below()).instrument()));
+    BlockState(((noteBlock, _) -> noteBlock.getValue(NoteBlock.INSTRUMENT))),
+    BelowBlock(((_, blockPos) -> Minecraft.getInstance().level.getBlockState(blockPos.below()).instrument()));
 
     private final InstrumentDetectFunction instrumentDetectFunction;
 

@@ -182,7 +182,7 @@ public class CombatHud extends HudElement {
         .name("custom-scale")
         .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
-        .onChanged(aBoolean -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -191,7 +191,7 @@ public class CombatHud extends HudElement {
         .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
-        .onChanged(aDouble -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .min(0.5)
         .sliderRange(0.5, 3)
         .build()

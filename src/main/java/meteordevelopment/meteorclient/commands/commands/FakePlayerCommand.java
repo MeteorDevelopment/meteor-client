@@ -24,7 +24,7 @@ public class FakePlayerCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(literal("add")
-            .executes(context -> {
+            .executes(_ -> {
                 FakePlayer fakePlayer = Modules.get().get(FakePlayer.class);
                 FakePlayerManager.add(fakePlayer.name.get(), fakePlayer.health.get(), fakePlayer.copyInv.get());
                 return SINGLE_SUCCESS;
@@ -56,14 +56,14 @@ public class FakePlayerCommand extends Command {
         );
 
         builder.then(literal("clear")
-            .executes(context -> {
+            .executes(_ -> {
                 FakePlayerManager.clear();
                 return SINGLE_SUCCESS;
             })
         );
 
         builder.then(literal("list")
-            .executes(context -> {
+            .executes(_ -> {
                 info("--- Fake Players ((highlight)%s(default)) ---", FakePlayerManager.count());
                 FakePlayerManager.forEach(fp -> ChatUtils.info("(highlight)%s".formatted(fp.getName().getString())));
                 return SINGLE_SUCCESS;

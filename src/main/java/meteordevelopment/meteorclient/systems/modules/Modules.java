@@ -134,7 +134,7 @@ public class Modules extends System<Modules> {
     }
 
     public List<Module> getGroup(Category category) {
-        return groups.computeIfAbsent(category, category1 -> new ArrayList<>());
+        return groups.computeIfAbsent(category, _ -> new ArrayList<>());
     }
 
     public Collection<Module> getAll() {

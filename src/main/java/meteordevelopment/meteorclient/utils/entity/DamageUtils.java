@@ -406,7 +406,7 @@ public class DamageUtils {
     /* Raycasts */
 
     private static BlockHitResult raycast(ExposureRaycastContext context, RaycastFactory raycastFactory) {
-        return BlockGetter.traverseBlocks(context.start, context.end, context, raycastFactory, ctx -> null);
+        return BlockGetter.traverseBlocks(context.start, context.end, context, raycastFactory, _ -> null);
     }
 
     public record ExposureRaycastContext(Vec3 start, Vec3 end) {

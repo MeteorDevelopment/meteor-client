@@ -75,7 +75,7 @@ public class StringListSetting extends Setting<List<String>> {
         table.clear();
 
         ArrayList<String> strings = new ArrayList<>(setting.get());
-        CharFilter filter = setting.filter == null ? (text, c) -> true : setting.filter;
+        CharFilter filter = setting.filter == null ? (_, _) -> true : setting.filter;
 
         for (int i = 0; i < setting.get().size(); i++) {
             int msgI = i;

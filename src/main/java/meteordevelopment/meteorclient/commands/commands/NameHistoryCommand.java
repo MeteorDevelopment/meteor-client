@@ -38,7 +38,7 @@ public class NameHistoryCommand extends Command {
                 UUID uuid = lookUpTarget.getProfile().id();
 
                 NameHistory history = Http.get("https://laby.net/api/v2/user/" + uuid + "/get-profile")
-                    .exceptionHandler(e -> error("There was an error fetching that users name history."))
+                    .exceptionHandler(_ -> error("There was an error fetching that users name history."))
                     .sendJson(NameHistory.class);
 
                 if (history == null) {

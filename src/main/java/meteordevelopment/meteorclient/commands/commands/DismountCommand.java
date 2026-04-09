@@ -18,7 +18,7 @@ public class DismountCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.executes(context -> {
+        builder.executes(_ -> {
             Input sneak = new Input(false, false, false, false, false, true, false);
             mc.getConnection().send(new ServerboundPlayerInputPacket(sneak));
             return SINGLE_SUCCESS;

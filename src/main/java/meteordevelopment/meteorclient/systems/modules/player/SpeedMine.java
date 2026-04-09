@@ -28,7 +28,7 @@ public class SpeedMine extends Module {
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .defaultValue(Mode.Damage)
-        .onChanged(mode -> removeHaste())
+        .onChanged(_ -> removeHaste())
         .build()
     );
 
@@ -63,7 +63,7 @@ public class SpeedMine extends Module {
         .defaultValue(2)
         .min(1)
         .visible(() -> mode.get() == Mode.Haste)
-        .onChanged(i -> removeHaste())
+        .onChanged(_ -> removeHaste())
         .build()
     );
 

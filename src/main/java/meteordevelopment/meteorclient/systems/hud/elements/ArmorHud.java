@@ -32,7 +32,7 @@ public class ArmorHud extends HudElement {
         .name("orientation")
         .description("How to display armor.")
         .defaultValue(Orientation.Horizontal)
-        .onChanged(val -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -56,7 +56,7 @@ public class ArmorHud extends HudElement {
         .name("durability")
         .description("How to display armor durability.")
         .defaultValue(Durability.Bar)
-        .onChanged(durability1 -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -82,7 +82,7 @@ public class ArmorHud extends HudElement {
         .name("custom-scale")
         .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
-        .onChanged(aBoolean -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -91,7 +91,7 @@ public class ArmorHud extends HudElement {
         .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
-        .onChanged(aDouble -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .min(0.5)
         .sliderRange(0.5, 3)
         .build()

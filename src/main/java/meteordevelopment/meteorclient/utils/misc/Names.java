@@ -99,7 +99,7 @@ public class Names {
     }
 
     public static String get(Holder<Enchantment> enchantment) {
-        return enchantmentEntryNames.computeIfAbsent(enchantment, enchantment1 -> StringUtil.stripColor(enchantment.value().description().getString()));
+        return enchantmentEntryNames.computeIfAbsent(enchantment, _ -> StringUtil.stripColor(enchantment.value().description().getString()));
     }
 
     public static String get(EntityType<?> entityType) {
@@ -108,7 +108,7 @@ public class Names {
 
     public static String get(ParticleType<?> type) {
         if (!(type instanceof ParticleOptions)) return "";
-        return particleTypesNames.computeIfAbsent(type, effect1 -> StringUtils.capitalize(BuiltInRegistries.PARTICLE_TYPE.getKey(type).getPath().replace("_", " ")));
+        return particleTypesNames.computeIfAbsent(type, _ -> StringUtils.capitalize(BuiltInRegistries.PARTICLE_TYPE.getKey(type).getPath().replace("_", " ")));
     }
 
     public static String getSoundName(Identifier id) {

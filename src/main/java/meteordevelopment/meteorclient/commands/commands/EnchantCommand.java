@@ -35,7 +35,7 @@ public class EnchantCommand extends Command {
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(literal("one").then(argument("enchantment", RegistryEntryReferenceArgumentType.enchantment())
             .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
-                one(context, enchantment -> context.getArgument("level", Integer.class));
+                one(context, _ -> context.getArgument("level", Integer.class));
                 return SINGLE_SUCCESS;
             })))
             .then(literal("max").executes(context -> {
@@ -46,10 +46,10 @@ public class EnchantCommand extends Command {
 
         builder.then(literal("all_possible")
             .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
-                all(true, enchantment -> context.getArgument("level", Integer.class));
+                all(true, _ -> context.getArgument("level", Integer.class));
                 return SINGLE_SUCCESS;
             })))
-            .then(literal("max").executes(context -> {
+            .then(literal("max").executes(_ -> {
                 all(true, Enchantment::getMaxLevel);
                 return SINGLE_SUCCESS;
             }))
@@ -57,16 +57,16 @@ public class EnchantCommand extends Command {
 
         builder.then(literal("all")
             .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
-                all(false, enchantment -> context.getArgument("level", Integer.class));
+                all(false, _ -> context.getArgument("level", Integer.class));
                 return SINGLE_SUCCESS;
             })))
-            .then(literal("max").executes(context -> {
+            .then(literal("max").executes(_ -> {
                 all(false, Enchantment::getMaxLevel);
                 return SINGLE_SUCCESS;
             }))
         );
 
-        builder.then(literal("clear").executes(context -> {
+        builder.then(literal("clear").executes(_ -> {
             ItemStack itemStack = tryGetItemStack();
             Utils.clearEnchantments(itemStack);
 

@@ -26,7 +26,7 @@ public class SpectateCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.then(literal("reset").executes(context -> {
+        builder.then(literal("reset").executes(_ -> {
             mc.setCameraEntity(mc.player);
             return SINGLE_SUCCESS;
         }));

@@ -361,7 +361,7 @@ public class Notifier extends Module {
     }
 
     private int getChatId(Entity entity) {
-        return chatIdMap.computeIfAbsent(entity.getUUID(), value -> random.nextInt());
+        return chatIdMap.computeIfAbsent(entity.getUUID(), _ -> random.nextInt());
     }
 
     private void createJoinNotifications(ClientboundPlayerInfoUpdatePacket packet) {

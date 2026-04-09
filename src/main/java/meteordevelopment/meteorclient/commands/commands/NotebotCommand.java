@@ -46,36 +46,36 @@ public class NotebotCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.then(literal("help").executes(ctx -> {
+        builder.then(literal("help").executes(_ -> {
             Util.getPlatform().openUri("https://github.com/MeteorDevelopment/meteor-client/wiki/Notebot-Guide");
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("status").executes(ctx -> {
+        builder.then(literal("status").executes(_ -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             info(notebot.getStatus());
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("pause").executes(ctx -> {
+        builder.then(literal("pause").executes(_ -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.pause();
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("resume").executes(ctx -> {
+        builder.then(literal("resume").executes(_ -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.pause();
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("stop").executes(ctx -> {
+        builder.then(literal("stop").executes(_ -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.stop();
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("randomsong").executes(ctx -> {
+        builder.then(literal("randomsong").executes(_ -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.playRandomSong();
             return SINGLE_SUCCESS;
@@ -107,7 +107,7 @@ public class NotebotCommand extends Command {
                     return SINGLE_SUCCESS;
                 })));
 
-        builder.then(literal("record").then(literal("start").executes(ctx -> {
+        builder.then(literal("record").then(literal("start").executes(_ -> {
             ticks = -1;
             song.clear();
             MeteorClient.EVENT_BUS.subscribe(this);
@@ -115,7 +115,7 @@ public class NotebotCommand extends Command {
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("record").then(literal("cancel").executes(ctx -> {
+        builder.then(literal("record").then(literal("cancel").executes(_ -> {
             MeteorClient.EVENT_BUS.unsubscribe(this);
             info("Recording cancelled");
             return SINGLE_SUCCESS;
@@ -146,7 +146,7 @@ public class NotebotCommand extends Command {
     private void onReadPacket(PacketEvent.Receive event) {
         if (event.packet instanceof ClientboundSoundPacket sound && sound.getSound().value().location().getPath().contains("note_block")) {
             if (ticks == -1) ticks = 0;
-            List<Note> notes = song.computeIfAbsent(ticks, tick -> new ArrayList<>());
+            List<Note> notes = song.computeIfAbsent(ticks, _ -> new ArrayList<>());
             var note = getNote(sound);
             if (note != null) {
                 notes.add(note);

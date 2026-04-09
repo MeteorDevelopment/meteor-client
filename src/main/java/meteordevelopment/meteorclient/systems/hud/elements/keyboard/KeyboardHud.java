@@ -78,7 +78,7 @@ public class KeyboardHud extends HudElement {
         .min(0.5)
         .sliderRange(0.5, 5)
         .decimalPlaces(1)
-        .onChanged(s -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -90,7 +90,7 @@ public class KeyboardHud extends HudElement {
         .sliderRange(0, 10)
         .decimalPlaces(1)
         .visible(() -> preset.get() != Preset.Custom)
-        .onChanged(s -> onPresetChanged(preset.get()))
+        .onChanged(_ -> onPresetChanged(preset.get()))
         .build()
     );
 
@@ -99,7 +99,7 @@ public class KeyboardHud extends HudElement {
         .description("Physical keyboard layout (ANSI or ISO).")
         .defaultValue(KeyboardLayout.ANSI)
         .visible(() -> preset.get() == Preset.Keyboard)
-        .onChanged(layout -> onPresetChanged(preset.get()))
+        .onChanged(_ -> onPresetChanged(preset.get()))
         .build()
     );
 
@@ -108,7 +108,7 @@ public class KeyboardHud extends HudElement {
         .description("Shows clicks per second on keys.")
         .defaultValue(false)
         .visible(() -> preset.get() != Preset.Custom)
-        .onChanged(b -> onPresetChanged(preset.get()))
+        .onChanged(_ -> onPresetChanged(preset.get()))
         .build()
     );
 
@@ -852,7 +852,7 @@ public class KeyboardHud extends HudElement {
 
     public class CustomKeyListSetting extends Setting<List<Key>> {
         public CustomKeyListSetting() {
-            super("custom-keys", "Configure the custom keys display.", List.of(), k -> onPresetChanged(preset.get()), s -> {
+            super("custom-keys", "Configure the custom keys display.", List.of(), _ -> onPresetChanged(preset.get()), _ -> {
             }, () -> preset.get() == Preset.Custom);
         }
 

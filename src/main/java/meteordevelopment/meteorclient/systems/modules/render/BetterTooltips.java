@@ -75,7 +75,7 @@ public class BetterTooltips extends Module {
         .name("display-when")
         .description("When to display previews.")
         .defaultValue(DisplayWhen.Keybind)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -84,7 +84,7 @@ public class BetterTooltips extends Module {
         .description("The bind for keybind mode.")
         .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
         .visible(() -> displayWhen.get() == DisplayWhen.Keybind)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -117,7 +117,7 @@ public class BetterTooltips extends Module {
         .name("containers")
         .description("Shows a preview of a containers when hovering over it in an inventory.")
         .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -132,7 +132,7 @@ public class BetterTooltips extends Module {
         .name("echests")
         .description("Shows a preview of your echest when hovering over it in an inventory.")
         .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -140,7 +140,7 @@ public class BetterTooltips extends Module {
         .name("maps")
         .description("Shows a preview of a map when hovering over it in an inventory.")
         .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -158,7 +158,7 @@ public class BetterTooltips extends Module {
         .name("books")
         .description("Shows contents of a book when hovering over it in an inventory.")
         .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -166,7 +166,7 @@ public class BetterTooltips extends Module {
         .name("banners")
         .description("Shows banners' patterns when hovering over it in an inventory. Also works with shields.")
         .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -174,7 +174,7 @@ public class BetterTooltips extends Module {
         .name("entities-in-buckets")
         .description("Shows entities in buckets when hovering over it in an inventory.")
         .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -182,7 +182,7 @@ public class BetterTooltips extends Module {
         .name("bundles")
         .description("Shows a preview of bundle contents when hovering over it in an inventory.")
         .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -190,7 +190,7 @@ public class BetterTooltips extends Module {
         .name("food-info")
         .description("Shows hunger and saturation values for food items.")
         .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -200,7 +200,7 @@ public class BetterTooltips extends Module {
         .name("byte-size")
         .description("Displays an item's size in bytes in the tooltip.")
         .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 
@@ -216,7 +216,7 @@ public class BetterTooltips extends Module {
         .name("status-effects")
         .description("Adds list of status effects to tooltips of food items.")
         .defaultValue(true)
-        .onChanged(value -> updateTooltips = true)
+        .onChanged(_ -> updateTooltips = true)
         .build()
     );
 

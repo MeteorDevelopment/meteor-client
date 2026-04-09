@@ -41,7 +41,7 @@ public class BlockESP extends Module {
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Blocks to search for.")
-        .onChanged(blocks1 -> {
+        .onChanged(_ -> {
             if (isActive() && Utils.canUpdate()) onActivate();
         })
         .build()

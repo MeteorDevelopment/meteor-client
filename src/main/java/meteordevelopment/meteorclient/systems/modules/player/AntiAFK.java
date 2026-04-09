@@ -58,7 +58,7 @@ public class AntiAFK extends Module {
         .name("strafe")
         .description("Strafe right and left.")
         .defaultValue(false)
-        .onChanged(aBoolean -> {
+        .onChanged(_ -> {
             strafeTimer = 0;
             direction = false;
 

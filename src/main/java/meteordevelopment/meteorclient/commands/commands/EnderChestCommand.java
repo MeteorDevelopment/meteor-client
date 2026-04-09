@@ -19,7 +19,7 @@ public class EnderChestCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.executes(context -> {
+        builder.executes(_ -> {
             Utils.openContainer(Items.ENDER_CHEST.getDefaultInstance(), new ItemStack[27], true);
             return SINGLE_SUCCESS;
         });

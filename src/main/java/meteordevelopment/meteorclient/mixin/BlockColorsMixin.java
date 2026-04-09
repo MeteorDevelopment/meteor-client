@@ -30,7 +30,7 @@ public abstract class BlockColorsMixin {
         index = 0
     )
     private static List<BlockTintSource> modifySpruceLeavesColor(List<BlockTintSource> layers) {
-        return List.of(state -> getModifiedColor(-10380959));
+        return List.of(_ -> getModifiedColor(-10380959));
     }
 
     @ModifyArg(
@@ -43,7 +43,7 @@ public abstract class BlockColorsMixin {
         index = 0
     )
     private static List<BlockTintSource> modifyBirchLeavesColor(List<BlockTintSource> layers) {
-        return List.of(state -> getModifiedColor(-8345771));
+        return List.of(_ -> getModifiedColor(-8345771));
     }
 
     @Unique

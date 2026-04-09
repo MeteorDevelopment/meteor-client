@@ -57,14 +57,14 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
 
         if (id != null) {
             res = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + UndashedUuid.toString(id))
-                .exceptionHandler(e -> MeteorClient.LOG.error("Error while trying to connect session server for friend '{}'", name))
+                .exceptionHandler(_ -> MeteorClient.LOG.error("Error while trying to connect session server for friend '{}'", name))
                 .sendJsonResponse(APIResponse.class);
         }
 
         // Fallback to name-based lookup
         if (res == null || res.statusCode() != 200) {
             res = Http.get("https://api.mojang.com/users/profiles/minecraft/" + name)
-                .exceptionHandler(e -> MeteorClient.LOG.error("Error while trying to update info for friend '{}'", name))
+                .exceptionHandler(_ -> MeteorClient.LOG.error("Error while trying to update info for friend '{}'", name))
                 .sendJsonResponse(APIResponse.class);
         }
 

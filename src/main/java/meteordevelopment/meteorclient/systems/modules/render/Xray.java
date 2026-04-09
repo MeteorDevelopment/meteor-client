@@ -38,7 +38,7 @@ public class Xray extends Module {
         .name("whitelist")
         .description("Which blocks to show x-rayed.")
         .defaultValue(ORES)
-        .onChanged(v -> {
+        .onChanged(_ -> {
             if (isActive()) mc.levelRenderer.allChanged();
         })
         .build()
@@ -50,7 +50,7 @@ public class Xray extends Module {
         .defaultValue(25)
         .range(0, 255)
         .sliderMax(255)
-        .onChanged(onChanged -> {
+        .onChanged(_ -> {
             if (isActive()) mc.levelRenderer.allChanged();
         })
         .build()
@@ -60,7 +60,7 @@ public class Xray extends Module {
         .name("exposed-only")
         .description("Show only exposed ores.")
         .defaultValue(false)
-        .onChanged(onChanged -> {
+        .onChanged(_ -> {
             if (isActive()) mc.levelRenderer.allChanged();
         })
         .build());

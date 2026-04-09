@@ -40,7 +40,7 @@ public class Fullbright extends Module {
         .description("Which type of light to use for Luminance mode.")
         .defaultValue(LightLayer.BLOCK)
         .visible(() -> mode.get() == Mode.Luminance)
-        .onChanged(integer -> {
+        .onChanged(_ -> {
             if (mc.levelRenderer != null && isActive()) mc.levelRenderer.allChanged();
         })
         .build()
@@ -53,7 +53,7 @@ public class Fullbright extends Module {
         .defaultValue(8)
         .range(0, 15)
         .sliderMax(15)
-        .onChanged(integer -> {
+        .onChanged(_ -> {
             if (mc.levelRenderer != null && isActive()) mc.levelRenderer.allChanged();
         })
         .build()

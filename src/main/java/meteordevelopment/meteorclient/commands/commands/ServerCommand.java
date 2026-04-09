@@ -61,17 +61,17 @@ public class ServerCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.executes(context -> {
+        builder.executes(_ -> {
             basicInfo();
             return SINGLE_SUCCESS;
         });
 
-        builder.then(literal("info").executes(ctx -> {
+        builder.then(literal("info").executes(_ -> {
             basicInfo();
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("plugins").executes(ctx -> {
+        builder.then(literal("plugins").executes(_ -> {
             plugins.addAll(commandTreePlugins);
 
             if (alias != null) {
@@ -82,7 +82,7 @@ public class ServerCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("tps").executes(ctx -> {
+        builder.then(literal("tps").executes(_ -> {
             float tps = TickRate.INSTANCE.getTickRate();
             ChatFormatting color;
             if (tps > 17.0f) color = ChatFormatting.GREEN;

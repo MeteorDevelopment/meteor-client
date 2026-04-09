@@ -25,7 +25,7 @@ public class CommandsCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.executes(context -> {
+        builder.executes(_ -> {
             ChatUtils.info("--- Commands ((highlight)%d(default)) ---", Commands.COMMANDS.size());
 
             MutableComponent commands = Component.literal("");

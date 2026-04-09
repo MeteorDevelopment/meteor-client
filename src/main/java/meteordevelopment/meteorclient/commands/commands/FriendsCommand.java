@@ -56,7 +56,7 @@ public class FriendsCommand extends Command {
             )
         );
 
-        builder.then(literal("list").executes(context -> {
+        builder.then(literal("list").executes(_ -> {
                 info("--- Friends ((highlight)%s(default)) ---", Friends.get().count());
                 Friends.get().forEach(friend -> ChatUtils.info("(highlight)%s".formatted(friend.getName())));
                 return SINGLE_SUCCESS;

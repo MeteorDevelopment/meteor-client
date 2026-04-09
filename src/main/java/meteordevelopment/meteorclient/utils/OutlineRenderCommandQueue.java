@@ -42,7 +42,7 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
 
     @Override
     public SubmitNodeCollection order(int i) {
-        return submitsPerOrder.computeIfAbsent(i, order -> new OutlineBatchingRenderCommandQueue(this));
+        return submitsPerOrder.computeIfAbsent(i, _ -> new OutlineBatchingRenderCommandQueue(this));
     }
 
     private class OutlineBatchingRenderCommandQueue extends SubmitNodeCollection {

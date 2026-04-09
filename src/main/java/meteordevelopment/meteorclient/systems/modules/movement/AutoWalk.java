@@ -51,7 +51,7 @@ public class AutoWalk extends Module {
         .name("simple-direction")
         .description("The direction to walk in simple mode.")
         .defaultValue(Direction.Forwards)
-        .onChanged(direction1 -> {
+        .onChanged(_ -> {
             if (isActive()) unpress();
         })
         .visible(() -> mode.get() == Mode.Simple)

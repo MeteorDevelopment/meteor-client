@@ -48,7 +48,7 @@ public class InputCommand extends Command {
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         for (Pair<KeyMapping, String> keyBinding : holdKeys) {
             builder.then(literal(keyBinding.getSecond())
-                .executes(context -> {
+                .executes(_ -> {
                     activeHandlers.add(new KeypressHandler(keyBinding.getFirst(), 1));
                     return SINGLE_SUCCESS;
                 })
@@ -63,7 +63,7 @@ public class InputCommand extends Command {
 
         for (Pair<KeyMapping, String> keyBinding : pressKeys) {
             builder.then(literal(keyBinding.getSecond())
-                .executes(context -> {
+                .executes(_ -> {
                     press(keyBinding.getFirst());
                     return SINGLE_SUCCESS;
                 })
@@ -72,14 +72,14 @@ public class InputCommand extends Command {
 
         for (KeyMapping keyBinding : mc.options.keyHotbarSlots) {
             builder.then(literal(keyBinding.getName().substring(4))
-                .executes(context -> {
+                .executes(_ -> {
                     press(keyBinding);
                     return SINGLE_SUCCESS;
                 })
             );
         }
 
-        builder.then(literal("clear").executes(ctx -> {
+        builder.then(literal("clear").executes(_ -> {
             if (activeHandlers.isEmpty()) warning("No active keypress handlers.");
             else {
                 info("Cleared all keypress handlers.");
@@ -89,7 +89,7 @@ public class InputCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("list").executes(ctx -> {
+        builder.then(literal("list").executes(_ -> {
             if (activeHandlers.isEmpty()) warning("No active keypress handlers.");
             else {
                 info("Active keypress handlers: ");

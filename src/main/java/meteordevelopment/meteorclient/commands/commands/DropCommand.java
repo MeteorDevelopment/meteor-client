@@ -32,27 +32,27 @@ public class DropCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         // Main Hand
-        builder.then(literal("hand").executes(context -> drop(player -> player.drop(true))));
+        builder.then(literal("hand").executes(_ -> drop(player -> player.drop(true))));
 
         // Offhand
-        builder.then(literal("offhand").executes(context -> drop(player -> InvUtils.drop().slotOffhand())));
+        builder.then(literal("offhand").executes(_ -> drop(_ -> InvUtils.drop().slotOffhand())));
 
         // Hotbar
-        builder.then(literal("hotbar").executes(context -> drop(player -> {
+        builder.then(literal("hotbar").executes(_ -> drop(_ -> {
             for (int i = 0; i < 9; i++) {
                 InvUtils.drop().slotHotbar(i);
             }
         })));
 
         // Main Inv
-        builder.then(literal("inventory").executes(context -> drop(player -> {
+        builder.then(literal("inventory").executes(_ -> drop(_ -> {
             for (int i = 0; i < 27; i++) {
                 InvUtils.drop().slotMain(i);
             }
         })));
 
         // Hotbar and main inv
-        builder.then(literal("all").executes(context -> drop(player -> {
+        builder.then(literal("all").executes(_ -> drop(player -> {
             for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
                 InvUtils.drop().slot(i);
             }
@@ -60,7 +60,7 @@ public class DropCommand extends Command {
         })));
 
         // Armor
-        builder.then(literal("armor").executes(context -> drop(player -> {
+        builder.then(literal("armor").executes(_ -> drop(_ -> {
             for (EquipmentSlot equipmentSlot : EquipmentSlotGroup.ARMOR) {
                 if (equipmentSlot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
                     InvUtils.drop().slotArmor(equipmentSlot.getIndex());

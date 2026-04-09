@@ -44,7 +44,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         .description("The icon of the waypoint.")
         .defaultValue("Square")
         .supplier(() -> Waypoints.BUILTIN_ICONS)
-        .onChanged(v -> validateIcon())
+        .onChanged(_ -> validateIcon())
         .build()
     );
 

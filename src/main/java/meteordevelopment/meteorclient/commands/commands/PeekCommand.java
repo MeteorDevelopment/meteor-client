@@ -24,7 +24,7 @@ public class PeekCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.executes(context -> {
+        builder.executes(_ -> {
             if (Utils.openContainer(mc.player.getMainHandItem(), ITEMS, true)) return SINGLE_SUCCESS;
             else if (Utils.openContainer(mc.player.getOffhandItem(), ITEMS, true)) return SINGLE_SUCCESS;
             else if (mc.crosshairPickEntity instanceof ItemFrame itemFrame && Utils.openContainer(itemFrame.getItem(), ITEMS, true))

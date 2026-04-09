@@ -58,7 +58,7 @@ public class CompassHud extends HudElement {
         .name("custom-scale")
         .description("Apply custom scales to this hud element.")
         .defaultValue(false)
-        .onChanged(aBoolean -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -79,7 +79,7 @@ public class CompassHud extends HudElement {
         .defaultValue(1)
         .min(0.5)
         .sliderRange(0.5, 3)
-        .onChanged(aDouble -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 

@@ -150,7 +150,7 @@ public class NbtCommand extends Command {
             return suggestionsBuilder.buildFuture();
         })));
 
-        builder.then(literal("get").executes(context -> {
+        builder.then(literal("get").executes(_ -> {
             DataAccessor dataCommandObject = new EntityDataAccessor(mc.player);
             NbtPathArgument.NbtPath handPath = NbtPathArgument.NbtPath.of("SelectedItem");
 
@@ -170,7 +170,7 @@ public class NbtCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("copy").executes(context -> {
+        builder.then(literal("copy").executes(_ -> {
             DataAccessor dataCommandObject = new EntityDataAccessor(mc.player);
             NbtPathArgument.NbtPath handPath = NbtPathArgument.NbtPath.of("SelectedItem");
 

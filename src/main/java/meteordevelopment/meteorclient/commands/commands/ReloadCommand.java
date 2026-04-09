@@ -22,7 +22,7 @@ public class ReloadCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.executes(context -> {
+        builder.executes(_ -> {
             warning("Reloading systems, this may take a while.");
 
             Systems.load();

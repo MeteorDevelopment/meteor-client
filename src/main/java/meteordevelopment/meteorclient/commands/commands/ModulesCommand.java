@@ -23,7 +23,7 @@ public class ModulesCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.executes(context -> {
+        builder.executes(_ -> {
             ChatUtils.info("--- Modules ((highlight)%d(default)) ---", Modules.get().getCount());
 
             Modules.loopCategories().forEach(category -> {

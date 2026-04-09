@@ -26,7 +26,7 @@ public class WaspCommand extends Command {
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         AutoWasp wasp = Modules.get().get(AutoWasp.class);
 
-        builder.then(literal("reset").executes(context -> {
+        builder.then(literal("reset").executes(_ -> {
             wasp.disable();
             return SINGLE_SUCCESS;
         }));

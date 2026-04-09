@@ -43,7 +43,7 @@ public class InventoryHud extends HudElement {
         .name("custom-scale")
         .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
-        .onChanged(aBoolean -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -52,7 +52,7 @@ public class InventoryHud extends HudElement {
         .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
-        .onChanged(aDouble -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .min(0.5)
         .sliderRange(0.5, 3)
         .build()
@@ -64,7 +64,7 @@ public class InventoryHud extends HudElement {
         .name("background")
         .description("Background of inventory viewer.")
         .defaultValue(Background.Texture)
-        .onChanged(bg -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 

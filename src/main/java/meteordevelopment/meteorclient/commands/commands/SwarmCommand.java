@@ -48,7 +48,7 @@ public class SwarmCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
-        builder.then(literal("disconnect").executes(context -> {
+        builder.then(literal("disconnect").executes(_ -> {
             Swarm swarm = Modules.get().get(Swarm.class);
             if (swarm.isActive()) {
                 swarm.close();
@@ -78,7 +78,7 @@ public class SwarmCommand extends Command {
                     })
                 )
             )
-            .then(literal("confirm").executes(ctx -> {
+            .then(literal("confirm").executes(_ -> {
                 if (pendingConnection == null) {
                     error("No pending swarm connections.");
                     return SINGLE_SUCCESS;
@@ -105,7 +105,7 @@ public class SwarmCommand extends Command {
             }))
         );
 
-        builder.then(literal("connections").executes(context -> {
+        builder.then(literal("connections").executes(_ -> {
             Swarm swarm = Modules.get().get(Swarm.class);
             if (swarm.isActive()) {
                 if (swarm.isHost()) {

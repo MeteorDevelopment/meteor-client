@@ -131,11 +131,11 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
 
     public WTextBox textBox(String text, String placeholder) {
-        return textBox(text, placeholder, (text1, c) -> true, null);
+        return textBox(text, placeholder, (_, _) -> true, null);
     }
 
     public WTextBox textBox(String text) {
-        return textBox(text, (text1, c) -> true, null);
+        return textBox(text, (_, _) -> true, null);
     }
 
     public abstract <T> WDropdown<T> dropdown(T[] values, T value);
