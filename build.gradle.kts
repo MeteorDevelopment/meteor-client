@@ -136,7 +136,7 @@ listOf("jij", "implementation", "include").forEach { configName ->
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")
+    accessWidenerPath = file("src/main/resources/meteor-client.classtweaker")
 }
 
 tasks {
