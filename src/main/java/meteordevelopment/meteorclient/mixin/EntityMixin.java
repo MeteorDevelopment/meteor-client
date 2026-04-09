@@ -43,34 +43,17 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Inject(method = "isInWater", at = @At(value = "HEAD"), cancellable = true)
-    private void isInWater(CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = {"isInWater", "isInLava"}, at = @At("HEAD"), cancellable = true)
+    private void onIsInFluid(CallbackInfoReturnable<Boolean> cir) {
         if ((Object) this != mc.player) return;
 
-        if (Modules.get().get(Flight.class).isActive()) cir.setReturnValue(false);
-        if (Modules.get().get(NoSlow.class).fluidDrag()) cir.setReturnValue(false);
+        Flight flight = Modules.get().get(Flight.class);
+        NoSlow noSlow = Modules.get().get(NoSlow.class);
+        if (flight.isActive() || noSlow.fluidDrag()) cir.setReturnValue(false);
     }
 
-    @Inject(method = "isInLava", at = @At(value = "HEAD"), cancellable = true)
-    private void isInLava(CallbackInfoReturnable<Boolean> cir) {
-        if ((Object) this != mc.player) return;
-
-        if (Modules.get().get(Flight.class).isActive()) cir.setReturnValue(false);
-        if (Modules.get().get(NoSlow.class).fluidDrag()) cir.setReturnValue(false);
-    }
-
-    @Inject(method = "onAboveBubbleColumn", at = @At("HEAD"))
-    private void onAboveBubbleColumn(CallbackInfo ci) {
-        if ((Object) this != mc.player) return;
-
-        Jesus jesus = Modules.get().get(Jesus.class);
-        if (jesus.isActive()) {
-            jesus.isInBubbleColumn = true;
-        }
-    }
-
-    @Inject(method = "onInsideBubbleColumn", at = @At("HEAD"))
-    private void onInsideBubbleColumn(CallbackInfo ci) {
+    @Inject(method = {"onAboveBubbleColumn", "onInsideBubbleColumn"}, at = @At("HEAD"))
+    private void onBubbleColumn(CallbackInfo ci) {
         if ((Object) this != mc.player) return;
 
         Jesus jesus = Modules.get().get(Jesus.class);

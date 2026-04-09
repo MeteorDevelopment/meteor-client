@@ -167,8 +167,7 @@ public class Jesus extends Module {
     private boolean prePathManagerWalkOnLava;
 
     /**
-     * {@link EntityMixin#onAboveBubbleColumn(CallbackInfo)}
-     * {@link EntityMixin#onInsideBubbleColumn(CallbackInfo)}
+     * {@link EntityMixin#onBubbleColumn(CallbackInfo)}
      */
     public boolean isInBubbleColumn = false;
 
