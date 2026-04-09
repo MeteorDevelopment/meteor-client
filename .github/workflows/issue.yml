@@ -24,7 +24,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check Content
-        uses: machiecodes/check-content@v1.0.0
+        uses: machiecodes/check-content@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -32,6 +32,4 @@ jobs:
           gemini-model: "gemini-2.5-flash"
           project-context: "Meteor Client is a Minecraft utility/cheat client built as a Fabric mod, intended for use
           on anarchy servers where cheating is permitted. It is written in Java and targets a specific major Minecraft
-          version at any given time. It is open source and maintained on GitHub.
-
-"
+          version at any given time. It is open source and maintained on GitHub."
