@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import com.google.common.base.MoreObjects;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.ArmRenderEvent;
@@ -18,16 +18,17 @@ import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
-import net.minecraft.registry.tag.ItemTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Objects;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -48,25 +49,26 @@ public abstract class HeldItemRendererMixin {
     @Shadow
     protected abstract boolean shouldSkipHandAnimationOnSwap(ItemStack from, ItemStack to);
 
-    @ModifyVariable(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/network/ClientPlayerEntity;I)V", at = @At(value = "STORE", ordinal = 0), index = 6)
+    @ModifyExpressionValue(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/network/ClientPlayerEntity;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getHandSwingProgress(F)F"))
     private float modifySwing(float swingProgress) {
         HandView module = Modules.get().get(HandView.class);
-        Hand hand = MoreObjects.firstNonNull(mc.player.preferredHand, Hand.MAIN_HAND);
+        Hand hand = Objects.requireNonNullElse(mc.player.preferredHand, Hand.MAIN_HAND);
 
         if (module.isActive()) {
-            if (module.swordSlash() && hand == Hand.MAIN_HAND && mc.player.getMainHandStack().isIn(ItemTags.SWORDS)) {
+            if (module.swordSlash() && hand == Hand.MAIN_HAND && mainHand.isIn(ItemTags.SWORDS)) {
                 return 0f;
             }
-            if (hand == Hand.OFF_HAND && !mc.player.getOffHandStack().isEmpty()) {
+            if (hand == Hand.OFF_HAND && !offHand.isEmpty()) {
                 return swingProgress + module.offSwing.get().floatValue();
             }
-            if (hand == Hand.MAIN_HAND && !mc.player.getMainHandStack().isEmpty()) {
+            if (hand == Hand.MAIN_HAND && !mainHand.isEmpty()) {
                 return swingProgress + module.mainSwing.get().floatValue();
             }
         }
 
         return swingProgress;
     }
+
     @ModifyReturnValue(method = "shouldSkipHandAnimationOnSwap", at = @At("RETURN"))
     private boolean modifySkipSwapAnimation(boolean original) {
         return original || Modules.get().get(HandView.class).skipSwapping();
@@ -74,8 +76,11 @@ public abstract class HeldItemRendererMixin {
 
     @ModifyArg(method = "updateHeldItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;clamp(FFF)F", ordinal = 2), index = 0)
     private float modifyEquipProgressMainhand(float value) {
+        HandView handView = Modules.get().get(HandView.class);
+        if (handView.swordSlash() && mc.player.getMainHandStack().isIn(ItemTags.SWORDS)) return value;
+
         float f = mc.player.getHandEquippingProgress(1f);
-        float modified = Modules.get().get(HandView.class).oldAnimations() ? 1 : f * f * f;
+        float modified = handView.oldAnimations() ? 1 : f * f * f;
 
         return (shouldSkipHandAnimationOnSwap(mainHand, mc.player.getMainHandStack()) ? modified : 0) - equipProgressMainHand;
     }
