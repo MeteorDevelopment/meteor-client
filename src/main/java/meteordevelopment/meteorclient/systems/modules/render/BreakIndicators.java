@@ -165,7 +165,7 @@ public class BreakIndicators extends Module {
     }
 
     private void renderBlock(Render3DEvent event, AABB orig, BlockPos pos, double shrinkFactor, double progress) {
-        AABB box = orig.deflate(
+        AABB box = orig.contract(
             orig.getXsize() * shrinkFactor,
             orig.getYsize() * shrinkFactor,
             orig.getZsize() * shrinkFactor
