@@ -24,7 +24,7 @@ public class AntiPacketKick extends Module {
     public final Setting<Boolean> logExceptions = sgGeneral.add(new BoolSetting.Builder()
         .name("log-exceptions")
         .description("Logs caught exceptions.")
-        .defaultValue(false)
+        .defaultValue(true)
         .visible(catchExceptions::get)
         .build()
     );
