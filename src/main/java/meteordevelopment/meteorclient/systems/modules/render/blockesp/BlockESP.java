@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class BlockESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -100,7 +101,7 @@ public class BlockESP extends Module {
 
     public final Setting<Keybind> group1Key = sgGeneral.add(new KeybindSetting.Builder()
         .name("group-1-key")
-        .description("Key to toggle group 1 visibility.")
+        .description("Key to activate group 1 (mutually exclusive with group 2).")
         .defaultValue(Keybind.fromKey(GLFW_KEY_1))
         .visible(enableGroupKeybinds::get)
         .build()
@@ -108,29 +109,27 @@ public class BlockESP extends Module {
 
     public final Setting<Keybind> group2Key = sgGeneral.add(new KeybindSetting.Builder()
         .name("group-2-key")
-        .description("Key to toggle group 2 visibility.")
+        .description("Key to activate group 2 (mutually exclusive with group 1).")
         .defaultValue(Keybind.fromKey(GLFW_KEY_2))
         .visible(enableGroupKeybinds::get)
         .build()
     );
 
-    // Initial state: only group 1 is visible
+    // 初始状态：只显示 group 1
     public boolean showGroup1 = true;
     public boolean showGroup2 = false;
     private boolean wasGroup1KeyPressed = false;
     private boolean wasGroup2KeyPressed = false;
 
-    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
-
+    // Fix #2: 不再使用 Mutable 成员变量跨线程传递，改为在 onBlockUpdate 里捕获局部 int
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
+
+    // Fix #6: 统一使用 chunks 作为锁对象，消除 chunks/groups 双锁不一致问题
     private final Set<ESPGroup> groups = new ReferenceOpenHashSet<>();
-    private final ExecutorService workerThread = Executors.newFixedThreadPool(2); // 优化：使用2个线程池提高并发
+
+    private ExecutorService workerThread;
     private int group1Counter = 0;
     private int group2Counter = 0;
-    
-    // 缓存常用设置，减少重复get()调用
-    private List<Block> cachedBlocks1;
-    private List<Block> cachedBlocks2;
 
     private DimensionType lastDimension;
 
@@ -142,6 +141,11 @@ public class BlockESP extends Module {
 
     @Override
     public void onActivate() {
+        // Fix #5: 每次激活时创建新的线程池（防止上次 deactivate 后残留关闭状态）
+        if (workerThread == null || workerThread.isShutdown()) {
+            workerThread = Executors.newFixedThreadPool(2);
+        }
+
         synchronized (chunks) {
             chunks.clear();
             groups.clear();
@@ -159,6 +163,19 @@ public class BlockESP extends Module {
         synchronized (chunks) {
             chunks.clear();
             groups.clear();
+        }
+
+        // Fix #5: 关闭线程池，释放资源，等待最多 2 秒让任务安全结束
+        if (workerThread != null && !workerThread.isShutdown()) {
+            workerThread.shutdown();
+            try {
+                if (!workerThread.awaitTermination(2, TimeUnit.SECONDS)) {
+                    workerThread.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                workerThread.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
@@ -189,32 +206,30 @@ public class BlockESP extends Module {
         return chunk == null ? null : chunk.get(x, y, z);
     }
 
+    // Fix #6: 统一用 chunks 锁
     public ESPGroup newGroup(Block block) {
-        synchronized (groups) {
-            // Determine which group counter to use based on block type
+        synchronized (chunks) {
             if (blocks1.get().contains(block)) {
-                // For group 1 blocks, use positive IDs
                 ESPGroup group = new ESPGroup(++group1Counter, block, 1);
                 groups.add(group);
                 return group;
             } else {
-                // For group 2 blocks, use negative IDs
                 ESPGroup group = new ESPGroup(-(++group2Counter), block, 2);
                 groups.add(group);
                 return group;
             }
         }
     }
-    
-    // Getters for group lists
+
     public List<Block> getBlocks1() {
         return blocks1.get();
     }
-    
+
     public List<Block> getBlocks2() {
         return blocks2.get();
     }
 
+    // Fix #6: 统一用 chunks 锁（原来用的是 chunks 但注释写的 groups，保持一致）
     public void removeGroup(ESPGroup group) {
         synchronized (chunks) {
             groups.remove(group);
@@ -227,18 +242,21 @@ public class BlockESP extends Module {
     }
 
     private void searchChunk(Chunk chunk) {
+        // Fix #3: 直接调用 blocks1/2.get()，不依赖可能为 null 的缓存字段
+        // 缓存的意义仅在同一 tick 内复用，不应跨方法传递
+        List<Block> b1 = blocks1.get();
+        List<Block> b2 = blocks2.get();
+
         workerThread.submit(() -> {
             if (!isActive()) return;
-            
-            // 优化：使用缓存的方块列表
-            ESPChunk schunk = ESPChunk.searchChunk(chunk, cachedBlocks1 != null ? cachedBlocks1 : blocks1.get(), cachedBlocks2 != null ? cachedBlocks2 : blocks2.get());
+
+            ESPChunk schunk = ESPChunk.searchChunk(chunk, b1, b2);
 
             if (schunk.size() > 0) {
                 synchronized (chunks) {
                     chunks.put(chunk.getPos().toLong(), schunk);
                     schunk.update();
 
-                    // 优化：减少邻居区块更新频率，仅在必要时更新
                     ChunkPos pos = chunk.getPos();
                     updateChunk(pos.x - 1, pos.z);
                     updateChunk(pos.x + 1, pos.z);
@@ -251,114 +269,92 @@ public class BlockESP extends Module {
 
     @EventHandler
     private void onBlockUpdate(BlockUpdateEvent event) {
-        // Minecraft probably reuses the event.pos BlockPos instance because it causes problems when trying to use it inside another thread
-        int bx = event.pos.getX();
-        int by = event.pos.getY();
-        int bz = event.pos.getZ();
+        // Fix #2: 在主线程立刻捕获坐标为局部 int，避免 Mutable 成员变量跨线程竞态
+        final int bx = event.pos.getX();
+        final int by = event.pos.getY();
+        final int bz = event.pos.getZ();
 
-        int chunkX = bx >> 4;
-        int chunkZ = bz >> 4;
-        long key = ChunkPos.toLong(chunkX, chunkZ);
+        final int chunkX = bx >> 4;
+        final int chunkZ = bz >> 4;
+        final long key   = ChunkPos.toLong(chunkX, chunkZ);
 
-        // 优化：使用缓存的方块列表进行快速检查
-        List<Block> blockList1 = cachedBlocks1 != null ? cachedBlocks1 : blocks1.get();
-        List<Block> blockList2 = cachedBlocks2 != null ? cachedBlocks2 : blocks2.get();
-        
+        List<Block> blockList1 = blocks1.get();
+        List<Block> blockList2 = blocks2.get();
+
         Block newBlock = event.newState.getBlock();
         Block oldBlock = event.oldState.getBlock();
-        
-        // 优化：提前检查，快速排除不相关的方块更新
-        if (blockList1.contains(newBlock) || blockList1.contains(oldBlock) || 
-            blockList2.contains(newBlock) || blockList2.contains(oldBlock)) {
-            
-            boolean newBlockInGroup1 = blockList1.contains(newBlock);
-            boolean newBlockInGroup2 = blockList2.contains(newBlock);
-            boolean oldBlockInGroup1 = blockList1.contains(oldBlock);
-            boolean oldBlockInGroup2 = blockList2.contains(oldBlock);
-            
-            boolean newBlockInAnyGroup = newBlockInGroup1 || newBlockInGroup2;
-            boolean oldBlockInAnyGroup = oldBlockInGroup1 || oldBlockInGroup2;
-            
-            final boolean added = newBlockInAnyGroup && !oldBlockInAnyGroup;
-            final boolean removed = !newBlockInAnyGroup && oldBlockInAnyGroup;
-            
-            if (added || removed) {
-                workerThread.submit(() -> {
-                    synchronized (chunks) {
-                        ESPChunk chunk = chunks.get(key);
 
-                        if (chunk == null) {
-                            chunk = new ESPChunk(chunkX, chunkZ);
-                            if (chunk.shouldBeDeleted()) return;
+        boolean newInGroup1 = blockList1.contains(newBlock);
+        boolean newInGroup2 = blockList2.contains(newBlock);
+        boolean oldInGroup1 = blockList1.contains(oldBlock);
+        boolean oldInGroup2 = blockList2.contains(oldBlock);
 
-                            chunks.put(key, chunk);
-                        }
+        boolean newInAny = newInGroup1 || newInGroup2;
+        boolean oldInAny = oldInGroup1 || oldInGroup2;
 
-                        blockPos.set(bx, by, bz);
+        final boolean added   = newInAny && !oldInAny;
+        final boolean removed = !newInAny && oldInAny;
 
-                        if (added) chunk.add(blockPos);
-                        else chunk.remove(blockPos);
+        if (!added && !removed) return;
 
-                        // Update neighbour blocks
-                        for (int x = -1; x < 2; x++) {
-                            for (int z = -1; z < 2; z++) {
-                                for (int y = -1; y < 2; y++) {
-                                    if (x == 0 && y == 0 && z == 0) continue;
+        workerThread.submit(() -> {
+            synchronized (chunks) {
+                ESPChunk chunk = chunks.get(key);
 
-                                    updateBlock(bx + x, by + y, bz + z);
-                                }
-                            }
+                if (chunk == null) {
+                    chunk = new ESPChunk(chunkX, chunkZ);
+                    if (chunk.shouldBeDeleted()) return;
+                    chunks.put(key, chunk);
+                }
+
+                // Fix #2: 使用局部捕获的坐标创建新的 BlockPos，不复用 Mutable 成员变量
+                BlockPos pos = new BlockPos(bx, by, bz);
+
+                if (added)   chunk.add(pos);
+                else         chunk.remove(pos);
+
+                for (int x = -1; x < 2; x++) {
+                    for (int z = -1; z < 2; z++) {
+                        for (int y = -1; y < 2; y++) {
+                            if (x == 0 && y == 0 && z == 0) continue;
+                            updateBlock(bx + x, by + y, bz + z);
                         }
                     }
-                });
+                }
             }
-        }
+        });
     }
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
         DimensionType dimension = mc.world.getDimension();
-
         if (lastDimension != dimension) onActivate();
         lastDimension = dimension;
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        // 优化：缓存设置值，减少重复get()调用
-        boolean enableGroupKeybindsFlag = enableGroupKeybinds.get();
-        if (enableGroupKeybindsFlag) {
+        if (enableGroupKeybinds.get()) {
             boolean isGroup1KeyPressed = group1Key.get().isPressed();
             boolean isGroup2KeyPressed = group2Key.get().isPressed();
-            
-            // Group 1 key debounce - mutually exclusive with group 2
-            if (isGroup1KeyPressed && !wasGroup1KeyPressed) {
-                if (!showGroup1) {
-                    showGroup1 = true;
-                    showGroup2 = false;
-                }
+
+            // 单向激活 + 互斥：按下时切换到该组（如果已在该组则无反应）
+            if (isGroup1KeyPressed && !wasGroup1KeyPressed && !showGroup1) {
+                showGroup1 = true;
+                showGroup2 = false;
             }
-            
-            // Group 2 key debounce - mutually exclusive with group 1
-            if (isGroup2KeyPressed && !wasGroup2KeyPressed) {
-                if (!showGroup2) {
-                    showGroup2 = true;
-                    showGroup1 = false;
-                }
+
+            if (isGroup2KeyPressed && !wasGroup2KeyPressed && !showGroup2) {
+                showGroup2 = true;
+                showGroup1 = false;
             }
-            
-            // Update key states
+
             wasGroup1KeyPressed = isGroup1KeyPressed;
             wasGroup2KeyPressed = isGroup2KeyPressed;
         } else {
-            // Reset key states when group keybinds are disabled
             wasGroup1KeyPressed = false;
             wasGroup2KeyPressed = false;
         }
-        
-        // 优化：缓存方块列表，减少重复get()调用
-        cachedBlocks1 = blocks1.get();
-        cachedBlocks2 = blocks2.get();
     }
 
     @EventHandler
@@ -374,10 +370,10 @@ public class BlockESP extends Module {
                             block.loaded = false;
                         }
                     });
-
                     it.remove();
+                } else {
+                    chunk.render(event);
                 }
-                else chunk.render(event);
             }
 
             if (tracers.get()) {
@@ -388,8 +384,11 @@ public class BlockESP extends Module {
         }
     }
 
+    // Fix #7: getInfoString 在渲染线程调用，加锁保护 groups 读取
     @Override
     public String getInfoString() {
-        return "%s groups".formatted(groups.size());
+        synchronized (chunks) {
+            return "%s groups".formatted(groups.size());
+        }
     }
 }
