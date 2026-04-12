@@ -5,6 +5,10 @@
 
 package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -16,6 +20,8 @@ import meteordevelopment.meteorclient.utils.misc.IChangeable;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 
 public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlockData<ESPBlockData> {
     public ShapeMode shapeMode;
@@ -25,6 +31,8 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
     public boolean tracer;
     public SettingColor tracerColor;
 
+    public final List<String> stateFilters = new ArrayList<>();
+    
     private boolean changed;
 
     public ESPBlockData(ShapeMode shapeMode, SettingColor lineColor, SettingColor sideColor, boolean tracer, SettingColor tracerColor) {
@@ -70,6 +78,9 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
         tracer = value.tracer;
         tracerColor.set(value.tracerColor);
 
+        stateFilters.clear();
+        stateFilters.addAll(value.stateFilters);
+
         changed = value.changed;
 
         return this;
@@ -77,7 +88,9 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
 
     @Override
     public ESPBlockData copy() {
-        return new ESPBlockData(shapeMode, new SettingColor(lineColor), new SettingColor(sideColor), tracer, new SettingColor(tracerColor));
+        ESPBlockData copy = new ESPBlockData(shapeMode, new SettingColor(lineColor), new SettingColor(sideColor), tracer, new SettingColor(tracerColor));
+        copy.stateFilters.addAll(stateFilters);
+        return copy;
     }
 
     @Override
@@ -90,6 +103,12 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
 
         tag.putBoolean("tracer", tracer);
         tag.put("tracerColor", tracerColor.toTag());
+
+        NbtList filtersList = new NbtList();
+        for (String filter : stateFilters) {
+            filtersList.add(NbtString.of(filter));
+        }
+        tag.put("stateFilters", filtersList);
 
         tag.putBoolean("changed", changed);
 
@@ -104,6 +123,14 @@ public class ESPBlockData implements IGeneric<ESPBlockData>, IChangeable, IBlock
 
         tracer = tag.getBoolean("tracer", false);
         tracerColor.fromTag(tag.getCompoundOrEmpty("tracerColor"));
+
+        stateFilters.clear();
+        tag.getList("stateFilters").ifPresent(filtersList -> {
+            for (int i = 0; i < filtersList.size(); i++) {
+                filtersList.getString(i).ifPresent(stateFilters::add);
+            }
+        });
+
 
         changed = tag.getBoolean("changed", false);
 
