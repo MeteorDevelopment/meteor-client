@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.NameProtect;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
@@ -48,6 +49,9 @@ public abstract class MultiplayerScreenMixin extends Screen {
 
     @Inject(method = "refreshWidgetPositions", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
+        if (!Config.get().showAccountManager.get())
+            return;
+
         textColor1 = Color.fromRGBA(255, 255, 255, 255);
         textColor2 = Color.fromRGBA(175, 175, 175, 255);
 
@@ -76,6 +80,9 @@ public abstract class MultiplayerScreenMixin extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         super.render(context, mouseX, mouseY, deltaTicks);
+
+        if (!Config.get().showAccountManager.get())
+            return;
 
         int x = 3;
         int y = 3;

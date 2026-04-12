@@ -166,6 +166,13 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<Boolean> showAccountManager = sgMisc.add(new BoolSetting.Builder()
+        .name("show-account-manager")
+        .description("Render the account manager on the Multiplayer screen.")
+        .defaultValue(true)
+        .build()
+    );
+
     public List<String> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {
