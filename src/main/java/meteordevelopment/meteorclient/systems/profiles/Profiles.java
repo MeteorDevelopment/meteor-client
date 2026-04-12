@@ -24,9 +24,18 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
     public static final File FOLDER = new File(MeteorClient.FOLDER, "profiles");
 
     private List<Profile> profiles = new ArrayList<>();
+    private Profile activeProfile = null;
 
     public Profiles() {
         super("profiles");
+    }
+
+    public void setActiveProfile(Profile profile) {
+        this.activeProfile = profile;
+    }
+
+    public String getActiveProfileName() {
+        return activeProfile != null ? activeProfile.name.get() : "None";
     }
 
     public static Profiles get() {
@@ -85,12 +94,14 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
         tag.put("profiles", NbtUtils.listToTag(profiles));
+        if (activeProfile != null) tag.putString("activeProfile", activeProfile.name.get());
         return tag;
     }
 
     @Override
     public Profiles fromTag(NbtCompound tag) {
         profiles = NbtUtils.listFromTag(tag.getListOrEmpty("profiles"), Profile::new);
+        tag.getString("activeProfile").ifPresent(name -> activeProfile = get(name));
 
         for (File file : FOLDER.listFiles()) {
             if (file.isDirectory() && get(file.getName()) == null) {
