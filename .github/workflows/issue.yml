@@ -1,0 +1,35 @@
+name: Issue
+
+on:
+  issues:
+    types: [ opened ]
+
+jobs:
+  issue-moderator:
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Check Template
+        uses: machiecodes/check-template@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Content
+        uses: machiecodes/check-content@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          gemini-model: "gemini-2.5-flash"
+          project-context: "Meteor Client is a Minecraft utility/cheat client built as a Fabric mod, intended for use
+          on anarchy servers where cheating is permitted. It is written in Java and targets a specific major Minecraft
+          version at any given time. It is open source and maintained on GitHub."
