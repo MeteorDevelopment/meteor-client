@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.FluidRenderer;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.ARGB;
@@ -21,6 +22,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FluidRenderer.class)
@@ -36,7 +38,7 @@ public abstract class FluidRendererMixin {
         AMBIENT.set(ambience.isActive() && ambience.customLavaColor.get() && fluidState.is(FluidTags.LAVA));
 
         // Xray and Wallhack
-        int alpha = Xray.getAlpha(fluidState.createLegacyBlock(), pos);
+        int alpha = Xray.getFluidAlpha(fluidState, pos);
 
         if (alpha == 0) ci.cancel();
         else ALPHAS.set(alpha);
@@ -55,9 +57,29 @@ public abstract class FluidRendererMixin {
             int green = ARGB.green(color);
             int blue = ARGB.blue(color);
 
-            vertex(builder, x, y, z, red * 255, green * 255, blue * 255, alpha, u, v, lightCoords);
+            vertex(builder, x, y, z, red, green, blue, alpha, u, v, lightCoords);
             ci.cancel();
         }
+    }
+
+    @ModifyArg(
+        method = "tesselate",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/FluidRenderer$Output;getBuilder(Lnet/minecraft/client/renderer/chunk/ChunkSectionLayer;)Lcom/mojang/blaze3d/vertex/VertexConsumer;"),
+        index = 0
+    )
+    private ChunkSectionLayer onGetBuilderLayer(ChunkSectionLayer layer) {
+        int alpha = ALPHAS.get();
+        if (alpha > 0 && alpha < 255) return ChunkSectionLayer.TRANSLUCENT;
+
+        if (AMBIENT.get()) {
+            Ambience ambience = Modules.get().get(Ambience.class);
+            int a = ambience.lavaColor.get().a;
+            if (ambience.isActive() && ambience.customLavaColor.get() && a > 0 && a < 255) {
+                return ChunkSectionLayer.TRANSLUCENT;
+            }
+        }
+
+        return layer;
     }
 
     @Unique

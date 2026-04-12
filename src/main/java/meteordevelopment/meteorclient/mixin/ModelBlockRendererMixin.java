@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.BlockQuadOutput;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,6 +25,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
@@ -52,6 +54,41 @@ public abstract class ModelBlockRendererMixin {
         if (alpha != -1) {
             quadInstance.multiplyColor(ARGB.color(alpha, 255, 255, 255));
         }
+    }
+
+    @ModifyArg(
+        method = "putQuadWithTint",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/BlockQuadOutput;put(FFFLnet/minecraft/client/resources/model/geometry/BakedQuad;Lcom/mojang/blaze3d/vertex/QuadInstance;)V"),
+        index = 3
+    )
+    private BakedQuad putQuadWithTint$xrayLayer(BakedQuad quad) {
+        int alpha = ALPHAS.get();
+        if (alpha <= 0 || alpha >= 255) return quad;
+
+        BakedQuad.MaterialInfo materialInfo = quad.materialInfo();
+        if (materialInfo.layer() == ChunkSectionLayer.TRANSLUCENT) return quad;
+
+        BakedQuad.MaterialInfo translucentInfo = new BakedQuad.MaterialInfo(
+            materialInfo.sprite(),
+            ChunkSectionLayer.TRANSLUCENT,
+            materialInfo.itemRenderType(),
+            materialInfo.tintIndex(),
+            materialInfo.shade(),
+            materialInfo.lightEmission()
+        );
+
+        return new BakedQuad(
+            quad.position0(),
+            quad.position1(),
+            quad.position2(),
+            quad.position3(),
+            quad.packedUV0(),
+            quad.packedUV1(),
+            quad.packedUV2(),
+            quad.packedUV3(),
+            quad.direction(),
+            translucentInfo
+        );
     }
 
     @ModifyReturnValue(method = "shouldRenderFace", at = @At("RETURN"))
