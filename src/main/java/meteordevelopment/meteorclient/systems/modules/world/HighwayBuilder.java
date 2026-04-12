@@ -78,6 +78,9 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("ConstantConditions")
 public class HighwayBuilder extends Module {
+    // How many completed rows behind the player we keep intact.
+    private static final int BEHIND_CHECK_DISTANCE = 2;
+
     public enum Floor {
         Replace,
         PlaceMissing
@@ -162,6 +165,13 @@ public class HighwayBuilder extends Module {
         .name("mine-above-railings")
         .description("Mines blocks above railings.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> checkBehind = sgGeneral.add(new BoolSetting.Builder()
+        .name("check-behind")
+        .description("Checks and repairs holes behind you while continuing to build forward.")
+        .defaultValue(false)
         .build()
     );
 
@@ -471,7 +481,6 @@ public class HighwayBuilder extends Module {
     /* todo
         - separate digging and paving more effectively
         - separate walking forwards from the current state to speed up actions
-        - scan one block behind you to ensure the highway is still valid
         - do something about god damn lava flowing in
      */
 
@@ -614,6 +623,12 @@ public class HighwayBuilder extends Module {
             if (floor.get() == Floor.Replace) render(event, blockPosProvider.getFloor(), mBlockPos -> canMine(mBlockPos, false), true);
             if (railings.get()) render(event, blockPosProvider.getRailings(0), mBlockPos -> canMine(mBlockPos, false), true);
             if (mineAboveRailings.get()) render(event, blockPosProvider.getRailings(1), mBlockPos -> canMine(mBlockPos, true), true);
+            if (checkBehind.get()) {
+                // Reuse the same mine colors (red by default) for behind integrity checks.
+                if (floor.get() == Floor.Replace) render(event, blockPosProvider.getBehindFloor(), mBlockPos -> canMine(mBlockPos, false), true);
+                if (railings.get()) render(event, blockPosProvider.getBehindRailings(0), mBlockPos -> canMine(mBlockPos, false), true);
+                if (mineAboveRailings.get()) render(event, blockPosProvider.getBehindRailings(1), mBlockPos -> canMine(mBlockPos, true), true);
+            }
             if (state == State.MineEChestBlockade) render(event, blockPosProvider.getBlockade(true, blockadeType.get()), mBlockPos -> canMine(mBlockPos, true), true);
         }
 
@@ -640,6 +655,28 @@ public class HighwayBuilder extends Module {
             }
 
             render(event, blockPosProvider.getFloor(), mBlockPos -> canPlace(mBlockPos, false), false);
+            if (checkBehind.get()) {
+                // Reuse the same place colors (blue by default) for behind repairs.
+                if (railings.get()) {
+                    render(event, blockPosProvider.getBehindRailings(0), mBlockPos -> canPlace(mBlockPos, false), false);
+
+                    if (cornerBlock.get()) {
+                        render(event, blockPosProvider.getBehindRailings(-1), mBlockPos -> {
+                            boolean valid = false;
+                            for (MBlockPos pos : blockPosProvider.getBehindRailings(0)) {
+                                if (!blocksToPlace.get().contains(pos.getState().getBlock()) && pos.add(0, -1, 0).equals(mBlockPos)) {
+                                    valid = true;
+                                    break;
+                                }
+                            }
+
+                            return valid && canPlace(mBlockPos, false);
+                        }, false);
+                    }
+                }
+
+                render(event, blockPosProvider.getBehindFloor(), mBlockPos -> canPlace(mBlockPos, false), false);
+            }
             if (state == State.PlaceEChestBlockade) render(event, blockPosProvider.getBlockade(false, blockadeType.get()), mBlockPos -> canPlace(mBlockPos, false), false);
         }
     }
@@ -853,6 +890,15 @@ public class HighwayBuilder extends Module {
                     else b.setState(PlaceRailings); // Place Railings
                 }
                 else if (needsToPlace(b, b.blockPosProvider.getFloor(), false)) b.setState(PlaceFloor); // Place Floor
+                // Behind checks intentionally run after forward tasks so we never stop extending the highway.
+                else if (b.checkBehind.get() && b.floor.get() == Floor.Replace && needsToMine(b, b.blockPosProvider.getBehindFloor(), false)) b.setState(MineBehindFloor); // Mine behind floor
+                else if (b.checkBehind.get() && b.railings.get() && needsToMine(b, b.blockPosProvider.getBehindRailings(0), false)) b.setState(MineBehindRailings); // Mine behind railings
+                else if (b.checkBehind.get() && b.mineAboveRailings.get() && needsToMine(b, b.blockPosProvider.getBehindRailings(1), true)) b.setState(MineBehindAboveRailings); // Mine above behind railings
+                else if (b.checkBehind.get() && b.railings.get() && needsToPlace(b, b.blockPosProvider.getBehindRailings(0), false)) {
+                    if (b.cornerBlock.get() && needsToPlace(b, b.blockPosProvider.getBehindRailings(-1), false)) b.setState(PlaceBehindCornerBlock); // Place behind corner support block
+                    else b.setState(PlaceBehindRailings); // Place behind railings
+                }
+                else if (b.checkBehind.get() && needsToPlace(b, b.blockPosProvider.getBehindFloor(), false)) b.setState(PlaceBehindFloor); // Place behind floor
             }
 
             private boolean needsToMine(HighwayBuilder b, MBPIterator it, boolean mineBlocksToPlace) {
@@ -1028,6 +1074,42 @@ public class HighwayBuilder extends Module {
             }
         },
 
+        MineBehindFloor {
+            @Override
+            protected void start(HighwayBuilder b) {
+                mine(b, b.blockPosProvider.getBehindFloor(), false, Forward, this);
+            }
+
+            @Override
+            protected void tick(HighwayBuilder b) {
+                mine(b, b.blockPosProvider.getBehindFloor(), false, Forward, this);
+            }
+        },
+
+        MineBehindRailings {
+            @Override
+            protected void start(HighwayBuilder b) {
+                mine(b, b.blockPosProvider.getBehindRailings(0), false, Forward, this);
+            }
+
+            @Override
+            protected void tick(HighwayBuilder b) {
+                mine(b, b.blockPosProvider.getBehindRailings(0), false, Forward, this);
+            }
+        },
+
+        MineBehindAboveRailings {
+            @Override
+            protected void start(HighwayBuilder b) {
+                mine(b, b.blockPosProvider.getBehindRailings(1), true, Forward, this);
+            }
+
+            @Override
+            protected void tick(HighwayBuilder b) {
+                mine(b, b.blockPosProvider.getBehindRailings(1), true, Forward, this);
+            }
+        },
+
         PlaceCornerBlock {
             @Override
             protected void start(HighwayBuilder b) {
@@ -1079,6 +1161,60 @@ public class HighwayBuilder extends Module {
                 if (slot == -1) return;
 
                 place(b, b.blockPosProvider.getFloor(), slot, Forward);
+            }
+        },
+
+        PlaceBehindCornerBlock {
+            @Override
+            protected void start(HighwayBuilder b) {
+                int slot = findBlocksToPlacePrioritizeTrash(b);
+                if (slot == -1) return;
+
+                place(b, b.blockPosProvider.getBehindRailings(-1), slot, Forward);
+            }
+
+            @Override
+            protected void tick(HighwayBuilder b) {
+                int slot = findBlocksToPlacePrioritizeTrash(b);
+                if (slot == -1) return;
+
+                place(b, b.blockPosProvider.getBehindRailings(-1), slot, Forward);
+            }
+        },
+
+        PlaceBehindRailings {
+            @Override
+            protected void start(HighwayBuilder b) {
+                int slot = findBlocksToPlace(b);
+                if (slot == -1) return;
+
+                place(b, b.blockPosProvider.getBehindRailings(0), slot, Forward);
+            }
+
+            @Override
+            protected void tick(HighwayBuilder b) {
+                int slot = findBlocksToPlace(b);
+                if (slot == -1) return;
+
+                place(b, b.blockPosProvider.getBehindRailings(0), slot, Forward);
+            }
+        },
+
+        PlaceBehindFloor {
+            @Override
+            protected void start(HighwayBuilder b) {
+                int slot = findBlocksToPlace(b);
+                if (slot == -1) return;
+
+                place(b, b.blockPosProvider.getBehindFloor(), slot, Forward);
+            }
+
+            @Override
+            protected void tick(HighwayBuilder b) {
+                int slot = findBlocksToPlace(b);
+                if (slot == -1) return;
+
+                place(b, b.blockPosProvider.getBehindFloor(), slot, Forward);
             }
         },
 
@@ -2247,6 +2383,7 @@ public class HighwayBuilder extends Module {
     private interface IBlockPosProvider {
         MBPIterator getFront();
         MBPIterator getFloor();
+        MBPIterator getBehindFloor();
 
         /**
          * state:
@@ -2255,6 +2392,7 @@ public class HighwayBuilder extends Module {
          *  -1 for the block under the railings
          */
         MBPIterator getRailings(int state);
+        MBPIterator getBehindRailings(int state);
 
         MBPIterator getLiquids();
         MBPIterator getBlockade(boolean mine, BlockadeType type);
@@ -2337,6 +2475,49 @@ public class HighwayBuilder extends Module {
         }
 
         @Override
+        public MBPIterator getBehindFloor() {
+            pos.coerceBlockLevel(mc.player).offset(dir.opposite()).offset(leftDir, getWidthLeft()).add(0, -1, 0);
+
+            return new MBPIterator() {
+                private int w, d = 1;
+                private int pw, pd;
+
+                @Override
+                public boolean hasNext() {
+                    return d <= BEHIND_CHECK_DISTANCE && w < width.get();
+                }
+
+                @Override
+                public MBlockPos next() {
+                    MBlockPos r = pos2.set(pos).offset(rightDir, w++);
+                    if (w >= width.get()) {
+                        w = 0;
+                        d++;
+                        // Step one row farther back each time we finish scanning the current row.
+                        pos.coerceBlockLevel(mc.player).offset(dir.opposite(), d).offset(leftDir, getWidthLeft()).add(0, -1, 0);
+                    }
+                    return r;
+                }
+
+                @Override
+                public void save() {
+                    pd = d;
+                    pw = w;
+                    w = 0;
+                    d = 1;
+                    pos.coerceBlockLevel(mc.player).offset(dir.opposite(), d).offset(leftDir, getWidthLeft()).add(0, -1, 0);
+                }
+
+                @Override
+                public void restore() {
+                    d = pd;
+                    w = pw;
+                    pos.coerceBlockLevel(mc.player).offset(dir.opposite(), d).offset(leftDir, getWidthLeft()).add(0, -1, 0);
+                }
+            };
+        }
+
+        @Override
         public MBPIterator getRailings(int state) {
             pos.coerceBlockLevel(mc.player).offset(dir);
 
@@ -2378,6 +2559,59 @@ public class HighwayBuilder extends Module {
                 public void restore() {
                     i = pi;
                     y = py;
+                }
+            };
+        }
+
+        @Override
+        public MBPIterator getBehindRailings(int state) {
+            pos.coerceBlockLevel(mc.player).offset(dir.opposite());
+
+            return new MBPIterator() {
+                private int d = 1, i, y = state;
+                private int pd, pi, py;
+
+                @Override
+                public boolean hasNext() {
+                    return d <= BEHIND_CHECK_DISTANCE && i < 2 && y < (state == 1 ? height.get() : state + 1);
+                }
+
+                @Override
+                public MBlockPos next() {
+                    if (i == 0) pos2.set(pos).offset(leftDir, getWidthLeft() + 1).add(0, y, 0);
+                    else pos2.set(pos).offset(rightDir, getWidthRight() + 1).add(0, y, 0);
+
+                    y++;
+                    if (y >= (state == 1 ? height.get() : state + 1)) {
+                        y = state;
+                        i++;
+                        if (i >= 2) {
+                            i = 0;
+                            d++;
+                            pos.coerceBlockLevel(mc.player).offset(dir.opposite(), d);
+                        }
+                    }
+
+                    return pos2;
+                }
+
+                @Override
+                public void save() {
+                    pd = d;
+                    pi = i;
+                    py = y;
+                    d = 1;
+                    i = 0;
+                    y = state;
+                    pos.coerceBlockLevel(mc.player).offset(dir.opposite(), d);
+                }
+
+                @Override
+                public void restore() {
+                    d = pd;
+                    i = pi;
+                    y = py;
+                    pos.coerceBlockLevel(mc.player).offset(dir.opposite(), d);
                 }
             };
         }
@@ -2603,6 +2837,69 @@ public class HighwayBuilder extends Module {
         }
 
         @Override
+        public MBPIterator getBehindFloor() {
+            HorizontalDirection backDir = dir.opposite();
+            HorizontalDirection backLeftDir = rightDir;
+
+            return new MBPIterator() {
+                private int d = 1, i, w;
+                private int pd, pi, pw;
+
+                {
+                    initPos();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return d <= BEHIND_CHECK_DISTANCE && i < 2 && w < width.get();
+                }
+
+                @Override
+                public MBlockPos next() {
+                    pos2.set(pos).offset(leftDir, w++);
+
+                    if (w >= (i == 0 ? width.get() - 1 : width.get())) {
+                        w = 0;
+                        i++;
+                        if (i >= 2) {
+                            i = 0;
+                            d++;
+                        }
+                        initPos();
+                    }
+
+                    return pos2;
+                }
+
+                private void initPos() {
+                    // Diagonal roads are split across two adjacent front rows, so we mirror that layout behind.
+                    if (i == 0) pos.coerceBlockLevel(mc.player).add(0, -1, 0).offset(backDir, d - 1).offset(backDir.rotateLeft()).offset(backLeftDir, getWidthLeft() - 1);
+                    else pos.coerceBlockLevel(mc.player).add(0, -1, 0).offset(backDir, d).offset(backLeftDir, getWidthLeft());
+                }
+
+                @Override
+                public void save() {
+                    pd = d;
+                    pi = i;
+                    pw = w;
+                    d = 1;
+                    i = w = 0;
+
+                    initPos();
+                }
+
+                @Override
+                public void restore() {
+                    d = pd;
+                    i = pi;
+                    w = pw;
+
+                    initPos();
+                }
+            };
+        }
+
+        @Override
         public MBPIterator getRailings(int state) {
             pos.coerceBlockLevel(mc.player).offset(dir.rotateLeft()).offset(leftDir, getWidthLeft());
 
@@ -2646,6 +2943,70 @@ public class HighwayBuilder extends Module {
 
                 @Override
                 public void restore() {
+                    i = pi;
+                    y = py;
+
+                    initPos();
+                }
+            };
+        }
+
+        @Override
+        public MBPIterator getBehindRailings(int state) {
+            HorizontalDirection backDir = dir.opposite();
+            HorizontalDirection backLeftDir = rightDir;
+            HorizontalDirection backRightDir = leftDir;
+
+            return new MBPIterator() {
+                private int d = 1, i, y = state;
+                private int pd, pi, py;
+
+                {
+                    initPos();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return d <= BEHIND_CHECK_DISTANCE && i < 2 && y < (state == 1 ? height.get() : state + 1);
+                }
+
+                @Override
+                public MBlockPos next() {
+                    pos2.set(pos).add(0, y++, 0);
+
+                    if (y >= (state == 1 ? height.get() : state + 1)) {
+                        y = state;
+                        i++;
+                        if (i >= 2) {
+                            i = 0;
+                            d++;
+                        }
+                        initPos();
+                    }
+
+                    return pos2;
+                }
+
+                private void initPos() {
+                    if (i == 0) pos.coerceBlockLevel(mc.player).offset(backDir, d - 1).offset(backDir.rotateLeft()).offset(backLeftDir, getWidthLeft());
+                    else pos.coerceBlockLevel(mc.player).offset(backDir, d - 1).offset(backDir.rotateRight()).offset(backRightDir, getWidthRight());
+                }
+
+                @Override
+                public void save() {
+                    pd = d;
+                    pi = i;
+                    py = y;
+                    d = 1;
+                    i = 0;
+                    y = state;
+
+                    initPos();
+                }
+
+                @Override
+                public void restore() {
+                    d = pd;
                     i = pi;
                     y = py;
 
