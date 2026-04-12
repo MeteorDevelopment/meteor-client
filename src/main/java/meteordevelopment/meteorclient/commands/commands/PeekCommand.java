@@ -27,8 +27,8 @@ public class PeekCommand extends Command {
         builder.executes(context -> {
             if (Utils.openContainer(mc.player.getMainHandStack(), ITEMS, true)) return SINGLE_SUCCESS;
             else if (Utils.openContainer(mc.player.getOffHandStack(), ITEMS, true)) return SINGLE_SUCCESS;
-            else if (mc.targetedEntity instanceof ItemFrameEntity &&
-                Utils.openContainer(((ItemFrameEntity) mc.targetedEntity).getHeldItemStack(), ITEMS, true)
+            else if (mc.targetedEntity instanceof ItemFrameEntity frame &&
+                Utils.openContainer(frame.getHeldItemStack(), ITEMS, true)
             ) return SINGLE_SUCCESS;
             else throw CANT_PEEK.create();
         });
