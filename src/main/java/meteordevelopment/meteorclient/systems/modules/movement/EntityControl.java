@@ -24,7 +24,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -33,21 +32,20 @@ public class EntityControl extends Module {
     private final SettingGroup sgSpeed = settings.createGroup("Speed");
     private final SettingGroup sgFlight = settings.createGroup("Flight");
 
-    List<EntityType<?>> list = new ArrayList<>();
-
-    {
-        BuiltInRegistries.ENTITY_TYPE.forEach(entityType -> {
-            if (EntityUtils.isRideable(entityType) && entityType != EntityType.MINECART && entityType != EntityType.LLAMA && entityType != EntityType.TRADER_LLAMA) {
-                list.add(entityType);
-            }
-        });
-    }
+    private final List<EntityType<?>> list = BuiltInRegistries.ENTITY_TYPE.stream()
+        .filter(entityType ->
+            EntityUtils.isRideable(entityType)
+                && entityType != EntityType.MINECART
+                && entityType != EntityType.LLAMA
+                && entityType != EntityType.TRADER_LLAMA
+        )
+        .toList();
 
     private final Setting<Set<EntityType<?>>> entities = sgControl.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Target entities.")
         .filter(entityType -> EntityUtils.isRideable(entityType) && entityType != EntityType.MINECART && entityType != EntityType.LLAMA && entityType != EntityType.TRADER_LLAMA)
-        .defaultValue(list.toArray(new EntityType<?>[0]))
+        .defaultValue(list.toArray(EntityType[]::new))
         .build()
     );
 

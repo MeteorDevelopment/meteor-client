@@ -396,7 +396,7 @@ public class ProjectileEntitySimulator {
                 pierceLevel--;
             }
 
-            return new SimulationStep(stop, hits.toArray(new HitResult[0]));
+            return new SimulationStep(stop, hits.toArray(HitResult[]::new));
         } else {
             HitResult entityCollision = ProjectileUtil.getEntityHitResult(
                 mc.level,

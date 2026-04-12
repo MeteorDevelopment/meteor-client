@@ -329,7 +329,7 @@ public class BetterTooltips extends Module {
         // EChest preview
         else if (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest()) {
             event.tooltipData = EChestMemory.isKnown()
-                ? new ContainerTooltipComponent(EChestMemory.ITEMS.toArray(new ItemStack[27]), ECHEST_COLOR)
+                ? new ContainerTooltipComponent(EChestMemory.ITEMS.toArray(ItemStack[]::new), ECHEST_COLOR)
                 : new TextTooltipComponent(Component.literal("Unknown inventory.").withStyle(ChatFormatting.DARK_RED));
         }
 
