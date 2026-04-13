@@ -141,6 +141,7 @@
     "MouseMixin",
     "MultiplayerScreenMixin",
     "MutableTextMixin",
+    "PacketBundlingMixin",
     "PacketByteBufMixin",
     "ParticleManagerMixin",
     "PlayerEntityAccessor",
