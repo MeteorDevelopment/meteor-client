@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.screens.EditBookTitleAndAuthorScreen;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -43,6 +44,12 @@ public abstract class BookViewScreenMixin extends Screen {
     @Shadow
     private int currentPage;
 
+    @Shadow
+    protected abstract void pageForward();
+
+    @Shadow
+    protected abstract void pageBack();
+
     public BookViewScreenMixin(Component title) {
         super(title);
     }
@@ -64,7 +71,7 @@ public abstract class BookViewScreenMixin extends Screen {
                 try {
                     NbtIo.write(tag, out);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    MeteorClient.LOG.error("Error writing the book to the output stream", e);
                 }
 
                 String encoded = Base64.getEncoder().encodeToString(bytes.array);
@@ -105,5 +112,14 @@ public abstract class BookViewScreenMixin extends Screen {
                 .size(120, 20)
                 .build()
         );
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (verticalAmount == 0) return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+
+        if (verticalAmount < 0) this.pageForward(); // scroll down
+        else this.pageBack();                       // scroll up
+        return true;
     }
 }

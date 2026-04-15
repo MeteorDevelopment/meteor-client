@@ -67,7 +67,7 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
-    @ModifyArg(method = "swing(Lnet/minecraft/world/InteractionHand;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;swing(Lnet/minecraft/world/InteractionHand;Z)V"))
+    @ModifyVariable(method = "swing(Lnet/minecraft/world/InteractionHand;)V", at = @At("HEAD"), argsOnly = true, name = "hand")
     private InteractionHand setHand(InteractionHand hand) {
         if ((Object) this != mc.player) return hand;
 
@@ -76,6 +76,7 @@ public abstract class LivingEntityMixin extends Entity {
             if (handView.swingMode.get() == HandView.SwingMode.None) return hand;
             return handView.swingMode.get() == HandView.SwingMode.Offhand ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
         }
+
         return hand;
     }
 
