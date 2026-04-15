@@ -55,6 +55,7 @@ public class Commands {
         add(new SpectateCommand());
         add(new GamemodeCommand());
         add(new SaveMapCommand());
+        add(new LogoutCommand());
         add(new MacroCommand());
         add(new ModulesCommand());
         add(new BindsCommand());
