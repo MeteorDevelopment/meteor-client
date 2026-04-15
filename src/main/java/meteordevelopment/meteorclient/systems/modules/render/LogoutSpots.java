@@ -113,7 +113,6 @@ public class LogoutSpots extends Module {
     public WWidget getWidget(GuiTheme theme) {
         WVerticalList list = theme.verticalList();
 
-        // Button to Clear Interacted Blocks
         WButton clear = list.add(theme.button("Clear Logout Spots")).expandX().widget();
 
         clear.action = this::clearLogoutSpots;
