@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.NameProtect;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
@@ -42,6 +43,15 @@ public abstract class MultiplayerScreenMixin extends Screen {
     @Unique
     private ButtonWidget proxies;
 
+    @Unique
+    private static final int BUTTON_WIDTH = 75;
+    @Unique
+    private static final int BUTTON_HEIGHT = 20;
+    @Unique
+    private static final int MARGIN = 3;
+    @Unique
+    private static final int GAP = 2;
+
     public MultiplayerScreenMixin(Text title) {
         super(title);
     }
@@ -57,28 +67,60 @@ public abstract class MultiplayerScreenMixin extends Screen {
         if (accounts == null) {
             accounts = addDrawableChild(
                 new ButtonWidget.Builder(Text.literal("Accounts"), button -> client.setScreen(GuiThemes.get().accountsScreen()))
-                    .size(75, 20)
+                    .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                     .build()
             );
         }
-        accounts.setPosition(this.width - 75 - 3, 3);
 
         if (proxies == null) {
             proxies = addDrawableChild(
-                    new ButtonWidget.Builder(Text.literal("Proxies"), button -> client.setScreen(GuiThemes.get().proxiesScreen()))
-                        .size(75, 20)
-                        .build()
-                );
+                new ButtonWidget.Builder(Text.literal("Proxies"), button -> client.setScreen(GuiThemes.get().proxiesScreen()))
+                    .size(BUTTON_WIDTH, BUTTON_HEIGHT)
+                    .build()
+            );
         }
-        proxies.setPosition(this.width - 75 - 3 - 75 - 2, 3);
+
+        Config config = Config.get();
+        boolean accountsVisible = config.showAccountButton.get();
+        boolean proxiesVisible = config.showProxiesButton.get();
+        Config.ButtonAnchor accountAnchor = config.accountButtonAnchor.get();
+        Config.ButtonAnchor proxiesAnchor = config.proxiesButtonAnchor.get();
+
+        accounts.visible = accountsVisible;
+        proxies.visible = proxiesVisible;
+
+        positionButton(accounts, accountAnchor, proxiesVisible && proxiesAnchor == accountAnchor, true);
+        positionButton(proxies, proxiesAnchor, accountsVisible && accountAnchor == proxiesAnchor, false);
+    }
+
+    @Unique
+    private void positionButton(ButtonWidget button, Config.ButtonAnchor anchor, boolean sharingCorner, boolean isAccounts) {
+        int leftOffset  = sharingCorner && isAccounts  ? BUTTON_WIDTH + GAP : 0;
+        int rightOffset = sharingCorner && !isAccounts ? BUTTON_WIDTH + GAP : 0;
+
+        switch (anchor) {
+            case TopRight    -> button.setPosition(this.width  - MARGIN - BUTTON_WIDTH - rightOffset, MARGIN);
+            case TopLeft     -> button.setPosition(MARGIN + leftOffset, MARGIN);
+            case BottomLeft  -> button.setPosition(MARGIN + leftOffset, this.height - MARGIN - BUTTON_HEIGHT);
+            case BottomRight -> button.setPosition(this.width  - MARGIN - BUTTON_WIDTH - rightOffset, this.height - MARGIN - BUTTON_HEIGHT);
+        }
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         super.render(context, mouseX, mouseY, deltaTicks);
 
-        int x = 3;
-        int y = 3;
+        // Shifts the top left account and proxy text to right if buttons are also top left
+        Config config = Config.get();
+        int x = MARGIN;
+        if (config.showProxiesButton.get() && config.proxiesButtonAnchor.get() == Config.ButtonAnchor.TopLeft) {
+            x += BUTTON_WIDTH + GAP;
+        }
+        if (config.showAccountButton.get() && config.accountButtonAnchor.get() == Config.ButtonAnchor.TopLeft) {
+            x += BUTTON_WIDTH + GAP;
+        }
+
+        int y = MARGIN;
 
         // Logged in as
         context.drawTextWithShadow(mc.textRenderer, loggedInAs, x, y, textColor1);

@@ -103,6 +103,36 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<Boolean> showAccountButton = sgVisual.add(new BoolSetting.Builder()
+        .name("accounts-button")
+        .description("Shows the accounts button in the multiplayer screen.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<ButtonAnchor> accountButtonAnchor = sgVisual.add(new EnumSetting.Builder<ButtonAnchor>()
+        .name("accounts-button-position")
+        .description("Where the accounts button is displayed")
+        .defaultValue(ButtonAnchor.TopRight)
+        .visible(showAccountButton::get)
+        .build()
+    );
+
+    public final Setting<Boolean> showProxiesButton = sgVisual.add(new BoolSetting.Builder()
+        .name("proxies-button")
+        .description("Shows the proxies button in the multiplayer screen.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<ButtonAnchor> proxiesButtonAnchor = sgVisual.add(new EnumSetting.Builder<ButtonAnchor>()
+        .name("proxies-button-position")
+        .description("Where the proxies button is displayed")
+        .defaultValue(ButtonAnchor.TopRight)
+        .visible(showProxiesButton::get)
+        .build()
+    );
+
     // Modules
 
     public final Setting<List<Module>> hiddenModules = sgModules.add(new ModuleListSetting.Builder()
@@ -205,5 +235,12 @@ public class Config extends System<Config> {
         List<String> list = new ArrayList<>();
         for (NbtElement item : tag.getListOrEmpty(key)) list.add(item.asString().orElse(""));
         return list;
+    }
+
+    public enum ButtonAnchor {
+        TopLeft,
+        TopRight,
+        BottomLeft,
+        BottomRight,
     }
 }
