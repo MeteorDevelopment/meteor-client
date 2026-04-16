@@ -118,6 +118,13 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<Boolean> showAccountStatus = sgVisual.add(new BoolSetting.Builder()
+        .name("account-status")
+        .description("Shows information about the current account in the multiplayer screen.")
+        .defaultValue(true)
+        .build()
+    );
+
     public final Setting<Boolean> showProxiesButton = sgVisual.add(new BoolSetting.Builder()
         .name("proxies-button")
         .description("Shows the proxies button in the multiplayer screen.")
@@ -130,6 +137,13 @@ public class Config extends System<Config> {
         .description("Where the proxies button is displayed")
         .defaultValue(ButtonAnchor.TopRight)
         .visible(showProxiesButton::get)
+        .build()
+    );
+
+    public final Setting<Boolean> showProxiesStatus = sgVisual.add(new BoolSetting.Builder()
+        .name("proxy-status")
+        .description("Shows information about the current proxy in the multiplayer screen.")
+        .defaultValue(true)
         .build()
     );
 

@@ -110,8 +110,13 @@ public abstract class MultiplayerScreenMixin extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         super.render(context, mouseX, mouseY, deltaTicks);
 
-        // Shifts the top left account and proxy text to right if buttons are also top left
         Config config = Config.get();
+
+        if (!config.showAccountStatus.get() && !config.showProxiesStatus.get()) {
+            return;
+        }
+
+        // Shifts the top left account and proxy text to right if buttons are also top left
         int x = MARGIN;
         if (config.showProxiesButton.get() && config.proxiesButtonAnchor.get() == Config.ButtonAnchor.TopLeft) {
             x += BUTTON_WIDTH + GAP;
@@ -123,10 +128,16 @@ public abstract class MultiplayerScreenMixin extends Screen {
         int y = MARGIN;
 
         // Logged in as
-        context.drawTextWithShadow(mc.textRenderer, loggedInAs, x, y, textColor1);
-        context.drawTextWithShadow(mc.textRenderer, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
+        if (config.showAccountStatus.get()) {
+            context.drawTextWithShadow(mc.textRenderer, loggedInAs, x, y, textColor1);
+            context.drawTextWithShadow(mc.textRenderer, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
 
-        y += textRenderer.fontHeight + 2;
+            y += textRenderer.fontHeight + 2;
+        }
+
+        if (!config.showProxiesStatus.get()) {
+            return;
+        }
 
         // Proxy
         Proxy proxy = Proxies.get().getEnabled();
