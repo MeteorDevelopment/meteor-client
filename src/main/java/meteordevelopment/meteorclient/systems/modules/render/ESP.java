@@ -1,13 +1,12 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * This file is part of the Meteor Client distribution[](https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
  * Optimized for performance & fixed logical features (Flicker, Gradient, Raycast Target).
  */
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -29,12 +28,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.scoreboard.*;
-import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 
+import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
@@ -136,28 +135,15 @@ public class ESP extends Module {
 
     public final Setting<Integer> hpThreshold = sgGeneral.add(new IntSetting.Builder()
         .name("hp-threshold")
-        .description("血量等于或低于此值时才显示ESP (满血通常为20)。")
-        .defaultValue(19) // 默认改成19，如果是20的话满血也会被渲染出来
+        .description("血量等于或低于此值时才显示ESP (满血通常为20)")
+        .defaultValue(20)
         .range(1, 40)
         .sliderRange(1, 40)
         .visible(hpGate::get)
         .build()
     );
 
-    // ==================== 血量来源模式 ====================
 
-    public enum HealthSource {
-        Tab,    // 从计分板 Tab 列表读取（服务器推送的真实血量，适用于支持的服务器）
-        Client  // 从客户端实体数据读取（本地可见血量，通用兼容）
-    }
-
-    public final Setting<HealthSource> healthSource = sgGeneral.add(new EnumSetting.Builder<HealthSource>()
-        .name("health-source")
-        .description("Tab可以绕过某些服务器强制修改客户端满血的反作弊。")
-        .defaultValue(HealthSource.Tab) // 建议默认用Tab应对实战服务器
-        .visible(healthColors::get)
-        .build()
-    );
 
     // ==================== Shape / Fade ====================
 
@@ -286,7 +272,9 @@ public class ESP extends Module {
 
     private int count;
     private Entity cachedTarget = null;
-    private final Object2IntMap<UUID> tabHealthCache = new Object2IntOpenHashMap<>();
+    private final HashMap<Long, Double> cachedHealthMap = new HashMap<>();
+    private long lastHealthCacheUpdate = 0;
+    private static final long HEALTH_CACHE_INTERVAL = 500;
 
     public ESP() {
         super(Categories.Render, "esp", "Renders entities through walls. Optimized Edition.");
@@ -294,46 +282,53 @@ public class ESP extends Module {
 
     @Override
     public void onDeactivate() {
-        tabHealthCache.clear();
+        cachedHealthMap.clear();
     }
 
     // ==================== Tick ====================
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        tabHealthCache.clear();
-        if (healthSource.get() != HealthSource.Tab) return;
+        cachedTarget = highlightTarget.get() ? getTargetEntity(100.0, 1.0f) : null;
+    }
+
+    private double getCachedHealth(PlayerEntity player) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastHealthCacheUpdate > HEALTH_CACHE_INTERVAL) {
+            updateHealthCache();
+        }
+        long playerId = player.getUuid().getMostSignificantBits();
+        return cachedHealthMap.getOrDefault(playerId, 20.0);
+    }
+
+    private void updateHealthCache() {
         if (mc.world == null) return;
-
-        Scoreboard sb  = mc.world.getScoreboard();
-        ScoreboardObjective obj = sb.getObjectiveForSlot(ScoreboardDisplaySlot.LIST);
-        if (obj == null) obj = sb.getObjectiveForSlot(ScoreboardDisplaySlot.BELOW_NAME);
-
+        cachedHealthMap.clear();
         for (PlayerEntity player : mc.world.getPlayers()) {
+            cachedHealthMap.put(player.getUuid().getMostSignificantBits(), getGateHp(player));
+        }
+        lastHealthCacheUpdate = System.currentTimeMillis();
+    }
+
+    private double getGateHp(PlayerEntity player) {
+        if (mc.world != null && mc.world.getScoreboard() != null) {
+            Scoreboard sb = mc.world.getScoreboard();
+            ScoreboardObjective obj = sb.getObjectiveForSlot(ScoreboardDisplaySlot.LIST);
             if (obj != null) {
                 try {
-                    ScoreHolder holder = ScoreHolder.fromProfile(player.getGameProfile());
-                    ReadableScoreboardScore score = sb.getScore(holder, obj);
-                    if (score != null && score.getScore() > 0) {
-                        tabHealthCache.put(player.getUuid(), score.getScore());
-                        continue;
+                    ReadableScoreboardScore score = sb.getScore(player, obj);
+                    if (score != null) {
+                        int points = score.getScore();
+                        if (points > 0) return points;
                     }
                 } catch (Exception ignored) {}
             }
-            tabHealthCache.put(player.getUuid(), (int)(player.getHealth() + player.getAbsorptionAmount()));
         }
+        return player.getHealth() + player.getAbsorptionAmount();
     }
 
-    // ==================== 血量获取 ====================
-
     private double getHp(PlayerEntity p) {
-        if (healthSource.get() == HealthSource.Tab) {
-            UUID uuid = p.getUuid();
-            if (tabHealthCache.containsKey(uuid)) {
-                return tabHealthCache.getInt(uuid);
-            }
-        }
-        return p.getHealth() + p.getAbsorptionAmount();
+        return getCachedHealth(p);
     }
 
     // ==================== Render 3D ====================
@@ -446,12 +441,20 @@ public class ESP extends Module {
         if (!EntityUtils.isInRenderDistance(entity)) return true;
         if (!entities.get().contains(entity.getType())) return true;
 
+        if (mode.get() == Mode.Shader || mode.get() == Mode.Glow) {
+            if (!isInFrustum(entity)) return true;
+        }
+
         if (hpGate.get() && entity instanceof PlayerEntity p) {
             double hpVal = getHp(p);
             if (hpVal > hpThreshold.get()) return true;
         }
 
         return false;
+    }
+
+    private boolean isInFrustum(Entity entity) {
+        return PlayerUtils.isWithinCamera(entity, 1000.0);
     }
 
     public Color getColor(Entity entity, boolean isTarget) {
@@ -466,17 +469,11 @@ public class ESP extends Module {
         return baseColor.set(color.r, color.g, color.b, (int) (color.a * alpha));
     }
 
-    // 【核心修复区域】=============
     public Color getColor(Entity entity) {
-        // Meteor 的 Shader 和 Glow 模式依赖这个外部 API 获取颜色
         boolean isTarget = highlightTarget.get() && entity == cachedTarget;
-        
-        // 之前少写了这一行，导致在 Shader 模式下完全无视了任何跳过逻辑（不过滤满血玩家、不过滤猪牛羊等）
         if (!isTarget && shouldSkip(entity)) return null;
-
         return getColor(entity, isTarget);
     }
-    // ============================
 
     private double getFadeAlpha(Entity entity) {
         double distSq = PlayerUtils.squaredDistanceToCamera(
@@ -499,6 +496,11 @@ public class ESP extends Module {
         if (entity instanceof PlayerEntity p && healthColors.get()) {
             double hpVal = getHp(p);
 
+            // 默认99视为高血量（绿色）
+            if (hpVal >= 99) {
+                return mutableHealthColor.set(HIGH_HP);
+            }
+
             // 致命血量：红白闪烁
             if (hpVal <= 5) {
                 if (hpFlicker.get()) {
@@ -512,7 +514,7 @@ public class ESP extends Module {
                 }
                 return mutableHealthColor.set(LOW_HP);
             }
-            // 正常区间渐变：红 → 橙 → 绿
+            // 正常区间渐变
             else if (hpVal <= 20) {
                 if (hpGradient.get()) {
                     if (hpVal <= 10) {
@@ -533,11 +535,9 @@ public class ESP extends Module {
                         );
                     }
                 }
-                return hpVal <= 10
-                    ? mutableHealthColor.set(LOW_HP)
-                    : mutableHealthColor.set(MEDIUM_HP);
+                return hpVal <= 10 ? mutableHealthColor.set(LOW_HP) : mutableHealthColor.set(MEDIUM_HP);
             }
-            // 满血
+            // 其他情况（高于20但不是99）
             else {
                 return mutableHealthColor.set(HIGH_HP);
             }
@@ -553,11 +553,11 @@ public class ESP extends Module {
         }
         else {
             return switch (entity.getType().getSpawnGroup()) {
-                case CREATURE                                                          -> animalsColor.get();
+                case CREATURE -> animalsColor.get();
                 case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
-                case MONSTER                                                           -> monstersColor.get();
-                case AMBIENT                                                           -> ambientColor.get();
-                default                                                                -> miscColor.get();
+                case MONSTER -> monstersColor.get();
+                case AMBIENT -> ambientColor.get();
+                default -> miscColor.get();
             };
         }
     }
@@ -620,11 +620,7 @@ public class ESP extends Module {
     }
 
     public enum Mode {
-        Box,
-        Wireframe,
-        _2D,
-        Shader,
-        Glow;
+        Box, Wireframe, _2D, Shader, Glow;
 
         @Override
         public String toString() {

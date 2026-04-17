@@ -1,12 +1,5 @@
-/*
- * This file is part of Meteor Client.
- * Copyright (c) Meteor Development.
- */
-
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -17,27 +10,25 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.player.NameProtect;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
-import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.*;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameMode;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3d;
 
 import java.util.*;
@@ -45,508 +36,413 @@ import java.util.*;
 public class Nametags extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlayers = settings.createGroup("Players");
-    private final SettingGroup sgItems   = settings.createGroup("Items");
     private final SettingGroup sgRender  = settings.createGroup("Render");
 
+    // General
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
-        .defaultValue(EntityType.PLAYER, EntityType.ITEM)
-        .build());
+        .description("Select entities to draw nametags on.")
+        .defaultValue(EntityType.PLAYER)
+        .build()
+    );
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale").defaultValue(1.1).min(0.1).build());
+        .name("scale")
+        .description("The scale of the nametag.")
+        .defaultValue(1.1)
+        .min(0.1)
+        .max(1.5)
+        .sliderRange(0.1, 1.5)
+        .build()
+    );
 
-    private final Setting<Double> nearDistance = sgGeneral.add(new DoubleSetting.Builder()
-        .name("near-distance")
-        .defaultValue(2.0).min(0.1).max(100.0).sliderRange(0.1, 10.0)
-        .build());
-
-    private final Setting<Double> farDistance = sgGeneral.add(new DoubleSetting.Builder()
-        .name("far-distance")
-        .defaultValue(30.0).min(0.1).max(200.0).sliderRange(1.0, 50.0)
-        .build());
-
-    private final Setting<Boolean> vanillaOverhead = sgGeneral.add(new BoolSetting.Builder()
-        .name("vanilla-overhead")
-        .defaultValue(true)
-        .build());
+    private final Setting<Boolean> inverseDistanceScale = sgGeneral.add(new BoolSetting.Builder()
+        .name("inverse-distance-scale")
+        .description("Nametags are smaller when close and larger when far.")
+        .defaultValue(false)
+        .build()
+    );
 
     public final Setting<Boolean> hideVanilla = sgGeneral.add(new BoolSetting.Builder()
         .name("hide-vanilla")
+        .description("Hides vanilla nametags.")
         .defaultValue(false)
-        .build());
-
-    private final Setting<Boolean> ignoreSelf = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-self").defaultValue(true).build());
-
-    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-friends").defaultValue(false).build());
-
-    private final Setting<Boolean> ignoreBots = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-bots").defaultValue(true).build());
-
-    private final Setting<Integer> maxDistance = sgGeneral.add(new IntSetting.Builder()
-        .name("max-distance")
-        .defaultValue(100).min(1).max(1000).sliderRange(1, 200)
-        .build());
-
-    private final Setting<Boolean> displayHealth = sgPlayers.add(new BoolSetting.Builder()
-        .name("health").defaultValue(true).build());
-
-    // ==================== 血量来源模式 ====================
-    public enum HealthSource {
-        Tab,
-        Client
-    }
-
-    public final Setting<HealthSource> healthSource = sgPlayers.add(new EnumSetting.Builder<HealthSource>()
-        .name("health-source")
-        .description("Tab: 从计分板读取真实血量(防作弊绕过)。Client: 本地可见血量。")
-        .defaultValue(HealthSource.Tab)
         .build()
     );
-    // ====================================================
 
-    private final Setting<Boolean> displayGameMode = sgPlayers.add(new BoolSetting.Builder()
-        .name("gamemode").defaultValue(false).build());
-
-    private final Setting<Boolean> displayDistance = sgPlayers.add(new BoolSetting.Builder()
-        .name("distance").defaultValue(false).build());
-
-    private final Setting<Boolean> displayPing = sgPlayers.add(new BoolSetting.Builder()
-        .name("ping").defaultValue(true).build());
-
-    // Fix #3: espHealthColors 现在实际控制名字颜色随 HP 变化
-    private final Setting<Boolean> espHealthColors = sgPlayers.add(new BoolSetting.Builder()
-        .name("esp-health-colors")
-        .description("根据生命值动态改变名字颜色，<=20橙色，<10红色")
+    private final Setting<Boolean> ignoreSelf = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-self")
+        .description("Ignore yourself when in third person or freecam.")
         .defaultValue(true)
-        .build());
+        .build()
+    );
 
-    private final Setting<Integer> maxNameLength = sgPlayers.add(new IntSetting.Builder()
-        .name("max-name-length")
-        .defaultValue(10).min(0).max(50)
-        .build());
+    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-friends")
+        .description("Ignore rendering nametags for friends.")
+        .defaultValue(false)
+        .build()
+    );
 
-    private final Setting<Boolean> displayItems = sgPlayers.add(new BoolSetting.Builder()
-        .name("items").defaultValue(true).build());
-
-    private final Setting<Boolean> displayEnchants = sgPlayers.add(new BoolSetting.Builder()
-        .name("display-enchants")
+    private final Setting<Boolean> ignoreBots = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-bots")
+        .description("Only render non-bot nametags.")
         .defaultValue(true)
-        .visible(displayItems::get)
-        .build());
+        .build()
+    );
 
-    private final Setting<Boolean> displayTeamIcon = sgPlayers.add(new BoolSetting.Builder()
-        .name("team-icon")
+    private final Setting<Boolean> culling = sgGeneral.add(new BoolSetting.Builder()
+        .name("culling")
+        .description("Only render a certain number of nametags at a certain distance.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> maxCullRange = sgGeneral.add(new DoubleSetting.Builder()
+        .name("culling-range")
+        .description("Only render nametags within this distance of your player.")
+        .defaultValue(20)
+        .min(0)
+        .sliderMax(200)
+        .visible(culling::get)
+        .build()
+    );
+
+    private final Setting<Integer> maxCullCount = sgGeneral.add(new IntSetting.Builder()
+        .name("culling-count")
+        .description("Only render this many nametags.")
+        .defaultValue(50)
+        .min(1)
+        .sliderRange(1, 100)
+        .visible(culling::get)
+        .build()
+    );
+
+    // Players
+    private final Setting<Boolean> pvpNametag = sgPlayers.add(new BoolSetting.Builder()
+        .name("pvp-nametag")
+        .description("Show HP nametag on players.")
         .defaultValue(true)
-        .build());
+        .build()
+    );
 
-    private final Setting<Boolean> displayDamageReduction = sgItems.add(new BoolSetting.Builder()
-        .name("damage-reduction")
+    private final Setting<Boolean> showDistance = sgPlayers.add(new BoolSetting.Builder()
+        .name("show-distance")
+        .description("Show distance to player.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> distanceDecimals = sgPlayers.add(new IntSetting.Builder()
+        .name("distance-decimals")
+        .defaultValue(1)
+        .range(0, 3)
+        .visible(showDistance::get)
+        .build()
+    );
+
+    private final Setting<Boolean> showArmorReduction = sgPlayers.add(new BoolSetting.Builder()
+        .name("show-armor-reduction")
+        .description("Show armor damage reduction percentage.")
         .defaultValue(true)
-        .build());
+        .build()
+    );
 
-    private final Setting<Integer> drMinPercent = sgItems.add(new IntSetting.Builder()
-        .name("dr-min-percent")
-        .defaultValue(10).min(0).max(100)
-        .visible(displayDamageReduction::get)
-        .build());
+    private final Setting<Integer> armorReductionThreshold = sgPlayers.add(new IntSetting.Builder()
+        .name("reduction-threshold")
+        .description("Only show armor reduction when it exceeds this percentage.")
+        .defaultValue(65)
+        .range(0, 100)
+        .sliderRange(0, 100)
+        .visible(showArmorReduction::get)
+        .build()
+    );
 
-    private final Setting<Boolean> itemCount = sgItems.add(new BoolSetting.Builder()
-        .name("show-count").defaultValue(true).build());
-
+    // Render
     private final Setting<SettingColor> background = sgRender.add(new ColorSetting.Builder()
         .name("background-color")
+        .description("The color of the nametag background.")
         .defaultValue(new SettingColor(0, 0, 0, 75))
-        .build());
+        .build()
+    );
 
     private final Setting<SettingColor> nameColor = sgRender.add(new ColorSetting.Builder()
         .name("name-color")
+        .description("The color of the nametag names.")
         .defaultValue(new SettingColor())
-        .build());
+        .build()
+    );
 
-    private final Setting<SettingColor> pingColor = sgRender.add(new ColorSetting.Builder()
-        .name("ping-color")
-        .defaultValue(new SettingColor(20, 170, 170))
-        .visible(displayPing::get)
-        .build());
-
-    private final Setting<SettingColor> gamemodeColor = sgRender.add(new ColorSetting.Builder()
-        .name("gamemode-color")
-        .defaultValue(new SettingColor(232, 185, 35))
-        .visible(displayGameMode::get)
-        .build());
-
-    // 颜色常量
-    private final Color LOW_HP    = new Color(200, 80,  80);
-    private final Color MEDIUM_HP = new Color(255, 180, 60);
-    private final Color HIGH_HP   = new Color(100, 200, 100);
-    private final Color WHITE     = new Color(255, 255, 255);
-    // Fix #1: 血量固定黑色
-    private final Color BLACK     = new Color(0, 0, 0, 255);
-
-    // Fix #4: 只保留一个 mutableColor，renderTeamIcon 改为直接构造 packed int
-    private final Color mutableColor = new Color();
+    private final Color RED   = new Color(255, 25,  25);
+    private final Color AMBER = new Color(255, 105, 25);
+    private final Color GREEN = new Color(25,  252, 25);
+    private final Color CYAN  = new Color(20,  200, 200);
+    private final Color GOLD  = new Color(232, 185, 35);
 
     private final Vector3d pos = new Vector3d();
-    private final List<Entity> entitiesList = new ArrayList<>();
-    private final StringBuilder sb = new StringBuilder();
 
-    private int bgAlpha;
-    private int textAlpha;
-
-    // FastUtil 避免装箱开销
-    private final Object2IntMap<UUID> tabHealthCache = new Object2IntOpenHashMap<>();
+    private final List<Entity> entityList = new ArrayList<>();
+    private final HashMap<Long, Double> cachedHealthMap = new HashMap<>();
+    private long lastHealthCacheUpdate = 0;
+    private static final long HEALTH_CACHE_INTERVAL = 500;
 
     public Nametags() {
-        super(Categories.Render, "nametags", "Nametags");
+        super(Categories.Render, "nametags", "Displays HP and armor reduction nametags above players.");
     }
 
     @Override
     public void onDeactivate() {
-        tabHealthCache.clear();
+        cachedHealthMap.clear();
     }
-
-    // ==================== Tick ====================
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        // Tab血量缓存刷新逻辑（同ESP统一）
-        tabHealthCache.clear();
-        if (healthSource.get() == HealthSource.Tab && mc.world != null) {
-            Scoreboard sb = mc.world.getScoreboard();
-            ScoreboardObjective obj = sb.getObjectiveForSlot(ScoreboardDisplaySlot.LIST);
-            if (obj == null) obj = sb.getObjectiveForSlot(ScoreboardDisplaySlot.BELOW_NAME);
+        entityList.clear();
 
-            for (PlayerEntity player : mc.world.getPlayers()) {
-                if (obj != null) {
-                    try {
-                        ScoreHolder holder = ScoreHolder.fromProfile(player.getGameProfile());
-                        ReadableScoreboardScore score = sb.getScore(holder, obj);
-                        if (score != null && score.getScore() > 0) {
-                            tabHealthCache.put(player.getUuid(), score.getScore());
-                            continue; // 成功获取到Tab计分板血量，直接跳过Fallback
-                        }
-                    } catch (Exception ignored) {}
-                }
-                // Fallback 到客户端血量
-                tabHealthCache.put(player.getUuid(), (int)(player.getHealth() + player.getAbsorptionAmount()));
-            }
-        }
-
-        // 实体更新逻辑
-        entitiesList.clear();
-        if (mc.world == null) return;
-
-        boolean freecam     = Modules.get().isActive(Freecam.class);
-        boolean firstPerson = mc.options.getPerspective().isFirstPerson();
-        double maxDistSq    = (double) maxDistance.get() * maxDistance.get();
-
-        Set<EntityType<?>> entityTypes    = entities.get();
-        boolean ignoreSelfFlag    = ignoreSelf.get();
-        boolean ignoreFriendsFlag = ignoreFriends.get();
-        boolean ignoreBotsFlag    = ignoreBots.get();
+        boolean freecamNotActive = !Modules.get().isActive(Freecam.class);
+        boolean notThirdPerson   = mc.options.getPerspective().isFirstPerson();
+        Vec3d cameraPos          = mc.gameRenderer.getCamera().getCameraPos();
 
         for (Entity entity : mc.world.getEntities()) {
-            if (!entityTypes.contains(entity.getType())) continue;
-            if (PlayerUtils.squaredDistanceToCamera(entity) > maxDistSq) continue;
+            EntityType<?> type = entity.getType();
+            if (!entities.get().contains(type)) continue;
 
-            if (entity instanceof PlayerEntity p) {
-                if (entity == mc.player && ignoreSelfFlag && !freecam && firstPerson) continue;
-                if (ignoreFriendsFlag && Friends.get().isFriend(p)) continue;
-                if (ignoreBotsFlag && EntityUtils.getGameMode(p) == null) continue;
+            if (type == EntityType.PLAYER) {
+                if ((ignoreSelf.get() || (freecamNotActive && notThirdPerson))
+                    && entity == mc.player) continue;
+
+                if (EntityUtils.getGameMode((PlayerEntity) entity) == null
+                    && ignoreBots.get()) continue;
+
+                if (Friends.get().isFriend((PlayerEntity) entity)
+                    && ignoreFriends.get()) continue;
             }
-            entitiesList.add(entity);
-        }
 
-        entitiesList.sort((e1, e2) -> Double.compare(
-            PlayerUtils.squaredDistanceToCamera(e2),
-            PlayerUtils.squaredDistanceToCamera(e1)
-        ));
-    }
-
-    // ==================== 血量获取 ====================
-
-    private double getHp(PlayerEntity p) {
-        if (healthSource.get() == HealthSource.Tab) {
-            UUID uuid = p.getUuid();
-            if (tabHealthCache.containsKey(uuid)) {
-                return tabHealthCache.getInt(uuid);
+            if (!culling.get() || PlayerUtils.isWithinCamera(entity, maxCullRange.get())) {
+                entityList.add(entity);
             }
         }
-        return p.getHealth() + p.getAbsorptionAmount();
+
+        entityList.sort(Comparator.comparing(e -> e.squaredDistanceTo(cameraPos)));
     }
 
-    // ==================== Render ====================
+    // ── 血量缓存 ──────────────────────────────────────────────────────────────
+
+    private double getCachedHealth(PlayerEntity player) {
+        long now = System.currentTimeMillis();
+        if (now - lastHealthCacheUpdate > HEALTH_CACHE_INTERVAL) updateHealthCache();
+        long id = player.getUuid().getMostSignificantBits();
+        return cachedHealthMap.getOrDefault(id, 20.0);
+    }
+
+    private void updateHealthCache() {
+        if (mc.world == null) return;
+        cachedHealthMap.clear();
+        for (PlayerEntity p : mc.world.getPlayers()) {
+            cachedHealthMap.put(p.getUuid().getMostSignificantBits(), getGateHp(p));
+        }
+        lastHealthCacheUpdate = System.currentTimeMillis();
+    }
+
+    private double getGateHp(PlayerEntity player) {
+        if (mc.world != null && mc.world.getScoreboard() != null) {
+            Scoreboard sb  = mc.world.getScoreboard();
+            ScoreboardObjective obj = sb.getObjectiveForSlot(ScoreboardDisplaySlot.LIST);
+            if (obj != null) {
+                try {
+                    ReadableScoreboardScore score = sb.getScore(player, obj);
+                    if (score != null && score.getScore() > 0) return score.getScore();
+                } catch (Exception ignored) {}
+            }
+        }
+        return player.getHealth() + player.getAbsorptionAmount();
+    }
+
+    // ── 护甲减伤计算 ──────────────────────────────────────────────────────────
+
+    private double calcDamageReduction(PlayerEntity player) {
+        double armor     = player.getArmor();
+        double toughness = player.getAttributeValue(
+            net.minecraft.entity.attribute.EntityAttributes.ARMOR_TOUGHNESS);
+
+        double refDamage = 1.0;
+        double armorEff  = Math.max(armor / 5.0,
+                           Math.min(armor - refDamage * (4.0 / (toughness + 8.0)), 20.0));
+        double armorReduction = armorEff / 25.0;
+
+        int totalProtLevel = 0;
+        EquipmentSlot[] slots = { EquipmentSlot.HEAD, EquipmentSlot.CHEST,
+                                   EquipmentSlot.LEGS, EquipmentSlot.FEET };
+        for (EquipmentSlot slot : slots) {
+            ItemStack stack = player.getEquippedStack(slot);
+            if (stack.isEmpty()) continue;
+
+            var enchants = stack.get(DataComponentTypes.ENCHANTMENTS);
+            if (enchants == null) continue;
+
+            for (var entry : enchants.getEnchantmentEntries()) {
+                RegistryKey<Enchantment> key = entry.getKey().getKey().orElse(null);
+                int lvl = entry.getIntValue();
+                if (key == null) continue;
+
+                if (key.equals(Enchantments.PROTECTION))                 totalProtLevel += lvl;
+                else if (key.equals(Enchantments.BLAST_PROTECTION))      totalProtLevel += lvl * 2;
+                else if (key.equals(Enchantments.FIRE_PROTECTION))       totalProtLevel += lvl * 2;
+                else if (key.equals(Enchantments.PROJECTILE_PROTECTION)) totalProtLevel += (int)(lvl * 1.5);
+            }
+        }
+
+        double enchantReduction = Math.min(totalProtLevel * 0.04, 0.8);
+        double total = 1.0 - (1.0 - armorReduction) * (1.0 - enchantReduction);
+        return Math.min(total, 0.95);
+    }
+
+    // ── 渲染 ──────────────────────────────────────────────────────────────────
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        boolean shadow = true;
+        int count  = getRenderCount();
+        boolean shadow = Config.get().customFont.get();
 
-        for (Entity entity : entitiesList) {
+        for (int i = count - 1; i > -1; i--) {
+            Entity entity = entityList.get(i);
+
             Utils.set(pos, entity, event.tickDelta);
-            pos.add(0, entity.getEyeHeight(entity.getPose()) + 0.5, 0);
+            pos.add(0, getHeight(entity), 0);
 
-            double dist      = PlayerUtils.distanceToCamera(entity);
-            float distFade   = smoothstep(nearDistance.get().floatValue(), farDistance.get().floatValue(), (float) dist);
-            float finalScale = MathHelper.clamp((float) (scale.get() * (1 - distFade * 0.5f)), 0.5f, 10f);
-
-            bgAlpha   = (int) MathHelper.lerp(distFade, 255, 60);
-            textAlpha = bgAlpha;
-
-            if (!NametagUtils.to2D(pos, finalScale)) continue;
-
-            if (entity instanceof PlayerEntity player) {
-                renderPlayer(event, player, shadow, dist);
-            } else if (entity instanceof ItemEntity item) {
-                renderItem(item.getStack(), shadow);
-            }
-        }
-    }
-
-    // ==================== Player ====================
-
-    private void renderPlayer(Render2DEvent event, PlayerEntity player, boolean shadow, double dist) {
-        TextRenderer text = TextRenderer.get();
-        NametagUtils.begin(pos);
-
-        // --- 数据准备 ---
-        String gmText = "";
-        if (displayGameMode.get()) {
-            GameMode gm = EntityUtils.getGameMode(player);
-            gmText = gm == null ? "[BOT] " : switch (gm) {
-                case SPECTATOR -> "[Sp] ";
-                case SURVIVAL  -> "[S] ";
-                case CREATIVE  -> "[C] ";
-                case ADVENTURE -> "[A] ";
-            };
-        }
-
-        String rawName = player.getName().getString();
-        String name = player == mc.player
-            ? Modules.get().get(NameProtect.class).getName(rawName)
-            : rawName;
-        if (maxNameLength.get() > 0 && name.length() > maxNameLength.get()) {
-            name = name.substring(0, maxNameLength.get()) + "...";
-        } else if (maxNameLength.get() == 0) {
-            name = "";
-        }
-
-        // --- 核心修复区：统一获取真实血量 ---
-        double hpVal = getHp(player);
-
-        // Fix #3: espHealthColors 实际控制名字颜色
-        Color nameCol = PlayerUtils.getPlayerColor(player, nameColor.get());
-        if (espHealthColors.get()) {
-            // 这里统一使用了反作弊绕过获取到的 hpVal，而非只用客户端假血
-            if (hpVal < 10)       nameCol = LOW_HP;
-            else if (hpVal <= 20) nameCol = MEDIUM_HP;
-            else                  nameCol = HIGH_HP;
-        }
-
-        // Fix #1: 血量固定黑色
-        Color healthCol = BLACK;
-
-        String pingText = "";
-        if (displayPing.get()) pingText = " [" + EntityUtils.getPing(player) + "ms]";
-
-        String distText = "";
-        if (displayDistance.get()) distText = " " + String.format("%.1f", dist) + "m";
-
-        String drText = "";
-        if (displayDamageReduction.get()) {
-            float base    = 10f;
-            float reduced = DamageUtils.calculateReductions(base, player, mc.world.getDamageSources().playerAttack(mc.player));
-            float pct     = MathHelper.clamp(1f - reduced / base, 0f, 1f) * 100f;
-            if (pct >= drMinPercent.get()) drText = " [DR " + (int) pct + "%]";
-        }
-
-        double height = text.getHeight(shadow);
-
-        // 添加空格前缀，避免与名字粘连
-        String healthText = displayHealth.get() ? " " + (int) hpVal : "";
-
-        Team playerTeam = player.getScoreboardTeam();
-
-        if (vanillaOverhead.get()) {
-            sb.setLength(0);
-            if (displayGameMode.get()) sb.append(gmText);
-            appendTeamText(sb, playerTeam);
-            sb.append(name).append(healthText).append(pingText).append(distText).append(drText);
-            String fullStr = sb.toString();
-
-            double width = text.getWidth(fullStr, shadow);
-            double x     = -width / 2;
-            double y     = -height * 2;
-
-            Renderer2D.COLOR.begin();
-            Renderer2D.COLOR.quad(x - 1, y - 1, width + 2, height + 2,
-                newColor(background.get().getPacked(), bgAlpha));
-            Renderer2D.COLOR.render();
-
-            text.beginBig();
-            double cx = x;
-            if (displayGameMode.get())
-                cx = text.render(gmText, cx, y, newColor(gamemodeColor.get().getPacked(), textAlpha), shadow);
-            cx = renderTeamIcon(text, cx, y, playerTeam, shadow);
-            if (!name.isEmpty())
-                cx = text.render(name, cx, y, newColor(nameCol.getPacked(), textAlpha), shadow);
-            if (displayHealth.get())
-                cx = text.render(healthText, cx, y, newColor(healthCol.getPacked(), textAlpha), shadow);
-            if (displayPing.get())
-                cx = text.render(pingText, cx, y, newColor(pingColor.get().getPacked(), textAlpha), shadow);
-            if (displayDistance.get())
-                cx = text.render(distText, cx, y, newColor(WHITE.getPacked(), textAlpha), shadow);
-            if (!drText.isEmpty())
-                text.render(drText, cx, y, newColor(BLACK.getPacked(), textAlpha), shadow);
-            text.end();
-
-            if (displayItems.get()) renderItemsAndEnchants(event, player, shadow, height);
-            NametagUtils.end();
-            return;
-        }
-
-        // 标准模式
-        sb.setLength(0);
-        if (displayGameMode.get()) sb.append(gmText);
-        appendTeamText(sb, playerTeam);
-        sb.append(name).append(healthText).append(pingText).append(distText).append(drText);
-        double total = text.getWidth(sb.toString(), shadow);
-        double half  = total / 2;
-
-        Renderer2D.COLOR.begin();
-        Renderer2D.COLOR.quad(-half - 1, -height - 1, total + 2, height + 2,
-            newColor(background.get().getPacked(), bgAlpha));
-        Renderer2D.COLOR.render();
-
-        text.beginBig();
-        double x = -half;
-        if (displayGameMode.get())
-            x = text.render(gmText, x, -height, newColor(gamemodeColor.get().getPacked(), textAlpha), shadow);
-        x = renderTeamIcon(text, x, -height, playerTeam, shadow);
-        x = text.render(name, x, -height, newColor(nameCol.getPacked(), textAlpha), shadow);
-        if (displayHealth.get())
-            x = text.render(healthText, x, -height, newColor(healthCol.getPacked(), textAlpha), shadow);
-        if (displayPing.get())
-            x = text.render(pingText, x, -height, newColor(pingColor.get().getPacked(), textAlpha), shadow);
-        if (displayDistance.get())
-            x = text.render(distText, x, -height, newColor(WHITE.getPacked(), textAlpha), shadow);
-        if (!drText.isEmpty())
-            text.render(drText, x, -height, newColor(BLACK.getPacked(), textAlpha), shadow);
-        text.end();
-
-        if (displayItems.get()) renderItemsAndEnchants(event, player, shadow, height);
-        NametagUtils.end();
-    }
-
-    // ==================== 队伍图标 ====================
-
-    private void appendTeamText(StringBuilder out, Team team) {
-        if (!displayTeamIcon.get() || team == null) return;
-        String prefix = team.getPrefix().getString();
-        String suffix = team.getSuffix().getString();
-        if (!prefix.isEmpty())      out.append(prefix);
-        else if (!suffix.isEmpty()) out.append(suffix);
-        else                        out.append("[T] ");
-    }
-
-    private double renderTeamIcon(TextRenderer text, double x, double y, Team team, boolean shadow) {
-        if (!displayTeamIcon.get() || team == null) return x;
-        String prefix = team.getPrefix().getString();
-        String suffix = team.getSuffix().getString();
-        String icon   = !prefix.isEmpty() ? prefix : (!suffix.isEmpty() ? suffix : "[T] ");
-        Integer cv    = team.getColor().getColorValue();
-        int packed    = cv != null
-            ? ((cv & 0x00FFFFFF) | (textAlpha << 24))
-            : ((0x00FFFFFF)      | (textAlpha << 24));
-        return text.render(icon, x, y, new Color(packed), shadow);
-    }
-
-    // ==================== Items ====================
-
-    private void renderItemsAndEnchants(Render2DEvent event, PlayerEntity player,
-                                        boolean shadow, double height) {
-        TextRenderer text = TextRenderer.get();
-        double itemY = -height - 38;
-        double itemX = -48;
-
-        for (int i = 0; i < 6; i++) {
-            ItemStack stack = getItem(player, i);
-            RenderUtils.drawItem(event.drawContext, stack, (int) itemX, (int) itemY, 2, true);
-
-            if (displayEnchants.get() && !stack.isEmpty()) {
-                ItemEnchantmentsComponent ench = EnchantmentHelper.getEnchantments(stack);
-                text.begin(0.9, false, true);
-                double ex = itemX + 16;
-                double ey = itemY;
-                for (RegistryEntry<Enchantment> e : ench.getEnchantments()) {
-                    sb.setLength(0);
-                    sb.append(Utils.getEnchantSimpleName(e, 3)).append(" ").append(ench.getLevel(e));
-                    String line = sb.toString();
-                    text.render(line, ex - text.getWidth(line, shadow), ey, WHITE, shadow);
-                    ey += text.getHeight(shadow);
+            if (inverseDistanceScale.get()) {
+                Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
+                double dx = cameraPos.x - entity.getX();
+                double dy = cameraPos.y - entity.getY();
+                double dz = cameraPos.z - entity.getZ();
+                double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                // 最终渲染尺寸不超过 scale 上限 1.5
+                double invScale = scale.get() * MathHelper.clamp(0.4 + dist * 0.06, 0.4, 1.5 / scale.get());
+                if (NametagUtils.to2D(pos, invScale, false)) {
+                    if (entity.getType() == EntityType.PLAYER)
+                        renderNametagPlayer(event, (PlayerEntity) entity, shadow);
                 }
-                text.end();
+            } else {
+                if (NametagUtils.to2D(pos, scale.get())) {
+                    if (entity.getType() == EntityType.PLAYER)
+                        renderNametagPlayer(event, (PlayerEntity) entity, shadow);
+                }
             }
-            itemX += 18;
         }
     }
 
-    private void renderItem(ItemStack stack, boolean shadow) {
-        if (stack.isEmpty()) return;
+    private int getRenderCount() {
+        int count = culling.get() ? maxCullCount.get() : entityList.size();
+        return MathHelper.clamp(count, 0, entityList.size());
+    }
+
+    @Override
+    public String getInfoString() {
+        return Integer.toString(getRenderCount());
+    }
+
+    private double getHeight(Entity entity) {
+        return entity.getEyeHeight(entity.getPose()) + 0.5;
+    }
+
+    private void renderNametagPlayer(Render2DEvent event, PlayerEntity player, boolean shadow) {
+        if (!pvpNametag.get()) return;
+
         TextRenderer text = TextRenderer.get();
-        NametagUtils.begin(pos);
+        NametagUtils.begin(pos, event.drawContext);
 
-        String name     = Names.get(stack);
-        String countStr = (itemCount.get() && stack.getCount() > 1) ? " x" + stack.getCount() : "";
+        // ── 血量 ──
+        double hp     = getCachedHealth(player);
+        int    health = Math.round((float) hp);
 
-        double w = text.getWidth(name + countStr, shadow);
-        double h = text.getHeight(shadow);
+        Color hpColor;
+        if (hp >= 99)      hpColor = GREEN;
+        else if (hp <= 6)  hpColor = RED;
+        else if (hp <= 12) hpColor = AMBER;
+        else               hpColor = GREEN;
 
-        Renderer2D.COLOR.begin();
-        Renderer2D.COLOR.quad(-w / 2 - 1, -h - 1, w + 2, h + 2,
-            newColor(background.get().getPacked(), bgAlpha));
-        Renderer2D.COLOR.render();
+        String hpText = String.valueOf(health);
+
+        // ── 减伤百分比 ──
+        boolean showReduction  = false;
+        String  reductionText  = "";
+        Color   reductionColor = CYAN;
+
+        if (showArmorReduction.get()) {
+            double reduction    = calcDamageReduction(player);
+            int    reductionPct = (int) Math.round(reduction * 100);
+            if (reductionPct > armorReductionThreshold.get()) {
+                showReduction = true;
+                reductionText = reductionPct + "%";
+                reductionColor = reductionPct >= 80 ? GOLD : CYAN;
+            }
+        }
+
+        // ── 距离 ──
+        boolean showDist = showDistance.get()
+            && (player != mc.getCameraEntity() || Modules.get().isActive(Freecam.class));
+        String distText = "";
+
+        if (showDist) {
+            double s    = Math.pow(10, distanceDecimals.get());
+            double dist = Math.round(PlayerUtils.distanceToCamera(player) * s) / s;
+            distText = dist + "m";
+        }
+
+        // ── 计算布局 ──
+        double lineH = text.getHeight(shadow);
+        double hpW   = text.getWidth(hpText, shadow);
+        double redW  = showReduction ? text.getWidth(reductionText, shadow) : 0;
+        double distW = showDist      ? text.getWidth(distText, shadow)      : 0;
+
+        double maxW  = Math.max(hpW, Math.max(redW, distW));
+        double halfW = maxW / 2;
+
+        int    lines  = 1 + (showReduction ? 1 : 0) + (showDist ? 1 : 0);
+        double totalH = lineH * lines;
+
+        drawBg(-halfW, -totalH, maxW, totalH);
 
         text.beginBig();
-        text.render(name, -w / 2, -h, newColor(nameColor.get().getPacked(), textAlpha), shadow);
-        if (!countStr.isEmpty())
-            text.render(countStr, -w / 2 + text.getWidth(name, shadow), -h,
-                newColor(WHITE.getPacked(), textAlpha), shadow);
+
+        double y = -totalH;
+
+        // 第1行：血量
+        text.render(hpText, -hpW / 2, y, hpColor, shadow);
+        y += lineH;
+
+        // 第2行（可选）：减伤百分比
+        if (showReduction) {
+            text.render(reductionText, -redW / 2, y, reductionColor, shadow);
+            y += lineH;
+        }
+
+        // 第3行（可选）：距离
+        if (showDist) {
+            text.render(distText, -distW / 2, y, EntityUtils.getColorFromDistance(player), shadow);
+        }
+
         text.end();
-
-        NametagUtils.end();
+        NametagUtils.end(event.drawContext);
     }
 
-    // ==================== Helpers ====================
-
-    private ItemStack getItem(PlayerEntity p, int i) {
-        return switch (i) {
-            case 0  -> p.getMainHandStack();
-            case 1  -> p.getEquippedStack(EquipmentSlot.HEAD);
-            case 2  -> p.getEquippedStack(EquipmentSlot.CHEST);
-            case 3  -> p.getEquippedStack(EquipmentSlot.LEGS);
-            case 4  -> p.getEquippedStack(EquipmentSlot.FEET);
-            case 5  -> p.getOffHandStack();
-            default -> ItemStack.EMPTY;
-        };
+    private void drawBg(double x, double y, double width, double height) {
+        Renderer2D.COLOR.begin();
+        Renderer2D.COLOR.quad(x - 1, y - 1, width + 2, height + 2, background.get());
+        Renderer2D.COLOR.render();
     }
 
-    public boolean excludeBots()    { return ignoreBots.get(); }
-    public boolean playerNametags() { return isActive() && entities.get().contains(EntityType.PLAYER); }
+    // ── 枚举 ──────────────────────────────────────────────────────────────────
 
-    private static float smoothstep(float edge0, float edge1, float x) {
-        x = MathHelper.clamp((x - edge0) / (edge1 - edge0), 0f, 1f);
-        return x * x * (3 - 2 * x);
-    }
+    public enum Position    { Above, OnTop }
+    public enum Durability  { None, Total, Percentage }
+    public enum DistanceColorMode { Gradient, Flat }
 
-    private Color newColor(int packedRgb, int alpha) {
-        return mutableColor.set(
-            (packedRgb >> 16) & 0xFF,
-            (packedRgb >>  8) & 0xFF,
-             packedRgb        & 0xFF,
-            alpha
-        );
+    // ── 对外接口 ──────────────────────────────────────────────────────────────
+
+    public boolean excludeBots() { return ignoreBots.get(); }
+
+    public boolean playerNametags() {
+        return isActive() && entities.get().contains(EntityType.PLAYER);
     }
 }

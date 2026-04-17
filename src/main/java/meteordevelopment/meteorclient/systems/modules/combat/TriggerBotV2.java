@@ -47,12 +47,6 @@ public class TriggerBotV2 extends Module {
         .name("air-swing-max").defaultValue(5.5).visible(smartAirSwing::get).build());
 
     // ==================== Timing ====================
-    private final Setting<Integer> comboHoverMin = sgTiming.add(new IntSetting.Builder()
-        .name("combo-hover-min").defaultValue(1).min(0).build());
-
-    private final Setting<Integer> comboHoverMax = sgTiming.add(new IntSetting.Builder()
-        .name("combo-hover-max").defaultValue(2).min(0).build());
-
     private final Setting<Double> critThreshold = sgTiming.add(new DoubleSetting.Builder()
         .name("crit-threshold").defaultValue(0.72).build());
 
@@ -66,19 +60,16 @@ public class TriggerBotV2 extends Module {
         .name("combo-max").defaultValue(1.0).build());
 
     // ==================== State (Static) ====================
-    // static 保证模块 toggle off/on 重建实例后锁定目标不丢失
     private static Entity lockedTarget = null;
 
     // ==================== State (Instance) ====================
-    private boolean isFirstAttack       = true;
-    private Entity  lastTickTarget      = null;
-    private int     hoverTickCounter    = 0;
-    private int     comboRequiredHover  = -1;
+    private boolean isFirstAttack        = true;
+    private Entity  lastTickTarget       = null;
     private double  cachedComboThreshold = -1;
-    private boolean hasClickedThisTick  = false;
+    private boolean hasClickedThisTick   = false;
 
     public TriggerBotV2() {
-        super(Categories.Combat, "trigger-bot-v2", "Instant activation on first hit.");
+        super(Categories.Combat, "trigger-bot-v2", "Instant activation. (0-Delay when walking)");
     }
 
     @Override
@@ -95,8 +86,6 @@ public class TriggerBotV2 extends Module {
         isFirstAttack        = true;
         lockedTarget         = null;
         lastTickTarget       = null;
-        hoverTickCounter     = 0;
-        comboRequiredHover   = -1;
         cachedComboThreshold = -1;
     }
 
@@ -106,7 +95,6 @@ public class TriggerBotV2 extends Module {
         if (mc.player == null || mc.world == null || mc.player.isUsingItem()) return;
 
         // --- Layer 1: 重锤快速路径 ---
-        // smash attack 触发阈值为下落 1.5 格
         if (isMace()) {
             if (mc.player.fallDistance >= 1.5f) {
                 Entity target = getCrosshairTarget();
@@ -117,35 +105,28 @@ public class TriggerBotV2 extends Module {
             return;
         }
 
-        // --- Layer 2: Smart Air Swing (仅首刀前，附近无敌人时空挥预热冷却) ---
-        // Fix #4: 空挥后不改变 isFirstAttack，保持首刀状态
+        // --- Layer 2: Smart Air Swing ---
         if (isFirstAttack && smartAirSwing.get()) {
-            double range = airSwingMin.get() + (random.nextDouble() * (airSwingMax.get() - airSwingMin.get()));
-            if (getNearbyEnemiesCount(range) == 0) {
-                doLeftClick(false);
-                return;  
+            Entity crosshairTarget = getCrosshairTarget();
+            boolean targetIsPlayer = crosshairTarget instanceof PlayerEntity;
+
+            // 只有准星对着玩家、或没对着任何合法目标时，才执行空挥逻辑
+            if (targetIsPlayer || crosshairTarget == null) {
+                double range = airSwingMin.get() + (random.nextDouble() * (airSwingMax.get() - airSwingMin.get()));
+                if (getNearbyPlayersCount(range) == 0) {
+                    doLeftClick(false);
+                    return;
+                }
             }
         }
 
         // --- Layer 3: Combat Logic ---
         Entity currentTarget = getCrosshairTarget();
 
-   
-        boolean isRelevantTarget = (isFirstAttack)
-            ? (currentTarget != null)
-            : (currentTarget != null && currentTarget == lockedTarget);
-
-        if (!isRelevantTarget || currentTarget != lastTickTarget) {
-            hoverTickCounter = 0;
-        } else {
-            hoverTickCounter++;
-        }
-
-   
+        // 目标死亡时重置锁定
         if (lockedTarget != null && !lockedTarget.isAlive()) {
             lockedTarget         = null;
             isFirstAttack        = true;
-            comboRequiredHover   = -1;
             cachedComboThreshold = -1;
         }
 
@@ -154,6 +135,7 @@ public class TriggerBotV2 extends Module {
             return;
         }
 
+        // 连击时，只有当准星指向已锁定的目标才处理
         if (!isFirstAttack && currentTarget != lockedTarget) {
             lastTickTarget = currentTarget;
             return;
@@ -162,33 +144,24 @@ public class TriggerBotV2 extends Module {
         lastTickTarget = currentTarget;
 
         boolean shouldCrit = canCrit();
-        boolean hoverReady;
 
-        if (isFirstAttack) {
-            hoverReady = true;
-        } else {
-            if (comboRequiredHover == -1) {
-                comboRequiredHover = comboHoverMin.get()
-                    + random.nextInt(Math.max(1, comboHoverMax.get() - comboHoverMin.get() + 1));
-            }
-            if (cachedComboThreshold == -1) {
-                cachedComboThreshold = comboMinThreshold.get()
-                    + (random.nextDouble() * (comboMaxThreshold.get() - comboMinThreshold.get()));
-            }
-            hoverReady = (hoverTickCounter >= comboRequiredHover);
+        if (!isFirstAttack && cachedComboThreshold == -1) {
+            cachedComboThreshold = comboMinThreshold.get()
+                + (random.nextDouble() * (comboMaxThreshold.get() - comboMinThreshold.get()));
         }
+
+        float progress = mc.player.getAttackCooldownProgress(0.5f);
+        float predictedProgress = progress;
 
         boolean readyToAttack = false;
 
         if (shouldCrit) {
-            float progress = mc.player.getAttackCooldownProgress(0.5f);
-            readyToAttack = (progress >= critThreshold.get());
-        } else if (hoverReady) {
-            float progress = mc.player.getAttackCooldownProgress(0.5f);
+            readyToAttack = (predictedProgress >= critThreshold.get());
+        } else {
             if (isFirstAttack) {
-                readyToAttack = (progress >= firstHitThreshold.get());
+                readyToAttack = (predictedProgress >= firstHitThreshold.get());
             } else {
-                readyToAttack = (progress >= cachedComboThreshold);
+                readyToAttack = (predictedProgress >= cachedComboThreshold);
             }
         }
 
@@ -201,9 +174,7 @@ public class TriggerBotV2 extends Module {
 
     private void postAttackProcessing() {
         isFirstAttack        = false;
-        hoverTickCounter     = 0;
-        comboRequiredHover   = -1;
-        cachedComboThreshold = -1;  // Fix #2: 重置缓存，下次 combo 重新随机
+        cachedComboThreshold = -1;
     }
 
     private void doLeftClick(boolean requestCrit) {
@@ -243,10 +214,12 @@ public class TriggerBotV2 extends Module {
         return myTeam != null && targetTeam != null && myTeam.getColor() == targetTeam.getColor();
     }
 
-    private int getNearbyEnemiesCount(double range) {
+    private int getNearbyPlayersCount(double range) {
         if (mc.world == null) return 0;
         Box box = mc.player.getBoundingBox().expand(range);
-        return mc.world.getOtherEntities(mc.player, box, this::isValid).size();
+        return mc.world.getOtherEntities(mc.player, box, e ->
+            e instanceof PlayerEntity p && isValid(p)
+        ).size();
     }
 
     private boolean isMace() {

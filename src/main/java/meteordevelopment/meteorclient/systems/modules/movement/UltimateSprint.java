@@ -14,7 +14,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.entity.Entity;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.Random; // 【修改1：导入Random】
+import java.util.Random;
 
 public class UltimateSprint extends Module {
     public static UltimateSprint instance;
@@ -24,7 +24,6 @@ public class UltimateSprint extends Module {
     private Runnable externalCallback = null;
     private int currentDelayTicks = 0;
 
-    // 【修改2：增加存随机数的变量】
     private int currentRandomTarget = 0;
     private final Random random = new Random();
 
@@ -32,7 +31,6 @@ public class UltimateSprint extends Module {
 
     // ==================== 设置项 ====================
 
-    // 【修改3：把原来的 attackDelay 拆分为 min 和 max】
     private final Setting<Integer> minDelay = sgGeneral.add(new IntSetting.Builder()
             .name("min-delay")
             .description("最小延迟 Tick (Grim建议2)")
@@ -86,13 +84,15 @@ public class UltimateSprint extends Module {
             instance.externalCallback = callback;
             instance.currentDelayTicks = 0;
 
-            // 【修改4：在这里生成随机数】
-            int min = instance.minDelay.get();
-            int max = instance.maxDelay.get();
-            if (min > max) { int t = min; min = max; max = t; } // 防止填反
-            
-            // 生成 min 到 max 的随机数并存起来
-            instance.currentRandomTarget = min + instance.random.nextInt(max - min + 1);
+            if (instance.mc.player != null && !instance.mc.player.isSprinting()) {
+                instance.currentRandomTarget = 0;
+            } else {
+                int min = instance.minDelay.get();
+                int max = instance.maxDelay.get();
+                if (min > max) { int t = min; min = max; max = t; } 
+                
+                instance.currentRandomTarget = min + instance.random.nextInt(max - min + 1);
+            }
         }
     }
 
@@ -119,7 +119,6 @@ public class UltimateSprint extends Module {
         if (mc.player == null || mc.world == null)
             return;
 
-        // --- 1. 基础移动同步 (WASD) ---
         if (mc.currentScreen == null) {
             mc.options.forwardKey.setPressed(Input.isKeyPressed(GLFW.GLFW_KEY_W));
             mc.options.backKey.setPressed(Input.isKeyPressed(GLFW.GLFW_KEY_S));
@@ -130,44 +129,29 @@ public class UltimateSprint extends Module {
             return;
         }
 
-        // --- 2. 处理攻击请求与延迟逻辑 ---
         if (externalRequest && externalCallback != null) {
-            // A. 强制停止疾跑
             mc.options.sprintKey.setPressed(false);
             if (mc.player.isSprinting()) {
                 mc.player.setSprinting(false);
             }
 
-            // B. 检查延迟
-            // 【修改5：这里对比生成的随机数，而不是固定值】
             if (currentDelayTicks < currentRandomTarget) {
                 currentDelayTicks++;
-                return; // 延迟未到，直接退出
+                return; 
             } else {
-                // 延迟已到，准备执行攻击
-                boolean shouldAttack = true;
-
-                if (needReCheck.get()) {
-                    if (getTarget() == null) {
-                        shouldAttack = false; 
-                    }
-                }
-
-                if (shouldAttack) {
+                if (needReCheck.get() && getTarget() == null) {
+                    resetRequests(); 
+                } else {
                     try {
                         externalCallback.run();
                     } catch (Exception e) {
                         e.printStackTrace(); 
                     }
+                    resetRequests(); 
                 }
-
-                resetRequests(); 
-                
-                return; 
             }
         }
 
-        // --- 3. 常规疾跑逻辑 ---
         if (needRestoreSprint.get()) {
             boolean forward = mc.options.forwardKey.isPressed();
             boolean back = mc.options.backKey.isPressed();
@@ -195,7 +179,6 @@ public class UltimateSprint extends Module {
         mc.options.sprintKey.setPressed(pressed);
     }
 
-    // 兼容性占位
     public boolean rageSprint() { return false; }
     public boolean unsprintInWater() { return false; }
     public boolean stopSprinting() { return !isActive(); }
