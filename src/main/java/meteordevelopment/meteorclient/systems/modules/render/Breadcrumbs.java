@@ -73,7 +73,7 @@ public class Breadcrumbs extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!mc.player.isLoaded()) return;
+        if (!mc.getNetworkHandler().isLoaded()) return;
 
         if (lastDimension != mc.world.getDimension()) {
             sectionPool.freeAll(sections);

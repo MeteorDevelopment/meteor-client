@@ -31,7 +31,6 @@ public class MicrosoftAccount extends Account<MicrosoftAccount> {
         if (token == null) return false;
 
         super.login();
-        cache.loadHead();
 
         setSession(new Session(cache.username, UndashedUuid.fromStringLenient(cache.uuid), token, Optional.empty(), Optional.empty()));
         return true;
@@ -50,7 +49,7 @@ public class MicrosoftAccount extends Account<MicrosoftAccount> {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof MicrosoftAccount)) return false;
-        return ((MicrosoftAccount) o).name.equals(this.name);
+        if (!(o instanceof MicrosoftAccount account)) return false;
+        return account.name.equals(this.name);
     }
 }

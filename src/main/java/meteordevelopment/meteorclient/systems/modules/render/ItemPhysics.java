@@ -9,8 +9,9 @@ import meteordevelopment.meteorclient.events.render.ApplyTransformationEvent;
 import meteordevelopment.meteorclient.events.render.RenderItemEntityEvent;
 import meteordevelopment.meteorclient.mixin.ItemRenderStateAccessor;
 import meteordevelopment.meteorclient.mixin.LayerRenderStateAccessor;
-import meteordevelopment.meteorclient.mixininterface.IBakedQuad;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -20,9 +21,10 @@ import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.json.Transformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
+import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.random.Random;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.List;
 
@@ -31,56 +33,30 @@ public class ItemPhysics extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    // 设置：自定义缩放倍率
-    private final Setting<Double> customScale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("custom-scale")
-        .description("Scale factor for the specific items in the list.")
-        .defaultValue(1.5) // 默认放大1.5倍
-        .min(0.1)
-        .sliderMax(5.0)
-        .build()
-    );
-
-    // 设置：需要缩放的物品列表
-    private final Setting<List<Item>> customScaleItems = sgGeneral.add(new ItemListSetting.Builder()
-        .name("custom-scale-items")
-        .description("List of items to apply the custom scale to.")
-        .defaultValue(
-            // 默认包含：金苹果、附魔金苹果、金锭(黄金)、钻石、玩家头颅(金头)、其他头颅
-            Items.GOLDEN_APPLE,
-            Items.ENCHANTED_GOLDEN_APPLE,
-            Items.GOLD_INGOT,
-            Items.DIAMOND,
-            Items.PLAYER_HEAD,
-            Items.CREEPER_HEAD,
-            Items.ZOMBIE_HEAD,
-            Items.SKELETON_SKULL,
-            Items.WITHER_SKELETON_SKULL,
-            Items.DRAGON_HEAD,
-            Items.PIGLIN_HEAD
-        )
-        .build()
-    );
-
-    private final Setting<Boolean> smooth3D = sgGeneral.add(new BoolSetting.Builder()
-        .name("smooth-3d")
-        .description("Keep smooth 3D item rendering.")
+    private final Setting<Boolean> randomRotation = sgGeneral.add(new BoolSetting.Builder()
+        .name("random-rotation")
+        .description("Adds a random rotation to every item.")
         .defaultValue(true)
         .build()
     );
 
+    private final Random random = Random.createLocal();
+    private boolean skipTransformation;
+
     public ItemPhysics() {
-        super(Categories.Render, "item-physics", "3D item rendering with custom scaling.");
+        super(Categories.Render, "item-physics", "Applies physics to items on the ground.");
     }
 
     @EventHandler
     private void onRenderItemEntity(RenderItemEntityEvent event) {
         event.cancel();
 
-        if (event.renderState.itemRenderState.isEmpty())
+        if (event.renderState.itemRenderState.isEmpty() || event.itemEntity == null)
             return;
 
         MatrixStack matrices = event.matrixStack;
+
+        random.setSeed(event.itemEntity.getId() * 89748956L);
 
         for (int i = 0; i < ((ItemRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayerCount(); i++) {
             ItemRenderState.LayerRenderState layer = ((ItemRenderStateAccessor) event.renderState.itemRenderState).meteor$getLayers()[i];
@@ -89,37 +65,66 @@ public class ItemPhysics extends Module {
             matrices.push();
             applyTransformation(matrices, ((LayerRenderStateAccessor) layer).meteor$getTransform());
             matrices.translate(0, info.offsetY, 0);
+            offsetInWater(matrices, event.itemEntity);
 
-            // Apply custom scaling if item is in the list
-            if (customScaleItems.get().contains(event.itemEntity.getStack().getItem())) {
-                float s = customScale.get().floatValue();
-                if (s != 1.0f) {
-                    matrices.scale(s, s, s);
-                }
+            if (info.flat) {
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
+                matrices.translate(0, 0, info.offsetZ);
             }
 
-            renderSimpleLayer(event, info);
+            if (randomRotation.get()) {
+                var axis = RotationAxis.POSITIVE_Y;
+                var x = 0.5f;
+                var y = 0.0f;
+                var z = 0.5f;
+
+                if (info.flat) {
+                    axis = RotationAxis.POSITIVE_Z;
+                    y = 0.5f;
+                    z = 0.0f;
+                }
+
+                float degrees = (random.nextFloat() * 2 - 1) * 90;
+
+                matrices.translate(x, y, z);
+                matrices.multiply(axis.rotationDegrees(degrees));
+                matrices.translate(-x, -y, -z);
+            }
+
+            renderLayer(event, info);
 
             matrices.pop();
         }
     }
 
-    private void renderSimpleLayer(RenderItemEntityEvent event, ModelInfo info) {
-        // Keep original rendering logic but remove physics effects
+    @EventHandler
+    private void onApplyTransformation(ApplyTransformationEvent event) {
+        if (skipTransformation)
+            event.cancel();
+    }
+
+    private void renderLayer(RenderItemEntityEvent event, ModelInfo info) {
+        MatrixStack matrices = event.matrixStack;
+        skipTransformation = true;
+
         for (int j = 0; j < event.renderState.renderedAmount; j++) {
+            matrices.push();
+
             if (j > 0) {
-                // Apply proper stacking without random physics
-                translate(event.matrixStack, info, 0, PIXEL_SIZE / 2f, 0);
+                float x = (random.nextFloat() * 2 - 1) * 0.25f;
+                float z = (random.nextFloat() * 2 - 1) * 0.25f;
+                translate(matrices, info, x, 0, z);
             }
-            
-            event.renderState.itemRenderState.render(
-                event.matrixStack, 
-                event.renderCommandQueue, 
-                event.light, 
-                OverlayTexture.DEFAULT_UV, 
-                event.renderState.outlineColor
-            );
+
+            event.renderState.itemRenderState.render(matrices, event.renderCommandQueue, event.light, OverlayTexture.DEFAULT_UV, event.renderState.outlineColor);
+
+            matrices.pop();
+
+            float y = Math.max(random.nextFloat() * PIXEL_SIZE, PIXEL_SIZE / 2f);
+            translate(matrices, info, 0, y, 0);
         }
+
+        skipTransformation = false;
     }
 
     private void translate(MatrixStack matrices, ModelInfo info, float x, float y, float z) {
@@ -128,11 +133,11 @@ public class ItemPhysics extends Module {
             y = z;
             z = -temp;
         }
+
         matrices.translate(x, y, z);
     }
 
     private void applyTransformation(MatrixStack matrices, Transformation transform) {
-        // Simple transformation without physics effects
         transform = new Transformation(
             transform.rotation(),
             new Vector3f(transform.translation().x(), 0, transform.translation().z()),
@@ -142,21 +147,26 @@ public class ItemPhysics extends Module {
         transform.apply(false, matrices.peek());
     }
 
+    private void offsetInWater(MatrixStack matrices, ItemEntity entity) {
+        if (entity.isTouchingWater()) {
+            matrices.translate(0, 0.333f, 0);
+        }
+    }
+
     private ModelInfo getInfo(List<BakedQuad> quads) {
         float minX = Float.MAX_VALUE, maxX = Float.MIN_VALUE;
         float minY = Float.MAX_VALUE, maxY = Float.MIN_VALUE;
         float minZ = Float.MAX_VALUE, maxZ = Float.MIN_VALUE;
 
-        for (BakedQuad _quad : quads) {
-            IBakedQuad quad = (IBakedQuad) (Object) _quad;
-
+        for (BakedQuad quad : quads) {
             for (int i = 0; i < 4; i++) {
-                minY = Math.min(minY, quad.meteor$getY(i));
-                maxY = Math.max(maxY, quad.meteor$getY(i));
-                minZ = Math.min(minZ, quad.meteor$getZ(i));
-                maxZ = Math.max(maxZ, quad.meteor$getZ(i));
-                minX = Math.min(minX, quad.meteor$getX(i));
-                maxX = Math.max(maxX, quad.meteor$getX(i));
+                Vector3fc vec = quad.getPosition(i);
+                minY = Math.min(minY, vec.y());
+                maxY = Math.max(maxY, vec.y());
+                minZ = Math.min(minZ, vec.z());
+                maxZ = Math.max(maxZ, vec.z());
+                minX = Math.min(minX, vec.x());
+                maxX = Math.max(maxX, vec.x());
             }
         }
 

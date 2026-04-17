@@ -118,7 +118,7 @@ public class GuiRenderer {
         rTex.end();
 
         r.render();
-        rTex.render("u_Texture", TEXTURE.getGlTextureView());
+        rTex.render("u_Texture", TEXTURE.getGlTextureView(), TEXTURE.getSampler());
 
         // Normal text
         theme.textRenderer().begin(theme.scale(1));
@@ -254,7 +254,7 @@ public class GuiRenderer {
             rTex.texQuad(x, y, width, height, rotation, 0, 0, 1, 1, WHITE);
             rTex.end();
 
-            rTex.render(texture.getGlTextureView());
+            rTex.render(texture.getGlTextureView(), texture.getSampler());
         });
     }
 

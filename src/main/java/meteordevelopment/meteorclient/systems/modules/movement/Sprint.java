@@ -1,7 +1,12 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -67,12 +72,10 @@ public class Sprint extends Module {
             return;
         }
 
-        // 2. 被打时暂停 (拟人)
-        if (stopOnHurt.get() && mc.player.hurtTime > 8) {
-             mc.player.setSprinting(false);
-             if (mc.options != null) mc.options.sprintKey.setPressed(false);
-             return;
-        }
+        boolean strictSprint = !(mc.player.isPartlyTouchingWater())
+            && !mc.player.hasBlindnessEffect()
+            && mc.player.hasVehicle() ? (mc.player.getVehicle().canSprintAsVehicle() && mc.player.getVehicle().isLogicalSideForUpdatingMovement()) : mc.player.getHungerManager().canSprint()
+            && (!mc.player.horizontalCollision || mc.player.collidedSoftly);
 
         // 3. 正常疾跑逻辑
         if (shouldSprint()) {

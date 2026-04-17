@@ -18,7 +18,7 @@ public abstract class WPressable extends WWidget {
 
     @Override
     public boolean onMouseClicked(Click click, boolean doubled) {
-        if (mouseOver && (click.button() == GLFW_MOUSE_BUTTON_LEFT || click.button() == GLFW_MOUSE_BUTTON_RIGHT) && !doubled) pressed = true;
+        if (mouseOver && (click.button() == GLFW_MOUSE_BUTTON_LEFT || click.button() == GLFW_MOUSE_BUTTON_RIGHT)) pressed = true;
         return pressed;
     }
 

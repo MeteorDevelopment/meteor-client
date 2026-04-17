@@ -23,8 +23,8 @@ public class AddCrackedAccountScreen extends AddAccountScreen {
         // Name
         t.add(theme.label("Name: "));
         WTextBox name = t.add(theme.textBox("", "seasnail8169", (text, c) ->
-            // Username can't contain spaces
-            c != ' '
+            /** @see net.minecraft.util.StringHelper#isValidPlayerName */
+            c > 32 && c < 127
         )).minWidth(400).expandX().widget();
         name.setFocused(true);
         t.row();
@@ -32,11 +32,12 @@ public class AddCrackedAccountScreen extends AddAccountScreen {
         // Add
         add = t.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
-            if (!name.get().isEmpty() && name.get().length() < 17) {
-                CrackedAccount account = new CrackedAccount(name.get());
-                if (!(Accounts.get().exists(account))) {
-                    AccountsScreen.addAccount(this, parent, account);
-                }
+            String username = name.get().trim();
+            if (username.length() > 16) return;
+
+            CrackedAccount account = new CrackedAccount(username);
+            if (!(Accounts.get().exists(account))) {
+                AccountsScreen.addAccount(this, parent, account);
             }
         };
 

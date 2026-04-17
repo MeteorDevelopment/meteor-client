@@ -22,7 +22,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
-import meteordevelopment.meteorclient.utils.misc.text.TextVisitor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gl.RenderPipelines;
@@ -271,14 +270,11 @@ public class BetterChat extends Module {
             String messageString = message.getString();
             if (antiClearRegex.matcher(messageString).find()) {
                 MutableText newMessage = Text.empty();
-                TextVisitor.visit(message, (text, style, string) -> {
+                message.visit((style, string) -> {
                     Matcher antiClearMatcher = antiClearRegex.matcher(string);
-                    if (antiClearMatcher.find()) {
-                        // assume literal text content
-                        newMessage.append(Text.literal(antiClearMatcher.replaceAll("\n\n")).setStyle(style));
-                    } else {
-                        newMessage.append(text.copyContentOnly().setStyle(style));
-                    }
+                    newMessage.append(Text.literal(
+                        antiClearMatcher.find() ? antiClearMatcher.replaceAll("\n\n") : string
+                    ).setStyle(style));
 
                     return Optional.empty();
                 }, Style.EMPTY);
@@ -407,6 +403,9 @@ public class BetterChat extends Module {
 
     private static final Pattern TIMESTAMP_REGEX = Pattern.compile("^<\\d{1,2}:\\d{1,2}>");
 
+    public ChatHudLine.Visible line;
+
+
     /** Registers a custom player head to render based on a message prefix */
     public static void registerCustomHead(String prefix, Identifier texture) {
         CUSTOM_HEAD_ENTRIES.add(new CustomHeadEntry(prefix, texture));
@@ -422,23 +421,20 @@ public class BetterChat extends Module {
         return width;
     }
 
-    public void beforeDrawMessage(DrawContext context, ChatHudLine.Visible line, int y, int color) {
-        if (!isActive() || !playerHeads.get()) return;
+
+    public void beforeDrawMessage(DrawContext context, int y, int color) {
+        if (!isActive() || !playerHeads.get() || line == null) return;
 
         // Only draw the first line of multi line messages
         if (((IChatHudLineVisible) (Object) line).meteor$isStartOfEntry())  {
             drawTexture(context, (IChatHudLine) (Object) line, y, color);
         }
-
-        // Offset
-        context.getMatrices().pushMatrix();
-        context.getMatrices().translate(10, 0);
     }
 
-    public void afterDrawMessage(DrawContext context) {
+    public void afterDrawMessage() {
         if (!isActive() || !playerHeads.get()) return;
 
-        context.getMatrices().popMatrix();
+        line = null;
     }
 
     private void drawTexture(DrawContext context, IChatHudLine line, int y, int color) {

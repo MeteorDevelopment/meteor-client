@@ -23,7 +23,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -109,10 +109,8 @@ public class ServerSpoof extends Module {
 
             // 1. 检查通道黑名单拦截
             if (blockChannels.get()) {
-                for (String channelKeyword : channels.get()) {
-                    // 如果包名包含黑名单关键词 (例如 "meteor:main")
-                    if (StringUtils.containsIgnoreCase(idString, channelKeyword)) {
-                        // 拦截并不发送
+                for (String channel : channels.get()) {
+                    if (Strings.CI.contains(id.toString(), channel)) {
                         event.cancel();
                         return;
                     }
@@ -125,10 +123,7 @@ public class ServerSpoof extends Module {
                 // 创建一个新的品牌包，内容是我们设定的 (例如 "fabric")
                 CustomPayloadC2SPacket spoofedPacket = new CustomPayloadC2SPacket(new BrandCustomPayload(brand.get()));
 
-                // 发送伪造的包
-                event.connection.send(spoofedPacket, null, true);
-                
-                // 拦截原始的包
+                event.sendSilently(spoofedPacket);
                 event.cancel();
             }
         }

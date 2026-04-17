@@ -19,7 +19,7 @@ import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.renderer.text.FontFamily;
 import meteordevelopment.meteorclient.renderer.text.FontInfo;
 import meteordevelopment.meteorclient.settings.FontFaceSetting;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.List;
 
@@ -61,7 +61,10 @@ public class FontFaceSettingScreen extends WindowScreen {
         };
 
         WView view = add(theme.view()).expandX().widget();
+        // Prevents double scrolling for view-in-view scenario
+        view.maxHeight = window.view.maxHeight - 128;
         view.scrollOnlyWhenMouseOver = false;
+
         table = view.add(theme.table()).expandX().widget();
 
         initTable();
@@ -72,7 +75,7 @@ public class FontFaceSettingScreen extends WindowScreen {
             String name = fontFamily.getName();
 
             WLabel item = theme.label(name);
-            if (!filterText.isEmpty() && !StringUtils.containsIgnoreCase(name, filterText)) continue;
+            if (!filterText.isEmpty() && !Strings.CI.contains(name, filterText)) continue;
             table.add(item);
 
             WDropdown<FontInfo.Type> dropdown = table.add(theme.dropdown(FontInfo.Type.Regular)).right().widget();

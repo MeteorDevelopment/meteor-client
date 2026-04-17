@@ -22,10 +22,11 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.hud.elements.keyboard.KeyboardHud;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.resource.language.I18n;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,6 +72,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         factories.put(ColorListSetting.class, (table, setting) -> colorListW(table, (ColorListSetting) setting));
         factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
         factories.put(Vector3dSetting.class, (table, setting) -> vector3dW(table, (Vector3dSetting) setting));
+        factories.put(KeyboardHud.CustomKeyListSetting.class, (table, setting) -> customKeyListW(table, (KeyboardHud.CustomKeyListSetting) setting));
     }
 
     @Override
@@ -110,7 +112,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         RemoveInfo removeInfo = null;
 
         for (Setting<?> setting : group) {
-            if (!StringUtils.containsIgnoreCase(setting.title, filter)) continue;
+            if (!Strings.CI.contains(setting.title, filter)) continue;
 
             boolean visible = setting.isVisible();
             setting.lastWasVisible = visible;
@@ -464,6 +466,11 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         table.row();
 
         return component;
+    }
+
+    private void customKeyListW(WTable table, KeyboardHud.CustomKeyListSetting setting) {
+        WTable wtable = table.add(theme.table()).expandX().widget();
+        KeyboardHud.fillTable(theme, wtable, setting);
     }
 
     // Other

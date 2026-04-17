@@ -24,12 +24,11 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
@@ -71,11 +70,11 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         for (File file : files) {
             if (file.getName().endsWith(PNG)) {
                 try (FileInputStream inputStream = new FileInputStream(file)) {
-                    String name = StringUtils.removeEnd(file.getName(), PNG);
+                    String name = Strings.CS.removeEnd(file.getName(), PNG);
                     AbstractTexture texture = new NativeImageBackedTexture(() -> name, NativeImage.read(inputStream));
                     icons.put(name, texture);
                 }
-                catch (IOException e) {
+                catch (Exception e) {
                     MeteorClient.LOG.error("Failed to read a waypoint icon", e);
                 }
             }

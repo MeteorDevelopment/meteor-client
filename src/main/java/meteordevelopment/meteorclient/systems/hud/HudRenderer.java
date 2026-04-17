@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
+import meteordevelopment.meteorclient.mixininterface.IGameRenderer;
 import meteordevelopment.meteorclient.renderer.*;
 import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
 import meteordevelopment.meteorclient.renderer.text.Font;
@@ -27,8 +28,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.lwjgl.BufferUtils;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -89,7 +90,7 @@ public class HudRenderer {
                         .attachments(mc.getFramebuffer())
                         .pipeline(MeteorRenderPipelines.UI_TEXT)
                         .mesh(fontHolder.getMesh())
-                        .sampler("u_Texture", fontHolder.font.texture.getGlTextureView())
+                        .sampler("u_Texture", fontHolder.font.texture.getGlTextureView(), fontHolder.font.texture.getSampler())
                         .end();
                 }
                 else {
@@ -132,7 +133,7 @@ public class HudRenderer {
     public void texture(Identifier id, double x, double y, double width, double height, Color color) {
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
-        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTextureView());
+        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTextureView(), mc.getTextureManager().getTexture(id).getSampler());
     }
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {
@@ -234,7 +235,6 @@ public class HudRenderer {
         entity.lastHeadYaw = entity.getYaw();
 
         var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).getAndUpdateRenderState(entity, 1);
-        state.hitbox = null;
 
         entity.bodyYaw = previousBodyYaw;
         entity.setYaw(previousYaw);
@@ -299,10 +299,12 @@ public class HudRenderer {
     }
 
     private static FontHolder loadFont(int height) {
-        byte[] data = Utils.readBytes(Fonts.RENDERER.fontFace.toStream());
-        ByteBuffer buffer = BufferUtils.createByteBuffer(data.length).put(data).flip();
-
-        return new FontHolder(new Font(buffer, height));
+        try {
+            ByteBuffer buffer = Fonts.RENDERER.fontFace.readToDirectByteBuffer();
+            return new FontHolder(new Font(buffer, height));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load font: " + Fonts.RENDERER.fontFace, e);
+        }
     }
 
     private static class FontHolder {

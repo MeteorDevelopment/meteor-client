@@ -55,12 +55,30 @@ public class AutoFish extends Module {
         .build()
     );
 
+    private final Setting<Integer> castDelayVariance = sgGeneral.add(new IntSetting.Builder()
+        .name("cast-delay-variance")
+        .description("Maximum amount of randomness added to cast delay.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(30)
+        .build()
+    );
+
     private final Setting<Integer> catchDelay = sgGeneral.add(new IntSetting.Builder()
         .name("catch-delay")
         .description("How long to wait after hooking a fish to reel it in.")
         .defaultValue(6)
         .min(1)
         .sliderMax(20)
+        .build()
+    );
+
+    private final Setting<Integer> catchDelayVariance = sgGeneral.add(new IntSetting.Builder()
+        .name("catch-delay-variance")
+        .description("Maximum amount of randomness added to catch delay.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(10) // Since the shortest Java edition catch window is 20 ticks, this is the highest possible variance that won't miss fish.
         .build()
     );
 
@@ -118,7 +136,7 @@ public class AutoFish extends Module {
 
         if (!wasHooked) {
             if (((FishingBobberEntityAccessor) mc.player.fishHook).meteor$hasCaughtFish()) {
-                catchDelayLeft = catchDelay.get();
+                catchDelayLeft = randomizeDelay(catchDelay.get(), catchDelayVariance.get());
                 wasHooked = true;
             }
 
@@ -136,7 +154,7 @@ public class AutoFish extends Module {
     private void useRod() {
         Utils.rightClick();
         wasHooked = false;
-        castDelayLeft = castDelay.get();
+        castDelayLeft = randomizeDelay(castDelay.get(), castDelayVariance.get());
     }
 
     private int findBestRod() {
@@ -165,5 +183,21 @@ public class AutoFish extends Module {
         }
 
         return bestSlot;
+    }
+
+    private double randomizeDelay(int delay, int variance) {
+        if (variance == 0) return delay;
+
+        // Sample the standard normal distribution via Box-Muller transform
+        double scale = Math.sqrt(-2 * Math.log(Utils.random(0.0001, 1.0)));
+        double angle = Math.TAU * Utils.random(0.0, 1.0);
+        double norm = scale * Math.cos(angle);
+
+        // Clamp to 3 standard deviations and re-scale to [-3.0, +3.0]
+        final double MAX_SD = 3.0;
+        norm = Math.clamp(norm, -MAX_SD, MAX_SD) / MAX_SD;
+
+        delay += Math.round((float)(norm * variance));
+        return Math.max(1, delay);
     }
 }

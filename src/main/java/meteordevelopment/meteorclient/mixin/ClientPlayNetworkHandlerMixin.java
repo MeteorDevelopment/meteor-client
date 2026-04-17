@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -26,6 +27,7 @@ import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
+import meteordevelopment.meteorclient.systems.modules.player.NoRotate;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
@@ -131,6 +133,34 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
         if (itemEntity instanceof ItemEntity && entity == client.player) {
             MeteorClient.EVENT_BUS.post(PickItemsEvent.get(((ItemEntity) itemEntity).getStack(), packet.getStackAmount()));
         }
+    }
+
+    @Inject(method = "onPlayerPositionLook", at = @At("HEAD"))
+    private void onPlayerPositionLookHead(PlayerPositionLookS2CPacket packet, CallbackInfo ci,
+          @Share("noRotateYaw") LocalFloatRef yawRef,
+          @Share("noRotatePitch") LocalFloatRef pitchRef) {
+        NoRotate noRotate = Modules.get().get(NoRotate.class);
+        if (!noRotate.isActive() || client.player == null) return;
+
+        yawRef.set(client.player.getYaw());
+        pitchRef.set(client.player.getPitch());
+    }
+
+    @Inject(method = "onPlayerPositionLook", at = @At("RETURN"))
+    private void onPlayerPositionLookReturn(PlayerPositionLookS2CPacket packet, CallbackInfo ci,
+        @Share("noRotateYaw") LocalFloatRef yawRef,
+        @Share("noRotatePitch") LocalFloatRef pitchRef) {
+        NoRotate noRotate = Modules.get().get(NoRotate.class);
+        if (!noRotate.isActive() || client.player == null) return;
+
+        float savedYaw = yawRef.get();
+        float savedPitch = pitchRef.get();
+
+        //not noticeable by player but forces a server update
+        client.player.setYaw(savedYaw + 0.000001f);
+        client.player.setPitch(savedPitch + 0.000001f);
+        client.player.headYaw = savedYaw;
+        client.player.bodyYaw = savedYaw;
     }
 
     @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)

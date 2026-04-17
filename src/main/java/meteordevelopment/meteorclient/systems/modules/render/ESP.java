@@ -1,11 +1,10 @@
 /*
- * This file is part of the Meteor Client distribution[](https://github.com/MeteorDevelopment/meteor-client).
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
  * Optimized for performance & fixed logical features (Flicker, Gradient, Raycast Target).
  */
 
 package meteordevelopment.meteorclient.systems.modules.render;
-
 
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -35,7 +34,6 @@ import org.joml.Vector3d;
 
 import java.util.HashMap;
 import java.util.Set;
-import java.util.UUID;
 
 public class ESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -143,8 +141,6 @@ public class ESP extends Module {
         .build()
     );
 
-
-
     // ==================== Shape / Fade ====================
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
@@ -183,18 +179,26 @@ public class ESP extends Module {
 
     // ==================== Colors ====================
 
-    public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
-        .name("distance-colors")
-        .description("Changes the color of tracers depending on distance.")
-        .defaultValue(false)
+    public final Setting<ESPColorMode> colorMode = sgColors.add(new EnumSetting.Builder<ESPColorMode>()
+        .name("color-mode")
+        .description("Determines the colors used for entities.")
+        .defaultValue(ESPColorMode.EntityType)
         .build()
     );
 
     public final Setting<Boolean> friendOverride = sgColors.add(new BoolSetting.Builder()
         .name("show-friend-colors")
-        .description("Override the distance color of friends with the friend color.")
+        .description("Whether or not to override the distance/health color of friends with the friend color.")
         .defaultValue(true)
-        .visible(distance::get)
+        .visible(() -> colorMode.get() == ESPColorMode.Distance || colorMode.get() == ESPColorMode.Health)
+        .build()
+    );
+
+    private final Setting<SettingColor> nonLivingEntityColor = sgColors.add(new ColorSetting.Builder()
+        .name("non-living-entity-color")
+        .description("The color used for non living entities such as dropped items.")
+        .defaultValue(new SettingColor(25, 25, 25))
+        .visible(() -> colorMode.get() == ESPColorMode.Health)
         .build()
     );
 
@@ -202,42 +206,47 @@ public class ESP extends Module {
         .name("players-color")
         .description("The other player's color.")
         .defaultValue(new SettingColor(220, 220, 220))
-        .visible(() -> !distance.get())
+        .visible(() -> colorMode.get() == ESPColorMode.EntityType)
         .build()
     );
 
     private final Setting<SettingColor> animalsColor = sgColors.add(new ColorSetting.Builder()
         .name("animals-color")
+        .description("The animal's color.")
         .defaultValue(new SettingColor(150, 255, 150, 255))
-        .visible(() -> !distance.get())
+        .visible(() -> colorMode.get() == ESPColorMode.EntityType)
         .build()
     );
 
     private final Setting<SettingColor> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
         .name("water-animals-color")
+        .description("The water animal's color.")
         .defaultValue(new SettingColor(150, 150, 255, 255))
-        .visible(() -> !distance.get())
+        .visible(() -> colorMode.get() == ESPColorMode.EntityType)
         .build()
     );
 
     private final Setting<SettingColor> monstersColor = sgColors.add(new ColorSetting.Builder()
         .name("monsters-color")
+        .description("The monster's color.")
         .defaultValue(new SettingColor(255, 150, 150, 255))
-        .visible(() -> !distance.get())
+        .visible(() -> colorMode.get() == ESPColorMode.EntityType)
         .build()
     );
 
     private final Setting<SettingColor> ambientColor = sgColors.add(new ColorSetting.Builder()
         .name("ambient-color")
+        .description("The ambient's color.")
         .defaultValue(new SettingColor(150, 150, 150, 255))
-        .visible(() -> !distance.get())
+        .visible(() -> colorMode.get() == ESPColorMode.EntityType)
         .build()
     );
 
     private final Setting<SettingColor> miscColor = sgColors.add(new ColorSetting.Builder()
         .name("misc-color")
+        .description("The misc color.")
         .defaultValue(new SettingColor(200, 200, 200, 255))
-        .visible(() -> !distance.get())
+        .visible(() -> colorMode.get() == ESPColorMode.EntityType)
         .build()
     );
 
@@ -453,6 +462,10 @@ public class ESP extends Module {
         return false;
     }
 
+    public boolean shouldSkip(EntityType<?> entityType) {
+        return !entities.get().contains(entityType);
+    }
+
     private boolean isInFrustum(Entity entity) {
         return PlayerUtils.isWithinCamera(entity, 1000.0);
     }
@@ -466,6 +479,8 @@ public class ESP extends Module {
         if (alpha == 0) return null;
 
         Color color = getEntityTypeColor(entity);
+        if (color == null) return null;
+
         return baseColor.set(color.r, color.g, color.b, (int) (color.a * alpha));
     }
 
@@ -493,15 +508,14 @@ public class ESP extends Module {
     }
 
     public Color getEntityTypeColor(Entity entity) {
+        // 保留你自定义的高级血量渐变和濒死闪烁逻辑
         if (entity instanceof PlayerEntity p && healthColors.get()) {
             double hpVal = getHp(p);
 
-            // 默认99视为高血量（绿色）
             if (hpVal >= 99) {
                 return mutableHealthColor.set(HIGH_HP);
             }
 
-            // 致命血量：红白闪烁
             if (hpVal <= 5) {
                 if (hpFlicker.get()) {
                     long cycle  = flickerPeriod.get() * 50L;
@@ -514,7 +528,6 @@ public class ESP extends Module {
                 }
                 return mutableHealthColor.set(LOW_HP);
             }
-            // 正常区间渐变
             else if (hpVal <= 20) {
                 if (hpGradient.get()) {
                     if (hpVal <= 10) {
@@ -537,21 +550,27 @@ public class ESP extends Module {
                 }
                 return hpVal <= 10 ? mutableHealthColor.set(LOW_HP) : mutableHealthColor.set(MEDIUM_HP);
             }
-            // 其他情况（高于20但不是99）
             else {
                 return mutableHealthColor.set(HIGH_HP);
             }
         }
-        else if (distance.get()) {
-            if (friendOverride.get() && entity instanceof PlayerEntity pe && Friends.get().isFriend(pe)) {
-                return Config.get().friendColor.get();
-            }
+        
+        // 覆盖好友颜色
+        if (friendOverride.get() && entity instanceof PlayerEntity pe && Friends.get().isFriend(pe)) {
+            return Config.get().friendColor.get();
+        }
+
+        // 适配官方 1.21.11 新引入的 colorMode 枚举 (修复原有 distance.get() 的编译错误)
+        if (colorMode.get() == ESPColorMode.Health) {
+            return EntityUtils.getColorFromHealth(entity, nonLivingEntityColor.get());
+        } else if (colorMode.get() == ESPColorMode.Distance) {
             return EntityUtils.getColorFromDistance(entity);
         }
-        else if (entity instanceof PlayerEntity pe) {
+
+        // 实体类型模式（保留你自定义的基础颜色）
+        if (entity instanceof PlayerEntity pe) {
             return PlayerUtils.getPlayerColor(pe, playersColor.get());
-        }
-        else {
+        } else {
             return switch (entity.getType().getSpawnGroup()) {
                 case CREATURE -> animalsColor.get();
                 case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
@@ -617,6 +636,18 @@ public class ESP extends Module {
     @Override
     public String getInfoString() {
         return Integer.toString(count);
+    }
+
+    // 官方 1.21.11 新增的颜色枚举，保留下来以配合上文逻辑
+    public enum ESPColorMode {
+        EntityType,
+        Distance,
+        Health;
+
+        @Override
+        public String toString() {
+            return this == EntityType ? "Entity Type" : super.toString();
+        }
     }
 
     public enum Mode {

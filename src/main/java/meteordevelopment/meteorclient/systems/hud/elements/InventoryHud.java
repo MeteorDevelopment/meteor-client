@@ -71,13 +71,12 @@ public class InventoryHud extends HudElement {
     public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
         .description("Color used for the background.")
-        .visible(() -> background.get() == Background.Flat)
-        .defaultValue(new SettingColor(25, 25, 25, 50))
+        .visible(() -> background.get() != Background.None)
+        .defaultValue(new SettingColor(255, 255, 255))
         .build()
     );
 
     private final ItemStack[] containerItems = new ItemStack[9 * 3];
-    private final Color WHITE = new Color(255, 255, 255);
 
     private InventoryHud() {
         super(INFO);
@@ -92,8 +91,7 @@ public class InventoryHud extends HudElement {
         ItemStack container = getContainer();
         boolean hasContainer = containers.get() && container != null;
         if (hasContainer) Utils.getItemsInContainerItem(container, containerItems);
-        Color drawColor = hasContainer ? Utils.getShulkerColor(container) :
-            background.get() == Background.Flat ? backgroundColor.get() : WHITE;
+        Color drawColor = hasContainer ? Utils.getShulkerColor(container) : backgroundColor.get();
 
         if (background.get() != Background.None) {
             drawBackground(renderer, (int) x, (int) y, drawColor);

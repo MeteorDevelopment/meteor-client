@@ -17,7 +17,12 @@ import java.util.UUID;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FakePlayerEntity extends OtherClientPlayerEntity {
-    public boolean doNotPush, hideWhenInsideCamera, noHit;
+    /** Disables entity push with this fake player */
+    public boolean doNotPush;
+    /** Stops rendering the fake player when you are inside it */
+    public boolean hideWhenInsideCamera;
+    /** Prevents you from interacting with the fake player; will also prevent TargetUtils selecting it as a target */
+    public boolean noHit;
 
     public FakePlayerEntity(PlayerEntity player, String name, float health, boolean copyInv) {
         super(mc.world, new GameProfile(UUID.randomUUID(), name));

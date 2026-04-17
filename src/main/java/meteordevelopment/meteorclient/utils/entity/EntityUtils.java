@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -20,8 +21,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.BoatEntity;
-import net.minecraft.entity.vehicle.ChestBoatEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
@@ -50,7 +49,41 @@ public class EntityUtils {
     }
 
     public static boolean isRideable(EntityType<?> type) {
-        return type == EntityType.MINECART || BoatEntity.class.isAssignableFrom(type.getBaseClass()) || ChestBoatEntity.class.isAssignableFrom(type.getBaseClass()) || type == EntityType.CAMEL || type == EntityType.DONKEY || type == EntityType.HORSE || type == EntityType.LLAMA || type == EntityType.MULE || type == EntityType.PIG || type == EntityType.SKELETON_HORSE || type == EntityType.STRIDER || type == EntityType.ZOMBIE_HORSE;
+        return type == EntityType.PIG ||
+            type == EntityType.STRIDER ||
+            type == EntityType.HORSE ||
+            type == EntityType.DONKEY ||
+            type == EntityType.MULE ||
+            type == EntityType.SKELETON_HORSE ||
+            type == EntityType.ZOMBIE_HORSE ||
+            type == EntityType.LLAMA ||
+            type == EntityType.TRADER_LLAMA ||
+            type == EntityType.CAMEL ||
+            type == EntityType.CAMEL_HUSK ||
+            type == EntityType.MINECART ||
+            type == EntityType.OAK_BOAT ||
+            type == EntityType.SPRUCE_BOAT ||
+            type == EntityType.BIRCH_BOAT ||
+            type == EntityType.JUNGLE_BOAT ||
+            type == EntityType.ACACIA_BOAT ||
+            type == EntityType.CHERRY_BOAT ||
+            type == EntityType.DARK_OAK_BOAT ||
+            type == EntityType.PALE_OAK_BOAT ||
+            type == EntityType.MANGROVE_BOAT ||
+            type == EntityType.BAMBOO_RAFT ||
+            type == EntityType.ACACIA_CHEST_BOAT ||
+            type == EntityType.BIRCH_CHEST_BOAT ||
+            type == EntityType.CHERRY_CHEST_BOAT ||
+            type == EntityType.DARK_OAK_CHEST_BOAT ||
+            type == EntityType.JUNGLE_CHEST_BOAT ||
+            type == EntityType.MANGROVE_CHEST_BOAT ||
+            type == EntityType.OAK_CHEST_BOAT ||
+            type == EntityType.PALE_OAK_CHEST_BOAT ||
+            type == EntityType.SPRUCE_CHEST_BOAT ||
+            type == EntityType.BAMBOO_CHEST_RAFT ||
+            type == EntityType.NAUTILUS ||
+            type == EntityType.ZOMBIE_NAUTILUS ||
+            type == EntityType.HAPPY_GHAST;
     }
 
     public static float getTotalHealth(LivingEntity target) {
@@ -75,8 +108,9 @@ public class EntityUtils {
     @SuppressWarnings("deprecation") // Use of AbstractBlock.AbstractBlockState#blocksMovement
     public static boolean isAboveWater(Entity entity) {
         BlockPos.Mutable blockPos = entity.getBlockPos().mutableCopy();
+        int bottom = mc.world.getBottomY();
 
-        for (int i = 0; i < 64; i++) {
+        while (blockPos.getY() > bottom) {
             BlockState state = mc.world.getBlockState(blockPos);
 
             if (state.blocksMovement()) break;
@@ -112,8 +146,8 @@ public class EntityUtils {
     }
 
     public static boolean isInRenderDistance(double posX, double posZ) {
-        double x = Math.abs(mc.gameRenderer.getCamera().getPos().x - posX);
-        double z = Math.abs(mc.gameRenderer.getCamera().getPos().z - posZ);
+        double x = Math.abs(mc.gameRenderer.getCamera().getCameraPos().x - posX);
+        double z = Math.abs(mc.gameRenderer.getCamera().getCameraPos().z - posZ);
         double d = (mc.options.getViewDistance().getValue() + 1) * 16;
 
         return x < d && z < d;
@@ -174,6 +208,38 @@ public class EntityUtils {
         return distanceColor;
     }
 
+    public static Color getColorFromHealth(Entity entity, Color nonLivingEntityColor) {
+        // For entities without health (items, pearls, etc.)
+        if (!(entity instanceof LivingEntity living)) {
+            return new Color(nonLivingEntityColor);
+        }
+
+        float health = living.getHealth();
+        float maxHealth = living.getMaxHealth();
+
+        if (maxHealth <= 0) {
+            return new Color(nonLivingEntityColor);
+        }
+
+        double percent = health / maxHealth;
+
+        percent = Math.max(0.0, Math.min(1.0, percent));
+
+        int r, g;
+
+        if (percent < 0.5) {
+            // Red to Yellow
+            r = 255;
+            g = (int) (255 * (percent / 0.5));
+        } else {
+            // Yellow to Green
+            g = 255;
+            r = 255 - (int) (255 * ((percent - 0.5) / 0.5));
+        }
+
+        return new Color(r, g, 0, 255);
+    }
+
     public static boolean intersectsWithEntity(Box box, Predicate<Entity> predicate) {
         EntityLookup<Entity> entityLookup = ((WorldAccessor) mc.world).meteor$getEntityLookup();
 
@@ -227,5 +293,10 @@ public class EntityUtils {
 
     public static EntityType<?> getGroup(Entity entity) {
         return entity.getType();
+    }
+
+    // Copied from ServerPlayNetworkHandler#isEntityOnAir
+    public static boolean isOnAir(Entity entity) {
+        return entity.getEntityWorld().getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
     }
 }

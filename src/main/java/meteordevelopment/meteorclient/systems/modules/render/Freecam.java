@@ -183,21 +183,8 @@ public class Freecam extends Module {
         perspective = mc.options.getPerspective();
         speedValue = speed.get();
 
-        // 保存玩家状态
-        playerX = mc.player.getX();
-        playerY = mc.player.getY();
-        playerZ = mc.player.getZ();
-        
-        Vec3d velocity = mc.player.getVelocity();
-        playerVelX = velocity.x;
-        playerVelY = velocity.y;
-        playerVelZ = velocity.z;
-        
-        playerOnGround = mc.player.isOnGround();
-        playerFallDistance = (float) mc.player.fallDistance;
-
-        Utils.set(pos, mc.gameRenderer.getCamera().getPos());
-        Utils.set(prevPos, mc.gameRenderer.getCamera().getPos());
+        Utils.set(pos, mc.gameRenderer.getCamera().getCameraPos());
+        Utils.set(prevPos, mc.gameRenderer.getCamera().getCameraPos());
 
         if (mc.options.getPerspective() == Perspective.THIRD_PERSON_FRONT) {
             yaw += 180;
@@ -405,7 +392,7 @@ public class Freecam extends Module {
         if (requireDoubleClick.get() && clickTs - prevClick > 500) return;
 
         Camera cam = mc.gameRenderer.getCamera();
-        Vec3d posVec = cam.getPos();
+        Vec3d posVec = cam.getCameraPos();
         Vec3d lookVec = Vec3d.fromPolar(cam.getPitch(), cam.getYaw());
         short maxDist = 256;
         Vec3d max = posVec.add(lookVec.multiply(maxDist));

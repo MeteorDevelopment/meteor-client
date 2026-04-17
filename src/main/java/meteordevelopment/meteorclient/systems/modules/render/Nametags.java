@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.player.NameProtect;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -25,7 +26,6 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.*;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -119,6 +119,29 @@ public class Nametags extends Module {
     );
 
     // Players
+    private final Setting<Boolean> showName = sgPlayers.add(new BoolSetting.Builder()
+        .name("show-name")
+        .description("Shows the player's name (required for Prefix and Gamemode features).")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> displayPrefix = sgPlayers.add(new BoolSetting.Builder()
+        .name("use-display-name")
+        .description("Uses the players server display name instead of their account name.")
+        .defaultValue(false)
+        .visible(showName::get)
+        .build()
+    );
+
+    private final Setting<Boolean> displayGameMode = sgPlayers.add(new BoolSetting.Builder()
+        .name("gamemode")
+        .description("Shows the player's GameMode.")
+        .defaultValue(false)
+        .visible(showName::get)
+        .build()
+    );
+
     private final Setting<Boolean> pvpNametag = sgPlayers.add(new BoolSetting.Builder()
         .name("pvp-nametag")
         .description("Show HP nametag on players.")
@@ -311,7 +334,7 @@ public class Nametags extends Module {
             pos.add(0, getHeight(entity), 0);
 
             if (inverseDistanceScale.get()) {
-                Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
+                Vec3d cameraPos = mc.gameRenderer.getCamera().getCameraPos();
                 double dx = cameraPos.x - entity.getX();
                 double dy = cameraPos.y - entity.getY();
                 double dz = cameraPos.z - entity.getZ();
@@ -351,7 +374,36 @@ public class Nametags extends Module {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos, event.drawContext);
 
-        // ── 血量 ──
+        // ── 1. 名字与游戏模式 (Upstream 1.21.11 整合) ──
+        String nameText = "";
+        double nameW = 0;
+
+        if (showName.get()) {
+            // NameProtect 兼容
+            if (player == mc.player) {
+                nameText = Modules.get().get(NameProtect.class).getName(player.getName().getString());
+            } else {
+                // 显示昵称兼容
+                if (displayPrefix.get() && player.getDisplayName() != null) {
+                    nameText = player.getDisplayName().getString();
+                } else {
+                    nameText = player.getName().getString();
+                }
+            }
+
+            // 游戏模式后缀兼容
+            if (displayGameMode.get()) {
+                net.minecraft.world.GameMode gm = EntityUtils.getGameMode(player);
+                if (gm != null) {
+                    String gmStr = gm.name();
+                    // 首字母大写处理 (如 "Survival" -> "S", "Creative" -> "C")
+                    nameText += "[" + gmStr.substring(0, 1).toUpperCase() + gmStr.substring(1) + "]";
+                }
+            }
+            nameW = text.getWidth(nameText, shadow);
+        }
+
+        // ── 2. 血量 (Head 魔改逻辑) ──
         double hp     = getCachedHealth(player);
         int    health = Math.round((float) hp);
 
@@ -363,7 +415,7 @@ public class Nametags extends Module {
 
         String hpText = String.valueOf(health);
 
-        // ── 减伤百分比 ──
+        // ── 3. 减伤百分比 (Head 魔改逻辑) ──
         boolean showReduction  = false;
         String  reductionText  = "";
         Color   reductionColor = CYAN;
@@ -378,7 +430,7 @@ public class Nametags extends Module {
             }
         }
 
-        // ── 距离 ──
+        // ── 4. 距离 (Head 魔改逻辑) ──
         boolean showDist = showDistance.get()
             && (player != mc.getCameraEntity() || Modules.get().isActive(Freecam.class));
         String distText = "";
@@ -389,16 +441,17 @@ public class Nametags extends Module {
             distText = dist + "m";
         }
 
-        // ── 计算布局 ──
+        // ── 计算全局动态布局 ──
         double lineH = text.getHeight(shadow);
         double hpW   = text.getWidth(hpText, shadow);
         double redW  = showReduction ? text.getWidth(reductionText, shadow) : 0;
         double distW = showDist      ? text.getWidth(distText, shadow)      : 0;
 
-        double maxW  = Math.max(hpW, Math.max(redW, distW));
+        // 取所有行里最宽的，作为背景板的宽度
+        double maxW  = Math.max(nameW, Math.max(hpW, Math.max(redW, distW)));
         double halfW = maxW / 2;
 
-        int    lines  = 1 + (showReduction ? 1 : 0) + (showDist ? 1 : 0);
+        int lines = (showName.get() ? 1 : 0) + 1 + (showReduction ? 1 : 0) + (showDist ? 1 : 0);
         double totalH = lineH * lines;
 
         drawBg(-halfW, -totalH, maxW, totalH);
@@ -407,17 +460,20 @@ public class Nametags extends Module {
 
         double y = -totalH;
 
-        // 第1行：血量
+        // 逐行渲染 (动态调整行数)
+        if (showName.get()) {
+            text.render(nameText, -nameW / 2, y, nameColor.get(), shadow);
+            y += lineH;
+        }
+
         text.render(hpText, -hpW / 2, y, hpColor, shadow);
         y += lineH;
 
-        // 第2行（可选）：减伤百分比
         if (showReduction) {
             text.render(reductionText, -redW / 2, y, reductionColor, shadow);
             y += lineH;
         }
 
-        // 第3行（可选）：距离
         if (showDist) {
             text.render(distText, -distW / 2, y, EntityUtils.getColorFromDistance(player), shadow);
         }

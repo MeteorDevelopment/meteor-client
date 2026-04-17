@@ -26,7 +26,6 @@ public abstract class WView extends WVerticalList {
     private boolean moveAfterPositionWidgets;
 
     protected boolean handleMouseOver;
-    protected boolean handlePressed;
 
     @Override
     public void init() {
@@ -77,7 +76,7 @@ public abstract class WView extends WVerticalList {
     @Override
     public boolean onMouseClicked(Click click, boolean doubled) {
         if (handleMouseOver && click.button() == GLFW_MOUSE_BUTTON_LEFT && !doubled) {
-            handlePressed = true;
+            setFocused(true);
             return true;
         }
 
@@ -86,7 +85,7 @@ public abstract class WView extends WVerticalList {
 
     @Override
     public boolean onMouseReleased(Click click) {
-        if (handlePressed) handlePressed = false;
+        if (focused) setFocused(false);
 
         return false;
     }
@@ -104,13 +103,13 @@ public abstract class WView extends WVerticalList {
             }
         }
 
-        if (handlePressed) {
+        if (focused) {
             double preScroll = scroll;
             double mouseDelta = mouseY - lastMouseY;
 
             //scroll += Math.round(theme.scale(mouseDelta + mouseDelta * ((height / actualHeight) * 0.7627725)));
             //scroll += Math.round(theme.scale(mouseDelta * (1 / (height / actualHeight))));
-            scroll += Math.round(mouseDelta * ((actualHeight - handleHeight() / 2) / height)); // TODO: Someone improve this
+            scroll += Math.round(mouseDelta * ((actualHeight - handleHeight() / 2) / height));
             scroll = MathHelper.clamp(scroll, 0, actualHeight - height);
 
             targetScroll = scroll;
@@ -123,9 +122,13 @@ public abstract class WView extends WVerticalList {
     @Override
     public boolean onMouseScrolled(double amount) {
         if (!scrollOnlyWhenMouseOver || mouseOver) {
+            double max = actualHeight - height;
+
             targetScroll -= Math.round(theme.scale(amount * 40));
-            targetScroll = MathHelper.clamp(targetScroll, 0, actualHeight - height);
-            return true;
+            targetScroll = MathHelper.clamp(targetScroll, 0, max);
+
+            // Only consume the event if the view actually scrolled, otherwise propagate to parent.
+            return targetScroll > 0 && targetScroll < max;
         }
 
         return false;
@@ -164,7 +167,13 @@ public abstract class WView extends WVerticalList {
 
     @Override
     protected boolean propagateEvents(WWidget widget) {
-        return ((widget.y >= y && widget.y <= y + height) || (widget.y + widget.height >= y && widget.y + widget.height <= y + height)) || ((y >= widget.y && y <= widget.y + widget.height) || (y + height >= widget.y && y + height <= widget.y + widget.height));
+        if (widget.isFocused()) return true;
+
+        // Propagate to any visible view, to allow inputs even when not hovered
+        if (widget instanceof WView) return isWidgetInView(widget);
+
+        // Propagate to any visible widget while the view is hovered
+        return mouseOver && isWidgetInView(widget);
     }
 
     protected double handleWidth() {
@@ -181,5 +190,9 @@ public abstract class WView extends WVerticalList {
 
     protected double handleY() {
         return y + (height - handleHeight()) * (scroll / (actualHeight - height));
+    }
+
+    public boolean isWidgetInView(WWidget widget) {
+        return widget.y < y + height && widget.y + widget.height > y;
     }
 }

@@ -95,7 +95,7 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
-    @ModifyArg(method = "swingHand(Lnet/minecraft/util/Hand;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;swingHand(Lnet/minecraft/util/Hand;Z)V"))
+    @ModifyVariable(method = "swingHand(Lnet/minecraft/util/Hand;Z)V", at = @At("HEAD"), argsOnly = true)
     private Hand setHand(Hand hand) {
         if ((Object) this != mc.player) return hand;
 
@@ -104,10 +104,11 @@ public abstract class LivingEntityMixin extends Entity {
             if (handView.swingMode.get() == HandView.SwingMode.None) return hand;
             return handView.swingMode.get() == HandView.SwingMode.Offhand ? Hand.OFF_HAND : Hand.MAIN_HAND;
         }
+
         return hand;
     }
 
-    @ModifyExpressionValue(method = "getHandSwingDuration", at = @At(value = "CONSTANT", args = "intValue=6"))
+    @ModifyExpressionValue(method = "getHandSwingDuration", at = @At(value = "INVOKE", target = "Lnet/minecraft/component/type/SwingAnimationComponent;duration()I"))
     private int getHandSwingDuration(int original) {
         if ((Object) this != mc.player) return original;
 
@@ -140,6 +141,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyReturnValue(method = "hasStatusEffect", at = @At("RETURN"))
     private boolean hasStatusEffect(boolean original, RegistryEntry<StatusEffect> effect) {
+        if (effect == null || effect.value() == null) return original;
         if (Modules.get().get(NoStatusEffects.class).shouldBlock(effect.value())) return false;
 
         return original;

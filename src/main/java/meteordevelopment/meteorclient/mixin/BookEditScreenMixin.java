@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
+import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookEditScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -36,6 +37,12 @@ public abstract class BookEditScreenMixin extends Screen {
     @Shadow
     protected abstract void updatePage();
 
+    @Shadow
+    protected abstract void openNextPage();
+
+    @Shadow
+    protected abstract void openPreviousPage();
+
     public BookEditScreenMixin(Text title) {
         super(title);
     }
@@ -56,7 +63,7 @@ public abstract class BookEditScreenMixin extends Screen {
                     try {
                         NbtIo.write(tag, out);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        MeteorClient.LOG.error("Error writing the book to the output stream", e);
                     }
 
                     try {
@@ -101,12 +108,21 @@ public abstract class BookEditScreenMixin extends Screen {
 
                         updatePage();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        MeteorClient.LOG.error("Error reading the data from your clipboard", e);
                     }
                 })
                 .position(4, 4 + 20 + 2)
                 .size(120, 20)
                 .build()
         );
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (verticalAmount == 0) return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+
+        if (verticalAmount < 0) this.openNextPage();    // scroll down
+        else this.openPreviousPage();                   // scroll up
+        return true;
     }
 }

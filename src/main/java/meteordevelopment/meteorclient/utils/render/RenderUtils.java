@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
+import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -39,6 +40,10 @@ public class RenderUtils {
     @PostInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RenderUtils.class);
+    }
+
+    public static boolean isShaderPackInUse() {
+        return IrisApi.getInstance().isShaderPackInUse();
     }
 
     // Items
@@ -74,7 +79,7 @@ public class RenderUtils {
         Vector4f center4 = new Vector4f(0, 0, 0, 1).mul(invProjection).mul(invView);
         center4.div(center4.w);
 
-        Vec3d camera = mc.gameRenderer.getCamera().getPos();
+        Vec3d camera = mc.gameRenderer.getCamera().getCameraPos();
         center = new Vec3d(camera.x + center4.x, camera.y + center4.y, camera.z + center4.z);
     }
 
@@ -165,4 +170,3 @@ public class RenderUtils {
         }
     }
 }
-

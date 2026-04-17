@@ -78,4 +78,7 @@ public interface MinecraftClientAccessor {
     @Mutable
     @Accessor("apiServices")
     void meteor$setApiServices(ApiServices apiServices);
+
+    @Invoker("handleInputEvents")
+    void meteor$handleInputEvents();
 }

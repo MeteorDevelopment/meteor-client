@@ -39,7 +39,7 @@ public class CompassHud extends HudElement {
     );
 
     private final Setting<SettingColor> colorOther = sgGeneral.add(new ColorSetting.Builder()
-        .name("color-north")
+        .name("color-other")
         .description("Color of other directions.")
         .defaultValue(new SettingColor())
         .build()
