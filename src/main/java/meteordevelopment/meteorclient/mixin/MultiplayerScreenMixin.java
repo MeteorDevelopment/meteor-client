@@ -81,20 +81,20 @@ public abstract class MultiplayerScreenMixin extends Screen {
         }
 
         Config config = Config.get();
-        boolean accountsVisible = config.showAccountButton.get();
-        boolean proxiesVisible = config.showProxiesButton.get();
-        Config.ButtonAnchor accountAnchor = config.accountButtonAnchor.get();
-        Config.ButtonAnchor proxiesAnchor = config.proxiesButtonAnchor.get();
+        Config.ButtonPosition accountPos = config.accountButtonAnchor.get();
+        Config.ButtonPosition proxiesPos = config.proxiesButtonAnchor.get();
+        boolean accountsVisible = accountPos != Config.ButtonPosition.Hidden;
+        boolean proxiesVisible = proxiesPos != Config.ButtonPosition.Hidden;
 
         accounts.visible = accountsVisible;
         proxies.visible = proxiesVisible;
 
-        positionButton(accounts, accountAnchor, proxiesVisible && proxiesAnchor == accountAnchor, true);
-        positionButton(proxies, proxiesAnchor, accountsVisible && accountAnchor == proxiesAnchor, false);
+        positionButton(accounts, accountPos, proxiesVisible && proxiesPos == accountPos, true);
+        positionButton(proxies, proxiesPos, accountsVisible && accountPos == proxiesPos, false);
     }
 
     @Unique
-    private void positionButton(ButtonWidget button, Config.ButtonAnchor anchor, boolean sharingCorner, boolean isAccounts) {
+    private void positionButton(ButtonWidget button, Config.ButtonPosition anchor, boolean sharingCorner, boolean isAccounts) {
         int leftOffset  = sharingCorner && isAccounts  ? BUTTON_WIDTH + GAP : 0;
         int rightOffset = sharingCorner && !isAccounts ? BUTTON_WIDTH + GAP : 0;
 
@@ -103,6 +103,7 @@ public abstract class MultiplayerScreenMixin extends Screen {
             case TopLeft     -> button.setPosition(MARGIN + leftOffset, MARGIN);
             case BottomLeft  -> button.setPosition(MARGIN + leftOffset, this.height - MARGIN - BUTTON_HEIGHT);
             case BottomRight -> button.setPosition(this.width  - MARGIN - BUTTON_WIDTH - rightOffset, this.height - MARGIN - BUTTON_HEIGHT);
+            default -> button.setPosition(this.width  - MARGIN - BUTTON_WIDTH - rightOffset, MARGIN); // Top right
         }
     }
 
@@ -118,10 +119,10 @@ public abstract class MultiplayerScreenMixin extends Screen {
 
         // Shifts the top left account and proxy text to right if buttons are also top left
         int x = MARGIN;
-        if (config.showProxiesButton.get() && config.proxiesButtonAnchor.get() == Config.ButtonAnchor.TopLeft) {
+        if (config.proxiesButtonAnchor.get() != Config.ButtonPosition.Hidden && config.proxiesButtonAnchor.get() == Config.ButtonPosition.TopLeft) {
             x += BUTTON_WIDTH + GAP;
         }
-        if (config.showAccountButton.get() && config.accountButtonAnchor.get() == Config.ButtonAnchor.TopLeft) {
+        if (config.accountButtonAnchor.get() != Config.ButtonPosition.Hidden && config.accountButtonAnchor.get() == Config.ButtonPosition.TopLeft) {
             x += BUTTON_WIDTH + GAP;
         }
 

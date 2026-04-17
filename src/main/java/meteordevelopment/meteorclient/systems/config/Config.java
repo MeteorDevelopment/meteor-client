@@ -103,18 +103,10 @@ public class Config extends System<Config> {
         .build()
     );
 
-    public final Setting<Boolean> showAccountButton = sgVisual.add(new BoolSetting.Builder()
+    public final Setting<ButtonPosition> accountButtonAnchor = sgVisual.add(new EnumSetting.Builder<ButtonPosition>()
         .name("accounts-button")
-        .description("Shows the accounts button in the multiplayer screen.")
-        .defaultValue(true)
-        .build()
-    );
-
-    public final Setting<ButtonAnchor> accountButtonAnchor = sgVisual.add(new EnumSetting.Builder<ButtonAnchor>()
-        .name("accounts-button-position")
-        .description("Where the accounts button is displayed")
-        .defaultValue(ButtonAnchor.TopRight)
-        .visible(showAccountButton::get)
+        .description("Controls the position and visibility of the accounts button in the multiplayer screen.")
+        .defaultValue(ButtonPosition.TopRight)
         .build()
     );
 
@@ -125,18 +117,10 @@ public class Config extends System<Config> {
         .build()
     );
 
-    public final Setting<Boolean> showProxiesButton = sgVisual.add(new BoolSetting.Builder()
+    public final Setting<ButtonPosition> proxiesButtonAnchor = sgVisual.add(new EnumSetting.Builder<ButtonPosition>()
         .name("proxies-button")
-        .description("Shows the proxies button in the multiplayer screen.")
-        .defaultValue(true)
-        .build()
-    );
-
-    public final Setting<ButtonAnchor> proxiesButtonAnchor = sgVisual.add(new EnumSetting.Builder<ButtonAnchor>()
-        .name("proxies-button-position")
-        .description("Where the proxies button is displayed")
-        .defaultValue(ButtonAnchor.TopRight)
-        .visible(showProxiesButton::get)
+        .description("Controls the position and visibility of the proxies button in the multiplayer screen.")
+        .defaultValue(ButtonPosition.TopRight)
         .build()
     );
 
@@ -251,10 +235,11 @@ public class Config extends System<Config> {
         return list;
     }
 
-    public enum ButtonAnchor {
+    public enum ButtonPosition {
         TopLeft,
         TopRight,
         BottomLeft,
         BottomRight,
+        Hidden,
     }
 }
