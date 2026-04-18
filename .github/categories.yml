@@ -28,12 +28,19 @@ categories:
 
   - name: "cheating"
     description: >
-      The user is asking about bypassing, evading, or disabling a specific anticheat plugin, or asking
-      why a module was detected or flagged by an anticheat. This includes requests for anticheat-specific
-      bypasses, questions about why Meteor was detected, and feature requests motivated by anticheat evasion.
-      Known anticheats to look for: AAC, Grim, Matrix, NCP, NoCheatPlus, Spartan, Vulcan, Watchdog, Wraith,
-      Donut, GlazE, GodsEye, AntiCheatAddition. Keywords: "bypass", "detected", "flagged", "disabler",
-      "anticheat", "anti-cheat", "anti cheat".
+      The user is asking about bypassing anticheats or evading detection **specifically on non-anarchy servers.**
+      Meteor is an anarchy client, so we do care about being able to pass certain checks from certain anticheats that
+      see common use in anarchy servers - Grim specifically for movement checks, updated NCP (nocheatplus), old NCP
+      all come to mind. If the user is asking about altering basic functionality to bypass those anticheats, or adding
+      a bypass for them to one of the more "important" modules such as killaura, speed, or other useful anarchy
+      utilities, that is fine. What isn't fine is asking about bypassing other anticheats that are generally used on
+      non-anarchy servers: AAC, Matrix, Spartan, Vulcan, Watchdog, Wraith, Donut, GlazE, GodsEye, AntiCheatAddition.
+      This category also encompasses users asking for features normally associated with cheating/griefing on those
+      servers, such as "anti-vanish" or modules that warn when staff are near, force OP exploits, etc. This does not
+      include requesting changes to existing modules such as nuker, flamethrower, xray, wallhack, etc - these are
+      valid utilities for an anarchy use case. If the user asks broadly for bypasses without referring to a specific
+      anticheat, consider it a valid suggestion - users asking for cheating purposes seem to specify a specific
+      server or anticheat a lot of the time.
     message: >
       ### This issue is being automatically closed.
 
@@ -42,14 +49,12 @@ categories:
       add workarounds for specific anticheats unless they are necessary to support basic functionality in an anarchy
       setting.
 
-  - name: "launchers"
+  - name: "incompatible"
     description: >
-      The user is asking about compatibility with or support for third-party launchers or other mod clients,
+      The user is asking about compatibility with or support for third-party launchers or other minecraft clients,
       particularly those targeting non-desktop platforms or cracked accounts. This includes issues caused
-      by running Meteor alongside or within these environments. Known clients and launchers to look for:
-      Lunar Client, Feather Client, LabyMod, OptiFine, OptiFabric, PojavLauncher, TLauncher, Badlion.
-      Keywords: "lunar", "feather", "labymod", "optifine", "pojav", "tlauncher", "cracked", "mobile",
-      "android", "ios".
+      by running Meteor alongside or within these environments. Keywords to look for: Lunar Client, Feather Client,
+      LabyMod, OptiFine, OptiFabric, Pojav, TLauncher, Badlion, Zalith, cracked, mobile, android, ios, mojolauncher.
     message: >
       ### This issue is being automatically closed.
 
@@ -59,17 +64,20 @@ categories:
 
   - name: "features"
     description: >
-      The user is requesting a feature that is impossible to implement, explicitly associated with
-      griefing or malicious use beyond Meteor's scope, or that the project has no intention of adding.
-      This includes features that would require server-side exploitation or violate the spirit of the project.
-      Keywords: force op, dupe exploits, portal godmode, infinite reach, anti-vanish, tp-aura, ping bypass,
-      .panic command, crash exploits, x-ray bypasses.
+      The user is requesting a feature that is either technically impossible, relies on a game bug or exploit
+      that has been or will soon be patched, or requires server-side exploitation to function. This includes dupe
+      exploits, crash exploits, and features that bypass server-side mechanics entirely. Keywords: dupe, duplication,
+      force op, portal godmode, infinite reach, ping bypass, book ban, bow oneshot, anti-xray bypass, crash exploit,
+      kill aura bypass. This does not include requesting changes to existing modules such as nuker,
+      flamethrower, xray, wallhack, etc - these are valid utilities for an anarchy use case.
     message: >
       ### This issue is being automatically closed.
 
-      This feature is either impossible to implement, associated with cheating or griefing in an non-anarchy
-      setting, or explicitly associated with malicious use beyond the intended scope of Meteor. Please do not
-      open issues requesting features of this nature, they will not be considered.
+      This feature relies either on exploits in Minecraft's code or server-side behavior that a client mod cannot
+      control. Exploits are hard to find and often patched immediately after being made public, making them not
+      worth it to maintain. If you're not sure what the difference between client-side and server-side means,
+      [this article](https://cybrancee.com/blog/minecraft-client-side-and-server-side-explained/) is a good
+      starting point.
 
   - name: "forge-port"
     description: >
@@ -92,15 +100,16 @@ categories:
     message: >
       ### This issue is being automatically closed.
 
-      This does not appear to be a bug report or a valid feature request. For general questions and
-      discussion, please use the [Discord](https://meteorclient.com/discord) instead.
+      This does not appear to be a bug report or feature request. For general questions and discussion,
+      please use the [community discord](https://meteorclient.com/discord) instead.
 
-  - name: "no-reproduction-info"
+  - name: "incomplete"
     description: >
-      The issue is a bug report but contains no meaningful information to reproduce the problem — no steps
-      to reproduce, no Meteor version, no Minecraft version, no logs, and no description beyond a vague
-      complaint. Examples: "it doesn't work", "meteor is broken", "this module is bugged" with no further
-      detail. The issue may also be missing a crash report or log when one would clearly be relevant.
+      This category applies only to bug report or crash report issues, **suggestions are exempt**. Suggestions
+      will begin with the heading "Describe the feature" - if it starts with that, you cannot categorize the issue
+      into this category. The issue is a bug report but contains no meaningful information. This includes no steps
+      to reproduce the problem, no Meteor version, no Minecraft version, no logs, or no description beyond a vague
+      complaint. Examples: "it doesn't work", "meteor is broken", "this module is bugged" with no further detail.
     message: >
       ### This issue is being automatically closed.
 
