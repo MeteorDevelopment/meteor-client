@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.NameProtect;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
@@ -42,6 +43,15 @@ public abstract class JoinMultiplayerScreenMixin extends Screen {
     @Unique
     private Button proxies;
 
+    @Unique
+    private static final int BUTTON_WIDTH = 75;
+    @Unique
+    private static final int BUTTON_HEIGHT = 20;
+    @Unique
+    private static final int MARGIN = 3;
+    @Unique
+    private static final int GAP = 2;
+
     public JoinMultiplayerScreenMixin(Component title) {
         super(title);
     }
@@ -57,34 +67,78 @@ public abstract class JoinMultiplayerScreenMixin extends Screen {
         if (accounts == null) {
             accounts = addRenderableWidget(
                 new Button.Builder(Component.literal("Accounts"), _ -> minecraft.setScreen(GuiThemes.get().accountsScreen()))
-                    .size(75, 20)
+                    .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                     .build()
             );
         }
-        accounts.setPosition(this.width - 75 - 3, 3);
 
         if (proxies == null) {
             proxies = addRenderableWidget(
                 new Button.Builder(Component.literal("Proxies"), _ -> minecraft.setScreen(GuiThemes.get().proxiesScreen()))
-                    .size(75, 20)
+                    .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                     .build()
             );
         }
-        proxies.setPosition(this.width - 75 - 3 - 75 - 2, 3);
+
+        Config config = Config.get();
+        Config.ButtonPosition accountPos = config.accountButtonAnchor.get();
+        Config.ButtonPosition proxiesPos = config.proxiesButtonAnchor.get();
+        boolean accountsVisible = accountPos != Config.ButtonPosition.Hidden;
+        boolean proxiesVisible = proxiesPos != Config.ButtonPosition.Hidden;
+
+        accounts.visible = accountsVisible;
+        proxies.visible = proxiesVisible;
+
+        positionButton(accounts, accountPos, proxiesVisible && proxiesPos == accountPos, true);
+        positionButton(proxies, proxiesPos, accountsVisible && accountPos == proxiesPos, false);
+    }
+
+    @Unique
+    private void positionButton(Button button, Config.ButtonPosition anchor, boolean sharingCorner, boolean isAccounts) {
+        int leftOffset  = sharingCorner && isAccounts  ? BUTTON_WIDTH + GAP : 0;
+        int rightOffset = sharingCorner && !isAccounts ? BUTTON_WIDTH + GAP : 0;
+
+        switch (anchor) {
+            case TopRight    -> button.setPosition(this.width  - MARGIN - BUTTON_WIDTH - rightOffset, MARGIN);
+            case TopLeft     -> button.setPosition(MARGIN + leftOffset, MARGIN);
+            case BottomLeft  -> button.setPosition(MARGIN + leftOffset, this.height - MARGIN - BUTTON_HEIGHT);
+            case BottomRight -> button.setPosition(this.width  - MARGIN - BUTTON_WIDTH - rightOffset, this.height - MARGIN - BUTTON_HEIGHT);
+            default -> button.setPosition(this.width  - MARGIN - BUTTON_WIDTH - rightOffset, MARGIN); // Top right
+        }
     }
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
         super.extractRenderState(graphics, mouseX, mouseY, deltaTicks);
 
-        int x = 3;
-        int y = 3;
+        Config config = Config.get();
+
+        if (!config.showAccountStatus.get() && !config.showProxiesStatus.get()) {
+            return;
+        }
+
+        // Shifts the top left account and proxy text to right if buttons are also top left
+        int x = MARGIN;
+        if (config.proxiesButtonAnchor.get() != Config.ButtonPosition.Hidden && config.proxiesButtonAnchor.get() == Config.ButtonPosition.TopLeft) {
+            x += BUTTON_WIDTH + GAP;
+        }
+        if (config.accountButtonAnchor.get() != Config.ButtonPosition.Hidden && config.accountButtonAnchor.get() == Config.ButtonPosition.TopLeft) {
+            x += BUTTON_WIDTH + GAP;
+        }
+
+        int y = MARGIN;
 
         // Logged in as
-        graphics.text(mc.font, loggedInAs, x, y, textColor1);
-        graphics.text(mc.font, Modules.get().get(NameProtect.class).getName(minecraft.getUser().getName()), x + loggedInAsLength, y, textColor2);
+        if (config.showAccountStatus.get()) {
+            graphics.text(mc.font, loggedInAs, x, y, textColor1);
+            graphics.text(mc.font, Modules.get().get(NameProtect.class).getName(minecraft.getUser().getName()), x + loggedInAsLength, y, textColor2);
 
-        y += font.lineHeight + 2;
+            y += font.lineHeight + 2;
+        }
+
+        if (!config.showProxiesStatus.get()) {
+            return;
+        }
 
         // Proxy
         Proxy proxy = Proxies.get().getEnabled();
