@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
@@ -16,6 +17,7 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -299,16 +301,14 @@ public class LocateCommand extends Command {
     }
 
     private @Nullable Vec3 findByBlockList(List<Block> blockList) {
-        /*List<BlockPos> posList = BaritoneAPI.getProvider().getWorldScanner().scanChunkRadius(BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext(), blockList, 64, 10, 32);
+        List<BlockPos> posList = BaritoneAPI.getProvider().getWorldScanner().scanChunkRadius(BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext(), blockList, 64, 10, 32);
         if (posList.isEmpty()) {
             return null;
         }
         if (posList.size() < 3) {
             warning("Only %d block(s) found. This search might be a false positive.", posList.size());
         }
-        return new Vec3(posList.getFirst().getX(), posList.getFirst().getY(), posList.getFirst().getZ());*/
-
-        return null; // TODO(Baritone)
+        return new Vec3(posList.getFirst().getX(), posList.getFirst().getY(), posList.getFirst().getZ());
     }
 
     @EventHandler

@@ -11,7 +11,7 @@ loom = "1.16-SNAPSHOT"
 
 # Mods
 # Baritone (https://github.com/MeteorDevelopment/baritone)
-baritone = "1.21.10-SNAPSHOT"
+baritone = "26.1-SNAPSHOT"
 # Sodium (https://github.com/CaffeineMC/sodium-fabric)
 sodium = "mc26.1.1-0.8.9-fabric"
 # Lithium (https://github.com/CaffeineMC/lithium-fabric)

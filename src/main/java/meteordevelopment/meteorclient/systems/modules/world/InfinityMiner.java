@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.world;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
+import baritone.api.pathing.goals.GoalBlock;
 import baritone.api.process.ICustomGoalProcess;
 import baritone.api.process.IMineProcess;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -128,8 +129,7 @@ public class InfinityMiner extends Module {
             if (walkHome.get()) {
                 if (isBaritoneNotWalking()) {
                     info("Walking home.");
-                    /*baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(homePos));*/
-                    // TODO(Baritone)
+                    baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(homePos));
                 } else if (mc.player.blockPosition().equals(homePos) && logOut.get()) logOut();
             } else if (logOut.get()) logOut();
             else {
@@ -202,16 +202,14 @@ public class InfinityMiner extends Module {
         Block[] array = new Block[targetBlocks.get().size()];
 
         baritone.getPathingBehavior().cancelEverything();
-        /*baritone.getMineProcess().mine(targetBlocks.get().toArray(array));*/
-        // TODO(Baritone)
+        baritone.getMineProcess().mine(targetBlocks.get().toArray(array));
     }
 
     private void mineRepairBlocks() {
         Block[] array = new Block[repairBlocks.get().size()];
 
         baritone.getPathingBehavior().cancelEverything();
-        /*baritone.getMineProcess().mine(repairBlocks.get().toArray(array));*/
-        // TODO(Baritone)
+        baritone.getMineProcess().mine(repairBlocks.get().toArray(array));
     }
 
     private void logOut() {

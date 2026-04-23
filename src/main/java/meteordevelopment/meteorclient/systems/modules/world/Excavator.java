@@ -88,8 +88,7 @@ public class Excavator extends Module {
     @Override
     public void onDeactivate() {
         baritone.getSelectionManager().removeSelection(baritone.getSelectionManager().getLastSelection());
-        /*if (baritone.getBuilderProcess().isActive()) baritone.getCommandManager().execute("stop");*/
-        // TODO(Baritone)
+        if (baritone.getBuilderProcess().isActive()) baritone.getCommandManager().execute("stop");
         status = Status.SEL_START;
     }
 
@@ -109,24 +108,23 @@ public class Excavator extends Module {
         selectCorners();
     }
 
-    // TODO(Baritone)
     private void selectCorners() {
         if (!(mc.hitResult instanceof BlockHitResult result)) return;
 
         if (status == Status.SEL_START) {
-            /*start = BetterBlockPos.from(result.getBlockPos());*/
+            start = BetterBlockPos.from(result.getBlockPos());
             status = Status.SEL_END;
             if (logSelection.get()) {
                 info("Start corner set: (%d, %d, %d)".formatted(start.x, start.y, start.z));
             }
         } else if (status == Status.SEL_END) {
-            /*end = BetterBlockPos.from(result.getBlockPos());*/
+            end = BetterBlockPos.from(result.getBlockPos());
             status = Status.WORKING;
             if (logSelection.get()) {
                 info("End corner set: (%d, %d, %d)".formatted(end.x, end.y, end.z));
             }
             baritone.getSelectionManager().addSelection(start, end);
-            /*baritone.getBuilderProcess().clearArea(start, end);*/
+            baritone.getBuilderProcess().clearArea(start, end);
         }
     }
 
