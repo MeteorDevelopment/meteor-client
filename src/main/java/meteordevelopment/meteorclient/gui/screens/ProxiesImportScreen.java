@@ -49,52 +49,54 @@ public class ProxiesImportScreen extends WindowScreen {
 
                     matcher = Proxies.PROXY_PATTERN.matcher(line);
                     if (matcher.matches()) {
-                        String address = matcher.group(2).replaceAll("\\b0+\\B", "");
-                        int port = Integer.parseInt(matcher.group(3));
+                        String address = matcher.group("address").replaceAll("\\b0+\\B", "");
+                        int port = Integer.parseInt(matcher.group("port"));
 
                         proxy = new Proxy.Builder()
                             .address(address)
                             .port(port)
-                            .name(matcher.group(1) != null ? matcher.group(1) : address + ":" + port)
-                            .type(matcher.group(4) != null ? ProxyType.parse(matcher.group(4)) : ProxyType.Socks4)
+                            .name(matcher.group("name") != null ? matcher.group("name") : address + ":" + port)
+                            .type(matcher.group("type") != null ? ProxyType.parse(matcher.group("type")) : ProxyType.SOCKS4)
+                            .secure(matcher.group("secure") != null)
                             .build();
                     }
 
                     matcher = Proxies.PROXY_PATTERN_WEBSHARE.matcher(line);
                     if (proxy == null && matcher.matches()) {
-                        String address = matcher.group(1).replaceAll("\\b0+\\B", "");
-                        int port = Integer.parseInt(matcher.group(2));
+                        String address = matcher.group("address").replaceAll("\\b0+\\B", "");
+                        int port = Integer.parseInt(matcher.group("port"));
 
                         proxy = new Proxy.Builder()
                             .address(address)
                             .port(port)
                             .name(address + ":" + port)
-                            .username(matcher.group(3) != null ? matcher.group(3) : "")
-                            .password(matcher.group(4) != null ? matcher.group(4) : "")
-                            .type(ProxyType.Socks5)
+                            .username(matcher.group("username") != null ? matcher.group("username") : "")
+                            .password(matcher.group("password") != null ? matcher.group("password") : "")
+                            .type(ProxyType.HTTP)
+                            .secure(true)
                             .build();
                     }
 
                     matcher = Proxies.PROXY_PATTERN_URI.matcher(line);
                     if (proxy == null && matcher.matches()) {
-                        String address = matcher.group("addr").replaceAll("\\b0+\\B", "");
+                        String address = matcher.group("address").replaceAll("\\b0+\\B", "");
                         int port = Integer.parseInt(matcher.group("port"));
 
-                        ProxyType type = ProxyType.parse(matcher.group(1));
+                        ProxyType type = ProxyType.parse(matcher.group("type"));
+                        boolean secure = matcher.group("secure") != null;
                         if (type == null) {
-                            if (matcher.group(1) != null && matcher.group(1).equals("socks")) type = ProxyType.Socks5;
-                                // if it has a password it's a socks5 proxy
-                            else if (matcher.group("pass") != null) type = ProxyType.Socks5;
-                            else type = ProxyType.Socks4;
+                            type = ProxyType.HTTP;
+                            secure = true;
                         }
 
                         proxy = new Proxy.Builder()
                             .address(address)
                             .port(port)
                             .name(address + ":" + port)
-                            .username(matcher.group("user") != null ? matcher.group("user") : "")
-                            .password(matcher.group("pass") != null ? matcher.group("pass") : "")
+                            .username(matcher.group("username") != null ? matcher.group("username") : "")
+                            .password(matcher.group("password") != null ? matcher.group("password") : "")
                             .type(type)
+                            .secure(secure)
                             .build();
                     }
 
