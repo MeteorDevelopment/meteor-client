@@ -38,6 +38,9 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.network.packet.s2c.common.ResourcePackSendS2CPacket;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.WorldChunk;
@@ -132,6 +135,56 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
 
         if (itemEntity instanceof ItemEntity && entity == client.player) {
             MeteorClient.EVENT_BUS.post(PickItemsEvent.get(((ItemEntity) itemEntity).getStack(), packet.getStackAmount()));
+        }
+    }
+
+    @Inject(method = "onBlockEntityUpdate", at = @At("HEAD"))
+    private void onBlockEntityUpdate(BlockEntityUpdateS2CPacket packet, CallbackInfo ci) {
+        NbtCompound nbt = packet.getNbt();
+        if (nbt != null) {
+            stripTranslateTags(nbt);
+        }
+    }
+
+    @Unique
+    private void stripTranslateTags(NbtCompound nbt) {
+        // Strip translate tags from sign NBT to prevent server-side translation detection
+        // This blocks servers from detecting mods by checking if translation keys of certan mods or clients are present if so they are present they are exposed to the server for having those mods or clients
+        if (nbt.contains("front_text")) {
+            nbt.getCompound("front_text").ifPresent(frontText -> {
+                if (frontText.contains("messages")) {
+                    frontText.getList("messages").ifPresent(messages -> {
+                        for (int i = 0; i < messages.size(); i++) {
+                            messages.getCompound(i).ifPresent(message -> {
+                                if (message.contains("translate")) {
+                                    message.remove("translate");
+                                    message.getString("fallback").ifPresent(fallback -> {
+                                        message.putString("text", fallback);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+        if (nbt.contains("back_text")) {
+            nbt.getCompound("back_text").ifPresent(backText -> {
+                if (backText.contains("messages")) {
+                    backText.getList("messages").ifPresent(messages -> {
+                        for (int i = 0; i < messages.size(); i++) {
+                            messages.getCompound(i).ifPresent(message -> {
+                                if (message.contains("translate")) {
+                                    message.remove("translate");
+                                    message.getString("fallback").ifPresent(fallback -> {
+                                        message.putString("text", fallback);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         }
     }
 
