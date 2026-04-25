@@ -169,6 +169,7 @@
     "SectionedEntityCacheAccessor",
     "ServerPlayerEntityMixin",
     "ServerResourcePackLoaderMixin",
+	"ShaderCapeFixMixin",
     "ShaderLoaderMixin",
     "ShadowPiecesCommandRendererMixin",
     "ShulkerBoxScreenHandlerAccessor",
