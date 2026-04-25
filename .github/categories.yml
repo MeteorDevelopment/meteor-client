@@ -1,0 +1,118 @@
+categories:
+  - name: "new-versions"
+    description: >
+      The user is asking when Meteor will update to a new Minecraft version, or expressing impatience
+      about update timelines. Keywords and phrases to look for: "when will meteor update", "1.xx support",
+      "any eta", "will you update to", "please update", "update when", "waiting for update".
+    message: >
+      ### This issue is being automatically closed.
+
+      Please do not open issues asking when Meteor will update to a new Minecraft version. Maintainers work
+      on Meteor in their spare time, and updates are not guaranteed. New versions of Meteor are released
+      when they are ready. Follow the [Discord](https://meteorclient.com/discord) or watch the repository
+      for announcements.
+
+  - name: "old-versions"
+    description: >
+      The user is asking for support with an old, unsupported version of Minecraft or Meteor, or attempting to procure
+      old Meteor builds. This includes any Minecraft version that is not the current version Meteor targets, or
+      any Meteor build that is not the latest. Keywords: "1.19", "1.20", "old version", "legacy", "older build",
+      "previous version", "downgrade".
+    message: >
+      ### This issue is being automatically closed.
+
+      Meteor only supports the latest version of Minecraft. Our [archive page](https://www.meteorclient.com/archive)
+      stores major Meteor versions starting at 1.21.4 and the most recent dev builds can be obtained from our Maven.
+      No support is provided for building or running old versions of Meteor - you will have to troubleshoot any
+      issues you encounter yourself.
+
+  - name: "cheating"
+    description: >
+      The user is asking about bypassing anticheats or evading detection **specifically on non-anarchy servers.**
+      Meteor is an anarchy client, so we do care about being able to pass certain checks from certain anticheats that
+      see common use in anarchy servers - Grim specifically for movement checks, updated NCP (nocheatplus), old NCP
+      all come to mind. If the user is asking about altering basic functionality to bypass those anticheats, or adding
+      a bypass for them to one of the more "important" modules such as killaura, speed, or other useful anarchy
+      utilities, that is fine. What isn't fine is asking about bypassing other anticheats that are generally used on
+      non-anarchy servers: AAC, Matrix, Spartan, Vulcan, Watchdog, Wraith, Donut, GlazE, GodsEye, AntiCheatAddition.
+      This category also encompasses users asking for features normally associated with cheating/griefing on those
+      servers, such as "anti-vanish" or modules that warn when staff are near, force OP exploits, etc. This does not
+      include requesting changes to existing modules such as nuker, flamethrower, xray, wallhack, etc - these are
+      valid utilities for an anarchy use case. If the user asks broadly for bypasses without referring to a specific
+      anticheat, consider it a valid suggestion - users asking for cheating purposes seem to specify a specific
+      server or anticheat a lot of the time.
+    message: >
+      ### This issue is being automatically closed.
+
+      Meteor is intended to be used as a utility client on anarchy servers that explicitly allow its use. We discourage
+      the use of Meteor for any purpose that would be considered cheating or griefing. Likewise, We do not intend to
+      add workarounds for specific anticheats unless they are necessary to support basic functionality in an anarchy
+      setting.
+
+  - name: "incompatible"
+    description: >
+      The user is asking about compatibility with or support for third-party launchers or other minecraft clients,
+      particularly those targeting non-desktop platforms or cracked accounts. This includes issues caused
+      by running Meteor alongside or within these environments. Keywords to look for: Lunar Client, Feather Client,
+      LabyMod, OptiFine, OptiFabric, Pojav, TLauncher, Badlion, Zalith, cracked, mobile, android, ios, mojolauncher.
+    message: >
+      ### This issue is being automatically closed.
+
+      Meteor does not offer support for "legit clients" such as Lunar or Feather, launchers that support
+      cracked accounts, or launchers targeting non-desktop platforms. Meteor is unlikely to run correctly
+      in these environments if at all. You will have to troubleshoot any issues you encounter yourself.
+
+  - name: "features"
+    description: >
+      The user is requesting a feature that is either technically impossible, relies on a game bug or exploit
+      that has been or will soon be patched, or requires server-side exploitation to function. This includes dupe
+      exploits, crash exploits, and features that bypass server-side mechanics entirely. Keywords: dupe, duplication,
+      force op, portal godmode, infinite reach, ping bypass, book ban, bow oneshot, anti-xray bypass, crash exploit,
+      kill aura bypass. This does not include requesting changes to existing modules such as nuker,
+      flamethrower, xray, wallhack, etc - these are valid utilities for an anarchy use case.
+    message: >
+      ### This issue is being automatically closed.
+
+      This feature relies either on exploits in Minecraft's code or server-side behavior that a client mod cannot
+      control. Exploits are hard to find and often patched immediately after being made public, making them not
+      worth it to maintain. If you're not sure what the difference between client-side and server-side means,
+      [this article](https://cybrancee.com/blog/minecraft-client-side-and-server-side-explained/) is a good
+      starting point.
+
+  - name: "forge-port"
+    description: >
+      The user is asking about a Forge port of Meteor Client, asking why Meteor is not available on Forge,
+      or requesting that Meteor be ported to Forge. Keywords: "forge", "forge port", "forge version",
+      "why not forge", "port to forge", "forge support", "forge mod".
+    message: >
+      ### This issue is being automatically closed.
+
+      Porting Meteor to Forge would require rewriting the majority of the client to accommodate entirely
+      different APIs, and would take a massive amount of time and effort. We do not plan to port to Forge
+      in the future.
+
+  - name: "not-an-issue"
+    description: >
+      The submission is not a bug report or a valid feature request. This includes general questions,
+      thank-you messages, rants, spam, memes, requests for help with unrelated topics, or content that
+      belongs in the Discord rather than the issue tracker. The issue body may be very short, nonsensical,
+      or completely unrelated to Meteor Client.
+    message: >
+      ### This issue is being automatically closed.
+
+      This does not appear to be a bug report or feature request. For general questions and discussion,
+      please use the [community discord](https://meteorclient.com/discord) instead.
+
+  - name: "incomplete"
+    description: >
+      This category applies only to bug report or crash report issues, **suggestions are exempt**. Suggestions
+      will begin with the heading "Describe the feature" - if it starts with that, you cannot categorize the issue
+      into this category. The issue is a bug report but contains no meaningful information. This includes no steps
+      to reproduce the problem, no Meteor version, no Minecraft version, no logs, or no description beyond a vague
+      complaint. Examples: "it doesn't work", "meteor is broken", "this module is bugged" with no further detail.
+    message: >
+      ### This issue is being automatically closed.
+
+      This issue does not contain enough information to reproduce the problem. Please re-open with detailed
+      steps to reproduce, your Minecraft and Meteor versions, and any relevant logs or crash reports.
+      Issues without reproduction information cannot be investigated.
