@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
+import meteordevelopment.meteorclient.mixininterface.IGameRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
@@ -27,12 +28,15 @@ import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 @Mixin(InGameHud.class)
 public abstract class InGameHudMixin {
     @Shadow public abstract void clear();
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        ((IGameRenderer) mc.gameRenderer).meteor$flushGuiState();
         context.createNewRootLayer();
 
         Profilers.get().push(MeteorClient.MOD_ID + "_render_2d");

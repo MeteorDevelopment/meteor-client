@@ -114,6 +114,7 @@ public class NoFall extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
+        if (mc.player == null) return;
         if (pauseOnMace.get() && mc.player.getMainHandStack().getItem() instanceof MaceItem) return;
         if (mc.player.getAbilities().creativeMode
             || !(event.packet instanceof PlayerMoveC2SPacket)

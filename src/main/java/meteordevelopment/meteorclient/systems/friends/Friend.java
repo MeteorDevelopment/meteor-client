@@ -70,7 +70,11 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
         if (res != null && res.statusCode() == 200) {
             name = res.body().name;
             id = UndashedUuid.fromStringLenient(res.body().id);
-            mc.execute(() -> headTexture = PlayerHeadUtils.fetchHead(id));
+
+            byte[] head = PlayerHeadUtils.fetchHead(id);
+            mc.execute(() -> {
+                if (head != null) headTexture = new PlayerHeadTexture(head, true);
+            });
         }
 
         // cracked accounts shouldn't be assigned ids

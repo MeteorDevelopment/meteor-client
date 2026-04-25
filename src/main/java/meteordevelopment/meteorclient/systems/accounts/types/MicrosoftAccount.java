@@ -31,7 +31,6 @@ public class MicrosoftAccount extends Account<MicrosoftAccount> {
         if (token == null) return false;
 
         super.login();
-        cache.loadHead();
 
         setSession(new Session(cache.username, UndashedUuid.fromStringLenient(cache.uuid), token, Optional.empty(), Optional.empty()));
         return true;

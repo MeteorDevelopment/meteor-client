@@ -28,10 +28,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
-import net.minecraft.entity.mob.EndermanEntity;
-import net.minecraft.entity.mob.PiglinEntity;
-import net.minecraft.entity.mob.ZombifiedPiglinEntity;
-import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.mob.*;
+import net.minecraft.entity.passive.FrogEntity;
+import net.minecraft.entity.passive.ParrotEntity;
+import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -169,10 +169,17 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<EntityAge> mobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAge>()
-        .name("mob-age-filter")
-        .description("Determines the age of the mobs to target (baby, adult, or both).")
+    private final Setting<EntityAge> passiveMobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAge>()
+        .name("passive-mob-age-filter")
+        .description("Determines the age of passive mobs to target (animals, villagers).")
         .defaultValue(EntityAge.Adult)
+        .build()
+    );
+
+    private final Setting<EntityAge> hostileMobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAge>()
+        .name("hostile-mob-age-filter")
+        .description("Determines the age of hostile mobs to target (zombies, piglins, hoglins, zoglins).")
+        .defaultValue(EntityAge.Both)
         .build()
     );
 
@@ -408,9 +415,7 @@ public class KillAura extends Module {
         }
         if (ignorePassive.get()) {
             if (entity instanceof EndermanEntity enderman && !enderman.isAngry()) return false;
-            if (entity instanceof PiglinEntity piglin && !piglin.isAttacking()) return false;
-            if (entity instanceof ZombifiedPiglinEntity zombifiedPiglin && !zombifiedPiglin.isAttacking()) return false;
-            if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
+            if ((entity instanceof PiglinEntity || entity instanceof ZombifiedPiglinEntity || entity instanceof WolfEntity) && !((MobEntity) entity).isAttacking()) return false;
         }
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
@@ -418,12 +423,24 @@ public class KillAura extends Module {
             if (shieldMode.get() == ShieldMode.Ignore && player.isBlocking()) return false;
             if (player instanceof FakePlayerEntity fakePlayer && fakePlayer.noHit) return false;
         }
-        if (entity instanceof AnimalEntity animal) {
-            return switch (mobAgeFilter.get()) {
-                case Baby -> animal.isBaby();
-                case Adult -> !animal.isBaby();
-                case Both -> true;
-            };
+        if (entity instanceof LivingEntity livingEntity) {
+            // Hostile mobs with baby variants (zombies, piglins, hoglins, zoglins)
+            if (entity instanceof ZombieEntity || entity instanceof PiglinEntity
+                || entity instanceof HoglinEntity || entity instanceof ZoglinEntity) {
+                return switch (hostileMobAgeFilter.get()) {
+                    case Baby -> livingEntity.isBaby();
+                    case Adult -> !livingEntity.isBaby();
+                    case Both -> true;
+                };
+            }
+            // Passive mobs with baby variants (animals, villagers)
+            if (entity instanceof PassiveEntity && (!(entity instanceof FrogEntity || entity instanceof ParrotEntity))) {
+                return switch (passiveMobAgeFilter.get()) {
+                    case Baby -> livingEntity.isBaby();
+                    case Adult -> !livingEntity.isBaby();
+                    case Both -> true;
+                };
+            }
         }
         return true;
     }

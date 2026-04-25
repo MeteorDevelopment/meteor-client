@@ -23,7 +23,7 @@
       "meteordevelopment.meteorclient.MeteorClient"
     ],
     "modmenu": [
-      "meteordevelopment.meteorclient.ModMenuIntegration"
+      "meteordevelopment.meteorclient.modintegration.ModMenuIntegration"
     ]
   },
   "mixins": [
@@ -43,6 +43,9 @@
       "links": {
         "modmenu.discord": "https://meteorclient.com/discord"
       }
+    },
+    "badoptimizations:cache_hooks": {
+      "lightmap": "meteordevelopment.meteorclient.modintegration.BadOptimizationsHook"
     }
   },
   "depends": {
@@ -54,7 +57,8 @@
     "optifabric": "*",
     "feather": "*",
     "origins": "*",
-    "sodium": "<0.7.0",
-    "morechathistory": "*"
+    "sodium": "<0.8.7",
+    "morechathistory": "*",
+    "lithium": "<0.21.3"
   }
 }

@@ -64,7 +64,13 @@ public abstract class WContainer extends WWidget {
 
     @Override
     public boolean isFocused() {
-        for (Cell<?> cell : cells) if (cell.widget().isFocused()) return true;
+        if (focused) return true;
+
+        for (Cell<?> cell : cells) {
+            if (cell.widget().isFocused())
+                return true;
+        }
+
         return false;
     }
 

@@ -12,14 +12,12 @@ import meteordevelopment.meteorclient.gui.widgets.WLabel;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.mixin.TextHandlerAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.font.TextHandler;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.WritableBookContentComponent;
 import net.minecraft.component.type.WrittenBookContentComponent;
@@ -56,21 +54,31 @@ public class BookBot extends Module {
         .build()
     );
 
+    private final Setting<RandomType> randomType = sgGeneral.add(new EnumSetting.Builder<RandomType>()
+        .name("random-type")
+        .description("What kind of random to use.")
+        .defaultValue(RandomType.Utf8)
+        .visible(() -> mode.get() == Mode.Random)
+        .build()
+    );
+
     private final Setting<Integer> pages = sgGeneral.add(new IntSetting.Builder()
         .name("pages")
         .description("The number of pages to write per book.")
         .defaultValue(50)
         .range(1, 100)
         .sliderRange(1, 100)
-        .visible(() -> mode.get() != Mode.File)
+        .visible(() -> mode.get() != Mode.File && randomType.get() != RandomType.PaperMC)
         .build()
     );
 
-    private final Setting<Boolean> onlyAscii = sgGeneral.add(new BoolSetting.Builder()
-        .name("ascii-only")
-        .description("Only uses the characters in the ASCII charset.")
-        .defaultValue(false)
-        .visible(() -> mode.get() == Mode.Random)
+    private final Setting<Integer> characters = sgGeneral.add(new IntSetting.Builder()
+        .name("characters")
+        .description("How many characters to write per page.")
+        .defaultValue(128)
+        .range(1, 1024)
+        .sliderRange(1, 1024)
+        .visible(() -> mode.get() == Mode.Random && randomType.get() != RandomType.PaperMC)
         .build()
     );
 
@@ -207,15 +215,11 @@ public class BookBot extends Module {
         // Write book
 
         if (mode.get() == Mode.Random) {
-            int origin = onlyAscii.get() ? 0x21 : 0x0800;
-            int bound = onlyAscii.get() ? 0x7E : 0x10FFFF;
-
-            writeBook(
-                // Generate a random load of ints to use as random characters
-                random.ints(origin, bound)
-                    .filter(i -> !Character.isWhitespace(i) && i != '\r' && i != '\n')
-                    .iterator()
-            );
+            switch (randomType.get()) {
+                case Ascii -> writeBook(random.ints(0x21, 0x80).filter(i -> !Character.isWhitespace(i) && i != '\r' && i != '\n').iterator());
+                case Utf8 -> writeBook(random.ints(0x21, 0xD800).filter(i -> !Character.isWhitespace(i) && i != '\r' && i != '\n').iterator());
+                case PaperMC -> writePaperMcBook();
+            }
         } else if (mode.get() == Mode.File) {
             // Ignore if somehow the file got deleted
             if ((file == null || !file.exists()) && mode.get() == Mode.File) {
@@ -273,61 +277,64 @@ public class BookBot extends Module {
             List<StringVisitable> wrappedLines = mc.textRenderer.wrapLinesWithoutLanguage(Text.literal(text.toString()), 114);
             processLinesToPages(wrappedLines, pages, filteredPages, maxPages);
         } else {
-            // Non-word-wrapping logic
-            TextHandler.WidthRetriever widthRetriever = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).meteor$getWidthRetriever();
             int pageIndex = 0;
-            int lineIndex = 0;
             final StringBuilder page = new StringBuilder();
-            float lineWidth = 0;
 
-            while (chars.hasNext()) {
-                int c = chars.nextInt();
-
-                if (c == '\r' || c == '\n') {
-                    page.append('\n');
-                    lineWidth = 0;
-                    lineIndex++;
-                } else {
-                    float charWidth = widthRetriever.getWidth(c, Style.EMPTY);
-
-                    // Reached end of line
-                    if (lineWidth + charWidth > 114f) {
-                        page.append('\n');
-                        lineWidth = charWidth;
-                        lineIndex++;
-                        // Wrap to next line, unless wrapping to next page
-                        if (lineIndex != 14) page.appendCodePoint(c);
-                    } else if (lineWidth == 0f && c == ' ') {
-                        continue; // Prevent leading space from text wrapping
-                    } else {
-                        lineWidth += charWidth;
-                        page.appendCodePoint(c);
-                    }
+            while (pageIndex != maxPages) {
+                for (int i = 0; i < characters.get() && chars.hasNext(); i++) {
+                    page.appendCodePoint(chars.nextInt());
                 }
 
-                // Reached end of page
-                if (lineIndex == 14) {
-                    filteredPages.add(RawFilteredPair.of(Text.of(page.toString())));
-                    pages.add(page.toString());
+                if (!page.isEmpty()) {
+                    String builtPage = page.toString();
+                    filteredPages.add(RawFilteredPair.of(Text.of(builtPage)));
+                    pages.add(builtPage);
                     page.setLength(0);
-                    pageIndex++;
-                    lineIndex = 0;
+                }
 
-                    // No more pages
-                    if (pageIndex == maxPages) break;
+                pageIndex++;
+            }
+        }
 
-                    // Wrap to next page
-                    if (c != '\r' && c != '\n') {
-                        page.appendCodePoint(c);
-                    }
+        createBook(pages, filteredPages);
+    }
+
+    /**
+     * @author S
+     */
+    private void writePaperMcBook() {
+        ArrayList<String> pages = new ArrayList<>();
+        ArrayList<RawFilteredPair<Text>> filteredPages = new ArrayList<>();
+        final StringBuilder page = new StringBuilder();
+
+        PrimitiveIterator.OfInt oneByte = random.ints(0x21, 0x80).iterator();
+        PrimitiveIterator.OfInt twoBytes = random.ints(0x0080, 0x0800).iterator();
+        PrimitiveIterator.OfInt threeBytes = random.ints(0x0800, 0xD800).iterator();
+
+        for (int pageIndex = 0; pageIndex < 100; pageIndex++) {
+            if (pageIndex < 50) {
+                page.appendCodePoint(threeBytes.nextInt());
+                for (int i = 1; i < 1024; i++) {
+                    page.appendCodePoint(oneByte.nextInt());
+                }
+            } else if (pageIndex == 50) {
+                for (int i = 0; i < 110; i++) {
+                    page.appendCodePoint(threeBytes.nextInt());
+                }
+                page.appendCodePoint(twoBytes.nextInt());
+                for (int i = 0; i < 913; i++) {
+                    page.appendCodePoint(oneByte.nextInt());
+                }
+            } else {
+                for (int i = 0; i < 1024; i++) {
+                    page.appendCodePoint(threeBytes.nextInt());
                 }
             }
 
-            // No more characters, end current page
-            if (!page.isEmpty() && pageIndex != maxPages) {
-                filteredPages.add(RawFilteredPair.of(Text.of(page.toString())));
-                pages.add(page.toString());
-            }
+            String builtPage = page.toString();
+            filteredPages.add(RawFilteredPair.of(Text.of(builtPage)));
+            pages.add(builtPage);
+            page.setLength(0);
         }
 
         createBook(pages, filteredPages);
@@ -341,7 +348,7 @@ public class BookBot extends Module {
         for (StringVisitable line : lines) {
             String lineText = line.getString();
 
-            if (currentPage.length() > 0) {
+            if (!currentPage.isEmpty()) {
                 currentPage.append('\n');
             }
             currentPage.append(lineText);
@@ -401,5 +408,11 @@ public class BookBot extends Module {
     public enum Mode {
         File,
         Random
+    }
+
+    public enum RandomType {
+        Ascii,
+        Utf8,
+        PaperMC
     }
 }
