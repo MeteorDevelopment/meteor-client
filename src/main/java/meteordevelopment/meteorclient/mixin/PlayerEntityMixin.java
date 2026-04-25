@@ -27,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -132,5 +133,20 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @ModifyReturnValue(method = "getEntityInteractionRange", at = @At("RETURN"))
     private double modifyEntityInteractionRange(double original) {
         return Math.max(0, original + Modules.get().get(Reach.class).entityReach());
+    }
+
+    @Inject(method = "canAttackEntityIn", at = @At("HEAD"), cancellable = true)
+    private void canReachAttackIn(Box box, double additionalRange, CallbackInfoReturnable<Boolean> cir) {
+        if (Modules.get().get(Reach.class).isActive()) cir.setReturnValue(true);
+    }
+    
+    @Inject(method = "canInteractWithEntityIn", at = @At("HEAD"), cancellable = true)
+    private void canReachEntityIn(Box box, double additionalRange, CallbackInfoReturnable<Boolean> cir) {
+        if (Modules.get().get(Reach.class).isActive()) cir.setReturnValue(true);
+    }
+    
+    @Inject(method = "canInteractWithBlockAt", at = @At("HEAD"), cancellable = true)
+    private void canReachBlock(BlockPos pos, double additionalRange, CallbackInfoReturnable<Boolean> cir) {
+        if (Modules.get().get(Reach.class).isActive()) cir.setReturnValue(true);
     }
 }
