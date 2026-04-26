@@ -38,7 +38,7 @@ public class BarrierTweaks extends Module {
     );
 
     public BarrierTweaks() {
-        super(Categories.Render, "barrier-tweaks", "Displays barriers without distance-based flickering.");
+        super(Categories.Render, "barrier-tweaks", "Changes how barrier blocks are displayed.");
     }
 
     @EventHandler
