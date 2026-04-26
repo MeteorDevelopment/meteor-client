@@ -22,6 +22,12 @@ public class BarrierTweaks extends Module {
         .sliderMax(64)
         .build()
     );
+    private final Setting<ListMode> mode = sgGeneral.add(new EnumSetting.Builder<BarrierTweaks.ListMode>()
+        .name("mode")
+        .description("The mode to use for displaying barriers.")
+        .defaultValue(ListMode.Always)
+        .build()
+    );
 
     public BarrierTweaks() {
         super(Categories.Render, "barrier-tweaks", "Displays barriers without distance-based flickering.");
@@ -30,6 +36,7 @@ public class BarrierTweaks extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (mc.player == null || mc.world == null) return;
+        if (mode.get() == ListMode.WhenHoldingBarrier && !mc.player.getMainHandStack().isOf(Blocks.BARRIER.asItem())) return;
 
         BlockIterator.register(range.get(), range.get(), (pos, blockState) -> {
             if (blockState.isOf(Blocks.BARRIER)) {
@@ -43,5 +50,10 @@ public class BarrierTweaks extends Module {
                 );
             }
         });
+    }
+
+    public enum ListMode {
+        Always,
+        WhenHoldingBarrier
     }
 }
