@@ -11,7 +11,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
@@ -43,13 +43,13 @@ public class MeshBuilder {
         this(pipeline.getVertexFormat(), pipeline.getVertexFormatMode());
     }
 
-    public MeshBuilder(VertexFormat format, VertexFormat.DrawMode drawMode) {
+    public MeshBuilder(VertexFormat format, VertexFormat.Mode drawMode) {
         this.format = format;
         primitiveVerticesSize = format.getVertexSize();
-        primitiveIndicesCount = drawMode.firstVertexCount;
+        primitiveIndicesCount = drawMode.primitiveLength;
     }
 
-    public MeshBuilder(VertexFormat format, VertexFormat.DrawMode drawMode, int vertexCount, int indexCount) {
+    public MeshBuilder(VertexFormat format, VertexFormat.Mode drawMode, int vertexCount, int indexCount) {
         this(format, drawMode);
         allocateBuffers(vertexCount, indexCount);
     }
@@ -64,12 +64,11 @@ public class MeshBuilder {
         building = true;
 
         if (Utils.rendering3D) {
-            Vec3d camera = mc.gameRenderer.getCamera().getCameraPos();
+            Vec3 camera = mc.gameRenderer.getMainCamera().position();
 
             cameraX = camera.x;
             cameraZ = camera.z;
-        }
-        else {
+        } else {
             cameraX = 0;
             cameraZ = 0;
         }

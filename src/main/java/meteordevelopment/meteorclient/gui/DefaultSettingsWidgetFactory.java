@@ -25,14 +25,14 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.elements.keyboard.KeyboardHud;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.resources.language.I18n;
 import org.apache.commons.lang3.Strings;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -189,7 +189,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private void stringW(WTable table, StringSetting setting) {
-        CharFilter filter = setting.filter == null ? (text, c) -> true : setting.filter;
+        CharFilter filter = setting.filter == null ? (_, _) -> true : setting.filter;
         Cell<WTextBox> cell = table.add(theme.textBox(setting.get(), setting.placeholder, filter, setting.renderer));
         if (setting.wide) cell.minWidth(Utils.getWindowWidth() - Utils.getWindowWidth() / 4.0);
 
@@ -251,17 +251,17 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void blockW(WTable table, BlockSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
 
-        WItem item = list.add(theme.item(setting.get().asItem().getDefaultStack())).widget();
+        WItem item = list.add(theme.item(setting.get().asItem().getDefaultInstance())).widget();
 
         WButton select = list.add(theme.button("Select")).widget();
         select.action = () -> {
             BlockSettingScreen screen = new BlockSettingScreen(theme, setting);
-            screen.onClosed(() -> item.set(setting.get().asItem().getDefaultStack()));
+            screen.onClosed(() -> item.set(setting.get().asItem().getDefaultInstance()));
 
             mc.setScreen(screen);
         };
 
-        reset(table, setting, () -> item.set(setting.get().asItem().getDefaultStack()));
+        reset(table, setting, () -> item.set(setting.get().asItem().getDefaultInstance()));
     }
 
     private void blockPosW(WTable table, BlockPosSetting setting) {
@@ -281,17 +281,17 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void itemW(WTable table, ItemSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
 
-        WItem item = list.add(theme.item(setting.get().asItem().getDefaultStack())).widget();
+        WItem item = list.add(theme.item(setting.get().asItem().getDefaultInstance())).widget();
 
         WButton select = list.add(theme.button("Select")).widget();
         select.action = () -> {
             ItemSettingScreen screen = new ItemSettingScreen(theme, setting);
-            screen.onClosed(() -> item.set(setting.get().getDefaultStack()));
+            screen.onClosed(() -> item.set(setting.get().getDefaultInstance()));
 
             mc.setScreen(screen);
         };
 
-        reset(table, setting, () -> item.set(setting.get().getDefaultStack()));
+        reset(table, setting, () -> item.set(setting.get().getDefaultInstance()));
     }
 
     private void itemListW(WTable table, ItemListSetting setting) {
@@ -346,18 +346,20 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private void potionW(WTable table, PotionSetting setting) {
+        var potion = setting.get().potion.get();
+
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
-        WItemWithLabel item = list.add(theme.itemWithLabel(setting.get().potion, I18n.translate(setting.get().potion.getItem().getTranslationKey()))).widget();
+        WItemWithLabel item = list.add(theme.itemWithLabel(potion, I18n.get(potion.getItem().getDescriptionId()))).widget();
 
         WButton button = list.add(theme.button("Select")).expandCellX().widget();
         button.action = () -> {
             WidgetScreen screen = new PotionSettingScreen(theme, setting);
-            screen.onClosed(() -> item.set(setting.get().potion));
+            screen.onClosed(() -> item.set(potion));
 
             mc.setScreen(screen);
         };
 
-        reset(list, setting, () -> item.set(setting.get().potion));
+        reset(list, setting, () -> item.set(potion));
     }
 
     private void fontW(WTable table, FontFaceSetting setting) {
@@ -447,7 +449,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         });
     }
 
-    private WDoubleEdit addVectorComponent(WTable table, String label, double value, Consumer<Double> update, Vector3dSetting setting) {
+    private WDoubleEdit addVectorComponent(WTable table, String label, double value, DoubleConsumer update, Vector3dSetting setting) {
         table.add(theme.label(label + ": "));
 
         WDoubleEdit component = table.add(theme.doubleEdit(value, setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.decimalPlaces, setting.noSlider)).expandX().widget();

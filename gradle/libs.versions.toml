@@ -1,25 +1,25 @@
 [versions]
 # Fabric (https://fabricmc.net/develop)
-minecraft = "1.21.11"
-yarn-mappings = "1.21.11+build.3"
-fabric-loader = "0.18.2"
-fabric-api = "0.140.0+1.21.11"
+jdk = "25"
+minecraft = "26.1.2"
+fabric-loader = "0.19.2"
+fabric-api = "0.146.1+26.1.2"
 
 # Plugins
 # Loom (https://github.com/FabricMC/fabric-loom)
-loom = "1.14-SNAPSHOT"
+loom = "1.16-SNAPSHOT"
 
 # Mods
 # Baritone (https://github.com/MeteorDevelopment/baritone)
-baritone = "1.21.10-SNAPSHOT"
+baritone = "26.1-SNAPSHOT"
 # Sodium (https://github.com/CaffeineMC/sodium-fabric)
-sodium = "mc1.21.11-0.8.7-fabric"
+sodium = "mc26.1.1-0.8.9-fabric"
 # Lithium (https://github.com/CaffeineMC/lithium-fabric)
-lithium = "mc1.21.11-0.21.3-fabric"
+lithium = "mc26.1.2-0.24.2-fabric"
 # Iris (https://github.com/IrisShaders/Iris)
-iris = "1.10.2+1.21.11-fabric"
+iris = "1.10.9+26.1-fabric"
 # ModMenu (https://github.com/TerraformersMC/ModMenu)
-modmenu = "15.0.0"
+modmenu = "18.0.0-alpha.8"
 # Orbit (https://github.com/MeteorDevelopment/orbit)
 orbit = "0.2.4"
 # Starscript (https://github.com/MeteorDevelopment/starscript)
@@ -31,14 +31,13 @@ reflections = "0.10.2"
 # Netty (https://github.com/netty/netty)
 netty = "4.2.7.Final"
 # ViaFabricPlus (https://github.com/ViaVersion/ViaFabricPlus)
-viafabricplus = "4.4.0"
-# WaybackAuthLib (https://github.com/FlorianMichael/WaybackAuthLib)
-waybackauthlib = "1.0.1"
+viafabricplus = "4.5.2"
+# WaybackAuthLib (https://github.com/florianreuth/WaybackAuthLib)
+waybackauthlib = "1.1.0"
 
 [libraries]
 # Fabric base
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
-yarn = { module = "net.fabricmc:yarn", version.ref = "yarn-mappings" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 
 # Mods
@@ -57,7 +56,7 @@ discord-ipc = { module = "meteordevelopment:discord-ipc", version.ref = "discord
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
 netty-handler-proxy = { module = "io.netty:netty-handler-proxy", version.ref = "netty" }
 netty-codec-socks = { module = "io.netty:netty-codec-socks", version.ref = "netty" }
-waybackauthlib = { module = "de.florianmichael:WaybackAuthLib", version.ref = "waybackauthlib" }
+waybackauthlib = { module = "de.florianreuth:waybackauthlib", version.ref = "waybackauthlib" }
 
 [plugins]
-fabric-loom = { id = "fabric-loom", version.ref = "loom" }
+fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "loom" }

@@ -17,8 +17,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -73,11 +72,6 @@ public class HudTab extends Tab {
             WButton resetSettings = bottom.add(theme.button(GuiRenderer.RESET)).widget();
             resetSettings.action = hud.settings::reset;
             resetSettings.tooltip = "Reset";
-        }
-
-        @Override
-        protected void onRenderBefore(DrawContext drawContext, float delta) {
-            HudEditorScreen.renderElements(drawContext);
         }
 
         @Override

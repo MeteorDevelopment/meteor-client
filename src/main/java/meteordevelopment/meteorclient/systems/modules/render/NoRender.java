@@ -8,17 +8,18 @@ package meteordevelopment.meteorclient.systems.modules.render;
 import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ParticleEvent;
+import meteordevelopment.meteorclient.mixin.BlockEntityRenderStateAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.AbstractBannerBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.particle.ParticleType;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.AbstractBannerBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 
 import java.util.List;
 import java.util.Set;
@@ -262,7 +263,7 @@ public class NoRender extends Module {
         .name("cave-culling")
         .description("Disables Minecraft's cave culling algorithm.")
         .defaultValue(false)
-        .onChanged(b -> mc.worldRenderer.reload())
+        .onChanged(_ -> mc.levelRenderer.allChanged())
         .build()
     );
 
@@ -311,14 +312,14 @@ public class NoRender extends Module {
         .name("texture-rotations")
         .description("Changes texture rotations and model offsets to use a constant value instead of the block position.")
         .defaultValue(false)
-        .onChanged(b -> mc.worldRenderer.reload())
+        .onChanged(_ -> mc.levelRenderer.allChanged())
         .build()
     );
 
     private final Setting<List<Block>> blockEntities = sgWorld.add(new BlockListSetting.Builder()
         .name("block-entities")
         .description("Block entities (chest, shulker block, etc.) to not render.")
-        .filter(block -> block instanceof BlockEntityProvider && !(block instanceof AbstractBannerBlock))
+        .filter(block -> block instanceof EntityBlock && !(block instanceof AbstractBannerBlock))
         .build()
     );
 
@@ -385,12 +386,12 @@ public class NoRender extends Module {
 
     @Override
     public void onActivate() {
-        if (noCaveCulling.get() || noTextureRotations.get()) mc.worldRenderer.reload();
+        if (noCaveCulling.get() || noTextureRotations.get()) mc.levelRenderer.allChanged();
     }
 
     @Override
     public void onDeactivate() {
-        if (noCaveCulling.get() || noTextureRotations.get()) mc.worldRenderer.reload();
+        if (noCaveCulling.get() || noTextureRotations.get()) mc.levelRenderer.allChanged();
     }
 
     // Overlay
@@ -460,6 +461,7 @@ public class NoRender extends Module {
     public boolean noCrosshair() {
         return isActive() && noCrosshair.get();
     }
+
     public boolean noTitle() {
         return isActive() && noTitle.get();
     }
@@ -565,7 +567,7 @@ public class NoRender extends Module {
 
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
-        if (blockEntities.get().contains(event.blockEntityState.blockState.getBlock())) event.cancel();
+        if (blockEntities.get().contains(((BlockEntityRenderStateAccessor) event.blockEntityState).meteor$getBlockState().getBlock())) event.cancel();
     }
 
     // Entity

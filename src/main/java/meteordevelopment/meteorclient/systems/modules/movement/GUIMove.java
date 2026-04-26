@@ -5,11 +5,11 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
-import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
+import meteordevelopment.meteorclient.mixin.CreativeModeInventoryScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -18,11 +18,11 @@ import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.ingame.*;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.inventory.*;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.CreativeModeTabs;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -47,7 +47,7 @@ public class GUIMove extends Module {
         .description("Allows you to jump while in GUIs.")
         .defaultValue(true)
         .onChanged(aBoolean -> {
-            if (isActive() && !aBoolean) mc.options.jumpKey.setPressed(false);
+            if (isActive() && !aBoolean) mc.options.keyJump.setDown(false);
         })
         .build()
     );
@@ -57,7 +57,7 @@ public class GUIMove extends Module {
         .description("Allows you to sneak while in GUIs.")
         .defaultValue(true)
         .onChanged(aBoolean -> {
-            if (isActive() && !aBoolean) mc.options.sneakKey.setPressed(false);
+            if (isActive() && !aBoolean) mc.options.keyShift.setDown(false);
         })
         .build()
     );
@@ -67,7 +67,7 @@ public class GUIMove extends Module {
         .description("Allows you to sprint while in GUIs.")
         .defaultValue(true)
         .onChanged(aBoolean -> {
-            if (isActive() && !aBoolean) mc.options.sprintKey.setPressed(false);
+            if (isActive() && !aBoolean) mc.options.keySprint.setDown(false);
         })
         .build()
     );
@@ -93,25 +93,26 @@ public class GUIMove extends Module {
 
     @Override
     public void onDeactivate() {
-        mc.options.forwardKey.setPressed(false);
-        mc.options.backKey.setPressed(false);
-        mc.options.leftKey.setPressed(false);
-        mc.options.rightKey.setPressed(false);
+        mc.options.keyUp.setDown(false);
+        mc.options.keyDown.setDown(false);
+        mc.options.keyLeft.setDown(false);
+        mc.options.keyRight.setDown(false);
 
-        if (jump.get()) mc.options.jumpKey.setPressed(false);
-        if (sneak.get()) mc.options.sneakKey.setPressed(false);
-        if (sprint.get()) mc.options.sprintKey.setPressed(false);
+        if (jump.get()) mc.options.keyJump.setDown(false);
+        if (sneak.get()) mc.options.keyShift.setDown(false);
+        if (sprint.get()) mc.options.keySprint.setDown(false);
     }
 
     public boolean disableSpace() {
-        return isActive() && jump.get() && mc.options.jumpKey.isDefault();
+        return isActive() && jump.get() && mc.options.keyJump.isDefault();
     }
+
     public boolean disableArrows() {
         return isActive() && arrowsRotate.get();
     }
 
     @EventHandler
-    private void onKey(KeyEvent event) {
+    private void onKey(KeyInputEvent event) {
         onInput(event.key(), event.action);
     }
 
@@ -123,14 +124,14 @@ public class GUIMove extends Module {
     private void onInput(int key, KeyAction action) {
         if (skip()) return;
 
-        pass(mc.options.forwardKey, key, action);
-        pass(mc.options.backKey, key, action);
-        pass(mc.options.leftKey, key, action);
-        pass(mc.options.rightKey, key, action);
+        pass(mc.options.keyUp, key, action);
+        pass(mc.options.keyDown, key, action);
+        pass(mc.options.keyLeft, key, action);
+        pass(mc.options.keyRight, key, action);
 
-        if (jump.get()) pass(mc.options.jumpKey, key, action);
-        if (sneak.get()) pass(mc.options.sneakKey, key, action);
-        if (sprint.get()) pass(mc.options.sprintKey, key, action);
+        if (jump.get()) pass(mc.options.keyJump, key, action);
+        if (sneak.get()) pass(mc.options.keyShift, key, action);
+        if (sprint.get()) pass(mc.options.keySprint, key, action);
     }
 
     @EventHandler
@@ -143,18 +144,18 @@ public class GUIMove extends Module {
 
         if (arrowsRotate.get()) {
             if (!freecam.isActive()) {
-                float yaw = mc.player.getYaw();
-                float pitch = mc.player.getPitch();
+                float yaw = mc.player.getYRot();
+                float pitch = mc.player.getXRot();
 
                 if (Input.isKeyPressed(GLFW_KEY_LEFT)) yaw -= rotationDelta;
                 if (Input.isKeyPressed(GLFW_KEY_RIGHT)) yaw += rotationDelta;
                 if (Input.isKeyPressed(GLFW_KEY_UP)) pitch -= rotationDelta;
                 if (Input.isKeyPressed(GLFW_KEY_DOWN)) pitch += rotationDelta;
 
-                pitch = MathHelper.clamp(pitch, -90, 90);
+                pitch = Mth.clamp(pitch, -90, 90);
 
-                mc.player.setYaw(yaw);
-                mc.player.setPitch(pitch);
+                mc.player.setYRot(yaw);
+                mc.player.setXRot(pitch);
             } else {
                 double dy = 0, dx = 0;
 
@@ -168,21 +169,21 @@ public class GUIMove extends Module {
         }
     }
 
-    private void pass(KeyBinding bind, int key, KeyAction action) {
+    private void pass(KeyMapping bind, int key, KeyAction action) {
         if (Input.getKey(bind) != key) return;
-        if (action == KeyAction.Press) bind.setPressed(true);
-        if (action == KeyAction.Release) bind.setPressed(false);
+        if (action == KeyAction.Press) bind.setDown(true);
+        if (action == KeyAction.Release) bind.setDown(false);
     }
 
     public boolean skip() {
-        if (mc.currentScreen == null ||
-            (mc.currentScreen instanceof CreativeInventoryScreen && CreativeInventoryScreenAccessor.meteor$getSelectedTab() == ItemGroups.getSearchGroup())
-            || mc.currentScreen instanceof ChatScreen
-            || mc.currentScreen instanceof SignEditScreen
-            || mc.currentScreen instanceof AnvilScreen
-            || mc.currentScreen instanceof AbstractCommandBlockScreen
-            || mc.currentScreen instanceof StructureBlockScreen) return true;
-        if (screens.get() == Screens.GUI && !(mc.currentScreen instanceof WidgetScreen)) return true;
-        return screens.get() == Screens.Inventory && mc.currentScreen instanceof WidgetScreen;
+        if (mc.screen == null ||
+            (mc.screen instanceof CreativeModeInventoryScreen && CreativeModeInventoryScreenAccessor.meteor$getSelectedTab() == CreativeModeTabs.searchTab())
+            || mc.screen instanceof ChatScreen
+            || mc.screen instanceof SignEditScreen
+            || mc.screen instanceof AnvilScreen
+            || mc.screen instanceof AbstractCommandBlockEditScreen
+            || mc.screen instanceof StructureBlockEditScreen) return true;
+        if (screens.get() == Screens.GUI && !(mc.screen instanceof WidgetScreen)) return true;
+        return screens.get() == Screens.Inventory && mc.screen instanceof WidgetScreen;
     }
 }

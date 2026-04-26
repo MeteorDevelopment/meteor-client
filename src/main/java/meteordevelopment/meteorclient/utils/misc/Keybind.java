@@ -7,9 +7,9 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.input.MouseInput;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonInfo;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Objects;
 
@@ -89,11 +89,11 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         return this.value == value && this.modifiers == modifiers;
     }
 
-    public boolean matches(KeyInput input) {
+    public boolean matches(KeyEvent input) {
         return matches(true, input.key(), input.modifiers());
     }
 
-    public boolean matches(MouseInput input) {
+    public boolean matches(MouseButtonInfo input) {
         return matches(false, input.button(), 0);
     }
 
@@ -165,8 +165,8 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     // Serialization
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.putBoolean("isKey", isKey);
         tag.putInt("value", value);
@@ -176,10 +176,10 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     @Override
-    public Keybind fromTag(NbtCompound tag) {
-        isKey = tag.getBoolean("isKey", false);
-        value = tag.getInt("value", 0);
-        modifiers = tag.getInt("modifiers", 0);
+    public Keybind fromTag(CompoundTag tag) {
+        isKey = tag.getBooleanOr("isKey", false);
+        value = tag.getIntOr("value", 0);
+        modifiers = tag.getIntOr("modifiers", 0);
 
         return this;
     }

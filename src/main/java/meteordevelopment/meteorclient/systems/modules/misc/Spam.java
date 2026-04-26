@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.List;

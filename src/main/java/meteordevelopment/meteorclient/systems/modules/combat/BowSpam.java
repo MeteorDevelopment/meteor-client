@@ -15,11 +15,11 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.ArrowItem;
-import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class BowSpam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -90,7 +90,7 @@ public class BowSpam extends Module {
             if (ticks >= crossbowDelay.get()) {
                 int slot = crossbow.slot();
                 if (!crossbow.isHotbar()) {
-                    FindItemResult valid = InvUtils.find(stack -> stack.isEmpty() || stack.isOf(Items.CROSSBOW) || stack.isOf(Items.ARROW), 0, 8);
+                    FindItemResult valid = InvUtils.find(stack -> stack.isEmpty() || stack.is(Items.CROSSBOW) || stack.is(Items.ARROW), 0, 8);
                     if (!valid.found()) return;
 
                     InvUtils.quickSwap().fromId(valid.slot()).to(crossbow.slot());
@@ -98,35 +98,34 @@ public class BowSpam extends Module {
                 }
 
                 InvUtils.swap(slot, true);
-                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
                 InvUtils.swapBack();
 
                 ticks = 0;
-            }
-            else {
+            } else {
                 ticks++;
             }
 
             return;
         }
 
-        if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found())
+        if (!mc.player.getAbilities().instabuild && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found())
             return;
 
-        if (!onlyWhenHoldingRightClick.get() || mc.options.useKey.isPressed()) {
+        if (!onlyWhenHoldingRightClick.get() || mc.options.keyUse.isDown()) {
             boolean isBow = InvUtils.testInHands(Items.BOW);
             if (!isBow && wasBow) setPressed(false);
 
             wasBow = isBow;
             if (!isBow) return;
 
-            if (mc.player.getItemUseTime() >= charge.get()) {
-                mc.interactionManager.stopUsingItem(mc.player);
+            if (mc.player.getTicksUsingItem() >= charge.get()) {
+                mc.gameMode.releaseUsingItem(mc.player);
             } else {
                 setPressed(true);
             }
 
-            wasHoldingRightClick = mc.options.useKey.isPressed();
+            wasHoldingRightClick = mc.options.keyUse.isDown();
         } else {
             if (wasHoldingRightClick) {
                 setPressed(false);
@@ -136,7 +135,7 @@ public class BowSpam extends Module {
     }
 
     private void setPressed(boolean pressed) {
-        mc.options.useKey.setPressed(pressed);
+        mc.options.keyUse.setDown(pressed);
     }
 
     private boolean crossbow(ItemStack stack) {

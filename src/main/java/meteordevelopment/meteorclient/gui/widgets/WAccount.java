@@ -29,6 +29,7 @@ public abstract class WAccount extends WHorizontalList {
     }
 
     protected abstract Color loggedInColor();
+
     protected abstract Color accountTypeColor();
 
     @Override
@@ -38,7 +39,7 @@ public abstract class WAccount extends WHorizontalList {
 
         // Name
         WLabel name = add(theme.label(account.getUsername())).widget();
-        if (mc.getSession().getUsername().equalsIgnoreCase(account.getUsername())) name.color = loggedInColor();
+        if (mc.getUser().getName().equalsIgnoreCase(account.getUsername())) name.color = loggedInColor();
 
         // Type
         WLabel label = add(theme.label("(" + account.getType() + ")")).expandCellX().right().widget();

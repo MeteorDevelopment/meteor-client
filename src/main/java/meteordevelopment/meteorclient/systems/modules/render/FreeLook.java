@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.option.Perspective;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.CameraType;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 public class FreeLook extends Module {
@@ -64,7 +64,7 @@ public class FreeLook extends Module {
     public float cameraYaw;
     public float cameraPitch;
 
-    private Perspective prePers;
+    private CameraType prePers;
 
     public FreeLook() {
         super(Categories.Render, "free-look", "Allows more rotation options in third person.");
@@ -72,20 +72,21 @@ public class FreeLook extends Module {
 
     @Override
     public void onActivate() {
-        cameraYaw = mc.player.getYaw();
-        cameraPitch = mc.player.getPitch();
-        prePers = mc.options.getPerspective();
+        cameraYaw = mc.player.getYRot();
+        cameraPitch = mc.player.getXRot();
+        prePers = mc.options.getCameraType();
 
-        if (prePers != Perspective.THIRD_PERSON_BACK &&  togglePerspective.get()) mc.options.setPerspective(Perspective.THIRD_PERSON_BACK);
+        if (prePers != CameraType.THIRD_PERSON_BACK && togglePerspective.get())
+            mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
     }
 
     @Override
     public void onDeactivate() {
-        if (mc.options.getPerspective() != prePers && togglePerspective.get()) mc.options.setPerspective(prePers);
+        if (mc.options.getCameraType() != prePers && togglePerspective.get()) mc.options.setCameraType(prePers);
     }
 
     public boolean playerMode() {
-        return isActive() && mc.options.getPerspective() == Perspective.THIRD_PERSON_BACK && mode.get() == Mode.Player;
+        return isActive() && mc.options.getCameraType() == CameraType.THIRD_PERSON_BACK && mode.get() == Mode.Player;
     }
 
     public boolean cameraMode() {
@@ -104,23 +105,23 @@ public class FreeLook extends Module {
                         if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) cameraPitch += 0.5;
                     }
                     case Camera -> {
-                        float yaw = mc.player.getYaw();
-                        float pitch = mc.player.getPitch();
+                        float yaw = mc.player.getYRot();
+                        float pitch = mc.player.getXRot();
 
                         if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) yaw -= 0.5;
                         if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) yaw += 0.5;
                         if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) pitch -= 0.5;
                         if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) pitch += 0.5;
 
-                        mc.player.setYaw(yaw);
-                        mc.player.setPitch(pitch);
+                        mc.player.setYRot(yaw);
+                        mc.player.setXRot(pitch);
                     }
                 }
             }
         }
 
-        mc.player.setPitch(MathHelper.clamp(mc.player.getPitch(), -90, 90));
-        cameraPitch = MathHelper.clamp(cameraPitch, -90, 90);
+        mc.player.setXRot(Mth.clamp(mc.player.getXRot(), -90, 90));
+        cameraPitch = Mth.clamp(cameraPitch, -90, 90);
     }
 
     public enum Mode {

@@ -17,14 +17,14 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.AbstractPressurePlateBlock;
-import net.minecraft.block.AnvilBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.ButtonBlock;
-import net.minecraft.client.gui.screen.ingame.AnvilScreen;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.gui.screens.inventory.AnvilScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.AnvilBlock;
+import net.minecraft.world.level.block.BasePressurePlateBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ButtonBlock;
 
 public class AutoAnvil extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -93,7 +93,7 @@ public class AutoAnvil extends Module {
         .build()
     );
 
-    private PlayerEntity target;
+    private Player target;
     private int timer;
 
     public AutoAnvil() {
@@ -114,7 +114,7 @@ public class AutoAnvil extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         // Head check
-        if (toggleOnBreak.get() && target != null && target.getEquippedStack(EquipmentSlot.HEAD).isEmpty()) {
+        if (toggleOnBreak.get() && target != null && target.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
             error("Target head slot is empty... disabling.");
             toggle();
             return;
@@ -127,21 +127,21 @@ public class AutoAnvil extends Module {
         }
 
         if (placeButton.get()) {
-            FindItemResult floorBlock = InvUtils.findInHotbar(itemStack -> Block.getBlockFromItem(itemStack.getItem()) instanceof AbstractPressurePlateBlock || Block.getBlockFromItem(itemStack.getItem()) instanceof ButtonBlock);
-            BlockUtils.place(target.getBlockPos(), floorBlock, rotate.get(), 0, false);
+            FindItemResult floorBlock = InvUtils.findInHotbar(itemStack -> Block.byItem(itemStack.getItem()) instanceof BasePressurePlateBlock || Block.byItem(itemStack.getItem()) instanceof ButtonBlock);
+            BlockUtils.place(target.blockPosition(), floorBlock, rotate.get(), 0, false);
         }
 
         if (timer >= delay.get()) {
             timer = 0;
 
-            FindItemResult anvil = InvUtils.findInHotbar(itemStack -> Block.getBlockFromItem(itemStack.getItem()) instanceof AnvilBlock);
+            FindItemResult anvil = InvUtils.findInHotbar(itemStack -> Block.byItem(itemStack.getItem()) instanceof AnvilBlock);
             if (!anvil.found()) return;
 
             for (int i = height.get(); i > 1; i--) {
-                BlockPos blockPos = target.getBlockPos().up().add(0, i, 0);
+                BlockPos blockPos = target.blockPosition().above().offset(0, i, 0);
 
                 for (int j = 0; j < i; j++) {
-                    if (!mc.world.getBlockState(target.getBlockPos().up(j + 1)).isReplaceable()) {
+                    if (!mc.level.getBlockState(target.blockPosition().above(j + 1)).canBeReplaced()) {
                         break;
                     }
                 }

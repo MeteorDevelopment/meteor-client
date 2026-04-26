@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.events.entity.player;
 
-import net.minecraft.util.hit.HitResult;
+import net.minecraft.world.phys.HitResult;
 
 public class ItemUseCrosshairTargetEvent {
     private static final ItemUseCrosshairTargetEvent INSTANCE = new ItemUseCrosshairTargetEvent();

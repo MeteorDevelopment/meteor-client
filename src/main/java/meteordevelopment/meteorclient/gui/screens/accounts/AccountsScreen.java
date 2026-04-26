@@ -68,7 +68,7 @@ public class AccountsScreen extends WindowScreen {
             mc.execute(() -> {
                 if (screen != null) {
                     screen.locked = false;
-                    screen.close();
+                    screen.onClose();
                 }
 
                 parent.reload();

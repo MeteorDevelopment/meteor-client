@@ -96,7 +96,7 @@ public class Ambience extends Module {
         .name("custom-grass-color")
         .description("Whether the grass color should be changed.")
         .defaultValue(false)
-        .onChanged(val -> reload())
+        .onChanged(_ -> reload())
         .build()
     );
 
@@ -105,7 +105,7 @@ public class Ambience extends Module {
         .description("The color of the grass.")
         .defaultValue(new SettingColor(102, 0, 0))
         .visible(customGrassColor::get)
-        .onChanged(val -> reload())
+        .onChanged(_ -> reload())
         .build()
     );
 
@@ -113,7 +113,7 @@ public class Ambience extends Module {
         .name("custom-foliage-color")
         .description("Whether the foliage color should be changed.")
         .defaultValue(false)
-        .onChanged(val -> reload())
+        .onChanged(_ -> reload())
         .build()
     );
 
@@ -122,7 +122,7 @@ public class Ambience extends Module {
         .description("The color of the foliage.")
         .defaultValue(new SettingColor(102, 0, 0))
         .visible(customFoliageColor::get)
-        .onChanged(val -> reload())
+        .onChanged(_ -> reload())
         .build()
     );
 
@@ -130,7 +130,7 @@ public class Ambience extends Module {
         .name("custom-water-color")
         .description("Whether the water color should be changed.")
         .defaultValue(false)
-        .onChanged(val -> reload())
+        .onChanged(_ -> reload())
         .build()
     );
 
@@ -139,7 +139,7 @@ public class Ambience extends Module {
         .description("The color of the water.")
         .defaultValue(new SettingColor(102, 0, 0))
         .visible(customWaterColor::get)
-        .onChanged(val -> reload())
+        .onChanged(_ -> reload())
         .build()
     );
 
@@ -147,7 +147,7 @@ public class Ambience extends Module {
         .name("custom-lava-color")
         .description("Whether the lava color should be changed.")
         .defaultValue(false)
-        .onChanged(val -> reload())
+        .onChanged(_ -> reload())
         .build()
     );
 
@@ -156,7 +156,7 @@ public class Ambience extends Module {
         .description("The color of the lava.")
         .defaultValue(new SettingColor(102, 0, 0))
         .visible(customLavaColor::get)
-        .onChanged(val -> reload())
+        .onChanged(_ -> reload())
         .build()
     );
 
@@ -190,7 +190,7 @@ public class Ambience extends Module {
     }
 
     private void reload() {
-        if (mc.worldRenderer != null && isActive()) mc.worldRenderer.reload();
+        if (mc.levelRenderer != null && isActive()) mc.levelRenderer.allChanged();
     }
 
     public SettingColor skyColor() {

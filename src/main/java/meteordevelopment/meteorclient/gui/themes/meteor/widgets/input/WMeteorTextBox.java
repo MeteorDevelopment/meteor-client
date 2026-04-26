@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 public class WMeteorTextBox extends WTextBox implements MeteorWidget {
     private boolean cursorVisible;
@@ -100,8 +100,7 @@ public class WMeteorTextBox extends WTextBox implements MeteorWidget {
         if (cursorTimer >= 1) {
             cursorVisible = !cursorVisible;
             cursorTimer = 0;
-        }
-        else {
+        } else {
             cursorTimer += delta * 1.75;
         }
 
@@ -116,8 +115,7 @@ public class WMeteorTextBox extends WTextBox implements MeteorWidget {
         // Text content
         if (!text.isEmpty()) {
             this.renderer.render(renderer, x + pad - overflowWidth, y + pad, text, theme.textColor.get());
-        }
-        else if (placeholder != null) {
+        } else if (placeholder != null) {
             this.renderer.render(renderer, x + pad - overflowWidth, y + pad, placeholder, theme.placeholderColor.get());
         }
 
@@ -131,7 +129,7 @@ public class WMeteorTextBox extends WTextBox implements MeteorWidget {
 
         // Cursor
         animProgress += delta * 10 * (focused && cursorVisible ? 1 : -1);
-        animProgress = MathHelper.clamp(animProgress, 0, 1);
+        animProgress = Mth.clamp(animProgress, 0, 1);
 
         if ((focused && cursorVisible) || animProgress > 0) {
             renderer.setAlpha(animProgress);
