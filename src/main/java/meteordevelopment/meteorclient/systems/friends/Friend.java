@@ -15,8 +15,8 @@ import meteordevelopment.meteorclient.utils.render.PlayerHeadUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.net.http.HttpResponse;
 import java.util.Objects;
 import java.util.UUID;
@@ -38,6 +38,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
     public Friend(PlayerEntity player) {
         this(player.getName().getString(), player.getUuid());
     }
+
     public Friend(String name) {
         this(name, null);
     }

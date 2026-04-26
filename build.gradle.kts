@@ -89,7 +89,7 @@ dependencies {
     jij(libs.orbit)
     jij(libs.starscript)
     jij(libs.discord.ipc)
-    jij(libs.reflections)
+    jij(libs.classgraph)
     jij(libs.netty.handler.proxy) { isTransitive = false }
     jij(libs.netty.codec.socks) { isTransitive = false }
     jij(libs.waybackauthlib)
