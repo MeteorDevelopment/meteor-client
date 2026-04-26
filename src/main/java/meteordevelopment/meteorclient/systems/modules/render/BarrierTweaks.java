@@ -28,6 +28,14 @@ public class BarrierTweaks extends Module {
         .defaultValue(ListMode.Always)
         .build()
     );
+    public final Setting<Integer> maxAge = sgGeneral.add(new IntSetting.Builder()
+        .name("max-age")
+        .description("Changes the delay in ticks of the particle being deleted after breaking the block.")
+        .defaultValue(20)
+        .min(0)
+        .sliderMax(100)
+        .build()
+    );
 
     public BarrierTweaks() {
         super(Categories.Render, "barrier-tweaks", "Displays barriers without distance-based flickering.");
