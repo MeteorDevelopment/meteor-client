@@ -136,6 +136,7 @@ public class AutoEat extends Module {
     @EventHandler(priority = EventPriority.LOW)
     private void onTick(TickEvent.Pre event) {
         // Don't eat if AutoGap is already eating
+        if (mc.player == null) return;
         if (Modules.get().get(AutoGap.class).isEating()) return;
 
         // case 1: Already eating
@@ -262,6 +263,7 @@ public class AutoEat extends Module {
     }
 
     public boolean shouldEat() {
+        if (mc.player == null) return false;
         boolean healthLow = mc.player.getHealth() <= healthThreshold.get();
         boolean hungerLow = mc.player.getFoodData().getFoodLevel() <= hungerThreshold.get();
         if (!thresholdMode.get().test(healthLow, hungerLow)) return false;
