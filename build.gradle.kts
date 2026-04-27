@@ -118,7 +118,7 @@ java {
 // Source: https://github.com/florianreuth/BaseProject/blob/main/src/main/kotlin/de/florianreuth/baseproject/Fabric.kt
 // Licensed under Apache License 2.0
 val jijExcluded = setOf("org.slf4j", "jsr305")
-listOf("jij", "implementation", "include").forEach { configName ->
+listOf("api", "implementation", "include").forEach { configName ->
     configurations.named(configName).configure {
         defaultDependencies {
             configurations.getByName("jij").incoming.resolutionResult.allComponents
