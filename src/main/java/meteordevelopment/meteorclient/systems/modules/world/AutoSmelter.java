@@ -39,7 +39,7 @@ public class AutoSmelter extends Module {
     private final Setting<Integer> fuelItemsPerRefill = sgGeneral.add(new IntSetting.Builder()
         .name("fuel-items-per-refill")
         .description("How many fuel items to put into the furnace each time it refills")
-        .defaultValue(1)
+        .defaultValue(64)
         .range(1,64)
         .sliderRange(1,64)
         .build()
