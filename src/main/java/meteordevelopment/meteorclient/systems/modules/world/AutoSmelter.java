@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
 import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.ItemListSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -19,6 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipePropertySet;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
+import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.List;
 
@@ -31,6 +33,15 @@ public class AutoSmelter extends Module {
         .defaultValue(Items.COAL, Items.CHARCOAL)
         .filter(this::fuelItemFilter)
         .bypassFilterWhenSavingAndLoading()
+        .build()
+    );
+
+    private final Setting<Integer> fuelItemsPerRefill = sgGeneral.add(new IntSetting.Builder()
+        .name("fuel-items-per-refill")
+        .description("How many fuel items to put into the furnace each time it refills")
+        .defaultValue(1)
+        .range(1,64)
+        .sliderRange(1,64)
         .build()
     );
 
@@ -47,6 +58,12 @@ public class AutoSmelter extends Module {
         .name("disable-when-out-of-items")
         .description("Disable the module when you run out of items")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> closeAfterDeposit = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-close")
+        .defaultValue(false)
         .build()
     );
 
@@ -76,6 +93,10 @@ public class AutoSmelter extends Module {
 
         // Insert new items
         insertItems(c);
+
+        if (closeAfterDeposit.get() && mc.currentScreen != null) {
+            mc.currentScreen.close();
+        }
     }
 
     private void insertItems(AbstractFurnaceScreenHandler c) {
@@ -100,14 +121,17 @@ public class AutoSmelter extends Module {
             return;
         }
 
+        if (slot == -1) return;
+
         InvUtils.move().fromId(slot).toId(0);
+        c.slots.getFirst().getStack();
     }
 
-    private void checkFuel(AbstractFurnaceScreenHandler c) {
+    private boolean checkFuel(AbstractFurnaceScreenHandler c) {
         ItemStack fuelStack = c.slots.get(1).getStack();
 
-        if (c.getFuelProgress() > 0) return;
-        if (!fuelStack.isEmpty()) return;
+        if (c.getFuelProgress() > 0) return false;
+        if (!fuelStack.isEmpty()) return false;
 
         int slot = -1;
         for (int i = 3; i < c.slots.size(); i++) {
@@ -122,10 +146,35 @@ public class AutoSmelter extends Module {
         if (disableWhenOutOfItems.get() && slot == -1) {
             error("You do not have any fuel in your inventory. Disabling.");
             toggle();
-            return;
+            return false;
         }
 
-        InvUtils.move().fromId(slot).toId(1);
+        if (slot == -1) return false;
+
+        ItemStack sourceStack = c.slots.get(slot).getStack();
+        int moveCount = Math.min(fuelItemsPerRefill.get(), Math.min(sourceStack.getCount(), c.slots.get(1).getMaxItemCount(sourceStack)));
+
+        if (moveCount <= 0) return false;
+
+        return moveFuelItems(slot, moveCount);
+    }
+
+    private boolean moveFuelItems(int fromId, int amount) {
+        if (amount <= 0 || mc.player == null || mc.interactionManager == null) return false;
+        if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) return false;
+
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, fromId, 0, SlotActionType.PICKUP, mc.player);
+
+        for (int i = 0; i < amount; i++) {
+            if (mc.player.currentScreenHandler.getCursorStack().isEmpty()) break;
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 1, 1, SlotActionType.PICKUP, mc.player);
+        }
+
+        if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, fromId, 0, SlotActionType.PICKUP, mc.player);
+        }
+
+        return !mc.player.currentScreenHandler.getSlot(1).getStack().isEmpty();
     }
 
     private void takeResults(AbstractFurnaceScreenHandler c) {
