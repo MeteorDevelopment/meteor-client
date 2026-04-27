@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.mixininterface.IAbstractFurnaceMenu;
 import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.ItemListSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -15,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.world.inventory.AbstractFurnaceMenu;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -34,6 +36,15 @@ public class AutoSmelter extends Module {
         .build()
     );
 
+    private final Setting<Integer> fuelItemsPerRefill = sgGeneral.add(new IntSetting.Builder()
+        .name("fuel-items-per-refill")
+        .description("How many fuel items to put into the furnace each time it refills")
+        .defaultValue(64)
+        .range(1, 64)
+        .sliderRange(1, 16)
+        .build()
+    );
+
     private final Setting<List<Item>> smeltableItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("smeltable-items")
         .description("Items to smelt")
@@ -47,6 +58,12 @@ public class AutoSmelter extends Module {
         .name("disable-when-out-of-items")
         .description("Disable the module when you run out of items")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> autoClose = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-close")
+        .defaultValue(false)
         .build()
     );
 
@@ -76,6 +93,8 @@ public class AutoSmelter extends Module {
 
         // Insert new items
         insertItems(c);
+
+        if (autoClose.get()) mc.setScreen(null);
     }
 
     private void insertItems(AbstractFurnaceMenu c) {
@@ -100,7 +119,10 @@ public class AutoSmelter extends Module {
             return;
         }
 
+        if (slot == -1) return;
+
         InvUtils.move().fromId(slot).toId(0);
+        c.slots.getFirst().getItem().isEmpty();
     }
 
     private void checkFuel(AbstractFurnaceMenu c) {
@@ -125,7 +147,32 @@ public class AutoSmelter extends Module {
             return;
         }
 
-        InvUtils.move().fromId(slot).toId(1);
+        if (slot == -1) return;
+
+        ItemStack sourceStack = c.slots.get(slot).getItem();
+        int moveCount = Math.min(fuelItemsPerRefill.get(), Math.min(sourceStack.getCount(), c.slots.get(1).getMaxStackSize(sourceStack)));
+
+        if (moveCount <= 0) return;
+
+        moveFuelItems(c, slot, moveCount);
+    }
+
+    private void moveFuelItems(AbstractFurnaceMenu c, int fromId, int amount) {
+        if (amount <= 0 || mc.player == null || mc.gameMode == null) return;
+        if (!mc.player.containerMenu.getCarried().isEmpty()) return;
+
+        mc.gameMode.handleContainerInput(c.containerId, fromId, 0, ContainerInput.PICKUP, mc.player);
+
+        for (int i = 0; i < amount; i++) {
+            if (mc.player.containerMenu.getCarried().isEmpty()) break;
+            mc.gameMode.handleContainerInput(c.containerId, 1, 1, ContainerInput.PICKUP, mc.player);
+        }
+
+        if (!mc.player.containerMenu.getCarried().isEmpty()) {
+            mc.gameMode.handleContainerInput(c.containerId, fromId, 0, ContainerInput.PICKUP, mc.player);
+        }
+
+        c.slots.get(1).getItem().isEmpty();
     }
 
     private void takeResults(AbstractFurnaceMenu c) {
