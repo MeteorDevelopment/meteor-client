@@ -196,6 +196,15 @@ public class Utils {
         return false;
     }
 
+    public static boolean isFood(ItemStack stack) {
+        return isFood(stack.getItem());
+    }
+
+    // Not every food item in minecraft is consumable for some reason (e.g. buckets of any fish)
+    public static boolean isFood(Item item) {
+        return item.components().has(DataComponents.FOOD) && item.components().has(DataComponents.CONSUMABLE);
+    }
+
     public static int getRenderDistance() {
         return Math.max(mc.options.renderDistance().get(), ((ClientPacketListenerAccessor) mc.getConnection()).meteor$getServerChunkRadius());
     }

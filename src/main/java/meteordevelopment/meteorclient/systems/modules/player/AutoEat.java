@@ -54,7 +54,7 @@ public class AutoEat extends Module {
             Items.SPIDER_EYE,
             Items.SUSPICIOUS_STEW
         )
-        .filter(item -> item.components().get(DataComponents.FOOD) != null)
+        .filter(Utils::isFood)
         .build()
     );
 
@@ -147,7 +147,7 @@ public class AutoEat extends Module {
             }
 
             // Check if the item in current slot is not food anymore
-            if (mc.player.getInventory().getItem(slot).get(DataComponents.FOOD) == null) {
+            if (!Utils.isFood(mc.player.getInventory().getItem(slot))) {
                 int newSlot = findSlot();
 
                 // Stop if no food found
@@ -269,10 +269,11 @@ public class AutoEat extends Module {
         slot = findSlot();
         if (slot == -1) return false;
 
-        FoodProperties food = mc.player.getInventory().getItem(slot).get(DataComponents.FOOD);
-        if (food == null) return false;
+        ItemStack item = mc.player.getInventory().getItem(slot);
+        FoodProperties prop = item.get(DataComponents.FOOD);
+        if (prop == null || !Utils.isFood(item)) return false;
 
-        return (mc.player.getFoodData().needsFood() || food.canAlwaysEat());
+        return (mc.player.getFoodData().needsFood() || prop.canAlwaysEat());
     }
 
     /**
@@ -282,8 +283,7 @@ public class AutoEat extends Module {
     private int findSlot() {
         // prefer offhand
         Item offHandItem = mc.player.getOffhandItem().getItem();
-        FoodProperties offHandFood = offHandItem.components().get(DataComponents.FOOD);
-        if (offHandFood != null && !blacklist.get().contains(offHandItem)) return SlotUtils.OFFHAND;
+        if (Utils.isFood(offHandItem) && !blacklist.get().contains(offHandItem)) return SlotUtils.OFFHAND;
 
         // if offhand empty, prefer best in hotbar
         int slot = findBestFood(SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END);
@@ -305,6 +305,7 @@ public class AutoEat extends Module {
             // Skip if item isn't food
             ItemStack stack = mc.player.getInventory().getItem(i);
             FoodProperties food = stack.get(DataComponents.FOOD);
+            if (!Utils.isFood(stack)) continue;
             if (food == null) continue;
 
             // Skip if item is in blacklist

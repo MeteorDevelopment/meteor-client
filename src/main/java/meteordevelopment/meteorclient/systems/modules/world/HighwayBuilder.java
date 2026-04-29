@@ -44,7 +44,6 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.ClientInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
@@ -1168,7 +1167,7 @@ public class HighwayBuilder extends Module {
                                 eject = false;
                                 break;
                             }
-                            if (stack.has(DataComponents.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(stack.getItem())) {
+                            if (Utils.isFood(stack) && !Modules.get().get(AutoEat.class).blacklist.get().contains(stack.getItem())) {
                                 eject = false;
                                 break;
                             }
@@ -1431,7 +1430,7 @@ public class HighwayBuilder extends Module {
                                 stop = false;
                                 break;
                             }
-                            if (b.restockTask.food && stack.has(DataComponents.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(stack.getItem())) {
+                            if (b.restockTask.food && Utils.isFood(stack) && !Modules.get().get(AutoEat.class).blacklist.get().contains(stack.getItem())) {
                                 stop = false;
                                 break;
                             }
@@ -1451,7 +1450,7 @@ public class HighwayBuilder extends Module {
                     boolean restockOccurred = (
                         (b.restockTask.materials && (hasItem(b, stack -> stack.getItem() instanceof BlockItem bi && b.blocksToPlace.get().contains(bi.getBlock())) || b.blocksToPlace.get().contains(Blocks.OBSIDIAN) && countItem(b, itemStack -> itemStack.getItem() == Items.ENDER_CHEST) > b.saveEchests.get())) ||
                             (b.restockTask.pickaxes && countItem(b, itemStack -> itemStack.is(ItemTags.PICKAXES)) > b.savePickaxes.get()) ||
-                            (b.restockTask.food && hasItem(b, itemStack -> itemStack.has(DataComponents.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem())))
+                            (b.restockTask.food && hasItem(b, itemStack -> Utils.isFood(itemStack) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem())))
                     );
 
                     if (restockOccurred) {
@@ -1529,7 +1528,7 @@ public class HighwayBuilder extends Module {
                 if (b.restockTask.pickaxes)
                     slotsPulled += countSlots(b, itemStack -> itemStack.is(ItemTags.PICKAXES)) - b.savePickaxes.get();
                 if (b.restockTask.food)
-                    slotsPulled += countSlots(b, itemStack -> itemStack.has(DataComponents.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem()));
+                    slotsPulled += countSlots(b, itemStack -> Utils.isFood(itemStack) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem()));
 
 
                 // whether we have pulled the minimum amount of items we want
@@ -1644,7 +1643,7 @@ public class HighwayBuilder extends Module {
                     if (grabFromInventory(inv, itemStack -> itemStack.is(ItemTags.PICKAXES))) return true;
                 }
                 if (b.restockTask.food) {
-                    return grabFromInventory(inv, itemStack -> itemStack.has(DataComponents.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem()));
+                    return grabFromInventory(inv, itemStack -> Utils.isFood(itemStack) && !Modules.get().get(AutoEat.class).blacklist.get().contains(itemStack.getItem()));
                 }
 
                 return false;
@@ -1673,7 +1672,7 @@ public class HighwayBuilder extends Module {
                                 return true;
                         }
                         if (b.restockTask.pickaxes && stack.is(ItemTags.PICKAXES)) return true;
-                        if (b.restockTask.food && stack.has(DataComponents.FOOD) && !Modules.get().get(AutoEat.class).blacklist.get().contains(stack.getItem()))
+                        if (b.restockTask.food && Utils.isFood(stack) && !Modules.get().get(AutoEat.class).blacklist.get().contains(stack.getItem()))
                             return true;
                     }
 
