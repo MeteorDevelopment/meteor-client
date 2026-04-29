@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -250,7 +251,7 @@ public class Offhand extends Module {
         return mc.player.getMainHandItem().getItem() == Items.BOW
             || mc.player.getMainHandItem().getItem() == Items.TRIDENT
             || mc.player.getMainHandItem().getItem() == Items.CROSSBOW
-            || mc.player.getMainHandItem().getItem().components().has(DataComponents.FOOD);
+            || Utils.isFood(mc.player.getMainHandItem());
     }
 
     @Override
