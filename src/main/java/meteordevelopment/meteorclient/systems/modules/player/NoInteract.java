@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
@@ -149,13 +150,13 @@ public class NoInteract extends Module {
     }
 
     private boolean shouldAttackBlock(BlockPos blockPos) {
-        if (blockMineMode.get() == ListMode.WhiteList &&
-            blockMine.get().contains(mc.level.getBlockState(blockPos).getBlock())) {
-            return false;
-        }
+        boolean blockInList = blockMine.get().contains(mc.level.getBlockState(blockPos).getBlock());
 
-        return blockMineMode.get() != ListMode.BlackList ||
-            !blockMine.get().contains(mc.level.getBlockState(blockPos).getBlock());
+        if (blockMineMode.get() == ListMode.WhiteList) {
+            return blockInList;
+        } else {
+            return !blockInList;
+        }
     }
 
     private boolean shouldInteractBlock(BlockHitResult hitResult, InteractionHand hand) {
@@ -167,13 +168,13 @@ public class NoInteract extends Module {
         }
 
         // Blocks
-        if (blockInteractMode.get() == ListMode.BlackList &&
-            blockInteract.get().contains(mc.level.getBlockState(hitResult.getBlockPos()).getBlock())) {
-            return false;
-        }
+        boolean blockInList = blockInteract.get().contains(mc.level.getBlockState(hitResult.getBlockPos()).getBlock());
 
-        return blockInteractMode.get() != ListMode.WhiteList ||
-            blockInteract.get().contains(mc.level.getBlockState(hitResult.getBlockPos()).getBlock());
+        if (blockInteractMode.get() == ListMode.WhiteList) {
+            return blockInList;
+        } else {
+            return !blockInList;
+        }
     }
 
     private boolean shouldAttackEntity(Entity entity) {
