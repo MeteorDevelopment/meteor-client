@@ -9,6 +9,10 @@ import meteordevelopment.meteorclient.events.entity.EntityAddedEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
@@ -39,6 +43,13 @@ public class LogoutSpots extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     // General
+
+    private final Setting<Boolean> clearOnDeactivate = sgGeneral.add(new BoolSetting.Builder()
+        .name("clear-on-deactivate")
+        .description("Clears all logout spot when module is deactivated.")
+        .defaultValue(false)
+        .build()
+    );
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
@@ -106,6 +117,17 @@ public class LogoutSpots extends Module {
     }
 
     @Override
+    public WWidget getWidget(GuiTheme theme) {
+        WVerticalList list = theme.verticalList();
+
+        WButton clear = list.add(theme.button("Clear Logout Spots")).expandX().widget();
+
+        clear.action = this::clearLogoutSpots;
+
+        return list;
+    }
+
+    @Override
     public void onActivate() {
         lastPlayerList.addAll(mc.getConnection().getOnlinePlayers());
         updateLastPlayers();
@@ -116,10 +138,9 @@ public class LogoutSpots extends Module {
 
     @Override
     public void onDeactivate() {
-        players.clear();
-        lastPlayerList.clear();
+        if (clearOnDeactivate.get()) clearLogoutSpots();
     }
-
+    
     private void updateLastPlayers() {
         lastPlayers.clear();
         for (Entity entity : mc.level.entitiesForRendering()) {
@@ -194,6 +215,15 @@ public class LogoutSpots extends Module {
     @Override
     public String getInfoString() {
         return Integer.toString(players.size());
+    }
+
+    public void clearLogoutSpots() {
+        players.clear();
+        lastPlayerList.clear();
+    }
+
+    public boolean removeLogoutSpot(String playerName) {
+        return players.removeIf(entry -> entry.name.equalsIgnoreCase(playerName));
     }
 
     private static final Vector3d pos = new Vector3d();
