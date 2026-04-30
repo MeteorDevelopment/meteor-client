@@ -13,9 +13,9 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleType;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
 
 import java.util.List;
 
@@ -43,12 +43,12 @@ public class Trail extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (pause.get()
-            && mc.player.getX() == mc.player.lastX
-            && mc.player.getY() == mc.player.lastY
-            && mc.player.getZ() == mc.player.lastZ) return;
+            && mc.player.getX() == mc.player.xo
+            && mc.player.getY() == mc.player.yo
+            && mc.player.getZ() == mc.player.zo) return;
 
         for (ParticleType<?> particleType : particles.get()) {
-            mc.world.addParticleClient((ParticleEffect) particleType, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0, 0, 0);
+            mc.level.addParticle((ParticleOptions) particleType, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0, 0, 0);
         }
     }
 }

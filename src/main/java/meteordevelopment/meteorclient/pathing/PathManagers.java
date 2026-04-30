@@ -42,7 +42,7 @@ public class PathManagers {
         try {
             Class.forName(name);
             return true;
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException _) {
             return false;
         }
     }

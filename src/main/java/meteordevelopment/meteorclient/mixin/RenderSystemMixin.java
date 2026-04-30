@@ -22,13 +22,13 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 @Mixin(RenderSystem.class)
 public abstract class RenderSystemMixin {
     @Inject(method = "flipFrame", at = @At("TAIL"))
-    private static void meteor$flipFrame(CallbackInfo info) {
+    private static void meteor$flipFrame(CallbackInfo ci) {
         MeshUniforms.flipFrame();
         PostProcessShader.flipFrame();
         ChamsShader.flipFrame();
         OutlineUniforms.flipFrame();
 
         if (Modules.get() == null || mc.player == null) return;
-        if (Modules.get().get(InventoryTweaks.class).frameInput()) ((MinecraftClientAccessor) mc).meteor$handleInputEvents();
+        if (Modules.get().get(InventoryTweaks.class).frameInput()) ((MinecraftAccessor) mc).meteor$handleInputEvents();
     }
 }

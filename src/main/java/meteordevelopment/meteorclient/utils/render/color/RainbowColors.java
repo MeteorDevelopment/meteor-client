@@ -87,7 +87,7 @@ public class RainbowColors {
             waypoint.color.get().update();
         }
 
-        if (mc.currentScreen instanceof WidgetScreen) {
+        if (mc.screen instanceof WidgetScreen) {
             for (SettingGroup group : GuiThemes.get().settings) {
                 for (Setting<?> setting : group) {
                     if (setting instanceof ColorSetting) ((SettingColor) setting.get()).update();

@@ -10,21 +10,21 @@ import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSe
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.BlockListSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.function.Predicate;
 
 public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
     public BlockListSettingScreen(GuiTheme theme, BlockListSetting setting) {
-        super(theme, "Select Blocks", setting, setting.get(), Registries.BLOCK);
+        super(theme, "Select Blocks", setting, setting.get(), BuiltInRegistries.BLOCK);
     }
 
     @Override
     protected boolean includeValue(Block value) {
-        if (Registries.BLOCK.getId(value).getPath().endsWith("_wall_banner")) {
+        if (BuiltInRegistries.BLOCK.getKey(value).getPath().endsWith("_wall_banner")) {
             return false;
         }
 
@@ -36,22 +36,22 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
 
     @Override
     protected WWidget getValueWidget(Block value) {
-        return theme.itemWithLabel(value.asItem().getDefaultStack(), Names.get(value));
+        return theme.itemWithLabel(value.asItem().getDefaultInstance(), Names.get(value));
     }
 
     @Override
     protected String[] getValueNames(Block value) {
         return new String[]{
             Names.get(value),
-            Registries.BLOCK.getId(value).toString()
+            BuiltInRegistries.BLOCK.getKey(value).toString()
         };
     }
 
     @Override
     protected Block getAdditionalValue(Block value) {
-        String path = Registries.BLOCK.getId(value).getPath();
+        String path = BuiltInRegistries.BLOCK.getKey(value).getPath();
         if (!path.endsWith("_banner")) return null;
 
-        return Registries.BLOCK.get(Identifier.ofVanilla(path.substring(0, path.length() - 6) + "wall_banner"));
+        return BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(path.substring(0, path.length() - 6) + "wall_banner"));
     }
 }

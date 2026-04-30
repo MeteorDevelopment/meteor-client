@@ -12,7 +12,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
-import meteordevelopment.meteorclient.mixininterface.IGameRenderer;
 import meteordevelopment.meteorclient.renderer.*;
 import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
 import meteordevelopment.meteorclient.renderer.text.Font;
@@ -21,11 +20,11 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -56,20 +55,20 @@ public class HudRenderer {
         })
         .build(CacheLoader.from(HudRenderer::loadFont));
 
-    public DrawContext drawContext;
+    public GuiGraphicsExtractor graphics;
     public double delta;
 
     private HudRenderer() {
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 
-    public void begin(DrawContext drawContext) {
+    public void begin(GuiGraphicsExtractor graphics) {
         Renderer2D.COLOR.begin();
 
-        this.drawContext = drawContext;
+        this.graphics = graphics;
         this.delta = Utils.frameTime;
 
-        drawContext.createNewRootLayer();
+        graphics.nextStratum();
 
         if (!hud.hasCustomFont()) {
             VanillaTextRenderer.INSTANCE.scaleIndividually = true;
@@ -87,21 +86,19 @@ public class HudRenderer {
 
                 if (fontHolder.visited) {
                     MeshRenderer.begin()
-                        .attachments(mc.getFramebuffer())
+                        .attachments(mc.getMainRenderTarget())
                         .pipeline(MeteorRenderPipelines.UI_TEXT)
                         .mesh(fontHolder.getMesh())
-                        .sampler("u_Texture", fontHolder.font.texture.getGlTextureView(), fontHolder.font.texture.getSampler())
+                        .sampler("u_Texture", fontHolder.font.texture.getTextureView(), fontHolder.font.texture.getSampler())
                         .end();
-                }
-                else {
+                } else {
                     it.remove();
                     fontCache.put(fontHolder.font.getHeight(), fontHolder);
                 }
 
                 fontHolder.visited = false;
             }
-        }
-        else {
+        } else {
             VanillaTextRenderer.INSTANCE.end();
             VanillaTextRenderer.INSTANCE.scaleIndividually = false;
         }
@@ -109,9 +106,9 @@ public class HudRenderer {
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
 
-        drawContext.createNewRootLayer();
+        graphics.nextStratum();
 
-        drawContext = null;
+        graphics = null;
     }
 
     public void line(double x1, double y1, double x2, double y2, Color color) {
@@ -133,7 +130,7 @@ public class HudRenderer {
     public void texture(Identifier id, double x, double y, double width, double height, Color color) {
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, width, height, color);
-        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getGlTextureView(), mc.getTextureManager().getTexture(id).getSampler());
+        Renderer2D.TEXTURE.render(mc.getTextureManager().getTexture(id).getTextureView(), mc.getTextureManager().getTexture(id).getSampler());
     }
 
     public double text(String text, double x, double y, Color color, boolean shadow, double scale) {
@@ -159,13 +156,13 @@ public class HudRenderer {
             font.render(mesh, text, x, y, color, scale);
 
             CustomTextRenderer.SHADOW_COLOR.a = preShadowA;
-        }
-        else {
+        } else {
             width = font.render(mesh, text, x, y, color, scale);
         }
 
         return width;
     }
+
     public double text(String text, double x, double y, Color color, boolean shadow) {
         return text(text, x, y, color, shadow, -1);
     }
@@ -181,12 +178,15 @@ public class HudRenderer {
         VanillaTextRenderer.INSTANCE.scale = (scale == -1 ? hud.getTextScale() : scale) * 2;
         return VanillaTextRenderer.INSTANCE.getWidth(text, shadow);
     }
+
     public double textWidth(String text, boolean shadow) {
         return textWidth(text, shadow, -1);
     }
+
     public double textWidth(String text, double scale) {
         return textWidth(text, false, scale);
     }
+
     public double textWidth(String text) {
         return textWidth(text, false, -1);
     }
@@ -200,9 +200,11 @@ public class HudRenderer {
         VanillaTextRenderer.INSTANCE.scale = (scale == -1 ? hud.getTextScale() : scale) * 2;
         return VanillaTextRenderer.INSTANCE.getHeight(shadow);
     }
+
     public double textHeight(boolean shadow) {
         return textHeight(shadow, -1);
     }
+
     public double textHeight() {
         return textHeight(false, -1);
     }
@@ -212,37 +214,37 @@ public class HudRenderer {
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverlay) {
-        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay, countOverlay, true);
+        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay, countOverlay, true);
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay);
+        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay);
     }
 
-    public void entity(LivingEntity entity,  int x, int y, int width, int height, float yaw, float pitch) {
-        float previousBodyYaw = entity.bodyYaw;
-        float previousYaw = entity.getYaw();
-        float previousPitch = entity.getPitch();
-        float lastLastHeadYaw = entity.lastHeadYaw;
-        float lastHeadYaw = entity.headYaw;
+    public void entity(LivingEntity entity, int x, int y, int width, int height, float yaw, float pitch) {
+        float previousBodyYaw = entity.yBodyRot;
+        float previousYaw = entity.getYRot();
+        float previousPitch = entity.getXRot();
+        float lastLastHeadYaw = entity.yHeadRotO;
+        float lastHeadYaw = entity.yHeadRot;
 
         float tanYaw = (float) Math.atan((yaw) / 40.0f);
         float tanPitch = (float) Math.atan((pitch) / 40.0f);
-        entity.bodyYaw = 180.0f + tanYaw * 20.0f;
-        entity.setYaw(180.0f + tanYaw * 40.0f);
-        entity.setPitch(-tanPitch * 20.0f);
-        entity.headYaw = entity.getYaw();
-        entity.lastHeadYaw = entity.getYaw();
+        entity.yBodyRot = 180.0f + tanYaw * 20.0f;
+        entity.setYRot(180.0f + tanYaw * 40.0f);
+        entity.setXRot(-tanPitch * 20.0f);
+        entity.yHeadRot = entity.getYRot();
+        entity.yHeadRotO = entity.getYRot();
 
-        var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).getAndUpdateRenderState(entity, 1);
+        var state = (LivingEntityRenderState) mc.getEntityRenderDispatcher().getRenderer(entity).createRenderState(entity, 1);
 
-        entity.bodyYaw = previousBodyYaw;
-        entity.setYaw(previousYaw);
-        entity.setPitch(previousPitch);
-        entity.lastHeadYaw = lastLastHeadYaw;
-        entity.headYaw = lastHeadYaw;
+        entity.yBodyRot = previousBodyYaw;
+        entity.setYRot(previousYaw);
+        entity.setXRot(previousPitch);
+        entity.yHeadRot = lastLastHeadYaw;
+        entity.yHeadRotO = lastHeadYaw;
 
-        float s = 1.0f / mc.getWindow().getScaleFactor();
+        float s = 1.0f / mc.getWindow().getGuiScale();
         int x1 = (int) (x * s);
         int y1 = (int) (y * s);
         int x2 = (int) ((x + width) * s);
@@ -252,7 +254,7 @@ public class HudRenderer {
         Vector3f translation = new Vector3f(0, 1f, 0);
         Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
 
-        drawContext.addEntity(state, scale, translation, rotation, null, x1, y1, x2, y2);
+        graphics.entity(state, scale, translation, rotation, null, x1, y1, x2, y2);
     }
 
     private FontHolder getFontHolder(double scale, boolean render) {

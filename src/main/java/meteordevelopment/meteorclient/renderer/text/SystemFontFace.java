@@ -25,6 +25,6 @@ public final class SystemFontFace extends FontFace {
 
     @Override
     public String toString() {
-        return super.toString() + " (" + path.toString() + ")";
+        return "%s (%s)".formatted(super.toString(), path);
     }
 }

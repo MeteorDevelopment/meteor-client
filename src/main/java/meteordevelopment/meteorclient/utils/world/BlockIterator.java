@@ -13,8 +13,8 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -27,7 +27,7 @@ public class BlockIterator {
 
     private static final List<Runnable> afterCallbacks = new ReferenceArrayList<>();
 
-    private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private static final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
     private static int hRadius, vRadius;
 
     private static boolean disableCurrent;
@@ -50,11 +50,11 @@ public class BlockIterator {
 
         for (int x = px - hRadius; x <= px + hRadius; x++) {
             for (int z = pz - hRadius; z <= pz + hRadius; z++) {
-                for (int y = Math.max(mc.world.getBottomY(), py - vRadius); y <= py + vRadius; y++) {
-                    if (y > mc.world.getHeight()) break;
+                for (int y = Math.max(mc.level.getMinY(), py - vRadius); y <= py + vRadius; y++) {
+                    if (y > mc.level.getHeight()) break;
 
                     blockPos.set(x, y, z);
-                    BlockState blockState = mc.world.getBlockState(blockPos);
+                    BlockState blockState = mc.level.getBlockState(blockPos);
 
                     int dx = Math.abs(x - px);
                     int dy = Math.abs(y - py);
