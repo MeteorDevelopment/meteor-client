@@ -44,6 +44,13 @@ public class LogoutSpots extends Module {
 
     // General
 
+    private final Setting<Boolean> clearOnDeactivate = sgGeneral.add(new BoolSetting.Builder()
+        .name("clear-on-deactivate")
+        .description("Clears all logout spot when module is deactivated.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
         .description("The scale.")
@@ -129,6 +136,10 @@ public class LogoutSpots extends Module {
         lastDimension = mc.level.dimensionType();
     }
 
+    @Override
+    public void onDeactivate() {
+        if (clearOnDeactivate.get()) clearLogoutSpots();
+    }
     
     private void updateLastPlayers() {
         lastPlayers.clear();

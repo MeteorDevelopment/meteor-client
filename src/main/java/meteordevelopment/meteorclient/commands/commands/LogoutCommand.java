@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.LogoutSpots;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.command.CommandSource;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 
 public class LogoutCommand extends Command {
     public LogoutCommand() {
@@ -19,10 +19,11 @@ public class LogoutCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
+        LogoutSpots logoutSpots = Modules.get().get(LogoutSpots.class);
+
         builder.then(literal("clear")
-            .executes(context -> {
-                LogoutSpots logoutSpots = Modules.get().get(LogoutSpots.class);
+            .executes(_ -> {
                 logoutSpots.clearLogoutSpots();
                 
                 ChatUtils.info("Cleared all logout spots");
@@ -34,8 +35,6 @@ public class LogoutCommand extends Command {
             .then(argument("name", StringArgumentType.word())
                 .executes(context -> {
                     String playerName = StringArgumentType.getString(context, "name");
-                    LogoutSpots logoutSpots = Modules.get().get(LogoutSpots.class);
-
                     boolean removed = logoutSpots.removeLogoutSpot(playerName);
                     
                     if (removed) {
