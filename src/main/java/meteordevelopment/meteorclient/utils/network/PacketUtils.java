@@ -35,6 +35,8 @@ public class PacketUtils {
         C2S_PACKETS_R.put("ServerboundAcceptCodeOfConductPacket", net.minecraft.network.protocol.configuration.ServerboundAcceptCodeOfConductPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket.class, "ServerboundAcceptTeleportationPacket");
         C2S_PACKETS_R.put("ServerboundAcceptTeleportationPacket", net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundAttackPacket.class, "ServerboundAttackPacket");
+        C2S_PACKETS_R.put("ServerboundAttackPacket", net.minecraft.network.protocol.game.ServerboundAttackPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket.class, "ServerboundBlockEntityTagQueryPacket");
         C2S_PACKETS_R.put("ServerboundBlockEntityTagQueryPacket", net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket.class, "ServerboundChangeDifficultyPacket");
