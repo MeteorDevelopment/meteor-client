@@ -61,7 +61,7 @@ public abstract class GuiRendererMixin {
         var mouseY = (int) mc.mouseHandler.getScaledYPos(mc.getWindow());
 
         var fogRenderer = ((GameRendererAccessor) mc.gameRenderer).meteor$fogRenderer();
-        var delta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
+        var delta = mc.getDeltaTracker().getGameTimeDeltaTicks();
 
         if (Utils.canUpdate()) {
             Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
