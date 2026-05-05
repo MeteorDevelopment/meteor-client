@@ -259,9 +259,7 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
-        double frameTime = Utils.frameTime;
-
-        animProgress += frameTime * 14 * (closing ? -1 : 1);
+        animProgress += (delta / 20 * 14) * (closing ? -1 : 1);
         animProgress = Mth.clamp(animProgress, 0, 1);
 
         if (closing && (animProgress == 0 || parent != null)) {
@@ -273,18 +271,18 @@ public abstract class WidgetScreen extends Screen {
         // Apply projection without scaling
         Utils.unscaledProjection();
 
-        onRenderBefore(graphics, mouseX, mouseY, frameTime);
+        onRenderBefore(graphics, mouseX, mouseY, delta);
 
         RENDERER.theme = theme;
         theme.beforeRender();
 
         RENDERER.begin(graphics);
         RENDERER.setAlpha(animProgress);
-        root.render(RENDERER, mouseX, mouseY, frameTime);
+        root.render(RENDERER, mouseX, mouseY, delta / 20);
         RENDERER.setAlpha(1);
         RENDERER.end();
 
-        boolean tooltip = RENDERER.renderTooltip(graphics, mouseX, mouseY, frameTime);
+        boolean tooltip = RENDERER.renderTooltip(graphics, mouseX, mouseY, delta / 20);
 
         if (debug) {
             DEBUG_RENDERER.render(root);
@@ -303,7 +301,7 @@ public abstract class WidgetScreen extends Screen {
         }
     }
 
-    protected void onRenderBefore(GuiGraphicsExtractor graphics, int mouseX, int mouseY, double delta) {
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
     }
 
     @Override
