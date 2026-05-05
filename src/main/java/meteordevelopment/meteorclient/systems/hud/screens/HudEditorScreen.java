@@ -280,9 +280,9 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    protected void onRenderBefore(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+    protected void onRenderBefore(GuiGraphicsExtractor graphics, int mouseX, int mouseY, double delta) {
         boolean renderSplitLines = pressed && !selection.isEmpty() && moved;
-        if (renderSplitLines || splitLinesAnimation > 0) renderSplitLines(renderSplitLines, delta / 20);
+        if (renderSplitLines || splitLinesAnimation > 0) renderSplitLines(renderSplitLines, delta);
 
         Renderer2D.COLOR.begin();
         onRender(mouseX, mouseY);
