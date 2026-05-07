@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.BlockDataSetting;
 import meteordevelopment.meteorclient.settings.IBlockData;
 import meteordevelopment.meteorclient.utils.misc.IChangeable;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.misc.ICopyable;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Names;
@@ -41,7 +42,7 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
 
     @Override
     protected WWidget getValueWidget(Block block) {
-        return theme.itemWithLabel(block.asItem().getDefaultInstance(), Names.get(block));
+        return theme.itemWithLabel(DisplayItemUtils.toStack(block), Names.get(block));
     }
 
     @Override

@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.elements.keyboard.KeyboardHud;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.resources.language.I18n;
 import org.apache.commons.lang3.Strings;
@@ -251,17 +252,17 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void blockW(WTable table, BlockSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
 
-        WItem item = list.add(theme.item(setting.get().asItem().getDefaultInstance())).widget();
+        WItem item = list.add(theme.item(DisplayItemUtils.toStack(setting.get().asItem()))).widget();
 
         WButton select = list.add(theme.button("Select")).widget();
         select.action = () -> {
             BlockSettingScreen screen = new BlockSettingScreen(theme, setting);
-            screen.onClosed(() -> item.set(setting.get().asItem().getDefaultInstance()));
+            screen.onClosed(() -> item.set(DisplayItemUtils.toStack(setting.get().asItem())));
 
             mc.setScreen(screen);
         };
 
-        reset(table, setting, () -> item.set(setting.get().asItem().getDefaultInstance()));
+        reset(table, setting, () -> item.set(DisplayItemUtils.toStack(setting.get().asItem())));
     }
 
     private void blockPosW(WTable table, BlockPosSetting setting) {
@@ -281,17 +282,17 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void itemW(WTable table, ItemSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
 
-        WItem item = list.add(theme.item(setting.get().asItem().getDefaultInstance())).widget();
+        WItem item = list.add(theme.item(DisplayItemUtils.toStack(setting.get()))).widget();
 
         WButton select = list.add(theme.button("Select")).widget();
         select.action = () -> {
             ItemSettingScreen screen = new ItemSettingScreen(theme, setting);
-            screen.onClosed(() -> item.set(setting.get().getDefaultInstance()));
+            screen.onClosed(() -> item.set(DisplayItemUtils.toStack(setting.get())));
 
             mc.setScreen(screen);
         };
 
-        reset(table, setting, () -> item.set(setting.get().getDefaultInstance()));
+        reset(table, setting, () -> item.set(DisplayItemUtils.toStack(setting.get())));
     }
 
     private void itemListW(WTable table, ItemListSetting setting) {

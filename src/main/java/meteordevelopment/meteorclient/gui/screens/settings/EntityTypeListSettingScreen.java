@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.settings.EntityTypeListSetting;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Names;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.Tuple;
@@ -238,7 +239,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
             //noinspection DataFlowIssue
             if (component.type() == entityType) {
-                stack = item.getDefaultInstance();
+                stack = DisplayItemUtils.toStack(item);
                 break;
             }
         }
