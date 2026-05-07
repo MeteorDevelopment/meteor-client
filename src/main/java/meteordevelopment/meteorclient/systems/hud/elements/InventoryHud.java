@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.resources.Identifier;
@@ -76,6 +77,12 @@ public class InventoryHud extends HudElement {
         .build()
     );
 
+    private static final ItemStack[] PREVIEW_ITEMS = {
+        DisplayItemUtils.toStack(Items.OBSIDIAN, 64),
+        DisplayItemUtils.toStack(Items.END_CRYSTAL, 64),
+        DisplayItemUtils.toStack(Items.GOLDEN_APPLE, 64)
+    };
+
     private final ItemStack[] containerItems = new ItemStack[9 * 3];
 
     private InventoryHud() {
@@ -97,13 +104,18 @@ public class InventoryHud extends HudElement {
             drawBackground(renderer, (int) x, (int) y, drawColor);
         }
 
-        if (mc.player == null) return;
-
         renderer.post(() -> {
             for (int row = 0; row < 3; row++) {
                 for (int i = 0; i < 9; i++) {
                     int index = row * 9 + i;
-                    ItemStack stack = hasContainer ? containerItems[index] : mc.player.getInventory().getItem(index + 9);
+                    ItemStack stack;
+
+                    if (mc.player == null) {
+                        stack = index < PREVIEW_ITEMS.length ? PREVIEW_ITEMS[index] : null;
+                    } else {
+                        stack = hasContainer ? containerItems[index] : mc.player.getInventory().getItem(index + 9);
+                    }
+
                     if (stack == null) continue;
 
                     int itemX = background.get() == Background.Texture ? (int) (x + (8 + i * 18) * getScale()) : (int) (x + (1 + i * 18) * getScale());
