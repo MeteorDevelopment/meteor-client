@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.MeteorMcGuiRenderer;
 import net.minecraft.client.Minecraft;
@@ -63,7 +64,7 @@ public abstract class GuiRendererMixin {
         var fogRenderer = ((GameRendererAccessor) mc.gameRenderer).meteor$fogRenderer();
         var delta = mc.getDeltaTracker().getGameTimeDeltaTicks();
 
-        if (Utils.canUpdate()) {
+        if (Utils.canUpdate() || HudEditorScreen.isOpen()) {
             Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
 
             Utils.unscaledProjection();
