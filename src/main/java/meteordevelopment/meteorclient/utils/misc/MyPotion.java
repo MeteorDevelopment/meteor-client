@@ -5,7 +5,9 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -72,7 +74,11 @@ public enum MyPotion {
     public final Item[] ingredients;
 
     MyPotion(Holder<Potion> potion, Item... ingredients) {
-        this.potion = () -> PotionContents.createItemStack(Items.POTION, potion);
+        this.potion = () -> {
+            ItemStack stack = DisplayItemUtils.toStack(Items.POTION);
+            stack.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
+            return stack;
+        };
         this.ingredients = ingredients;
     }
 }
