@@ -55,6 +55,7 @@ public class AutoEat extends Module {
             Items.SUSPICIOUS_STEW
         )
         .filter(item -> item.components().get(DataComponents.FOOD) != null)
+        .bypassFilterWhenSavingAndLoading()                                                       
         .build()
     );
 
