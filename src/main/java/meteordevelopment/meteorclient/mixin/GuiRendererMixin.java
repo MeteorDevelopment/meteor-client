@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.MeteorMcGuiRenderer;
 import net.minecraft.client.Minecraft;
@@ -52,7 +53,7 @@ public abstract class GuiRendererMixin {
         );
     }
 
-    @Inject(method = "draw", at = @At("HEAD"))
+    @Inject(method = "render", at = @At("TAIL"))
     private void draw$executeDrawRange(CallbackInfo ci) {
         if ((GuiRenderer) (Object) this instanceof MeteorMcGuiRenderer) return;
         var mc = Minecraft.getInstance();
@@ -63,7 +64,9 @@ public abstract class GuiRendererMixin {
         var fogRenderer = ((GameRendererAccessor) mc.gameRenderer).meteor$fogRenderer();
         var delta = mc.getDeltaTracker().getGameTimeDeltaTicks();
 
-        if (Utils.canUpdate()) {
+        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(mc.getMainRenderTarget().getDepthTexture(), 1.0);
+
+        if (Utils.canUpdate() || HudEditorScreen.isOpen()) {
             Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
 
             Utils.unscaledProjection();
@@ -83,7 +86,6 @@ public abstract class GuiRendererMixin {
             guiRenderer.render(fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
         }
 
-        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(mc.getMainRenderTarget().getDepthTexture(), 1.0);
         guiRenderer.endFrame();
     }
 }
