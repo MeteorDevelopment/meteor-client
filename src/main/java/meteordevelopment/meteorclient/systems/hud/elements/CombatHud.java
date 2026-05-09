@@ -23,6 +23,7 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.core.Holder;
@@ -455,12 +456,12 @@ public class CombatHud extends HudElement {
     private ItemStack getItem(int i) {
         if (isInEditor()) {
             return switch (i) {
-                case 0 -> Items.NETHERITE_BOOTS.getDefaultInstance();
-                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultInstance();
-                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultInstance();
-                case 3 -> Items.NETHERITE_HELMET.getDefaultInstance();
-                case 4 -> Items.TOTEM_OF_UNDYING.getDefaultInstance();
-                case 5 -> Items.END_CRYSTAL.getDefaultInstance();
+                case 0 -> DisplayItemUtils.toStack(Items.NETHERITE_BOOTS);
+                case 1 -> DisplayItemUtils.toStack(Items.NETHERITE_LEGGINGS);
+                case 2 -> DisplayItemUtils.toStack(Items.NETHERITE_CHESTPLATE);
+                case 3 -> DisplayItemUtils.toStack(Items.NETHERITE_HELMET);
+                case 4 -> DisplayItemUtils.toStack(Items.TOTEM_OF_UNDYING);
+                case 5 -> DisplayItemUtils.toStack(Items.END_CRYSTAL);
                 default -> ItemStack.EMPTY;
             };
         }

@@ -230,7 +230,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     private void onRender(Render2DEvent event) {
         if (Utils.isLoading()) return;
 
-        if (!active || shouldHideHud()) return;
+        if (!(active || HudEditorScreen.isOpen()) || shouldHideHud()) return;
         if ((mc.options.hideGui || mc.debugEntries.isOverlayVisible()) && !HudEditorScreen.isOpen()) return;
 
         HudRenderer.INSTANCE.begin(event.graphics);

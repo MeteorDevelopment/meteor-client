@@ -20,6 +20,7 @@ import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.item.Items;
@@ -123,7 +124,7 @@ public class ModulesScreen extends TabScreen {
         searchWindow = w;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(Items.COMPASS.getDefaultInstance())).pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(DisplayItemUtils.toStack(Items.COMPASS))).pad(2);
         }
 
         c.add(w);
@@ -178,7 +179,7 @@ public class ModulesScreen extends TabScreen {
         w.spacing = 0;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(Items.NETHER_STAR.getDefaultInstance())).pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(DisplayItemUtils.toStack(Items.NETHER_STAR))).pad(2);
         }
 
         Cell<WWindow> cell = c.add(w);
