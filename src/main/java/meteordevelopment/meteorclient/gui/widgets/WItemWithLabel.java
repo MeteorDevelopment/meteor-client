@@ -12,6 +12,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
 
 import java.util.Iterator;
 
@@ -39,7 +40,10 @@ public class WItemWithLabel extends WHorizontalList {
         String str = "";
 
         if (itemStack.getItem() == Items.POTION) {
-            Iterator<MobEffectInstance> effects = itemStack.getItem().components().get(DataComponents.POTION_CONTENTS).getAllEffects().iterator();
+            PotionContents potionContents = itemStack.get(DataComponents.POTION_CONTENTS);
+            if (potionContents == null) return str;
+            
+            Iterator<MobEffectInstance> effects = potionContents.getAllEffects().iterator();
             if (!effects.hasNext()) return str;
 
             str += " ";

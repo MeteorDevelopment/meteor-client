@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -191,15 +192,15 @@ public class ArmorHud extends HudElement {
     private ItemStack getItem(EquipmentSlot slot) {
         if (isInEditor()) {
             return switch (slot.getIndex()) {
-                case 3 -> Items.NETHERITE_HELMET.getDefaultInstance();
-                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultInstance();
-                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultInstance();
-                default -> Items.NETHERITE_BOOTS.getDefaultInstance();
+                case 3 -> DisplayItemUtils.toStack(Items.NETHERITE_HELMET);
+                case 2 -> DisplayItemUtils.toStack(Items.NETHERITE_CHESTPLATE);
+                case 1 -> DisplayItemUtils.toStack(Items.NETHERITE_LEGGINGS);
+                default -> DisplayItemUtils.toStack(Items.NETHERITE_BOOTS);
             };
         }
 
         ItemStack stack = mc.player.getItemBySlot(slot);
-        return stack.isEmpty() && showEmpty.get() ? Items.BARRIER.getDefaultInstance() : stack;
+        return stack.isEmpty() && showEmpty.get() ? DisplayItemUtils.toStack(Items.BARRIER) : stack;
     }
 
     private float getScale() {

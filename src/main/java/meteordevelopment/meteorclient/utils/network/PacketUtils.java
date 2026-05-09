@@ -35,6 +35,8 @@ public class PacketUtils {
         C2S_PACKETS_R.put("ServerboundAcceptCodeOfConductPacket", net.minecraft.network.protocol.configuration.ServerboundAcceptCodeOfConductPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket.class, "ServerboundAcceptTeleportationPacket");
         C2S_PACKETS_R.put("ServerboundAcceptTeleportationPacket", net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundAttackPacket.class, "ServerboundAttackPacket");
+        C2S_PACKETS_R.put("ServerboundAttackPacket", net.minecraft.network.protocol.game.ServerboundAttackPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket.class, "ServerboundBlockEntityTagQueryPacket");
         C2S_PACKETS_R.put("ServerboundBlockEntityTagQueryPacket", net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket.class, "ServerboundChangeDifficultyPacket");
@@ -151,6 +153,8 @@ public class PacketUtils {
         C2S_PACKETS_R.put("ServerboundSetCommandMinecartPacket", net.minecraft.network.protocol.game.ServerboundSetCommandMinecartPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket.class, "ServerboundSetCreativeModeSlotPacket");
         C2S_PACKETS_R.put("ServerboundSetCreativeModeSlotPacket", net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSetGameRulePacket.class, "ServerboundSetGameRulePacket");
+        C2S_PACKETS_R.put("ServerboundSetGameRulePacket", net.minecraft.network.protocol.game.ServerboundSetGameRulePacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSetJigsawBlockPacket.class, "ServerboundSetJigsawBlockPacket");
         C2S_PACKETS_R.put("ServerboundSetJigsawBlockPacket", net.minecraft.network.protocol.game.ServerboundSetJigsawBlockPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSetStructureBlockPacket.class, "ServerboundSetStructureBlockPacket");
@@ -159,6 +163,8 @@ public class PacketUtils {
         C2S_PACKETS_R.put("ServerboundSetTestBlockPacket", net.minecraft.network.protocol.game.ServerboundSetTestBlockPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSignUpdatePacket.class, "ServerboundSignUpdatePacket");
         C2S_PACKETS_R.put("ServerboundSignUpdatePacket", net.minecraft.network.protocol.game.ServerboundSignUpdatePacket.class);
+        C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSpectateEntityPacket.class, "ServerboundSpectateEntityPacket");
+        C2S_PACKETS_R.put("ServerboundSpectateEntityPacket", net.minecraft.network.protocol.game.ServerboundSpectateEntityPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.status.ServerboundStatusRequestPacket.class, "ServerboundStatusRequestPacket");
         C2S_PACKETS_R.put("ServerboundStatusRequestPacket", net.minecraft.network.protocol.status.ServerboundStatusRequestPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSwingPacket.class, "ServerboundSwingPacket");
@@ -264,6 +270,8 @@ public class PacketUtils {
         S2C_PACKETS_R.put("ClientboundForgetLevelChunkPacket", net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket.class);
         S2C_PACKETS.put(net.minecraft.network.protocol.game.ClientboundGameEventPacket.class, "ClientboundGameEventPacket");
         S2C_PACKETS_R.put("ClientboundGameEventPacket", net.minecraft.network.protocol.game.ClientboundGameEventPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.protocol.game.ClientboundGameRuleValuesPacket.class, "ClientboundGameRuleValuesPacket");
+        S2C_PACKETS_R.put("ClientboundGameRuleValuesPacket", net.minecraft.network.protocol.game.ClientboundGameRuleValuesPacket.class);
         S2C_PACKETS.put(net.minecraft.network.protocol.game.ClientboundGameTestHighlightPosPacket.class, "ClientboundGameTestHighlightPosPacket");
         S2C_PACKETS_R.put("ClientboundGameTestHighlightPosPacket", net.minecraft.network.protocol.game.ClientboundGameTestHighlightPosPacket.class);
         S2C_PACKETS.put(net.minecraft.network.protocol.login.ClientboundHelloPacket.class, "ClientboundHelloPacket");
@@ -290,6 +298,8 @@ public class PacketUtils {
         S2C_PACKETS_R.put("ClientboundLoginFinishedPacket", net.minecraft.network.protocol.login.ClientboundLoginFinishedPacket.class);
         S2C_PACKETS.put(net.minecraft.network.protocol.game.ClientboundLoginPacket.class, "ClientboundLoginPacket");
         S2C_PACKETS_R.put("ClientboundLoginPacket", net.minecraft.network.protocol.game.ClientboundLoginPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.protocol.game.ClientboundLowDiskSpaceWarningPacket.class, "ClientboundLowDiskSpaceWarningPacket");
+        S2C_PACKETS_R.put("ClientboundLowDiskSpaceWarningPacket", net.minecraft.network.protocol.game.ClientboundLowDiskSpaceWarningPacket.class);
         S2C_PACKETS.put(net.minecraft.network.protocol.game.ClientboundMapItemDataPacket.class, "ClientboundMapItemDataPacket");
         S2C_PACKETS_R.put("ClientboundMapItemDataPacket", net.minecraft.network.protocol.game.ClientboundMapItemDataPacket.class);
         S2C_PACKETS.put(net.minecraft.network.protocol.game.ClientboundMerchantOffersPacket.class, "ClientboundMerchantOffersPacket");
