@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.AltModelBlockRendererImpl;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,7 +41,7 @@ public abstract class AltModelBlockRendererImplMixin {
         Xray xray = Modules.get().get(Xray.class);
 
         if (xray.isActive()) {
-            return xray.modifyDrawSide(blockState, level, pos, direction, original);
+            return !xray.modifyDrawSide(blockState, level, pos, direction, !original);
         }
 
         return original;
@@ -54,6 +55,10 @@ public abstract class AltModelBlockRendererImplMixin {
             cir.setReturnValue(false);
         }
         else if (alpha != -1) {
+            if (alpha > 0 && alpha < 255) {
+                quad.chunkLayer(ChunkSectionLayer.TRANSLUCENT);
+            }
+        	            
             for (int i = 0; i < 4; i++) {
                 quad.color(i, rewriteQuadAlpha(quad.color(i), alpha));
             }
