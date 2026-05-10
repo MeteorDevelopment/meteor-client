@@ -53,12 +53,11 @@ public abstract class AltModelBlockRendererImplMixin {
 
         if (alpha == 0) {
             cir.setReturnValue(false);
-        }
-        else if (alpha != -1) {
+        } else if (alpha != -1) {
             if (alpha > 0 && alpha < 255) {
                 quad.chunkLayer(ChunkSectionLayer.TRANSLUCENT);
             }
-        	            
+
             for (int i = 0; i < 4; i++) {
                 quad.color(i, rewriteQuadAlpha(quad.color(i), alpha));
             }
