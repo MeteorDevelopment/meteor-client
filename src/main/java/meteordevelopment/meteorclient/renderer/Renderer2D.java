@@ -5,12 +5,12 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import meteordevelopment.meteorclient.gui.renderer.packer.TextureRegion;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.GpuSampler;
+import net.minecraft.client.Minecraft;
 
 public class Renderer2D {
     public static Renderer2D COLOR;
@@ -64,13 +64,13 @@ public class Renderer2D {
         if (triangles.isBuilding()) triangles.end();
 
         MeshRenderer.begin()
-            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .attachments(Minecraft.getInstance().getMainRenderTarget())
             .pipeline(MeteorRenderPipelines.UI_COLORED_LINES)
             .mesh(lines)
             .end();
 
         MeshRenderer.begin()
-            .attachments(MinecraftClient.getInstance().getFramebuffer())
+            .attachments(Minecraft.getInstance().getMainRenderTarget())
             .pipeline(textured ? MeteorRenderPipelines.UI_TEXTURED : MeteorRenderPipelines.UI_COLORED)
             .mesh(triangles)
             .sampler(samplerName, samplerView, sampler)

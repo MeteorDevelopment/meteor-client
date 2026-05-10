@@ -21,11 +21,18 @@ public class PlayerHeadUtils {
         STEVE_HEAD = new PlayerHeadTexture();
     }
 
-    public static PlayerHeadTexture fetchHead(UUID id) {
+    public static byte[] fetchHead(UUID id) {
         if (id == null) return null;
 
         String url = getSkinUrl(id);
-        return url != null ? new PlayerHeadTexture(url) : null;
+        if (url == null) return null;
+
+        try {
+            return PlayerHeadTexture.downloadHead(url);
+        } catch (java.io.IOException e) {
+            MeteorClient.LOG.error("Could not fetch player head for {}.", id, e);
+            return null;
+        }
     }
 
     public static String getSkinUrl(UUID id) {

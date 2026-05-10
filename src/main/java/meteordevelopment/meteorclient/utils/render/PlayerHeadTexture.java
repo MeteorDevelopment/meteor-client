@@ -23,56 +23,17 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class PlayerHeadTexture extends Texture {
     private boolean needsRotate;
 
-    public PlayerHeadTexture(String url) {
+    public PlayerHeadTexture(byte[] head, boolean needsRotate) {
         super(8, 8, TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
 
-        BufferedImage skin;
-        try {
-            skin = ImageIO.read(Http.get(url).sendInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        byte[] head = new byte[8 * 8 * 4];
-        int[] pixel = new int[4];
-
-        int i = 0;
-        for (int x = 8; x < 16; x++) {
-            for (int y = 8; y < 16; y++) {
-                skin.getData().getPixel(x, y, pixel);
-
-                for (int j = 0; j < 4; j++) {
-                    head[i] = (byte) pixel[j];
-                    i++;
-                }
-            }
-        }
-
-        i = 0;
-        for (int x = 40; x < 48; x++) {
-            for (int y = 8; y < 16; y++) {
-                skin.getData().getPixel(x, y, pixel);
-
-                if (pixel[3] != 0) {
-                    for (int j = 0; j < 4; j++) {
-                        head[i] = (byte) pixel[j];
-                        i++;
-                    }
-                }
-                else i += 4;
-            }
-        }
-
         upload(BufferUtils.createByteBuffer(head.length).put(head));
-
-        needsRotate = true;
+        this.needsRotate = needsRotate;
     }
 
     public PlayerHeadTexture() {
         super(8, 8, TextureFormat.RGBA8, FilterMode.NEAREST, FilterMode.NEAREST);
 
-        try (InputStream inputStream = mc.getResourceManager().getResource(MeteorClient.identifier("textures/steve.png")).get().getInputStream()) {
+        try (InputStream inputStream = mc.getResourceManager().getResource(MeteorClient.identifier("textures/steve.png")).get().open()) {
             ByteBuffer data = TextureUtil.readResource(inputStream);
             data.rewind();
 
@@ -86,13 +47,50 @@ public class PlayerHeadTexture extends Texture {
                 STBImage.stbi_image_free(image);
             }
             MemoryUtil.memFree(data);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public boolean needsRotate() {
         return needsRotate;
+    }
+
+    public static byte[] downloadHead(String url) throws IOException {
+        BufferedImage skin;
+        try (InputStream in = Http.get(url).sendInputStream()) {
+            skin = ImageIO.read(in);
+        }
+
+        if (skin == null) throw new IOException("Failed to decode skin image.");
+
+        byte[] head = new byte[8 * 8 * 4];
+        int[] pixel = new int[4];
+
+        int i = 0;
+        for (int x = 8; x < 16; x++) {
+            for (int y = 8; y < 16; y++) {
+                skin.getData().getPixel(x, y, pixel);
+
+                for (int j = 0; j < 4; j++) {
+                    head[i++] = (byte) pixel[j];
+                }
+            }
+        }
+
+        i = 0;
+        for (int x = 40; x < 48; x++) {
+            for (int y = 8; y < 16; y++) {
+                skin.getData().getPixel(x, y, pixel);
+
+                if (pixel[3] != 0) {
+                    for (int j = 0; j < 4; j++) {
+                        head[i++] = (byte) pixel[j];
+                    }
+                } else i += 4;
+            }
+        }
+
+        return head;
     }
 }

@@ -10,12 +10,12 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.MaceItem;
-import net.minecraft.item.TridentItem;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.MaceItem;
+import net.minecraft.world.item.TridentItem;
 
 import java.util.Set;
 
@@ -120,7 +120,8 @@ public class Hitboxes extends Module {
     }
 
     public double getEntityValue(Entity entity) {
-        if (!(isActive() && testWeapon()) || (ignoreFriends.get() && entity instanceof PlayerEntity playerEntity && Friends.get().isFriend(playerEntity))) return 0;
+        if (!(isActive() && testWeapon()) || (ignoreFriends.get() && entity instanceof Player playerEntity && Friends.get().isFriend(playerEntity)))
+            return 0;
         if (entities.get().contains(entity.getType())) return value.get();
         return 0;
     }
@@ -128,13 +129,13 @@ public class Hitboxes extends Module {
     private boolean testWeapon() {
         if (!onlyOnWeapon.get()) return true;
         return InvUtils.testInMainHand(itemStack -> {
-            if (sword.get() && itemStack.isIn(ItemTags.SWORDS)) return true;
-            if (axe.get() && itemStack.isIn(ItemTags.AXES)) return true;
-            if (pickaxe.get() && itemStack.isIn(ItemTags.PICKAXES)) return true;
-            if (shovel.get() && itemStack.isIn(ItemTags.SHOVELS)) return true;
-            if (hoe.get() && itemStack.isIn(ItemTags.HOES)) return true;
+            if (sword.get() && itemStack.is(ItemTags.SWORDS)) return true;
+            if (axe.get() && itemStack.is(ItemTags.AXES)) return true;
+            if (pickaxe.get() && itemStack.is(ItemTags.PICKAXES)) return true;
+            if (shovel.get() && itemStack.is(ItemTags.SHOVELS)) return true;
+            if (hoe.get() && itemStack.is(ItemTags.HOES)) return true;
             if (mace.get() && itemStack.getItem() instanceof MaceItem) return true;
-            if (spear.get() && itemStack.isIn(ItemTags.SPEARS)) return true;
+            if (spear.get() && itemStack.is(ItemTags.SPEARS)) return true;
             if (trident.get() && itemStack.getItem() instanceof TridentItem) return true;
             return false;
         });

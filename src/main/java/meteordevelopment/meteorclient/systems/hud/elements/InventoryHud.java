@@ -12,11 +12,12 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -43,7 +44,7 @@ public class InventoryHud extends HudElement {
         .name("custom-scale")
         .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
-        .onChanged(aBoolean -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -52,7 +53,7 @@ public class InventoryHud extends HudElement {
         .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
-        .onChanged(aDouble -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .min(0.5)
         .sliderRange(0.5, 3)
         .build()
@@ -64,7 +65,7 @@ public class InventoryHud extends HudElement {
         .name("background")
         .description("Background of inventory viewer.")
         .defaultValue(Background.Texture)
-        .onChanged(bg -> calculateSize())
+        .onChanged(_ -> calculateSize())
         .build()
     );
 
@@ -75,6 +76,12 @@ public class InventoryHud extends HudElement {
         .defaultValue(new SettingColor(255, 255, 255))
         .build()
     );
+
+    private static final ItemStack[] PREVIEW_ITEMS = {
+        DisplayItemUtils.toStack(Items.OBSIDIAN, 64),
+        DisplayItemUtils.toStack(Items.END_CRYSTAL, 64),
+        DisplayItemUtils.toStack(Items.GOLDEN_APPLE, 64)
+    };
 
     private final ItemStack[] containerItems = new ItemStack[9 * 3];
 
@@ -97,13 +104,18 @@ public class InventoryHud extends HudElement {
             drawBackground(renderer, (int) x, (int) y, drawColor);
         }
 
-        if (mc.player == null) return;
-
         renderer.post(() -> {
             for (int row = 0; row < 3; row++) {
                 for (int i = 0; i < 9; i++) {
                     int index = row * 9 + i;
-                    ItemStack stack = hasContainer ? containerItems[index] : mc.player.getInventory().getStack(index + 9);
+                    ItemStack stack;
+
+                    if (mc.player == null) {
+                        stack = index < PREVIEW_ITEMS.length ? PREVIEW_ITEMS[index] : null;
+                    } else {
+                        stack = hasContainer ? containerItems[index] : mc.player.getInventory().getItem(index + 9);
+                    }
+
                     if (stack == null) continue;
 
                     int itemX = background.get() == Background.Texture ? (int) (x + (8 + i * 18) * getScale()) : (int) (x + (1 + i * 18) * getScale());
@@ -124,7 +136,8 @@ public class InventoryHud extends HudElement {
         int h = getHeight();
 
         switch (background.get()) {
-            case Texture, Outline -> renderer.texture(background.get() == Background.Texture ? TEXTURE : TEXTURE_TRANSPARENT, x, y, w, h, color);
+            case Texture, Outline ->
+                renderer.texture(background.get() == Background.Texture ? TEXTURE : TEXTURE_TRANSPARENT, x, y, w, h, color);
             case Flat -> renderer.quad(x, y, w, h, color);
         }
     }
@@ -132,10 +145,10 @@ public class InventoryHud extends HudElement {
     private ItemStack getContainer() {
         if (isInEditor() || mc.player == null) return null;
 
-        ItemStack stack = mc.player.getOffHandStack();
+        ItemStack stack = mc.player.getOffhandItem();
         if (Utils.hasItems(stack) || stack.getItem() == Items.ENDER_CHEST) return stack;
 
-        stack = mc.player.getMainHandStack();
+        stack = mc.player.getMainHandItem();
         if (Utils.hasItems(stack) || stack.getItem() == Items.ENDER_CHEST) return stack;
 
         return null;

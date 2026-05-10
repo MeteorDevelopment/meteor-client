@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
-import net.minecraft.util.Hand;
+import net.minecraft.world.InteractionHand;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -18,18 +18,18 @@ public record FindItemResult(int slot, int count) {
         return slot != -1;
     }
 
-    public Hand getHand() {
-        if (slot == SlotUtils.OFFHAND) return Hand.OFF_HAND;
-        if (slot == mc.player.getInventory().getSelectedSlot()) return Hand.MAIN_HAND;
+    public InteractionHand getHand() {
+        if (slot == SlotUtils.OFFHAND) return InteractionHand.OFF_HAND;
+        if (slot == mc.player.getInventory().getSelectedSlot()) return InteractionHand.MAIN_HAND;
         return null;
     }
 
     public boolean isMainHand() {
-        return getHand() == Hand.MAIN_HAND;
+        return getHand() == InteractionHand.MAIN_HAND;
     }
 
     public boolean isOffhand() {
-        return getHand() == Hand.OFF_HAND;
+        return getHand() == InteractionHand.OFF_HAND;
     }
 
     public boolean isHotbar() {

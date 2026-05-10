@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.utils.entity;
 
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.Comparator;
 
@@ -51,11 +51,11 @@ public enum SortPriority implements Comparator<Entity> {
         else if (e1l && !e2l) return 1;
         else if (!e1l) return -1;
 
-        double e1yaw = Math.abs(Rotations.getYaw(e1) - mc.player.getYaw());
-        double e2yaw = Math.abs(Rotations.getYaw(e2) - mc.player.getYaw());
+        double e1yaw = Math.abs(Rotations.getYaw(e1) - mc.player.getYRot());
+        double e2yaw = Math.abs(Rotations.getYaw(e2) - mc.player.getYRot());
 
-        double e1pitch = Math.abs(Rotations.getPitch(e1) - mc.player.getPitch());
-        double e2pitch = Math.abs(Rotations.getPitch(e2) - mc.player.getPitch());
+        double e1pitch = Math.abs(Rotations.getPitch(e1) - mc.player.getXRot());
+        double e2pitch = Math.abs(Rotations.getPitch(e2) - mc.player.getXRot());
 
         return Double.compare(e1yaw * e1yaw + e1pitch * e1pitch, e2yaw * e2yaw + e2pitch * e2pitch);
     }

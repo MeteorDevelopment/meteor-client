@@ -27,7 +27,7 @@ public class AddMicrosoftAccountScreen extends AddAccountScreen {
                 AccountsScreen.addAccount(null, parent, account);
             }
 
-            close();
+            onClose();
         });
 
         add(theme.label("Please select the account to log into in your browser."));
@@ -36,17 +36,18 @@ public class AddMicrosoftAccountScreen extends AddAccountScreen {
         WHorizontalList l = add(theme.horizontalList()).expandX().widget();
 
         WButton copy = l.add(theme.button("Copy link")).expandX().widget();
-        copy.action = () -> mc.keyboard.setClipboard(url);
+        copy.action = () -> mc.keyboardHandler.setClipboard(url);
 
         WButton cancel = l.add(theme.button("Cancel")).expandX().widget();
         cancel.action = () -> {
             MicrosoftLogin.stopServer();
-            close();
+            onClose();
         };
     }
 
     @Override
-    public void tick() {}
+    public void tick() {
+    }
 
     @Override
     public boolean shouldCloseOnEsc() {

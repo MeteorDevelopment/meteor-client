@@ -6,9 +6,9 @@
 package meteordevelopment.meteorclient.utils.misc.input;
 
 import meteordevelopment.meteorclient.gui.GuiKeyEvents;
-import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
+import meteordevelopment.meteorclient.mixin.KeyMappingAccessor;
 import meteordevelopment.meteorclient.utils.misc.CursorStyle;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -30,15 +30,15 @@ public class Input {
         if (button >= 0 && button < buttons.length) buttons[button] = pressed;
     }
 
-    public static int getKey(KeyBinding bind) {
-        return ((KeyBindingAccessor) bind).meteor$getKey().getCode();
+    public static int getKey(KeyMapping bind) {
+        return ((KeyMappingAccessor) bind).meteor$getKey().getValue();
     }
 
-    public static void setKeyState(KeyBinding bind, boolean pressed) {
+    public static void setKeyState(KeyMapping bind, boolean pressed) {
         setKeyState(getKey(bind), pressed);
     }
 
-    public static boolean isPressed(KeyBinding bind) {
+    public static boolean isPressed(KeyMapping bind) {
         return isKeyPressed(getKey(bind)) || isButtonPressed(getKey(bind));
     }
 
@@ -56,7 +56,7 @@ public class Input {
 
     public static void setCursorStyle(CursorStyle style) {
         if (lastCursorStyle != style) {
-            GLFW.glfwSetCursor(mc.getWindow().getHandle(), style.getGlfwCursor());
+            GLFW.glfwSetCursor(mc.getWindow().handle(), style.getGlfwCursor());
             lastCursorStyle = style;
         }
     }

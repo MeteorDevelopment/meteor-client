@@ -7,11 +7,11 @@ package meteordevelopment.meteorclient.utils.render.color;
 
 import meteordevelopment.meteorclient.utils.misc.ICopyable;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Style;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -57,10 +57,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     public Color(float r, float g, float b, float a) {
-        this.r = (int)(r*255);
-        this.g = (int)(g*255);
-        this.b = (int)(b*255);
-        this.a = (int)(a*255);
+        this.r = (int) (r * 255);
+        this.g = (int) (g * 255);
+        this.b = (int) (b * 255);
+        this.a = (int) (a * 255);
 
         validate();
     }
@@ -86,12 +86,12 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         this.a = color.getAlpha();
     }
 
-    public Color(Formatting formatting) {
+    public Color(ChatFormatting formatting) {
         if (formatting.isColor()) {
-            this.r = toRGBAR(formatting.getColorValue());
-            this.g = toRGBAG(formatting.getColorValue());
-            this.b = toRGBAB(formatting.getColorValue());
-            this.a = toRGBAA(formatting.getColorValue());
+            this.r = toRGBAR(formatting.getColor());
+            this.g = toRGBAG(formatting.getColor());
+            this.b = toRGBAB(formatting.getColor());
+            this.a = toRGBAA(formatting.getColor());
         } else {
             this.r = 255;
             this.g = 255;
@@ -101,10 +101,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     public Color(TextColor textColor) {
-        this.r = toRGBAR(textColor.getRgb());
-        this.g = toRGBAG(textColor.getRgb());
-        this.b = toRGBAB(textColor.getRgb());
-        this.a = toRGBAA(textColor.getRgb());
+        this.r = toRGBAR(textColor.getValue());
+        this.g = toRGBAG(textColor.getValue());
+        this.b = toRGBAB(textColor.getValue());
+        this.a = toRGBAA(textColor.getValue());
     }
 
     public Color(Style style) {
@@ -115,10 +115,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
             this.b = 255;
             this.a = 255;
         } else {
-            this.r = toRGBAR(textColor.getRgb());
-            this.g = toRGBAG(textColor.getRgb());
-            this.b = toRGBAB(textColor.getRgb());
-            this.a = toRGBAA(textColor.getRgb());
+            this.r = toRGBAR(textColor.getValue());
+            this.g = toRGBAG(textColor.getValue());
+            this.b = toRGBAB(textColor.getValue());
+            this.a = toRGBAA(textColor.getValue());
         }
     }
 
@@ -263,7 +263,7 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
             this.a = a;
 
             return true;
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
             return false;
         }
     }
@@ -303,8 +303,8 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         else if (a > 255) a = 255;
     }
 
-    public Vec3d getVec3d() {
-        return new Vec3d(r / 255.0, g / 255.0, b / 255.0);
+    public Vec3 getVec3d() {
+        return new Vec3(r / 255.0, g / 255.0, b / 255.0);
     }
 
     public Vector3f getVec3f() {
@@ -320,8 +320,8 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.putInt("r", r);
         tag.putInt("g", g);
@@ -332,11 +332,11 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     @Override
-    public Color fromTag(NbtCompound tag) {
-        r = tag.getInt("r", 0);
-        g = tag.getInt("g", 0);
-        b = tag.getInt("b", 0);
-        a = tag.getInt("a", 0);
+    public Color fromTag(CompoundTag tag) {
+        r = tag.getIntOr("r", 0);
+        g = tag.getIntOr("g", 0);
+        b = tag.getIntOr("b", 0);
+        a = tag.getIntOr("a", 0);
 
         validate();
         return this;

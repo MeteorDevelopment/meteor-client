@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.EntityMixin;
-import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixin.ServerboundMovePlayerPacketAccessor;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -22,20 +22,20 @@ import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Straf
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.passive.StriderEntity;
-import net.minecraft.entity.vehicle.AbstractBoatEntity;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.GameMode;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Strider;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.Shapes;
 import org.joml.Vector2d;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -167,8 +167,7 @@ public class Jesus extends Module {
     private boolean prePathManagerWalkOnLava;
 
     /**
-     * {@link EntityMixin#onBubbleColumnSurfaceCollision(CallbackInfo)}
-     * {@link EntityMixin#onBubbleColumnCollision(CallbackInfo)}
+     * {@link EntityMixin#onBubbleColumn(CallbackInfo)}
      */
     public boolean isInBubbleColumn = false;
 
@@ -196,31 +195,32 @@ public class Jesus extends Module {
         boolean bubbleColumn = isInBubbleColumn;
         isInBubbleColumn = false;
 
-        if (mc.player.isInSwimmingPose()) return;
-        if (mc.player.isTouchingWater() && !waterShouldBeSolid()) return;
+        if (mc.player.isVisuallySwimming()) return;
+        if (mc.player.isInWater() && !waterShouldBeSolid()) return;
         if (mc.player.isInLava() && !lavaShouldBeSolid()) return;
 
-        Entity movingEntity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        Entity movingEntity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
 
         // Move up in bubble columns
         if (bubbleColumn) {
-            if (mc.options.jumpKey.isPressed() && movingEntity.getVelocity().getY() < 0.11) ((IVec3d) movingEntity.getVelocity()).meteor$setY(0.11);
+            if (mc.options.keyJump.isDown() && movingEntity.getDeltaMovement().y() < 0.11)
+                ((IVec3) movingEntity.getDeltaMovement()).meteor$setY(0.11);
             return;
         }
 
         // Move up
-        if (movingEntity.isTouchingWater() || movingEntity.isInLava()) {
-            ((IVec3d) movingEntity.getVelocity()).meteor$setY(0.11);
+        if (movingEntity.isInWater() || movingEntity.isInLava()) {
+            ((IVec3) movingEntity.getDeltaMovement()).meteor$setY(0.11);
             ascending = 0;
             return;
         }
 
-        BlockState blockBelowState = mc.world.getBlockState(movingEntity.getBlockPos().down());
-        boolean waterLogged = blockBelowState.get(Properties.WATERLOGGED, false);
+        BlockState blockBelowState = mc.level.getBlockState(movingEntity.blockPosition().below());
+        boolean waterLogged = blockBelowState.getValueOrElse(BlockStateProperties.WATERLOGGED, false);
 
-        if (ascending == 0) ((IVec3d) movingEntity.getVelocity()).meteor$setY(0.11);
+        if (ascending == 0) ((IVec3) movingEntity.getDeltaMovement()).meteor$setY(0.11);
         else if (ascending == 1 && (blockBelowState.getBlock() == Blocks.WATER || blockBelowState.getBlock() == Blocks.LAVA || waterLogged))
-            ((IVec3d) movingEntity.getVelocity()).meteor$setY(0);
+            ((IVec3) movingEntity.getDeltaMovement()).meteor$setY(0);
 
         ascending++;
     }
@@ -229,10 +229,9 @@ public class Jesus extends Module {
     private void onCanWalkOnFluid(CanWalkOnFluidEvent event) {
         if (mc.player != null && mc.player.isSwimming()) return;
 
-        if ((event.fluidState.getFluid() == Fluids.WATER || event.fluidState.getFluid() == Fluids.FLOWING_WATER) && waterShouldBeSolid()) {
+        if ((event.fluidState.getType() == Fluids.WATER || event.fluidState.getType() == Fluids.FLOWING_WATER) && waterShouldBeSolid()) {
             event.walkOnFluid = true;
-        }
-        else if ((event.fluidState.getFluid() == Fluids.LAVA || event.fluidState.getFluid() == Fluids.FLOWING_LAVA) && lavaShouldBeSolid()) {
+        } else if ((event.fluidState.getType() == Fluids.LAVA || event.fluidState.getType() == Fluids.FLOWING_LAVA) && lavaShouldBeSolid()) {
             event.walkOnFluid = true;
         }
     }
@@ -241,39 +240,39 @@ public class Jesus extends Module {
     private void onFluidCollisionShape(CollisionShapeEvent event) {
         if (event.state.getFluidState().isEmpty()) return;
 
-        if ((event.state.getBlock() == Blocks.WATER || event.state.getFluidState().getFluid() == Fluids.WATER) && !mc.player.isTouchingWater() && waterShouldBeSolid() && event.pos.getY() <= mc.player.getY() - 1) {
-            event.shape = VoxelShapes.fullCube();
+        if ((event.state.getBlock() == Blocks.WATER || event.state.getFluidState().getType() == Fluids.WATER) && !mc.player.isInWater() && waterShouldBeSolid() && event.pos.getY() <= mc.player.getY() - 1) {
+            event.shape = Shapes.block();
         } else if (event.state.getBlock() == Blocks.LAVA && !mc.player.isInLava() && lavaShouldBeSolid() && (isLavaDangerous() || event.pos.getY() <= mc.player.getY() - 1)) {
-            event.shape = VoxelShapes.fullCube();
+            event.shape = Shapes.block();
         }
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof PlayerMoveC2SPacket packet)) return;
-        if (mc.player.isTouchingWater() && !waterShouldBeSolid()) return;
+        if (!(event.packet instanceof ServerboundMovePlayerPacket packet)) return;
+        if (mc.player.isInWater() && !waterShouldBeSolid()) return;
         if (mc.player.isInLava() && !lavaShouldBeSolid()) return;
         if (!ncpBypass.get()) return;
 
         // Check inWater, fallDistance and if over liquid
-        Pair<Boolean, Boolean> overLiquid = isOverLiquid();
-        boolean shouldWork = (overLiquid.getLeft() && waterShouldBeSolid()) || (overLiquid.getRight() && lavaShouldBeSolid());
+        Tuple<Boolean, Boolean> overLiquid = isOverLiquid();
+        boolean shouldWork = (overLiquid.getA() && waterShouldBeSolid()) || (overLiquid.getB() && lavaShouldBeSolid());
 
-        if (mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.fallDistance > 3f || !shouldWork) return;
+        if (mc.player.isInWater() || mc.player.isInLava() || mc.player.fallDistance > 3f || !shouldWork) return;
 
-        ((PlayerMoveC2SPacketAccessor) packet).meteor$setOnGround(false);
-        if (!mc.player.isOnGround() || !packet.changesPosition()) return;
+        ((ServerboundMovePlayerPacketAccessor) packet).meteor$setOnGround(false);
+        if (!mc.player.onGround() || !packet.hasPosition()) return;
 
-        ((PlayerMoveC2SPacketAccessor) packet).meteor$setY(packet.getY(0) - (0.02 + (0.0001 * swimmingTicks)));
+        ((ServerboundMovePlayerPacketAccessor) packet).meteor$setY(packet.getY(0) - (0.02 + (0.0001 * swimmingTicks)));
     }
 
     @EventHandler
     private void onMoveEvent(PlayerMoveEvent event) {
         if (!ncpBypass.get()) return;
 
-        Pair<Boolean, Boolean> overLiquid = isOverLiquid();
-        boolean water = overLiquid.getLeft() && waterShouldBeSolid();
-        boolean lava  = overLiquid.getRight() && lavaShouldBeSolid();
+        Tuple<Boolean, Boolean> overLiquid = isOverLiquid();
+        boolean water = overLiquid.getA() && waterShouldBeSolid();
+        boolean lava = overLiquid.getB() && lavaShouldBeSolid();
 
         if (!water && !lava) {
             swimmingTicks = 0;
@@ -281,45 +280,45 @@ public class Jesus extends Module {
         }
 
         if (++swimmingTicks < 15) {
-            if (mc.player.isOnGround()) {
+            if (mc.player.onGround()) {
                 Vector2d vel = Strafe.transformStrafe(PlayerUtils.isMoving() ? 0.2873 : 0);
-                ((IVec3d) event.movement).meteor$setXZ(vel.x, vel.y);
+                ((IVec3) event.movement).meteor$setXZ(vel.x, vel.y);
             }
 
             return;
         }
 
         swimmingTicks = 0;
-        if (slowDown.get()) ((IVec3d) event.movement).meteor$setXZ(0, 0);
-        ((IVec3d) mc.player.getVelocity()).meteor$setY(0.08);
+        if (slowDown.get()) ((IVec3) event.movement).meteor$setXZ(0, 0);
+        ((IVec3) mc.player.getDeltaMovement()).meteor$setY(0.08);
     }
 
     private boolean waterShouldBeSolid() {
-        if (EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR || mc.player.getAbilities().flying) return false;
+        if (EntityUtils.getGameMode(mc.player) == GameType.SPECTATOR || mc.player.getAbilities().flying) return false;
 
         if (mc.player.getVehicle() != null) {
-            if (mc.player.getVehicle() instanceof AbstractBoatEntity) return false;
+            if (mc.player.getVehicle() instanceof AbstractBoat) return false;
         }
 
         if (Modules.get().get(Flight.class).isActive()) return false;
 
         if (dipIfBurning.get() && mc.player.isOnFire()) return false;
-        if (dipOnSneakWater.get() && mc.options.sneakKey.isPressed()) return false;
+        if (dipOnSneakWater.get() && mc.options.keyShift.isDown()) return false;
         if (dipOnFallWater.get() && mc.player.fallDistance > dipFallHeightWater.get()) return false;
 
         return waterMode.get() == Mode.Solid;
     }
 
     private boolean lavaShouldBeSolid() {
-        if (EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR || mc.player.getAbilities().flying) return false;
+        if (EntityUtils.getGameMode(mc.player) == GameType.SPECTATOR || mc.player.getAbilities().flying) return false;
 
         if (mc.player.getVehicle() != null) {
-            if (mc.player.getVehicle() instanceof StriderEntity) return false;
+            if (mc.player.getVehicle() instanceof Strider) return false;
         }
 
         if (isLavaDangerous() && lavaMode.get() == Mode.Solid) return true;
 
-        if (dipOnSneakLava.get() && mc.options.sneakKey.isPressed()) return false;
+        if (dipOnSneakLava.get() && mc.options.keyShift.isDown()) return false;
         if (dipOnFallLava.get() && mc.player.fallDistance > dipFallHeightLava.get()) return false;
 
         return lavaMode.get() == Mode.Solid;
@@ -327,18 +326,18 @@ public class Jesus extends Module {
 
     private boolean isLavaDangerous() {
         if (!dipIfFireResistant.get()) return true;
-        return !mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) || (!(mc.player.getStatusEffect(StatusEffects.FIRE_RESISTANCE).getDuration() > (15 * 20 * mc.player.getAttributeValue(EntityAttributes.BURNING_TIME))));
+        return !mc.player.hasEffect(MobEffects.FIRE_RESISTANCE) || (mc.player.getEffect(MobEffects.FIRE_RESISTANCE).getDuration() <= (15 * 20 * mc.player.getAttributeValue(Attributes.BURNING_TIME)));
     }
 
-    private Pair<Boolean, Boolean> isOverLiquid() {
-        Box box = mc.player.hasVehicle() ? mc.player.getBoundingBox().union(mc.player.getVehicle().getBoundingBox()) : mc.player.getBoundingBox();
-        BlockState[] states = mc.world.getStatesInBox(box.offset(0.0, -0.01, 0.0)).toArray(BlockState[]::new);
+    private Tuple<Boolean, Boolean> isOverLiquid() {
+        AABB box = mc.player.isPassenger() ? mc.player.getBoundingBox().minmax(mc.player.getVehicle().getBoundingBox()) : mc.player.getBoundingBox();
+        BlockState[] states = mc.level.getBlockStatesIfLoaded(box.move(0.0, -0.01, 0.0)).toArray(BlockState[]::new);
 
         boolean water = false, lava = false;
         boolean foundSolid = false;
 
         for (BlockState state : states) {
-            if (state.getBlock() == Blocks.WATER || state.getFluidState().getFluid() == Fluids.WATER) water = true;
+            if (state.getBlock() == Blocks.WATER || state.getFluidState().getType() == Fluids.WATER) water = true;
             else if (state.getBlock() == Blocks.LAVA) lava = true;
 
             else if (!state.isAir()) {
@@ -347,7 +346,7 @@ public class Jesus extends Module {
             }
         }
 
-        return new Pair<>(water && !foundSolid, lava && !foundSolid);
+        return new Tuple<>(water && !foundSolid, lava && !foundSolid);
     }
 
     public enum Mode {

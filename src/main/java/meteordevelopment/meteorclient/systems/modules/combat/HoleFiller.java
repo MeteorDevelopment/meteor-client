@@ -24,15 +24,15 @@ import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -240,7 +240,7 @@ public class HoleFiller extends Module {
         .build()
     );
 
-    private final List<PlayerEntity> targets = new ArrayList<>();
+    private final List<Player> targets = new ArrayList<>();
     private final List<Hole> holes = new ArrayList<>();
     private int timer;
 
@@ -259,11 +259,11 @@ public class HoleFiller extends Module {
         holes.clear();
 
         // Grab blocks from hotbar
-        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.byItem(itemStack.getItem())));
         if (!block.found()) return;
 
         // Probe for holes
-        BlockIterator.register(searchRadius.get(), searchRadius.get(), (blockPos, blockState) -> {
+        BlockIterator.register(searchRadius.get(), searchRadius.get(), (blockPos, _) -> {
             if (!validHole(blockPos)) return;
 
             int surroundBlocks = 0;
@@ -272,17 +272,17 @@ public class HoleFiller extends Module {
             for (Direction direction : Direction.values()) {
                 if (direction == Direction.UP) continue;
 
-                BlockState state = mc.world.getBlockState(blockPos.offset(direction));
+                BlockState state = mc.level.getBlockState(blockPos.relative(direction));
 
-                if (state.getBlock().getBlastResistance() >= 600) surroundBlocks++;
+                if (state.getBlock().getExplosionResistance() >= 600) surroundBlocks++;
                 else if (direction == Direction.DOWN) return;
-                else if (validHole(blockPos.offset(direction)) && air == null) {
+                else if (validHole(blockPos.relative(direction)) && air == null) {
                     for (Direction dir : Direction.values()) {
                         if (dir == direction.getOpposite() || dir == Direction.UP) continue;
 
-                        BlockState state1 = mc.world.getBlockState(blockPos.offset(direction).offset(dir));
+                        BlockState state1 = mc.level.getBlockState(blockPos.relative(direction).relative(dir));
 
-                        if (state1.getBlock().getBlastResistance() >= 600) surroundBlocks++;
+                        if (state1.getBlock().getExplosionResistance() >= 600) surroundBlocks++;
                         else return;
                     }
 
@@ -331,7 +331,7 @@ public class HoleFiller extends Module {
         if (!BlockUtils.canPlace(blockPos)) return false;
 
         // Hole must have air above it
-        if (!mc.world.getBlockState(blockPos.up()).isReplaceable()) return false;
+        if (!mc.level.getBlockState(blockPos.above()).canBeReplaced()) return false;
 
         // Check raycast and range
         if (isOutOfRange(blockPos)) return false;
@@ -348,50 +348,50 @@ public class HoleFiller extends Module {
     private void setTargets() {
         targets.clear();
 
-        for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player.squaredDistanceTo(mc.player) > Math.pow(targetRange.get(), 2) ||
+        for (Player player : mc.level.players()) {
+            if (player.distanceToSqr(mc.player) > Math.pow(targetRange.get(), 2) ||
                 player.isCreative() ||
                 player == mc.player ||
-                player.isDead() ||
+                player.isDeadOrDying() ||
                 !Friends.get().shouldAttack(player) ||
                 (ignoreSafe.get() && isSurrounded(player)) ||
-                (onlyMoving.get() && (player.getX() - player.lastX != 0 || player.getY() - player.lastY != 0 || player.getZ() - player.lastZ != 0))
+                (onlyMoving.get() && (player.getX() - player.xo != 0 || player.getY() - player.yo != 0 || player.getZ() - player.zo != 0))
             ) continue;
 
             targets.add(player);
         }
     }
 
-    private boolean isSurrounded(PlayerEntity target) {
+    private boolean isSurrounded(Player target) {
         for (Direction dir : DirectionAccessor.meteor$getHorizontal()) {
-            BlockPos blockPos = target.getBlockPos().offset(dir);
-            Block block = mc.world.getBlockState(blockPos).getBlock();
-            if (block.getBlastResistance() < 600) return false;
+            BlockPos blockPos = target.blockPosition().relative(dir);
+            Block block = mc.level.getBlockState(blockPos).getBlock();
+            if (block.getExplosionResistance() < 600) return false;
         }
 
         return true;
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3d pos = blockPos.toCenterPos().add(0, 0.499, 0); // Set to the top of the block as holes will be viewed from above
+        Vec3 pos = blockPos.getCenter().add(0, 0.499, 0); // Set to the top of the block as holes will be viewed from above
         if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
 
-        RaycastContext raycastContext = new RaycastContext(mc.player.getEyePos(), pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
-        BlockHitResult result = mc.world.raycast(raycastContext);
+        ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        BlockHitResult result = mc.level.clip(clipContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !PlayerUtils.isWithin(pos, placeWallsRange.get());
 
         return false;
     }
 
-    private boolean isCloseToHolePos(PlayerEntity target, BlockPos blockPos) {
-        Vec3d pos = target.getEntityPos();
+    private boolean isCloseToHolePos(Player target, BlockPos blockPos) {
+        Vec3 pos = target.position();
 
         // Prediction mode via target's movement delta
         if (predictMovement.get()) {
-            double dx = target.getX() - target.lastX;
-            double dy = target.getY() - target.lastY;
-            double dz = target.getZ() - target.lastZ;
+            double dx = target.getX() - target.xo;
+            double dy = target.getY() - target.yo;
+            double dz = target.getZ() - target.zo;
             pos = pos.add(dx * ticksToPredict.get(), dy * ticksToPredict.get(), dz * ticksToPredict.get());
         }
 
@@ -404,7 +404,7 @@ public class HoleFiller extends Module {
     }
 
     private static class Hole {
-        private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+        private final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
         private final byte exclude;
 
         public Hole(BlockPos blockPos, byte exclude) {

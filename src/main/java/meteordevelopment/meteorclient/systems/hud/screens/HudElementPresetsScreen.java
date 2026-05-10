@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.client.gui.DrawContext;
 import org.jetbrains.annotations.Nullable;
 
 public class HudElementPresetsScreen extends WindowScreen {
@@ -40,7 +39,7 @@ public class HudElementPresetsScreen extends WindowScreen {
         enterAction = () -> {
             if (firstPreset == null) return;
             Hud.get().add(firstPreset, x, y);
-            close();
+            onClose();
         };
     }
 
@@ -63,15 +62,10 @@ public class HudElementPresetsScreen extends WindowScreen {
             WPlus add = l.add(theme.plus()).expandCellX().right().widget();
             add.action = () -> {
                 Hud.get().add(preset, x, y);
-                close();
+                onClose();
             };
 
             if (firstPreset == null) firstPreset = preset;
         }
-    }
-
-    @Override
-    protected void onRenderBefore(DrawContext drawContext, float delta) {
-        HudEditorScreen.renderElements(drawContext);
     }
 }

@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
@@ -37,14 +37,14 @@ public class GenericSetting<T extends IGeneric<T>> extends Setting<T> {
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
+    public CompoundTag save(CompoundTag tag) {
         tag.put("value", get().toTag());
 
         return tag;
     }
 
     @Override
-    public T load(NbtCompound tag) {
+    public T load(CompoundTag tag) {
         get().fromTag(tag.getCompoundOrEmpty("value"));
 
         return get();

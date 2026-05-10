@@ -11,15 +11,15 @@ import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.screens.CommitsScreen;
-import meteordevelopment.meteorclient.mixininterface.IText;
+import meteordevelopment.meteorclient.mixininterface.IComponent;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.MeteorToast;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.Items;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.Items;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class TitleScreenCredits {
         for (MeteorAddon addon : AddonManager.ADDONS) add(addon);
 
         // Sort by width (Meteor always first)
-        credits.sort(Comparator.comparingInt(value -> value.addon == MeteorClient.ADDON ? Integer.MIN_VALUE : -mc.textRenderer.getWidth(value.text)));
+        credits.sort(Comparator.comparingInt(value -> value.addon == MeteorClient.ADDON ? Integer.MIN_VALUE : -mc.font.width(value.text)));
 
         // Check for latest commits
         MeteorExecutor.execute(() -> {
@@ -56,7 +56,7 @@ public class TitleScreenCredits {
                     case Http.UNAUTHORIZED -> {
                         String message = "Invalid authentication token for repository '%s'".formatted(repo.getOwnerName());
                         MeteorToast toast = new MeteorToast.Builder("GitHub: Unauthorized").icon(Items.BARRIER).text(message).build();
-                        mc.getToastManager().add(toast);
+                        mc.getToastManager().addToast(toast);
                         MeteorClient.LOG.warn(message);
                         if (System.getenv("meteor.github.authorization") == null) {
                             MeteorClient.LOG.info("Consider setting an authorization " +
@@ -64,13 +64,15 @@ public class TitleScreenCredits {
                             MeteorClient.LOG.info("See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens");
                         }
                     }
-                    case Http.FORBIDDEN -> MeteorClient.LOG.warn("Could not fetch updates for addon '{}': Rate-limited by GitHub.", credit.addon.name);
-                    case Http.NOT_FOUND -> MeteorClient.LOG.warn("Could not fetch updates for addon '{}': GitHub repository '{}' not found.", credit.addon.name, repo.getOwnerName());
+                    case Http.FORBIDDEN ->
+                        MeteorClient.LOG.warn("Could not fetch updates for addon '{}': Rate-limited by GitHub.", credit.addon.name);
+                    case Http.NOT_FOUND ->
+                        MeteorClient.LOG.warn("Could not fetch updates for addon '{}': GitHub repository '{}' not found.", credit.addon.name, repo.getOwnerName());
                     case Http.SUCCESS -> {
                         if (!credit.addon.getCommit().equals(res.body().commit.sha)) {
                             synchronized (credit.text) {
-                                credit.text.append(Text.literal("*").formatted(Formatting.RED));
-                                ((IText) ((Text) credit.text)).meteor$invalidateCache(); // ???
+                                credit.text.append(Component.literal("*").withStyle(ChatFormatting.RED));
+                                ((IComponent) ((Component) credit.text)).meteor$invalidateCache(); // ???
                             }
                         }
                     }
@@ -82,32 +84,32 @@ public class TitleScreenCredits {
     private static void add(MeteorAddon addon) {
         Credit credit = new Credit(addon);
 
-        credit.text.append(Text.literal(addon.name).styled(style -> style.withColor(addon.color.getPacked())));
-        credit.text.append(Text.literal(" by ").formatted(Formatting.GRAY));
+        credit.text.append(Component.literal(addon.name).withStyle(style -> style.withColor(addon.color.getPacked())));
+        credit.text.append(Component.literal(" by ").withStyle(ChatFormatting.GRAY));
 
         for (int i = 0; i < addon.authors.length; i++) {
             if (i > 0) {
-                credit.text.append(Text.literal(i == addon.authors.length - 1 ? " & " : ", ").formatted(Formatting.GRAY));
+                credit.text.append(Component.literal(i == addon.authors.length - 1 ? " & " : ", ").withStyle(ChatFormatting.GRAY));
             }
 
-            credit.text.append(Text.literal(addon.authors[i]).formatted(Formatting.WHITE));
+            credit.text.append(Component.literal(addon.authors[i]).withStyle(ChatFormatting.WHITE));
         }
 
         credits.add(credit);
     }
 
-    public static void render(DrawContext context) {
+    public static void render(GuiGraphicsExtractor graphics) {
         if (credits.isEmpty()) init();
 
         int y = 3;
         for (Credit credit : credits) {
             synchronized (credit.text) {
-                int x = mc.currentScreen.width - 3 - mc.textRenderer.getWidth(credit.text);
+                int x = mc.screen.width - 3 - mc.font.width(credit.text);
 
-                context.drawTextWithShadow(mc.textRenderer, credit.text, x, y, -1);
+                graphics.text(mc.font, credit.text, x, y, -1);
             }
 
-            y += mc.textRenderer.fontHeight + 2;
+            y += mc.font.lineHeight + 2;
         }
     }
 
@@ -116,19 +118,19 @@ public class TitleScreenCredits {
         for (Credit credit : credits) {
             int width;
             synchronized (credit.text) {
-                width = mc.textRenderer.getWidth(credit.text);
+                width = mc.font.width(credit.text);
             }
 
-            int x = mc.currentScreen.width - 3 - width;
+            int x = mc.screen.width - 3 - width;
 
-            if (mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + mc.textRenderer.fontHeight + 2) {
+            if (mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + mc.font.lineHeight + 2) {
                 if (credit.addon.getRepo() != null && credit.addon.getCommit() != null) {
                     mc.setScreen(new CommitsScreen(GuiThemes.get(), credit.addon));
                     return true;
                 }
             }
 
-            y += mc.textRenderer.fontHeight + 2;
+            y += mc.font.lineHeight + 2;
         }
 
         return false;
@@ -136,7 +138,7 @@ public class TitleScreenCredits {
 
     private static class Credit {
         public final MeteorAddon addon;
-        public final MutableText text = Text.empty();
+        public final MutableComponent text = Component.empty();
 
         public Credit(MeteorAddon addon) {
             this.addon = addon;

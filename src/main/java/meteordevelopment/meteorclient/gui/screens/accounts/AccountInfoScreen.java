@@ -33,7 +33,7 @@ public class AccountInfoScreen extends WindowScreen {
         if (account.getType() == AccountType.Session) tokenLabel = "";
 
         WButton copy = theme.button("Copy");
-        copy.action = () -> mc.keyboard.setClipboard(e.getToken());
+        copy.action = () -> mc.keyboardHandler.setClipboard(e.getToken());
 
         l.add(theme.label(tokenLabel));
         l.add(theme.label(account.getType() == AccountType.Session ? "Click to copy Token" : e.getToken()).color(Color.GRAY)).pad(5);

@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.player;
 
 import io.netty.channel.Channel;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.ClientConnectionAccessor;
+import meteordevelopment.meteorclient.mixin.ConnectionAccessor;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -15,12 +15,12 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 
 public class OffhandCrash extends Module {
-    private static final PlayerActionC2SPacket PACKET = new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, new BlockPos(0, 0, 0) , Direction.UP);
+    private static final ServerboundPlayerActionPacket PACKET = new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND, new BlockPos(0, 0, 0), Direction.UP);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -56,7 +56,7 @@ public class OffhandCrash extends Module {
     private void onTick(TickEvent.Post event) {
         if (!doCrash.get()) return;
 
-        Channel channel = ((ClientConnectionAccessor) mc.player.networkHandler.getConnection()).meteor$getChannel();
+        Channel channel = ((ConnectionAccessor) mc.player.connection.getConnection()).meteor$getChannel();
         for (int i = 0; i < speed.get(); ++i) channel.write(PACKET);
         channel.flush();
     }

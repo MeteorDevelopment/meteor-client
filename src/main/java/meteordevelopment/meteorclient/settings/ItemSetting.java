@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.item.Item;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -24,7 +24,7 @@ public class ItemSetting extends Setting<Item> {
 
     @Override
     protected Item parseImpl(String str) {
-        return parseId(Registries.ITEM, str);
+        return parseId(BuiltInRegistries.ITEM, str);
     }
 
     @Override
@@ -34,22 +34,22 @@ public class ItemSetting extends Setting<Item> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registries.ITEM.getIds();
+        return BuiltInRegistries.ITEM.keySet();
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
-        tag.putString("value", Registries.ITEM.getId(get()).toString());
+    public CompoundTag save(CompoundTag tag) {
+        tag.putString("value", BuiltInRegistries.ITEM.getKey(get()).toString());
 
         return tag;
     }
 
     @Override
-    public Item load(NbtCompound tag) {
-        value = Registries.ITEM.get(Identifier.of(tag.getString("value","")));
+    public Item load(CompoundTag tag) {
+        value = BuiltInRegistries.ITEM.getValue(Identifier.parse(tag.getStringOr("value", "")));
 
         if (filter != null && !filter.test(value)) {
-            for (Item item : Registries.ITEM) {
+            for (Item item : BuiltInRegistries.ITEM) {
                 if (filter.test(item)) {
                     value = item;
                     break;

@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.events.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 public class EntityRemovedEvent {
     private static final EntityRemovedEvent INSTANCE = new EntityRemovedEvent();

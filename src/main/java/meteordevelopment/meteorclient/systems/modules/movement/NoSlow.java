@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.Blocks;
 
 public class NoSlow extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -162,7 +162,7 @@ public class NoSlow extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (web.get() == WebMode.Timer) {
-            if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.COBWEB && !mc.player.isOnGround()) {
+            if (mc.level.getBlockState(mc.player.blockPosition()).getBlock() == Blocks.COBWEB && !mc.player.onGround()) {
                 resetTimer = false;
                 Modules.get().get(Timer.class).setOverride(webTimer.get());
             } else if (!resetTimer) {

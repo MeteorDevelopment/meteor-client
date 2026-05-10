@@ -5,23 +5,23 @@
 
 package meteordevelopment.meteorclient.utils.misc.input;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import meteordevelopment.meteorclient.MeteorClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyBinds {
-    private static final KeyBinding.Category CATEGORY = KeyBinding.Category.create(MeteorClient.identifier("meteor-client"));
+    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(MeteorClient.identifier("meteor-client"));
 
-    public static KeyBinding OPEN_GUI = new KeyBinding("key.meteor-client.open-gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, CATEGORY);
-    public static KeyBinding OPEN_COMMANDS = new KeyBinding("key.meteor-client.open-commands", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_PERIOD, CATEGORY);
+    public static KeyMapping OPEN_GUI = new KeyMapping("key.meteor-client.open-gui", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, CATEGORY);
+    public static KeyMapping OPEN_COMMANDS = new KeyMapping("key.meteor-client.open-commands", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_PERIOD, CATEGORY);
 
     private KeyBinds() {
     }
 
-    public static KeyBinding[] apply(KeyBinding[] binds) {
+    public static KeyMapping[] apply(KeyMapping[] binds) {
         // Add key binding
-        KeyBinding[] newBinds = new KeyBinding[binds.length + 2];
+        KeyMapping[] newBinds = new KeyMapping[binds.length + 2];
 
         System.arraycopy(binds, 0, newBinds, 0, binds.length);
         newBinds[binds.length] = OPEN_GUI;

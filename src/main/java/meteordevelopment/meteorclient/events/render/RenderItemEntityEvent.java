@@ -7,12 +7,12 @@ package meteordevelopment.meteorclient.events.render;
 
 import meteordevelopment.meteorclient.events.Cancellable;
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
-import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.state.ItemEntityRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.ItemEntity;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.state.ItemEntityRenderState;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.entity.item.ItemEntity;
 import org.jspecify.annotations.Nullable;
 
 public class RenderItemEntityEvent extends Cancellable {
@@ -22,13 +22,13 @@ public class RenderItemEntityEvent extends Cancellable {
     public ItemEntity itemEntity;
     public ItemEntityRenderState renderState;
     public float tickDelta;
-    public MatrixStack matrixStack;
-    public VertexConsumerProvider vertexConsumerProvider;
+    public PoseStack matrixStack;
+    public MultiBufferSource vertexConsumerProvider;
     public int light;
-    public ItemModelManager itemModelManager;
-    public OrderedRenderCommandQueue renderCommandQueue;
+    public ItemModelResolver itemModelManager;
+    public SubmitNodeCollector renderCommandQueue;
 
-    public static RenderItemEntityEvent get(ItemEntityRenderState renderState, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, ItemModelManager itemModelManager, OrderedRenderCommandQueue renderCommandQueue) {
+    public static RenderItemEntityEvent get(ItemEntityRenderState renderState, float tickDelta, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int light, ItemModelResolver itemModelManager, SubmitNodeCollector renderCommandQueue) {
         INSTANCE.setCancelled(false);
         INSTANCE.itemEntity = (ItemEntity) ((IEntityRenderState) renderState).meteor$getEntity();
         INSTANCE.renderState = renderState;

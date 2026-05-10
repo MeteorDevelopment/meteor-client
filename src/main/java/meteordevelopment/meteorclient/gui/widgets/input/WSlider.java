@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.gui.widgets.input;
 
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import net.minecraft.client.gui.Click;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 
 public abstract class WSlider extends WWidget {
     public Runnable action;
@@ -16,16 +16,16 @@ public abstract class WSlider extends WWidget {
     protected double value;
     protected double min, max;
 
-	// ghost slider for scrolling event
-	protected double scrollHandleX, scrollHandleY, scrollHandleH;
-	protected boolean scrollHandleMouseOver;
+    // ghost slider for scrolling event
+    protected double scrollHandleX, scrollHandleY, scrollHandleH;
+    protected boolean scrollHandleMouseOver;
 
     protected boolean handleMouseOver;
     protected boolean dragging;
     protected double valueAtDragStart;
 
     public WSlider(double value, double min, double max) {
-        this.value = MathHelper.clamp(value, min, max);
+        this.value = Mth.clamp(value, min, max);
         this.min = min;
         this.max = max;
     }
@@ -43,7 +43,7 @@ public abstract class WSlider extends WWidget {
     }
 
     @Override
-    public boolean onMouseClicked(Click click, boolean doubled) {
+    public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
         if (mouseOver && !doubled) {
             valueAtDragStart = value;
             double handleSize = handleSize();
@@ -67,21 +67,21 @@ public abstract class WSlider extends WWidget {
         double s2 = s / 2;
 
         double x = this.x + s2 + valueWidth - height / 2;
-        handleMouseOver =  mouseX >= x && mouseX <= x + height && mouseY >= y && mouseY <= y + height;
+        handleMouseOver = mouseX >= x && mouseX <= x + height && mouseY >= y && mouseY <= y + height;
 
-		if(!scrollHandleMouseOver) {
-			scrollHandleX = x;
-			scrollHandleY = y;
-			scrollHandleH = height;
-			if(handleMouseOver) {
-				scrollHandleMouseOver = true;
-			}
-		} else {
-			scrollHandleMouseOver = mouseX >= scrollHandleX &&
-									mouseX <= scrollHandleX + scrollHandleH &&
-									mouseY >= scrollHandleY &&
-									mouseY <= scrollHandleY + scrollHandleH;
-		}
+        if (!scrollHandleMouseOver) {
+            scrollHandleX = x;
+            scrollHandleY = y;
+            scrollHandleH = height;
+            if (handleMouseOver) {
+                scrollHandleMouseOver = true;
+            }
+        } else {
+            scrollHandleMouseOver = mouseX >= scrollHandleX &&
+                mouseX <= scrollHandleX + scrollHandleH &&
+                mouseY >= scrollHandleY &&
+                mouseY <= scrollHandleY + scrollHandleH;
+        }
 
         boolean mouseOverX = mouseX >= this.x + s2 && mouseX <= this.x + s2 + width - s;
         mouseOver = mouseOverX && mouseY >= this.y && mouseY <= this.y + height;
@@ -89,7 +89,7 @@ public abstract class WSlider extends WWidget {
         if (dragging) {
             if (mouseOverX) {
                 valueWidth += mouseX - lastMouseX;
-                valueWidth = MathHelper.clamp(valueWidth, 0, width - s);
+                valueWidth = Mth.clamp(valueWidth, 0, width - s);
 
                 set((valueWidth / (width - s)) * (max - min) + min);
                 if (action != null) action.run();
@@ -106,7 +106,7 @@ public abstract class WSlider extends WWidget {
     }
 
     @Override
-    public boolean onMouseReleased(Click click) {
+    public boolean onMouseReleased(MouseButtonEvent click) {
         if (dragging) {
             if (value != valueAtDragStart && actionOnRelease != null) {
                 actionOnRelease.run();
@@ -120,35 +120,34 @@ public abstract class WSlider extends WWidget {
         return false;
     }
 
-	@Override
-	public boolean onMouseScrolled(double amount) {
-		// when user starts to scroll over regular handle
-		// remember its position and check only this "ghost"
-		// position to allow scroll (until it leaves ghost area)
-		if (!scrollHandleMouseOver && handleMouseOver) {
-			scrollHandleX = x;
-			scrollHandleY = y;
-			scrollHandleH = height;
-			scrollHandleMouseOver = true;
-		}
+    @Override
+    public boolean onMouseScrolled(double amount) {
+        // when user starts to scroll over regular handle
+        // remember its position and check only this "ghost"
+        // position to allow scroll (until it leaves ghost area)
+        if (!scrollHandleMouseOver && handleMouseOver) {
+            scrollHandleX = x;
+            scrollHandleY = y;
+            scrollHandleH = height;
+            scrollHandleMouseOver = true;
+        }
 
-		if (scrollHandleMouseOver) {
-			if (parent instanceof WIntEdit) {
-				set(value + amount);
-			}
-			else {
-				set(value + 0.05 * amount);
-			}
+        if (scrollHandleMouseOver) {
+            if (parent instanceof WIntEdit) {
+                set(value + amount);
+            } else {
+                set(value + 0.05 * amount);
+            }
 
-			if (action != null) action.run();
-			return true;
-		}
+            if (action != null) action.run();
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
     public void set(double value) {
-        this.value = MathHelper.clamp(value, min, max);
+        this.value = Mth.clamp(value, min, max);
     }
 
     public double get() {

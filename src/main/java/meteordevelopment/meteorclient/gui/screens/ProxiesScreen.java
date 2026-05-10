@@ -151,10 +151,8 @@ public class ProxiesScreen extends WindowScreen {
             if (timer > 2) {
                 refreshButton.set(getNext(refreshButton));
                 timer = 0;
-            }
-            else timer++;
-        }
-        else {
+            } else timer++;
+        } else {
             if (!refreshButton.getText().equals("Refresh")) {
                 refreshButton.set("Refresh");
             }
@@ -163,7 +161,7 @@ public class ProxiesScreen extends WindowScreen {
             }
         }
 
-        for (Map.Entry<Proxy, WLabel> entry : statuses.entrySet()) {
+        for (var entry : statuses.entrySet()) {
             Proxy proxy = entry.getKey();
             WLabel label = entry.getValue();
 

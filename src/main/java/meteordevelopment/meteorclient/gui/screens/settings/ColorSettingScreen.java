@@ -20,13 +20,13 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.gui.Click;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.Mth;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ColorSettingScreen extends WindowScreen {
-    private static final Color[] HUE_COLORS = { new Color(255, 0, 0), new Color(255, 255, 0), new Color(0, 255, 0), new Color(0, 255, 255), new Color(0, 0, 255), new Color(255, 0, 255), new Color(255, 0, 0) };
+    private static final Color[] HUE_COLORS = {new Color(255, 0, 0), new Color(255, 255, 0), new Color(0, 255, 0), new Color(0, 255, 255), new Color(0, 0, 255), new Color(255, 0, 255), new Color(255, 0, 0)};
     private static final Color WHITE = new Color(255, 255, 255);
     private static final Color BLACK = new Color(0, 0, 0);
 
@@ -93,7 +93,7 @@ public class ColorSettingScreen extends WindowScreen {
         WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
 
         WButton backButton = bottomList.add(theme.button("Back")).expandX().widget();
-        backButton.action = this::close;
+        backButton.action = this::onClose;
 
         WButton copyButton = bottomList.add(theme.button(GuiRenderer.COPY)).widget();
         copyButton.action = this::toClipboard;
@@ -171,7 +171,7 @@ public class ColorSettingScreen extends WindowScreen {
         double b = 0;
         boolean calculated = false;
 
-        if(brightnessQuad.saturation <= 0.0) {
+        if (brightnessQuad.saturation <= 0.0) {
             r = brightnessQuad.value;
             g = brightnessQuad.value;
             b = brightnessQuad.value;
@@ -278,7 +278,7 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        public boolean onMouseClicked(Click click, boolean doubled) {
+        public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
             if (doubled) return false;
 
             if (mouseOver) {
@@ -296,7 +296,7 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        public boolean onMouseReleased(Click click) {
+        public boolean onMouseReleased(MouseButtonEvent click) {
             if (dragging) {
                 dragging = false;
                 setFocused(false);
@@ -366,7 +366,7 @@ public class ColorSettingScreen extends WindowScreen {
     @Override
     public boolean fromClipboard() {
         if (!NbtUtils.fromClipboard(setting.get())) {
-            String clipboard = mc.keyboard.getClipboard().trim();
+            String clipboard = mc.keyboardHandler.getClipboard().trim();
             SettingColor parsed;
 
             parsed = parseRGBA(clipboard);
@@ -396,8 +396,7 @@ public class ColorSettingScreen extends WindowScreen {
         try {
             color = new SettingColor(Integer.parseInt(rgba[0]), Integer.parseInt(rgba[1]), Integer.parseInt(rgba[2]));
             if (rgba.length == 4) color.a = Integer.parseInt(rgba[3]);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             return null;
         }
 
@@ -413,8 +412,7 @@ public class ColorSettingScreen extends WindowScreen {
         try {
             color = new SettingColor(Integer.parseInt(hex.substring(0, 2), 16), Integer.parseInt(hex.substring(2, 4), 16), Integer.parseInt(hex.substring(4, 6), 16));
             if (hex.length() == 8) color.a = Integer.parseInt(hex.substring(6, 8), 16);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             return null;
         }
 
@@ -445,10 +443,10 @@ public class ColorSettingScreen extends WindowScreen {
             double min, max, delta;
 
             min = Math.min(c.r, c.g);
-            min = min  < c.b ? min  : c.b;
+            min = min < c.b ? min : c.b;
 
             max = Math.max(c.r, c.g);
-            max = max  > c.b ? max  : c.b;
+            max = max > c.b ? max : c.b;
 
             delta = max - min;
             if (delta < 0.00001) {
@@ -500,7 +498,7 @@ public class ColorSettingScreen extends WindowScreen {
             int i;
 
             hh = hueAngle;
-            if(hh >= 360.0) hh = 0.0;
+            if (hh >= 360.0) hh = 0.0;
             hh /= 60.0;
             i = (int) hh;
             ff = hh - i;
@@ -552,7 +550,7 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        public boolean onMouseClicked(Click click, boolean doubled) {
+        public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
             if (doubled) return false;
 
             if (mouseOver) {
@@ -570,7 +568,7 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        public boolean onMouseReleased(Click click) {
+        public boolean onMouseReleased(MouseButtonEvent click) {
             if (dragging) {
                 dragging = false;
                 setFocused(false);
@@ -584,7 +582,7 @@ public class ColorSettingScreen extends WindowScreen {
             if (dragging) {
                 if (mouseX >= this.x && mouseX <= this.x + width) {
                     handleX += mouseX - lastMouseX;
-                    handleX = MathHelper.clamp(handleX, 0, width);
+                    handleX = Mth.clamp(handleX, 0, width);
                 } else {
                     if (handleX > 0 && mouseX < this.x) handleX = 0;
                     else if (handleX < width && mouseX > this.x + width) handleX = width;

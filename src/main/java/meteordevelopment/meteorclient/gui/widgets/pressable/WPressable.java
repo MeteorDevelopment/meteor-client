@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.gui.widgets.pressable;
 
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.MouseButtonEvent;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
@@ -17,13 +17,14 @@ public abstract class WPressable extends WWidget {
     protected boolean pressed;
 
     @Override
-    public boolean onMouseClicked(Click click, boolean doubled) {
-        if (mouseOver && (click.button() == GLFW_MOUSE_BUTTON_LEFT || click.button() == GLFW_MOUSE_BUTTON_RIGHT)) pressed = true;
+    public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
+        if (mouseOver && (click.button() == GLFW_MOUSE_BUTTON_LEFT || click.button() == GLFW_MOUSE_BUTTON_RIGHT))
+            pressed = true;
         return pressed;
     }
 
     @Override
-    public boolean onMouseReleased(Click click) {
+    public boolean onMouseReleased(MouseButtonEvent click) {
         if (pressed) {
             onPressed(click.button());
             if (action != null) action.run();
@@ -34,5 +35,6 @@ public abstract class WPressable extends WWidget {
         return false;
     }
 
-    protected void onPressed(int button) {}
+    protected void onPressed(int button) {
+    }
 }

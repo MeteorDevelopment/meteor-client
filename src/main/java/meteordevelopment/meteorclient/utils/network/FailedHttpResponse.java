@@ -36,7 +36,7 @@ public record FailedHttpResponse<T>(HttpRequest request, Exception exception) im
 
     @Override
     public HttpHeaders headers() {
-        return HttpHeaders.of(Map.of(), (s1, s2) -> true);
+        return HttpHeaders.of(Map.of(), (_, _) -> true);
     }
 
     @Override

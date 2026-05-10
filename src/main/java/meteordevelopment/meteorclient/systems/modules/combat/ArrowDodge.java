@@ -12,13 +12,13 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.simulator.ProjectileEntitySimulator;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.entity.projectile.SpectralArrowEntity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.entity.projectile.arrow.SpectralArrow;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
@@ -84,15 +84,15 @@ public class ArrowDodge extends Module {
         .build()
     );
 
-    private final List<Vec3d> possibleMoveDirections = Arrays.asList(
-        new Vec3d(1, 0, 1),
-        new Vec3d(0, 0, 1),
-        new Vec3d(-1, 0, 1),
-        new Vec3d(1, 0, 0),
-        new Vec3d(-1, 0, 0),
-        new Vec3d(1, 0, -1),
-        new Vec3d(0, 0, -1),
-        new Vec3d(-1, 0, -1)
+    private final List<Vec3> possibleMoveDirections = Arrays.asList(
+        new Vec3(1, 0, 1),
+        new Vec3(0, 0, 1),
+        new Vec3(-1, 0, 1),
+        new Vec3(1, 0, 0),
+        new Vec3(-1, 0, 0),
+        new Vec3(1, 0, -1),
+        new Vec3(0, 0, -1),
+        new Vec3(-1, 0, -1)
     );
 
     private final ProjectileEntitySimulator simulator = new ProjectileEntitySimulator();
@@ -108,12 +108,13 @@ public class ArrowDodge extends Module {
         vec3s.freeAll(points);
         points.clear();
 
-        for (Entity e : mc.world.getEntities()) {
-            if (!(e instanceof ProjectileEntity projectile)) continue;
-            if (!allProjectiles.get() && !(projectile instanceof ArrowEntity || projectile instanceof SpectralArrowEntity)) continue;
+        for (Entity e : mc.level.entitiesForRendering()) {
+            if (!(e instanceof Projectile projectile)) continue;
+            if (!allProjectiles.get() && !(projectile instanceof Arrow || projectile instanceof SpectralArrow))
+                continue;
             if (ignoreOwn.get()) {
                 Entity owner = projectile.getOwner();
-                if (owner != null && owner.getUuid().equals(mc.player.getUuid())) continue;
+                if (owner != null && owner.getUUID().equals(mc.player.getUUID())) continue;
             }
 
             if (!simulator.set(projectile)) continue;
@@ -123,14 +124,14 @@ public class ArrowDodge extends Module {
             }
         }
 
-        if (isValid(Vec3d.ZERO, false)) return; // no need to move
+        if (isValid(Vec3.ZERO, false)) return; // no need to move
 
         double speed = moveSpeed.get();
         for (int i = 0; i < 500; i++) { // it's not a while loop so it doesn't freeze if something is wrong
             boolean didMove = false;
             Collections.shuffle(possibleMoveDirections); //Make the direction unpredictable
-            for (Vec3d direction : possibleMoveDirections) {
-                Vec3d velocity = direction.multiply(speed);
+            for (Vec3 direction : possibleMoveDirections) {
+                Vec3 velocity = direction.scale(speed);
                 if (isValid(velocity, true)) {
                     move(velocity);
                     didMove = true;
@@ -143,41 +144,42 @@ public class ArrowDodge extends Module {
 
     }
 
-    private void move(Vec3d vel) {
+    private void move(Vec3 vel) {
         move(vel.x, vel.y, vel.z);
     }
 
     private void move(double velX, double velY, double velZ) {
         switch (moveType.get()) {
-            case Velocity -> mc.player.setVelocity(velX, velY, velZ);
+            case Velocity -> mc.player.setDeltaMovement(velX, velY, velZ);
             case Packet -> {
-                Vec3d newPos = mc.player.getEntityPos().add(velX, velY, velZ);
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y, newPos.z, false, mc.player.horizontalCollision));
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y - 0.01, newPos.z, true, mc.player.horizontalCollision));
+                Vec3 newPos = mc.player.position().add(velX, velY, velZ);
+                mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(newPos.x, newPos.y, newPos.z, false, mc.player.horizontalCollision));
+                mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(newPos.x, newPos.y - 0.01, newPos.z, true, mc.player.horizontalCollision));
             }
         }
     }
 
-    private boolean isValid(Vec3d velocity, boolean checkGround) {
-        Vec3d playerPos = mc.player.getEntityPos().add(velocity);
-        Vec3d headPos = playerPos.add(0, 1, 0);
+    private boolean isValid(Vec3 velocity, boolean checkGround) {
+        Vec3 playerPos = mc.player.position().add(velocity);
+        Vec3 headPos = playerPos.add(0, 1, 0);
 
         for (Vector3d pos : points) {
-            Vec3d projectilePos = new Vec3d(pos.x, pos.y, pos.z);
-            if (projectilePos.isInRange(playerPos, distanceCheck.get())) return false;
-            if (projectilePos.isInRange(headPos, distanceCheck.get())) return false;
+            Vec3 projectilePos = new Vec3(pos.x, pos.y, pos.z);
+            if (projectilePos.closerThan(playerPos, distanceCheck.get())) return false;
+            if (projectilePos.closerThan(headPos, distanceCheck.get())) return false;
         }
 
         if (checkGround) {
-            BlockPos blockPos = mc.player.getBlockPos().add(BlockPos.ofFloored(velocity.x, velocity.y, velocity.z));
+            BlockPos blockPos = mc.player.blockPosition().offset(BlockPos.containing(velocity.x, velocity.y, velocity.z));
 
             // check if target pos is air
-            if (!mc.world.getBlockState(blockPos).getCollisionShape(mc.world, blockPos).isEmpty()) return false;
-            else if (!mc.world.getBlockState(blockPos.up()).getCollisionShape(mc.world, blockPos.up()).isEmpty()) return false;
+            if (!mc.level.getBlockState(blockPos).getCollisionShape(mc.level, blockPos).isEmpty()) return false;
+            else if (!mc.level.getBlockState(blockPos.above()).getCollisionShape(mc.level, blockPos.above()).isEmpty())
+                return false;
 
             if (groundCheck.get()) {
                 // check if ground under target is solid
-                return !mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()).isEmpty();
+                return !mc.level.getBlockState(blockPos.below()).getCollisionShape(mc.level, blockPos.below()).isEmpty();
             }
 
         }

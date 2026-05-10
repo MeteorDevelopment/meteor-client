@@ -11,16 +11,16 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 
 public class ElytraFlightMode {
-    protected final MinecraftClient mc;
+    protected final Minecraft mc;
     protected final ElytraFly elytraFly;
     private final ElytraFlightModes type;
 
@@ -30,12 +30,12 @@ public class ElytraFlightMode {
     protected int jumpTimer;
     protected double velX, velY, velZ;
     protected double ticksLeft;
-    protected Vec3d forward, right;
+    protected Vec3 forward, right;
     protected double acceleration;
 
     public ElytraFlightMode(ElytraFlightModes type) {
         this.elytraFly = Modules.get().get(ElytraFly.class);
-        this.mc = MinecraftClient.getInstance();
+        this.mc = Minecraft.getInstance();
         this.type = type;
     }
 
@@ -49,11 +49,11 @@ public class ElytraFlightMode {
         }
 
         if (elytraFly.replace.get()) {
-            ItemStack chestStack = mc.player.getEquippedStack(EquipmentSlot.CHEST);
+            ItemStack chestStack = mc.player.getItemBySlot(EquipmentSlot.CHEST);
 
             if (chestStack.getItem() == Items.ELYTRA) {
-                if (chestStack.getMaxDamage() - chestStack.getDamage() <= elytraFly.replaceDurability.get()) {
-                    FindItemResult elytra = InvUtils.find(stack -> stack.getMaxDamage() - stack.getDamage() > elytraFly.replaceDurability.get() && stack.getItem() == Items.ELYTRA);
+                if (chestStack.getMaxDamage() - chestStack.getDamageValue() <= elytraFly.replaceDurability.get()) {
+                    FindItemResult elytra = InvUtils.find(stack -> stack.getMaxDamage() - stack.getDamageValue() > elytraFly.replaceDurability.get() && stack.getItem() == Items.ELYTRA);
 
                     InvUtils.move().from(elytra.slot()).toArmor(2);
                 }
@@ -86,11 +86,11 @@ public class ElytraFlightMode {
     public void autoTakeoff() {
         if (incrementJumpTimer) jumpTimer++;
 
-        boolean jumpPressed = mc.options.jumpKey.isPressed();
+        boolean jumpPressed = mc.options.keyJump.isDown();
 
         if ((elytraFly.autoTakeOff.get() && elytraFly.flightMode.get() != ElytraFlightModes.Pitch40 && elytraFly.flightMode.get() != ElytraFlightModes.Bounce) ||
             (!elytraFly.manualTakeoff.get() && elytraFly.flightMode.get() == ElytraFlightModes.Bounce) && jumpPressed) {
-            if (!lastJumpPressed && !mc.player.isGliding()) {
+            if (!lastJumpPressed && !mc.player.isFallFlying()) {
                 jumpTimer = 0;
                 incrementJumpTimer = true;
             }
@@ -100,8 +100,8 @@ public class ElytraFlightMode {
                 incrementJumpTimer = false;
                 mc.player.setJumping(false);
                 mc.player.setSprinting(true);
-                mc.player.jump();
-                mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+                mc.player.jumpFromGround();
+                mc.getConnection().send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
             }
         }
 
@@ -109,10 +109,10 @@ public class ElytraFlightMode {
     }
 
     public void handleAutopilot() {
-        if (!mc.player.isGliding()) return;
+        if (!mc.player.isFallFlying()) return;
 
         if (elytraFly.autoPilot.get() && mc.player.getY() > elytraFly.autoPilotMinimumHeight.get() && elytraFly.flightMode.get() != ElytraFlightModes.Bounce) {
-            mc.options.forwardKey.setPressed(true);
+            mc.options.keyUp.setDown(true);
             lastForwardPressed = true;
         }
 
@@ -124,13 +124,13 @@ public class ElytraFlightMode {
                 if (!itemResult.found()) return;
 
                 if (itemResult.isOffhand()) {
-                    mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
-                    mc.player.swingHand(Hand.OFF_HAND);
+                    mc.gameMode.useItem(mc.player, InteractionHand.OFF_HAND);
+                    mc.player.swing(InteractionHand.OFF_HAND);
                 } else {
                     InvUtils.swap(itemResult.slot(), true);
 
-                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                    mc.player.swingHand(Hand.MAIN_HAND);
+                    mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
+                    mc.player.swing(InteractionHand.MAIN_HAND);
 
                     InvUtils.swapBack();
                 }
@@ -143,21 +143,21 @@ public class ElytraFlightMode {
         boolean a = false;
         boolean b = false;
 
-        if (mc.options.forwardKey.isPressed()) {
+        if (mc.options.keyUp.isDown()) {
             velX += forward.x * getSpeed() * 10;
             velZ += forward.z * getSpeed() * 10;
             a = true;
-        } else if (mc.options.backKey.isPressed()) {
+        } else if (mc.options.keyDown.isDown()) {
             velX -= forward.x * getSpeed() * 10;
             velZ -= forward.z * getSpeed() * 10;
             a = true;
         }
 
-        if (mc.options.rightKey.isPressed()) {
+        if (mc.options.keyRight.isDown()) {
             velX += right.x * getSpeed() * 10;
             velZ += right.z * getSpeed() * 10;
             b = true;
-        } else if (mc.options.leftKey.isPressed()) {
+        } else if (mc.options.keyLeft.isDown()) {
             velX -= right.x * getSpeed() * 10;
             velZ -= right.z * getSpeed() * 10;
             b = true;
@@ -171,8 +171,8 @@ public class ElytraFlightMode {
     }
 
     public void handleVerticalSpeed(PlayerMoveEvent event) {
-        if (mc.options.jumpKey.isPressed()) velY += 0.5 * elytraFly.verticalSpeed.get();
-        else if (mc.options.sneakKey.isPressed()) velY -= 0.5 * elytraFly.verticalSpeed.get();
+        if (mc.options.keyJump.isDown()) velY += 0.5 * elytraFly.verticalSpeed.get();
+        else if (mc.options.keyShift.isDown()) velY -= 0.5 * elytraFly.verticalSpeed.get();
     }
 
     public void handleFallMultiplier() {

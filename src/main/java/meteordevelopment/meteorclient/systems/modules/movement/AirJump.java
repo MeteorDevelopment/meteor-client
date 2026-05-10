@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -35,30 +35,29 @@ public class AirJump extends Module {
 
     @Override
     public void onActivate() {
-        level = mc.player.getBlockPos().getY();
+        level = mc.player.blockPosition().getY();
     }
 
     @EventHandler
-    private void onKey(KeyEvent event) {
-        if (Modules.get().isActive(Freecam.class) || mc.currentScreen != null || mc.player.isOnGround()) return;
+    private void onKey(KeyInputEvent event) {
+        if (Modules.get().isActive(Freecam.class) || mc.screen != null || mc.player.onGround()) return;
 
         if (event.action != KeyAction.Press) return;
 
-        if (mc.options.jumpKey.matchesKey(event.input)) {
-            level = mc.player.getBlockPos().getY();
-            mc.player.jump();
-        }
-        else if (mc.options.sneakKey.matchesKey(event.input)) {
+        if (mc.options.keyJump.matches(event.input)) {
+            level = mc.player.blockPosition().getY();
+            mc.player.jumpFromGround();
+        } else if (mc.options.keyShift.matches(event.input)) {
             level--;
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (Modules.get().isActive(Freecam.class) || mc.player.isOnGround()) return;
+        if (Modules.get().isActive(Freecam.class) || mc.player.onGround()) return;
 
-        if (maintainLevel.get() && mc.player.getBlockPos().getY() == level && mc.options.jumpKey.isPressed()) {
-            mc.player.jump();
+        if (maintainLevel.get() && mc.player.blockPosition().getY() == level && mc.options.keyJump.isDown()) {
+            mc.player.jumpFromGround();
         }
     }
 }
