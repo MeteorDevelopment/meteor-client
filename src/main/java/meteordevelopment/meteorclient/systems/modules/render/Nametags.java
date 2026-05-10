@@ -364,18 +364,16 @@ public class Nametags extends Module {
             Utils.set(pos, entity, event.tickDelta);
             pos.add(0, getHeight(entity), 0);
 
-            EntityType<?> type = entity.getType();
-
             if (NametagUtils.to2D(pos, scale.get())) {
-                if (type == EntityType.PLAYER) renderNametagPlayer(event, (Player) entity, shadow);
-                else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getItem(), shadow);
-                else if (type == EntityType.ITEM_FRAME || type == EntityType.GLOW_ITEM_FRAME)
-                    renderNametagItem(((ItemFrame) entity).getItem(), shadow);
-                else if (type == EntityType.TNT) renderTntNametag(ticksToTime(((PrimedTnt) entity).getFuse()), shadow);
-                else if (type == EntityType.TNT_MINECART && ((MinecartTNT) entity).isPrimed())
-                    renderTntNametag(ticksToTime(((MinecartTNT) entity).getFuse()), shadow);
-                else if (entity instanceof LivingEntity livingEntity) renderGenericLivingNametag(livingEntity, shadow);
-                else renderGenericNametag(entity, shadow);
+                switch (entity) {
+                    case Player player -> renderNametagPlayer(event, player, shadow);
+                    case ItemEntity item -> renderNametagItem(item.getItem(), shadow);
+                    case ItemFrame itemFrame -> renderNametagItem(itemFrame.getItem(), shadow);
+                    case PrimedTnt tnt -> renderTntNametag(ticksToTime(tnt.getFuse()), shadow);
+                    case MinecartTNT minecartTNT -> renderTntNametag(ticksToTime(minecartTNT.getFuse()), shadow);
+                    case LivingEntity living -> renderGenericLivingNametag(living, shadow);
+                    default -> renderGenericNametag(entity, shadow);
+                }
             }
         }
     }
