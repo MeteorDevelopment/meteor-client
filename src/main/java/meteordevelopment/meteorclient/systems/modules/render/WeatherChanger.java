@@ -43,9 +43,7 @@ public class WeatherChanger extends Module {
 
     @Override
     public void onActivate() {
-        if (mc.level == null) {
-            return;
-        }
+        if (mc.level == null) return;
 
         oldThunderLevel = mc.level.getThunderLevel(1f);
         oldRainLevel = mc.level.getRainLevel(1f);
@@ -53,9 +51,7 @@ public class WeatherChanger extends Module {
 
     @Override
     public void onDeactivate() {
-        if (mc.level == null) {
-            return;
-        }
+        if (mc.level == null) return;
 
         mc.level.setRainLevel(oldRainLevel);
         mc.level.setThunderLevel(oldThunderLevel);
@@ -63,30 +59,30 @@ public class WeatherChanger extends Module {
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.packet instanceof ClientboundGameEventPacket packet) {
-            ClientboundGameEventPacket.Type type = packet.getEvent();
+        if (!(event.packet instanceof ClientboundGameEventPacket packet)) return;
 
-            if (type == ClientboundGameEventPacket.START_RAINING
-                || type == ClientboundGameEventPacket.STOP_RAINING
-                || type == ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE
-                || type == ClientboundGameEventPacket.RAIN_LEVEL_CHANGE) {
+        ClientboundGameEventPacket.Type type = packet.getEvent();
+        if (!isWeatherPacket(type)) return;
 
-                if (type == ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE) {
-                    oldThunderLevel = packet.getParam();
-                } else if (type == ClientboundGameEventPacket.RAIN_LEVEL_CHANGE) {
-                    oldRainLevel = packet.getParam();
-                }
-
-                event.cancel();
-            }
+        if (type == ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE) {
+            oldThunderLevel = packet.getParam();
+        } else if (type == ClientboundGameEventPacket.RAIN_LEVEL_CHANGE) {
+            oldRainLevel = packet.getParam();
         }
+
+        event.cancel();
+    }
+
+    private boolean isWeatherPacket(ClientboundGameEventPacket.Type type) {
+        return type == ClientboundGameEventPacket.START_RAINING
+            || type == ClientboundGameEventPacket.STOP_RAINING
+            || type == ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE
+            || type == ClientboundGameEventPacket.RAIN_LEVEL_CHANGE;
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.level == null) {
-            return;
-        }
+        if (mc.level == null) return;
 
         mc.level.setRainLevel(rainLevel.get().floatValue());
         mc.level.setThunderLevel(thunderLevel.get().floatValue());
