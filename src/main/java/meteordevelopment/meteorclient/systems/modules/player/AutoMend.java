@@ -29,6 +29,7 @@ public class AutoMend extends Module {
         .name("blacklist")
         .description("Item blacklist.")
         .filter(item -> item.components().get(DataComponents.DAMAGE) != null)
+        .bypassFilterWhenSavingAndLoading()                                                        
         .build()
     );
 

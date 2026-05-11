@@ -17,7 +17,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.protocol.game.ServerboundAttackPacket;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.world.entity.Entity;
@@ -61,7 +60,7 @@ public class Criticals extends Module {
         .build()
     );
 
-    private ServerboundInteractPacket attackPacket;
+    private ServerboundAttackPacket attackPacket;
     private ServerboundSwingPacket swingPacket;
     private boolean sendPackets;
     private int sendTimer;
@@ -116,10 +115,10 @@ public class Criticals extends Module {
                     case Jump, MiniJump -> {
                         if (!sendPackets) {
                             sendPackets = true;
-                            attackPacket = (ServerboundInteractPacket) event.packet;
+                            attackPacket = (ServerboundAttackPacket) event.packet;
 
                             if (mode.get() == Mode.Jump) {
-                                mc.player.isJumping();
+                                mc.player.jumpFromGround();
                                 waitingForPeak = true;
                                 lastY = mc.player.getY();
                             } else {

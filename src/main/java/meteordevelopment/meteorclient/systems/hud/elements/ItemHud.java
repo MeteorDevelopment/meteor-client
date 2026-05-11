@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.world.item.Item;
@@ -90,7 +91,7 @@ public class ItemHud extends HudElement {
 
     @Override
     public void render(HudRenderer renderer) {
-        ItemStack itemStack = new ItemStack(item.get(), InvUtils.find(item.get()).count());
+        ItemStack itemStack = DisplayItemUtils.toStack(item.get(), InvUtils.find(item.get()).count());
 
         if (noneMode.get() == NoneMode.HideItem && itemStack.isEmpty()) {
             if (isInEditor()) {

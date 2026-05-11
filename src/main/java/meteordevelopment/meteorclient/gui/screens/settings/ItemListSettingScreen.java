@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSe
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.ItemListSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -31,7 +32,7 @@ public class ItemListSettingScreen extends CollectionListSettingScreen<Item> {
 
     @Override
     protected WWidget getValueWidget(Item value) {
-        return theme.itemWithLabel(value.getDefaultInstance());
+        return theme.itemWithLabel(DisplayItemUtils.toStack(value));
     }
 
     @Override

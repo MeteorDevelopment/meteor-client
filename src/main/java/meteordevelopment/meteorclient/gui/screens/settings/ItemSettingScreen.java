@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.ItemSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -52,7 +53,7 @@ public class ItemSettingScreen extends WindowScreen {
             if (setting.filter != null && !setting.filter.test(item)) continue;
             if (item == Items.AIR) continue;
 
-            WItemWithLabel itemLabel = theme.itemWithLabel(item.getDefaultInstance(), Names.get(item));
+            WItemWithLabel itemLabel = theme.itemWithLabel(DisplayItemUtils.toStack(item), Names.get(item));
             if (!filterText.isEmpty() && !Strings.CI.contains(itemLabel.getLabelText(), filterText)) continue;
             table.add(itemLabel);
 

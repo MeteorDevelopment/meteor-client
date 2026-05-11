@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSe
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.BlockListSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -36,7 +37,7 @@ public class BlockListSettingScreen extends CollectionListSettingScreen<Block> {
 
     @Override
     protected WWidget getValueWidget(Block value) {
-        return theme.itemWithLabel(value.asItem().getDefaultInstance(), Names.get(value));
+        return theme.itemWithLabel(DisplayItemUtils.toStack(value), Names.get(value));
     }
 
     @Override

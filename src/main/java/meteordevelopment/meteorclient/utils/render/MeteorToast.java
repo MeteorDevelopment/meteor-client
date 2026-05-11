@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -70,7 +71,7 @@ public class MeteorToast implements Toast {
         }
 
         public Builder icon(@Nullable Item item) {
-            this.icon = item != null ? item.getDefaultInstance() : null;
+            this.icon = item != null ? DisplayItemUtils.toStack(item) : null;
             return this;
         }
 

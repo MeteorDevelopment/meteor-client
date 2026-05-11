@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSe
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.Names;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
@@ -39,14 +40,14 @@ public class StatusEffectListSettingScreen extends CollectionListSettingScreen<M
     }
 
     private ItemStack getPotionStack(MobEffect effect) {
-        ItemStack potion = Items.POTION.getDefaultInstance();
+        ItemStack potion = DisplayItemUtils.toStack(Items.POTION);
 
         potion.set(
             DataComponents.POTION_CONTENTS,
             new PotionContents(
-                potion.get(DataComponents.POTION_CONTENTS).potion(),
+                Optional.empty(),
                 Optional.of(effect.getColor()),
-                potion.get(DataComponents.POTION_CONTENTS).customEffects(),
+                List.of(),
                 Optional.empty()
             )
         );
