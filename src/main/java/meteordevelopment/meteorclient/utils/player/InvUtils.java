@@ -31,7 +31,7 @@ public class InvUtils {
 
     // Predicates
 
-    public static Predicate<ItemStack> isOneOf(Item... items) {
+    private static Predicate<ItemStack> isOneOf(Item... items) {
         return itemStack -> {
             for (var item : items) if (itemStack.is(item)) return true;
             return false;
