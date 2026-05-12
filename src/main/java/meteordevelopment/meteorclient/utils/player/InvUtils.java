@@ -31,15 +31,19 @@ public class InvUtils {
 
     // Predicates
 
+    public static Predicate<ItemStack> isOneOf(Item... items) {
+        return itemStack -> {
+            for (var item : items) if (itemStack.is(item)) return true;
+            return false;
+        };
+    }
+
     public static boolean testInMainHand(Predicate<ItemStack> predicate) {
         return predicate.test(mc.player.getMainHandItem());
     }
 
     public static boolean testInMainHand(Item... items) {
-        return testInMainHand(itemStack -> {
-            for (var item : items) if (itemStack.is(item)) return true;
-            return false;
-        });
+        return testInMainHand(isOneOf(items));
     }
 
     public static boolean testInOffHand(Predicate<ItemStack> predicate) {
@@ -47,10 +51,7 @@ public class InvUtils {
     }
 
     public static boolean testInOffHand(Item... items) {
-        return testInOffHand(itemStack -> {
-            for (var item : items) if (itemStack.is(item)) return true;
-            return false;
-        });
+        return testInOffHand(isOneOf(items));
     }
 
     public static boolean testInHands(Predicate<ItemStack> predicate) {
@@ -73,10 +74,7 @@ public class InvUtils {
     }
 
     public static boolean testInHotbar(Item... items) {
-        return testInHotbar(itemStack -> {
-            for (var item : items) if (itemStack.is(item)) return true;
-            return false;
-        });
+        return testInHotbar(isOneOf(items));
     }
 
     // Finding items
@@ -86,12 +84,7 @@ public class InvUtils {
     }
 
     public static FindItemResult findInHotbar(Item... items) {
-        return findInHotbar(itemStack -> {
-            for (Item item : items) {
-                if (itemStack.getItem() == item) return true;
-            }
-            return false;
-        });
+        return findInHotbar(isOneOf(items));
     }
 
     public static FindItemResult findInHotbar(Predicate<ItemStack> isGood) {
@@ -107,12 +100,7 @@ public class InvUtils {
     }
 
     public static FindItemResult find(Item... items) {
-        return find(itemStack -> {
-            for (Item item : items) {
-                if (itemStack.getItem() == item) return true;
-            }
-            return false;
-        });
+        return find(isOneOf(items));
     }
 
     public static FindItemResult find(Predicate<ItemStack> isGood) {
