@@ -53,39 +53,51 @@ public abstract class GuiRendererMixin {
         );
     }
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void draw$executeDrawRange(CallbackInfo ci) {
+    @Inject(method = "render", at = @At("HEAD"))
+    private void render$preGui(CallbackInfo ci) {
         if ((GuiRenderer) (Object) this instanceof MeteorMcGuiRenderer) return;
         var mc = Minecraft.getInstance();
 
+        if (mc.screen == null || mc.screen instanceof WidgetScreen) return;
+        meteor$render2D(mc);
+    }
+
+    @Inject(method = "render", at = @At("TAIL"))
+    private void render$postGui(CallbackInfo ci) {
+        if ((GuiRenderer) (Object) this instanceof MeteorMcGuiRenderer) return;
+        var mc = Minecraft.getInstance();
+
+        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(mc.getMainRenderTarget().getDepthTexture(), 1.0);
+
+        if (mc.screen == null || mc.screen instanceof WidgetScreen) {
+            meteor$render2D(mc);
+        }
+
+        guiRenderer.endFrame();
+    }
+
+    @Unique
+    private void meteor$render2D(Minecraft mc) {
         var mouseX = (int) mc.mouseHandler.getScaledXPos(mc.getWindow());
         var mouseY = (int) mc.mouseHandler.getScaledYPos(mc.getWindow());
 
         var fogRenderer = ((GameRendererAccessor) mc.gameRenderer).meteor$fogRenderer();
         var delta = mc.getDeltaTracker().getGameTimeDeltaTicks();
-
-        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(mc.getMainRenderTarget().getDepthTexture(), 1.0);
+        var graphics = new GuiGraphicsExtractor(mc, renderState, mouseX, mouseY);
 
         if (Utils.canUpdate() || HudEditorScreen.isOpen()) {
             Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
 
             Utils.unscaledProjection();
-
-            var graphics = new GuiGraphicsExtractor(mc, renderState, mouseX, mouseY);
-            MeteorClient.EVENT_BUS.post(Render2DEvent.get(graphics, graphics.guiWidth(), graphics.guiWidth(), delta));
+            MeteorClient.EVENT_BUS.post(Render2DEvent.get(graphics, graphics.guiWidth(), graphics.guiHeight(), delta));
             guiRenderer.render(fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
-
             Utils.scaledProjection();
-
             Profiler.get().pop();
         }
 
         if (mc.screen instanceof WidgetScreen widgetScreen) {
-            var graphics = new GuiGraphicsExtractor(mc, renderState, mouseX, mouseY);
             widgetScreen.renderCustom(graphics, mouseX, mouseY, delta);
             guiRenderer.render(fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
         }
-
-        guiRenderer.endFrame();
     }
 }
