@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.BlockBehaviourAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -25,6 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -132,13 +132,16 @@ public class Quiver extends Module {
 
         for (int i = mc.player.getInventory().getContainerSize(); i > 0; i--) {
             if (i == mc.player.getInventory().getSelectedSlot()) continue;
+            
+            if (i >= 36 && i <= 39) continue;
 
             ItemStack item = mc.player.getInventory().getItem(i);
 
             if (item.getItem() != Items.TIPPED_ARROW) continue;
+            
+            PotionContents potion = item.get(DataComponents.POTION_CONTENTS);
 
-            Iterator<MobEffectInstance> effects = item.getItem().components().get(DataComponents.POTION_CONTENTS).getAllEffects().iterator();
-
+            Iterator<MobEffectInstance> effects = potion.getAllEffects().iterator();
             if (!effects.hasNext()) continue;
 
             MobEffect effect = effects.next().getEffect().value();
@@ -229,13 +232,15 @@ public class Quiver extends Module {
     }
 
     private boolean headIsOpen() {
-        testPos.set(mc.player.blockPosition().offset(0, 1, 0));
-        BlockState pos1 = mc.level.getBlockState(testPos);
-        if (((BlockBehaviourAccessor) pos1.getBlock()).meteor$isHasCollision()) return false;
+        BlockPos eyePos = BlockPos.containing(mc.player.getX(), mc.player.getEyeY(), mc.player.getZ());
 
-        testPos.offset(0, 1, 0);
-        BlockState pos2 = mc.level.getBlockState(testPos);
-        return !((BlockBehaviourAccessor) pos2.getBlock()).meteor$isHasCollision();
+        for (int i = 0; i <= 2; i++) {
+            testPos.set(eyePos).move(0, i, 0);
+            BlockState state = mc.level.getBlockState(testPos);
+            if (!state.getCollisionShape(mc.level, testPos).isEmpty()) return false;
+        }
+
+        return true;
     }
 
     private boolean hasEffect(MobEffect effect) {
