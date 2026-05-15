@@ -140,6 +140,8 @@ public class Zoom extends Module {
 
     @EventHandler
     private void onMouseScroll(MouseScrollEvent event) {
+        if (mc.screen != null) return;
+
         if (scrollSensitivity.get() > 0 && isActive()) {
             value += event.value * 0.25 * (scrollSensitivity.get() * value);
             if (value < 1) value = 1;
