@@ -20,6 +20,7 @@ import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.item.*;
 
@@ -348,6 +349,7 @@ public class ItemListSettingScreen extends WindowScreen {
         if (item instanceof SpawnEggItem) return ItemCategory.SPAWN_EGGS;
 
         try {
+            if (item.getDefaultInstance().is(ItemTags.SWORDS) || item.getDefaultInstance().is(ItemTags.SPEARS)) return ItemCategory.WEAPONS;
             if (item.components().has(DataComponents.EQUIPPABLE)) return ItemCategory.ARMOR;
             if (item.components().has(DataComponents.TOOL)) return ItemCategory.TOOLS;
             if (Utils.isFood(item)) return ItemCategory.FOOD;
