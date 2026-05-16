@@ -10,8 +10,8 @@ import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSe
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.Names;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class ParticleTypeListSettingScreen extends CollectionListSettingScreen<P
 
     @Override
     protected boolean includeValue(ParticleType<?> value) {
-        return value instanceof ParticleOptions;
+        return value != ParticleTypes.FLASH;
     }
 
     @Override
