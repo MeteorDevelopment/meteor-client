@@ -332,7 +332,8 @@ public class ItemListSettingScreen extends WindowScreen {
     }
 
     private static ItemCategory getCategory(Item item) {
-        // The order of these is semi important, ex: placing block check first results in things like carrots being put in blocks instead of food
+        // The ordering of these checks is important! If you change the order double check that items are in expected categories.
+
         if (item instanceof BowItem
             || item instanceof CrossbowItem
             || item instanceof TridentItem
@@ -348,16 +349,22 @@ public class ItemListSettingScreen extends WindowScreen {
         ) return ItemCategory.PROJECTILES;
         if (item instanceof SpawnEggItem) return ItemCategory.SPAWN_EGGS;
 
+        // Food check must be before block check so carrots and other food items which can also be planted don't get placed with blocks
+        try {
+            if (Utils.isFood(item)) return ItemCategory.FOOD;
+        } catch (Exception ignored) {}
+
+        // Block check should come before Armor check or carpets will end up Armor category
+        if (item instanceof BlockItem) return ItemCategory.BLOCKS;
+
         try {
             if (item.getDefaultInstance().is(ItemTags.SWORDS) || item.getDefaultInstance().is(ItemTags.SPEARS)) return ItemCategory.WEAPONS;
             if (item.components().has(DataComponents.EQUIPPABLE)) return ItemCategory.ARMOR;
             if (item.components().has(DataComponents.TOOL)) return ItemCategory.TOOLS;
-            if (Utils.isFood(item)) return ItemCategory.FOOD;
             if (item.components().has(DataComponents.POTION_CONTENTS)) return ItemCategory.POTIONS;
             if (item.components().has(DataComponents.ENTITY_DATA)) return ItemCategory.SPAWN_EGGS;
         } catch (Exception ignored) {}
 
-        if (item instanceof BlockItem) return ItemCategory.BLOCKS;
 
         return ItemCategory.OTHER;
     }
