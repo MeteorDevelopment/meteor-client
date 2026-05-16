@@ -350,7 +350,7 @@ public class ItemListSettingScreen extends WindowScreen {
         try {
             if (item.components().has(DataComponents.EQUIPPABLE)) return ItemCategory.ARMOR;
             if (item.components().has(DataComponents.TOOL)) return ItemCategory.TOOLS;
-            if (item.components().has(DataComponents.FOOD)) return ItemCategory.FOOD;
+            if (Utils.isFood(item)) return ItemCategory.FOOD;
             if (item.components().has(DataComponents.POTION_CONTENTS)) return ItemCategory.POTIONS;
             if (item.components().has(DataComponents.ENTITY_DATA)) return ItemCategory.SPAWN_EGGS;
         } catch (Exception ignored) {}
