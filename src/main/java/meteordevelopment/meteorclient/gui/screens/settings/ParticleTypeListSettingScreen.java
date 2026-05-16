@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSe
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.Names;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -19,11 +18,6 @@ import java.util.List;
 public class ParticleTypeListSettingScreen extends CollectionListSettingScreen<ParticleType<?>> {
     public ParticleTypeListSettingScreen(GuiTheme theme, Setting<List<ParticleType<?>>> setting) {
         super(theme, "Select Particles", setting, setting.get(), BuiltInRegistries.PARTICLE_TYPE);
-    }
-
-    @Override
-    protected boolean includeValue(ParticleType<?> value) {
-        return value instanceof ParticleOptions;
     }
 
     @Override
