@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.events.packets;
 
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 
 public class ContainerSlotUpdateEvent {
     private static final ContainerSlotUpdateEvent INSTANCE = new ContainerSlotUpdateEvent();
 
-    public ScreenHandlerSlotUpdateS2CPacket packet;
+    public ClientboundContainerSetSlotPacket packet;
 
-    public static ContainerSlotUpdateEvent get(ScreenHandlerSlotUpdateS2CPacket packet) {
+    public static ContainerSlotUpdateEvent get(ClientboundContainerSetSlotPacket packet) {
         INSTANCE.packet = packet;
         return INSTANCE;
     }

@@ -28,10 +28,10 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.listeners.ConsumerListener;
-import net.minecraft.client.gl.DynamicUniformStorage;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.DynamicUniformStorage;
 
 import java.nio.ByteBuffer;
 
@@ -148,10 +148,10 @@ public class Blur extends Module {
     private GpuTextureView createFbo(int i) {
         double scale = 1 / Math.pow(2, i);
 
-        int width = (int) (mc.getWindow().getFramebufferWidth() * scale);
-        int height = (int) (mc.getWindow().getFramebufferHeight() * scale);
+        int width = (int) (mc.getWindow().getWidth() * scale);
+        int height = (int) (mc.getWindow().getHeight() * scale);
 
-        return RenderSystem.getDevice().createTextureView(RenderSystem.getDevice().createTexture("Blur - " + i, 15,  TextureFormat.RGBA8, width, height, 1, 1));
+        return RenderSystem.getDevice().createTextureView(RenderSystem.getDevice().createTexture("Blur - " + i, 15, TextureFormat.RGBA8, width, height, 1, 1));
     }
 
     private void onRenderAfterWorld() {
@@ -199,7 +199,7 @@ public class Blur extends Module {
         }
 
         // Initial downsample
-        renderToFbo(fbos[0], mc.getFramebuffer().getColorAttachmentView(), MeteorRenderPipelines.BLUR_DOWN, ubos[0]);
+        renderToFbo(fbos[0], mc.getMainRenderTarget().getColorTextureView(), MeteorRenderPipelines.BLUR_DOWN, ubos[0]);
 
         // Downsample
         for (int i = 0; i < iterations; i++) {
@@ -213,10 +213,10 @@ public class Blur extends Module {
 
         // Render output
         MeshRenderer.begin()
-            .attachments(mc.getFramebuffer())
+            .attachments(mc.getMainRenderTarget())
             .pipeline(MeteorRenderPipelines.BLUR_PASSTHROUGH)
             .fullscreen()
-            .sampler("u_Texture", fbos[0], RenderSystem.getSamplerCache().get(FilterMode.LINEAR)) // todo ???
+            .sampler("u_Texture", fbos[0], RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR)) // todo ???
             .end();
     }
 
@@ -226,16 +226,16 @@ public class Blur extends Module {
             .pipeline(pipeline)
             .fullscreen()
             .uniform("BlurData", ubo)
-            .sampler("u_Texture", sourceTexture, RenderSystem.getSamplerCache().get(FilterMode.LINEAR))
+            .sampler("u_Texture", sourceTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR))
             .end();
     }
 
     private boolean shouldRender() {
         if (!isActive()) return false;
-        Screen screen = mc.currentScreen;
+        Screen screen = mc.screen;
 
         if (screen instanceof WidgetScreen) return meteor.get();
-        if (screen instanceof HandledScreen) return inventories.get();
+        if (screen instanceof AbstractContainerScreen) return inventories.get();
         if (screen instanceof ChatScreen) return chat.get();
         if (screen != null) return other.get();
 
@@ -266,7 +266,8 @@ public class Blur extends Module {
 
     private static final FixedUniformStorage<BlurUniformData> UNIFORM_STORAGE = new FixedUniformStorage<>("Meteor - Blur UBO", UNIFORM_SIZE, 6);
 
-    private record BlurUniformData(float halfTexelSizeX, float halfTexelSizeY, float offset) implements DynamicUniformStorage.Uploadable {
+    private record BlurUniformData(float halfTexelSizeX, float halfTexelSizeY,
+                                   float offset) implements DynamicUniformStorage.DynamicUniform {
         @Override
         public void write(ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)

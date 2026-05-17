@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.world.gen.GeneratorOptions;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.levelgen.WorldOptions;
 
 import java.util.OptionalLong;
 import java.util.function.Consumer;
@@ -19,7 +19,7 @@ public class SeedSetting extends Setting<Long> {
 
     @Override
     protected Long parseImpl(String str) {
-        OptionalLong optionalLong = GeneratorOptions.parseSeed(str);
+        OptionalLong optionalLong = WorldOptions.parseSeed(str);
         if (optionalLong.isPresent()) {
             return optionalLong.getAsLong();
         }
@@ -32,15 +32,15 @@ public class SeedSetting extends Setting<Long> {
     }
 
     @Override
-    public NbtCompound save(NbtCompound tag) {
+    public CompoundTag save(CompoundTag tag) {
         tag.putLong("seed", get());
 
         return tag;
     }
 
     @Override
-    public Long load(NbtCompound tag) {
-        set(tag.getLong("seed", 0));
+    public Long load(CompoundTag tag) {
+        set(tag.getLongOr("seed", 0));
 
         return get();
     }

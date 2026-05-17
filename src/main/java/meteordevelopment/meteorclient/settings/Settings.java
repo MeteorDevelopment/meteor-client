@@ -11,9 +11,9 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -93,6 +93,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         groups.add(group);
         return group;
     }
+
     public SettingGroup createGroup(String name) {
         return createGroup(name, true);
     }
@@ -105,8 +106,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
 
                 if (setting instanceof ColorSetting) {
                     RainbowColors.addSetting((Setting<SettingColor>) setting);
-                }
-                else if (setting instanceof ColorListSetting) {
+                } else if (setting instanceof ColorListSetting) {
                     RainbowColors.addSettingList((Setting<List<SettingColor>>) setting);
                 }
             }
@@ -119,8 +119,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
             for (Setting<?> setting : group) {
                 if (setting instanceof ColorSetting) {
                     RainbowColors.removeSetting((Setting<SettingColor>) setting);
-                }
-                else if (setting instanceof ColorListSetting) {
+                } else if (setting instanceof ColorListSetting) {
                     RainbowColors.removeSettingList((Setting<List<SettingColor>>) setting);
                 }
             }
@@ -155,10 +154,10 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
-        NbtList groupsTag = new NbtList();
+        ListTag groupsTag = new ListTag();
         for (SettingGroup group : groups) {
             if (group.wasChanged()) groupsTag.add(group.toTag());
         }
@@ -168,15 +167,15 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
 
     @Override
-    public Settings fromTag(NbtCompound tag) {
+    public Settings fromTag(CompoundTag tag) {
         reset();
 
-        NbtList groupsTag = tag.getListOrEmpty("groups");
+        ListTag groupsTag = tag.getListOrEmpty("groups");
 
-        for (NbtElement t : groupsTag) {
-            NbtCompound groupTag = (NbtCompound) t;
+        for (Tag t : groupsTag) {
+            CompoundTag groupTag = (CompoundTag) t;
 
-            SettingGroup sg = getGroup(groupTag.getString("name", ""));
+            SettingGroup sg = getGroup(groupTag.getStringOr("name", ""));
             if (sg != null) sg.fromTag(groupTag);
         }
 

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
+import com.mojang.blaze3d.platform.MacosUtil;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
@@ -19,8 +20,10 @@ import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.item.Items;
-import net.minecraft.util.Pair;
+import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +31,12 @@ import java.util.Set;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class ModulesScreen extends TabScreen {
     private WCategoryController controller;
+    private WWindow searchWindow;
+    private WTextBox searchTextBox;
 
     public ModulesScreen(GuiTheme theme) {
         super(theme, Tabs.get().getFirst());
@@ -61,7 +67,7 @@ public class ModulesScreen extends TabScreen {
         w.spacing = 0;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(category.icon)).pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(category.icon.get())).pad(2);
         }
 
         c.add(w);
@@ -81,16 +87,16 @@ public class ModulesScreen extends TabScreen {
     protected void createSearchW(WContainer w, String text) {
         if (!text.isEmpty()) {
             // Titles
-            List<Pair<Module, String>> modules = Modules.get().searchTitles(text);
+            List<Tuple<Module, String>> modules = Modules.get().searchTitles(text);
 
             if (!modules.isEmpty()) {
                 WSection section = w.add(theme.section("Modules")).expandX().widget();
                 section.spacing = 0;
 
                 int count = 0;
-                for (Pair<Module, String> p : modules) {
+                for (Tuple<Module, String> p : modules) {
                     if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
-                    section.add(theme.module(p.getLeft(), p.getRight())).expandX();
+                    section.add(theme.module(p.getA(), p.getB())).expandX();
                     count++;
                 }
             }
@@ -115,9 +121,10 @@ public class ModulesScreen extends TabScreen {
     protected WWindow createSearch(WContainer c) {
         WWindow w = theme.window("Search");
         w.id = "search";
+        searchWindow = w;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(Items.COMPASS.getDefaultStack())).pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(DisplayItemUtils.toStack(Items.COMPASS))).pad(2);
         }
 
         c.add(w);
@@ -129,6 +136,7 @@ public class ModulesScreen extends TabScreen {
 
         WTextBox text = w.add(theme.textBox("")).minWidth(140).expandX().widget();
         text.setFocused(true);
+        searchTextBox = text;
         text.action = () -> {
             l.clear();
             createSearchW(l, text.get());
@@ -138,6 +146,25 @@ public class ModulesScreen extends TabScreen {
         createSearchW(l, text.get());
 
         return w;
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent value) {
+        if (locked) return false;
+
+        boolean cntrl = MacosUtil.IS_MACOS ? value.modifiers() == GLFW_MOD_SUPER : value.modifiers() == GLFW_MOD_CONTROL;
+
+        if (cntrl && value.key() == GLFW_KEY_F) {
+            if (searchWindow != null) searchWindow.setExpanded(true);
+            if (searchTextBox != null) {
+                searchTextBox.setFocused(true);
+                searchTextBox.setCursorMax();
+            }
+
+            return true;
+        }
+
+        return super.keyPressed(value);
     }
 
     // Favorites
@@ -152,7 +179,7 @@ public class ModulesScreen extends TabScreen {
         w.spacing = 0;
 
         if (theme.categoryIcons()) {
-            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(Items.NETHER_STAR.getDefaultStack())).pad(2);
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(DisplayItemUtils.toStack(Items.NETHER_STAR))).pad(2);
         }
 
         Cell<WWindow> cell = c.add(w);
@@ -193,7 +220,8 @@ public class ModulesScreen extends TabScreen {
     }
 
     @Override
-    public void reload() {}
+    public void reload() {
+    }
 
     // Stuff
 
@@ -227,8 +255,7 @@ public class ModulesScreen extends TabScreen {
             if (favorites == null) {
                 favorites = createFavorites(this);
                 if (favorites != null) windows.add(favorites.widget());
-            }
-            else {
+            } else {
                 favorites.widget().clear();
 
                 if (!createFavoritesW(favorites.widget())) {

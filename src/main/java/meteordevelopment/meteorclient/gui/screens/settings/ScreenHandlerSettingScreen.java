@@ -9,29 +9,29 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.screens.settings.base.CollectionListSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.inventory.MenuType;
 
 import java.util.List;
 
-public class ScreenHandlerSettingScreen extends CollectionListSettingScreen<ScreenHandlerType<?>> {
-    public ScreenHandlerSettingScreen(GuiTheme theme, Setting<List<ScreenHandlerType<?>>> setting) {
-        super(theme, "Select Screen Handlers", setting, setting.get(), Registries.SCREEN_HANDLER);
+public class ScreenHandlerSettingScreen extends CollectionListSettingScreen<MenuType<?>> {
+    public ScreenHandlerSettingScreen(GuiTheme theme, Setting<List<MenuType<?>>> setting) {
+        super(theme, "Select Screen Handlers", setting, setting.get(), BuiltInRegistries.MENU);
     }
 
     @Override
-    protected WWidget getValueWidget(ScreenHandlerType<?> value) {
+    protected WWidget getValueWidget(MenuType<?> value) {
         return theme.label(getName(value));
     }
 
     @Override
-    protected String[] getValueNames(ScreenHandlerType<?> type) {
+    protected String[] getValueNames(MenuType<?> type) {
         return new String[]{
             getName(type)
         };
     }
 
-    private static String getName(ScreenHandlerType<?> type) {
-        return Registries.SCREEN_HANDLER.getId(type).toString();
+    private static String getName(MenuType<?> type) {
+        return BuiltInRegistries.MENU.getKey(type).toString();
     }
 }

@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.renderer;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 
 public abstract class MeteorVertexFormatElements {
-    public static final VertexFormatElement POS2 = VertexFormatElement.register(getNextVertexFormatElementId(), 0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.POSITION, 2);
+    public static final VertexFormatElement POS2 = VertexFormatElement.register(getNextVertexFormatElementId(), 0, VertexFormatElement.Type.FLOAT, false, 2);
 
     private MeteorVertexFormatElements() {}
 

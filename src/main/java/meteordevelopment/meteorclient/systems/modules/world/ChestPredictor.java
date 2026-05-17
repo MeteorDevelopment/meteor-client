@@ -24,58 +24,57 @@ import meteordevelopment.meteorclient.utils.render.PeekScreen;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.datafixer.DataFixTypes;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.LootTables;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.registries.VanillaRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NbtSizeTracker;
-import net.minecraft.registry.BuiltinRegistries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.resource.ResourceFinder;
-import net.minecraft.structure.StructureTemplate;
-import net.minecraft.structure.StructureTemplateManager;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.math.random.ChunkRandom;
-import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.gen.structure.Structure;
-import net.minecraft.world.gen.structure.StructureKeys;
+import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -121,7 +120,7 @@ public class ChestPredictor extends Module {
         .build()
     );
 
-    private static final List<BlockRotation> ALL_ROTATIONS = List.of(BlockRotation.values());
+    private static final List<Rotation> ALL_ROTATIONS = List.of(Rotation.values());
 
     private static final class LootablePiecesHolder {
         // only pieces with one chest are supported due to optimizations
@@ -154,14 +153,14 @@ public class ChestPredictor extends Module {
                 "ancient_city/structures/tall_ruin_1",
                 "ancient_city/structures/tall_ruin_3",
                 "ancient_city/structures/tall_ruin_4"
-            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.ofVanilla(s), LootTables.ANCIENT_CITY_CHEST, World.OVERWORLD)
-                .withBiomeFunction(_ -> StructureKeys.ANCIENT_CITY)
+            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.withDefaultNamespace(s), BuiltInLootTables.ANCIENT_CITY, Level.OVERWORLD)
+                .withBiomeFunction(_ -> BuiltinStructures.ANCIENT_CITY)
                 .withRotations(ALL_ROTATIONS)
                 .withFilteredBlocks(ANCIENT_CITY_FILTERED_BLOCKS)
                 .build()));
 
-            builder.add(new PieceDataBuilder(Identifier.ofVanilla("ancient_city/structures/ice_box_1"), LootTables.ANCIENT_CITY_ICE_BOX_CHEST, World.OVERWORLD)
-                .withBiomeFunction(_ -> StructureKeys.ANCIENT_CITY)
+            builder.add(new PieceDataBuilder(Identifier.withDefaultNamespace("ancient_city/structures/ice_box_1"), BuiltInLootTables.ANCIENT_CITY_ICE_BOX, Level.OVERWORLD)
+                .withBiomeFunction(_ -> BuiltinStructures.ANCIENT_CITY)
                 .withRotations(ALL_ROTATIONS)
                 .withFilteredBlocks(ANCIENT_CITY_FILTERED_BLOCKS)
                 .build());
@@ -189,8 +188,8 @@ public class ChestPredictor extends Module {
                 "bastion/units/ramparts/ramparts_1",
                 "bastion/units/stages/stage_0_2",
                 "bastion/units/stages/stage_1_2"
-            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.ofVanilla(s), LootTables.BASTION_OTHER_CHEST, World.NETHER)
-                .withBiomeFunction(_ -> StructureKeys.BASTION_REMNANT)
+            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.withDefaultNamespace(s), BuiltInLootTables.BASTION_OTHER, Level.NETHER)
+                .withBiomeFunction(_ -> BuiltinStructures.BASTION_REMNANT)
                 .withRotations(ALL_ROTATIONS)
                 .withFilteredBlocks(BASTION_FILTERED_BLOCKS)
                 .build()));
@@ -198,8 +197,8 @@ public class ChestPredictor extends Module {
             List.of(
                 "bastion/hoglin_stable/large_stables/inner_3",
                 "bastion/hoglin_stable/small_stables/inner_2"
-            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.ofVanilla(s), LootTables.BASTION_HOGLIN_STABLE_CHEST, World.NETHER)
-                .withBiomeFunction(_ -> StructureKeys.BASTION_REMNANT)
+            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.withDefaultNamespace(s), BuiltInLootTables.BASTION_HOGLIN_STABLE, Level.NETHER)
+                .withBiomeFunction(_ -> BuiltinStructures.BASTION_REMNANT)
                 .withRotations(ALL_ROTATIONS)
                 .withFilteredBlocks(BASTION_FILTERED_BLOCKS)
                 .build()));
@@ -208,8 +207,8 @@ public class ChestPredictor extends Module {
                 "bastion/treasure/bases/centers/center_0",
                 "bastion/treasure/bases/centers/center_2",
                 "bastion/treasure/bases/centers/center_3"
-            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.ofVanilla(s), LootTables.BASTION_TREASURE_CHEST, World.NETHER)
-                .withBiomeFunction(_ -> StructureKeys.BASTION_REMNANT)
+            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.withDefaultNamespace(s), BuiltInLootTables.BASTION_TREASURE, Level.NETHER)
+                .withBiomeFunction(_ -> BuiltinStructures.BASTION_REMNANT)
                 .withRotations(ALL_ROTATIONS)
                 .withFilteredBlocks(BASTION_FILTERED_BLOCKS)
                 .build()));
@@ -218,25 +217,25 @@ public class ChestPredictor extends Module {
         });
     }
 
-    private static final Map<RegistryKey<Structure>, SaltData> STRUCTURE_SALTS = Util.make(() -> {
-        RegistryWrapper.WrapperLookup registry = BuiltinRegistries.createWrapperLookup();
-        RegistryWrapper.Impl<Structure> structures = registry.getOrThrow(RegistryKeys.STRUCTURE);
-        return structures.streamEntries()
+    private static final Map<ResourceKey<Structure>, SaltData> STRUCTURE_SALTS = Util.make(() -> {
+        HolderLookup.Provider registry = VanillaRegistries.createLookup();
+        HolderLookup.RegistryLookup<Structure> structures = registry.lookupOrThrow(Registries.STRUCTURE);
+        return structures.listElements()
             .collect(Collectors.groupingBy(
-                s -> s.value().getFeatureGenerationStep().ordinal(),
-                Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(s -> s.registryKey().getValue().toString()))))).entrySet().stream()
-            .<Map.Entry<RegistryKey<Structure>, SaltData>>mapMulti((entry, consumer) -> {
-                TreeSet<RegistryEntry.Reference<Structure>> forStep = entry.getValue();
+                s -> s.value().step().ordinal(),
+                Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(s -> s.key().identifier().toString()))))).entrySet().stream()
+            .<Map.Entry<ResourceKey<Structure>, SaltData>>mapMulti((entry, consumer) -> {
+                TreeSet<Holder.Reference<Structure>> forStep = entry.getValue();
                 int num = forStep.size();
                 for (int i = 0; i < num; i++) {
                     //noinspection DataFlowIssue
-                    consumer.accept(Map.entry(forStep.pollFirst().registryKey(), new SaltData(entry.getKey(), i)));
+                    consumer.accept(Map.entry(forStep.pollFirst().key(), new SaltData(entry.getKey(), i)));
                 }
             })
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
     });
 
-    private static final Map<Integer, RegistryKey<Enchantment>> CUBIOMES_ENCHANTMENT_ID_TO_MC = ImmutableMap.<Integer, RegistryKey<Enchantment>>builder()
+    private static final Map<Integer, ResourceKey<Enchantment>> CUBIOMES_ENCHANTMENT_ID_TO_MC = ImmutableMap.<Integer, ResourceKey<Enchantment>>builder()
         .put(Cubiomes.PROTECTION(), Enchantments.PROTECTION)
         .put(Cubiomes.FIRE_PROTECTION(), Enchantments.FIRE_PROTECTION)
         .put(Cubiomes.BLAST_PROTECTION(), Enchantments.BLAST_PROTECTION)
@@ -289,7 +288,7 @@ public class ChestPredictor extends Module {
     @Override
     public void onActivate() {
         if (this.seed.get() == null) {
-            ChatUtils.sendMsg(Text.literal("Seed not configured!"));
+            ChatUtils.sendMsg(Component.literal("Seed not configured!"));
             this.toggle();
         } else {
             super.onActivate();
@@ -308,35 +307,35 @@ public class ChestPredictor extends Module {
         if (!this.isActive()) {
             return;
         }
-        ClientWorld level = this.mc.world;
+        Level level = this.mc.level;
         if (level == null) {
             return;
         }
-        Chunk chunk = level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
+        ChunkAccess chunk = level.getChunk(chunkPos.x(), chunkPos.z(), ChunkStatus.FULL, false);
         if (chunk == null) {
             return;
         }
-        ChunkSection[] sectionArray = chunk.getSectionArray();
+        LevelChunkSection[] sectionArray = chunk.getSections();
         for (int i = 0, sectionArrayLength = sectionArray.length; i < sectionArrayLength; i++) {
-            ChunkSection chunkSection = sectionArray[i];
-            if (chunkSection.isEmpty()) {
+            LevelChunkSection chunkSection = sectionArray[i];
+            if (chunkSection.hasOnlyAir()) {
                 continue;
             }
-            if (!chunkSection.hasAny(blockState -> blockState.isOf(Blocks.CHEST))) {
+            if (!chunkSection.maybeHas(blockState -> blockState.is(Blocks.CHEST))) {
                 continue;
             }
-            this.scanSection(ChunkSectionPos.from(chunkPos, chunk.sectionIndexToCoord(i)));
+            this.scanSection(SectionPos.of(chunkPos, chunk.getSectionYFromSectionIndex(i)));
         }
     }
 
-    private void scanSection(ChunkSectionPos sectionPos) {
-        BlockPos minPos = sectionPos.getMinPos();
-        BlockPos.Mutable blockPos = new BlockPos.Mutable();
-        for (int x = minPos.getX(), maxX = x + ChunkSection.field_31406; x < maxX; x++) {
+    private void scanSection(SectionPos sectionPos) {
+        BlockPos minPos = sectionPos.origin();
+        BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
+        for (int x = minPos.getX(), maxX = x + LevelChunkSection.SECTION_WIDTH; x < maxX; x++) {
             blockPos.setX(x);
-            for (int z = minPos.getZ(), maxZ = z + ChunkSection.field_31406; z < maxZ; z++) {
+            for (int z = minPos.getZ(), maxZ = z + LevelChunkSection.SECTION_WIDTH; z < maxZ; z++) {
                 blockPos.setZ(z);
-                for (int y = minPos.getY(), maxY = y + ChunkSection.field_31407; y < maxY; y++) {
+                for (int y = minPos.getY(), maxY = y + LevelChunkSection.SECTION_HEIGHT; y < maxY; y++) {
                     blockPos.setY(y);
 
                     if (this.testBlock(blockPos)) {
@@ -348,10 +347,10 @@ public class ChestPredictor extends Module {
     }
 
     private boolean testBlock(BlockPos pos) {
-        ClientWorld level = this.mc.world;
+        Level level = this.mc.level;
         assert level != null;
 
-        RegistryKey<World> dimension = detectDimension(level.getDimension());
+        ResourceKey<Level> dimension = detectDimension(level.dimensionType());
 
         for (PieceData pieceData : LootablePiecesHolder.LOOTABLE_PIECES) {
 
@@ -360,38 +359,38 @@ public class ChestPredictor extends Module {
             }
 
             for (Map<BlockPos, BlockState> blockMap : pieceData.variants) {
-                BlockPos.Mutable chestPos = new BlockPos.Mutable();
-                if (!matchesWorld(pos, blockMap, chestPos)) {
+                BlockPos.MutableBlockPos chestPos = new BlockPos.MutableBlockPos();
+                if (!matchesLevel(pos, blockMap, chestPos)) {
                     continue;
                 }
 
-                RegistryEntry<Biome> biome = level.getBiome(chestPos);
+                Holder<Biome> biome = level.getBiome(chestPos);
 
                 SaltData saltData = pieceData.biomeFunction.apply(biome);
 
-                ChunkRandom worldgenRandom = new ChunkRandom(new Xoroshiro128PlusPlusRandom(-1, -1));
-                long decorationSeed = worldgenRandom.setPopulationSeed(this.seed.get(), chestPos.getX() & ~15, chestPos.getZ() & ~15);
+                WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(-1, -1));
+                long decorationSeed = worldgenRandom.setDecorationSeed(this.seed.get(), chestPos.getX() & ~15, chestPos.getZ() & ~15);
 
-                worldgenRandom.setDecoratorSeed(decorationSeed, saltData.index, saltData.step);
+                worldgenRandom.setFeatureSeed(decorationSeed, saltData.index, saltData.step);
                 long lootSeed = worldgenRandom.nextLong();
 
-                SimpleInventory container = this.generateLoot(pieceData.ltc, lootSeed);
+                SimpleContainer container = this.generateLoot(pieceData.ltc, lootSeed);
 
                 if (container == null) {
                     continue;
                 }
 
                 Runnable clickEvent = () -> {
-                    var stack = Items.CHEST.getDefaultStack();
-                    stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal(Long.toString(lootSeed)));
+                    var stack = Items.CHEST.getDefaultInstance();
+                    stack.set(DataComponents.CUSTOM_NAME, Component.literal(Long.toString(lootSeed)));
                     mc.setScreen(new PeekScreen(stack, container));
                 };
 
-                Text showComponent = Text.translatable("module.chest-predictor.showLoot").styled(s -> s
-                    .withUnderline(true)
-                    .withHoverEvent(new HoverEvent.ShowText(Text.translatable("module.chest-predictor.clickToShow")))
+                Component showComponent = Component.translatable("module.chest-predictor.showLoot").withStyle(s -> s
+                    .withUnderlined(true)
+                    .withHoverEvent(new HoverEvent.ShowText(Component.translatable("module.chest-predictor.clickToShow")))
                     .withClickEvent(new RunnableClickEvent(clickEvent)));
-                ChatUtils.sendMsg(Text.translatable("module.chest-predictor.predicted", ChatUtils.formatCoords(Vec3d.of(chestPos)), pieceData.piece, showComponent));
+                ChatUtils.sendMsg(Component.translatable("module.chest-predictor.predicted", ChatUtils.formatCoords(Vec3.atLowerCornerOf(chestPos)), pieceData.piece, showComponent));
 
                 return true;
             }
@@ -399,13 +398,13 @@ public class ChestPredictor extends Module {
         return false;
     }
 
-    private boolean matchesWorld(BlockPos start, Map<BlockPos, BlockState> blocks, BlockPos.Mutable chestPos) {
-        ClientWorld level = this.mc.world;
+    private boolean matchesLevel(BlockPos start, Map<BlockPos, BlockState> blocks, BlockPos.MutableBlockPos chestPos) {
+        Level level = this.mc.level;
         assert level != null;
         return blocks.entrySet().stream().allMatch(posEntry -> {
             BlockPos blockPos = posEntry.getKey();
-            BlockPos worldPos = blockPos.add(start);
-            Chunk chunk = level.getChunk(ChunkSectionPos.getSectionCoord(worldPos.getX()), ChunkSectionPos.getSectionCoord(worldPos.getZ()), ChunkStatus.FULL, false);
+            BlockPos worldPos = blockPos.offset(start);
+            ChunkAccess chunk = level.getChunk(SectionPos.blockToSectionCoord(worldPos.getX()), SectionPos.blockToSectionCoord(worldPos.getZ()), ChunkStatus.FULL, false);
             if (chunk == null) {
                 return false;
             }
@@ -414,7 +413,7 @@ public class ChestPredictor extends Module {
 
             // it is safe to compare block states by identity
             if (worldBlockState == expectedBlockState) {
-                if (expectedBlockState.isOf(Blocks.CHEST)) {
+                if (expectedBlockState.is(Blocks.CHEST)) {
                     chestPos.set(worldPos);
                 }
                 return true;
@@ -423,38 +422,38 @@ public class ChestPredictor extends Module {
         });
     }
 
-    private @Nullable SimpleInventory generateLoot(MemorySegment ltc, long lootSeed) {
+    private @Nullable SimpleContainer generateLoot(MemorySegment ltc, long lootSeed) {
         Cubiomes.set_loot_seed(ltc, lootSeed);
         Cubiomes.generate_loot(ltc);
 
         int lootCount = LootTableContext.generated_item_count(ltc);
-        SimpleInventory container = new SimpleInventory(3 * 9);
+        SimpleContainer container = new SimpleContainer(3 * 9);
         for (int lootIdx = 0; lootIdx < lootCount; lootIdx++) {
             MemorySegment itemStackInternal = ItemStack.asSlice(LootTableContext.generated_items(ltc), lootIdx);
             String itemName = Cubiomes.get_item_name(ltc, ItemStack.item(itemStackInternal)).getString(0);
-            Registry<Item> itemRegistry = this.mc.player.getRegistryManager().getOrThrow(RegistryKeys.ITEM);
-            Item item = itemRegistry.getOptionalValue(Identifier.of(itemName)).orElse(null);
+            Registry<Item> itemRegistry = this.mc.player.registryAccess().lookupOrThrow(Registries.ITEM);
+            Item item = itemRegistry.getValue(Identifier.parse(itemName));
             if (item == null) {
                 LOGGER.error("Unknown item with name {}", itemName);
                 return null;
             }
-            var itemStack = new net.minecraft.item.ItemStack(item, ItemStack.count(itemStackInternal));
+            var itemStack = new net.minecraft.world.item.ItemStack(item, ItemStack.count(itemStackInternal));
             MemorySegment enchantments = ItemStack.enchantments(itemStackInternal);
             int enchantmentCount = ItemStack.enchantment_count(itemStackInternal);
             for (int enchantmentIdx = 0; enchantmentIdx < enchantmentCount; enchantmentIdx++) {
                 MemorySegment enchantInstance = EnchantInstance.asSlice(enchantments, enchantmentIdx);
                 int itemEnchantment = EnchantInstance.enchantment(enchantInstance);
-                RegistryKey<Enchantment> enchantmentKey = CUBIOMES_ENCHANTMENT_ID_TO_MC.get(itemEnchantment);
-                Registry<Enchantment> enchantmentRegistry = this.mc.player.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
-                itemStack.addEnchantment(enchantmentRegistry.getOrThrow(enchantmentKey), EnchantInstance.level(enchantInstance));
+                ResourceKey<Enchantment> enchantmentKey = CUBIOMES_ENCHANTMENT_ID_TO_MC.get(itemEnchantment);
+                Registry<Enchantment> enchantmentRegistry = this.mc.player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+                itemStack.enchant(enchantmentRegistry.getOrThrow(enchantmentKey), EnchantInstance.level(enchantInstance));
             }
-            container.addStack(itemStack);
+            container.addItem(itemStack);
         }
 
         return container;
     }
 
-    private record PieceData(Identifier piece, RegistryKey<World> dimension, List<Map<BlockPos, BlockState>> variants, Function<RegistryEntry<Biome>, SaltData> biomeFunction, MemorySegment ltc) {
+    private record PieceData(Identifier piece, ResourceKey<Level> dimension, List<Map<BlockPos, BlockState>> variants, Function<Holder<Biome>, SaltData> biomeFunction, MemorySegment ltc) {
     }
 
     private record SaltData(int step, int index) {
@@ -462,8 +461,8 @@ public class ChestPredictor extends Module {
 
     private static class PieceDataBuilder {
 
-        private static final List<BlockRotation> NO_ROTATIONS = List.of(BlockRotation.NONE);
-        private static final List<BlockMirror> NO_MIRRORS = List.of(BlockMirror.NONE);
+        private static final List<Rotation> NO_ROTATIONS = List.of(Rotation.NONE);
+        private static final List<Mirror> NO_MIRRORS = List.of(Mirror.NONE);
 
         private static final Set<Block> FILTERED_BLOCKS = Set.of(
             // structure template blocks
@@ -486,28 +485,28 @@ public class ChestPredictor extends Module {
         );
 
         private final Identifier piece;
-        private final RegistryKey<LootTable> lootTable;
-        private final RegistryKey<World> dimension;
+        private final ResourceKey<LootTable> lootTable;
+        private final ResourceKey<Level> dimension;
 
-        private List<BlockRotation> rotations = NO_ROTATIONS;
-        private List<BlockMirror> mirrors = NO_MIRRORS;
-        private BlockPos pivot = BlockPos.ORIGIN;
+        private List<Rotation> rotations = NO_ROTATIONS;
+        private List<Mirror> mirrors = NO_MIRRORS;
+        private BlockPos pivot = BlockPos.ZERO;
         private boolean centerPivot = false;
         private Set<Block> filteredBlocks = Collections.emptySet();
-        private @Nullable Function<RegistryEntry<Biome>, RegistryKey<Structure>> biomeFunction = null;
+        private @Nullable Function<Holder<Biome>, ResourceKey<Structure>> biomeFunction = null;
 
-        private PieceDataBuilder(Identifier piece, RegistryKey<LootTable> lootTable, RegistryKey<World> dimension) {
+        private PieceDataBuilder(Identifier piece, ResourceKey<LootTable> lootTable, ResourceKey<Level> dimension) {
             this.piece = piece;
             this.lootTable = lootTable;
             this.dimension = dimension;
         }
 
-        private PieceDataBuilder withRotations(List<BlockRotation> rotations) {
+        private PieceDataBuilder withRotations(List<Rotation> rotations) {
             this.rotations = rotations;
             return this;
         }
 
-        private PieceDataBuilder withMirrors(List<BlockMirror> mirrors) {
+        private PieceDataBuilder withMirrors(List<Mirror> mirrors) {
             this.mirrors = mirrors;
             return this;
         }
@@ -527,7 +526,7 @@ public class ChestPredictor extends Module {
             return this;
         }
 
-        private PieceDataBuilder withBiomeFunction(Function<RegistryEntry<Biome>, RegistryKey<Structure>> biomeFunction) {
+        private PieceDataBuilder withBiomeFunction(Function<Holder<Biome>, ResourceKey<Structure>> biomeFunction) {
             this.biomeFunction = biomeFunction;
             return this;
         }
@@ -549,7 +548,7 @@ public class ChestPredictor extends Module {
             }
 
             Map<BlockPos, BlockState> blockMap = pieceInfo.getSecond();
-            List<BlockPos> chests = blockMap.entrySet().stream().filter(entry -> entry.getValue().isOf(Blocks.CHEST)).map(Map.Entry::getKey).toList();
+            List<BlockPos> chests = blockMap.entrySet().stream().filter(entry -> entry.getValue().is(Blocks.CHEST)).map(Map.Entry::getKey).toList();
             if (chests.size() != 1) {
                 LOGGER.error("Structure piece does not have exactly one chest!");
                 return null;
@@ -557,14 +556,14 @@ public class ChestPredictor extends Module {
             BlockPos chestPos = chests.getFirst();
             var variants = this.rotations.stream()
                 .flatMap(rot -> this.mirrors.stream().map(mir -> new Object() {
-                    private final BlockRotation rotation = rot;
-                    private final BlockMirror mirror = mir;
+                    private final Rotation rotation = rot;
+                    private final Mirror mirror = mir;
                 }))
                 .map(variant -> {
-                    BlockPos transformedChestPos = StructureTemplate.transformAround(chestPos, variant.mirror, variant.rotation, this.pivot);
+                    BlockPos transformedChestPos = StructureTemplate.transform(chestPos, variant.mirror, variant.rotation, this.pivot);
                     return blockMap.entrySet().stream()
                         .collect(Collectors.toUnmodifiableMap(
-                            entry -> StructureTemplate.transformAround(entry.getKey(), variant.mirror, variant.rotation, this.pivot).subtract(transformedChestPos),
+                            entry -> StructureTemplate.transform(entry.getKey(), variant.mirror, variant.rotation, this.pivot).subtract(transformedChestPos),
                             entry -> entry.getValue().mirror(variant.mirror).rotate(variant.rotation))
                         );
                 })
@@ -579,7 +578,7 @@ public class ChestPredictor extends Module {
         }
 
         private static @Nullable Pair<Vec3i, Map<BlockPos, BlockState>> loadPiece(Identifier piece, Set<Block> filteredBlocks) {
-            Identifier fileIdentifier = StructureTemplateManager.STRUCTURE_NBT_RESOURCE_FINDER.toResourcePath(piece);
+            Identifier fileIdentifier = StructureTemplateManager.RESOURCE_STRUCTURE_LISTER.idToFile(piece);
             ModContainer modContainer = FabricLoader.getInstance().getModContainer(fileIdentifier.getNamespace()).orElse(null);
             if (modContainer == null) {
                 LOGGER.error("Could not find mod container for {}", fileIdentifier.getNamespace());
@@ -587,21 +586,21 @@ public class ChestPredictor extends Module {
             }
             String path = "data/%s/%s".formatted(fileIdentifier.getNamespace(), fileIdentifier.getPath());
             try (InputStream is = Files.newInputStream(modContainer.findPath(path).orElseThrow())) {
-                NbtCompound compoundTag = NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes());
-                int dataVersion = NbtHelper.getDataVersion(compoundTag, 500);
-                NbtCompound updatedTag = DataFixTypes.STRUCTURE.update(MinecraftClient.getInstance().getDataFixer(), compoundTag, dataVersion);
-                Vec3i size = updatedTag.get("size", Vec3i.CODEC).orElseThrow();
-                NbtList blocks = updatedTag.getList("blocks").orElseThrow();
-                NbtList palette = updatedTag.getList("palette").orElseThrow();
-                return Pair.of(size, blocks.streamCompounds()
+                CompoundTag compoundTag = NbtIo.readCompressed(is, NbtAccounter.unlimitedHeap());
+                int dataVersion = NbtUtils.getDataVersion(compoundTag, 500);
+                CompoundTag updatedTag = DataFixTypes.STRUCTURE.updateToCurrentVersion(Minecraft.getInstance().getFixerUpper(), compoundTag, dataVersion);
+                Vec3i size = updatedTag.read("size", Vec3i.CODEC).orElseThrow();
+                ListTag blocks = updatedTag.getList("blocks").orElseThrow();
+                ListTag palette = updatedTag.getList("palette").orElseThrow();
+                return Pair.of(size, blocks.compoundStream()
                     .map(compound -> {
-                        BlockPos pos = compound.get("pos", BlockPos.CODEC).orElseThrow();
+                        BlockPos pos = compound.read("pos", BlockPos.CODEC).orElseThrow();
                         int stateIdx = compound.getInt("state").orElseThrow();
                         BlockState state = BlockState.CODEC.parse(NbtOps.INSTANCE, palette.get(stateIdx)).getOrThrow();
                         return Map.entry(pos, state);
                     })
                     .filter(entry -> !FILTERED_BLOCKS.contains(entry.getValue().getBlock()))
-                    .filter(entry -> FILTERED_TAGS.stream().noneMatch(tag -> entry.getValue().isIn(tag)))
+                    .filter(entry -> FILTERED_TAGS.stream().noneMatch(tag -> entry.getValue().is(tag)))
                     .filter(entry -> !filteredBlocks.contains(entry.getValue().getBlock()))
                     .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue)));
             } catch (IOException | NoSuchElementException | IllegalStateException e) {
@@ -610,8 +609,8 @@ public class ChestPredictor extends Module {
             }
         }
 
-        private static @Nullable MemorySegment loadLootTable(RegistryKey<LootTable> lootTable) {
-            Identifier fileIdentifier = ResourceFinder.json(RegistryKeys.LOOT_TABLE).toResourcePath(lootTable.getValue());
+        private static @Nullable MemorySegment loadLootTable(ResourceKey<LootTable> lootTable) {
+            Identifier fileIdentifier = FileToIdConverter.registry(Registries.LOOT_TABLE).idToFile(lootTable.identifier());
             ModContainer modContainer = FabricLoader.getInstance().getModContainer(fileIdentifier.getNamespace()).orElse(null);
             if (modContainer == null) {
                 LOGGER.error("Could not find mod container for {}", fileIdentifier.getNamespace());
@@ -625,23 +624,23 @@ public class ChestPredictor extends Module {
                     MemorySegment stringInternal = tempArena.allocateFrom(string);
                     MemorySegment ltc = LootTableContext.allocate(GLOBAL_ARENA);
                     if (Cubiomes.init_loot_table(stringInternal.reinterpret(GLOBAL_ARENA, null), ltc, Cubiomes.MC_NEWEST()) != 0) {
-                        LOGGER.error("Could not initialize loot table {}", lootTable.getValue());
+                        LOGGER.error("Could not initialize loot table {}", lootTable.identifier());
                         return null;
                     }
                     return ltc;
                 }
             } catch (IOException | NoSuchElementException e) {
-                LOGGER.error("Error while loading loot table %s".formatted(lootTable.getValue()), e);
+                LOGGER.error("Error while loading loot table %s".formatted(lootTable.identifier()), e);
                 return null;
             }
         }
     }
 
-    private static RegistryKey<World> detectDimension(DimensionType dimension) {
+    private static ResourceKey<Level> detectDimension(DimensionType dimension) {
         return switch (dimension.skybox()) {
-            case OVERWORLD -> World.OVERWORLD;
-            case NONE -> World.NETHER;
-            case END -> World.END;
+            case OVERWORLD -> Level.OVERWORLD;
+            case NONE -> Level.NETHER;
+            case END -> Level.END;
         };
     }
 }

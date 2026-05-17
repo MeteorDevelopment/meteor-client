@@ -23,6 +23,7 @@ public class MeteorTextHud {
     public static final HudElementInfo<TextHud>.Preset LOOKING_AT_WITH_POSITION;
     public static final HudElementInfo<TextHud>.Preset BREAKING_PROGRESS;
     public static final HudElementInfo<TextHud>.Preset SERVER;
+    public static final HudElementInfo<TextHud>.Preset WEATHER;
     public static final HudElementInfo<TextHud>.Preset BIOME;
     public static final HudElementInfo<TextHud>.Preset WORLD_TIME;
     public static final HudElementInfo<TextHud>.Preset REAL_TIME;
@@ -46,6 +47,7 @@ public class MeteorTextHud {
         LOOKING_AT_WITH_POSITION = addPreset("Looking at with position", "Looking at: #1{crosshair_target.value} {crosshair_target.type != \"miss\" ? \"(\" + \"\" + floor(crosshair_target.value.pos.x) + \", \" + floor(crosshair_target.value.pos.y) + \", \" + floor(crosshair_target.value.pos.z) + \")\" : \"\"}", 0);
         BREAKING_PROGRESS = addPreset("Breaking progress", "Breaking progress: #1{round(player.breaking_progress * 100)}%", 0);
         SERVER = addPreset("Server", "Server: #1{server}");
+        WEATHER = addPreset("Weather", "Weather: #1{server.weather}", 0);
         BIOME = addPreset("Biome", "Biome: #1{player.biome}", 0);
         WORLD_TIME = addPreset("World time", "Time: #1{server.time}");
         REAL_TIME = addPreset("Real time", "Time: #1{time}");

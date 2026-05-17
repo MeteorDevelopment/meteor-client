@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -100,7 +100,8 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public boolean add(Proxy proxy) {
         for (Proxy p : proxies) {
-            if (p.type.get().equals(proxy.type.get()) && p.address.get().equals(proxy.address.get()) && Objects.equals(p.port.get(), proxy.port.get())) return false;
+            if (p.type.get().equals(proxy.type.get()) && p.address.get().equals(proxy.address.get()) && Objects.equals(p.port.get(), proxy.port.get()))
+                return false;
         }
 
         if (proxies.isEmpty()) proxy.enabled.set(true);
@@ -152,7 +153,8 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
                     executor.execute(() -> {
                         try {
                             check(toCheck, checked);
-                        } catch (InterruptedException ignored) {}
+                        } catch (InterruptedException _) {
+                        }
                     });
                 }
 
@@ -160,7 +162,8 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
                     executor.shutdown();
                     //noinspection ResultOfMethodCallIgnored
                     executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException _) {
+                }
 
                 refreshing = false;
             }
@@ -208,8 +211,8 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
         tag.put("settings", settings.toTag());
         tag.put("proxies", NbtUtils.listToTag(proxies));
@@ -218,7 +221,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     }
 
     @Override
-    public Proxies fromTag(NbtCompound tag) {
+    public Proxies fromTag(CompoundTag tag) {
         if (tag.contains("settings")) settings.fromTag(tag.getCompoundOrEmpty("settings"));
         proxies = NbtUtils.listFromTag(tag.getListOrEmpty("proxies"), Proxy::new);
 

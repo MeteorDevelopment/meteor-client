@@ -5,33 +5,18 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
+import meteordevelopment.meteorclient.mixin.ClientPacketListenerMixin;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.EntityPosition;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * @see ClientPacketListenerMixin#onHandleMovePlayerHead(ClientboundPlayerPositionPacket, CallbackInfo, LocalFloatRef, LocalFloatRef)
+ */
 public class NoRotate extends Module {
     public NoRotate() {
         super(Categories.Player, "no-rotate", "Attempts to block rotations sent from server to client.");
-    }
-
-    @EventHandler
-    private void onReceivePacket(PacketEvent.Receive event) {
-        if (event.packet instanceof PlayerPositionLookS2CPacket packet) {
-            EntityPosition oldPosition = packet.change();
-            EntityPosition newPosition = new EntityPosition(
-                oldPosition.position(),
-                oldPosition.deltaMovement(),
-                mc.player.getYaw(),
-                mc.player.getPitch()
-            );
-            event.packet = PlayerPositionLookS2CPacket.of(
-                packet.teleportId(),
-                newPosition,
-                packet.relatives()
-            );
-        }
     }
 }

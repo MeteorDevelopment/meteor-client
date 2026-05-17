@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.WaypointsModule;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.gui.screens.DeathScreen;
 
 public class AutoRespawn extends Module {
     public AutoRespawn() {
@@ -23,8 +23,8 @@ public class AutoRespawn extends Module {
     private void onOpenScreenEvent(OpenScreenEvent event) {
         if (!(event.screen instanceof DeathScreen)) return;
 
-        Modules.get().get(WaypointsModule.class).addDeath(mc.player.getEntityPos());
-        mc.player.requestRespawn();
+        Modules.get().get(WaypointsModule.class).addDeath(mc.player.position());
+        mc.player.respawn();
         event.cancel();
     }
 }

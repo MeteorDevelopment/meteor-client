@@ -34,7 +34,7 @@
     "meteor-client-lithium.mixins.json",
     "meteor-client-viafabricplus.mixins.json"
   ],
-  "accessWidener": "meteor-client.accesswidener",
+  "accessWidener": "meteor-client.classtweaker",
   "custom": {
     "meteor-client:build_number": "${build_number}",
     "meteor-client:color": "145,61,226",
@@ -49,15 +49,16 @@
     }
   },
   "depends": {
-    "java": ">=21",
-    "minecraft": ["${minecraft_version}"],
+    "java": ">=${jdk_version}",
+    "minecraft": "${minecraft_version}",
     "fabricloader": ">=${loader_version}"
   },
   "breaks": {
     "optifabric": "*",
     "feather": "*",
     "origins": "*",
-    "sodium": "<0.7.0",
-    "morechathistory": "*"
+    "sodium": "<0.8.7",
+    "morechathistory": "*",
+    "lithium": "<0.22.1"
   }
 }

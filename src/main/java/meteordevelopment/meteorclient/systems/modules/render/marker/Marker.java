@@ -20,9 +20,9 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 
@@ -49,12 +49,12 @@ public class Marker extends Module {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = super.toTag();
+    public CompoundTag toTag() {
+        CompoundTag tag = super.toTag();
 
-        NbtList list = new NbtList();
+        ListTag list = new ListTag();
         for (BaseMarker marker : markers) {
-            NbtCompound mTag = new NbtCompound();
+            CompoundTag mTag = new CompoundTag();
             mTag.putString("type", marker.getTypeName());
             mTag.put("marker", marker.toTag());
 
@@ -66,20 +66,20 @@ public class Marker extends Module {
     }
 
     @Override
-    public Module fromTag(NbtCompound tag) {
+    public Module fromTag(CompoundTag tag) {
         super.fromTag(tag);
 
         markers.clear();
-        NbtList list = tag.getListOrEmpty("markers");
+        ListTag list = tag.getListOrEmpty("markers");
 
-        for (NbtElement tagII : list) {
-            NbtCompound tagI = (NbtCompound) tagII;
+        for (Tag tagII : list) {
+            CompoundTag tagI = (CompoundTag) tagII;
 
-            String type = tagI.getString("type", "");
+            String type = tagI.getStringOr("type", "");
             BaseMarker marker = factory.createMarker(type);
 
             if (marker != null) {
-                NbtCompound markerTag = (NbtCompound) tagI.get("marker");
+                CompoundTag markerTag = (CompoundTag) tagI.get("marker");
                 if (markerTag != null) marker.fromTag(markerTag);
 
                 markers.add(marker);

@@ -11,32 +11,35 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.settings.Setting;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.registry.*;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
+import net.minecraft.IdentifierException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.data.registries.VanillaRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class DynamicRegistryListSettingScreen<T> extends CollectionListSettingScreen<RegistryKey<T>> {
-    protected final RegistryKey<Registry<T>> registryKey;
+public abstract class DynamicRegistryListSettingScreen<T> extends CollectionListSettingScreen<ResourceKey<T>> {
+    protected final ResourceKey<Registry<T>> registryKey;
 
-    public DynamicRegistryListSettingScreen(GuiTheme theme, String title, Setting<?> setting, Collection<RegistryKey<T>> collection, RegistryKey<Registry<T>> registryKey) {
+    public DynamicRegistryListSettingScreen(GuiTheme theme, String title, Setting<?> setting, Collection<ResourceKey<T>> collection, ResourceKey<Registry<T>> registryKey) {
         super(theme, title, setting, collection, createUniverse(collection, registryKey));
 
         this.registryKey = registryKey;
     }
 
-    private static <T> Iterable<RegistryKey<T>> createUniverse(Collection<RegistryKey<T>> collection, RegistryKey<Registry<T>> registryKey) {
-        Set<RegistryKey<T>> set = new ReferenceOpenHashSet<>(collection);
+    private static <T> Iterable<ResourceKey<T>> createUniverse(Collection<ResourceKey<T>> collection, ResourceKey<Registry<T>> registryKey) {
+        Set<ResourceKey<T>> set = new ReferenceOpenHashSet<>(collection);
 
-        Optional.ofNullable(MinecraftClient.getInstance().getNetworkHandler())
-            .map(networkHandler -> (RegistryWrapper.WrapperLookup) networkHandler.getRegistryManager())
-            .orElseGet(BuiltinRegistries::createWrapperLookup)
-            .getOptional(registryKey)
-            .ifPresent(registry -> registry.streamKeys().forEach(set::add));
+        Optional.ofNullable(Minecraft.getInstance().getConnection())
+            .map(networkHandler -> (HolderLookup.Provider) networkHandler.registryAccess())
+            .orElseGet(VanillaRegistries::createLookup)
+            .lookup(registryKey)
+            .ifPresent(registry -> registry.listElementIds().forEach(set::add));
 
         return set;
     }
@@ -53,9 +56,10 @@ public abstract class DynamicRegistryListSettingScreen<T> extends CollectionList
         manualEntry.add(theme.plus()).expandCellX().right().widget().action = () -> {
             String entry = textBox.get().trim();
             try {
-                Identifier id = entry.contains(":") ? Identifier.of(entry) : Identifier.ofVanilla(entry);
-                addValue(RegistryKey.of(registryKey, id));
-            } catch (InvalidIdentifierException ignored) {}
+                Identifier id = entry.contains(":") ? Identifier.parse(entry) : Identifier.withDefaultNamespace(entry);
+                addValue(ResourceKey.create(registryKey, id));
+            } catch (IdentifierException _) {
+            }
         };
     }
 }

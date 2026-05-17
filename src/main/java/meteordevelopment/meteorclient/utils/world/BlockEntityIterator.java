@@ -5,16 +5,16 @@
 
 package meteordevelopment.meteorclient.utils.world;
 
-import meteordevelopment.meteorclient.mixin.ChunkAccessor;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
+import meteordevelopment.meteorclient.mixin.ChunkAccessAccessor;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.chunk.ChunkAccess;
 
 import java.util.Iterator;
 import java.util.Map;
 
 public class BlockEntityIterator implements Iterator<BlockEntity> {
-    private final Iterator<Chunk> chunks;
+    private final Iterator<ChunkAccess> chunks;
     private Iterator<BlockEntity> blockEntities;
 
     public BlockEntityIterator() {
@@ -27,7 +27,7 @@ public class BlockEntityIterator implements Iterator<BlockEntity> {
         while (true) {
             if (!chunks.hasNext()) break;
 
-            Map<BlockPos, BlockEntity> blockEntityMap = ((ChunkAccessor) chunks.next()).getBlockEntities();
+            Map<BlockPos, BlockEntity> blockEntityMap = ((ChunkAccessAccessor) chunks.next()).getBlockEntities();
 
             if (!blockEntityMap.isEmpty()) {
                 blockEntities = blockEntityMap.values().iterator();

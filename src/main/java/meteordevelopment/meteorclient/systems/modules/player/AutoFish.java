@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.FishingBobberEntityAccessor;
+import meteordevelopment.meteorclient.mixin.FishingHookAccessor;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -17,10 +17,10 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.item.FishingRodItem;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.item.FishingRodItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -106,14 +106,14 @@ public class AutoFish extends Module {
             InvUtils.swap(bestRodSlot, false);
         }
 
-        if (!(mc.player.getMainHandStack().getItem() instanceof FishingRodItem)) return;
+        if (!(mc.player.getMainHandItem().getItem() instanceof FishingRodItem)) return;
 
         tryCast();
         tryCatch();
     }
 
     private void tryCast() {
-        if (mc.player.fishHook != null) return;
+        if (mc.player.fishing != null) return;
 
         if (!autoCast.get()) return;
 
@@ -126,16 +126,16 @@ public class AutoFish extends Module {
     }
 
     private void tryCatch() {
-        if (mc.player.fishHook == null) return;
-        if (mc.player.fishHook.getHookedEntity() != null) {
+        if (mc.player.fishing == null) return;
+        if (mc.player.fishing.getHookedIn() != null) {
             useRod();
             return;
         }
 
-        if (mc.player.fishHook.state != FishingBobberEntity.State.BOBBING) return;
+        if (mc.player.fishing.currentState != FishingHook.FishHookState.BOBBING) return;
 
         if (!wasHooked) {
-            if (((FishingBobberEntityAccessor) mc.player.fishHook).meteor$hasCaughtFish()) {
+            if (((FishingHookAccessor) mc.player.fishing).meteor$hasCaughtFish()) {
                 catchDelayLeft = randomizeDelay(catchDelay.get(), catchDelayVariance.get());
                 wasHooked = true;
             }
@@ -162,9 +162,9 @@ public class AutoFish extends Module {
         int bestScore = -1;
 
         for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.getInventory().getStack(i);
+            ItemStack stack = mc.player.getInventory().getItem(i);
             if (!(stack.getItem() instanceof FishingRodItem)) continue;
-            if (antiBreak.get() && stack.getDamage() == stack.getMaxDamage() - 1) continue;
+            if (antiBreak.get() && stack.getDamageValue() == stack.getMaxDamage() - 1) continue;
 
             int score = 0;
 
@@ -197,7 +197,7 @@ public class AutoFish extends Module {
         final double MAX_SD = 3.0;
         norm = Math.clamp(norm, -MAX_SD, MAX_SD) / MAX_SD;
 
-        delay += Math.round((float)(norm * variance));
+        delay += Math.round((float) (norm * variance));
         return Math.max(1, delay);
     }
 }

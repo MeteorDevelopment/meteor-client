@@ -12,13 +12,14 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.phys.EntityHitResult;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 public class AutoBreed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -42,10 +43,10 @@ public class AutoBreed extends Module {
         .build()
     );
 
-    private final Setting<Hand> hand = sgGeneral.add(new EnumSetting.Builder<Hand>()
+    private final Setting<InteractionHand> hand = sgGeneral.add(new EnumSetting.Builder<InteractionHand>()
         .name("hand-for-breeding")
         .description("The hand to use for breeding.")
-        .defaultValue(Hand.MAIN_HAND)
+        .defaultValue(InteractionHand.MAIN_HAND)
         .build()
     );
 
@@ -88,21 +89,20 @@ public class AutoBreed extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof AnimalEntity animal)) continue;
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            if (!(entity instanceof Animal animal)) continue;
 
             if (!entities.get().contains(animal.getType())
                 || !isCorrectAge(animal)
                 || animalsFed.containsKey(animal)
                 || !PlayerUtils.isWithin(animal, range.get())
-                || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack()))
+                || !animal.isFood(hand.get() == InteractionHand.MAIN_HAND ? mc.player.getMainHandItem() : mc.player.getOffhandItem()))
                 continue;
 
             Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> {
                 EntityHitResult location = new EntityHitResult(animal, animal.getBoundingBox().getCenter());
-                mc.interactionManager.interactEntityAtLocation(mc.player, animal, location, hand.get());
-                mc.interactionManager.interactEntity(mc.player, animal, hand.get());
-                mc.player.swingHand(hand.get());
+                mc.gameMode.interact(mc.player, animal, location, hand.get());
+                mc.player.swing(hand.get());
                 animalsFed.putLast(animal, tickCounter);
             });
             break;
@@ -122,7 +122,7 @@ public class AutoBreed extends Module {
         Both
     }
 
-    private boolean isCorrectAge(AnimalEntity animal) {
+    private boolean isCorrectAge(Animal animal) {
         return switch (mobAgeFilter.get()) {
             case Baby -> animal.isBaby();
             case Adult -> !animal.isBaby();

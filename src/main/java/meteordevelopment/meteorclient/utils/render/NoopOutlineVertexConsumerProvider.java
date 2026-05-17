@@ -5,22 +5,22 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import net.minecraft.client.render.OutlineVertexConsumerProvider;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.OutlineBufferSource;
+import net.minecraft.client.renderer.rendertype.RenderType;
 
-public class NoopOutlineVertexConsumerProvider extends OutlineVertexConsumerProvider {
+public class NoopOutlineVertexConsumerProvider extends OutlineBufferSource {
     public static final NoopOutlineVertexConsumerProvider INSTANCE = new NoopOutlineVertexConsumerProvider();
 
     private NoopOutlineVertexConsumerProvider() {
     }
 
     @Override
-    public VertexConsumer getBuffer(RenderLayer layer) {
+    public VertexConsumer getBuffer(RenderType layer) {
         return NoopVertexConsumer.INSTANCE;
     }
 
     @Override
-    public void draw() {
+    public void endOutlineBatch() {
     }
 }

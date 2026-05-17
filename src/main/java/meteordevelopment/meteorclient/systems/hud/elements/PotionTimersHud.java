@@ -12,9 +12,9 @@ import meteordevelopment.meteorclient.systems.hud.*;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffectUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class PotionTimersHud extends HudElement {
 
     // General
 
-    private final Setting<List<StatusEffect>> hiddenEffects = sgGeneral.add(new StatusEffectListSetting.Builder()
+    private final Setting<List<MobEffect>> hiddenEffects = sgGeneral.add(new StatusEffectListSetting.Builder()
         .name("hidden-effects")
         .description("Which effects not to show in the list.")
         .build()
@@ -155,7 +155,7 @@ public class PotionTimersHud extends HudElement {
         .build()
     );
 
-    private final List<Pair<StatusEffectInstance, String>> texts = new ArrayList<>();
+    private final List<Pair<MobEffectInstance, String>> texts = new ArrayList<>();
     private double rainbowHue;
 
     public PotionTimersHud() {
@@ -184,8 +184,8 @@ public class PotionTimersHud extends HudElement {
 
         texts.clear();
 
-        for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
-            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType().value())) continue;
+        for (MobEffectInstance statusEffectInstance : mc.player.getActiveEffects()) {
+            if (hiddenEffects.get().contains(statusEffectInstance.getEffect().value())) continue;
             if (!showAmbient.get() && statusEffectInstance.isAmbient()) continue;
             String text = getString(statusEffectInstance);
             texts.add(new ObjectObjectImmutablePair<>(statusEffectInstance, text));
@@ -216,10 +216,10 @@ public class PotionTimersHud extends HudElement {
 
         double localRainbowHue = rainbowHue;
 
-        for (Pair<StatusEffectInstance, String> potionEffectEntry : texts) {
+        for (Pair<MobEffectInstance, String> potionEffectEntry : texts) {
             Color color = switch (colorMode.get()) {
                 case Effect -> {
-                    int c = potionEffectEntry.left().getEffectType().value().getColor();
+                    int c = potionEffectEntry.left().getEffect().value().getColor();
                     yield new Color(c).a(255);
                 }
                 case Flat -> {
@@ -240,8 +240,8 @@ public class PotionTimersHud extends HudElement {
         }
     }
 
-    private String getString(StatusEffectInstance statusEffectInstance) {
-        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffectType().value()), statusEffectInstance.getAmplifier() + 1, StatusEffectUtil.getDurationText(statusEffectInstance, 1, mc.world.getTickManager().getTickRate()).getString());
+    private String getString(MobEffectInstance statusEffectInstance) {
+        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffect().value()), statusEffectInstance.getAmplifier() + 1, MobEffectUtil.formatDuration(statusEffectInstance, 1, mc.level.tickRateManager().tickrate()).getString());
     }
 
     private double getScale() {
@@ -249,8 +249,8 @@ public class PotionTimersHud extends HudElement {
     }
 
     private boolean hasNoVisibleEffects() {
-        for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
-            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType().value())) continue;
+        for (MobEffectInstance statusEffectInstance : mc.player.getActiveEffects()) {
+            if (hiddenEffects.get().contains(statusEffectInstance.getEffect().value())) continue;
             if (!showAmbient.get() && statusEffectInstance.isAmbient()) continue;
             return false;
         }

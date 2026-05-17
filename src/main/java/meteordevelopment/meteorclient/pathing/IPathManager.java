@@ -7,9 +7,9 @@ package meteordevelopment.meteorclient.pathing;
 
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.Settings;
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
 
 import java.util.function.Predicate;
 
@@ -19,11 +19,17 @@ public interface IPathManager {
     boolean isPathing();
 
     void pause();
+
     void resume();
+
     void stop();
 
-    default void moveTo(BlockPos pos) { moveTo(pos, false); }
+    default void moveTo(BlockPos pos) {
+        moveTo(pos, false);
+    }
+
     void moveTo(BlockPos pos, boolean ignoreY);
+
     void moveInDirection(float yaw);
 
     void mine(Block... blocks);
@@ -31,6 +37,7 @@ public interface IPathManager {
     void follow(Predicate<Entity> entity);
 
     float getTargetYaw();
+
     float getTargetPitch();
 
     ISettings getSettings();
@@ -39,9 +46,11 @@ public interface IPathManager {
         Settings get();
 
         Setting<Boolean> getWalkOnWater();
+
         Setting<Boolean> getWalkOnLava();
 
         Setting<Boolean> getStep();
+
         Setting<Boolean> getNoFall();
 
         void save();

@@ -23,20 +23,20 @@ import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.List;
 import java.util.Map;
 
 public class AutoGap extends Module {
     @SuppressWarnings("unchecked")
-    private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
+    private static final Class<? extends Module>[] AURAS = new Class[]{KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class};
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPotions = settings.createGroup("Potions");
@@ -154,7 +154,7 @@ public class AutoGap extends Module {
             // If we are eating check if we should still be still eating
             if (shouldEat()) {
                 // Check if the item in current slot is not gap or egap
-                if (isNotGapOrEGap(mc.player.getInventory().getStack(slot))) {
+                if (isNotGapOrEGap(mc.player.getInventory().getItem(slot))) {
                     // If not try finding a new slot
                     int slot = findSlot();
 
@@ -176,8 +176,7 @@ public class AutoGap extends Module {
             else {
                 stopEating();
             }
-        }
-        else {
+        } else {
             // If we are not eating check if we should start eating
             if (shouldEat()) {
                 // Try to find a valid slot
@@ -249,7 +248,7 @@ public class AutoGap extends Module {
     }
 
     private void setPressed(boolean pressed) {
-        mc.options.useKey.setPressed(pressed);
+        mc.options.keyUse.setDown(pressed);
     }
 
     private void changeSlot(int slot) {
@@ -266,17 +265,17 @@ public class AutoGap extends Module {
     }
 
     private boolean shouldEatPotions() {
-        Map<RegistryEntry<StatusEffect>, StatusEffectInstance> effects = mc.player.getActiveStatusEffects();
+        Map<Holder<MobEffect>, MobEffectInstance> effects = mc.player.getActiveEffectsMap();
 
         // Regeneration
         if (potionsRegeneration.get()) {
-            StatusEffectInstance effect = effects.get(StatusEffects.REGENERATION);
+            MobEffectInstance effect = effects.get(MobEffects.REGENERATION);
             if (effect == null || (beforeExpiry.get() && effect.getDuration() <= expiryThreshold.get())) return true;
         }
 
         // Fire resistance
         if (potionsFireResistance.get()) {
-            StatusEffectInstance effect = effects.get(StatusEffects.FIRE_RESISTANCE);
+            MobEffectInstance effect = effects.get(MobEffects.FIRE_RESISTANCE);
             if (effect == null || (beforeExpiry.get() && effect.getDuration() <= expiryThreshold.get())) {
                 requiresEGap = true;
                 return true;
@@ -285,7 +284,7 @@ public class AutoGap extends Module {
 
         // Absorption
         if (potionsAbsorption.get()) {
-            StatusEffectInstance effect = effects.get(StatusEffects.ABSORPTION);
+            MobEffectInstance effect = effects.get(MobEffects.ABSORPTION);
             if (effect == null || (beforeExpiry.get() && effect.getDuration() <= expiryThreshold.get())) {
                 requiresEGap = true;
                 return true;
@@ -304,7 +303,7 @@ public class AutoGap extends Module {
 
     private int findSlot() {
         for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.getInventory().getStack(i);
+            ItemStack stack = mc.player.getInventory().getItem(i);
 
             // Skip if item stack is empty
             if (stack.isEmpty()) continue;

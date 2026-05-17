@@ -18,13 +18,13 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.FallingBlock;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -179,7 +179,7 @@ public class Scaffold extends Module {
         .build()
     );
 
-    private final BlockPos.Mutable bp = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos bp = new BlockPos.MutableBlockPos();
 
     public Scaffold() {
         super(Categories.Movement, "scaffold", "Automatically places blocks under you.");
@@ -188,50 +188,51 @@ public class Scaffold extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (onlyOnClick.get() && !mc.options.useKey.isPressed()) return;
+        if (onlyOnClick.get() && !mc.options.keyUse.isDown()) return;
 
-        Vec3d vec = mc.player.getEntityPos().add(mc.player.getVelocity()).add(0, -0.75, 0);
+        Vec3 vec = mc.player.position().add(mc.player.getDeltaMovement()).add(0, -0.75, 0);
         if (airPlace.get()) {
-            bp.set(vec.getX(), vec.getY(), vec.getZ());
+            bp.set(vec.x(), vec.y(), vec.z());
         } else {
-            Vec3d pos = mc.player.getEntityPos();
-            if (aheadDistance.get() != 0 && !towering() && !mc.world.getBlockState(mc.player.getBlockPos().down()).getCollisionShape(mc.world, mc.player.getBlockPos()).isEmpty()) {
-                Vec3d dir = Vec3d.fromPolar(0, mc.player.getYaw()).multiply(aheadDistance.get(), 0, aheadDistance.get());
-                if (mc.options.forwardKey.isPressed()) pos = pos.add(dir.x, 0, dir.z);
-                if (mc.options.backKey.isPressed()) pos = pos.add(-dir.x, 0, -dir.z);
-                if (mc.options.leftKey.isPressed()) pos = pos.add(dir.z, 0, -dir.x);
-                if (mc.options.rightKey.isPressed()) pos = pos.add(-dir.z, 0, dir.x);
+            Vec3 pos = mc.player.position();
+            if (aheadDistance.get() != 0 && !towering() && !mc.level.getBlockState(mc.player.blockPosition().below()).getCollisionShape(mc.level, mc.player.blockPosition()).isEmpty()) {
+                Vec3 dir = Vec3.directionFromRotation(0, mc.player.getYRot()).multiply(aheadDistance.get(), 0, aheadDistance.get());
+                if (mc.options.keyUp.isDown()) pos = pos.add(dir.x, 0, dir.z);
+                if (mc.options.keyDown.isDown()) pos = pos.add(-dir.x, 0, -dir.z);
+                if (mc.options.keyLeft.isDown()) pos = pos.add(dir.z, 0, -dir.x);
+                if (mc.options.keyRight.isDown()) pos = pos.add(-dir.z, 0, dir.x);
             }
             bp.set(pos.x, vec.y, pos.z);
         }
-        if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed() && mc.player.getY() + vec.y > -1) {
+        if (mc.options.keyShift.isDown() && !mc.options.keyJump.isDown() && mc.player.getY() + vec.y > -1) {
             bp.setY(bp.getY() - 1);
         }
-        if (bp.getY() >= mc.player.getBlockPos().getY()) {
-            bp.setY(mc.player.getBlockPos().getY() - 1);
+        if (bp.getY() >= mc.player.blockPosition().getY()) {
+            bp.setY(mc.player.blockPosition().getY() - 1);
         }
-        BlockPos targetBlock = bp.toImmutable();
+        BlockPos targetBlock = bp.immutable();
 
         if (!airPlace.get() && (BlockUtils.getPlaceSide(bp) == null)) {
-            Vec3d pos = mc.player.getEntityPos();
+            Vec3 pos = mc.player.position();
             pos = pos.add(0, -0.98f, 0);
-            pos.add(mc.player.getVelocity());
+            pos.add(mc.player.getDeltaMovement());
 
             List<BlockPos> blockPosArray = new ArrayList<>();
             for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
                 for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
-                    for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getHeight(), mc.player.getY() + placeRange.get()); y++) {
+                    for (int y = (int) Math.max(mc.level.getMinY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.level.getHeight(), mc.player.getY() + placeRange.get()); y++) {
                         bp.set(x, y, z);
                         if (BlockUtils.getPlaceSide(bp) == null) continue;
                         if (!BlockUtils.canPlace(bp)) continue;
-                        if (mc.player.getEyePos().squaredDistanceTo(Vec3d.ofCenter(bp.offset(BlockUtils.getClosestPlaceSide(bp)))) > 36) continue;
+                        if (mc.player.getEyePosition().distanceToSqr(Vec3.atCenterOf(bp.relative(BlockUtils.getClosestPlaceSide(bp)))) > 36)
+                            continue;
                         blockPosArray.add(new BlockPos(bp));
                     }
                 }
             }
             if (blockPosArray.isEmpty()) return;
 
-            blockPosArray.sort(Comparator.comparingDouble((blockPos) -> blockPos.getSquaredDistance(targetBlock)));
+            blockPosArray.sort(Comparator.comparingDouble(blockPos -> blockPos.distSqr(targetBlock)));
 
             bp.set(blockPosArray.getFirst());
         }
@@ -240,8 +241,8 @@ public class Scaffold extends Module {
             List<BlockPos> blocks = new ArrayList<>();
             for (int x = (int) (bp.getX() - radius.get()); x <= bp.getX() + radius.get(); x++) {
                 for (int z = (int) (bp.getZ() - radius.get()); z <= bp.getZ() + radius.get(); z++) {
-                    BlockPos blockPos = BlockPos.ofFloored(x, bp.getY(), z);
-                    if (mc.player.getEntityPos().distanceTo(Vec3d.ofCenter(blockPos)) <= radius.get() || (x == bp.getX() && z == bp.getZ())) {
+                    BlockPos blockPos = BlockPos.containing(x, bp.getY(), z);
+                    if (mc.player.position().distanceTo(Vec3.atCenterOf(blockPos)) <= radius.get() || (x == bp.getX() && z == bp.getZ())) {
                         blocks.add(blockPos);
                     }
                 }
@@ -265,30 +266,30 @@ public class Scaffold extends Module {
         }
 
         FindItemResult result = InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp));
-        if (fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && result.found() && (autoSwitch.get() || result.getHand() != null)) {
-            Vec3d velocity = mc.player.getVelocity();
-            Box playerBox = mc.player.getBoundingBox();
-            if (Streams.stream(mc.world.getBlockCollisions(mc.player, playerBox.offset(0, 1, 0))).toList().isEmpty()) {
+        if (fastTower.get() && mc.options.keyJump.isDown() && !mc.options.keyShift.isDown() && result.found() && (autoSwitch.get() || result.getHand() != null)) {
+            Vec3 velocity = mc.player.getDeltaMovement();
+            AABB playerBox = mc.player.getBoundingBox();
+            if (Streams.stream(mc.level.getBlockCollisions(mc.player, playerBox.move(0, 1, 0))).toList().isEmpty()) {
                 // If there is no block above the player: move the player up, so he can place another block
                 if (whileMoving.get() || !PlayerUtils.isMoving()) {
-                    velocity = new Vec3d(velocity.x, towerSpeed.get(), velocity.z);
+                    velocity = new Vec3(velocity.x, towerSpeed.get(), velocity.z);
                 }
-                mc.player.setVelocity(velocity);
+                mc.player.setDeltaMovement(velocity);
             } else {
                 // If there is a block above the player: move the player down, so he's on top of the placed block
-                mc.player.setVelocity(velocity.x, Math.ceil(mc.player.getY()) - mc.player.getY(), velocity.z);
+                mc.player.setDeltaMovement(velocity.x, Math.ceil(mc.player.getY()) - mc.player.getY(), velocity.z);
                 mc.player.setOnGround(true);
             }
         }
     }
 
     public boolean scaffolding() {
-        return isActive() && (!onlyOnClick.get() || (onlyOnClick.get() && mc.options.useKey.isPressed()));
+        return isActive() && (!onlyOnClick.get() || (onlyOnClick.get() && mc.options.keyUse.isDown()));
     }
 
     public boolean towering() {
         FindItemResult result = InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp));
-        return scaffolding() && fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() &&
+        return scaffolding() && fastTower.get() && mc.options.keyJump.isDown() && !mc.options.keyShift.isDown() &&
             (whileMoving.get() || !PlayerUtils.isMoving()) && result.found() && (autoSwitch.get() || result.getHand() != null);
     }
 
@@ -300,8 +301,8 @@ public class Scaffold extends Module {
         if (blocksFilter.get() == ListMode.Blacklist && blocks.get().contains(block)) return false;
         else if (blocksFilter.get() == ListMode.Whitelist && !blocks.get().contains(block)) return false;
 
-        if (!Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, pos))) return false;
-        return !(block instanceof FallingBlock) || !FallingBlock.canFallThrough(mc.world.getBlockState(pos));
+        if (!Block.isShapeFullBlock(block.defaultBlockState().getCollisionShape(mc.level, pos))) return false;
+        return !(block instanceof FallingBlock) || !FallingBlock.isFree(mc.level.getBlockState(pos));
     }
 
     private boolean place(BlockPos bp) {
@@ -313,7 +314,7 @@ public class Scaffold extends Module {
         if (BlockUtils.place(bp, item, rotate.get(), 50, renderSwing.get(), true)) {
             // Render block if was placed
             if (render.get())
-                RenderUtils.renderTickingBlock(bp.toImmutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
+                RenderUtils.renderTickingBlock(bp.immutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
             return true;
         }
         return false;

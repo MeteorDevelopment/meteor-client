@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.world;
 
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
 
 public class Dir {
     public static final byte UP = 1 << 1;
@@ -20,12 +20,12 @@ public class Dir {
 
     public static byte get(Direction dir) {
         return switch (dir) {
-            case UP    -> UP;
-            case DOWN  -> DOWN;
+            case UP -> UP;
+            case DOWN -> DOWN;
             case NORTH -> NORTH;
             case SOUTH -> SOUTH;
-            case WEST  -> WEST;
-            case EAST  -> EAST;
+            case WEST -> WEST;
+            case EAST -> EAST;
         };
     }
 

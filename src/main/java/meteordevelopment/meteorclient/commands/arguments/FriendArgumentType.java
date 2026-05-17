@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static net.minecraft.command.CommandSource.suggestMatching;
+import static net.minecraft.commands.SharedSuggestionProvider.suggest;
 
 public class FriendArgumentType implements ArgumentType<String> {
     private static final FriendArgumentType INSTANCE = new FriendArgumentType();
@@ -33,7 +33,8 @@ public class FriendArgumentType implements ArgumentType<String> {
         return Friends.get().get(context.getArgument("friend", String.class));
     }
 
-    private FriendArgumentType() {}
+    private FriendArgumentType() {
+    }
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
@@ -42,7 +43,7 @@ public class FriendArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return suggestMatching(Streams.stream(Friends.get()).map(Friend::getName), builder);
+        return suggest(Streams.stream(Friends.get()).map(Friend::getName), builder);
     }
 
     @Override
