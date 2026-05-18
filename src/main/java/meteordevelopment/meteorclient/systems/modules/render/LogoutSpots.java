@@ -140,7 +140,7 @@ public class LogoutSpots extends Module {
     public void onDeactivate() {
         if (clearOnDeactivate.get()) clearLogoutSpots();
     }
-    
+
     private void updateLastPlayers() {
         lastPlayers.clear();
         for (Entity entity : mc.level.entitiesForRendering()) {
@@ -224,6 +224,10 @@ public class LogoutSpots extends Module {
 
     public boolean removeLogoutSpot(String playerName) {
         return players.removeIf(entry -> entry.name.equalsIgnoreCase(playerName));
+    }
+
+    public List<String> getLoggedOutPlayerNames() {
+        return players.stream().map(entry -> entry.name).toList();
     }
 
     private static final Vector3d pos = new Vector3d();

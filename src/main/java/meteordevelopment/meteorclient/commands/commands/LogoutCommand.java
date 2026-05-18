@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
+import meteordevelopment.meteorclient.commands.arguments.LogoutPlayerArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.LogoutSpots;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -25,18 +25,18 @@ public class LogoutCommand extends Command {
         builder.then(literal("clear")
             .executes(_ -> {
                 logoutSpots.clearLogoutSpots();
-                
+
                 ChatUtils.info("Cleared all logout spots");
                 return SINGLE_SUCCESS;
             })
         );
 
         builder.then(literal("remove")
-            .then(argument("name", StringArgumentType.word())
+            .then(argument("name", LogoutPlayerArgumentType.create())
                 .executes(context -> {
-                    String playerName = StringArgumentType.getString(context, "name");
+                    String playerName = LogoutPlayerArgumentType.get(context);
                     boolean removed = logoutSpots.removeLogoutSpot(playerName);
-                    
+
                     if (removed) {
                         ChatUtils.info("Removed logout spot for player: " + playerName);
                     } else {
