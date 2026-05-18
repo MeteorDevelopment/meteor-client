@@ -35,7 +35,7 @@ viafabricplus = "4.5.2"
 # WaybackAuthLib (https://github.com/florianreuth/WaybackAuthLib)
 waybackauthlib = "1.1.0"
 # cubiomes (https://github.com/xpple/cubiomes)
-cubiomes = "0.0.0-2026.5.15.1778855328+fb9e3c1e83bd53cadbe94326d5765d0fc2d9b217"
+cubiomes = "0.0.0-2026.5.18.1779128583+1a0c27a6b80f6bebbfe18b806af70fe18f33d0c4"
 
 [libraries]
 # Fabric base
