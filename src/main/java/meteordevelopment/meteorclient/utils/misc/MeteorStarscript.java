@@ -197,6 +197,7 @@ public class MeteorStarscript {
             .set("_toString", () -> Value.string(Utils.getWorldName()))
             .set("tps", () -> Value.number(TickRate.INSTANCE.getTickRate()))
             .set("time", () -> Value.string(Utils.getWorldTime()))
+            .set("weather", MeteorStarscript::weather)
             .set("player_count", () -> Value.number(mc.getConnection() != null ? mc.getConnection().getOnlinePlayers().size() : 0))
             .set("difficulty", () -> Value.string(mc.level != null ? mc.level.getDifficulty().name() : ""))
         );
@@ -519,6 +520,11 @@ public class MeteorStarscript {
                 return Value.string(Arrays.stream(id.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" ")));
             })
             .orElse(Value.string("Unknown"));
+    }
+
+    private static Value weather() {
+        if (mc.level == null) return Value.string("");
+        return Value.string(mc.level.isThundering() ? "Thunder" : mc.level.isRaining() ? "Rain" : "Clear");
     }
 
     private static Value handOrOffhand() {
