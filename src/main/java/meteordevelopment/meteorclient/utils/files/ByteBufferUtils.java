@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.function.IntFunction;
@@ -31,12 +32,13 @@ public final class ByteBufferUtils {
     }
 
     public static ByteBuffer readFully(ReadableByteChannel channel, IntFunction<ByteBuffer> allocator) throws IOException {
-        if (channel instanceof FileChannel fileChannel) {
-            long size = fileChannel.size();
+        // special-case if content size is known
+        if (channel instanceof SeekableByteChannel seekableChannel) {
+            long size = seekableChannel.size();
             if (size > Integer.MAX_VALUE) {
-                throw new IOException("File too large to read into ByteBuffer");
+                throw new IOException("Channel content too large to read into ByteBuffer");
             }
-            return readFully(fileChannel, (int) size, allocator);
+            return readFully(seekableChannel, (int) size, allocator);
         }
 
         ByteBuffer buffer = requireCapacity(allocator.apply(8192), 8192);
@@ -67,10 +69,10 @@ public final class ByteBufferUtils {
         return buffer;
     }
 
-    private static ByteBuffer readFully(FileChannel fileChannel, int fileSize, IntFunction<ByteBuffer> allocator) throws IOException {
-        ByteBuffer buffer = requireCapacity(allocator.apply(fileSize), fileSize);
+    private static ByteBuffer readFully(SeekableByteChannel channel, int size, IntFunction<ByteBuffer> allocator) throws IOException {
+        ByteBuffer buffer = requireCapacity(allocator.apply(size), size);
         while (buffer.hasRemaining()) {
-            int bytesRead = fileChannel.read(buffer);
+            int bytesRead = channel.read(buffer);
             if (bytesRead == -1) break; // EOF
         }
         buffer.flip();
