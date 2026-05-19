@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.function.IntFunction;
 
-import static java.nio.file.Files.size;
 
 @NullMarked
 public final class ByteBufferUtils {
@@ -24,21 +23,23 @@ public final class ByteBufferUtils {
 
     public static ByteBuffer readFully(Path path, IntFunction<ByteBuffer> allocator) throws IOException {
         try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
-            long size = size(path);
+            long size = channel.size();
             if (size > Integer.MAX_VALUE) {
                 throw new IOException("File too large to read into ByteBuffer: " + path);
             }
-            ByteBuffer buffer = allocator.apply((int) size);
-            while (buffer.hasRemaining()) {
-                int bytesRead = channel.read(buffer);
-                if (bytesRead == -1) break; // EOF
-            }
-            buffer.flip();
-            return buffer;
+            return readFully(channel, (int) size, allocator);
         }
     }
 
     public static ByteBuffer readFully(ReadableByteChannel channel, IntFunction<ByteBuffer> allocator) throws IOException {
+        if (channel instanceof FileChannel fileChannel) {
+            long size = fileChannel.size();
+            if (size > Integer.MAX_VALUE) {
+                throw new IOException("File too large to read into ByteBuffer");
+            }
+            return readFully(fileChannel, (int) size, allocator);
+        }
+
         ByteBuffer buffer = requireCapacity(allocator.apply(8192), 8192);
 
         while (true) {
@@ -63,6 +64,16 @@ public final class ByteBufferUtils {
             }
         }
 
+        buffer.flip();
+        return buffer;
+    }
+
+    private static ByteBuffer readFully(FileChannel fileChannel, int fileSize, IntFunction<ByteBuffer> allocator) throws IOException {
+        ByteBuffer buffer = requireCapacity(allocator.apply(fileSize), fileSize);
+        while (buffer.hasRemaining()) {
+            int bytesRead = fileChannel.read(buffer);
+            if (bytesRead == -1) break; // EOF
+        }
         buffer.flip();
         return buffer;
     }
