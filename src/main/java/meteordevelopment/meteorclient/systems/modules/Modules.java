@@ -547,7 +547,6 @@ public class Modules extends System<Modules> {
         add(new Flamethrower());
         add(new HighwayBuilder());
         add(new LiquidFiller());
-        add(new MountBypass());
         add(new NoGhostBlocks());
         add(new Nuker());
         add(new PacketMine());
