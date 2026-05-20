@@ -435,6 +435,7 @@ public class Modules extends System<Modules> {
         add(new AutoRespawn());
         add(new AutoTool());
         add(new BreakDelay());
+        add(new BetterFarming());
         add(new ChestSwap());
         add(new EXPThrower());
         add(new FakePlayer());
