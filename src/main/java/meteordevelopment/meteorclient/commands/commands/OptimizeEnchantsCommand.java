@@ -126,41 +126,44 @@ public class OptimizeEnchantsCommand extends Command {
 
     private void optimize(Item item, List<EnchantmentOptimizer.EnchantmentEntry> enchants) {
         try {
-            // Create optimizer from current registry
             var registry = mc.getConnection().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
             EnchantmentOptimizer.OptimizationResult result = EnchantmentOptimizer.create(registry).optimize(item, enchants);
 
-            // Display header
             String itemName = item != null ? item.components().get(DataComponents.ITEM_NAME).getString() : "Book";
-            ChatUtils.info("=== Enchantment Optimization for %s ===", itemName);
-            ChatUtils.info("Total Cost: (highlight)%d levels(default) (%d XP)", result.totalLevels(), result.totalXp());
+
+            MutableComponent msg = Component.empty();
+
+            // Header
+            msg.append(Component.literal("=== Enchantment Optimization for " + itemName + " ===\n").withStyle(ChatFormatting.GOLD));
+
+            msg.append(Component.literal("Total Cost: %d levels (%d XP)\n".formatted(result.totalLevels(), result.totalXp())).withStyle(ChatFormatting.YELLOW));
 
             if (result.instructions().isEmpty()) {
-                ChatUtils.info("No combinations needed - single enchantment only.");
+                msg.append(Component.literal("No combinations needed - single enchantment only.").withStyle(ChatFormatting.GRAY));
+
+                ChatUtils.sendMsg(msg);
                 return;
             }
 
-            ChatUtils.info("Steps:");
+            msg.append(Component.literal("Steps:\n").withStyle(ChatFormatting.AQUA));
 
-            // Display steps
             for (int i = 0; i < result.instructions().size(); i++) {
                 EnchantmentOptimizer.Instruction instr = result.instructions().get(i);
 
-                MutableComponent stepText = Component.literal(String.format("  %d. ", i + 1)).withStyle(ChatFormatting.GRAY);
-                stepText.append(Component.literal("Combine ").withStyle(ChatFormatting.GRAY));
-                stepText.append(formatItem(instr.left()).copy().withStyle(ChatFormatting.YELLOW));
-                stepText.append(Component.literal(" with ").withStyle(ChatFormatting.GRAY));
-                stepText.append(formatItem(instr.right()).copy().withStyle(ChatFormatting.AQUA));
-
-                ChatUtils.sendMsg(stepText);
-
-                ChatUtils.info("     Cost: (highlight)%d levels(default) (%d XP), Prior Work Penalty: %d",
-                    instr.levels(),
-                    instr.xp(),
-                    instr.priorWorkPenalty()
-                );
+                msg.append(Component.literal("  " + (i + 1) + ". Combine ").withStyle(ChatFormatting.GRAY));
+                msg.append(formatItem(instr.left()).copy().withStyle(ChatFormatting.YELLOW));
+                msg.append(Component.literal(" with ").withStyle(ChatFormatting.GRAY));
+                msg.append(formatItem(instr.right()).copy().withStyle(ChatFormatting.AQUA));
+                msg.append(Component.literal(
+                    "\n     Cost: %d levels (%d XP), Prior Work Penalty: %d\n".formatted(
+                        instr.levels(),
+                        instr.xp(),
+                        instr.priorWorkPenalty()
+                    )
+                ).withStyle(ChatFormatting.GRAY));
             }
 
+            ChatUtils.sendMsg(msg);
         } catch (Exception e) {
             error("Failed to optimize enchantments: %s", e.getMessage());
         }
