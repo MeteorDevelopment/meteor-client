@@ -14,15 +14,17 @@ import meteordevelopment.meteorclient.commands.arguments.EnchantmentLevelArgumen
 import meteordevelopment.meteorclient.commands.arguments.RegistryEntryReferenceArgumentType;
 import meteordevelopment.meteorclient.utils.misc.EnchantmentOptimizer;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.ItemStackArgumentType;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.Item;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,14 +35,14 @@ public class OptimizeEnchantsCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         // TODO: The optimizer supports book-only mode (item=null) for combining enchanted books,
         // but this command currently requires an item argument, so item will never be null.
         // Should we add an item-less version of the command for book-only optimization?
 
         // TODO: should we restrict the available items to only those that can be enchanted?
         // e.g. armors, weapons, tools, books, etc.
-        builder.then(argument("item", ItemStackArgumentType.itemStack(REGISTRY_ACCESS))
+        builder.then(argument("item", ItemArgument.item(REGISTRY_ACCESS))
                 .then(buildEnchantmentChain(1, 20))
             // TODO: what should the max depth be? Idk how many enchantments on a single item MC supports.
         );
@@ -50,7 +52,7 @@ public class OptimizeEnchantsCommand extends Command {
      * Recursively builds a chain of enchantment arguments.
      * Each enchantment requires a name and level, and can optionally chain to the next.
      */
-    private RequiredArgumentBuilder<CommandSource, ?> buildEnchantmentChain(int index, int maxDepth) {
+    private RequiredArgumentBuilder<ClientSuggestionProvider, ?> buildEnchantmentChain(int index, int maxDepth) {
         String enchantArg = "enchantment" + index;
         String levelArg = "level" + index;
 
@@ -71,7 +73,7 @@ public class OptimizeEnchantsCommand extends Command {
     /**
      * Extracts all enchantments from context and runs optimization.
      */
-    private void executeOptimization(CommandContext<CommandSource> context, int enchantmentCount) {
+    private void executeOptimization(CommandContext<ClientSuggestionProvider> context, int enchantmentCount) {
         try {
             Item item = getItem(context);
             List<EnchantmentOptimizer.EnchantmentEntry> enchants = new ArrayList<>();
@@ -81,7 +83,7 @@ public class OptimizeEnchantsCommand extends Command {
                 String levelArg = "level" + i;
 
                 try {
-                    RegistryEntry.Reference<Enchantment> enchantment =
+                    Holder.Reference<Enchantment> enchantment =
                         RegistryEntryReferenceArgumentType.getEnchantment(context, enchantArg);
                     int level = IntegerArgumentType.getInteger(context, levelArg);
 
@@ -96,7 +98,7 @@ public class OptimizeEnchantsCommand extends Command {
                     }
 
                     enchants.add(new EnchantmentOptimizer.EnchantmentEntry(enchantment, level));
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException _) {
                     // Argument doesn't exist, we've reached the end
                     break;
                 }
@@ -113,11 +115,11 @@ public class OptimizeEnchantsCommand extends Command {
         }
     }
 
-    private Item getItem(CommandContext<CommandSource> context) {
+    private Item getItem(CommandContext<ClientSuggestionProvider> context) {
         try {
-            var itemArg = ItemStackArgumentType.getItemStackArgument(context, "item");
-            return itemArg.getItem();
-        } catch (Exception e) {
+            var itemArg = ItemArgument.getItem(context, "item");
+            return itemArg.item().value();
+        } catch (Exception _) {
             return null;
         }
     }
@@ -125,11 +127,11 @@ public class OptimizeEnchantsCommand extends Command {
     private void optimize(Item item, List<EnchantmentOptimizer.EnchantmentEntry> enchants) {
         try {
             // Create optimizer from current registry
-            var registry = mc.getNetworkHandler().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+            var registry = mc.getConnection().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
             EnchantmentOptimizer.OptimizationResult result = EnchantmentOptimizer.create(registry).optimize(item, enchants);
 
             // Display header
-            String itemName = item != null ? item.getName().getString() : "Book";
+            String itemName = item != null ? item.components().get(DataComponents.ITEM_NAME).getString() : "Book";
             ChatUtils.info("=== Enchantment Optimization for %s ===", itemName);
             ChatUtils.info("Total Cost: (highlight)%d levels(default) (%d XP)", result.totalLevels(), result.totalXp());
 
@@ -144,11 +146,11 @@ public class OptimizeEnchantsCommand extends Command {
             for (int i = 0; i < result.instructions().size(); i++) {
                 EnchantmentOptimizer.Instruction instr = result.instructions().get(i);
 
-                MutableText stepText = Text.literal(String.format("  %d. ", i + 1)).formatted(Formatting.GRAY);
-                stepText.append(Text.literal("Combine ").formatted(Formatting.GRAY));
-                stepText.append(formatItem(instr.left()).copy().formatted(Formatting.YELLOW));
-                stepText.append(Text.literal(" with ").formatted(Formatting.GRAY));
-                stepText.append(formatItem(instr.right()).copy().formatted(Formatting.AQUA));
+                MutableComponent stepText = Component.literal(String.format("  %d. ", i + 1)).withStyle(ChatFormatting.GRAY);
+                stepText.append(Component.literal("Combine ").withStyle(ChatFormatting.GRAY));
+                stepText.append(formatItem(instr.left()).copy().withStyle(ChatFormatting.YELLOW));
+                stepText.append(Component.literal(" with ").withStyle(ChatFormatting.GRAY));
+                stepText.append(formatItem(instr.right()).copy().withStyle(ChatFormatting.AQUA));
 
                 ChatUtils.sendMsg(stepText);
 
@@ -164,18 +166,18 @@ public class OptimizeEnchantsCommand extends Command {
         }
     }
 
-    private Text formatItem(EnchantmentOptimizer.Combination comb) {
+    private Component formatItem(EnchantmentOptimizer.Combination comb) {
         String baseName = comb.baseItem != null
-            ? comb.baseItem.getName().getString()
+            ? comb.baseItem.components().get(DataComponents.ITEM_NAME).getString()
             : "Book";
 
         List<String> enchantments = new ArrayList<>();
         collectEnchantments(comb, enchantments);
 
-        if (enchantments.isEmpty()) return Text.literal(baseName);
+        if (enchantments.isEmpty()) return Component.literal(baseName);
 
         // Format: "ItemName (ench1, ench2, ench3)"
-        return Text.literal(baseName + " (" + String.join(", ", enchantments) + ")");
+        return Component.literal(baseName + " (" + String.join(", ", enchantments) + ")");
     }
 
     private void collectEnchantments(EnchantmentOptimizer.Combination comb, List<String> out) {

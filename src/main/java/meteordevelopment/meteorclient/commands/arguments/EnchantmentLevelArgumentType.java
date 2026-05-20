@@ -12,16 +12,16 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.Text;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class EnchantmentLevelArgumentType implements ArgumentType<Integer> {
-    private static final SimpleCommandExceptionType INVALID_LEVEL = new SimpleCommandExceptionType(Text.literal("Level must be at least 1"));
+    private static final SimpleCommandExceptionType INVALID_LEVEL = new SimpleCommandExceptionType(Component.literal("Level must be at least 1"));
     private final String enchantmentArgName;
 
     public EnchantmentLevelArgumentType(String enchantmentArgName) {
@@ -49,7 +49,7 @@ public class EnchantmentLevelArgumentType implements ArgumentType<Integer> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         try {
             // Try to get the enchantment from the previous argument
-            RegistryEntry.Reference<Enchantment> enchantment =
+            Holder.Reference<Enchantment> enchantment =
                 RegistryEntryReferenceArgumentType.getEnchantment(context, enchantmentArgName);
 
             int maxLevel = enchantment.value().getMaxLevel();
@@ -62,11 +62,11 @@ public class EnchantmentLevelArgumentType implements ArgumentType<Integer> {
                     int typedLevel = Integer.parseInt(remaining);
                     if (typedLevel > maxLevel) {
                         // Show error in suggestions
-                        builder.suggest(maxLevel, Text.literal("§c" + enchantName + " max level: " + maxLevel));
+                        builder.suggest(maxLevel, Component.literal("§c" + enchantName + " max level: " + maxLevel));
                     }
 
                     return builder.buildFuture();
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException _) {
                     // Command handler highlights invalid input
                 }
             }
@@ -78,7 +78,7 @@ public class EnchantmentLevelArgumentType implements ArgumentType<Integer> {
             }
 
             return builder.buildFuture();
-        } catch (Exception e) {
+        } catch (Exception _) {
             return Suggestions.empty();
         }
     }

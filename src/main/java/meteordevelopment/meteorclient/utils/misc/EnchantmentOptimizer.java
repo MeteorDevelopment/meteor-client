@@ -8,10 +8,10 @@ package meteordevelopment.meteorclient.utils.misc;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -22,17 +22,17 @@ import java.util.stream.Collectors;
 public class EnchantmentOptimizer {
     private static final int MAXIMUM_MERGE_LEVELS = 39;
 
-    private final Object2IntMap<RegistryEntry<Enchantment>> enchantmentIds;
+    private final Object2IntMap<Holder<Enchantment>> enchantmentIds;
     private final int[] enchantmentWeights;
     private final Map<ResultKey, Int2ObjectMap<ItemObject>> memoCache;
 
-    public EnchantmentOptimizer(List<RegistryEntry<Enchantment>> enchantments) {
+    public EnchantmentOptimizer(List<Holder<Enchantment>> enchantments) {
         this.enchantmentIds = new Object2IntOpenHashMap<>();
         this.enchantmentWeights = new int[enchantments.size()];
         this.memoCache = new HashMap<>();
 
         int id = 0;
-        for (RegistryEntry<Enchantment> entry : enchantments) {
+        for (Holder<Enchantment> entry : enchantments) {
             enchantmentIds.put(entry, id);
             int anvilCost = entry.value().getAnvilCost();
 
@@ -48,7 +48,7 @@ public class EnchantmentOptimizer {
         }
     }
 
-    public record EnchantmentEntry(RegistryEntry<Enchantment> enchantment, int level) {
+    public record EnchantmentEntry(Holder<Enchantment> enchantment, int level) {
     }
 
     public OptimizationResult optimize(@Nullable Item item, List<EnchantmentEntry> enchants) {
@@ -59,7 +59,7 @@ public class EnchantmentOptimizer {
             .map(e -> {
                 int id = enchantmentIds.getOrDefault(e.enchantment(), -1);
                 if (id == -1) {
-                    throw new IllegalArgumentException("Unknown enchantment: " + e.enchantment().getKey().orElseThrow().getValue());
+                    throw new IllegalArgumentException("Unknown enchantment: " + e.enchantment().unwrapKey().orElseThrow().identifier());
                 }
                 int value = e.level() * enchantmentWeights[id];
                 IntList ids = IntLists.singleton(id);
@@ -157,13 +157,13 @@ public class EnchantmentOptimizer {
 
         try {
             normal = new MergeEnchants(left, right);
-        } catch (MergeLevelsTooExpensiveException ignored) {
+        } catch (MergeLevelsTooExpensiveException _) {
             // Ignore too expensive merges
         }
 
         try {
             reversed = new MergeEnchants(right, left);
-        } catch (MergeLevelsTooExpensiveException ignored) {
+        } catch (MergeLevelsTooExpensiveException _) {
             // Ignore too expensive merges
         }
 
@@ -224,7 +224,7 @@ public class EnchantmentOptimizer {
                     for (Int2ObjectMap.Entry<ItemObject> entry : newWork2Item.int2ObjectEntrySet()) {
                         cheapest.merge(entry.getIntKey(), entry.getValue(), this::compareCheapest);
                     }
-                } catch (MergeLevelsTooExpensiveException ignored) {
+                } catch (MergeLevelsTooExpensiveException _) {
                     // Ignore too expensive merges
                 }
             }
@@ -321,12 +321,10 @@ public class EnchantmentOptimizer {
 
     public static class MergeEnchants extends ItemObject {
         MergeEnchants(ItemObject left, ItemObject right) {
-            super(left.type, left.value + right.value, new IntArrayList());
-
             int mergeCost = right.value + (1 << left.priorWork) - 1 + (1 << right.priorWork) - 1;
-            if (mergeCost > MAXIMUM_MERGE_LEVELS) {
-                throw new MergeLevelsTooExpensiveException();
-            }
+            if (mergeCost > MAXIMUM_MERGE_LEVELS) throw new MergeLevelsTooExpensiveException();
+
+            super(left.type, left.value + right.value, new IntArrayList());
 
             this.enchantIds.addAll(left.enchantIds);
             this.enchantIds.addAll(right.enchantIds);
@@ -344,7 +342,7 @@ public class EnchantmentOptimizer {
         public int value;                                           // Total value (sum of all books)
         public @Nullable Item item;                                 // For base item (only set on leaf item nodes)
         public @Nullable Item baseItem;                             // The base item for this combination tree (null = book)
-        public @Nullable RegistryEntry<Enchantment> enchantment;    // For enchanted book
+        public @Nullable Holder<Enchantment> enchantment;    // For enchanted book
         public int level;
 
         Combination() {
@@ -358,7 +356,7 @@ public class EnchantmentOptimizer {
         }
 
         // For leaf book nodes
-        Combination(RegistryEntry<Enchantment> enchantment, int level, int value) {
+        Combination(Holder<Enchantment> enchantment, int level, int value) {
             this.left = null;
             this.right = null;
             this.item = null;
@@ -455,8 +453,8 @@ public class EnchantmentOptimizer {
 
     // Static factory method to create optimizer from registry
     public static EnchantmentOptimizer create(Registry<Enchantment> registry) {
-        // streamEntries returns RegistryEntry.Reference, which extends RegistryEntry
-        List<RegistryEntry<Enchantment>> enchantments = new ArrayList<>(registry.streamEntries().toList());
+        // listElements returns Holder.Reference, which extends Holder
+        List<Holder<Enchantment>> enchantments = new ArrayList<>(registry.listElements().toList());
         return new EnchantmentOptimizer(enchantments);
     }
 }
