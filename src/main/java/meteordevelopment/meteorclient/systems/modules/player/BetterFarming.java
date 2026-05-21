@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -26,6 +25,7 @@ import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
@@ -49,13 +49,20 @@ public class BetterFarming extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noBreakUnripe = sgGeneral.add(new BoolSetting.Builder()
+        .name("no-break-unripe")
+        .description("Prevents player from breaking unripe crops.")
+        .defaultValue(true)
+        .build()
+    );
+
     public BetterFarming() {
         super(Categories.Player, "better-farming", "Improvements for crop farming.");
     }
 
     private Item placeItem = null;
-    private ArrayList<BlockPos> placements = new ArrayList<>();
-    private int mineCooldown = 0;
+    private ArrayList<BlockPos> cropPlacements = new ArrayList<>();
+    private int blockBreakCooldown = 0;
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onTick(TickEvent.Pre event) {
@@ -64,6 +71,7 @@ public class BetterFarming extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onStartBreakingBlockEvent(StartBreakingBlockEvent event) {
+        if (noBreakUnripe.get()) noBreakUnripeBreakEvent(event);
         if (cropReplace.get()) autoPlaceBreakEvent(event);
     }
 
@@ -72,19 +80,29 @@ public class BetterFarming extends Module {
         if (suppressTrample.get()) trampleSuppressionSendEvent(event);
     }
 
+    private void noBreakUnripeBreakEvent(StartBreakingBlockEvent event) {
+        BlockState blockState = mc.level.getBlockState(event.blockPos);
+
+        if (blockState.getBlock() instanceof CropBlock cropBlock) {
+            if (cropBlock.isMaxAge(blockState)) return;
+
+            event.cancel();
+        }
+    }
+
     private void autoPlaceTick() {
-        if (mineCooldown > 0) {
-            mineCooldown--;
+        if (blockBreakCooldown > 0) {
+            blockBreakCooldown--;
         }
 
         if (placeItem == null) return;
-        if (placements.isEmpty()) {
+        if (cropPlacements.isEmpty()) {
             placeItem = null;
             return;
         }
 
-        BlockPos blockPos = placements.getFirst();
-        placements.removeFirst();
+        BlockPos blockPos = cropPlacements.getFirst();
+        cropPlacements.removeFirst();
 
         FindItemResult foundItem = InvUtils.find(placeItem);
 
@@ -101,12 +119,13 @@ public class BetterFarming extends Module {
     }
 
     private void autoPlaceBreakEvent(StartBreakingBlockEvent event) {
-        MeteorClient.LOG.info("BREAK");
+        if (event.isCancelled()) return;
+
         BlockState blockState = mc.level.getBlockState(event.blockPos);
 
         if (!blockState.is(BlockTags.CROPS)) return;
 
-        if (mineCooldown > 0) {
+        if (blockBreakCooldown > 0) {
             event.cancel();
             return;
         }
@@ -117,10 +136,12 @@ public class BetterFarming extends Module {
         if (!foundItem.found()) return;
 
         placeItem = blockItem;
-        placements.add(event.blockPos);
-        mineCooldown = 3;
+        cropPlacements.add(event.blockPos);
 
-        if (foundItem.isMainHand()) return;
+        if (foundItem.isMainHand()) {
+            blockBreakCooldown = 3;
+            return;
+        };
 
         mc.gameMode.handlePickItemFromBlock(event.blockPos, false);
 
@@ -135,21 +156,33 @@ public class BetterFarming extends Module {
 
         ServerboundMovePlayerPacket packet = (ServerboundMovePlayerPacket) event.packet;
 
-        // Only suppress fall if current block or block beneath is farmland
         BlockPos blockPos = new BlockPos(
             (int) packet.getX(0d),
             (int) packet.getY(0d),
             (int) packet.getZ(0d)
         );
 
-        BlockState blockState1 = mc.level.getBlockState(blockPos.offset(0, -1, 0));
-        // Check block one over as well to fix edge jumping
-        BlockState blockState2 = mc.level.getBlockState(blockPos.offset(-1, -1, 1));
+        // Only suppress fall if blocks beneath are farmland
+        // Check 3x3 area beneath player, for if the player jumps on the edge
+        BlockPos[] posChecks = {
+            blockPos.offset(-1, -1, -1),
+            blockPos.offset(-1, -1, 0),
+            blockPos.offset(-1, -1, 1),
+            blockPos.offset(0, -1, -1),
+            blockPos.offset(0, -1, 0),
+            blockPos.offset(0, -1, 1),
+            blockPos.offset(1, -1, -1),
+            blockPos.offset(1, -1, 0),
+            blockPos.offset(1, -1, 1),
+        };
 
-        MeteorClient.LOG.info(blockPos.toShortString());
+        for (BlockPos pos : posChecks) {
+            BlockState blockState = mc.level.getBlockState(pos);
 
-        if (blockState1.is(Blocks.FARMLAND) || blockState2.is(Blocks.FARMLAND)) {
-            ((ServerboundMovePlayerPacketAccessor) event.packet).meteor$setOnGround(true);
+            if (blockState.is(Blocks.FARMLAND)) {
+                ((ServerboundMovePlayerPacketAccessor) event.packet).meteor$setOnGround(true);
+                break;
+            }
         }
     }
 }
