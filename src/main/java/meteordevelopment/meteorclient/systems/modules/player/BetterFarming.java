@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Item;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.ArrayList;
 
@@ -60,7 +62,14 @@ public class BetterFarming extends Module {
 
     private final Setting<Boolean> noBreakCaneBase = sgNoBreak.add(new BoolSetting.Builder()
         .name("no-break-cane-base")
-        .description("Prevents player from breaking the base of sugarcane and bamboo blocks.")
+        .description("Prevents player from breaking the base of sugarcane, bamboo and cactus blocks.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> noBreakSupportingBlocks = sgNoBreak.add(new BoolSetting.Builder()
+        .name("no-break-supporting-blocks")
+        .description("Prevents player from breaking the block supporting a crop, eg. Jungle log with cocoa, budding amethyst, sand under cactus.")
         .defaultValue(true)
         .build()
     );
@@ -81,7 +90,8 @@ public class BetterFarming extends Module {
     @EventHandler(priority = EventPriority.HIGH)
     private void onStartBreakingBlockEvent(StartBreakingBlockEvent event) {
         if (noBreakUnripe.get()) noBreakUnripeBreakEvent(event);
-        if (noBreakCaneBase.get()) noBreakCaneBaseEvent(event);
+        if (noBreakCaneBase.get()) noBreakCaneBaseBreakEvent(event);
+        if (noBreakSupportingBlocks.get()) noBreakSupportingBlocksBreakEvent(event);
         if (cropReplace.get()) autoPlaceBreakEvent(event);
     }
 
@@ -106,16 +116,79 @@ public class BetterFarming extends Module {
         }
     }
 
-    private void noBreakCaneBaseEvent(StartBreakingBlockEvent event) {
+    private boolean isCaneBlock(BlockState blockState) {
+        return blockState.is(Blocks.SUGAR_CANE)
+            || blockState.is(Blocks.BAMBOO)
+            || blockState.is(Blocks.CACTUS);
+    }
+
+    private boolean isSupportedBelowCrop(BlockState blockState) {
+        return blockState.is(BlockTags.CROPS)
+            || blockState.is(Blocks.NETHER_WART)
+            || isCaneBlock(blockState);
+    }
+
+    private boolean isReplaceableCrop(BlockState blockState) {
+        return blockState.is(BlockTags.CROPS)
+            || blockState.is(Blocks.NETHER_WART);
+    }
+
+    private boolean checkForCocoa(BlockPos blockPos) {
+        Direction[] checkDirections = {
+            Direction.NORTH,
+            Direction.SOUTH,
+            Direction.EAST,
+            Direction.WEST,
+        };
+
+        for (Direction direction : checkDirections) {
+            // Check block at blockPos offset by the direction normal vector.
+            BlockState bsCheck = mc.level.getBlockState(blockPos.offset(direction.getUnitVec3i()));
+
+            if (bsCheck.is(Blocks.COCOA)) {
+
+                Direction facingDirection = bsCheck.getValue(BlockStateProperties.HORIZONTAL_FACING);
+
+                if (facingDirection == direction.getOpposite()) {
+                    return true;
+                }
+            }
+
+        }
+
+        return false;
+    }
+
+    private void noBreakCaneBaseBreakEvent(StartBreakingBlockEvent event) {
         BlockState blockState = mc.level.getBlockState(event.blockPos);
         BlockState bsBelow = mc.level.getBlockState(event.blockPos.offset(0, -1, 0));
 
-        boolean bsIsCane = (blockState.is(Blocks.SUGAR_CANE) || blockState.is(Blocks.BAMBOO));
-        boolean bsBelowIsCane = (bsBelow.is(Blocks.SUGAR_CANE) || bsBelow.is(Blocks.BAMBOO));
+        boolean bsIsCane = isCaneBlock(blockState);
+        boolean bsBelowIsCane = isCaneBlock(bsBelow);
 
         if (!bsIsCane || bsBelowIsCane) return;
 
         event.cancel();
+    }
+
+    private void noBreakSupportingBlocksBreakEvent(StartBreakingBlockEvent event) {
+        BlockPos blockPos = event.blockPos;
+        BlockState blockState = mc.level.getBlockState(blockPos);
+        BlockState bsAbove = mc.level.getBlockState(blockPos.offset(0, 1, 0));
+
+        if (!isSupportedBelowCrop(blockState) && isSupportedBelowCrop(bsAbove)) {
+            event.cancel();
+            return;
+        }
+
+        if (blockState.is(BlockTags.SUPPORTS_COCOA) && checkForCocoa(blockPos)) {
+            event.cancel();
+            return;
+        }
+
+        if (blockState.is(Blocks.BUDDING_AMETHYST)) {
+            event.cancel();
+        }
     }
 
     private void autoPlaceTick() {
@@ -151,7 +224,7 @@ public class BetterFarming extends Module {
 
         BlockState blockState = mc.level.getBlockState(event.blockPos);
 
-        if (!(blockState.is(BlockTags.CROPS) || blockState.is(Blocks.NETHER_WART))) return;
+        if (!isReplaceableCrop(blockState)) return;
 
         if (blockBreakCooldown > 0) {
             event.cancel();
