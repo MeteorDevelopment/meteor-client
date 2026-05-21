@@ -26,12 +26,14 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 
 public class BetterFarming extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgNoBreak = settings.createGroup("No Break");
 
     // General
 
@@ -49,9 +51,16 @@ public class BetterFarming extends Module {
         .build()
     );
 
-    private final Setting<Boolean> noBreakUnripe = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> noBreakUnripe = sgNoBreak.add(new BoolSetting.Builder()
         .name("no-break-unripe")
         .description("Prevents player from breaking unripe crops.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> noBreakCaneBase = sgNoBreak.add(new BoolSetting.Builder()
+        .name("no-break-cane-base")
+        .description("Prevents player from breaking the base of sugarcane and bamboo blocks.")
         .defaultValue(true)
         .build()
     );
@@ -61,7 +70,7 @@ public class BetterFarming extends Module {
     }
 
     private Item placeItem = null;
-    private ArrayList<BlockPos> cropPlacements = new ArrayList<>();
+    private final ArrayList<BlockPos> cropPlacements = new ArrayList<>();
     private int blockBreakCooldown = 0;
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -72,6 +81,7 @@ public class BetterFarming extends Module {
     @EventHandler(priority = EventPriority.HIGH)
     private void onStartBreakingBlockEvent(StartBreakingBlockEvent event) {
         if (noBreakUnripe.get()) noBreakUnripeBreakEvent(event);
+        if (noBreakCaneBase.get()) noBreakCaneBaseEvent(event);
         if (cropReplace.get()) autoPlaceBreakEvent(event);
     }
 
@@ -88,6 +98,24 @@ public class BetterFarming extends Module {
 
             event.cancel();
         }
+
+        if (blockState.getBlock() instanceof NetherWartBlock) {
+            if (blockState.getValue(NetherWartBlock.AGE) >= NetherWartBlock.MAX_AGE) return;
+
+            event.cancel();
+        }
+    }
+
+    private void noBreakCaneBaseEvent(StartBreakingBlockEvent event) {
+        BlockState blockState = mc.level.getBlockState(event.blockPos);
+        BlockState bsBelow = mc.level.getBlockState(event.blockPos.offset(0, -1, 0));
+
+        boolean bsIsCane = (blockState.is(Blocks.SUGAR_CANE) || blockState.is(Blocks.BAMBOO));
+        boolean bsBelowIsCane = (bsBelow.is(Blocks.SUGAR_CANE) || bsBelow.is(Blocks.BAMBOO));
+
+        if (!bsIsCane || bsBelowIsCane) return;
+
+        event.cancel();
     }
 
     private void autoPlaceTick() {
@@ -123,7 +151,7 @@ public class BetterFarming extends Module {
 
         BlockState blockState = mc.level.getBlockState(event.blockPos);
 
-        if (!blockState.is(BlockTags.CROPS)) return;
+        if (!(blockState.is(BlockTags.CROPS) || blockState.is(Blocks.NETHER_WART))) return;
 
         if (blockBreakCooldown > 0) {
             event.cancel();
