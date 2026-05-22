@@ -197,6 +197,7 @@ public class StashFinder extends Module {
         if (Math.sqrt(chunkXAbs * chunkXAbs + chunkZAbs * chunkZAbs) < minimumDistance.get()) return;
 
         Chunk chunk = new Chunk(event.chunk().getPos());
+        boolean yCaptured = false;
 
         List<Block> blockBlacklist = blacklistedBlocks.get();
 
@@ -206,6 +207,10 @@ public class StashFinder extends Module {
             if (!blockBlacklist.isEmpty()) {
                 BlockPos below = blockEntity.getBlockPos().below();
                 if (blockBlacklist.contains(event.chunk().getBlockState(below).getBlock())) continue;
+            }
+            if(!yCaptured){
+                chunk.y = blockEntity.getBlockPos().getY();
+                yCaptured = true;
             }
 
             switch (blockEntity) {
@@ -229,8 +234,7 @@ public class StashFinder extends Module {
             else prevChunk = chunks.set(i, chunk);
 
             if (renderTracer.get()) {
-                double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, y, chunk.z));
+                tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, chunk.y, chunk.z));
             }
 
             saveJson();
@@ -296,8 +300,7 @@ public class StashFinder extends Module {
             WCheckbox visible = table.add(theme.checkbox(tracerPositions.containsKey(chunk.chunkPos))).widget();
             visible.action = () -> {
                 if (visible.checked) {
-                    double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                    tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, y, chunk.z));
+                    tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, chunk.y, chunk.z));
                 } else tracerPositions.remove(chunk.chunkPos);
             };
 
@@ -451,7 +454,7 @@ public class StashFinder extends Module {
 
             if (renderTracer.get()) {
                 event.renderer.line(
-                    RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, pos.x, mc.player.getEyeY(), pos.z, traceColor.get()
+                    RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, pos.x, pos.y, pos.z, traceColor.get()
                 );
             }
 
@@ -483,6 +486,7 @@ public class StashFinder extends Module {
 
         public ChunkPos chunkPos;
         public transient int x, z;
+        public int y;
         public int chests, barrels, shulkers, enderChests, furnaces, dispensersDroppers, hoppers;
 
         public Chunk(ChunkPos chunkPos) {
