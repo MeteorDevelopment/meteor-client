@@ -308,7 +308,7 @@ public class StashFinder extends Module {
             open.action = () -> mc.setScreen(new ChunkScreen(theme, chunk));
 
             WButton gotoBtn = table.add(theme.button("Goto")).widget();
-            gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(chunk.x, 0, chunk.z), true);
+            gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(chunk.x, chunk.y, chunk.z), true);
 
             WMinus delete = table.add(theme.minus()).widget();
             delete.action = () -> {
@@ -421,7 +421,7 @@ public class StashFinder extends Module {
                 .withColor(ChatFormatting.WHITE)
                 .applyFormat(ChatFormatting.UNDERLINE)
                 .withHoverEvent(new HoverEvent.ShowText(Component.literal("Path to stash")))
-                .withClickEvent(new RunnableClickEvent(() -> PathManagers.get().moveTo(new BlockPos(chunk.x, 0, chunk.z), true))));
+                .withClickEvent(new RunnableClickEvent(() -> PathManagers.get().moveTo(new BlockPos(chunk.x, chunk.y, chunk.z), true))));
 
         MutableComponent message = Component.literal("Found stash at ")
             .withStyle(ChatFormatting.GRAY)
