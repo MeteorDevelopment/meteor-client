@@ -416,7 +416,7 @@ public class BetterTooltips extends Module {
         });
 
         if (counts.size() > 5) {
-            textConsumer.accept((Component.translatable("container.shulkerBox.more", counts.size() - 5)).withStyle(ChatFormatting.ITALIC));
+            textConsumer.accept((Component.translatable("item.container.more_items", counts.size() - 5)).withStyle(ChatFormatting.ITALIC));
         }
     }
 
