@@ -108,8 +108,8 @@ public class EnchantCommand extends Command {
     }
 
     private void syncItem() {
-        mc.setScreen(new InventoryScreen(mc.player));
-        mc.setScreen(null);
+        mc.gui.setScreen(new InventoryScreen(mc.player));
+        mc.gui.setScreen(null);
     }
 
     private ItemStack tryGetItemStack() throws CommandSyntaxException {

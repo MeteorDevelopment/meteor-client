@@ -171,8 +171,8 @@ public class Freecam extends Module {
         perspective = mc.options.getCameraType();
         speedValue = speed.get();
 
-        Utils.set(pos, mc.gameRenderer.getMainCamera().position());
-        Utils.set(prevPos, mc.gameRenderer.getMainCamera().position());
+        Utils.set(pos, mc.gameRenderer.mainCamera().position());
+        Utils.set(prevPos, mc.gameRenderer.mainCamera().position());
 
         if (mc.options.getCameraType() == CameraType.THIRD_PERSON_FRONT) {
             yaw += 180;
@@ -350,7 +350,7 @@ public class Freecam extends Module {
 
         if (requireDoubleClick.get() && clickTs - prevClick > 500) return;
 
-        Camera cam = mc.gameRenderer.getMainCamera();
+        Camera cam = mc.gameRenderer.mainCamera();
         Vec3 posVec = cam.position();
         Vec3 lookVec = Vec3.directionFromRotation(cam.xRot(), cam.yRot());
         short maxDist = 256;
@@ -405,7 +405,7 @@ public class Freecam extends Module {
 
     @EventHandler(priority = EventPriority.LOW)
     private void onMouseScroll(MouseScrollEvent event) {
-        if (speedScrollSensitivity.get() > 0 && mc.screen == null) {
+        if (speedScrollSensitivity.get() > 0 && mc.gui.screen() == null) {
             speedValue += event.value * 0.25 * (speedScrollSensitivity.get() * speedValue);
             if (speedValue < 0.1) speedValue = 0.1;
 
@@ -448,8 +448,8 @@ public class Freecam extends Module {
 
     private boolean checkGuiMove() {
         GUIMove guiMove = Modules.get().get(GUIMove.class);
-        if (mc.screen != null && !guiMove.isActive()) return true;
-        return (mc.screen != null && guiMove.isActive() && guiMove.skip());
+        if (mc.gui.screen() != null && !guiMove.isActive()) return true;
+        return (mc.gui.screen() != null && guiMove.isActive() && guiMove.skip());
     }
 
     public void changeLookDirection(double deltaX, double deltaY) {

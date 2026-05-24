@@ -57,7 +57,7 @@ public class Macro implements ISerializable<Macro> {
     }
 
     public boolean onAction(boolean isKey, int value, int modifiers) {
-        if (!keybind.get().matches(isKey, value, modifiers) || mc.screen != null) return false;
+        if (!keybind.get().matches(isKey, value, modifiers) || mc.gui.screen() != null) return false;
         return onAction();
     }
 

@@ -152,7 +152,7 @@ public class CrystalAura extends Module {
         .name("entities")
         .description("Entities to attack.")
         .onlyAttackable()
-        .defaultValue(EntityType.PLAYER, EntityType.WARDEN, EntityType.WITHER)
+        .defaultValue(EntityTypes.PLAYER, EntityTypes.WARDEN, EntityTypes.WITHER)
         .build()
     );
 

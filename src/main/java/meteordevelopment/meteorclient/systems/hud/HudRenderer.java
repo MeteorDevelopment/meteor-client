@@ -86,7 +86,7 @@ public class HudRenderer {
 
                 if (fontHolder.visited) {
                     MeshRenderer.begin()
-                        .attachments(mc.getMainRenderTarget())
+                        .attachments(mc.gameRenderer.mainRenderTarget())
                         .pipeline(MeteorRenderPipelines.UI_TEXT)
                         .mesh(fontHolder.getMesh())
                         .sampler("u_Texture", fontHolder.font.texture.getTextureView(), fontHolder.font.texture.getSampler())

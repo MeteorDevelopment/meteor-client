@@ -52,7 +52,7 @@ public class BlockDataSettingScreen<T extends ICopyable<T> & ISerializable<T> & 
             T data = blockData;
             if (data == null) data = setting.defaultData.get().copy();
 
-            mc.setScreen(data.createScreen(theme, block, setting));
+            mc.gui.setScreen(data.createScreen(theme, block, setting));
             invalidate = true;
         };
         return edit;

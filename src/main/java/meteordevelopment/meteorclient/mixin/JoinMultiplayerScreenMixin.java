@@ -66,7 +66,7 @@ public abstract class JoinMultiplayerScreenMixin extends Screen {
 
         if (accounts == null) {
             accounts = addRenderableWidget(
-                new Button.Builder(Component.literal("Accounts"), _ -> minecraft.setScreen(GuiThemes.get().accountsScreen()))
+                new Button.Builder(Component.literal("Accounts"), _ -> minecraft.gui.setScreen(GuiThemes.get().accountsScreen()))
                     .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                     .build()
             );
@@ -74,7 +74,7 @@ public abstract class JoinMultiplayerScreenMixin extends Screen {
 
         if (proxies == null) {
             proxies = addRenderableWidget(
-                new Button.Builder(Component.literal("Proxies"), _ -> minecraft.setScreen(GuiThemes.get().proxiesScreen()))
+                new Button.Builder(Component.literal("Proxies"), _ -> minecraft.gui.setScreen(GuiThemes.get().proxiesScreen()))
                     .size(BUTTON_WIDTH, BUTTON_HEIGHT)
                     .build()
             );

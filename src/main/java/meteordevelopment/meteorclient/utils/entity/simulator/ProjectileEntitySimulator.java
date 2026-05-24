@@ -75,25 +75,25 @@ public class ProjectileEntitySimulator {
     // https://minecraft.wiki/w/Entity#Motion
 
     // ThrowableProjectile
-    private static final MotionData EGG = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityType.EGG);
-    private static final MotionData ENDER_PEARL = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityType.ENDER_PEARL);
-    private static final MotionData SNOWBALL = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityType.SNOWBALL);
-    private static final MotionData EXPERIENCE_BOTTLE = new MotionData(0.7f, -20, 0.07, 0.99f, 0.8f, EntityType.EXPERIENCE_BOTTLE);
-    private static final MotionData LINGERING_POTION = new MotionData(0.5f, -20, 0.05, 0.99f, 0.8f, EntityType.LINGERING_POTION);
-    private static final MotionData SPLASH_POTION = new MotionData(0.5f, -20, 0.05, 0.99f, 0.8f, EntityType.SPLASH_POTION);
+    private static final MotionData EGG = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityTypes.EGG);
+    private static final MotionData ENDER_PEARL = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityTypes.ENDER_PEARL);
+    private static final MotionData SNOWBALL = new MotionData(1.5f, 0, 0.03, 0.99f, 0.8f, EntityTypes.SNOWBALL);
+    private static final MotionData EXPERIENCE_BOTTLE = new MotionData(0.7f, -20, 0.07, 0.99f, 0.8f, EntityTypes.EXPERIENCE_BOTTLE);
+    private static final MotionData LINGERING_POTION = new MotionData(0.5f, -20, 0.05, 0.99f, 0.8f, EntityTypes.LINGERING_POTION);
+    private static final MotionData SPLASH_POTION = new MotionData(0.5f, -20, 0.05, 0.99f, 0.8f, EntityTypes.SPLASH_POTION);
 
     // AbstractHurtingProjectile
     private static final MotionData EXPLOSIVE = new MotionData(0, 0, 0, 1, 1, null); // fireball, wither skull, etc.
-    private static final MotionData WIND_CHARGE = new MotionData(1.5f, 0, 0, 1, 1, EntityType.WIND_CHARGE);
+    private static final MotionData WIND_CHARGE = new MotionData(1.5f, 0, 0, 1, 1, EntityTypes.WIND_CHARGE);
 
     // AbstractArrow
-    private static final MotionData ARROW = new MotionData(0, 0, 0.05, 0.99f, 0.6f, EntityType.ARROW);
-    private static final MotionData TRIDENT = new MotionData(2.5f, 0, 0.05, 0.99f, 0.99f, EntityType.TRIDENT);
+    private static final MotionData ARROW = new MotionData(0, 0, 0.05, 0.99f, 0.6f, EntityTypes.ARROW);
+    private static final MotionData TRIDENT = new MotionData(2.5f, 0, 0.05, 0.99f, 0.99f, EntityTypes.TRIDENT);
 
     // Other
-    private static final MotionData FIREWORK_ROCKET = new MotionData(0, 0, 0, 1, 1, EntityType.FIREWORK_ROCKET);
-    private static final MotionData FISHING_BOBBER = new MotionData(0, 0, 0.03, 0.92f, 0, EntityType.FISHING_BOBBER);
-    private static final MotionData LLAMA_SPIT = new MotionData(1.5f, 0, 0.06, 0.99f, 0, EntityType.LLAMA_SPIT);
+    private static final MotionData FIREWORK_ROCKET = new MotionData(0, 0, 0, 1, 1, EntityTypes.FIREWORK_ROCKET);
+    private static final MotionData FISHING_BOBBER = new MotionData(0, 0, 0.03, 0.92f, 0, EntityTypes.FISHING_BOBBER);
+    private static final MotionData LLAMA_SPIT = new MotionData(1.5f, 0, 0.06, 0.99f, 0, EntityTypes.LLAMA_SPIT);
 
 
     // held items

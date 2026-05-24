@@ -91,7 +91,7 @@ public class ElytraBoost extends Module {
     private void boost() {
         if (!Utils.canUpdate()) return;
 
-        if (mc.player.isFallFlying() && mc.screen == null) {
+        if (mc.player.isFallFlying() && mc.gui.screen() == null) {
             ItemStack itemStack = Items.FIREWORK_ROCKET.getDefaultInstance();
             itemStack.set(DataComponents.FIREWORKS, new Fireworks(fireworkLevel.get(), itemStack.get(DataComponents.FIREWORKS).explosions()));
 

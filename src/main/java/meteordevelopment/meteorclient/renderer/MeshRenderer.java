@@ -15,18 +15,19 @@ import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.datafixers.util.Pair;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.util.ARGB;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.OptionalInt;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -44,7 +45,7 @@ public class MeshRenderer {
     private @Nullable GpuBuffer indexBuffer;
     private Matrix4f matrix;
     private final HashMap<String, GpuBufferSlice> uniforms = new HashMap<>();
-    private final HashMap<String, Tuple<GpuTextureView, GpuSampler>> samplers = new HashMap<>();
+    private final HashMap<String, Pair<GpuTextureView, GpuSampler>> samplers = new HashMap<>();
 
     private MeshRenderer() {
     }
@@ -121,7 +122,7 @@ public class MeshRenderer {
 
     public MeshRenderer sampler(String name, GpuTextureView view, GpuSampler sampler) {
         if (name != null && view != null && sampler != null) {
-            samplers.put(name, new Tuple<>(view, sampler));
+            samplers.put(name, Pair.of(view, sampler));
         }
 
         return this;
@@ -154,9 +155,9 @@ public class MeshRenderer {
             GpuBuffer indexBuffer = mesh != null ? mesh.getIndexBuffer() : this.indexBuffer;
 
             {
-                OptionalInt clearColor = this.clearColor != null ?
-                    OptionalInt.of(ARGB.color(this.clearColor.a, this.clearColor.r, this.clearColor.g, this.clearColor.b)) :
-                    OptionalInt.empty();
+                Optional<Vector4fc> clearColor = this.clearColor != null
+                    ? Optional.of(new Vector4f(this.clearColor.r / 255.0f, this.clearColor.g / 255.0f, this.clearColor.b / 255.0f, this.clearColor.a / 255.0f))
+                    : Optional.empty();
 
                 GpuBufferSlice meshData = MeshUniforms.write(RenderUtils.projection, RenderSystem.getModelViewStack());
 
@@ -172,7 +173,7 @@ public class MeshRenderer {
                 }
 
                 for (var entry : samplers.entrySet()) {
-                    pass.bindTexture(entry.getKey(), entry.getValue().getA(), entry.getValue().getB());
+                    pass.bindTexture(entry.getKey(), entry.getValue().getFirst(), entry.getValue().getSecond());
                 }
 
                 pass.setVertexBuffer(0, vertexBuffer);
@@ -202,7 +203,7 @@ public class MeshRenderer {
     }
 
     private static void applyCameraPos() {
-        Vec3 cameraPos = mc.gameRenderer.getMainCamera().position();
+        Vec3 cameraPos = mc.gameRenderer.mainCamera().position();
         RenderSystem.getModelViewStack().translate(0, (float) -cameraPos.y, 0);
     }
 }

@@ -529,7 +529,7 @@ public class Nuker extends Module {
     }
 
     private void addTargetedBlockToList() {
-        if (!selectBlockBind.get().isPressed() || mc.screen != null) return;
+        if (!selectBlockBind.get().isPressed() || mc.gui.screen() != null) return;
 
         HitResult hitResult = mc.hitResult;
         if (hitResult == null || hitResult.getType() != HitResult.Type.BLOCK) return;

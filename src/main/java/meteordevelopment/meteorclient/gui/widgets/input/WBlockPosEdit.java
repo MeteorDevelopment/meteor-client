@@ -49,8 +49,8 @@ public class WBlockPosEdit extends WHorizontalList {
 
                 clicking = true;
                 MeteorClient.EVENT_BUS.subscribe(this);
-                previousScreen = mc.screen;
-                mc.setScreen(null);
+                previousScreen = mc.gui.screen();
+                mc.gui.setScreen(null);
             };
 
             WButton here = add(theme.button("Set Here")).expandX().widget();
@@ -71,7 +71,7 @@ public class WBlockPosEdit extends WHorizontalList {
             clicking = false;
             event.cancel();
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            mc.setScreen(previousScreen);
+            mc.gui.setScreen(previousScreen);
         }
     }
 
@@ -89,7 +89,7 @@ public class WBlockPosEdit extends WHorizontalList {
             clicking = false;
             event.cancel();
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            mc.setScreen(previousScreen);
+            mc.gui.setScreen(previousScreen);
         }
     }
 

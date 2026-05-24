@@ -64,7 +64,7 @@ public abstract class SimpleBlockRenderer {
             SimpleBlockRenderer.provider = vertexConsumerProvider;
 
             BlockEntityRenderState state = renderer.createRenderState();
-            renderer.extractRenderState(blockEntity, state, tickDelta, mc.gameRenderer.getMainCamera().position(), null);
+            renderer.extractRenderState(blockEntity, state, tickDelta, mc.gameRenderer.mainCamera().position(), null);
             renderer.submit(state, MATRICES, renderCommandQueue, mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState);
 
             renderDispatcher.renderAllFeatures();

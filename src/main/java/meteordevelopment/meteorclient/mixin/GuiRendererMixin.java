@@ -58,7 +58,7 @@ public abstract class GuiRendererMixin {
         if ((GuiRenderer) (Object) this instanceof MeteorMcGuiRenderer) return;
         var mc = Minecraft.getInstance();
 
-        if (mc.screen == null || mc.screen instanceof WidgetScreen) return;
+        if (mc.gui.screen() == null || mc.gui.screen() instanceof WidgetScreen) return;
         meteor$render2D(mc);
     }
 
@@ -67,9 +67,9 @@ public abstract class GuiRendererMixin {
         if ((GuiRenderer) (Object) this instanceof MeteorMcGuiRenderer) return;
         var mc = Minecraft.getInstance();
 
-        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(mc.getMainRenderTarget().getDepthTexture(), 1.0);
+        RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(mc.gameRenderer.mainRenderTarget().getDepthTexture(), 1.0);
 
-        if (mc.screen == null || mc.screen instanceof WidgetScreen) {
+        if (mc.gui.screen() == null || mc.gui.screen() instanceof WidgetScreen) {
             meteor$render2D(mc);
         }
 
@@ -96,7 +96,7 @@ public abstract class GuiRendererMixin {
             Profiler.get().pop();
         }
 
-        if (mc.screen instanceof WidgetScreen widgetScreen) {
+        if (mc.gui.screen() instanceof WidgetScreen widgetScreen) {
             var graphics = new GuiGraphicsExtractor(mc, renderState, mouseX, mouseY);
             var guiDelta = mc.getDeltaTracker().getGameTimeDeltaTicks();
 

@@ -21,6 +21,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,22 +31,22 @@ import java.util.stream.Stream;
 
 public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     public static final BlockEntityType<?>[] STORAGE_BLOCKS = new BlockEntityType[]{
-        BlockEntityType.BARREL,
-        BlockEntityType.BLAST_FURNACE,
-        BlockEntityType.BREWING_STAND,
-        BlockEntityType.CAMPFIRE,
-        BlockEntityType.CHEST,
-        BlockEntityType.CHISELED_BOOKSHELF,
-        BlockEntityType.CRAFTER,
-        BlockEntityType.DISPENSER,
-        BlockEntityType.DECORATED_POT,
-        BlockEntityType.DROPPER,
-        BlockEntityType.ENDER_CHEST,
-        BlockEntityType.FURNACE,
-        BlockEntityType.HOPPER,
-        BlockEntityType.SHULKER_BOX,
-        BlockEntityType.SMOKER,
-        BlockEntityType.TRAPPED_CHEST,
+        BlockEntityTypes.BARREL,
+        BlockEntityTypes.BLAST_FURNACE,
+        BlockEntityTypes.BREWING_STAND,
+        BlockEntityTypes.CAMPFIRE,
+        BlockEntityTypes.CHEST,
+        BlockEntityTypes.CHISELED_BOOKSHELF,
+        BlockEntityTypes.CRAFTER,
+        BlockEntityTypes.DISPENSER,
+        BlockEntityTypes.DECORATED_POT,
+        BlockEntityTypes.DROPPER,
+        BlockEntityTypes.ENDER_CHEST,
+        BlockEntityTypes.FURNACE,
+        BlockEntityTypes.HOPPER,
+        BlockEntityTypes.SHULKER_BOX,
+        BlockEntityTypes.SMOKER,
+        BlockEntityTypes.TRAPPED_CHEST,
     };
 
     public static final Registry<BlockEntityType<?>> REGISTRY = new SRegistry();

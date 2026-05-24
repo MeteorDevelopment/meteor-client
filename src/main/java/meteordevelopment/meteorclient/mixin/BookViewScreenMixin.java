@@ -106,7 +106,7 @@ public abstract class BookViewScreenMixin extends Screen {
 
         addRenderableWidget(
             new Button.Builder(Component.literal("Edit title & author"), _ -> {
-                mc.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2));
+                mc.gui.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2));
             })
                 .pos(4, 4 + 20 + 2)
                 .size(120, 20)

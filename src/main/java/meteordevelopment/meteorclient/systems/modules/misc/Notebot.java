@@ -562,7 +562,7 @@ public class Notebot extends Module {
 
         // Open Song GUI
         WButton openSongGUI = table.add(theme.button("Open Song GUI")).expandX().minWidth(100).widget();
-        openSongGUI.action = () -> mc.setScreen(theme.notebotSongs());
+        openSongGUI.action = () -> mc.gui.setScreen(theme.notebotSongs());
 
         table.row();
 

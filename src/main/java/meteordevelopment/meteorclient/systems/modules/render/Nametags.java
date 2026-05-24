@@ -32,10 +32,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -63,7 +60,7 @@ public class Nametags extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select entities to draw nametags on.")
-        .defaultValue(EntityType.PLAYER, EntityType.ITEM)
+        .defaultValue(EntityTypes.PLAYER, EntityTypes.ITEM)
         .build()
     );
 
@@ -333,13 +330,13 @@ public class Nametags extends Module {
 
         boolean freecamNotActive = !Modules.get().isActive(Freecam.class);
         boolean notThirdPerson = mc.options.getCameraType().isFirstPerson();
-        Vec3 cameraPos = mc.gameRenderer.getMainCamera().position();
+        Vec3 cameraPos = mc.gameRenderer.mainCamera().position();
 
         for (Entity entity : mc.level.entitiesForRendering()) {
             EntityType<?> type = entity.getType();
             if (!entities.get().contains(type)) continue;
 
-            if (type == EntityType.PLAYER) {
+            if (type == EntityTypes.PLAYER) {
                 if ((ignoreSelf.get() || (freecamNotActive && notThirdPerson)) && entity == mc.player) continue;
                 if (EntityUtils.getGameMode((Player) entity) == null && ignoreBots.get()) continue;
                 if (Friends.get().isFriend((Player) entity) && ignoreFriends.get()) continue;
@@ -393,7 +390,7 @@ public class Nametags extends Module {
     private double getHeight(Entity entity) {
         double height = entity.getEyeHeight(entity.getPose());
 
-        if (entity.getType() == EntityType.ITEM || entity.getType() == EntityType.ITEM_FRAME || entity.getType() == EntityType.GLOW_ITEM_FRAME)
+        if (entity.getType() == EntityTypes.ITEM || entity.getType() == EntityTypes.ITEM_FRAME || entity.getType() == EntityTypes.GLOW_ITEM_FRAME)
             height += 0.2;
         else height += 0.5;
 
@@ -749,6 +746,6 @@ public class Nametags extends Module {
     }
 
     public boolean playerNametags() {
-        return isActive() && entities.get().contains(EntityType.PLAYER);
+        return isActive() && entities.get().contains(EntityTypes.PLAYER);
     }
 }

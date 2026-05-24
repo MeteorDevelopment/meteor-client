@@ -10,6 +10,7 @@ import com.mojang.blaze3d.textures.FilterMode;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import net.minecraft.client.renderer.DynamicUniformStorage;
+import org.joml.Vector4f;
 
 import java.nio.ByteBuffer;
 
@@ -37,7 +38,7 @@ public abstract class PostProcessShader {
 
     public void clearTexture() {
         if (this.shouldDraw()) {
-            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorTexture(), 0);
+            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(framebuffer.getColorTexture(), new Vector4f(0));
         }
     }
 
@@ -53,7 +54,7 @@ public abstract class PostProcessShader {
         if (!shouldDraw()) return;
 
         var renderer = MeshRenderer.begin()
-            .attachments(mc.getMainRenderTarget())
+            .attachments(mc.gameRenderer.mainRenderTarget())
             .pipeline(pipeline)
             .fullscreen()
             .uniform("PostData", UNIFORM_STORAGE.writeUniform(new UniformData(

@@ -74,7 +74,7 @@ dependencies {
     modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
 
     // Compat fixes
-    compileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
+//    compileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion)) TODO: re-enable once available
     compileOnly(libs.sodium) { isTransitive = false }
     compileOnly(libs.lithium) { isTransitive = false }
     compileOnly(libs.iris) { isTransitive = false }
@@ -140,7 +140,7 @@ loom {
 }
 
 fun toMinecraftCompat(version: String): String {
-    val match = Regex("""^(\d{2})\.([1-9]\d*)(?:\.([1-9]\d*))?$""")
+    val match = Regex("""^(\d{2})\.([1-9]\d*)(?:\.([1-9]\d*))?.*$""")
         .matchEntire(version)
         ?: error("Invalid Minecraft version format: $version. Expected YY.D or YY.D.H")
 

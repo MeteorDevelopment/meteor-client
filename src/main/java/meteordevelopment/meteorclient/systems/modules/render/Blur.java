@@ -199,7 +199,7 @@ public class Blur extends Module {
         }
 
         // Initial downsample
-        renderToFbo(fbos[0], mc.getMainRenderTarget().getColorTextureView(), MeteorRenderPipelines.BLUR_DOWN, ubos[0]);
+        renderToFbo(fbos[0], mc.gameRenderer.mainRenderTarget().getColorTextureView(), MeteorRenderPipelines.BLUR_DOWN, ubos[0]);
 
         // Downsample
         for (int i = 0; i < iterations; i++) {
@@ -213,7 +213,7 @@ public class Blur extends Module {
 
         // Render output
         MeshRenderer.begin()
-            .attachments(mc.getMainRenderTarget())
+            .attachments(mc.gameRenderer.mainRenderTarget())
             .pipeline(MeteorRenderPipelines.BLUR_PASSTHROUGH)
             .fullscreen()
             .sampler("u_Texture", fbos[0], RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR)) // todo ???
@@ -232,7 +232,7 @@ public class Blur extends Module {
 
     private boolean shouldRender() {
         if (!isActive()) return false;
-        Screen screen = mc.screen;
+        Screen screen = mc.gui.screen();
 
         if (screen instanceof WidgetScreen) return meteor.get();
         if (screen instanceof AbstractContainerScreen) return inventories.get();

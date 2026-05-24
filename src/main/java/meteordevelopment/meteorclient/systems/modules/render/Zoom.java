@@ -96,16 +96,16 @@ public class Zoom extends Module {
             enabled = true;
         }
 
-        if (hideHud.get() && !mc.options.hideGui) {
+        if (hideHud.get() && !mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden) {
             hudManualToggled = false;
-            mc.options.hideGui = true;
+            mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden = true;
         }
     }
 
     @Override
     public void onDeactivate() {
         if (hideHud.get() && !hudManualToggled) {
-            mc.options.hideGui = false;
+            mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden = false;
         }
     }
 
@@ -140,7 +140,7 @@ public class Zoom extends Module {
 
     @EventHandler
     private void onMouseScroll(MouseScrollEvent event) {
-        if (mc.screen != null) return;
+        if (mc.gui.screen() != null) return;
 
         if (scrollSensitivity.get() > 0 && isActive()) {
             value += event.value * 0.25 * (scrollSensitivity.get() * value);

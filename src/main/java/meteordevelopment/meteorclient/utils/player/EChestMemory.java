@@ -46,8 +46,8 @@ public class EChestMemory {
         }
         if (echestOpenedState == 0) return;
 
-        if (!(mc.screen instanceof ContainerScreen)) return;
-        ChestMenu container = ((ContainerScreen) mc.screen).getMenu();
+        if (!(mc.gui.screen() instanceof ContainerScreen)) return;
+        ChestMenu container = ((ContainerScreen) mc.gui.screen()).getMenu();
         if (container == null) return;
         Container inv = container.getContainer();
 
