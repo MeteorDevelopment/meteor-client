@@ -346,8 +346,7 @@ public class StashFinder extends Module {
         // Try to load csv
         file = getCsvFile();
         if (!loaded && file.exists()) {
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(file));
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 reader.readLine();
 
                 String line;
@@ -364,8 +363,6 @@ public class StashFinder extends Module {
 
                     chunks.add(chunk);
                 }
-
-                reader.close();
             } catch (Exception _) {
                 if (chunks == null) chunks = new ArrayList<>();
             }

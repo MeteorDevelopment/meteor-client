@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -166,7 +167,9 @@ public class ProfilesTab extends Tab {
                 }
 
                 File f = new File(p.getFile(), filename);
-                NbtIo.writeUnnamedTagWithFallback(entry.getValue(), new DataOutputStream(new FileOutputStream(f)));
+                try (DataOutputStream output = new DataOutputStream(new FileOutputStream(f))) {
+                    NbtIo.writeUnnamedTagWithFallback(entry.getValue(), output);
+                }
             }
 
             Profiles.get().getAll().add(p);
