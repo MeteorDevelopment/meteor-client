@@ -192,7 +192,9 @@ public class Freecam extends Module {
         down = Input.isPressed(mc.options.keyShift);
 
         unpress();
-        if (reloadChunks.get()) mc.levelRenderer.allChanged();
+        if (reloadChunks.get()) {
+            mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+        }
     }
 
     @Override
