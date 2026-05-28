@@ -140,7 +140,7 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
                 NoopOutlineVertexConsumerProvider.INSTANCE,
                 NoopImmediateVertexConsumerProvider.INSTANCE,
                 mc.font,
-                mc.gameRenderer.getGameRenderState()
+                mc.gameRenderer.gameRenderState()
             );
         }
 

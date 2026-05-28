@@ -41,7 +41,7 @@ public class WireframeEntityRenderer {
         NoopOutlineVertexConsumerProvider.INSTANCE,
         NoopImmediateVertexConsumerProvider.INSTANCE,
         mc.font,
-        mc.gameRenderer.getGameRenderState()
+        mc.gameRenderer.gameRenderState()
     );
 
     private static Color sideColor;
@@ -78,7 +78,7 @@ public class WireframeEntityRenderer {
 
         matrices.pushPose();
         matrices.scale((float) scale, (float) scale, (float) scale);
-        renderer.submit(state, matrices, renderCommandQueue, mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState);
+        renderer.submit(state, matrices, renderCommandQueue, mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState);
         matrices.popPose();
 
         renderDispatcher.renderAllFeatures();

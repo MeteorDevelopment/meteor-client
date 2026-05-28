@@ -48,7 +48,7 @@ public abstract class SimpleBlockRenderer {
         NoopOutlineVertexConsumerProvider.INSTANCE,
         NoopImmediateVertexConsumerProvider.INSTANCE,
         mc.font,
-        mc.gameRenderer.getGameRenderState()
+        mc.gameRenderer.gameRenderState()
     );
 
     private SimpleBlockRenderer() {
@@ -65,7 +65,7 @@ public abstract class SimpleBlockRenderer {
 
             BlockEntityRenderState state = renderer.createRenderState();
             renderer.extractRenderState(blockEntity, state, tickDelta, mc.gameRenderer.mainCamera().position(), null);
-            renderer.submit(state, MATRICES, renderCommandQueue, mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState);
+            renderer.submit(state, MATRICES, renderCommandQueue, mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState);
 
             renderDispatcher.renderAllFeatures();
             renderCommandQueue.endFrame();
