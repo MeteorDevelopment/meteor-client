@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.renderer;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -40,16 +41,16 @@ public class MeshBuilder {
     private double cameraX, cameraZ;
 
     public MeshBuilder(RenderPipeline pipeline) {
-        this(pipeline.getVertexFormat(), pipeline.getVertexFormatMode());
+        this(pipeline.getVertexFormatBinding(0), pipeline.getPrimitiveTopology());
     }
 
-    public MeshBuilder(VertexFormat format, VertexFormat.Mode drawMode) {
+    public MeshBuilder(VertexFormat format, PrimitiveTopology drawMode) {
         this.format = format;
         primitiveVerticesSize = format.getVertexSize();
         primitiveIndicesCount = drawMode.primitiveLength;
     }
 
-    public MeshBuilder(VertexFormat format, VertexFormat.Mode drawMode, int vertexCount, int indexCount) {
+    public MeshBuilder(VertexFormat format, PrimitiveTopology drawMode, int vertexCount, int indexCount) {
         this(format, drawMode);
         allocateBuffers(vertexCount, indexCount);
     }
