@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.pipeline.BindGroupLayout;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
@@ -30,8 +31,12 @@ public abstract class MeteorRenderPipelines {
 
     // Snippets
 
-    private static final RenderPipeline.Snippet MESH_UNIFORMS = RenderPipeline.builder()
+    private static final BindGroupLayout MESH_BIND_GROUP = BindGroupLayout.builder()
         .withUniform("MeshData", UniformType.UNIFORM_BUFFER)
+        .build();
+
+    private static final RenderPipeline.Snippet MESH_UNIFORMS = RenderPipeline.builder()
+        .withBindGroupLayout(MESH_BIND_GROUP)
         .buildSnippet();
 
     // World
@@ -111,7 +116,7 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2_TEXTURE_COLOR).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/pos_tex_color.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/pos_tex_color.frag"))
-        .withSampler("u_Texture")
+        .withBindGroupLayout(BindGroupLayout.builder().withSampler("u_Texture").build())
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(true)
@@ -123,7 +128,7 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2_TEXTURE_COLOR).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/text.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/text.frag"))
-        .withSampler("u_Texture")
+        .withBindGroupLayout(BindGroupLayout.builder().withSampler("u_Texture").build())
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(true)
@@ -137,9 +142,11 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/post-process/base.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/post-process/outline.frag"))
-        .withSampler("u_Texture")
-        .withUniform("PostData", UniformType.UNIFORM_BUFFER)
-        .withUniform("OutlineData", UniformType.UNIFORM_BUFFER)
+        .withBindGroupLayout(BindGroupLayout.builder()
+            .withSampler("u_Texture")
+            .withUniform("PostData", UniformType.UNIFORM_BUFFER)
+            .withUniform("OutlineData", UniformType.UNIFORM_BUFFER)
+            .build())
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
@@ -151,10 +158,12 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/post-process/base.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/post-process/image.frag"))
-        .withSampler("u_Texture")
-        .withSampler("u_TextureI")
-        .withUniform("PostData", UniformType.UNIFORM_BUFFER)
-        .withUniform("ImageData", UniformType.UNIFORM_BUFFER)
+        .withBindGroupLayout(BindGroupLayout.builder()
+            .withSampler("u_Texture")
+            .withSampler("u_TextureI")
+            .withUniform("PostData", UniformType.UNIFORM_BUFFER)
+            .withUniform("ImageData", UniformType.UNIFORM_BUFFER)
+            .build())
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
@@ -168,8 +177,10 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/blur.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/blur_down.frag"))
-        .withSampler("u_Texture")
-        .withUniform("BlurData", UniformType.UNIFORM_BUFFER)
+        .withBindGroupLayout(BindGroupLayout.builder()
+            .withSampler("u_Texture")
+            .withUniform("BlurData", UniformType.UNIFORM_BUFFER)
+            .build())
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
@@ -181,8 +192,10 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/blur.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/blur_up.frag"))
-        .withSampler("u_Texture")
-        .withUniform("BlurData", UniformType.UNIFORM_BUFFER)
+        .withBindGroupLayout(BindGroupLayout.builder()
+            .withSampler("u_Texture")
+            .withUniform("BlurData", UniformType.UNIFORM_BUFFER)
+            .build())
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
@@ -194,7 +207,7 @@ public abstract class MeteorRenderPipelines {
         .withVertexBinding(0, MeteorVertexFormats.POS2).withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withVertexShader(MeteorClient.identifier("shaders/passthrough.vert"))
         .withFragmentShader(MeteorClient.identifier("shaders/passthrough.frag"))
-        .withSampler("u_Texture")
+        .withBindGroupLayout(BindGroupLayout.builder().withSampler("u_Texture").build())
         .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
