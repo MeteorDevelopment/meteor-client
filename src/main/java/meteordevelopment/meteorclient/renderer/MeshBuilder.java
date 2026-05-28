@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.renderer;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -221,12 +222,18 @@ public class MeshBuilder {
 
     public GpuBuffer getVertexBuffer() {
         vertices.limit(getVerticesOffset());
-        return format.uploadImmediateVertexBuffer(vertices);
+        var device = RenderSystem.getDevice();
+        GpuBuffer buffer = device.createBuffer(() -> "Mesh vertex buffer", GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST, vertices.remaining());
+        device.createCommandEncoder().writeToBuffer(buffer.slice(0, vertices.remaining()), vertices);
+        return buffer;
     }
 
     public GpuBuffer getIndexBuffer() {
         indices.limit(indicesCount * Integer.BYTES);
-        return format.uploadImmediateIndexBuffer(indices);
+        var device = RenderSystem.getDevice();
+        GpuBuffer buffer = device.createBuffer(() -> "Mesh index buffer", GpuBuffer.USAGE_INDEX | GpuBuffer.USAGE_COPY_DST, indices.remaining());
+        device.createCommandEncoder().writeToBuffer(buffer.slice(0, indices.remaining()), indices);
+        return buffer;
     }
 
     public int getIndicesCount() {
