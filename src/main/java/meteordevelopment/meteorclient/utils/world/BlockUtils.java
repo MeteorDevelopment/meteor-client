@@ -166,7 +166,7 @@ public class BlockUtils {
     }
 
     public static Direction getPlaceSide(BlockPos blockPos) {
-        Vec3 lookVec = blockPos.getCenter().subtract(mc.player.getEyePosition());
+        Vec3 lookVec = Vec3.atCenterOf(blockPos).subtract(mc.player.getEyePosition());
         double bestRelevancy = -Double.MAX_VALUE;
         Direction bestSide = null;
 

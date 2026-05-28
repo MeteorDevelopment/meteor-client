@@ -373,7 +373,7 @@ public class HoleFiller extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3 pos = blockPos.getCenter().add(0, 0.499, 0); // Set to the top of the block as holes will be viewed from above
+        Vec3 pos = Vec3.upFromBottomCenterOf(blockPos, 0.999); // Set to the top of the block as holes will be viewed from above
         if (!PlayerUtils.isWithin(pos, placeRange.get())) return true;
 
         ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);

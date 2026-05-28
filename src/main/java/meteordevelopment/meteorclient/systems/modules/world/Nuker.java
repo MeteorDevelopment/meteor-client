@@ -398,14 +398,14 @@ public class Nuker extends Module {
         // Flatten
         if (mode.get() == Mode.Flatten) pos1.setY((int) Math.floor(pY + 0.5));
 
-        AABB box = new AABB(pos1.getCenter(), pos2.getCenter());
+        AABB box = new AABB(Vec3.atCenterOf(pos1), Vec3.atCenterOf(pos2));
 
         // Find blocks to break
         BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
-            Vec3 center = blockPos.getCenter();
+            Vec3 center = Vec3.atCenterOf(blockPos);
             switch (shape.get()) {
                 case Sphere -> {
-                    if (Utils.squaredDistance(pX, pY, pZ, center.x(), center.y(), center.z()) > rangeSq)
+                    if (center.distanceToSqr(pX, pY, pZ) > rangeSq)
                         return;
                 }
                 case UniformCube -> {
@@ -502,7 +502,7 @@ public class Nuker extends Module {
     private void breakBlock(BlockPos blockPos) {
         if (interact.get()) {
             // Interact mode
-            BlockUtils.interact(new BlockHitResult(blockPos.getCenter(), BlockUtils.getDirection(blockPos), blockPos, true), InteractionHand.MAIN_HAND, swing.get());
+            BlockUtils.interact(new BlockHitResult(Vec3.atCenterOf(blockPos), BlockUtils.getDirection(blockPos), blockPos, true), InteractionHand.MAIN_HAND, swing.get());
             interacted.add(blockPos);
         } else if (packetMine.get()) {
             // Packet mine mode
@@ -519,7 +519,7 @@ public class Nuker extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3 pos = blockPos.getCenter();
+        Vec3 pos = Vec3.atCenterOf(blockPos);
         ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
         BlockHitResult result = mc.level.clip(clipContext);
         if (result == null || !result.getBlockPos().equals(blockPos))

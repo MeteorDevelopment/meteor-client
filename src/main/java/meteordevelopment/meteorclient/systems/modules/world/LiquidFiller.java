@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -230,7 +231,7 @@ public class LiquidFiller extends Module {
     private boolean isOutOfRange(BlockPos blockPos) {
         if (!isWithinShape(blockPos, placeRange.get())) return true;
 
-        ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), blockPos.getCenter(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), Vec3.atCenterOf(blockPos), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
         BlockHitResult result = mc.level.clip(clipContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !isWithinShape(blockPos, placeWallsRange.get());
@@ -250,6 +251,6 @@ public class LiquidFiller extends Module {
         }
 
         // Spherical shape
-        return PlayerUtils.isWithin(blockPos.getCenter(), range);
+        return PlayerUtils.isWithin(Vec3.atCenterOf(blockPos), range);
     }
 }
