@@ -15,17 +15,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.joml.Vector4f;
 import org.joml.Vector4fc;
+import org.jspecify.annotations.Nullable;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
@@ -38,14 +37,17 @@ public class MeshRenderer {
 
     private GpuTextureView colorAttachment;
     private GpuTextureView depthAttachment;
-    private Color clearColor;
+    private @Nullable Color clearColor;
     private RenderPipeline pipeline;
     private @Nullable MeshBuilder mesh;
     private @Nullable GpuBuffer vertexBuffer;
     private @Nullable GpuBuffer indexBuffer;
     private Matrix4f matrix;
-    private final HashMap<String, GpuBufferSlice> uniforms = new HashMap<>();
-    private final HashMap<String, Pair<GpuTextureView, GpuSampler>> samplers = new HashMap<>();
+    private final Map<String, GpuBufferSlice> uniforms = new Object2ObjectOpenHashMap<>();
+    private final Map<String, TextureViewAndSampler> samplers = new Object2ObjectOpenHashMap<>();
+
+    private record TextureViewAndSampler(GpuTextureView textureView, GpuSampler sampler) {
+    }
 
     private MeshRenderer() {
     }
@@ -122,7 +124,7 @@ public class MeshRenderer {
 
     public MeshRenderer sampler(String name, GpuTextureView view, GpuSampler sampler) {
         if (name != null && view != null && sampler != null) {
-            samplers.put(name, Pair.of(view, sampler));
+            samplers.put(name, new TextureViewAndSampler(view, sampler));
         }
 
         return this;
@@ -156,7 +158,7 @@ public class MeshRenderer {
 
             {
                 Optional<Vector4fc> clearColor = this.clearColor != null
-                    ? Optional.of(new Vector4f(this.clearColor.r / 255.0f, this.clearColor.g / 255.0f, this.clearColor.b / 255.0f, this.clearColor.a / 255.0f))
+                    ? Optional.of(this.clearColor.getVec4f())
                     : Optional.empty();
 
                 GpuBufferSlice meshData = MeshUniforms.write(RenderUtils.projection, RenderSystem.getModelViewStack());
@@ -173,7 +175,7 @@ public class MeshRenderer {
                 }
 
                 for (var entry : samplers.entrySet()) {
-                    pass.bindTexture(entry.getKey(), entry.getValue().getFirst(), entry.getValue().getSecond());
+                    pass.bindTexture(entry.getKey(), entry.getValue().textureView, entry.getValue().sampler);
                 }
 
                 pass.setVertexBuffer(0, vertexBuffer);

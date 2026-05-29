@@ -313,7 +313,11 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     public Vector4f getVec4f() {
-        return new Vector4f(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+        return getVec4f(new Vector4f());
+    }
+
+    public Vector4f getVec4f(Vector4f dest) {
+        return dest.set(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
     }
 
     public int getPacked() {
