@@ -178,9 +178,9 @@ public class MeshRenderer {
                     pass.bindTexture(entry.getKey(), entry.getValue().textureView, entry.getValue().sampler);
                 }
 
-                pass.setVertexBuffer(0, vertexBuffer);
+                pass.setVertexBuffer(0, vertexBuffer.slice());
                 pass.setIndexBuffer(indexBuffer, IndexType.INT);
-                pass.drawIndexed(0, 0, indexCount, 1);
+                pass.drawIndexed(0, 0, indexCount, 1, 0);
 
                 pass.close();
             }
