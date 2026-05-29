@@ -56,7 +56,7 @@ public class TitleScreenCredits {
                     case Http.UNAUTHORIZED -> {
                         String message = "Invalid authentication token for repository '%s'".formatted(repo.getOwnerName());
                         MeteorToast toast = new MeteorToast.Builder("GitHub: Unauthorized").icon(Items.BARRIER).text(message).build();
-                        mc.getToastManager().addToast(toast);
+                        mc.gui.toastManager().addToast(toast);
                         MeteorClient.LOG.warn(message);
                         if (System.getenv("meteor.github.authorization") == null) {
                             MeteorClient.LOG.info("Consider setting an authorization " +
