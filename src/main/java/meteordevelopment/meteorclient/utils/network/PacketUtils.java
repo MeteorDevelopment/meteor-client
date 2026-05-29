@@ -163,8 +163,8 @@ public class PacketUtils {
         C2S_PACKETS_R.put("ServerboundSetTestBlockPacket", net.minecraft.network.protocol.game.ServerboundSetTestBlockPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSignUpdatePacket.class, "ServerboundSignUpdatePacket");
         C2S_PACKETS_R.put("ServerboundSignUpdatePacket", net.minecraft.network.protocol.game.ServerboundSignUpdatePacket.class);
-        C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSpectateEntityPacket.class, "ServerboundSpectateEntityPacket");
-        C2S_PACKETS_R.put("ServerboundSpectateEntityPacket", net.minecraft.network.protocol.game.ServerboundSpectateEntityPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSpectatorActionPacket.class, "ServerboundSpectatorActionPacket");
+        C2S_PACKETS_R.put("ServerboundSpectatorActionPacket", net.minecraft.network.protocol.game.ServerboundSpectatorActionPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.status.ServerboundStatusRequestPacket.class, "ServerboundStatusRequestPacket");
         C2S_PACKETS_R.put("ServerboundStatusRequestPacket", net.minecraft.network.protocol.status.ServerboundStatusRequestPacket.class);
         C2S_PACKETS.put(net.minecraft.network.protocol.game.ServerboundSwingPacket.class, "ServerboundSwingPacket");
