@@ -54,14 +54,14 @@ public class StashFinder extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     private static final List<Block> DEFAULT_SUPPORT_BLOCK_BLACKLIST = List.of(
-        Blocks.OXIDIZED_COPPER,
-        Blocks.OXIDIZED_CUT_COPPER,
+        Blocks.COPPER_BLOCK.weathering().oxidized(),
+        Blocks.CUT_COPPER.weathering().oxidized(),
         Blocks.TUFF_BRICKS,
-        Blocks.WAXED_COPPER_BLOCK,
-        Blocks.WAXED_OXIDIZED_COPPER,
-        Blocks.WAXED_OXIDIZED_CUT_COPPER,
+        Blocks.COPPER_BLOCK.waxed().unaffected(),
+        Blocks.COPPER_BLOCK.waxed().oxidized(),
+        Blocks.CUT_COPPER.waxed().oxidized(),
         Blocks.BARREL,
-        Blocks.WAXED_COPPER_BULB
+        Blocks.COPPER_BULB.waxed().unaffected()
     );
 
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
@@ -241,12 +241,12 @@ public class StashFinder extends Module {
                     case Chat -> sendChatNotification(chunk);
                     case Toast -> {
                         MeteorToast toast = new MeteorToast.Builder(title).icon(Items.CHEST).text("Found Stash!").build();
-                        mc.getToastManager().addToast(toast);
+                        mc.gui.toastManager().addToast(toast);
                     }
                     case Both -> {
                         sendChatNotification(chunk);
                         MeteorToast toast = new MeteorToast.Builder(title).icon(Items.CHEST).text("Found Stash!").build();
-                        mc.getToastManager().addToast(toast);
+                        mc.gui.toastManager().addToast(toast);
                     }
                 }
             }
