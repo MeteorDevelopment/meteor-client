@@ -200,7 +200,8 @@ public class Freecam extends Module {
     @Override
     public void onDeactivate() {
         if (reloadChunks.get()) {
-            mc.execute(mc.levelRenderer::allChanged);
+            mc.execute(() ->
+                mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors()));
         }
 
         mc.options.setCameraType(perspective);
