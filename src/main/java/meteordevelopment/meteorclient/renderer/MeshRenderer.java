@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.IndexType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
@@ -14,7 +15,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -177,7 +177,7 @@ public class MeshRenderer {
                 }
 
                 pass.setVertexBuffer(0, vertexBuffer);
-                pass.setIndexBuffer(indexBuffer, VertexFormat.IndexType.INT);
+                pass.setIndexBuffer(indexBuffer, IndexType.INT);
                 pass.drawIndexed(0, 0, indexCount, 1);
 
                 pass.close();
