@@ -1,5 +1,5 @@
 
-<p align="center">1
+<p align="center">
 <img src="https://meteorclient.com/icon.png" alt="meteor-client-logo" width="15%"/>
 </p>
 
