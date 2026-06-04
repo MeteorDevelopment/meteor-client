@@ -30,6 +30,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
 import meteordevelopment.meteorclient.systems.modules.player.NoRotate;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.world.SignUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -39,6 +40,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -132,6 +134,11 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
         if (itemEntity instanceof ItemEntity item && entity == minecraft.player) {
             MeteorClient.EVENT_BUS.post(PickItemsEvent.get(item.getItem(), packet.getAmount()));
         }
+    }
+
+    @Inject(method = "handleOpenSignEditor", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;openTextEdit(Lnet/minecraft/world/level/block/entity/SignBlockEntity;Z)V"))
+    private void onHandleOpenSignEditor(ClientboundOpenSignEditorPacket packet, CallbackInfo ci, @Local SignBlockEntity sign) {
+        SignUtils.cacheOriginalText(sign, packet.isFrontText());
     }
 
     @Inject(method = "handleMovePlayer", at = @At("HEAD"))

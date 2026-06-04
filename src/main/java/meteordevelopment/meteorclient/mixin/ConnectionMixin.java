@@ -20,7 +20,7 @@ import meteordevelopment.meteorclient.systems.modules.misc.AntiPacketKick;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
-import meteordevelopment.meteorclient.utils.misc.TranslationUtils;
+import meteordevelopment.meteorclient.utils.world.SignUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.BandwidthDebugMonitor;
 import net.minecraft.network.Connection;
@@ -74,7 +74,9 @@ public abstract class ConnectionMixin {
 
     @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;)V", cancellable = true)
     private void onSendPacketHead(Packet<?> packet, @Nullable ChannelFutureListener listener, CallbackInfo ci) {
-        if (packet instanceof ServerboundSignUpdatePacket signPacket && containsMeteorTranslation(signPacket.getLines())) {
+        Packet<?> replacement = replaceMeteorSignTranslations(packet);
+        if (replacement != packet) {
+            ((Connection) (Object) this).send(replacement, listener);
             ci.cancel();
             return;
         }
@@ -84,12 +86,8 @@ public abstract class ConnectionMixin {
         }
     }
 
-    private static boolean containsMeteorTranslation(String[] lines) {
-        for (String line : lines) {
-            if (line != null && TranslationUtils.isNamespaceTranslation(MeteorClient.MOD_ID, line)) return true;
-        }
-
-        return false;
+    private Packet<?> replaceMeteorSignTranslations(Packet<?> packet) {
+        return packet instanceof ServerboundSignUpdatePacket signPacket ? SignUtils.replaceMeteorTranslations(signPacket) : packet;
     }
 
     @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;)V", at = @At("TAIL"))
