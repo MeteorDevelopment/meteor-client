@@ -29,7 +29,7 @@ discordipc = "1.1"
 # Reflections (https://github.com/ronmamo/reflections)
 reflections = "0.10.2"
 # Netty (https://github.com/netty/netty)
-netty = "4.2.7.Final"
+netty = "4.2.13.Final"
 # ViaFabricPlus (https://github.com/ViaVersion/ViaFabricPlus)
 viafabricplus = "4.5.2"
 # WaybackAuthLib (https://github.com/florianreuth/WaybackAuthLib)
