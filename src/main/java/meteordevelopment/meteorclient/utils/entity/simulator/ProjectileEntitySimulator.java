@@ -185,7 +185,7 @@ public class ProjectileEntitySimulator {
             velocity.add(vel.x, user.onGround() ? 0.0D : vel.y, vel.z);
         }
 
-        setSimulationData((Projectile) data.entity().create(mc.level, null), data);
+        setSimulationData((Projectile) data.entity().create(mc.level, EntitySpawnReason.NATURAL), data);
     }
 
     public void setFishingBobber(Entity user, float tickDelta, MotionData data) {
@@ -215,7 +215,7 @@ public class ProjectileEntitySimulator {
         double l = velocity.length();
         velocity.mul(0.6 / l + 0.5, 0.6 / l + 0.5, 0.6 / l + 0.5);
 
-        setSimulationData((Projectile) data.entity().create(mc.level, null), data);
+        setSimulationData((Projectile) data.entity().create(mc.level, EntitySpawnReason.NATURAL), data);
     }
 
 
