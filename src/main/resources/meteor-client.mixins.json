@@ -108,6 +108,7 @@
     "GlCommandEncoderMixin",
     "GlDeviceMixin",
     "GpuDeviceMixin",
+    "GuiMixin",
     "GuiGraphicsExtractorAccessor",
     "GuiGraphicsExtractorMixin",
     "GuiMessageMixin",

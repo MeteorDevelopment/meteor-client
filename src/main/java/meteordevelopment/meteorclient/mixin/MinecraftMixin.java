@@ -8,27 +8,20 @@ package meteordevelopment.meteorclient.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.Window;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.DoAttackEvent;
 import meteordevelopment.meteorclient.events.entity.player.DoItemUseEvent;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
-import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.game.ResolutionChangedEvent;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraft;
 import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
-import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.player.Multitask;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
@@ -38,9 +31,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CPSUtils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.MouseHandler;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -55,7 +46,10 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.meteordev.starscript.Script;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -79,14 +73,6 @@ public abstract class MinecraftMixin implements IMinecraft {
     public ClientLevel level;
     @Shadow
     @Final
-    public MouseHandler mouseHandler;
-    @Shadow
-    @Final
-    private Window window;
-    @Shadow
-    public Screen screen;
-    @Shadow
-    @Final
     public Options options;
 
     @Shadow
@@ -102,11 +88,6 @@ public abstract class MinecraftMixin implements IMinecraft {
     @Shadow
     @Nullable
     public LocalPlayer player;
-
-    @Shadow
-    @Final
-    @Mutable
-    private RenderTarget mainRenderTarget;
 
     @Shadow
     protected abstract void continueAttack(boolean down);
@@ -169,44 +150,6 @@ public abstract class MinecraftMixin implements IMinecraft {
         }
     }
 
-    @Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
-    private void onSetScreen(Screen screen, CallbackInfo ci) {
-        if (screen instanceof WidgetScreen)
-            screen.mouseMoved(mouseHandler.xpos() * window.getGuiScale(), mouseHandler.ypos() * window.getGuiScale());
-
-        OpenScreenEvent event = OpenScreenEvent.get(screen);
-        MeteorClient.EVENT_BUS.post(event);
-
-        if (event.isCancelled()) ci.cancel();
-    }
-
-    @WrapOperation(method = "setScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;releaseAll()V"))
-    private void onSetScreenKeyBindingUnpressAll(Operation<Void> op) {
-        Modules modules = Modules.get();
-        if (modules == null) {
-            op.call();
-            return;
-        }
-
-        GUIMove guimove = modules.get(GUIMove.class);
-        if (guimove == null || !guimove.isActive() || guimove.skip()) {
-            op.call();
-            return;
-        }
-
-        Options options = MeteorClient.mc.options;
-        for (KeyMapping kb : KeyMappingAccessor.getKeysById().values()) {
-            if (kb == options.keyUp) continue;
-            if (kb == options.keyLeft) continue;
-            if (kb == options.keyRight) continue;
-            if (kb == options.keyDown) continue;
-            if (guimove.sneak.get() && kb == options.keyShift) continue;
-            if (guimove.sprint.get() && kb == options.keySprint) continue;
-            if (guimove.jump.get() && kb == options.keyJump) continue;
-            ((KeyMappingAccessor) kb).meteor$invokeRelease();
-        }
-    }
-
     @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isItemEnabled(Lnet/minecraft/world/flag/FeatureFlagSet;)Z"))
     private void onStartUseItemHand(CallbackInfo ci, @Local(name = "heldItem") ItemStack heldItem) {
         FastUse fastUse = Modules.get().get(FastUse.class);
@@ -225,7 +168,7 @@ public abstract class MinecraftMixin implements IMinecraft {
         return MeteorClient.EVENT_BUS.post(ItemUseCrosshairTargetEvent.get(original)).target;
     }
 
-    @ModifyReturnValue(method = "reloadResourcePacks(ZLnet/minecraft/client/Minecraft$GameLoadCookie;)Ljava/util/concurrent/CompletableFuture;", at = @At("RETURN"))
+    @ModifyReturnValue(method = "reloadResourcePacks(ZLnet/minecraft/client/GameLoadCookie;)Ljava/util/concurrent/CompletableFuture;", at = @At("RETURN"))
     private CompletableFuture<Void> onReloadResourcePacksNewCompletableFuture(CompletableFuture<Void> original) {
         return original.thenRun(() -> MeteorClient.EVENT_BUS.post(ResourcePacksReloadedEvent.get()));
     }
@@ -344,11 +287,6 @@ public abstract class MinecraftMixin implements IMinecraft {
     @Override
     public void meteor$rightClick() {
         rightClick = true;
-    }
-
-    @Override
-    public void meteor$setFramebuffer(RenderTarget framebuffer) {
-        this.mainRenderTarget = framebuffer;
     }
 
     // Freecam
