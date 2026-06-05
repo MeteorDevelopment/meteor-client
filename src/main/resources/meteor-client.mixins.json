@@ -167,7 +167,7 @@
     "ProjectileUtilMixin",
     "ReloadStateAccessor",
     "RenderPipelineMixin",
-    "RenderSystemMixin",
+    "MinecraftRenderFrameMixin",
     "RenderTickCounterDynamicMixin",
     "RenderTypeAccessor",
     "ResourceLoadStateTrackerAccessor",
