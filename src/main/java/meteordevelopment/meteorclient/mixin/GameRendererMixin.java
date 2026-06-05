@@ -85,7 +85,7 @@ public abstract class GameRendererMixin {
     private List<PictureInPictureRenderer<?>> meteor$addSpecialRenderers(List<PictureInPictureRenderer<?>> list) {
         List<PictureInPictureRenderer<?>> result = new ArrayList<>(list.size() + 1);
         result.addAll(list);
-        result.add(new CustomBannerGuiElementRenderer(renderBuffers.bufferSource(), minecraft.getAtlasManager()));
+        result.add(new CustomBannerGuiElementRenderer(minecraft.getAtlasManager()));
         return result;
     }
 
