@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.Objective;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,8 +22,8 @@ import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-@Mixin(Gui.class)
-public abstract class GuiMixin {
+@Mixin(Hud.class)
+public abstract class HudMixin {
     @Inject(method = "extractEffects", at = @At("HEAD"), cancellable = true)
     private void onExtractStatusEffectOverlay(CallbackInfo ci) {
         if (Modules.get().get(NoRender.class).noPotionIcons()) ci.cancel();
@@ -34,12 +34,12 @@ public abstract class GuiMixin {
         if (Modules.get().get(NoRender.class).noPortalOverlay()) ci.cancel();
     }
 
-    @ModifyArgs(method = "extractCameraOverlays", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;extractTextureOverlay(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/resources/Identifier;F)V", ordinal = 0))
+    @ModifyArgs(method = "extractCameraOverlays", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Hud;extractTextureOverlay(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/resources/Identifier;F)V", ordinal = 0))
     private void onExtractPumpkinOverlay(Args args) {
         if (Modules.get().get(NoRender.class).noPumpkinOverlay()) args.set(2, 0f);
     }
 
-    @ModifyArgs(method = "extractCameraOverlays", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;extractTextureOverlay(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/resources/Identifier;F)V", ordinal = 1))
+    @ModifyArgs(method = "extractCameraOverlays", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Hud;extractTextureOverlay(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/resources/Identifier;F)V", ordinal = 1))
     private void onExtractPowderedSnowOverlay(Args args) {
         if (Modules.get().get(NoRender.class).noPowderedSnowOverlay()) args.set(2, 0f);
     }

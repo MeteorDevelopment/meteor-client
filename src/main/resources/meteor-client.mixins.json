@@ -112,7 +112,7 @@
     "GuiGraphicsExtractorMixin",
     "GuiMessageMixin",
     "GuiMessageVisibleMixin",
-    "GuiMixin",
+    "HudMixin",
     "GuiRendererMixin",
     "HumanoidArmorLayerMixin",
     "ItemContainerContentsMixin",
