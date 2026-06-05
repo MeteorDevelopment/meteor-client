@@ -19,7 +19,6 @@ import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
-import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.util.profiling.Profiler;
 import org.spongepowered.asm.mixin.Mixin;
@@ -80,8 +79,6 @@ public abstract class GuiRendererMixin {
     private void meteor$render2D(Minecraft mc) {
         var mouseX = (int) mc.mouseHandler.getScaledXPos(mc.getWindow());
         var mouseY = (int) mc.mouseHandler.getScaledYPos(mc.getWindow());
-        var fogRenderer = ((GameRendererAccessor) mc.gameRenderer).meteor$fogRenderer();
-
         if (Utils.canUpdate() || HudEditorScreen.isOpen()) {
             Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
             Utils.unscaledProjection();
@@ -90,7 +87,7 @@ public abstract class GuiRendererMixin {
             var tickDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
             MeteorClient.EVENT_BUS.post(Render2DEvent.get(graphics, graphics.guiWidth(), graphics.guiHeight(), tickDelta));
-            guiRenderer.render(fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
+            guiRenderer.render();
 
             Utils.scaledProjection();
             Profiler.get().pop();
@@ -101,7 +98,7 @@ public abstract class GuiRendererMixin {
             var guiDelta = mc.getDeltaTracker().getGameTimeDeltaTicks();
 
             widgetScreen.renderCustom(graphics, mouseX, mouseY, guiDelta);
-            guiRenderer.render(fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
+            guiRenderer.render();
         }
     }
 }
