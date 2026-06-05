@@ -16,8 +16,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.util.profiling.Profiler;
@@ -38,15 +36,13 @@ public abstract class GuiRendererMixin {
     private MeteorMcGuiRenderer guiRenderer;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init$meteor(GuiRenderState renderState, MultiBufferSource.BufferSource bufferSource, SubmitNodeCollector submitNodeCollector, FeatureRenderDispatcher featureRenderDispatcher, List<PictureInPictureRenderer<?>> pictureInPictureRenderers, CallbackInfo ci) {
+    private void init$meteor(GuiRenderState renderState, FeatureRenderDispatcher featureRenderDispatcher, List<PictureInPictureRenderer<?>> pictureInPictureRenderers, CallbackInfo ci) {
         if ((GuiRenderer) (Object) this instanceof MeteorMcGuiRenderer) return;
 
         this.renderState = new GuiRenderState();
 
         guiRenderer = new MeteorMcGuiRenderer(
             this.renderState,
-            bufferSource,
-            submitNodeCollector,
             featureRenderDispatcher,
             pictureInPictureRenderers
         );
