@@ -30,8 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.block.entity.BedBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -208,11 +207,12 @@ public class PlayerUtils {
 
             // Check for beds if in nether
             if (mc.level.environmentAttributes().getDimensionValue(EnvironmentAttributes.BED_RULE).explodes()) {
-                for (BlockEntity blockEntity : Utils.blockEntities()) {
-                    BlockPos bp = blockEntity.getBlockPos();
-                    Vec3 pos = new Vec3(bp.getX(), bp.getY(), bp.getZ());
+                BlockPos playerPos = mc.player.blockPosition();
+                int range = 6;
 
-                    if (blockEntity instanceof BedBlockEntity) {
+                for (BlockPos bp : BlockPos.betweenClosed(playerPos.offset(-range, -range, -range), playerPos.offset(range, range, range))) {
+                    if (mc.level.getBlockState(bp).getBlock() instanceof BedBlock) {
+                        Vec3 pos = new Vec3(bp.getX(), bp.getY(), bp.getZ());
                         float explosionDamage = DamageUtils.bedDamage(mc.player, pos);
                         if (explosionDamage > damageTaken) damageTaken = explosionDamage;
                     }
