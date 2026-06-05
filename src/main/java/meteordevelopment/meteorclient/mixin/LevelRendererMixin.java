@@ -21,9 +21,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import meteordevelopment.meteorclient.utils.OutlineRenderCommandQueue;
-import meteordevelopment.meteorclient.utils.render.NoopImmediateVertexConsumerProvider;
-import meteordevelopment.meteorclient.utils.render.NoopOutlineVertexConsumerProvider;
-import meteordevelopment.meteorclient.utils.render.WrapperImmediateVertexConsumerProvider;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.postprocess.EntityShader;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
@@ -124,21 +121,15 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
     private final OutlineRenderCommandQueue outlineRenderCommandQueue = new OutlineRenderCommandQueue();
 
     @Unique
-    private MultiBufferSource provider;
-
-    @Unique
     private FeatureRenderDispatcher renderDispatcher;
 
     @Inject(method = "submitEntities", at = @At("TAIL"))
     private void onSubmitEntities(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector output, CallbackInfo ci) {
         if (renderDispatcher == null) {
             renderDispatcher = new FeatureRenderDispatcher(
-                outlineRenderCommandQueue,
+                renderBuffers,
                 mc.getModelManager(),
-                new WrapperImmediateVertexConsumerProvider(() -> provider),
                 mc.getAtlasManager(),
-                NoopOutlineVertexConsumerProvider.INSTANCE,
-                NoopImmediateVertexConsumerProvider.INSTANCE,
                 mc.font,
                 mc.gameRenderer.gameRenderState()
             );
@@ -178,12 +169,8 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
             return;
 
         meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
-        provider = shader.vertexConsumerProvider;
-
-        renderDispatcher.renderAllFeatures();
-        outlineRenderCommandQueue.endFrame();
-
-        provider = null;
+        renderDispatcher.renderAllFeatures(outlineRenderCommandQueue);
+        outlineRenderCommandQueue.submitsPerOrder.clear();
         meteor$popEntityOutlineFramebuffer();
     }
 
@@ -233,6 +220,9 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
     @Shadow
     @Final
     private EntityRenderDispatcher entityRenderDispatcher;
+    @Shadow
+    @Final
+    private RenderBuffers renderBuffers;
     @Shadow
     @Final
     private LevelRenderState levelRenderState;
