@@ -131,7 +131,6 @@
     "LevelAccessor",
     "LevelChunkMixin",
     "LevelEntityGetterAdapterAccessor",
-    "LevelRendererAccessor",
     "LevelRendererMixin",
     "LightmapMixin",
     "LightningBoltRendererMixin",
