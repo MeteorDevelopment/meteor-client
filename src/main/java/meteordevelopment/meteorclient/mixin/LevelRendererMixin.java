@@ -77,11 +77,6 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
         if (Modules.get().isActive(BlockSelection.class)) ci.cancel();
     }
 
-    @ModifyArg(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;cullTerrain(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;Z)V"))
-    private boolean update$cullTerraion$modifySpectator(boolean spectator) {
-        return Modules.get().isActive(Freecam.class) || spectator;
-    }
-
     // No Render
 
     @WrapWithCondition(method = "extractLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/WeatherEffectRenderer;extractRenderState(Lnet/minecraft/world/level/Level;IFLnet/minecraft/world/phys/Vec3;Lnet/minecraft/client/renderer/state/level/WeatherRenderState;)V"))
