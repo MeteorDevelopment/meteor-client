@@ -129,6 +129,12 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
+        loopWidgets(root, widget -> {
+            if (widget instanceof WTextBox textBox && textBox.isFocused() && !textBox.mouseOver) {
+                textBox.setFocused(false);
+            }
+        });
+
         return root.mouseClicked(new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()), doubled);
     }
 
@@ -196,7 +202,6 @@ public abstract class WidgetScreen extends Screen {
         boolean shouldReturn = root.keyPressed(input) || super.keyPressed(input);
         if (shouldReturn) return true;
 
-        // Select next text box if TAB was pressed
         if (input.key() == GLFW_KEY_TAB) {
             AtomicReference<WTextBox> firstTextBox = new AtomicReference<>(null);
             AtomicBoolean done = new AtomicBoolean(false);
@@ -268,7 +273,6 @@ public abstract class WidgetScreen extends Screen {
 
         GuiKeyEvents.canUseKeys = true;
 
-        // Apply projection without scaling
         Utils.unscaledProjection();
 
         onRenderBefore(graphics, mouseX, mouseY, delta);
