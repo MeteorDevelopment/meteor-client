@@ -203,6 +203,7 @@ public class PlayerRadarHud extends HudElement {
     private List<AbstractClientPlayer> getPlayers() {
         players.clear();
         players.addAll(mc.level.players());
+        players.removeIf(e -> e == null || mc.getCameraEntity() == null);
         if (players.size() > limit.get()) players.subList(limit.get() - 1, players.size() - 1).clear();
         players.sort(Comparator.comparingDouble(e -> e.distanceToSqr(mc.getCameraEntity())));
 
