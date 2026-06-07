@@ -70,8 +70,9 @@ dependencies {
     implementation(libs.fabric.loader)
 
     val fapiVersion = libs.versions.fabric.api.get()
-    modInclude(fabricApi.module("fabric-api-base", fapiVersion))
-    modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
+compileOnly(fabricApi.module("fabric-api-base", fapiVersion))
+compileOnly(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
+
 
     // Compat fixes
     compileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
