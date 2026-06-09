@@ -5,9 +5,12 @@
 
 package meteordevelopment.meteorclient.renderer;
 
+import com.mojang.blaze3d.IndexType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.PrimitiveTopology;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -17,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.system.MemoryUtil.*;
@@ -35,6 +39,7 @@ public class MeshBuilder {
 
     private ByteBuffer indices = null;
     private long indicesPointer;
+    private final IndexType indexType = IndexType.INT; // TODO: maybe dynamically choose index type
 
     private int vertexI, indicesCount;
 
@@ -42,7 +47,13 @@ public class MeshBuilder {
     private double cameraX, cameraZ;
 
     public MeshBuilder(RenderPipeline pipeline) {
-        this(pipeline.getVertexFormatBinding(0), pipeline.getPrimitiveTopology());
+        this(
+            Objects.requireNonNull(
+                pipeline.getVertexFormatBinding(0),
+                () -> "RenderPipeline " + pipeline + " has no vertex format binding"
+            ),
+            pipeline.getPrimitiveTopology()
+        );
     }
 
     public MeshBuilder(VertexFormat format, PrimitiveTopology drawMode) {
@@ -122,10 +133,10 @@ public class MeshBuilder {
     public void line(int i1, int i2) {
         debugIndexBufferCapacity();
 
-        long p = indicesPointer + indicesCount * 4L;
+        long p = indicesPointer + indicesCount * (long) indexType.bytes;
 
-        memPutInt(p, i1);
-        memPutInt(p + 4, i2);
+        putIndex(p, i1);
+        putIndex(p + indexType.bytes, i2);
 
         indicesCount += 2;
     }
@@ -133,15 +144,15 @@ public class MeshBuilder {
     public void quad(int i1, int i2, int i3, int i4) {
         debugIndexBufferCapacity();
 
-        long p = indicesPointer + indicesCount * 4L;
+        long p = indicesPointer + indicesCount * (long) indexType.bytes;
 
-        memPutInt(p, i1);
-        memPutInt(p + 4, i2);
-        memPutInt(p + 8, i3);
+        putIndex(p, i1);
+        putIndex(p + indexType.bytes, i2);
+        putIndex(p + indexType.bytes * 2L, i3);
 
-        memPutInt(p + 12, i3);
-        memPutInt(p + 16, i4);
-        memPutInt(p + 20, i1);
+        putIndex(p + indexType.bytes * 3L, i3);
+        putIndex(p + indexType.bytes * 4L, i4);
+        putIndex(p + indexType.bytes * 5L, i1);
 
         indicesCount += 6;
     }
@@ -149,11 +160,11 @@ public class MeshBuilder {
     public void triangle(int i1, int i2, int i3) {
         debugIndexBufferCapacity();
 
-        long p = indicesPointer + indicesCount * 4L;
+        long p = indicesPointer + indicesCount * (long) indexType.bytes;
 
-        memPutInt(p, i1);
-        memPutInt(p + 4, i2);
-        memPutInt(p + 8, i3);
+        putIndex(p, i1);
+        putIndex(p + indexType.bytes, i2);
+        putIndex(p + indexType.bytes * 2L, i3);
 
         indicesCount += 3;
     }
@@ -176,7 +187,7 @@ public class MeshBuilder {
         }
 
         if (vertices == null || indices == null) {
-            allocateBuffers(256 * 4, 512 * 4);
+            allocateBuffers(256 * 4, 512 * indexType.bytes);
             return;
         }
 
@@ -191,11 +202,11 @@ public class MeshBuilder {
             verticesPointer = verticesPointerStart + offset;
         }
 
-        if ((indicesCount + indexCount) * Integer.BYTES >= indices.capacity()) {
-            int newSize = Math.max(indices.capacity() * 2, indices.capacity() + indexCount * Integer.BYTES);
+        if ((indicesCount + indexCount) * indexType.bytes >= indices.capacity()) {
+            int newSize = Math.max(indices.capacity() * 2, indices.capacity() + indexCount * indexType.bytes);
 
             ByteBuffer newIndices = BufferUtils.createByteBuffer(newSize);
-            memCopy(memAddress0(indices), memAddress0(newIndices), indicesCount * 4L);
+            memCopy(memAddress0(indices), memAddress0(newIndices), indicesCount * (long) indexType.bytes);
 
             indices = newIndices;
             indicesPointer = memAddress0(indices);
@@ -206,7 +217,7 @@ public class MeshBuilder {
         vertices = BufferUtils.createByteBuffer(primitiveVerticesSize * vertexCount);
         verticesPointer = verticesPointerStart = memAddress0(vertices);
 
-        indices = BufferUtils.createByteBuffer(indexCount * Integer.BYTES);
+        indices = BufferUtils.createByteBuffer(indexCount * indexType.bytes);
         indicesPointer = memAddress0(indices);
     }
 
@@ -228,20 +239,47 @@ public class MeshBuilder {
         return buffer;
     }
 
+    public GpuBufferSlice uploadVertexBuffer(CommandEncoder encoder) {
+        vertices.limit(getVerticesOffset());
+        return encoder.transientMemory().uploadGpu(vertices, primitiveVerticesSize, GpuBuffer.USAGE_VERTEX);
+    }
+
     public GpuBuffer getIndexBuffer() {
-        indices.limit(indicesCount * Integer.BYTES);
+        indices.limit(indicesCount * indexType.bytes);
         var device = RenderSystem.getDevice();
         GpuBuffer buffer = device.createBuffer(() -> "Mesh index buffer", GpuBuffer.USAGE_INDEX | GpuBuffer.USAGE_COPY_DST, indices.remaining());
         device.createCommandEncoder().writeToBuffer(buffer.slice(0, indices.remaining()), indices);
         return buffer;
     }
 
+    public GpuBufferSlice uploadIndexBuffer(CommandEncoder encoder) {
+        indices.limit(indicesCount * indexType.bytes);
+        return encoder.transientMemory().uploadGpu(indices, indexType.bytes, GpuBuffer.USAGE_INDEX);
+    }
+
     public int getIndicesCount() {
         return indicesCount;
     }
 
+    public IndexType getIndexType() {
+        return indexType;
+    }
+
     private int getVerticesOffset() {
         return (int) (verticesPointer - verticesPointerStart);
+    }
+
+    private void putIndex(long pointer, int index) {
+        switch (indexType) {
+            case INT -> memPutInt(pointer, index);
+            case SHORT -> {
+                if (DEBUG && (index < 0 || index > 0xFFFF)) {
+                    throw new IndexOutOfBoundsException("Index " + index + " cannot be represented by " + indexType + ".");
+                }
+
+                memPutShort(pointer, (short) index);
+            }
+        }
     }
 
     private void debugVertexBufferCapacity() {
@@ -251,7 +289,7 @@ public class MeshBuilder {
     }
 
     private void debugIndexBufferCapacity() {
-        if (DEBUG && (indices == null || indicesCount * Integer.BYTES >= indices.capacity())) {
+        if (DEBUG && (indices == null || indicesCount * indexType.bytes >= indices.capacity())) {
             throw new IndexOutOfBoundsException("Indices written to MeshBuilder without calling 'ensureCapacity()' first!");
         }
     }
