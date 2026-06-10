@@ -70,9 +70,8 @@ dependencies {
     implementation(libs.fabric.loader)
 
     val fapiVersion = libs.versions.fabric.api.get()
-compileOnly(fabricApi.module("fabric-api-base", fapiVersion))
-compileOnly(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
-
+    modInclude(fabricApi.module("fabric-api-base", fapiVersion))
+    modInclude(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
 
     // Compat fixes
     compileOnly(fabricApi.module("fabric-renderer-indigo", fapiVersion))
@@ -95,13 +94,6 @@ compileOnly(fabricApi.module("fabric-resource-loader-v1", fapiVersion))
     jij(libs.waybackauthlib)
 }
 
-sourceSets {
-    val launcher by creating {
-        java {
-            srcDir("src/launcher/java")
-        }
-    }
-}
 
 java {
     toolchain {
@@ -169,12 +161,6 @@ tasks {
         }
     }
 
-    // Compile launcher with Java 8 for backwards compatibility
-    named<JavaCompile>("compileLauncherJava").configure {
-        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-        targetCompatibility = JavaVersion.VERSION_1_8.toString()
-        options.compilerArgs.add("-Xlint:-options")
-    }
 
     jar {
         inputs.property("archivesName", project.base.archivesName.get())
@@ -183,12 +169,6 @@ tasks {
             rename { "${it}_${inputs.properties["archivesName"]}" }
         }
 
-        // Include launcher classes
-        from(sourceSets["launcher"].output)
-
-        manifest {
-            attributes["Main-Class"] = "meteordevelopment.meteorclient.Main"
-        }
     }
 
     withType<JavaCompile>().configureEach {
