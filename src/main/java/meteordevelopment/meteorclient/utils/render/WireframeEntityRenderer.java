@@ -7,50 +7,34 @@ package meteordevelopment.meteorclient.utils.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.mixin.RenderTypeAccessor;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
-import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.NonNull;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class WireframeEntityRenderer {
     private static final PoseStack matrices = new PoseStack();
+    private static final InterceptingStorage interceptStorage = new InterceptingStorage();
 
     private static Renderer3D renderer;
-
-    private static final SubmitNodeStorage renderCommandQueue = new SubmitNodeStorage();
-
-    private static final FeatureRenderDispatcher renderDispatcher = new FeatureRenderDispatcher(
-        renderCommandQueue,
-        mc.getModelManager(),
-        MyVertexConsumerProvider.INSTANCE,
-        mc.getAtlasManager(),
-        NoopOutlineVertexConsumerProvider.INSTANCE,
-        NoopImmediateVertexConsumerProvider.INSTANCE,
-        mc.font,
-        mc.gameRenderer.gameRenderState()
-    );
-
     private static Color sideColor;
     private static Color lineColor;
     private static ShapeMode shapeMode;
-
-    private static double offsetX;
-    private static double offsetY;
-    private static double offsetZ;
+    private static double offsetX, offsetY, offsetZ;
 
     private WireframeEntityRenderer() {
     }
@@ -68,48 +52,50 @@ public class WireframeEntityRenderer {
         offsetY = Mth.lerp(tickDelta, entity.yOld, entity.getY());
         offsetZ = Mth.lerp(tickDelta, entity.zOld, entity.getZ());
 
-        var renderer = (EntityRenderer<Entity, EntityRenderState>) mc.getEntityRenderDispatcher().getRenderer(entity);
-        var state = renderer.createRenderState(entity, tickDelta);
+        var entityRenderer = (EntityRenderer<Entity, EntityRenderState>) mc.getEntityRenderDispatcher().getRenderer(entity);
+        var state = entityRenderer.createRenderState(entity, tickDelta);
 
-        Vec3 entityOffset = renderer.getRenderOffset(state);
+        Vec3 entityOffset = entityRenderer.getRenderOffset(state);
         offsetX += entityOffset.x;
         offsetY += entityOffset.y;
         offsetZ += entityOffset.z;
 
         matrices.pushPose();
         matrices.scale((float) scale, (float) scale, (float) scale);
-        renderer.submit(state, matrices, renderCommandQueue, mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState);
+        entityRenderer.submit(state, matrices, interceptStorage, mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState);
         matrices.popPose();
 
-        renderDispatcher.renderAllFeatures();
-        renderCommandQueue.endFrame();
+        interceptStorage.clear();
     }
 
-    private static class MyVertexConsumerProvider extends MultiBufferSource.BufferSource {
-        public static final MyVertexConsumerProvider INSTANCE = new MyVertexConsumerProvider();
-        private final Object2ObjectOpenHashMap<RenderType, MyVertexConsumer> buffers = new Object2ObjectOpenHashMap<>();
+    private static class InterceptingStorage extends SubmitNodeStorage {
+        private final MyVertexConsumer vertexConsumer = new MyVertexConsumer();
 
-        protected MyVertexConsumerProvider() {
-            super(null, null);
+        @Override
+        public <S> void submitModel(
+            @NonNull Model<? super S> model,
+            @NonNull S state,
+            @NonNull PoseStack poseStack,
+            RenderType renderType,
+            int lightCoords,
+            int overlayCoords,
+            int tintedColor,
+            TextureAtlasSprite sprite,
+            int outlineColor,
+            ModelFeatureRenderer.CrumblingOverlay crumblingOverlay
+        ) {
+            if (renderType.isOutline()) return;
+            model.renderToBuffer(poseStack, vertexConsumer, lightCoords, overlayCoords, tintedColor);
         }
 
         @Override
-        public VertexConsumer getBuffer(RenderType layer) {
-            if (((RenderTypeAccessor) layer).getState().outputTarget == OutputTarget.ITEM_ENTITY_TARGET) {
-                return NoopVertexConsumer.INSTANCE;
-            }
-
-            return buffers.computeIfAbsent(layer, _ -> new MyVertexConsumer());
+        public void submitCustomGeometry(@NonNull PoseStack poseStack, RenderType renderType, SubmitNodeCollector.@NonNull CustomGeometryRenderer customGeometryRenderer) {
+            if (renderType.isOutline()) return;
+            customGeometryRenderer.render(poseStack.last(), vertexConsumer);
         }
 
-        @Override
-        public void endBatch() {
-            throw new RuntimeException();
-        }
-
-        @Override
-        public void endBatch(RenderType layer) {
-            throw new RuntimeException();
+        public void clear() {
+            submitsPerOrder.clear();
         }
     }
 
@@ -117,18 +103,14 @@ public class WireframeEntityRenderer {
         private final float[] xs = new float[4];
         private final float[] ys = new float[4];
         private final float[] zs = new float[4];
-
         private int i = 0;
 
         @Override
-        public VertexConsumer addVertex(float x, float y, float z) {
+        public @NonNull VertexConsumer addVertex(float x, float y, float z) {
             xs[i] = x;
             ys[i] = y;
             zs[i] = z;
-
-            i++;
-
-            if (i == 4) {
+            if (++i == 4) {
                 renderer.side(
                     offsetX + xs[0], offsetY + ys[0], offsetZ + zs[0],
                     offsetX + xs[1], offsetY + ys[1], offsetZ + zs[1],
@@ -138,45 +120,43 @@ public class WireframeEntityRenderer {
                     lineColor,
                     shapeMode
                 );
-
                 i = 0;
             }
-
             return this;
         }
 
         @Override
-        public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+        public @NonNull VertexConsumer setColor(int r, int g, int b, int a) {
             return this;
         }
 
         @Override
-        public VertexConsumer setColor(int argb) {
+        public @NonNull VertexConsumer setColor(int argb) {
             return this;
         }
 
         @Override
-        public VertexConsumer setUv(float u, float v) {
+        public @NonNull VertexConsumer setUv(float u, float v) {
             return this;
         }
 
         @Override
-        public VertexConsumer setUv1(int u, int v) {
+        public @NonNull VertexConsumer setUv1(int u, int v) {
             return this;
         }
 
         @Override
-        public VertexConsumer setUv2(int u, int v) {
+        public @NonNull VertexConsumer setUv2(int u, int v) {
             return this;
         }
 
         @Override
-        public VertexConsumer setNormal(float x, float y, float z) {
+        public @NonNull VertexConsumer setNormal(float x, float y, float z) {
             return this;
         }
 
         @Override
-        public VertexConsumer setLineWidth(float width) {
+        public @NonNull VertexConsumer setLineWidth(float w) {
             return this;
         }
     }
