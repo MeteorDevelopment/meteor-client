@@ -193,7 +193,7 @@ public class Freecam extends Module {
 
         unpress();
         if (reloadChunks.get()) {
-            mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+            mc.levelExtractor.allChanged();
         }
     }
 
@@ -201,7 +201,7 @@ public class Freecam extends Module {
     public void onDeactivate() {
         if (reloadChunks.get()) {
             mc.execute(() ->
-                mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors()));
+                mc.levelExtractor.allChanged());
         }
 
         mc.options.setCameraType(perspective);

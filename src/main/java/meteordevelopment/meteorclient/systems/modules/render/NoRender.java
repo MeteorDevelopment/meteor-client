@@ -256,7 +256,7 @@ public class NoRender extends Module {
         .name("cave-culling")
         .description("Disables Minecraft's cave culling algorithm.")
         .defaultValue(false)
-        .onChanged(_ -> mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors()))
+        .onChanged(_ -> mc.levelExtractor.allChanged())
         .build()
     );
 
@@ -305,7 +305,7 @@ public class NoRender extends Module {
         .name("texture-rotations")
         .description("Changes texture rotations and model offsets to use a constant value instead of the block position.")
         .defaultValue(false)
-        .onChanged(_ -> mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors()))
+        .onChanged(_ -> mc.levelExtractor.allChanged())
         .build()
     );
 
@@ -380,14 +380,14 @@ public class NoRender extends Module {
     @Override
     public void onActivate() {
         if (noCaveCulling.get() || noTextureRotations.get()) {
-            mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+            mc.levelExtractor.allChanged();
         }
     }
 
     @Override
     public void onDeactivate() {
         if (noCaveCulling.get() || noTextureRotations.get()) {
-            mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+            mc.levelExtractor.allChanged();
         }
     }
 

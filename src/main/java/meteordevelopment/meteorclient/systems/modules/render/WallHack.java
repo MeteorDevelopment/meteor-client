@@ -29,7 +29,7 @@ public class WallHack extends Module {
         .sliderMax(255)
         .onChanged(_ -> {
             if (this.isActive()) {
-                mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+                mc.levelExtractor.allChanged();
             }
         })
         .build()
@@ -41,7 +41,7 @@ public class WallHack extends Module {
         .defaultValue()
         .onChanged(_ -> {
             if (isActive()) {
-                mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+                mc.levelExtractor.allChanged();
             }
         })
         .build()
@@ -60,12 +60,12 @@ public class WallHack extends Module {
 
     @Override
     public void onActivate() {
-        mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+        mc.levelExtractor.allChanged();
     }
 
     @Override
     public void onDeactivate() {
-        mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+        mc.levelExtractor.allChanged();
     }
 
     @Override

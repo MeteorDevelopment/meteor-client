@@ -30,7 +30,7 @@ public class Fullbright extends Module {
             if (isActive()) {
                 if (mode != Mode.Potion) disableNightVision();
                 if (mc.levelRenderer != null) {
-                    mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+                    mc.levelExtractor.allChanged();
                 }
             }
         })
@@ -44,7 +44,7 @@ public class Fullbright extends Module {
         .visible(() -> mode.get() == Mode.Luminance)
         .onChanged(_ -> {
             if (mc.levelRenderer != null && isActive()) {
-                mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+                mc.levelExtractor.allChanged();
             }
         })
         .build()
@@ -59,7 +59,7 @@ public class Fullbright extends Module {
         .sliderMax(15)
         .onChanged(_ -> {
             if (mc.levelRenderer != null && isActive()) {
-                mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+                mc.levelExtractor.allChanged();
             }
         })
         .build()
@@ -72,14 +72,14 @@ public class Fullbright extends Module {
     @Override
     public void onActivate() {
         if (mode.get() == Mode.Luminance) {
-            mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+            mc.levelExtractor.allChanged();
         }
     }
 
     @Override
     public void onDeactivate() {
         if (mode.get() == Mode.Luminance) {
-            mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+            mc.levelExtractor.allChanged();
         } else if (mode.get() == Mode.Potion) disableNightVision();
     }
 

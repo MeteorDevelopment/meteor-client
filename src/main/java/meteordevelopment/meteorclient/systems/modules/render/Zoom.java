@@ -119,7 +119,7 @@ public class Zoom extends Module {
         mc.options.smoothCamera = preCinematic;
         mc.options.sensitivity().set(preMouseSensitivity);
 
-        mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+        mc.levelExtractor.allChanged();
     }
 
     @EventHandler
@@ -168,7 +168,7 @@ public class Zoom extends Module {
         event.fov /= (float) getScaling();
 
         if (lastFov != event.fov) {
-            mc.levelRenderer.invalidateCompiledGeometry(mc.level, mc.options, mc.gameRenderer.mainCamera(), mc.getBlockColors());
+            mc.levelExtractor.allChanged();
         }
         lastFov = event.fov;
     }
