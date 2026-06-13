@@ -23,14 +23,14 @@ public class CommandCycle extends Module {
 
     private final Setting<List<String>> commands = sgGeneral.add(new StringListSetting.Builder()
         .name("commands")
-        .description("Commands with optional delay. Example: /spawn [5], /home [10], /kill")
-        .defaultValue(List.of("/spawn [5]", "/home [10]", "/kill"))
+        .description("Commands with optional delays. Example: /spawn [5] [10] [15], /home [8], /kill")
+        .defaultValue(List.of("/spawn [5] [10]", "/home [8]", "/kill"))
         .build()
     );
 
     private final Setting<Integer> defaultDelay = sgGeneral.add(new IntSetting.Builder()
         .name("default-delay")
-        .description("Default delay in seconds when no [delay] is given")
+        .description("Default delay in seconds if no [delay] is specified")
         .defaultValue(5)
         .min(0)
         .sliderMax(120)
@@ -39,7 +39,7 @@ public class CommandCycle extends Module {
 
     private final Setting<Boolean> loop = sgGeneral.add(new BoolSetting.Builder()
         .name("loop")
-        .description("Repeat the list when finished")
+        .description("Repeat the sequence when finished")
         .defaultValue(true)
         .build()
     );
@@ -76,18 +76,21 @@ public class CommandCycle extends Module {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            int delayTicks = defaultDelay.get() * 20; // seconds → ticks
+            int delay = defaultDelay.get() * 20;
 
+            // Find the LAST delay in the line
             Matcher matcher = DELAY_PATTERN.matcher(line);
-            if (matcher.find()) {
+            while (matcher.find()) {
                 try {
-                    delayTicks = Integer.parseInt(matcher.group(1)) * 20;
-                    line = line.replaceFirst("\\[\\d+]", "").trim(); // remove [number]
+                    delay = Integer.parseInt(matcher.group(1)) * 20;
                 } catch (Exception ignored) {}
             }
 
-            if (!line.startsWith("/")) line = "/" + line;
-            parsedCommands.add(new CommandEntry(line, delayTicks));
+            // Remove all [numbers] from the command
+            String command = line.replaceAll("\\[\\d+]", "").trim();
+            if (!command.startsWith("/")) command = "/" + command;
+
+            parsedCommands.add(new CommandEntry(command, delay));
         }
     }
 
@@ -105,15 +108,12 @@ public class CommandCycle extends Module {
 
         CommandEntry entry = parsedCommands.get(currentIndex);
 
-        // Send the command safely
         ChatUtils.sendPlayerMsg(entry.command());
 
         timer = entry.delay();
 
-        // Go to next command
         currentIndex = (currentIndex + 1) % parsedCommands.size();
 
-        // If loop is disabled & we reached the end → stop module
         if (currentIndex == 0 && !loop.get()) {
             toggle();
         }
