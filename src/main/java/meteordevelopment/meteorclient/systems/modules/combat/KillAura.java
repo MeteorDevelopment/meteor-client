@@ -418,7 +418,7 @@ public class KillAura extends Module {
             ) return false;
         }
         if (ignorePassive.get()) {
-            if (entity instanceof EnderMan enderman && !enderman.isAngry()) return false;
+            if (entity instanceof EnderMan enderman && !enderman.isAggressive()) return false;
             if ((entity instanceof Piglin || entity instanceof ZombifiedPiglin || entity instanceof Wolf) && !((Mob) entity).isAggressive())
                 return false;
         }
