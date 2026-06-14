@@ -55,7 +55,7 @@ public class AutoEat extends Module {
             Items.SUSPICIOUS_STEW
         )
         .filter(Utils::isFood)
-        .bypassFilterWhenSavingAndLoading()                                                       
+        .bypassFilterWhenSavingAndLoading()
         .build()
     );
 
@@ -179,6 +179,7 @@ public class AutoEat extends Module {
     private void startEating() {
         prevSlot = mc.player.getInventory().getSelectedSlot();
         eat();
+        if (!eating) return;
 
         // Pause auras
         wasAura.clear();
@@ -325,8 +326,8 @@ public class AutoEat extends Module {
     }
 
     public enum ThresholdMode {
-        Health((health, hunger) -> health),
-        Hunger((health, hunger) -> hunger),
+        Health((health, _) -> health),
+        Hunger((_, hunger) -> hunger),
         Any((health, hunger) -> health || hunger),
         Both((health, hunger) -> health && hunger);
 
