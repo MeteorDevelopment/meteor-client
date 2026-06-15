@@ -139,7 +139,8 @@ public class Blink extends Module {
 
     @EventHandler
     private void onLeaveGame(GameLeftEvent event) {
-        onDeactivate();
+        dumpPackets(false);
+        cancelled = false;
     }
 
     @Override

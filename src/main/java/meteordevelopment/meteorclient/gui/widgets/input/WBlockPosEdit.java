@@ -53,7 +53,7 @@ public class WBlockPosEdit extends WHorizontalList {
                 mc.gui.setScreen(null);
             };
 
-            WButton here = add(theme.button("Set Here")).expandX().widget();
+            WButton here = add(theme.confirmedButton("Set Here", "Confirm")).expandX().widget();
             here.action = () -> {
                 lastValue = value;
                 set(new BlockPos(mc.player.blockPosition()));
