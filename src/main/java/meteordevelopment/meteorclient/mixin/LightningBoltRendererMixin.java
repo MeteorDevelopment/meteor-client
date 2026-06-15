@@ -23,6 +23,7 @@ public abstract class LightningBoltRendererMixin {
      */
     @Inject(method = "quad", at = @At(value = "HEAD"), cancellable = true)
     private static void onSetLightningVertex(Matrix4fc pose, VertexConsumer buffer, float xo0, float zo0, int h, float xo1, float zo1, float boltRed, float boltGreen, float boltBlue, float rr1, float rr2, boolean px1, boolean pz1, boolean px2, boolean pz2, CallbackInfo ci) {
+        if (Modules.get() == null) return;
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.changeLightningColor.get()) {

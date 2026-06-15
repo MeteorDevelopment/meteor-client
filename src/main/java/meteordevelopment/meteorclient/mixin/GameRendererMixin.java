@@ -16,12 +16,9 @@ import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import meteordevelopment.meteorclient.systems.modules.render.Zoom;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.CustomBannerGuiElementRenderer;
-import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -121,7 +118,6 @@ public abstract class GameRendererMixin {
 
         Matrix4fc correctedPosition = MixinPlugin.isIrisPresent && RenderUtils.isShaderPackInUse() ? new Matrix4f(modelViewMatrix).mul(inverseBob) : modelViewMatrix;
         RenderUtils.updateScreenCenter(projectionMatrix, correctedPosition);
-        NametagUtils.onRender(modelViewMatrix);
 
         // Render
 
@@ -145,20 +141,14 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "displayItemActivation", at = @At("HEAD"), cancellable = true)
     private void onDisplayItemActivation(ItemStack itemStack, CallbackInfo ci) {
-        if (itemStack.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
+        if (Modules.get() != null && itemStack.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
             ci.cancel();
         }
     }
 
     @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F", ordinal = 0))
     private float applyCameraTransformationsMathHelperLerpProxy(float original) {
-        return Modules.get().get(NoRender.class).noNausea() ? 0 : original;
+        return Modules.get() != null && Modules.get().get(NoRender.class).noNausea() ? 0 : original;
     }
 
-    @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)
-    private void renderItemInHand(CameraRenderState cameraState, float deltaPartialTick, Matrix4fc modelViewMatrix, CallbackInfo ci) {
-        if (!Modules.get().get(Freecam.class).renderHands() || !Modules.get().get(Zoom.class).renderHands()) {
-            ci.cancel();
-        }
-    }
 }

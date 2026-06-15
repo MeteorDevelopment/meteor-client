@@ -109,6 +109,7 @@ public abstract class JoinMultiplayerScreenMixin extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
+        if (Modules.get() == null) return;
         super.extractRenderState(graphics, mouseX, mouseY, deltaTicks);
 
         Config config = Config.get();

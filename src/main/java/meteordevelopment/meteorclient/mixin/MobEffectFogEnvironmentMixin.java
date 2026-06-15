@@ -23,6 +23,7 @@ public abstract class MobEffectFogEnvironmentMixin {
 
     @ModifyReturnValue(method = "isApplicable", at = @At("RETURN"))
     private boolean modifyShouldApply(boolean original) {
+        if (Modules.get() == null) return original;
         NoRender noRender = Modules.get().get(NoRender.class);
         if (getMobEffect() == MobEffects.BLINDNESS) return original && !noRender.noBlindness();
         if (getMobEffect() == MobEffects.DARKNESS) return original && !noRender.noDarkness();

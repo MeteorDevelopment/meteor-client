@@ -16,11 +16,9 @@ import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.mixininterface.IMinecraft;
 import meteordevelopment.meteorclient.settings.StatusEffectAmplifierMapSetting;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
-import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.player.EChestMemory;
-import meteordevelopment.meteorclient.utils.render.PeekScreen;
+import meteordevelopment.meteorclient.gui.screens.ContainerInventoryScreen;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockEntityIterator;
@@ -108,13 +106,6 @@ public class Utils {
         double tX = mc.player.getX() - mc.player.xo;
         double tY = mc.player.getY() - mc.player.yo;
         double tZ = mc.player.getZ() - mc.player.zo;
-
-        Timer timer = Modules.get().get(Timer.class);
-        if (timer.isActive()) {
-            tX *= timer.getMultiplier();
-            tY *= timer.getMultiplier();
-            tZ *= timer.getMultiplier();
-        }
 
         tX *= 20;
         tY *= 20;
@@ -255,8 +246,9 @@ public class Utils {
     public static boolean openContainer(ItemStack itemStack, ItemStack[] contents, boolean pause) {
         if (hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
             Utils.getItemsInContainerItem(itemStack, contents);
-            if (pause) screenToOpen = new PeekScreen(itemStack, contents);
-            else mc.setScreen(new PeekScreen(itemStack, contents));
+            ContainerInventoryScreen screen = new ContainerInventoryScreen(itemStack);
+            if (pause) screenToOpen = screen;
+            else mc.setScreen(screen);
             return true;
         }
 
@@ -309,7 +301,7 @@ public class Utils {
     public static Color getShulkerColor(ItemStack shulkerItem) {
         if (shulkerItem.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
-            if (block == Blocks.ENDER_CHEST) return BetterTooltips.ECHEST_COLOR;
+            if (block == Blocks.ENDER_CHEST) return new Color(80, 35, 130, 255);
 
             if (block instanceof ShulkerBoxBlock shulkerBlock) {
                 DyeColor dye = shulkerBlock.getColor();

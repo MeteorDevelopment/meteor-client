@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -131,25 +129,11 @@ public class ContainerInventoryScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
-
-        ItemStack stack = getSelectedItem((int) click.x(), (int) click.y());
-        if (tooltips.shouldOpenContents(click)) {
-            return tooltips.openContent(stack);
-        }
-
         return false;
     }
 
     @Override
     public boolean keyPressed(KeyEvent input) {
-        BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
-
-        ItemStack stack = getSelectedItem((int) mc.mouseHandler.getScaledXPos(mc.getWindow()), (int) mc.mouseHandler.getScaledYPos(mc.getWindow()));
-        if (tooltips.shouldOpenContents(input)) {
-            return tooltips.openContent(stack);
-        }
-
         if (input.key() == GLFW.GLFW_KEY_ESCAPE || mc.options.keyInventory.matches(input)) {
             onClose();
             return true;

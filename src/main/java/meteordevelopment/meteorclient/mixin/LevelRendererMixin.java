@@ -60,29 +60,17 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
     @Unique
     private NoRender noRender;
-    @Unique
-    private ESP esp;
 
     // if a world exists, meteor is initialised
     @Inject(method = "setLevel", at = @At("TAIL"))
     private void onSetLevel(ClientLevel level, CallbackInfo ci) {
-        esp = Modules.get().get(ESP.class);
+        if (Modules.get() == null) return;
         noRender = Modules.get().get(NoRender.class);
     }
 
     @Inject(method = "checkPoseStack", at = @At("HEAD"), cancellable = true)
     private void onCheckPoseStack(PoseStack poseStack, CallbackInfo ci) {
         ci.cancel();
-    }
-
-    @Inject(method = "renderHitOutline", at = @At("HEAD"), cancellable = true)
-    private void onDrawHighlightedHitOutline(PoseStack poseStack, VertexConsumer builder, double camX, double camY, double camZ, BlockOutlineRenderState state, int color, float width, CallbackInfo ci) {
-        if (Modules.get().isActive(BlockSelection.class)) ci.cancel();
-    }
-
-    @ModifyArg(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;cullTerrain(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;Z)V"))
-    private boolean update$cullTerraion$modifySpectator(boolean spectator) {
-        return Modules.get().isActive(Freecam.class) || spectator;
     }
 
     // No Render
@@ -113,91 +101,6 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
         return original;
     }
 
-    // Entity Shaders
-
-    @Inject(method = "renderLevel", at = @At("HEAD"))
-    private void onRenderLevelHead(GraphicsResourceAllocator resourceAllocator, DeltaTracker deltaTracker, boolean renderOutline, CameraRenderState cameraState, Matrix4fc modelViewMatrix, GpuBufferSlice terrainFog, Vector4f fogColor, boolean shouldRenderSky, ChunkSectionsToRender chunkSectionsToRender, CallbackInfo ci) {
-        PostProcessShaders.beginRender();
-    }
-
-    @Unique
-    private final OutlineRenderCommandQueue outlineRenderCommandQueue = new OutlineRenderCommandQueue();
-
-    @Unique
-    private MultiBufferSource provider;
-
-    @Unique
-    private FeatureRenderDispatcher renderDispatcher;
-
-    @Inject(method = "submitEntities", at = @At("TAIL"))
-    private void onSubmitEntities(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector output, CallbackInfo ci) {
-        if (renderDispatcher == null) {
-            renderDispatcher = new FeatureRenderDispatcher(
-                outlineRenderCommandQueue,
-                mc.getModelManager(),
-                new WrapperImmediateVertexConsumerProvider(() -> provider),
-                mc.getAtlasManager(),
-                NoopOutlineVertexConsumerProvider.INSTANCE,
-                NoopImmediateVertexConsumerProvider.INSTANCE,
-                mc.font,
-                mc.gameRenderer.getGameRenderState()
-            );
-        }
-
-        draw(levelRenderState, poseStack, PostProcessShaders.CHAMS, _ -> Color.WHITE);
-        draw(levelRenderState, poseStack, PostProcessShaders.ENTITY_OUTLINE, entity -> esp.getColor(entity));
-    }
-
-    @Unique
-    private void draw(LevelRenderState worldState, PoseStack matrices, EntityShader shader, Function<Entity, Color> colorGetter) {
-        var camera = worldState.cameraRenderState.pos;
-        var empty = true;
-
-        for (var state : worldState.entityRenderStates) {
-            Entity entity = ((IEntityRenderState) state).meteor$getEntity();
-            if (entity == null) continue;
-
-            if (!shader.shouldDraw(entity)) continue;
-
-            var color = colorGetter.apply(entity);
-            if (color == null) continue;
-            outlineRenderCommandQueue.setColor(color);
-
-            var renderer = entityRenderDispatcher.getRenderer(state);
-            var offset = renderer.getRenderOffset(state);
-
-            matrices.pushPose();
-            matrices.translate(state.x - camera.x + offset.x, state.y - camera.y + offset.y, state.z - camera.z + offset.z);
-            renderer.submit(state, matrices, outlineRenderCommandQueue, worldState.cameraRenderState);
-            matrices.popPose();
-
-            empty = false;
-        }
-
-        if (empty)
-            return;
-
-        meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
-        provider = shader.vertexConsumerProvider;
-
-        renderDispatcher.renderAllFeatures();
-        outlineRenderCommandQueue.endFrame();
-
-        provider = null;
-        meteor$popEntityOutlineFramebuffer();
-    }
-
-    @ModifyExpressionValue(method = "extractVisibleEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;isSectionCompiledAndVisible(Lnet/minecraft/core/BlockPos;)Z"))
-    boolean fillEntityRenderStatesIsRenderingReady(boolean original) {
-        if (esp.forceRender()) return true;
-        return original;
-    }
-
-    @Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;endOutlineBatch()V", shift = At.Shift.AFTER))
-    private void addMainPass$submitEntityVertices(CallbackInfo ci) {
-        PostProcessShaders.submitEntityVertices();
-    }
-
     @Inject(method = "resize", at = @At("HEAD"))
     private void onResize(int width, int height, CallbackInfo ci) {
         PostProcessShaders.onResized(width, height);
@@ -205,6 +108,7 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
     @Inject(method = "extractLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/level/LevelRenderState;cloudColor:I", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
     private void extractLevel$cloudColor(DeltaTracker deltaTracker, Camera camera, float deltaPartialTick, CallbackInfo ci) {
+        if (Modules.get() == null) return;
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customCloudColor.get()) {
@@ -216,7 +120,8 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
     @Inject(method = "extractBlockDestroyAnimation", at = @At("HEAD"), cancellable = true)
     private void onExtractBlockDestroyAnimation(CallbackInfo ci) {
-        if (Modules.get().isActive(BreakIndicators.class) || Modules.get().get(NoRender.class).noBlockBreakOverlay()) {
+        if (Modules.get() == null) return;
+        if (Modules.get().get(NoRender.class).noBlockBreakOverlay()) {
             ci.cancel();
         }
     }

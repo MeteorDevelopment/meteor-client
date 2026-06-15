@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.gui;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 import meteordevelopment.meteorclient.gui.screens.ModuleScreen;
 import meteordevelopment.meteorclient.gui.screens.ModulesScreen;
-import meteordevelopment.meteorclient.gui.screens.NotebotSongsScreen;
 import meteordevelopment.meteorclient.gui.screens.ProxiesScreen;
 import meteordevelopment.meteorclient.gui.screens.accounts.AccountsScreen;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
@@ -229,10 +228,6 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         return w(new WDoubleEdit(value, min, max, 0, 10, 3, false));
     }
 
-    public WBlockPosEdit blockPosEdit(BlockPos value) {
-        return w(new WBlockPosEdit(value));
-    }
-
     public WKeybind keybind(Keybind keybind) {
         return keybind(keybind, Keybind.none());
     }
@@ -265,10 +260,6 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
 
     public WidgetScreen accountsScreen() {
         return new AccountsScreen(this);
-    }
-
-    public NotebotSongsScreen notebotSongs() {
-        return new NotebotSongsScreen(this);
     }
 
     public WidgetScreen proxiesScreen() {

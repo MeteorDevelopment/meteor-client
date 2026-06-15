@@ -11,8 +11,6 @@ import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.*;
 import meteordevelopment.meteorclient.mixininterface.IMultiPlayerGameMode;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.player.BreakDelay;
-import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -70,19 +68,6 @@ public abstract class MultiPlayerGameModeMixin implements IMultiPlayerGameMode {
     @Inject(method = "startDestroyBlock", at = @At("HEAD"), cancellable = true)
     private void onStartDestroyBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         if (MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(pos, direction)).isCancelled()) cir.cancel();
-        else {
-            SpeedMine sm = Modules.get().get(SpeedMine.class);
-            BlockState state = mc.level.getBlockState(pos);
-
-            if (!sm.instamine() || !sm.filter(state.getBlock())) return;
-
-            if (state.getDestroyProgress(mc.player, mc.level, pos) > 0.5f) {
-                destroyBlock(pos);
-                startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence));
-                startPrediction(mc.level, sequence -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, pos, direction, sequence));
-                cir.setReturnValue(true);
-            }
-        }
     }
 
     @Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true)
@@ -123,16 +108,6 @@ public abstract class MultiPlayerGameModeMixin implements IMultiPlayerGameMode {
     private void creativeBreakDelayChange2(MultiPlayerGameMode interactionManager, int value) {
         BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
         destroyDelay = event.cooldown;
-    }
-
-    @ModifyExpressionValue(method = "continueDestroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getDestroyProgress(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
-    private float modifyBlockBreakingDelta(float original) {
-        if (Modules.get().get(BreakDelay.class).preventInstaBreak() && original >= 1) {
-            BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(destroyDelay));
-            destroyDelay = event.cooldown;
-            return 0;
-        }
-        return original;
     }
 
     @Inject(method = "destroyBlock", at = @At("HEAD"), cancellable = true)

@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.mixininterface.ISlot;
-import meteordevelopment.meteorclient.utils.render.PeekScreen;
+
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -34,7 +34,7 @@ public class InventorySorter {
         this.screen = screen;
 
         this.originInvPart = getInvPart(originSlot);
-        if (originInvPart == InvPart.Invalid || originInvPart == InvPart.Hotbar || screen instanceof PeekScreen) {
+        if (originInvPart == InvPart.Invalid || originInvPart == InvPart.Hotbar) {
             invalid = true;
             return;
         }

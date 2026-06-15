@@ -69,7 +69,6 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         factories.put(BlockDataSetting.class, (table, setting) -> blockDataW(table, (BlockDataSetting<?>) setting));
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
-        factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
         factories.put(ColorListSetting.class, (table, setting) -> colorListW(table, (ColorListSetting) setting));
         factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
         factories.put(Vector3dSetting.class, (table, setting) -> vector3dW(table, (Vector3dSetting) setting));
@@ -263,16 +262,6 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         };
 
         reset(table, setting, () -> item.set(DisplayItemUtils.toStack(setting.get().asItem())));
-    }
-
-    private void blockPosW(WTable table, BlockPosSetting setting) {
-        WBlockPosEdit edit = table.add(theme.blockPosEdit(setting.get())).expandX().widget();
-
-        edit.actionOnRelease = () -> {
-            if (!setting.set(edit.get())) edit.set(setting.get());
-        };
-
-        reset(table, setting, () -> edit.set(setting.get()));
     }
 
     private void blockListW(WTable table, BlockListSetting setting) {

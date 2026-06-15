@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.mixin.sodium;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.caffeinemc.mods.sodium.client.model.color.ColorProvider;
@@ -34,6 +33,7 @@ public abstract class SodiumFluidRendererImplDefaultRenderContextMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
+        if (Modules.get() == null) return;
         ambience = Modules.get().get(Ambience.class);
     }
 
@@ -47,7 +47,6 @@ public abstract class SodiumFluidRendererImplDefaultRenderContextMixin {
     @Unique
     private void lavaColorProvider(LevelSlice slice, BlockPos pos, BlockPos.MutableBlockPos scratchPos, FluidState state, ModelQuadView quad, int[] output, boolean smooth) {
         Color c = ambience.lavaColor.get();
-        int alpha = Xray.getFluidAlpha(state, pos);
-        Arrays.fill(output, Color.fromRGBA(c.r, c.g, c.b, alpha != -1 ? alpha : c.a));
+        Arrays.fill(output, Color.fromRGBA(c.r, c.g, c.b, c.a));
     }
 }

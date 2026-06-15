@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
@@ -34,6 +33,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public abstract class ScreenMixin {
     @Inject(method = "extractTransparentBackground", at = @At("HEAD"), cancellable = true)
     private void onExtractTransparentBackground(CallbackInfo ci) {
+        if (Modules.get() == null) return;
         if (Utils.canUpdate() && Modules.get().get(NoRender.class).noGuiBackground())
             ci.cancel();
     }
@@ -54,13 +54,5 @@ public abstract class ScreenMixin {
         }
     }
 
-    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
-        if ((Object) (this) instanceof ChatScreen) return;
-        GUIMove guiMove = Modules.get().get(GUIMove.class);
-        List<Integer> arrows = List.of(GLFW_KEY_RIGHT, GLFW_KEY_LEFT, GLFW_KEY_DOWN, GLFW_KEY_UP);
-        if ((guiMove.disableArrows() && arrows.contains(event.key())) || (guiMove.disableSpace() && event.key() == GLFW_KEY_SPACE)) {
-            cir.setReturnValue(true);
-        }
-    }
+
 }

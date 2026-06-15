@@ -29,6 +29,7 @@ public abstract class BlockBehaviourMixin {
 
     @Inject(method = "getSeed", at = @At("HEAD"), cancellable = true)
     private void onRenderingSeed(BlockState state, BlockPos pos, CallbackInfoReturnable<Long> cir) {
+        if (Modules.get() == null) return;
         if (Modules.get().get(NoRender.class).noTextureRotations()) cir.setReturnValue(0L);
     }
 }

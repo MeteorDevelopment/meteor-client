@@ -4,8 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
-    "ChunkAwareBlockCollisionSweeperMixin",
-    "LithiumEntityCollisionsMixin"
+    "ChunkAwareBlockCollisionSweeperMixin"
   ],
   "injectors": {
     "defaultRequire": 1

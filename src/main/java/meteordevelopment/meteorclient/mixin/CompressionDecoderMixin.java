@@ -16,6 +16,6 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class CompressionDecoderMixin {
     @ModifyExpressionValue(method = "decode", at = @At(value = "CONSTANT", args = "intValue=8388608"))
     private int meteor$maximizeUncompressedPacketLimit(int original) {
-        return Modules.get().isActive(AntiPacketKick.class) ? Integer.MAX_VALUE : original;
+        return Modules.get() != null && Modules.get().isActive(AntiPacketKick.class) ? Integer.MAX_VALUE : original;
     }
 }

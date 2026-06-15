@@ -21,6 +21,7 @@ public abstract class ItemRendererMixin {
         name = "foilType"
     )
     private ItemStackRenderState.FoilType modifyEnchant(ItemStackRenderState.FoilType foilType) {
+        if (Modules.get() == null) return foilType;
         if (Modules.get().get(NoRender.class).noEnchantGlint()) {
             return ItemStackRenderState.FoilType.NONE;
         }

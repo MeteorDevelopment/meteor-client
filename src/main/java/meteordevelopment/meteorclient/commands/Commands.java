@@ -33,7 +33,6 @@ public class Commands {
         add(new HClipCommand());
         add(new DismountCommand());
         add(new DisconnectCommand());
-        add(new DamageCommand());
         add(new DropCommand());
         add(new EnchantCommand());
         add(new FakePlayerCommand());
@@ -41,7 +40,6 @@ public class Commands {
         add(new CommandsCommand());
         add(new InventoryCommand());
         add(new NbtCommand());
-        add(new NotebotCommand());
         add(new PeekCommand());
         add(new EnderChestCommand());
         add(new ProfilesCommand());
@@ -49,7 +47,6 @@ public class Commands {
         add(new ResetCommand());
         add(new SayCommand());
         add(new ServerCommand());
-        add(new SwarmCommand());
         add(new ToggleCommand());
         add(new SettingCommand());
         add(new SpectateCommand());
@@ -65,8 +62,8 @@ public class Commands {
         add(new RotationCommand());
         add(new WaypointCommand());
         add(new InputCommand());
-        add(new WaspCommand());
         add(new LocateCommand());
+        add(new TermsimCommand());
         add(new HelpCommand());
 
         COMMANDS.sort(Comparator.comparing(Command::getName));

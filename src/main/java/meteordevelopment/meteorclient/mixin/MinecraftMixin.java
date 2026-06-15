@@ -27,13 +27,6 @@ import meteordevelopment.meteorclient.mixininterface.IMinecraft;
 import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
-import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
-import meteordevelopment.meteorclient.systems.modules.player.FastUse;
-import meteordevelopment.meteorclient.systems.modules.player.Multitask;
-import meteordevelopment.meteorclient.systems.modules.render.ESP;
-import meteordevelopment.meteorclient.systems.modules.render.Freecam;
-import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CPSUtils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
@@ -111,9 +104,6 @@ public abstract class MinecraftMixin implements IMinecraft {
     @Shadow
     protected abstract void continueAttack(boolean down);
 
-    @Unique
-    private boolean freecamSet = false;
-
     @Final
     @Shadow
     public GameRenderer gameRenderer;
@@ -180,41 +170,6 @@ public abstract class MinecraftMixin implements IMinecraft {
         if (event.isCancelled()) ci.cancel();
     }
 
-    @WrapOperation(method = "setScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;releaseAll()V"))
-    private void onSetScreenKeyBindingUnpressAll(Operation<Void> op) {
-        Modules modules = Modules.get();
-        if (modules == null) {
-            op.call();
-            return;
-        }
-
-        GUIMove guimove = modules.get(GUIMove.class);
-        if (guimove == null || !guimove.isActive() || guimove.skip()) {
-            op.call();
-            return;
-        }
-
-        Options options = MeteorClient.mc.options;
-        for (KeyMapping kb : KeyMappingAccessor.getKeysById().values()) {
-            if (kb == options.keyUp) continue;
-            if (kb == options.keyLeft) continue;
-            if (kb == options.keyRight) continue;
-            if (kb == options.keyDown) continue;
-            if (guimove.sneak.get() && kb == options.keyShift) continue;
-            if (guimove.sprint.get() && kb == options.keySprint) continue;
-            if (guimove.jump.get() && kb == options.keyJump) continue;
-            ((KeyMappingAccessor) kb).meteor$invokeRelease();
-        }
-    }
-
-    @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isItemEnabled(Lnet/minecraft/world/flag/FeatureFlagSet;)Z"))
-    private void onStartUseItemHand(CallbackInfo ci, @Local(name = "heldItem") ItemStack heldItem) {
-        FastUse fastUse = Modules.get().get(FastUse.class);
-        if (fastUse.isActive()) {
-            rightClickDelay = fastUse.getItemUseCooldown(heldItem);
-        }
-    }
-
     @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/InteractionHand;values()[Lnet/minecraft/world/InteractionHand;"), cancellable = true)
     private void onStartUseItemBeforeHands(CallbackInfo ci) {
         if (MeteorClient.EVENT_BUS.post(DoItemUseEvent.get()).isCancelled()) ci.cancel();
@@ -245,18 +200,6 @@ public abstract class MinecraftMixin implements IMinecraft {
         return customTitle;
     }
 
-    // Have to add this condition if we want to draw back a bow using packets, without it getting cancelled by vanilla code
-    @WrapWithCondition(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;releaseUsingItem(Lnet/minecraft/world/entity/player/Player;)V"))
-    private boolean wrapStopUsing(MultiPlayerGameMode instance, Player player) {
-        return HB$stopUsingItem();
-    }
-
-    @Unique
-    private boolean HB$stopUsingItem() {
-        HighwayBuilder b = Modules.get().get(HighwayBuilder.class);
-        return !b.isActive() || !b.drawingBow;
-    }
-
     @Inject(method = "resizeGui", at = @At("TAIL"))
     private void onResizeGui(CallbackInfo ci) {
         MeteorClient.EVENT_BUS.post(ResolutionChangedEvent.get());
@@ -277,68 +220,6 @@ public abstract class MinecraftMixin implements IMinecraft {
         lastTime = time;
     }
 
-    // Multitask
-
-    @ModifyExpressionValue(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;isDestroying()Z"))
-    private boolean startUseItemModifyIsBreakingBlock(boolean original) {
-        return !Modules.get().isActive(Multitask.class) && original;
-    }
-
-    @ModifyExpressionValue(method = "continueAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isUsingItem()Z"))
-    private boolean continueAttackModifyIsUsingItem(boolean original) {
-        return !Modules.get().isActive(Multitask.class) && original;
-    }
-
-    @ModifyExpressionValue(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isUsingItem()Z", ordinal = 0))
-    private boolean handleKeybindsModifyIsUsingItem(boolean original) {
-        return !Modules.get().get(Multitask.class).attackingEntities() && original;
-    }
-
-    @Inject(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isUsingItem()Z", ordinal = 0, shift = At.Shift.BEFORE))
-    private void handleKeybindsInjectStopUsingItem(CallbackInfo ci) {
-        if (Modules.get().get(Multitask.class).attackingEntities() && player.isUsingItem()) {
-            if (!options.keyUse.isDown() && HB$stopUsingItem()) gameMode.releaseUsingItem(player);
-            //noinspection StatementWithEmptyBody
-            while (options.keyUse.consumeClick()) ;
-        }
-    }
-
-    // Glow esp
-
-    @ModifyReturnValue(method = "shouldEntityAppearGlowing", at = @At("RETURN"))
-    private boolean shouldEntityAppearGlowingModifyIsOutline(boolean original, Entity entity) {
-        ESP esp = Modules.get().get(ESP.class);
-        if (esp == null) return original;
-        if (!esp.isGlow() || esp.shouldSkip(entity)) return original;
-
-        return esp.getColor(entity) != null || original;
-    }
-
-
-    // faster inputs
-
-    @Unique
-    private boolean isBreaking = false;
-
-    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;handleKeybinds()V"))
-    private boolean wrapHandleInputEvents(Minecraft instance) {
-        return !Modules.get().get(InventoryTweaks.class).frameInput();
-    }
-
-    @WrapWithCondition(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;continueAttack(Z)V"))
-    private boolean wrapHandleBlockBreaking(Minecraft instance, boolean down) {
-        isBreaking = down;
-        return !Modules.get().get(InventoryTweaks.class).frameInput();
-    }
-
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;handleKeybinds()V", shift = At.Shift.AFTER))
-    private void afterHandleInputEvents(CallbackInfo ci) {
-        if (!Modules.get().get(InventoryTweaks.class).frameInput()) return;
-
-        continueAttack(isBreaking);
-        isBreaking = false;
-    }
-
     // Interface
 
     @Override
@@ -351,53 +232,5 @@ public abstract class MinecraftMixin implements IMinecraft {
         this.mainRenderTarget = framebuffer;
     }
 
-    // Freecam
-    @Inject(method = "pick", at = @At("HEAD"), cancellable = true)
-    private void updateTargetedEntityInvoke(float partialTicks, CallbackInfo ci) {
-        Freecam freecam = Modules.get().get(Freecam.class);
-        boolean highwayBuilder = Modules.get().isActive(HighwayBuilder.class);
 
-        if ((freecam.isActive() || highwayBuilder) && this.getCameraEntity() != null && !freecamSet) {
-            ci.cancel();
-            Entity cameraE = this.getCameraEntity();
-
-            double x = cameraE.getX();
-            double y = cameraE.getY();
-            double z = cameraE.getZ();
-            double lastX = cameraE.xo;
-            double lastY = cameraE.yo;
-            double lastZ = cameraE.zo;
-            float yaw = cameraE.getYRot();
-            float pitch = cameraE.getXRot();
-            float lastYaw = cameraE.yRotO;
-            float lastPitch = cameraE.xRotO;
-
-            if (highwayBuilder) {
-                cameraE.setYRot(this.gameRenderer.getMainCamera().yRot());
-                cameraE.setXRot(this.gameRenderer.getMainCamera().xRot());
-            } else {
-                ((IVec3) cameraE.position()).meteor$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
-                cameraE.xo = freecam.prevPos.x;
-                cameraE.yo = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
-                cameraE.zo = freecam.prevPos.z;
-                cameraE.setYRot(freecam.yaw);
-                cameraE.setXRot(freecam.pitch);
-                cameraE.yRotO = freecam.lastYaw;
-                cameraE.xRotO = freecam.lastPitch;
-            }
-
-            freecamSet = true;
-            pick(partialTicks);
-            freecamSet = false;
-
-            ((IVec3) cameraE.position()).meteor$set(x, y, z);
-            cameraE.xo = lastX;
-            cameraE.yo = lastY;
-            cameraE.zo = lastZ;
-            cameraE.setYRot(yaw);
-            cameraE.setXRot(pitch);
-            cameraE.yRotO = lastYaw;
-            cameraE.xRotO = lastPitch;
-        }
-    }
 }

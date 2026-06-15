@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
@@ -222,7 +221,7 @@ public class PlayerUtils {
 
         // Check for fall distance with water check
         if (fall) {
-            if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
+            if (mc.player.fallDistance > 3) {
                 float damage = DamageUtils.fallDamage(mc.player);
 
                 if (damage > damageTaken && !EntityUtils.isAboveWater(mc.player)) {

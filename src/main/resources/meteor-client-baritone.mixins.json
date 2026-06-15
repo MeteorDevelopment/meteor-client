@@ -3,9 +3,7 @@
   "package": "meteordevelopment.meteorclient.mixin.baritone",
   "compatibilityLevel": "JAVA_21",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
-  "client": [
-    "ComeCommandMixin"
-  ],
+  "client": [],
   "injectors": {
     "defaultRequire": 1
   }

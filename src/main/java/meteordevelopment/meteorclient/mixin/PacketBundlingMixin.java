@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class PacketBundlingMixin {
     @ModifyExpressionValue(method = "addPacket", at = @At(value = "CONSTANT", args = "intValue=4096"))
     private int add(int value) {
-        if (Modules.get().get(AntiPacketKick.class).isActive()) return Integer.MAX_VALUE;
+        if (Modules.get() != null && Modules.get().get(AntiPacketKick.class).isActive()) return Integer.MAX_VALUE;
         return value;
     }
 }

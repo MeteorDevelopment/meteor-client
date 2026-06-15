@@ -45,16 +45,19 @@ public abstract class ClientLevelMixin {
 
     @Inject(method = "addDestroyBlockEffect", at = @At("HEAD"), cancellable = true)
     private void onAddDestroyBlockEffect(BlockPos pos, BlockState blockState, CallbackInfo ci) {
+        if (Modules.get() == null) return;
         if (Modules.get().get(NoRender.class).noParticle(ParticleTypes.BLOCK)) ci.cancel();
     }
 
     @Inject(method = "addBreakingBlockEffect", at = @At("HEAD"), cancellable = true)
     private void onAddBlockBreakingParticles(BlockPos pos, Direction direction, CallbackInfo ci) {
+        if (Modules.get() == null) return;
         if (Modules.get().get(NoRender.class).noParticle(ParticleTypes.BLOCK)) ci.cancel();
     }
 
     @ModifyArgs(method = "animateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;doAnimateTick(IIIILnet/minecraft/util/RandomSource;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos$MutableBlockPos;)V"))
     private void doRandomBlockDisplayTicks(Args args) {
+        if (Modules.get() == null) return;
         if (Modules.get().get(NoRender.class).noBarrierInvis()) {
             args.set(5, Blocks.BARRIER);
         }

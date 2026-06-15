@@ -17,11 +17,13 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 public interface BrightnessGetterMixin {
     @ModifyVariable(method = "lambda$static$0", at = @At(value = "STORE"), name = "sky")
     private static int getLightmapCoordinatesModifySkyLight(int sky) {
+        if (Modules.get() == null) return sky;
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightLayer.SKY), sky);
     }
 
     @ModifyVariable(method = "lambda$static$0", at = @At(value = "STORE"), name = "block")
     private static int getLightmapCoordinatesModifyBlockLight(int block) {
+        if (Modules.get() == null) return block;
         return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightLayer.BLOCK), block);
     }
 }

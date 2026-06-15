@@ -9,8 +9,6 @@ import meteordevelopment.meteorclient.mixin.CrossbowItemAccessor;
 import meteordevelopment.meteorclient.mixin.ProjectileInGroundAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
-import meteordevelopment.meteorclient.systems.modules.movement.Sneak;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.core.BlockPos;
@@ -145,8 +143,6 @@ public class ProjectileEntitySimulator {
         // I lost my mind for an hour trying to figure out why arrows and tridents were spawning lower than expected,
         // and it was because no slow air strict was silently causing the player to crouch AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
         Pose pose = user.getPose();
-        if (user == mc.player && (Modules.get().get(NoSlow.class).airStrict() || Modules.get().get(Sneak.class).doPacket()))
-            pose = Pose.CROUCHING;
         Utils.set(pos, user, tickDelta).add(0, user.getEyeHeight(pose) - 0.1f, 0);
 
         double yaw;
@@ -206,8 +202,6 @@ public class ProjectileEntitySimulator {
         double k = Math.sin(-pitch * 0.017453292F);
 
         Pose pose = user.getPose();
-        if (user == mc.player && (Modules.get().get(NoSlow.class).airStrict() || Modules.get().get(Sneak.class).doPacket()))
-            pose = Pose.CROUCHING;
         Utils.set(pos, user, tickDelta).sub(i * 0.3, 0, h * 0.3).add(0, user.getEyeHeight(pose), 0);
 
         velocity.set(-i, Mth.clamp(-(k / j), -5, 5), -h);

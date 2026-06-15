@@ -28,11 +28,10 @@
   },
   "mixins": [
     "meteor-client.mixins.json",
-    "meteor-client-baritone.mixins.json",
-    "meteor-client-indigo.mixins.json",
     "meteor-client-sodium.mixins.json",
     "meteor-client-lithium.mixins.json",
-    "meteor-client-viafabricplus.mixins.json"
+    "meteor-client-viafabricplus.mixins.json",
+    "meteor-client-fabric.mixins.json"
   ],
   "accessWidener": "meteor-client.classtweaker",
   "custom": {
@@ -44,9 +43,7 @@
         "modmenu.discord": "https://meteorclient.com/discord"
       }
     },
-    "badoptimizations:cache_hooks": {
-      "lightmap": "meteordevelopment.meteorclient.modintegration.BadOptimizationsHook"
-    }
+    "badoptimizations:cache_hooks": {}
   },
   "depends": {
     "java": ">=${jdk_version}",

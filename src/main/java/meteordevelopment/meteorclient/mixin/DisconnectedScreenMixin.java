@@ -32,7 +32,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
     @Unique
     private Button reconnectBtn;
     @Unique
-    private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
+    private double time;
 
     protected DisconnectedScreenMixin(Component title) {
         super(title);
@@ -40,7 +40,9 @@ public abstract class DisconnectedScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;arrangeElements()V", shift = At.Shift.BEFORE))
     private void addButtons(CallbackInfo ci) {
+        if (Modules.get() == null) return;
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
+        if (time == 0) time = autoReconnect.time.get() * 20;
 
         if (autoReconnect.lastServerConnection != null && !autoReconnect.button.get()) {
             reconnectBtn = new Button.Builder(Component.literal(getText()), _ -> tryConnecting()).build();
@@ -58,6 +60,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
 
     @Override
     public void tick() {
+        if (Modules.get() == null) return;
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
         if (!autoReconnect.isActive() || autoReconnect.lastServerConnection == null) return;
 
@@ -72,12 +75,13 @@ public abstract class DisconnectedScreenMixin extends Screen {
     @Unique
     private String getText() {
         String reconnectText = "Reconnect";
-        if (Modules.get().isActive(AutoReconnect.class)) reconnectText += " " + String.format("(%.1f)", time / 20);
+        if (Modules.get() != null && Modules.get().isActive(AutoReconnect.class)) reconnectText += " " + String.format("(%.1f)", time / 20);
         return reconnectText;
     }
 
     @Unique
     private void tryConnecting() {
+        if (Modules.get() == null) return;
         var lastServer = Modules.get().get(AutoReconnect.class).lastServerConnection;
         ConnectScreen.startConnecting(new TitleScreen(), mc, lastServer.left(), lastServer.right(), false, null);
     }

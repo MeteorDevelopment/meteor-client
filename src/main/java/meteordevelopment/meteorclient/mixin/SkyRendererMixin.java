@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class SkyRendererMixin {
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void updateRenderState(ClientLevel level, float partialTicks, Camera camera, SkyRenderState state, CallbackInfo ci) {
+        if (Modules.get() == null) return;
         Ambience ambience = Modules.get().get(Ambience.class);
         if (!ambience.isActive()) return;
 
@@ -32,6 +33,7 @@ public abstract class SkyRendererMixin {
 
     @ModifyArg(method = "renderEndSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DynamicUniforms;writeTransform(Lorg/joml/Matrix4fc;Lorg/joml/Vector4fc;Lorg/joml/Vector3fc;Lorg/joml/Matrix4fc;)Lcom/mojang/blaze3d/buffers/GpuBufferSlice;"))
     private Vector4fc modifyEndSkyColor(Vector4fc original) {
+        if (Modules.get() == null) return original;
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.endSky.get() && ambience.customSkyColor.get())

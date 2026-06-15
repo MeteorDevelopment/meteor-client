@@ -22,6 +22,7 @@ public abstract class BiomeColorsMixin {
      */
     @Inject(method = "getAverageWaterColor", at = @At("HEAD"), cancellable = true)
     private static void onGetWaterColor(BlockAndTintGetter level, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
+        if (Modules.get() == null) return;
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customWaterColor.get()) {
@@ -34,6 +35,7 @@ public abstract class BiomeColorsMixin {
      */
     @Inject(method = "getAverageFoliageColor", at = @At("HEAD"), cancellable = true)
     private static void onGetFoliageColor(BlockAndTintGetter level, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
+        if (Modules.get() == null) return;
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customFoliageColor.get()) {
@@ -46,6 +48,7 @@ public abstract class BiomeColorsMixin {
      */
     @Inject(method = "getAverageGrassColor", at = @At("HEAD"), cancellable = true)
     private static void onGetGrassColor(BlockAndTintGetter level, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
+        if (Modules.get() == null) return;
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customGrassColor.get()) {

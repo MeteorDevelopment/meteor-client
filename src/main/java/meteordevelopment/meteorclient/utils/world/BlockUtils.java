@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.utils.world;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.player.InstantRebreak;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
@@ -241,12 +240,6 @@ public class BlockUtils {
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field, and we don't want it to change when it has been stored in a field somewhere
         BlockPos pos = blockPos instanceof BlockPos.MutableBlockPos ? new BlockPos(blockPos) : blockPos;
-
-        InstantRebreak ir = Modules.get().get(InstantRebreak.class);
-        if (ir != null && ir.isActive() && ir.blockPos.equals(pos) && ir.shouldMine()) {
-            ir.sendPacket();
-            return true;
-        }
 
         if (mc.gameMode.isDestroying())
             mc.gameMode.continueDestroyBlock(pos, getDirection(blockPos));

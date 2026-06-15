@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.mixininterface.IChatListener;
 import meteordevelopment.meteorclient.mixininterface.IGuiMessage;
 import meteordevelopment.meteorclient.mixininterface.IGuiMessageVisible;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.chat.GuiMessage;
@@ -47,8 +46,6 @@ public abstract class ChatComponentMixin implements IChatHud {
     @Final
     private List<GuiMessage> allMessages;
 
-    @Unique
-    private BetterChat betterChat;
     @Unique
     private int nextId;
 
@@ -106,7 +103,6 @@ public abstract class ChatComponentMixin implements IChatHud {
             for (int i = allMessages.size() - 1; i > -1; i--) {
                 if (((IGuiMessage) (Object) allMessages.get(i)).meteor$getId() == nextId && nextId != 0) {
                     allMessages.remove(i);
-                    getBetterChat().removeLine(i);
                 }
             }
 
@@ -117,67 +113,5 @@ public abstract class ChatComponentMixin implements IChatHud {
         }
     }
 
-    //modify max lengths for messages and visible messages
-    @ModifyExpressionValue(method = "addMessageToQueue", at = @At(value = "CONSTANT", args = "intValue=100"))
-    private int maxLength(int size) {
-        if (Modules.get() == null || !getBetterChat().isLongerChat()) return size;
 
-        return size + betterChat.getExtraChatLines();
-    }
-
-    @ModifyExpressionValue(method = "addMessageToDisplayQueue", at = @At(value = "CONSTANT", args = "intValue=100"))
-    private int maxLengthVisible(int size) {
-        if (Modules.get() == null || !getBetterChat().isLongerChat()) return size;
-
-        return size + betterChat.getExtraChatLines();
-    }
-
-    // Player Heads
-
-    @ModifyExpressionValue(method = "extractRenderState(Lnet/minecraft/client/gui/components/ChatComponent$ChatGraphicsAccess;IILnet/minecraft/client/gui/components/ChatComponent$DisplayMode;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;ceil(F)I"))
-    private int onRender_modifyWidth(int width) {
-        return getBetterChat().modifyChatWidth(width);
-    }
-
-    // Anti spam
-
-    @Inject(method = "addMessageToDisplayQueue", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;isChatFocused()Z"))
-    private void onBreakChatMessageLines(GuiMessage message, CallbackInfo ci, @Local(name = "lines") List<FormattedCharSequence> lines) {
-        if (Modules.get() == null) return; // baritone calls addMessage before we initialise
-
-        getBetterChat().lines.addFirst(lines.size());
-    }
-
-    @Inject(method = "addMessageToQueue", at = @At(value = "INVOKE", target = "Ljava/util/List;removeLast()Ljava/lang/Object;"))
-    private void onRemoveMessage(GuiMessage message, CallbackInfo ci) {
-        if (Modules.get() == null) return;
-
-        int extra = getBetterChat().isLongerChat() ? getBetterChat().getExtraChatLines() : 0;
-        int size = betterChat.lines.size();
-
-        while (size > 100 + extra) {
-            betterChat.lines.removeLast();
-            size--;
-        }
-    }
-
-    @Inject(method = "clearMessages", at = @At("HEAD"))
-    private void onClearMessages(boolean history, CallbackInfo ci) {
-        getBetterChat().lines.clear();
-    }
-
-    @Inject(method = "refreshTrimmedMessages", at = @At("HEAD"))
-    private void onRefreshTrimmedMessages(CallbackInfo ci) {
-        getBetterChat().lines.clear();
-    }
-
-    // Other
-    @Unique
-    private BetterChat getBetterChat() {
-        if (betterChat == null) {
-            betterChat = Modules.get().get(BetterChat.class);
-        }
-
-        return betterChat;
-    }
 }

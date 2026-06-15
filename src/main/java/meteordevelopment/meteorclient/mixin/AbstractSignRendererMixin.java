@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class AbstractSignRendererMixin {
     @ModifyExpressionValue(method = "submitSignText", at = @At(value = "CONSTANT", args = {"intValue=4", "ordinal=1"}))
     private int loopTextLengthProxy(int i) {
-        if (Modules.get().get(NoRender.class).noSignText()) return 0;
+        if (Modules.get() != null && Modules.get().get(NoRender.class).noSignText()) return 0;
         return i;
     }
 }

@@ -17,7 +17,6 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.ServerConnectEndEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.AntiPacketKick;
-import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import net.minecraft.ChatFormatting;
@@ -55,16 +54,6 @@ public abstract class ConnectionMixin {
             ci.cancel();
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/network/chat/Component;)V", at = @At("HEAD"))
-    private void disconnect(Component reason, CallbackInfo ci) {
-        if (Modules.get().get(HighwayBuilder.class).isActive()) {
-            MutableComponent text = Component.literal("%n%n%s[%sHighway Builder%s] Statistics:%n".formatted(ChatFormatting.GRAY, ChatFormatting.BLUE, ChatFormatting.GRAY));
-            text.append(Modules.get().get(HighwayBuilder.class).getStatsText());
-
-            ((MutableComponent) reason).append(text);
-        }
-    }
-
     @Inject(method = "connect(Ljava/net/InetSocketAddress;Lnet/minecraft/server/network/EventLoopGroupHolder;Lnet/minecraft/network/Connection;)Lio/netty/channel/ChannelFuture;", at = @At("HEAD"))
     private static void onConnect(InetSocketAddress address, EventLoopGroupHolder eventLoopGroupHolder, Connection connection, CallbackInfoReturnable<ChannelFuture> cir) {
         MeteorClient.EVENT_BUS.post(ServerConnectEndEvent.get(address));
@@ -84,6 +73,7 @@ public abstract class ConnectionMixin {
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
     private void exceptionCaught(ChannelHandlerContext ctx, Throwable cause, CallbackInfo ci) {
+        if (Modules.get() == null) return;
         AntiPacketKick apk = Modules.get().get(AntiPacketKick.class);
         if (!(cause instanceof TimeoutException) && !(cause instanceof SkipPacketEncoderException) && apk.catchExceptions()) {
             if (apk.logExceptions.get()) apk.warning("Caught exception: %s", cause);

@@ -25,11 +25,12 @@ import java.util.List;
 public abstract class MapRendererMixin {
     @ModifyExpressionValue(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/MapRenderState;decorations:Ljava/util/List;", opcode = Opcodes.GETFIELD))
     private List<MapDecoration> getIconsProxy(List<MapDecoration> original) {
-        return (Modules.get().get(NoRender.class).noMapMarkers()) ? List.of() : original;
+        return (Modules.get() != null && Modules.get().get(NoRender.class).noMapMarkers()) ? List.of() : original;
     }
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void onDraw(MapRenderState mapRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, boolean showOnlyFrame, int lightCoords, CallbackInfo ci) {
+        if (Modules.get() == null) return;
         if (Modules.get().get(NoRender.class).noMapContents()) ci.cancel();
     }
 }

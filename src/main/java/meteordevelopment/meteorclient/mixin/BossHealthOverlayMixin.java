@@ -27,6 +27,7 @@ import java.util.Iterator;
 public abstract class BossHealthOverlayMixin {
     @Inject(method = "extractRenderState", at = @At("HEAD"), cancellable = true)
     private void onRender(CallbackInfo ci) {
+        if (Modules.get() == null) return;
         if (Modules.get().get(NoRender.class).noBossBar()) ci.cancel();
     }
 

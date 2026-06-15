@@ -34,6 +34,7 @@ public abstract class SoundEngineMixin {
 
     @Inject(method = "tickInGameSound()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/sounds/TickableSoundInstance;tick()V", ordinal = 0))
     private void onTick(CallbackInfo ci, @Local(name = "instance") TickableSoundInstance instance) {
+        if (Modules.get() == null) return;
         if (Modules.get().get(SoundBlocker.class).shouldBlock(instance)) stop(instance);
     }
 }

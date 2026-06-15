@@ -26,8 +26,6 @@ import meteordevelopment.meteorclient.mixininterface.IClientboundExplodePacket;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
-import meteordevelopment.meteorclient.systems.modules.player.NoRotate;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.Minecraft;
@@ -58,6 +56,7 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 
     @Inject(method = "handleAddEntity", at = @At("HEAD"), cancellable = true)
     private void onHandleAddEntity(ClientboundAddEntityPacket packet, CallbackInfo ci) {
+        if (Modules.get() == null) return;
         if (packet != null && packet.getType() != null) {
             if (Modules.get().get(NoRender.class).noEntity(packet.getType()) && Modules.get().get(NoRender.class).getDropSpawnPacket()) {
                 ci.cancel();
@@ -113,17 +112,6 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
         }
     }
 
-    @Inject(method = "handleExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V", shift = At.Shift.AFTER))
-    private void onHandleExplosionVelocity(ClientboundExplodePacket packet, CallbackInfo ci) {
-        Velocity velocity = Modules.get().get(Velocity.class);
-        if (!velocity.explosions.get()) return;
-
-        IClientboundExplodePacket explosionPacket = (IClientboundExplodePacket) (Object) packet;
-        explosionPacket.meteor$setVelocityX((float) (packet.playerKnockback().orElse(Vec3.ZERO).x * velocity.getHorizontal(velocity.explosionsHorizontal)));
-        explosionPacket.meteor$setVelocityY((float) (packet.playerKnockback().orElse(Vec3.ZERO).y * velocity.getVertical(velocity.explosionsVertical)));
-        explosionPacket.meteor$setVelocityZ((float) (packet.playerKnockback().orElse(Vec3.ZERO).z * velocity.getHorizontal(velocity.explosionsHorizontal)));
-    }
-
     @Inject(method = "handleTakeItemEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getEntity(I)Lnet/minecraft/world/entity/Entity;", ordinal = 0))
     private void onHandleTakeItemEntity(ClientboundTakeItemEntityPacket packet, CallbackInfo ci) {
         Entity itemEntity = minecraft.level.getEntity(packet.getItemId());
@@ -132,30 +120,6 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
         if (itemEntity instanceof ItemEntity item && entity == minecraft.player) {
             MeteorClient.EVENT_BUS.post(PickItemsEvent.get(item.getItem(), packet.getAmount()));
         }
-    }
-
-    @Inject(method = "handleMovePlayer", at = @At("HEAD"))
-    private void onHandleMovePlayerHead(ClientboundPlayerPositionPacket packet, CallbackInfo ci, @Share("noRotateYaw") LocalFloatRef yawRef, @Share("noRotatePitch") LocalFloatRef pitchRef) {
-        NoRotate noRotate = Modules.get().get(NoRotate.class);
-        if (!noRotate.isActive() || minecraft.player == null) return;
-
-        yawRef.set(minecraft.player.getYRot());
-        pitchRef.set(minecraft.player.getXRot());
-    }
-
-    @Inject(method = "handleMovePlayer", at = @At("RETURN"))
-    private void onHandleMovePlayerReturn(ClientboundPlayerPositionPacket packet, CallbackInfo ci, @Share("noRotateYaw") LocalFloatRef yawRef, @Share("noRotatePitch") LocalFloatRef pitchRef) {
-        NoRotate noRotate = Modules.get().get(NoRotate.class);
-        if (!noRotate.isActive() || minecraft.player == null) return;
-
-        float savedYaw = yawRef.get();
-        float savedPitch = pitchRef.get();
-
-        //not noticeable by player but forces a server update
-        minecraft.player.setYRot(savedYaw + 0.000001f);
-        minecraft.player.setXRot(savedPitch + 0.000001f);
-        minecraft.player.yHeadRot = savedYaw;
-        minecraft.player.yBodyRot = savedYaw;
     }
 
     @Inject(method = "sendChat", at = @At("HEAD"), cancellable = true)
