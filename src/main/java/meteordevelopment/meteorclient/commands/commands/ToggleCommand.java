@@ -13,8 +13,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 
-import java.util.List;
-
 public class ToggleCommand extends Command {
     public ToggleCommand() {
         super("toggle", "Toggles a module.", "t");
@@ -26,14 +24,14 @@ public class ToggleCommand extends Command {
             .then(literal("all")
                 .then(literal("on")
                     .executes(_ -> {
-                        List.copyOf(Modules.get().getAll()).forEach(Module::enable);
+                        Modules.get().getAll().forEach(Module::enable);
                         Hud.get().active = true;
                         return SINGLE_SUCCESS;
                     })
                 )
                 .then(literal("off")
                     .executes(_ -> {
-                        List.copyOf(Modules.get().getActive()).forEach(Module::toggle);
+                        Modules.get().getActive().forEach(Module::toggle);
                         Hud.get().active = false;
                         return SINGLE_SUCCESS;
                     })

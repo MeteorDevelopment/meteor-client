@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.sprite.SpriteGetter;
+import org.jspecify.annotations.NonNull;
 
 public class CustomBannerGuiElementRenderer extends PictureInPictureRenderer<CustomBannerGuiElementRenderState> {
     private final SpriteGetter sprites;
@@ -45,7 +46,7 @@ public class CustomBannerGuiElementRenderer extends PictureInPictureRenderer<Cus
     }
 
     @Override
-    protected String getTextureLabel() {
+    protected @NonNull String getTextureLabel() {
         return "custom banner";
     }
 }
