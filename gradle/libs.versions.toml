@@ -1,13 +1,13 @@
 [versions]
 # Fabric (https://fabricmc.net/develop)
 jdk = "25"
-minecraft = "26.2-rc-2"
+minecraft = "26.2"
 fabric-loader = "0.19.3"
-fabric-api = "0.152.0+26.2"
+fabric-api = "0.152.1+26.2"
 
 # Plugins
 # Loom (https://github.com/FabricMC/fabric-loom)
-loom = "1.16-SNAPSHOT"
+loom = "1.17-SNAPSHOT"
 
 # Mods
 # Baritone (https://github.com/MeteorDevelopment/baritone)
@@ -29,7 +29,7 @@ discordipc = "1.1"
 # Reflections (https://github.com/ronmamo/reflections)
 reflections = "0.10.2"
 # Netty (https://github.com/netty/netty)
-netty = "4.2.13.Final"
+netty = "4.2.15.Final"
 # ViaFabricPlus (https://github.com/ViaVersion/ViaFabricPlus)
 viafabricplus = "4.5.2"
 # WaybackAuthLib (https://github.com/florianreuth/WaybackAuthLib)
