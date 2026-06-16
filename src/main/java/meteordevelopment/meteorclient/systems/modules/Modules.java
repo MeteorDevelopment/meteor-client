@@ -6,7 +6,10 @@
 package meteordevelopment.meteorclient.systems.modules;
 
 import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -58,7 +61,7 @@ public class Modules extends System<Modules> {
     private final Map<Class<? extends Module>, Module> moduleInstances = new Reference2ReferenceOpenHashMap<>();
     private final Map<Category, List<Module>> groups = new Reference2ReferenceOpenHashMap<>();
 
-    private final List<Module> active = new ArrayList<>();
+    private final Set<Module> active = new ReferenceOpenHashSet<>();
     private Module moduleToBind;
     private boolean awaitingKeyRelease = false;
 
@@ -146,12 +149,12 @@ public class Modules extends System<Modules> {
         return moduleInstances.size();
     }
 
-    public List<Module> getActive() {
+    public Collection<Module> getActive() {
         return active;
     }
 
     public List<Pair<Module, String>> searchTitles(String text) {
-        Map<Pair<Module, String>, Integer> modules = new HashMap<>();
+        Object2IntMap<Pair<Module, String>> modules = new Object2IntOpenHashMap<>();
 
         for (Module module : this.moduleInstances.values()) {
             String title = module.title;
@@ -171,7 +174,7 @@ public class Modules extends System<Modules> {
         }
 
         List<Pair<Module, String>> l = new ArrayList<>(modules.keySet());
-        l.sort(Comparator.comparingInt(modules::get));
+        l.sort(Comparator.comparingInt(modules::getInt));
 
         return l;
     }
@@ -195,8 +198,7 @@ public class Modules extends System<Modules> {
 
     void addActive(Module module) {
         synchronized (active) {
-            if (!active.contains(module)) {
-                active.add(module);
+            if (active.add(module)) {
                 MeteorClient.EVENT_BUS.post(ActiveModulesChangedEvent.get());
             }
         }

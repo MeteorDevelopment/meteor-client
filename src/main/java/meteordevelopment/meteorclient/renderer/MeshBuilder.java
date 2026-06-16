@@ -50,7 +50,7 @@ public class MeshBuilder {
         this(
             Objects.requireNonNull(
                 pipeline.getVertexFormatBinding(0),
-                () -> "RenderPipeline " + pipeline + " has no vertex format binding"
+                () -> "RenderPipeline " + pipeline.getLocation() + " has no vertex format binding"
             ),
             pipeline.getPrimitiveTopology()
         );
