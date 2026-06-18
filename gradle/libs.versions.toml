@@ -19,7 +19,7 @@ lithium = "mc26.2-0.25.0-fabric"
 # Iris (https://github.com/IrisShaders/Iris)
 iris = "1.11.0+26.2-fabric"
 # ModMenu (https://github.com/TerraformersMC/ModMenu)
-modmenu = "18.0.0-alpha.8"
+modmenu = "20.0.0-beta.2"
 # Orbit (https://github.com/MeteorDevelopment/orbit)
 orbit = "0.2.4"
 # Starscript (https://github.com/MeteorDevelopment/starscript)
