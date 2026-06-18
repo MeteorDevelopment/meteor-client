@@ -40,7 +40,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     }
 
     @Override
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         return suggestions;
     }
 

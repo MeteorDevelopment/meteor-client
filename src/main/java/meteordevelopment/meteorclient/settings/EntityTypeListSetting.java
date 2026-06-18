@@ -89,7 +89,7 @@ public class EntityTypeListSetting extends Setting<Set<EntityType<?>>> {
     }
 
     @Override
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         if (suggestions == null) {
             suggestions = new ArrayList<>(groups);
             for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
