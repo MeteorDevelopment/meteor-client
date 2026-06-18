@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -160,9 +161,7 @@ public class VeinMiner extends Module {
 
         if (state.getDestroySpeed(mc.level, event.blockPos) < 0)
             return;
-        if (mode.get() == ListMode.Whitelist && !selectedBlocks.get().contains(state.getBlock()))
-            return;
-        if (mode.get() == ListMode.Blacklist && selectedBlocks.get().contains(state.getBlock()))
+        if (!mode.get().allows(selectedBlocks.get().contains(state.getBlock())))
             return;
 
         foundBlockPositions.clear();
@@ -278,8 +277,4 @@ public class VeinMiner extends Module {
         return mode.get().toString() + " (" + selectedBlocks.get().size() + ")";
     }
 
-    public enum ListMode {
-        Whitelist,
-        Blacklist
-    }
 }

@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -434,8 +435,8 @@ public class Nuker extends Module {
             if (isOutOfRange(blockPos)) return;
 
             // Check whitelist or blacklist
-            if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(blockState.getBlock())) return;
-            if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(blockState.getBlock())) return;
+            boolean blockInList = (listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get()).contains(blockState.getBlock());
+            if (!listMode.get().allows(blockInList)) return;
 
             if (interact.get() && interacted.contains(blockPos)) return;
 
@@ -552,11 +553,6 @@ public class Nuker extends Module {
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onBlockBreakingCooldown(BlockBreakingCooldownEvent event) {
         event.cooldown = 0;
-    }
-
-    public enum ListMode {
-        Whitelist,
-        Blacklist
     }
 
     public enum Mode {

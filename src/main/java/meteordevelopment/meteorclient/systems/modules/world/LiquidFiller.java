@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -159,11 +160,12 @@ public class LiquidFiller extends Module {
 
         // Find slot with a block
         FindItemResult item;
-        if (listMode.get() == ListMode.Whitelist) {
-            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && whitelist.get().contains(Block.byItem(itemStack.getItem())));
-        } else {
-            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && !blacklist.get().contains(Block.byItem(itemStack.getItem())));
-        }
+        item = InvUtils.findInHotbar(itemStack -> {
+            if (!(itemStack.getItem() instanceof BlockItem)) return false;
+
+            boolean itemInList = (listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get()).contains(Block.byItem(itemStack.getItem()));
+            return listMode.get().allows(itemInList);
+        });
         if (!item.found()) return;
 
         // Loop blocks around the player
@@ -202,11 +204,6 @@ public class LiquidFiller extends Module {
             }
             blocks.clear();
         });
-    }
-
-    public enum ListMode {
-        Whitelist,
-        Blacklist
     }
 
     public enum PlaceIn {
