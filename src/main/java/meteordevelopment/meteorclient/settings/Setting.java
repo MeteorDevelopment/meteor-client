@@ -14,13 +14,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
-    private static final List<String> NO_SUGGESTIONS = new ArrayList<>(0);
+    private static final List<String> NO_SUGGESTIONS = List.of();
 
     public final String name, title, description;
     private final IVisible visible;
@@ -108,7 +107,7 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return null;
     }
 
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         return NO_SUGGESTIONS;
     }
 
