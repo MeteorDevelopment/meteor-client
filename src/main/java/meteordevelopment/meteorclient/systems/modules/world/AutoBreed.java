@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.EntityAgeTest;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
@@ -51,10 +52,10 @@ public class AutoBreed extends Module {
         .build()
     );
 
-    private final Setting<EntityAge> mobAgeFilter = sgGeneral.add(new EnumSetting.Builder<EntityAge>()
+    private final Setting<EntityAgeTest> mobAgeFilter = sgGeneral.add(new EnumSetting.Builder<EntityAgeTest>()
         .name("mob-age-filter")
         .description("Determines the age of the mobs to target (baby, adult, or both).")
-        .defaultValue(EntityAge.Adult)
+        .defaultValue(EntityAgeTest.Adult)
         .build()
     );
 
@@ -94,7 +95,7 @@ public class AutoBreed extends Module {
             if (!(entity instanceof Animal animal)) continue;
 
             if (!entities.get().contains(animal.getType())
-                || !isCorrectAge(animal)
+                || !mobAgeFilter.get().test(animal)
                 || animalsFed.containsKey(animal)
                 || !PlayerUtils.isWithin(animal, range.get())
                 || !animal.isFood(hand.get() == InteractionHand.MAIN_HAND ? mc.player.getMainHandItem() : mc.player.getOffhandItem()))
@@ -117,17 +118,4 @@ public class AutoBreed extends Module {
         }
     }
 
-    public enum EntityAge {
-        Baby,
-        Adult,
-        Both
-    }
-
-    private boolean isCorrectAge(Animal animal) {
-        return switch (mobAgeFilter.get()) {
-            case Baby -> animal.isBaby();
-            case Adult -> !animal.isBaby();
-            case Both -> true;
-        };
-    }
 }
