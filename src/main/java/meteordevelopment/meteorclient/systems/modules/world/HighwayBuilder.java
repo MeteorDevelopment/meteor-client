@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
@@ -70,9 +71,9 @@ import org.jetbrains.annotations.Range;
 import org.joml.Vector3d;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 @SuppressWarnings("ConstantConditions")
@@ -455,7 +456,7 @@ public class HighwayBuilder extends Module {
     private boolean suspended = true, inventory = true;
     private int placeTimer, breakTimer, count, containerId;
     private final RestockTask restockTask = new RestockTask(this);
-    private final ArrayList<EndCrystal> ignoreCrystals = new ArrayList<>();
+    private final Set<EndCrystal> ignoreCrystals = new ReferenceOpenHashSet<>();
     public boolean drawingBow;
     public DoubleMineBlock normalMining, packetMining;
 

@@ -237,7 +237,7 @@ public class Notebot extends Module {
     private Song song; // Loaded song
     private final Map<Note, BlockPos> noteBlockPositions = new HashMap<>(); // Currently used noteblocks by the song
     private final Multimap<Note, BlockPos> scannedNoteblocks = MultimapBuilder.linkedHashKeys().arrayListValues().build(); // Found noteblocks
-    private final List<BlockPos> clickedBlocks = new ArrayList<>();
+    private final Set<BlockPos> clickedBlocks = new HashSet<>();
     private Stage stage = Stage.None;
     private PlayingMode playingMode = PlayingMode.None;
     private boolean isPlaying = false;

@@ -52,6 +52,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ColorCollection;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -580,7 +581,26 @@ public class Utils {
     }
 
     public static boolean isShulker(Item item) {
-        return item == Items.SHULKER_BOX || Items.DYED_SHULKER_BOX.asList().contains(item);
+        return item == Items.SHULKER_BOX || contains(Items.DYED_SHULKER_BOX, item);
+    }
+
+    public static <T> boolean contains(ColorCollection<T> collection, T value) {
+        return collection.white() == value
+            || collection.orange() == value
+            || collection.magenta() == value
+            || collection.lightBlue() == value
+            || collection.yellow() == value
+            || collection.lime() == value
+            || collection.pink() == value
+            || collection.gray() == value
+            || collection.lightGray() == value
+            || collection.cyan() == value
+            || collection.purple() == value
+            || collection.blue() == value
+            || collection.brown() == value
+            || collection.green() == value
+            || collection.red() == value
+            || collection.black() == value;
     }
 
     public static boolean isThrowable(Item item) {

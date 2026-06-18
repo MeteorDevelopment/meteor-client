@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.events.entity.player.InteractItemEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -24,8 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Fireworks;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 public class ElytraBoost extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -61,7 +61,7 @@ public class ElytraBoost extends Module {
         .build()
     );
 
-    private final List<FireworkRocketEntity> fireworks = new ArrayList<>();
+    private final Set<FireworkRocketEntity> fireworks = new ReferenceOpenHashSet<>();
 
     public ElytraBoost() {
         super(Categories.Movement, "elytra-boost", "Boosts your elytra as if you used a firework.");
