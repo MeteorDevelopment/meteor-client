@@ -68,12 +68,12 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
 
         @Override
         public <S> void submitModel(Model<? super S> model, S state, PoseStack matrices, RenderType renderLayer, int light, int overlay, int tintedColor, @Nullable TextureAtlasSprite sprite, int outlineColor, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
-            super.submitModel(model, state, matrices, renderLayer, light, overlay, color, sprite, 0, crumblingOverlay);
+            super.submitModel(model, state, matrices, renderLayer, light, overlay, color, sprite, color, crumblingOverlay);
         }
 
         @Override
         public void submitModelPart(ModelPart part, PoseStack matrices, RenderType renderLayer, int light, int overlay, @Nullable TextureAtlasSprite sprite, int tintedColor, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay, int i) {
-            super.submitModelPart(part, matrices, renderLayer, light, overlay, sprite, color, crumblingOverlay, i);
+            super.submitModelPart(part, matrices, renderLayer, light, overlay, sprite, color, crumblingOverlay, color);
         }
 
         @Override
@@ -83,7 +83,7 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
         @Override
         public void submitBlockModel(PoseStack poseStack, RenderType renderType, List<BlockStateModelPart> modelParts, int[] tintLayers, int lightCoords, int overlayCoords, int outlineColor) {
             Arrays.fill(tintLayers, color);
-            super.submitBlockModel(poseStack, renderType, modelParts, tintLayers, lightCoords, overlayCoords, outlineColor);
+            super.submitBlockModel(poseStack, renderType, modelParts, tintLayers, lightCoords, overlayCoords, color);
         }
 
         @Override
@@ -96,7 +96,7 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
                 tints = new int[]{color, color, color, color};
             }
 
-            super.submitItem(poseStack, displayContext, lightCoords, overlayCoords, outlineColor, tintLayers, quads, foilType);
+            super.submitItem(poseStack, displayContext, lightCoords, overlayCoords, color, tints, quads, foilType);
         }
 
         @Override
