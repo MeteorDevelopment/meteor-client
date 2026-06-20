@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.gui.renderer.packer.TexturePacker;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.Texture;
+import meteordevelopment.meteorclient.renderer.text.VanillaTextRenderer;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -83,6 +84,7 @@ public class GuiRenderer {
 
     public void begin(GuiGraphicsExtractor graphics) {
         this.graphics = graphics;
+        VanillaTextRenderer.INSTANCE.graphics = graphics;
         this.graphics.nextStratum();
 
         var matrices = graphics.pose();
@@ -100,6 +102,7 @@ public class GuiRenderer {
 
         graphics.pose().popMatrix();
         graphics.nextStratum();
+        VanillaTextRenderer.INSTANCE.graphics = null;
     }
 
     public void beginRender() {
