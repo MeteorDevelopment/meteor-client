@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
+import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.renderer.MeshBuilder;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
@@ -13,6 +14,7 @@ import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public class CustomTextRenderer implements TextRenderer {
     public static final Color SHADOW_COLOR = new Color(60, 60, 60, 180);
@@ -32,11 +34,11 @@ public class CustomTextRenderer implements TextRenderer {
     public CustomTextRenderer(FontFace fontFace) throws IOException {
         this.fontFace = fontFace;
 
-        ByteBuffer buffer = fontFace.readToDirectByteBuffer();
+        List<ByteBuffer> buffers = Fonts.readFontBuffers(fontFace);
 
         fonts = new Font[5];
         for (int i = 0; i < fonts.length; i++) {
-            fonts[i] = new Font(buffer, (int) Math.round(27 * ((i * 0.5) + 1)));
+            fonts[i] = new Font(buffers, (int) Math.round(27 * ((i * 0.5) + 1)));
         }
     }
 
@@ -120,6 +122,7 @@ public class CustomTextRenderer implements TextRenderer {
 
         if (!scaleOnly) {
             mesh.end();
+            font.uploadPendingGlyphs();
 
             MeshRenderer.begin()
                 .attachments(Minecraft.getInstance().getMainRenderTarget())

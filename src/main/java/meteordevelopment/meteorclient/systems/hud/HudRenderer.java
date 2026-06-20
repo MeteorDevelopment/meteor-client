@@ -85,6 +85,8 @@ public class HudRenderer {
                 FontHolder fontHolder = it.next();
 
                 if (fontHolder.visited) {
+                    fontHolder.font.uploadPendingGlyphs();
+
                     MeshRenderer.begin()
                         .attachments(mc.getMainRenderTarget())
                         .pipeline(MeteorRenderPipelines.UI_TEXT)
@@ -302,8 +304,8 @@ public class HudRenderer {
 
     private static FontHolder loadFont(int height) {
         try {
-            ByteBuffer buffer = Fonts.RENDERER.fontFace.readToDirectByteBuffer();
-            return new FontHolder(new Font(buffer, height));
+            List<ByteBuffer> buffers = Fonts.readFontBuffers(Fonts.RENDERER.fontFace);
+            return new FontHolder(new Font(buffers, height));
         } catch (IOException e) {
             throw new RuntimeException("Failed to load font: " + Fonts.RENDERER.fontFace, e);
         }

@@ -17,6 +17,8 @@ import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.render.FontUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -25,6 +27,23 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Fonts {
     public static final String[] BUILTIN_FONTS = {"JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation"};
+    private static final String[] FALLBACK_FONT_FAMILIES = {
+        "Noto Sans SC",
+        "Microsoft YaHei",
+        "Microsoft YaHei UI",
+        "DengXian",
+        "SimHei",
+        "SimSun",
+        "KaiTi",
+        "Microsoft JhengHei",
+        "Malgun Gothic",
+        "Yu Gothic",
+        "MS Gothic",
+        "Source Han Sans SC",
+        "WenQuanYi Zen Hei",
+        "PingFang SC",
+        "Hiragino Sans GB"
+    };
 
     public static String DEFAULT_FONT_FAMILY;
     public static FontFace DEFAULT_FONT;
@@ -86,6 +105,59 @@ public class Fonts {
             if (fontFamily.getName().equalsIgnoreCase(name)) {
                 return fontFamily;
             }
+        }
+
+        return null;
+    }
+
+    public static List<FontFace> getFallbackFonts(FontFace primary) {
+        List<FontFace> fonts = new ArrayList<>();
+
+        for (String familyName : FALLBACK_FONT_FAMILIES) {
+            FontFace font = getFallbackFont(familyName, primary);
+            if (font != null) {
+                fonts.add(font);
+                break;
+            }
+        }
+
+        return fonts;
+    }
+
+    public static List<ByteBuffer> readFontBuffers(FontFace primary) throws IOException {
+        List<ByteBuffer> buffers = new ArrayList<>();
+        buffers.add(primary.readToDirectByteBuffer());
+
+        for (FontFace fallbackFont : getFallbackFonts(primary)) {
+            try {
+                buffers.add(fallbackFont.readToDirectByteBuffer());
+            } catch (IOException e) {
+                MeteorClient.LOG.warn("Failed to load fallback font: {}", fallbackFont, e);
+            }
+        }
+
+        return buffers;
+    }
+
+    private static FontFace getFallbackFont(String familyName, FontFace primary) {
+        FontFamily family = getFamily(familyName);
+
+        if (family == null) {
+            String needle = familyName.toLowerCase();
+
+            for (FontFamily fontFamily : FONT_FAMILIES) {
+                if (fontFamily.getName().toLowerCase().contains(needle)) {
+                    family = fontFamily;
+                    break;
+                }
+            }
+        }
+
+        if (family == null) return null;
+
+        for (FontInfo.Type type : FontInfo.Type.values()) {
+            FontFace font = family.get(type);
+            if (font != null && !font.info.equals(primary.info)) return font;
         }
 
         return null;
