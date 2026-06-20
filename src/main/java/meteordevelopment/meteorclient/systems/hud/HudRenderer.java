@@ -66,6 +66,7 @@ public class HudRenderer {
         Renderer2D.COLOR.begin();
 
         this.graphics = graphics;
+        VanillaTextRenderer.INSTANCE.graphics = graphics;
         this.delta = Utils.frameTime;
 
         graphics.nextStratum();
@@ -109,6 +110,7 @@ public class HudRenderer {
         graphics.nextStratum();
 
         graphics = null;
+        VanillaTextRenderer.INSTANCE.graphics = null;
     }
 
     public void line(double x1, double y1, double x2, double y2, Color color) {
