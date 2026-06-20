@@ -55,6 +55,13 @@ public class BoatFly extends Module {
         .build()
     );
 
+    private final Setting<Boolean> sneakDescendsDownward = sgGeneral.add(new BoolSetting.Builder()
+        .name("sneak-descends-downward")
+        .description("Uses the sneak key to descend instead of sprint.")
+        .defaultValue(false)
+        .build()
+    );
+
     public BoatFly() {
         super(Categories.Movement, "boat-fly", "Transforms your boat into a plane.");
     }
@@ -73,7 +80,12 @@ public class BoatFly extends Module {
 
         // Vertical movement
         if (mc.options.jumpKey.isPressed()) velY += verticalSpeed.get() / 20;
-        if (mc.options.sprintKey.isPressed()) velY -= verticalSpeed.get() / 20;
+
+        boolean descending = sneakDescendsDownward.get()
+            ? mc.options.sneakKey.isPressed()
+            : mc.options.sprintKey.isPressed();
+
+        if (descending) velY -= verticalSpeed.get() / 20;
         else velY -= fallSpeed.get() / 20;
 
         // Apply velocity
@@ -85,5 +97,9 @@ public class BoatFly extends Module {
         if (event.packet instanceof VehicleMoveS2CPacket && cancelServerPackets.get()) {
             event.cancel();
         }
+    }
+
+    public boolean sneakDescendsDownward() {
+        return isActive() && sneakDescendsDownward.get();
     }
 }
