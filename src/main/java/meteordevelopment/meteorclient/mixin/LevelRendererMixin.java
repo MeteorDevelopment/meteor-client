@@ -11,8 +11,6 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.Stack;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderState;
 import meteordevelopment.meteorclient.mixininterface.ILevelRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -127,9 +125,15 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
             return;
 
         meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
-        renderDispatcher.renderAllFeatures(outlineRenderCommandQueue);
-        outlineRenderCommandQueue.submitsPerOrder.clear();
-        meteor$popEntityOutlineFramebuffer();
+
+        try {
+            try (var frame = renderDispatcher.prepareFrame(outlineRenderCommandQueue)) {
+                frame.executeOutline();
+            }
+        } finally {
+            outlineRenderCommandQueue.submitsPerOrder.clear();
+            meteor$popEntityOutlineFramebuffer();
+        }
     }
 
     @Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher$PreparedFrame;executeOutline()V", shift = At.Shift.AFTER))
@@ -144,10 +148,6 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
     // ILevelRenderer
 
-    // FIXME(26.2): this is effectively @Final, yet we change it later, causing a crash in ESP Shader mode.
-    @Shadow
-    private RenderTarget entityOutlineTarget;
-
     @Shadow
     @Final
     private LevelTargetBundle targets;
@@ -158,30 +158,24 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
     @Shadow
     @Final
     private RenderBuffers renderBuffers;
-    @Unique
-    private Stack<RenderTarget> framebufferStack;
 
     @Unique
-    private Stack<ResourceHandle<RenderTarget>> framebufferHandleStack;
+    private ResourceHandle<RenderTarget> entityOutlineFramebufferHandle;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void init$IWorldRenderer(CallbackInfo ci) {
-        framebufferStack = new ObjectArrayList<>();
-        framebufferHandleStack = new ObjectArrayList<>();
+        entityOutlineFramebufferHandle = null;
     }
 
     @Override
     public void meteor$pushEntityOutlineFramebuffer(RenderTarget framebuffer) {
-        framebufferStack.push(this.entityOutlineTarget);
-        this.entityOutlineTarget = framebuffer;
-
-        framebufferHandleStack.push(this.targets.entityOutline);
+        entityOutlineFramebufferHandle = this.targets.entityOutline;
         this.targets.entityOutline = () -> framebuffer;
     }
 
     @Override
     public void meteor$popEntityOutlineFramebuffer() {
-        this.entityOutlineTarget = framebufferStack.pop();
-        this.targets.entityOutline = framebufferHandleStack.pop();
+        this.targets.entityOutline = entityOutlineFramebufferHandle;
+        entityOutlineFramebufferHandle = null;
     }
 }
