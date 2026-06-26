@@ -70,7 +70,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> implements T
 
     private AuthResponse authenticate() {
         return Http.post(ENVIRONMENT.servicesHost() + "/authenticate")
-            .bodyJson(new AuthRequest("MINECRAFT", token, "LiquidBounce", UUID.randomUUID().toString(), true))
+            .bodyJson(new AuthRequest("MINECRAFT", token, "Meteor on Crack!", UUID.randomUUID().toString(), true))
             .sendJson(AuthResponse.class);
     }
 
