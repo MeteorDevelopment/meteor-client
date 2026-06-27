@@ -12,18 +12,20 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.PacketType;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> {
-    public final Predicate<Class<? extends Packet<?>>> filter;
+public class PacketListSetting extends Setting<Set<PacketType<? extends @NotNull Packet<?>>>> {
+    public final Predicate<PacketType<? extends @NotNull Packet<?>>> filter;
     private static List<String> suggestions;
 
-    public PacketListSetting(String name, String description, Set<Class<? extends Packet<?>>> defaultValue, Consumer<Set<Class<? extends Packet<?>>>> onChanged, Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated, Predicate<Class<? extends Packet<?>>> filter, IVisible visible) {
+    public PacketListSetting(String name, String description, Set<PacketType<? extends @NotNull Packet<?>>> defaultValue, Consumer<Set<PacketType<? extends @NotNull Packet<?>>>> onChanged, Consumer<Setting<Set<PacketType<? extends @NotNull Packet<?>>>>> onModuleActivated, Predicate<PacketType<? extends @NotNull Packet<?>>> filter, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.filter = filter;
@@ -35,13 +37,13 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     }
 
     @Override
-    protected Set<Class<? extends Packet<?>>> parseImpl(String str) {
+    protected Set<PacketType<? extends @NotNull Packet<?>>> parseImpl(String str) {
         String[] values = str.split(",");
-        Set<Class<? extends Packet<?>>> packets = new ObjectOpenHashSet<>(values.length);
+        Set<PacketType<? extends @NotNull Packet<?>>> packets = new ObjectOpenHashSet<>(values.length);
 
         try {
             for (String value : values) {
-                Class<? extends Packet<?>> packet = PacketUtils.getPacket(value.trim());
+                PacketType<? extends @NotNull Packet<?>> packet = PacketUtils.getPacket(value.trim());
                 if (packet != null && (filter == null || filter.test(packet))) packets.add(packet);
             }
         } catch (Exception _) {
@@ -51,22 +53,14 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     }
 
     @Override
-    protected boolean isValueValid(Set<Class<? extends Packet<?>>> value) {
+    protected boolean isValueValid(Set<PacketType<? extends @NotNull Packet<?>>> value) {
         return true;
     }
 
     @Override
     public List<String> getSuggestions() {
         if (suggestions == null) {
-            suggestions = new ArrayList<>(PacketUtils.getC2SPackets().size() + PacketUtils.getS2CPackets().size());
-
-            for (Class<? extends Packet<?>> packet : PacketUtils.getC2SPackets()) {
-                suggestions.add(PacketUtils.getName(packet));
-            }
-
-            for (Class<? extends Packet<?>> packet : PacketUtils.getS2CPackets()) {
-                suggestions.add(PacketUtils.getName(packet));
-            }
+            suggestions = PacketUtils.getPackets().stream().map(PacketType::toString).toList();
         }
 
         return suggestions;
@@ -75,8 +69,8 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag valueTag = new ListTag();
-        for (Class<? extends Packet<?>> packet : get()) {
-            valueTag.add(StringTag.valueOf(PacketUtils.getName(packet)));
+        for (PacketType<? extends @NotNull Packet<?>> packet : get()) {
+            valueTag.add(StringTag.valueOf(packet.toString()));
         }
         tag.put("value", valueTag);
 
@@ -84,13 +78,13 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     }
 
     @Override
-    public Set<Class<? extends Packet<?>>> load(CompoundTag tag) {
+    public Set<PacketType<? extends @NotNull Packet<?>>> load(CompoundTag tag) {
         get().clear();
 
         Tag valueTag = tag.get("value");
         if (valueTag instanceof ListTag listTag) {
             for (Tag t : listTag) {
-                Class<? extends Packet<?>> packet = PacketUtils.getPacket(t.asString().orElse(""));
+                PacketType<? extends @NotNull Packet<?>> packet = PacketUtils.getPacket(t.asString().orElse(""));
                 if (packet != null && (filter == null || filter.test(packet))) get().add(packet);
             }
         }
@@ -98,16 +92,24 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
         return get();
     }
 
-    public static class Builder extends SettingBuilder<Builder, Set<Class<? extends Packet<?>>>, PacketListSetting> {
-        private Predicate<Class<? extends Packet<?>>> filter;
+    public static class Builder extends SettingBuilder<Builder, Set<PacketType<? extends @NotNull Packet<?>>>, PacketListSetting> {
+        private Predicate<PacketType<? extends @NotNull Packet<?>>> filter;
 
         public Builder() {
             super(new ObjectOpenHashSet<>(0));
         }
 
-        public Builder filter(Predicate<Class<? extends Packet<?>>> filter) {
+        public Builder filter(Predicate<PacketType<? extends @NotNull Packet<?>>> filter) {
             this.filter = filter;
             return this;
+        }
+
+        public Builder clientbound() {
+            return filter(type -> type.flow() == PacketFlow.CLIENTBOUND);
+        }
+
+        public Builder serverbound() {
+            return filter(type -> type.flow() == PacketFlow.SERVERBOUND);
         }
 
         @Override
