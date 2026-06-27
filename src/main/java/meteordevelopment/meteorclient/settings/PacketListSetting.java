@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 
 public class PacketListSetting extends Setting<Set<PacketType<? extends @NotNull Packet<?>>>> {
     public final Predicate<PacketType<? extends @NotNull Packet<?>>> filter;
-    private static List<String> suggestions;
 
     public PacketListSetting(String name, String description, Set<PacketType<? extends @NotNull Packet<?>>> defaultValue, Consumer<Set<PacketType<? extends @NotNull Packet<?>>>> onChanged, Consumer<Setting<Set<PacketType<? extends @NotNull Packet<?>>>>> onModuleActivated, Predicate<PacketType<? extends @NotNull Packet<?>>> filter, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
@@ -59,11 +58,9 @@ public class PacketListSetting extends Setting<Set<PacketType<? extends @NotNull
 
     @Override
     public List<String> getSuggestions() {
-        if (suggestions == null) {
-            suggestions = PacketUtils.getPackets().stream().map(PacketType::toString).toList();
-        }
-
-        return suggestions;
+        return filter == null
+            ? PacketUtils.getPackets().stream().map(PacketType::toString).toList()
+            : PacketUtils.getPackets().stream().filter(filter).map(PacketType::toString).toList();
     }
 
     @Override
