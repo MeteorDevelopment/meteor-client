@@ -58,14 +58,26 @@ public class PacketUtils {
         return SERVERBOUND_PACKETS_MAP.get(id);
     }
 
-    public static @Nullable PacketType<? extends @NotNull Packet<?>> getPacket(String name) {
-        @Nullable Identifier identifier = Identifier.tryParse(name);
+    public static @Nullable PacketType<? extends @NotNull Packet<?>> getPacket(Identifier id) {
+        @Nullable PacketType<? extends @NotNull Packet<?>> clientbound = getClientboundPacket(id);
+        return clientbound != null ? clientbound : getServerboundPacket(id);
+    }
 
+    public static @Nullable PacketType<? extends @NotNull Packet<?>> getPacket(String name) {
+        if (name.startsWith("clientbound/")) {
+            @Nullable Identifier identifier = Identifier.tryParse(name.substring(12));
+            return CLIENTBOUND_PACKETS_MAP.get(identifier);
+        }
+
+        if (name.startsWith("serverbound/")) {
+            @Nullable Identifier identifier = Identifier.tryParse(name.substring(12));
+            return SERVERBOUND_PACKETS_MAP.get(identifier);
+        }
+
+        @Nullable Identifier identifier = Identifier.tryParse(name);
         if (identifier != null) {
-            @Nullable PacketType<? extends @NotNull Packet<?>> clientbound = CLIENTBOUND_PACKETS_MAP.get(identifier);
-            if (clientbound != null) return clientbound;
-            @Nullable PacketType<? extends @NotNull Packet<?>> serverbound = SERVERBOUND_PACKETS_MAP.get(identifier);
-            if (serverbound != null) return serverbound;
+            @Nullable PacketType<? extends @NotNull Packet<?>> type = getPacket(identifier);
+            if (type != null) return type;
         }
 
         return LEGACY_PACKET_MAPPINGS.get(name);
