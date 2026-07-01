@@ -45,3 +45,6 @@ accessible   field   net/minecraft/client/renderer/rendertype/RenderSetup output
 
 # ProjectileEntitySimulator#hitOrDeflect
 accessible   method   net/minecraft/world/entity/projectile/Projectile shouldBounceOnWorldBorder ()Z
+
+# Chest Predictor
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplateManager RESOURCE_STRUCTURE_LISTER Lnet/minecraft/resources/FileToIdConverter;

@@ -34,6 +34,8 @@ netty = "4.2.7.Final"
 viafabricplus = "4.5.2"
 # WaybackAuthLib (https://github.com/florianreuth/WaybackAuthLib)
 waybackauthlib = "1.1.0"
+# cubiomes (https://github.com/xpple/cubiomes)
+cubiomes = "0.0.0-2026.5.18.1779128583+1a0c27a6b80f6bebbfe18b806af70fe18f33d0c4"
 
 [libraries]
 # Fabric base
@@ -57,6 +59,7 @@ reflections = { module = "org.reflections:reflections", version.ref = "reflectio
 netty-handler-proxy = { module = "io.netty:netty-handler-proxy", version.ref = "netty" }
 netty-codec-socks = { module = "io.netty:netty-codec-socks", version.ref = "netty" }
 waybackauthlib = { module = "de.florianreuth:waybackauthlib", version.ref = "waybackauthlib" }
+cubiomes = { module = "dev.xpple:cubiomes", version.ref = "cubiomes" }
 
 [plugins]
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "loom" }
