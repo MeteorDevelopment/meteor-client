@@ -5,9 +5,23 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
@@ -22,7 +36,15 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.pathing.PathManagers;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BlockListSetting;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.ColorSetting;
+import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.KeybindSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.StorageBlockListSetting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -43,11 +65,16 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.*;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.entity.BarrelBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.phys.Vec3;
-
-import java.io.*;
-import java.util.*;
 
 public class StashFinder extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -197,6 +224,7 @@ public class StashFinder extends Module {
         if (Math.sqrt(chunkXAbs * chunkXAbs + chunkZAbs * chunkZAbs) < minimumDistance.get()) return;
 
         Chunk chunk = new Chunk(event.chunk().getPos());
+        boolean yCaptured = false;
 
         List<Block> blockBlacklist = blacklistedBlocks.get();
 
@@ -206,6 +234,10 @@ public class StashFinder extends Module {
             if (!blockBlacklist.isEmpty()) {
                 BlockPos below = blockEntity.getBlockPos().below();
                 if (blockBlacklist.contains(event.chunk().getBlockState(below).getBlock())) continue;
+            }
+            if(!yCaptured){
+                chunk.y = blockEntity.getBlockPos().getY();
+                yCaptured = true;
             }
 
             switch (blockEntity) {
@@ -229,8 +261,7 @@ public class StashFinder extends Module {
             else prevChunk = chunks.set(i, chunk);
 
             if (renderTracer.get()) {
-                double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, y, chunk.z));
+                tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, chunk.y, chunk.z));
             }
 
             saveJson();
@@ -290,14 +321,13 @@ public class StashFinder extends Module {
 
     private void fillTable(GuiTheme theme, WTable table) {
         for (Chunk chunk : chunks) {
-            table.add(theme.label("Pos: " + chunk.x + ", " + chunk.z)).padRight(10);
+            table.add(theme.label("Pos: " + chunk.x + ", " + chunk.y + ", " + chunk.z)).padRight(10);
             table.add(theme.label("Total: " + chunk.getTotal())).padRight(10);
 
             WCheckbox visible = table.add(theme.checkbox(tracerPositions.containsKey(chunk.chunkPos))).widget();
             visible.action = () -> {
                 if (visible.checked) {
-                    double y = mc.player != null ? mc.player.getEyeY() : 0.0;
-                    tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, y, chunk.z));
+                    tracerPositions.put(chunk.chunkPos, new Vec3(chunk.x, chunk.y, chunk.z));
                 } else tracerPositions.remove(chunk.chunkPos);
             };
 
@@ -305,7 +335,7 @@ public class StashFinder extends Module {
             open.action = () -> mc.setScreen(new ChunkScreen(theme, chunk));
 
             WButton gotoBtn = table.add(theme.button("Goto")).widget();
-            gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(chunk.x, 0, chunk.z), true);
+            gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(chunk.x, chunk.y, chunk.z), true);
 
             WMinus delete = table.add(theme.minus()).widget();
             delete.action = () -> {
@@ -413,12 +443,12 @@ public class StashFinder extends Module {
     }
 
     private void sendChatNotification(Chunk chunk) {
-        MutableComponent coords = Component.literal(chunk.x + ", " + chunk.z)
+        MutableComponent coords = Component.literal(chunk.x + ", " + chunk.y + ", " + chunk.z)
             .setStyle(Style.EMPTY
                 .withColor(ChatFormatting.WHITE)
                 .applyFormat(ChatFormatting.UNDERLINE)
                 .withHoverEvent(new HoverEvent.ShowText(Component.literal("Path to stash")))
-                .withClickEvent(new RunnableClickEvent(() -> PathManagers.get().moveTo(new BlockPos(chunk.x, 0, chunk.z), true))));
+                .withClickEvent(new RunnableClickEvent(() -> PathManagers.get().moveTo(new BlockPos(chunk.x, chunk.y, chunk.z), true))));
 
         MutableComponent message = Component.literal("Found stash at ")
             .withStyle(ChatFormatting.GRAY)
@@ -451,7 +481,7 @@ public class StashFinder extends Module {
 
             if (renderTracer.get()) {
                 event.renderer.line(
-                    RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, pos.x, mc.player.getEyeY(), pos.z, traceColor.get()
+                    RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, pos.x, pos.y, pos.z, traceColor.get()
                 );
             }
 
@@ -483,6 +513,7 @@ public class StashFinder extends Module {
 
         public ChunkPos chunkPos;
         public transient int x, z;
+        public int y;
         public int chests, barrels, shulkers, enderChests, furnaces, dispensersDroppers, hoppers;
 
         public Chunk(ChunkPos chunkPos) {
