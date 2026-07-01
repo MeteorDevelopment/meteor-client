@@ -166,7 +166,9 @@ public class ProfilesTab extends Tab {
                 }
 
                 File f = new File(p.getFile(), filename);
-                NbtIo.writeUnnamedTagWithFallback(entry.getValue(), new DataOutputStream(new FileOutputStream(f)));
+                try (DataOutputStream output = new DataOutputStream(new FileOutputStream(f))) {
+                    NbtIo.writeUnnamedTagWithFallback(entry.getValue(), output);
+                }
             }
 
             Profiles.get().getAll().add(p);

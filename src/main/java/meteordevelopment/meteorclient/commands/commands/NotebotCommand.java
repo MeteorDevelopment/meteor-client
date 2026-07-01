@@ -126,7 +126,7 @@ public class NotebotCommand extends Command {
             if (name == null || name.isEmpty()) {
                 throw INVALID_PATH.create(name);
             }
-            Path notebotFolder = MeteorClient.FOLDER.toPath().resolve("notebot");
+            Path notebotFolder = Notebot.PATH.toPath();
             Path path = notebotFolder.resolve(String.format("%s.txt", name)).normalize();
             if (!path.startsWith(notebotFolder)) {
                 throw INVALID_PATH.create(path);
