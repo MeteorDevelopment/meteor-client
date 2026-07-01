@@ -165,7 +165,8 @@ public class ProfilesTab extends Tab {
                     }
                 }
 
-                File f = new File(p.getFile(), filename);
+                File f = new File(p.getFile(), filename).getCanonicalFile();
+                if (!f.toPath().startsWith(Profiles.FOLDER.getCanonicalFile().toPath())) continue;
                 NbtIo.writeUnnamedTagWithFallback(entry.getValue(), new DataOutputStream(new FileOutputStream(f)));
             }
 
