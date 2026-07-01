@@ -1,5 +1,5 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * This file is part of the Meteor Client distribution[](https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
  */
 
@@ -54,6 +54,16 @@ public class AutoSmelter extends Module {
         .build()
     );
 
+    // Added to address user suggestion - allows control over how many items are smelted per action
+    private final Setting<Integer> smeltItemsPerRefill = sgGeneral.add(new IntSetting.Builder()
+        .name("smelt-items-per-refill")
+        .description("How many items to put into the furnace each time it refills")
+        .defaultValue(8)
+        .range(1, 64)
+        .sliderRange(1, 16)
+        .build()
+    );
+
     private final Setting<Boolean> disableWhenOutOfItems = sgGeneral.add(new BoolSetting.Builder()
         .name("disable-when-out-of-items")
         .description("Disable the module when you run out of items")
@@ -82,27 +92,29 @@ public class AutoSmelter extends Module {
     }
 
     public void tick(AbstractFurnaceMenu c) {
-        // Limit actions to happen every n ticks
+        // Limit actions to happen every n ticks to prevent lag and double actions
         if (mc.player.tickCount % 10 == 0) return;
 
         // Check for fuel
         checkFuel(c);
 
-        // Take the smelted results
+        // Take the smelted results from the output slot
         takeResults(c);
 
-        // Insert new items
+        // Insert new items to smelt
         insertItems(c);
 
         if (autoClose.get()) mc.setScreen(null);
     }
 
     private void insertItems(AbstractFurnaceMenu c) {
+        // Do nothing if input slot is already occupied
         ItemStack inputItemStack = c.slots.getFirst().getItem();
         if (!inputItemStack.isEmpty()) return;
 
         int slot = -1;
 
+        // Search inventory for a valid item to smelt
         for (int i = 3; i < c.slots.size(); i++) {
             ItemStack item = c.slots.get(i).getItem();
             if (!((IAbstractFurnaceMenu) c).meteor$canSmelt(item)) continue;
@@ -121,7 +133,28 @@ public class AutoSmelter extends Module {
 
         if (slot == -1) return;
 
-        InvUtils.move().fromId(slot).toId(0);
+        ItemStack sourceStack = c.slots.get(slot).getItem();
+        int moveCount = Math.min(smeltItemsPerRefill.get(), sourceStack.getCount());
+
+        moveSmeltItems(c, slot, moveCount);
+    }
+
+    // Moves exact amount of items to the input slot (similar style as moveFuelItems)
+    private void moveSmeltItems(AbstractFurnaceMenu c, int fromId, int amount) {
+        if (amount <= 0 || mc.player == null || mc.gameMode == null) return;
+        if (!mc.player.containerMenu.getCarried().isEmpty()) return;
+
+        mc.gameMode.handleContainerInput(c.containerId, fromId, 0, ContainerInput.PICKUP, mc.player);
+
+        for (int i = 0; i < amount; i++) {
+            if (mc.player.containerMenu.getCarried().isEmpty()) break;
+            mc.gameMode.handleContainerInput(c.containerId, 0, 1, ContainerInput.PICKUP, mc.player);
+        }
+
+        if (!mc.player.containerMenu.getCarried().isEmpty()) {
+            mc.gameMode.handleContainerInput(c.containerId, fromId, 0, ContainerInput.PICKUP, mc.player);
+        }
+
         c.slots.getFirst().getItem().isEmpty();
     }
 
