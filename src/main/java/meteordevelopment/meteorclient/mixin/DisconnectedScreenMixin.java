@@ -60,6 +60,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
     public void tick() {
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
         if (!autoReconnect.isActive() || autoReconnect.lastServerConnection == null) return;
+        if (autoReconnect.isReAuthInFlight()) return;
 
         if (time <= 0) {
             tryConnecting();
