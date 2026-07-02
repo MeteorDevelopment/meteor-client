@@ -8,8 +8,9 @@ package meteordevelopment.meteorclient.systems.proxies;
 import org.jetbrains.annotations.Nullable;
 
 public enum ProxyType {
-    Socks4,
-    Socks5;
+    HTTP,
+    SOCKS5,
+    SOCKS4;
 
     @Nullable
     public static ProxyType parse(String group) {
