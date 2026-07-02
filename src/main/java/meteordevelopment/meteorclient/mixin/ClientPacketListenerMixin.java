@@ -179,7 +179,7 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
                 ChatUtils.error(e.getMessage());
             }
 
-            minecraft.gui.getChat().addRecentChat(message);
+            minecraft.gui.hud.getChat().addRecentChat(message);
             ci.cancel();
         }
     }

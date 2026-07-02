@@ -29,6 +29,7 @@ import net.minecraft.util.CommonColors;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Set;
@@ -101,7 +102,7 @@ public class AutoLog extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Disconnects when a specified entity is present within a specified range.")
-        .defaultValue(EntityType.END_CRYSTAL)
+        .defaultValue(EntityTypes.END_CRYSTAL)
         .build()
     );
 

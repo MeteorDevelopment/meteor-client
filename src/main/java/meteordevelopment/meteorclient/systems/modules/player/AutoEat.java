@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
+import it.unimi.dsi.fastutil.booleans.BooleanBinaryOperator;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -29,7 +30,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.List;
-import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
     @SuppressWarnings("unchecked")
@@ -333,14 +333,14 @@ public class AutoEat extends Module {
         Any((health, hunger) -> health || hunger),
         Both((health, hunger) -> health && hunger);
 
-        private final BiPredicate<Boolean, Boolean> predicate;
+        private final BooleanBinaryOperator predicate;
 
-        ThresholdMode(BiPredicate<Boolean, Boolean> predicate) {
+        ThresholdMode(BooleanBinaryOperator predicate) {
             this.predicate = predicate;
         }
 
         public boolean test(boolean health, boolean hunger) {
-            return predicate.test(health, hunger);
+            return predicate.apply(health, hunger);
         }
     }
 

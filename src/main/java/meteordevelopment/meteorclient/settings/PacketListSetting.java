@@ -57,7 +57,7 @@ public class PacketListSetting extends Setting<Set<PacketType<? extends @NotNull
     }
 
     @Override
-    public List<String> getSuggestions() {
+    public Iterable<String> getSuggestions() {
         return filter == null
             ? PacketUtils.getPackets().stream().map(PacketType::toString).toList()
             : PacketUtils.getPackets().stream().filter(filter).map(PacketType::toString).toList();

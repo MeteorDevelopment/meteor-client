@@ -50,7 +50,7 @@ public class MacrosTab extends Tab {
             add(theme.horizontalSeparator()).expandX();
 
             WButton create = add(theme.button("Create")).expandX().widget();
-            create.action = () -> mc.setScreen(new EditMacroScreen(theme, null, this::reload));
+            create.action = () -> mc.gui.setScreen(new EditMacroScreen(theme, null, this::reload));
         }
 
         private void initTable(WTable table) {
@@ -61,7 +61,7 @@ public class MacrosTab extends Tab {
                 table.add(theme.label(macro.name.get() + " (" + macro.keybind.get() + ")"));
 
                 WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
-                edit.action = () -> mc.setScreen(new EditMacroScreen(theme, macro, this::reload));
+                edit.action = () -> mc.gui.setScreen(new EditMacroScreen(theme, macro, this::reload));
 
                 WConfirmedMinus remove = table.add(theme.confirmedMinus()).widget();
                 remove.action = () -> {

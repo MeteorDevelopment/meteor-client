@@ -8,7 +8,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 @NullMarked
-public non-sealed class BuiltinFontFace extends FontFace {
+public final class BuiltinFontFace extends FontFace {
     private final String name;
 
     public BuiltinFontFace(FontInfo info, String name) {

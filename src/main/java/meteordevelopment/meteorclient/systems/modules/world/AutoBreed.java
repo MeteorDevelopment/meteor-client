@@ -9,12 +9,14 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.EntityAgeTest;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.phys.EntityHitResult;
 
@@ -27,10 +29,10 @@ public class AutoBreed extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Entities to breed.")
-        .defaultValue(EntityType.HORSE, EntityType.DONKEY, EntityType.COW,
-            EntityType.MOOSHROOM, EntityType.SHEEP, EntityType.PIG, EntityType.CHICKEN, EntityType.WOLF,
-            EntityType.CAT, EntityType.OCELOT, EntityType.RABBIT, EntityType.LLAMA, EntityType.TURTLE,
-            EntityType.PANDA, EntityType.FOX, EntityType.BEE, EntityType.STRIDER, EntityType.HOGLIN)
+        .defaultValue(EntityTypes.HORSE, EntityTypes.DONKEY, EntityTypes.COW,
+            EntityTypes.MOOSHROOM, EntityTypes.SHEEP, EntityTypes.PIG, EntityTypes.CHICKEN, EntityTypes.WOLF,
+            EntityTypes.CAT, EntityTypes.OCELOT, EntityTypes.RABBIT, EntityTypes.LLAMA, EntityTypes.TURTLE,
+            EntityTypes.PANDA, EntityTypes.FOX, EntityTypes.BEE, EntityTypes.STRIDER, EntityTypes.HOGLIN)
         .onlyAttackable()
         .build()
     );
@@ -50,10 +52,10 @@ public class AutoBreed extends Module {
         .build()
     );
 
-    private final Setting<EntityAge> mobAgeFilter = sgGeneral.add(new EnumSetting.Builder<EntityAge>()
+    private final Setting<EntityAgeTest> mobAgeFilter = sgGeneral.add(new EnumSetting.Builder<EntityAgeTest>()
         .name("mob-age-filter")
         .description("Determines the age of the mobs to target (baby, adult, or both).")
-        .defaultValue(EntityAge.Adult)
+        .defaultValue(EntityAgeTest.Adult)
         .build()
     );
 
@@ -93,7 +95,7 @@ public class AutoBreed extends Module {
             if (!(entity instanceof Animal animal)) continue;
 
             if (!entities.get().contains(animal.getType())
-                || !isCorrectAge(animal)
+                || !mobAgeFilter.get().test(animal)
                 || animalsFed.containsKey(animal)
                 || !PlayerUtils.isWithin(animal, range.get())
                 || !animal.isFood(hand.get() == InteractionHand.MAIN_HAND ? mc.player.getMainHandItem() : mc.player.getOffhandItem()))
@@ -116,17 +118,4 @@ public class AutoBreed extends Module {
         }
     }
 
-    public enum EntityAge {
-        Baby,
-        Adult,
-        Both
-    }
-
-    private boolean isCorrectAge(Animal animal) {
-        return switch (mobAgeFilter.get()) {
-            case Baby -> animal.isBaby();
-            case Adult -> !animal.isBaby();
-            case Both -> true;
-        };
-    }
 }

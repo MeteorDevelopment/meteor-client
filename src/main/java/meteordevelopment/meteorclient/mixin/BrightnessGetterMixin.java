@@ -7,13 +7,13 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.LightLayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-@Mixin(LevelRenderer.BrightnessGetter.class)
+@Mixin(LightCoordsUtil.BrightnessGetter.class)
 public interface BrightnessGetterMixin {
     @ModifyVariable(method = "lambda$static$0", at = @At(value = "STORE"), name = "sky")
     private static int getLightmapCoordinatesModifySkyLight(int sky) {

@@ -34,7 +34,7 @@ public class NametagUtils {
         model.set(modelView);
         NametagUtils.projection.set(RenderUtils.projection);
 
-        Utils.set(camera, mc.gameRenderer.getMainCamera().position());
+        Utils.set(camera, mc.gameRenderer.mainCamera().position());
         cameraNegated.set(camera);
         cameraNegated.negate();
 

@@ -29,7 +29,7 @@ public class WallHack extends Module {
         .sliderMax(255)
         .onChanged(_ -> {
             if (this.isActive()) {
-                mc.levelRenderer.allChanged();
+                mc.levelExtractor.allChanged();
             }
         })
         .build()
@@ -40,7 +40,9 @@ public class WallHack extends Module {
         .description("What blocks should be targeted for Wall Hack.")
         .defaultValue()
         .onChanged(_ -> {
-            if (isActive()) mc.levelRenderer.allChanged();
+            if (isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build()
     );
@@ -58,12 +60,12 @@ public class WallHack extends Module {
 
     @Override
     public void onActivate() {
-        mc.levelRenderer.allChanged();
+        mc.levelExtractor.allChanged();
     }
 
     @Override
     public void onDeactivate() {
-        mc.levelRenderer.allChanged();
+        mc.levelExtractor.allChanged();
     }
 
     @Override

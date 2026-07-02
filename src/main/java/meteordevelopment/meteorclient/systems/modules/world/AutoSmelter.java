@@ -94,7 +94,7 @@ public class AutoSmelter extends Module {
         // Insert new items
         insertItems(c);
 
-        if (autoClose.get()) mc.setScreen(null);
+        if (autoClose.get()) mc.gui.setScreen(null);
     }
 
     private void insertItems(AbstractFurnaceMenu c) {

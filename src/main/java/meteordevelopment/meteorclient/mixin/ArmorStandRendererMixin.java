@@ -9,7 +9,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import net.minecraft.client.renderer.entity.ArmorStandRenderer;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -24,6 +24,6 @@ public abstract class ArmorStandRendererMixin {
     private boolean modifyMarkerValue(boolean original) {
         if (esp == null) esp = Modules.get().get(ESP.class);
 
-        return original && !(esp.isActive() && !esp.shouldSkip(EntityType.ARMOR_STAND));
+        return original && !(esp.isActive() && !esp.shouldSkip(EntityTypes.ARMOR_STAND));
     }
 }

@@ -81,7 +81,7 @@ public class CameraTweaks extends Module {
 
     @EventHandler
     private void onMouseScroll(MouseScrollEvent event) {
-        if (mc.options.getCameraType() == CameraType.FIRST_PERSON || mc.screen != null || !scrollingEnabled.get() || (scrollKeybind.get().isSet() && !scrollKeybind.get().isPressed()))
+        if (mc.options.getCameraType() == CameraType.FIRST_PERSON || mc.gui.screen() != null || !scrollingEnabled.get() || (scrollKeybind.get().isSet() && !scrollKeybind.get().isPressed()))
             return;
 
         if (scrollSensitivity.get() > 0) {

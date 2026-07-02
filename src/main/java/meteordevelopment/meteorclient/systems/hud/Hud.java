@@ -231,7 +231,8 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         if (Utils.isLoading()) return;
 
         if (!(active || HudEditorScreen.isOpen()) || shouldHideHud()) return;
-        if ((mc.options.hideGui || mc.debugEntries.isOverlayVisible()) && !HudEditorScreen.isOpen()) return;
+        if ((mc.gameRenderer.gameRenderState().guiRenderState.isHudHidden || mc.debugEntries.isOverlayVisible()) && !HudEditorScreen.isOpen())
+            return;
 
         HudRenderer.INSTANCE.begin(event.graphics);
 
@@ -247,7 +248,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     }
 
     private boolean shouldHideHud() {
-        return hideInMenus.get() && mc.screen != null && !(mc.screen instanceof WidgetScreen);
+        return hideInMenus.get() && mc.gui.screen() != null && !(mc.gui.screen() instanceof WidgetScreen);
     }
 
     @EventHandler

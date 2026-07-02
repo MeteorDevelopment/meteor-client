@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
+import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
+import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.nbt.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.util.*;
+import org.jspecify.annotations.Nullable;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -50,7 +50,7 @@ public class NbtUtils {
     public static boolean toClipboard(CompoundTag tag) {
         String preClipboard = mc.keyboardHandler.getClipboard();
         try {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            var byteArrayOutputStream = new FastByteArrayOutputStream();
             NbtIo.writeCompressed(tag, byteArrayOutputStream);
             mc.keyboardHandler.setClipboard(Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray()));
             return true;
@@ -74,11 +74,11 @@ public class NbtUtils {
         return true;
     }
 
-    public static CompoundTag fromClipboard() {
+    public static @Nullable CompoundTag fromClipboard() {
         try {
             byte[] data = Base64.getDecoder().decode(mc.keyboardHandler.getClipboard().trim());
-            ByteArrayInputStream bis = new ByteArrayInputStream(data);
-            return NbtIo.readCompressed(new DataInputStream(bis), NbtAccounter.unlimitedHeap());
+            var bis = new FastByteArrayInputStream(data);
+            return NbtIo.readCompressed(bis, NbtAccounter.unlimitedHeap());
         } catch (Exception e) {
             MeteorClient.LOG.error("Invalid NBT data pasted!", e);
             return null;

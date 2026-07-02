@@ -52,6 +52,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ColorCollection;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -96,8 +97,8 @@ public class Utils {
 
     @EventHandler
     private static void onTick(TickEvent.Post event) {
-        if (screenToOpen != null && mc.screen == null) {
-            mc.setScreen(screenToOpen);
+        if (screenToOpen != null && mc.gui.screen() == null) {
+            mc.gui.setScreen(screenToOpen);
             screenToOpen = null;
         }
     }
@@ -256,7 +257,7 @@ public class Utils {
         if (hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
             Utils.getItemsInContainerItem(itemStack, contents);
             if (pause) screenToOpen = new PeekScreen(itemStack, contents);
-            else mc.setScreen(new PeekScreen(itemStack, contents));
+            else mc.gui.setScreen(new PeekScreen(itemStack, contents));
             return true;
         }
 
@@ -543,14 +544,14 @@ public class Utils {
     }
 
     public static boolean canOpenGui() {
-        if (canUpdate()) return mc.screen == null;
-        return mc.screen instanceof TitleScreen
-            || mc.screen instanceof JoinMultiplayerScreen
-            || mc.screen instanceof SelectWorldScreen;
+        if (canUpdate()) return mc.gui.screen() == null;
+        return mc.gui.screen() instanceof TitleScreen
+            || mc.gui.screen() instanceof JoinMultiplayerScreen
+            || mc.gui.screen() instanceof SelectWorldScreen;
     }
 
     public static boolean canCloseGui() {
-        return mc.screen instanceof TabScreen;
+        return mc.gui.screen() instanceof TabScreen;
     }
 
     public static int random(int min, int max) {
@@ -580,7 +581,26 @@ public class Utils {
     }
 
     public static boolean isShulker(Item item) {
-        return item == Items.SHULKER_BOX || item == Items.WHITE_SHULKER_BOX || item == Items.ORANGE_SHULKER_BOX || item == Items.MAGENTA_SHULKER_BOX || item == Items.LIGHT_BLUE_SHULKER_BOX || item == Items.YELLOW_SHULKER_BOX || item == Items.LIME_SHULKER_BOX || item == Items.PINK_SHULKER_BOX || item == Items.GRAY_SHULKER_BOX || item == Items.LIGHT_GRAY_SHULKER_BOX || item == Items.CYAN_SHULKER_BOX || item == Items.PURPLE_SHULKER_BOX || item == Items.BLUE_SHULKER_BOX || item == Items.BROWN_SHULKER_BOX || item == Items.GREEN_SHULKER_BOX || item == Items.RED_SHULKER_BOX || item == Items.BLACK_SHULKER_BOX;
+        return item == Items.SHULKER_BOX || contains(Items.DYED_SHULKER_BOX, item);
+    }
+
+    public static <T> boolean contains(ColorCollection<T> collection, T value) {
+        return collection.white() == value
+            || collection.orange() == value
+            || collection.magenta() == value
+            || collection.lightBlue() == value
+            || collection.yellow() == value
+            || collection.lime() == value
+            || collection.pink() == value
+            || collection.gray() == value
+            || collection.lightGray() == value
+            || collection.cyan() == value
+            || collection.purple() == value
+            || collection.blue() == value
+            || collection.brown() == value
+            || collection.green() == value
+            || collection.red() == value
+            || collection.black() == value;
     }
 
     public static boolean isThrowable(Item item) {

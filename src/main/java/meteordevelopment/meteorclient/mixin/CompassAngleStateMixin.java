@@ -23,7 +23,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public abstract class CompassAngleStateMixin {
     @ModifyExpressionValue(method = "getWrappedVisualRotationY", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ItemOwner;getVisualRotationYInDegrees()F"))
     private static float callLivingEntityGetYaw(float original) {
-        if (Modules.get().isActive(Freecam.class)) return mc.gameRenderer.getMainCamera().yRot();
+        if (Modules.get().isActive(Freecam.class)) return mc.gameRenderer.mainCamera().yRot();
         return original;
     }
 
@@ -31,7 +31,7 @@ public abstract class CompassAngleStateMixin {
     private static double modifyGetAngleTo(double original, ItemOwner owner, BlockPos position) {
         if (Modules.get().isActive(Freecam.class)) {
             Vec3 vec3d = Vec3.atCenterOf(position);
-            Camera camera = mc.gameRenderer.getMainCamera();
+            Camera camera = mc.gameRenderer.mainCamera();
             return Math.atan2(vec3d.z() - camera.position().z, vec3d.x() - camera.position().x) / (float) (Math.PI * 2);
         }
 

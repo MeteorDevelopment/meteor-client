@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.entity.EntityAgeTest;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.Target;
@@ -131,7 +132,7 @@ public class KillAura extends Module {
         .name("entities")
         .description("Entities to attack.")
         .onlyAttackable()
-        .defaultValue(EntityType.PLAYER)
+        .defaultValue(EntityTypes.PLAYER)
         .build()
     );
 
@@ -170,17 +171,17 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<EntityAge> passiveMobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAge>()
+    private final Setting<EntityAgeTest> passiveMobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAgeTest>()
         .name("passive-mob-age-filter")
         .description("Determines the age of passive mobs to target (animals, villagers).")
-        .defaultValue(EntityAge.Adult)
+        .defaultValue(EntityAgeTest.Adult)
         .build()
     );
 
-    private final Setting<EntityAge> hostileMobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAge>()
+    private final Setting<EntityAgeTest> hostileMobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAgeTest>()
         .name("hostile-mob-age-filter")
         .description("Determines the age of hostile mobs to target (zombies, piglins, hoglins, zoglins).")
-        .defaultValue(EntityAge.Both)
+        .defaultValue(EntityAgeTest.Both)
         .build()
     );
 
@@ -261,7 +262,7 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final static ArrayList<Item> FILTER = new ArrayList<>(List.of(Items.DIAMOND_SWORD, Items.DIAMOND_AXE, Items.DIAMOND_PICKAXE, Items.DIAMOND_SHOVEL, Items.DIAMOND_HOE, Items.MACE, Items.DIAMOND_SPEAR, Items.TRIDENT));
+    private final static Set<Item> FILTER = Set.of(Items.DIAMOND_SWORD, Items.DIAMOND_AXE, Items.DIAMOND_PICKAXE, Items.DIAMOND_SHOVEL, Items.DIAMOND_HOE, Items.MACE, Items.DIAMOND_SPEAR, Items.TRIDENT);
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
@@ -432,19 +433,11 @@ public class KillAura extends Module {
             // Hostile mobs with baby variants (zombies, piglins, hoglins, zoglins)
             if (entity instanceof Zombie || entity instanceof Piglin
                 || entity instanceof Hoglin || entity instanceof Zoglin) {
-                return switch (hostileMobAgeFilter.get()) {
-                    case Baby -> livingEntity.isBaby();
-                    case Adult -> !livingEntity.isBaby();
-                    case Both -> true;
-                };
+                return hostileMobAgeFilter.get().test(livingEntity);
             }
             // Passive mobs with baby variants (animals, villagers)
             if (entity instanceof AgeableMob && (!(entity instanceof Frog || entity instanceof Parrot))) {
-                return switch (passiveMobAgeFilter.get()) {
-                    case Baby -> livingEntity.isBaby();
-                    case Adult -> !livingEntity.isBaby();
-                    case Both -> true;
-                };
+                passiveMobAgeFilter.get().test(livingEntity);
             }
         }
         return true;
@@ -519,9 +512,4 @@ public class KillAura extends Module {
         None
     }
 
-    public enum EntityAge {
-        Baby,
-        Adult,
-        Both
-    }
 }

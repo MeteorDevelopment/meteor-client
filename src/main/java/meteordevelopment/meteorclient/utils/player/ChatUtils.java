@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.player;
 
 import com.mojang.brigadier.StringReader;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixininterface.IChatHud;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
@@ -14,18 +15,15 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.*;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ChatUtils {
-    private static final List<Tuple<String, Supplier<Component>>> customPrefixes = new ArrayList<>();
+    private static final Object2ObjectLinkedOpenHashMap<String, Supplier<Component>> customPrefixes = new Object2ObjectLinkedOpenHashMap<>();
     private static String forcedPrefixClassName;
 
     private static Component PREFIX;
@@ -51,14 +49,7 @@ public class ChatUtils {
      */
     @SuppressWarnings("unused")
     public static void registerCustomPrefix(String packageName, Supplier<Component> supplier) {
-        for (Tuple<String, Supplier<Component>> pair : customPrefixes) {
-            if (pair.getA().equals(packageName)) {
-                pair.setB(supplier);
-                return;
-            }
-        }
-
-        customPrefixes.add(new Tuple<>(packageName, supplier));
+        customPrefixes.put(packageName, supplier);
     }
 
     /**
@@ -66,7 +57,7 @@ public class ChatUtils {
      */
     @SuppressWarnings("unused")
     public static void unregisterCustomPrefix(String packageName) {
-        customPrefixes.removeIf(pair -> pair.getA().equals(packageName));
+        customPrefixes.remove(packageName);
     }
 
     public static void forceNextPrefixClass(Class<?> klass) {
@@ -86,7 +77,7 @@ public class ChatUtils {
      * Sends the message as if the user typed it into chat.
      */
     public static void sendPlayerMsg(String message, boolean addToHistory) {
-        if (addToHistory) mc.gui.getChat().addRecentChat(message);
+        if (addToHistory) mc.gui.hud.getChat().addRecentChat(message);
 
         if (message.startsWith("/")) mc.player.connection.sendCommand(message.substring(1));
         else mc.player.connection.sendChat(message);
@@ -161,7 +152,7 @@ public class ChatUtils {
         if (!Config.get().deleteChatFeedback.get()) id = 0;
 
         final int finalId = id; // Intellij copes about using non-final args in lambdas
-        mc.execute(() -> ((IChatHud) mc.gui.getChat()).meteor$add(message, finalId));
+        mc.execute(() -> ((IChatHud) mc.gui.hud.getChat()).meteor$add(message, finalId));
     }
 
     private static MutableComponent getCustomPrefix(String prefixTitle, ChatFormatting prefixColor) {
@@ -206,9 +197,9 @@ public class ChatUtils {
 
         if (className == null) return PREFIX;
 
-        for (Tuple<String, Supplier<Component>> pair : customPrefixes) {
-            if (className.startsWith(pair.getA())) {
-                Component prefix = pair.getB().get();
+        for (var entry : customPrefixes.object2ObjectEntrySet()) {
+            if (className.startsWith(entry.getKey())) {
+                Component prefix = entry.getValue().get();
                 return prefix != null ? prefix : PREFIX;
             }
         }

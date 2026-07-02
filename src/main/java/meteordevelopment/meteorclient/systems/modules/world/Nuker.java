@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -398,14 +399,14 @@ public class Nuker extends Module {
         // Flatten
         if (mode.get() == Mode.Flatten) pos1.setY((int) Math.floor(pY + 0.5));
 
-        AABB box = new AABB(pos1.getCenter(), pos2.getCenter());
+        AABB box = new AABB(Vec3.atCenterOf(pos1), Vec3.atCenterOf(pos2));
 
         // Find blocks to break
         BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
-            Vec3 center = blockPos.getCenter();
+            Vec3 center = Vec3.atCenterOf(blockPos);
             switch (shape.get()) {
                 case Sphere -> {
-                    if (Utils.squaredDistance(pX, pY, pZ, center.x(), center.y(), center.z()) > rangeSq)
+                    if (center.distanceToSqr(pX, pY, pZ) > rangeSq)
                         return;
                 }
                 case UniformCube -> {
@@ -434,8 +435,8 @@ public class Nuker extends Module {
             if (isOutOfRange(blockPos)) return;
 
             // Check whitelist or blacklist
-            if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(blockState.getBlock())) return;
-            if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(blockState.getBlock())) return;
+            boolean blockInList = (listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get()).contains(blockState.getBlock());
+            if (!listMode.get().allows(blockInList)) return;
 
             if (interact.get() && interacted.contains(blockPos)) return;
 
@@ -502,7 +503,7 @@ public class Nuker extends Module {
     private void breakBlock(BlockPos blockPos) {
         if (interact.get()) {
             // Interact mode
-            BlockUtils.interact(new BlockHitResult(blockPos.getCenter(), BlockUtils.getDirection(blockPos), blockPos, true), InteractionHand.MAIN_HAND, swing.get());
+            BlockUtils.interact(new BlockHitResult(Vec3.atCenterOf(blockPos), BlockUtils.getDirection(blockPos), blockPos, true), InteractionHand.MAIN_HAND, swing.get());
             interacted.add(blockPos);
         } else if (packetMine.get()) {
             // Packet mine mode
@@ -519,7 +520,7 @@ public class Nuker extends Module {
     }
 
     private boolean isOutOfRange(BlockPos blockPos) {
-        Vec3 pos = blockPos.getCenter();
+        Vec3 pos = Vec3.atCenterOf(blockPos);
         ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
         BlockHitResult result = mc.level.clip(clipContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
@@ -529,7 +530,7 @@ public class Nuker extends Module {
     }
 
     private void addTargetedBlockToList() {
-        if (!selectBlockBind.get().isPressed() || mc.screen != null) return;
+        if (!selectBlockBind.get().isPressed() || mc.gui.screen() != null) return;
 
         HitResult hitResult = mc.hitResult;
         if (hitResult == null || hitResult.getType() != HitResult.Type.BLOCK) return;
@@ -552,11 +553,6 @@ public class Nuker extends Module {
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onBlockBreakingCooldown(BlockBreakingCooldownEvent event) {
         event.cooldown = 0;
-    }
-
-    public enum ListMode {
-        Whitelist,
-        Blacklist
     }
 
     public enum Mode {

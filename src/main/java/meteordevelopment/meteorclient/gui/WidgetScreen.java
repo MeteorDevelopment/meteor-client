@@ -67,7 +67,7 @@ public abstract class WidgetScreen extends Screen {
     public WidgetScreen(GuiTheme theme, String title) {
         super(Component.literal(title));
 
-        this.parent = mc.screen;
+        this.parent = mc.gui.screen();
         this.root = new WFullScreenRoot();
         this.theme = theme;
 
@@ -349,7 +349,7 @@ public abstract class WidgetScreen extends Screen {
 
                 taskAfterRender = () -> {
                     locked = true;
-                    mc.setScreen(parent);
+                    mc.gui.setScreen(parent);
 
                     // Restore mouse position to where it was when the screen was closed
                     if (parent != null) {

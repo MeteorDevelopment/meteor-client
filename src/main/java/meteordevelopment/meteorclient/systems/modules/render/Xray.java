@@ -41,7 +41,9 @@ public class Xray extends Module {
         .description("Which blocks to show x-rayed.")
         .defaultValue(ORES)
         .onChanged(_ -> {
-            if (isActive()) mc.levelRenderer.allChanged();
+            if (isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build()
     );
@@ -53,7 +55,9 @@ public class Xray extends Module {
         .range(0, 255)
         .sliderMax(255)
         .onChanged(_ -> {
-            if (isActive()) mc.levelRenderer.allChanged();
+            if (isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build()
     );
@@ -63,7 +67,9 @@ public class Xray extends Module {
         .description("Which fluids should use xray opacity.")
         .defaultValue(FluidOpacity.Both)
         .onChanged(_ -> {
-            if (isActive()) mc.levelRenderer.allChanged();
+            if (isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build()
     );
@@ -73,7 +79,9 @@ public class Xray extends Module {
         .description("Show only exposed ores.")
         .defaultValue(false)
         .onChanged(_ -> {
-            if (isActive()) mc.levelRenderer.allChanged();
+            if (isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build());
 
@@ -83,12 +91,12 @@ public class Xray extends Module {
 
     @Override
     public void onActivate() {
-        mc.levelRenderer.allChanged();
+        mc.levelExtractor.allChanged();
     }
 
     @Override
     public void onDeactivate() {
-        mc.levelRenderer.allChanged();
+        mc.levelExtractor.allChanged();
     }
 
     @Override

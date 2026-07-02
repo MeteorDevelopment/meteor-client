@@ -71,7 +71,7 @@ public class SaveMapCommand extends Command {
         File path = getPath();
         if (path == null) throw OOPS.create();
 
-        MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.gameRenderer.getMinecraft().getMapTextureManager();
+        MapTextureManagerAccessor textureManager = (MapTextureManagerAccessor) mc.getMapTextureManager();
         MapTextureManager.MapInstance texture = textureManager.meteor$invokeGetOrCreateMapInstance(map.get(DataComponents.MAP_ID), state);
         if (texture.texture.getPixels() == null) throw OOPS.create();
 

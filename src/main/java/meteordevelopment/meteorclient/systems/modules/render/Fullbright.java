@@ -29,7 +29,9 @@ public class Fullbright extends Module {
         .onChanged(mode -> {
             if (isActive()) {
                 if (mode != Mode.Potion) disableNightVision();
-                if (mc.levelRenderer != null) mc.levelRenderer.allChanged();
+                if (mc.levelRenderer != null) {
+                    mc.levelExtractor.allChanged();
+                }
             }
         })
         .build()
@@ -41,7 +43,9 @@ public class Fullbright extends Module {
         .defaultValue(LightLayer.BLOCK)
         .visible(() -> mode.get() == Mode.Luminance)
         .onChanged(_ -> {
-            if (mc.levelRenderer != null && isActive()) mc.levelRenderer.allChanged();
+            if (mc.levelRenderer != null && isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build()
     );
@@ -54,7 +58,9 @@ public class Fullbright extends Module {
         .range(0, 15)
         .sliderMax(15)
         .onChanged(_ -> {
-            if (mc.levelRenderer != null && isActive()) mc.levelRenderer.allChanged();
+            if (mc.levelRenderer != null && isActive()) {
+                mc.levelExtractor.allChanged();
+            }
         })
         .build()
     );
@@ -65,13 +71,16 @@ public class Fullbright extends Module {
 
     @Override
     public void onActivate() {
-        if (mode.get() == Mode.Luminance) mc.levelRenderer.allChanged();
+        if (mode.get() == Mode.Luminance) {
+            mc.levelExtractor.allChanged();
+        }
     }
 
     @Override
     public void onDeactivate() {
-        if (mode.get() == Mode.Luminance) mc.levelRenderer.allChanged();
-        else if (mode.get() == Mode.Potion) disableNightVision();
+        if (mode.get() == Mode.Luminance) {
+            mc.levelExtractor.allChanged();
+        } else if (mode.get() == Mode.Potion) disableNightVision();
     }
 
     public int getLuminance(LightLayer type) {

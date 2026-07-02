@@ -78,7 +78,7 @@ public class AutoClicker extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!inScreens.get() && mc.screen != null) return;
+        if (!inScreens.get() && mc.gui.screen() != null) return;
 
         switch (leftClickMode.get()) {
             case Disabled -> {

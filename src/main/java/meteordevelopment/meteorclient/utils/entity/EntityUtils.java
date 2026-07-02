@@ -17,6 +17,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
@@ -44,45 +45,45 @@ public class EntityUtils {
     }
 
     public static boolean isAttackable(EntityType<?> type) {
-        return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.SPLASH_POTION && type != EntityType.LINGERING_POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;
+        return type != EntityTypes.AREA_EFFECT_CLOUD && type != EntityTypes.ARROW && type != EntityTypes.FALLING_BLOCK && type != EntityTypes.FIREWORK_ROCKET && type != EntityTypes.ITEM && type != EntityTypes.LLAMA_SPIT && type != EntityTypes.SPECTRAL_ARROW && type != EntityTypes.ENDER_PEARL && type != EntityTypes.EXPERIENCE_BOTTLE && type != EntityTypes.SPLASH_POTION && type != EntityTypes.LINGERING_POTION && type != EntityTypes.TRIDENT && type != EntityTypes.LIGHTNING_BOLT && type != EntityTypes.FISHING_BOBBER && type != EntityTypes.EXPERIENCE_ORB && type != EntityTypes.EGG;
     }
 
     public static boolean isRideable(EntityType<?> type) {
-        return type == EntityType.PIG ||
-            type == EntityType.STRIDER ||
-            type == EntityType.HORSE ||
-            type == EntityType.DONKEY ||
-            type == EntityType.MULE ||
-            type == EntityType.SKELETON_HORSE ||
-            type == EntityType.ZOMBIE_HORSE ||
-            type == EntityType.LLAMA ||
-            type == EntityType.TRADER_LLAMA ||
-            type == EntityType.CAMEL ||
-            type == EntityType.CAMEL_HUSK ||
-            type == EntityType.MINECART ||
-            type == EntityType.OAK_BOAT ||
-            type == EntityType.SPRUCE_BOAT ||
-            type == EntityType.BIRCH_BOAT ||
-            type == EntityType.JUNGLE_BOAT ||
-            type == EntityType.ACACIA_BOAT ||
-            type == EntityType.CHERRY_BOAT ||
-            type == EntityType.DARK_OAK_BOAT ||
-            type == EntityType.PALE_OAK_BOAT ||
-            type == EntityType.MANGROVE_BOAT ||
-            type == EntityType.BAMBOO_RAFT ||
-            type == EntityType.ACACIA_CHEST_BOAT ||
-            type == EntityType.BIRCH_CHEST_BOAT ||
-            type == EntityType.CHERRY_CHEST_BOAT ||
-            type == EntityType.DARK_OAK_CHEST_BOAT ||
-            type == EntityType.JUNGLE_CHEST_BOAT ||
-            type == EntityType.MANGROVE_CHEST_BOAT ||
-            type == EntityType.OAK_CHEST_BOAT ||
-            type == EntityType.PALE_OAK_CHEST_BOAT ||
-            type == EntityType.SPRUCE_CHEST_BOAT ||
-            type == EntityType.BAMBOO_CHEST_RAFT ||
-            type == EntityType.NAUTILUS ||
-            type == EntityType.ZOMBIE_NAUTILUS ||
-            type == EntityType.HAPPY_GHAST;
+        return type == EntityTypes.PIG ||
+            type == EntityTypes.STRIDER ||
+            type == EntityTypes.HORSE ||
+            type == EntityTypes.DONKEY ||
+            type == EntityTypes.MULE ||
+            type == EntityTypes.SKELETON_HORSE ||
+            type == EntityTypes.ZOMBIE_HORSE ||
+            type == EntityTypes.LLAMA ||
+            type == EntityTypes.TRADER_LLAMA ||
+            type == EntityTypes.CAMEL ||
+            type == EntityTypes.CAMEL_HUSK ||
+            type == EntityTypes.MINECART ||
+            type == EntityTypes.OAK_BOAT ||
+            type == EntityTypes.SPRUCE_BOAT ||
+            type == EntityTypes.BIRCH_BOAT ||
+            type == EntityTypes.JUNGLE_BOAT ||
+            type == EntityTypes.ACACIA_BOAT ||
+            type == EntityTypes.CHERRY_BOAT ||
+            type == EntityTypes.DARK_OAK_BOAT ||
+            type == EntityTypes.PALE_OAK_BOAT ||
+            type == EntityTypes.MANGROVE_BOAT ||
+            type == EntityTypes.BAMBOO_RAFT ||
+            type == EntityTypes.ACACIA_CHEST_BOAT ||
+            type == EntityTypes.BIRCH_CHEST_BOAT ||
+            type == EntityTypes.CHERRY_CHEST_BOAT ||
+            type == EntityTypes.DARK_OAK_CHEST_BOAT ||
+            type == EntityTypes.JUNGLE_CHEST_BOAT ||
+            type == EntityTypes.MANGROVE_CHEST_BOAT ||
+            type == EntityTypes.OAK_CHEST_BOAT ||
+            type == EntityTypes.PALE_OAK_CHEST_BOAT ||
+            type == EntityTypes.SPRUCE_CHEST_BOAT ||
+            type == EntityTypes.BAMBOO_CHEST_RAFT ||
+            type == EntityTypes.NAUTILUS ||
+            type == EntityTypes.ZOMBIE_NAUTILUS ||
+            type == EntityTypes.HAPPY_GHAST;
     }
 
     public static float getTotalHealth(LivingEntity target) {
@@ -145,8 +146,8 @@ public class EntityUtils {
     }
 
     public static boolean isInRenderDistance(double posX, double posZ) {
-        double x = Math.abs(mc.gameRenderer.getMainCamera().position().x - posX);
-        double z = Math.abs(mc.gameRenderer.getMainCamera().position().z - posZ);
+        double x = Math.abs(mc.gameRenderer.mainCamera().position().x - posX);
+        double z = Math.abs(mc.gameRenderer.mainCamera().position().z - posZ);
         double d = (mc.options.renderDistance().get() + 1) * 16;
 
         return x < d && z < d;

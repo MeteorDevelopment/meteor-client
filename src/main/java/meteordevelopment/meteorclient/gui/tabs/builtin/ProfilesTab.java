@@ -87,7 +87,7 @@ public class ProfilesTab extends Tab {
             // Create
             WButton create = l.add(theme.button("Create")).expandX().widget();
             create.tooltip = "Create new profile";
-            create.action = () -> mc.setScreen(new EditProfileScreen(theme, null, this::reload));
+            create.action = () -> mc.gui.setScreen(new EditProfileScreen(theme, null, this::reload));
 
             // Import
             WButton importBtn = l.add(theme.button("Import")).expandX().widget();
@@ -125,10 +125,10 @@ public class ProfilesTab extends Tab {
                 load.action = profile::load;
 
                 WButton export = table.add(theme.button("Export")).widget();
-                export.action = () -> mc.setScreen(new ExportProfileScreen(theme, profile));
+                export.action = () -> mc.gui.setScreen(new ExportProfileScreen(theme, profile));
 
                 WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
-                edit.action = () -> mc.setScreen(new EditProfileScreen(theme, profile, this::reload));
+                edit.action = () -> mc.gui.setScreen(new EditProfileScreen(theme, profile, this::reload));
 
                 WConfirmedMinus remove = table.add(theme.confirmedMinus()).widget();
                 remove.action = () -> {

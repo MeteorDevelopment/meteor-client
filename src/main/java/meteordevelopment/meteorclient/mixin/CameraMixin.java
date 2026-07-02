@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -95,6 +96,14 @@ public abstract class CameraMixin implements ICamera {
             args.set(0, freeLook.cameraYaw);
             args.set(1, freeLook.cameraPitch);
         }
+    }
+
+    /**
+     * Set as spectator to disable smart culling
+     */
+    @ModifyExpressionValue(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
+    private boolean hookFreeCamDisableSmartCullInBlocks(boolean original) {
+        return original || Modules.get().get(Freecam.class).isActive();
     }
 
     @ModifyReturnValue(method = "calculateFov", at = @At("RETURN"))

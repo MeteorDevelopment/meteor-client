@@ -94,7 +94,7 @@ public class Excavator extends Module {
 
     @EventHandler
     private void onMouseClick(MouseClickEvent event) {
-        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.screen != null) {
+        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.gui.screen() != null) {
             return;
         }
         selectCorners();
@@ -102,7 +102,7 @@ public class Excavator extends Module {
 
     @EventHandler
     private void onKey(KeyInputEvent event) {
-        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.screen != null) {
+        if (event.action != KeyAction.Press || !selectionBind.get().isPressed() || mc.gui.screen() != null) {
             return;
         }
         selectCorners();

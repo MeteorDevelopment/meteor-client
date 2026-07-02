@@ -80,7 +80,7 @@ public class RenderUtils {
         Vector4f center4 = new Vector4f(0, 0, 0, 1).mul(invProjection).mul(invView);
         center4.div(center4.w);
 
-        Vec3 camera = mc.gameRenderer.getMainCamera().position();
+        Vec3 camera = mc.gameRenderer.mainCamera().position();
         center = new Vec3(camera.x + center4.x, camera.y + center4.y, camera.z + center4.z);
     }
 

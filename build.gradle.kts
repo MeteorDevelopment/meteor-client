@@ -140,12 +140,28 @@ loom {
 }
 
 fun toMinecraftCompat(version: String): String {
-    val match = Regex("""^(\d{2})\.([1-9]\d*)(?:\.([1-9]\d*))?$""")
-        .matchEntire(version)
-        ?: error("Invalid Minecraft version format: $version. Expected YY.D or YY.D.H")
+    // Stable release
+    val stable = Regex("""^(\d{2})\.([1-9]\d*)(?:\.(\d+))?$""")
 
-    val (year, drop, _) = match.destructured
-    return "~$year.$drop"
+    stable.matchEntire(version)?.let {
+        val (year, drop, _) = it.destructured
+        return "~$year.$drop"
+    }
+
+    // Prerelease
+    val pre = Regex("""^(\d{2})\.([1-9]\d*)-pre[-.](\d+)$""")
+    pre.matchEntire(version)?.let {
+        return version.replace("-pre-", "-pre.")
+    }
+
+    // Release Candidate
+    val rc = Regex("""^(\d{2})\.([1-9]\d*)-rc[-.](\d+)$""")
+    rc.matchEntire(version)?.let {
+        return version.replace("-rc-", "-rc.")
+    }
+
+    // fallback
+    return version
 }
 
 tasks {

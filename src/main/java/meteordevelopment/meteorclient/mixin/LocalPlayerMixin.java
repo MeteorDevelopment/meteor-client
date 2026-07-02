@@ -53,7 +53,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
             cir.setReturnValue(false);
     }
 
-    @ModifyExpressionValue(method = "handlePortalTransitionEffect", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;", opcode = Opcodes.GETFIELD))
+    @ModifyExpressionValue(method = "handlePortalTransitionEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;screen()Lnet/minecraft/client/gui/screens/Screen;", ordinal = 0))
     private Screen modifyPortalTransitionEffect(Screen original) {
         if (Modules.get().isActive(Portals.class)) return null;
         return original;

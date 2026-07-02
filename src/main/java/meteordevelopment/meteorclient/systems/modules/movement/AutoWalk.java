@@ -120,7 +120,7 @@ public class AutoWalk extends Module {
 
     private void onMovement() {
         if (!disableOnInput.get()) return;
-        if (mc.screen != null) {
+        if (mc.gui.screen() != null) {
             GUIMove guiMove = Modules.get().get(GUIMove.class);
             if (!guiMove.isActive()) return;
             if (guiMove.skip()) return;

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
@@ -70,9 +71,9 @@ import org.jetbrains.annotations.Range;
 import org.joml.Vector3d;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 @SuppressWarnings("ConstantConditions")
@@ -455,7 +456,7 @@ public class HighwayBuilder extends Module {
     private boolean suspended = true, inventory = true;
     private int placeTimer, breakTimer, count, containerId;
     private final RestockTask restockTask = new RestockTask(this);
-    private final ArrayList<EndCrystal> ignoreCrystals = new ArrayList<>();
+    private final Set<EndCrystal> ignoreCrystals = new ReferenceOpenHashSet<>();
     public boolean drawingBow;
     public DoubleMineBlock normalMining, packetMining;
 
@@ -1289,11 +1290,11 @@ public class HighwayBuilder extends Module {
                 BlockState blockState = b.mc.level.getBlockState(bp);
 
                 if (blockState.getBlock() == Blocks.ENDER_CHEST) {
-                    if (b.mc.screen instanceof ContainerScreen screen) {
+                    if (b.mc.gui.screen() instanceof ContainerScreen screen) {
                         // wait for the screen to be properly loaded
                         if (screen.getMenu().containerId != b.containerId) return;
 
-                        b.mc.screen.onClose();
+                        b.mc.gui.screen().onClose();
                     }
 
                     // if we don't know what's in your echest, open it quickly while we have one available to check
@@ -1536,7 +1537,7 @@ public class HighwayBuilder extends Module {
                     indicateStopping = true;
                     breakContainer = true;
                     stopTimer = 12;
-                    if (b.mc.screen != null) b.mc.screen.onClose();
+                    if (b.mc.gui.screen() != null) b.mc.gui.screen().onClose();
                     return;
                 }
 
@@ -1547,7 +1548,7 @@ public class HighwayBuilder extends Module {
                 switch (blockState.getBlock()) {
                     // if we have placed a shulker box there should be items inside we want
                     case ShulkerBoxBlock _ -> {
-                        if (b.mc.screen instanceof ShulkerBoxScreen screen) {
+                        if (b.mc.gui.screen() instanceof ShulkerBoxScreen screen) {
                             // wait for the screen to be properly loaded
                             if (screen.getMenu().containerId != b.containerId) return;
 
@@ -1560,7 +1561,7 @@ public class HighwayBuilder extends Module {
 
                             // we have taken everything we can from the shulker box, and since slotsPulled >= minimumSlots is false, we should keep going
                             // close the screen, break the shulker box, look for more containers to loot from
-                            b.mc.screen.onClose();
+                            b.mc.gui.screen().onClose();
                             breakContainer = true;
                         } else {
                             if (!b.searchShulkers.get()) breakContainer = true;
@@ -1570,7 +1571,7 @@ public class HighwayBuilder extends Module {
 
                     // we are either pulling items themselves, or shulkers containing items from your ec
                     case EnderChestBlock _ -> {
-                        if (b.mc.screen instanceof ContainerScreen screen) {
+                        if (b.mc.gui.screen() instanceof ContainerScreen screen) {
                             // wait for the screen to be properly loaded
                             if (screen.getMenu().containerId != b.containerId) return;
 
@@ -1598,7 +1599,7 @@ public class HighwayBuilder extends Module {
 
                             // if it reaches here, we have taken everything we can from your ender chest, and may have also grabbed a shulker
                             // we should be finished in your ender chest, so we can break it and either continue on our way or start checking shulkers
-                            b.mc.screen.onClose();
+                            b.mc.gui.screen().onClose();
                             breakContainer = true;
                         } else {
                             if (!b.searchEnderChest.get()) breakContainer = true;

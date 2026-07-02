@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ListMode;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -158,11 +160,12 @@ public class LiquidFiller extends Module {
 
         // Find slot with a block
         FindItemResult item;
-        if (listMode.get() == ListMode.Whitelist) {
-            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && whitelist.get().contains(Block.byItem(itemStack.getItem())));
-        } else {
-            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && !blacklist.get().contains(Block.byItem(itemStack.getItem())));
-        }
+        item = InvUtils.findInHotbar(itemStack -> {
+            if (!(itemStack.getItem() instanceof BlockItem)) return false;
+
+            boolean itemInList = (listMode.get() == ListMode.Whitelist ? whitelist.get() : blacklist.get()).contains(Block.byItem(itemStack.getItem()));
+            return listMode.get().allows(itemInList);
+        });
         if (!item.found()) return;
 
         // Loop blocks around the player
@@ -203,11 +206,6 @@ public class LiquidFiller extends Module {
         });
     }
 
-    public enum ListMode {
-        Whitelist,
-        Blacklist
-    }
-
     public enum PlaceIn {
         Both,
         Water,
@@ -230,7 +228,7 @@ public class LiquidFiller extends Module {
     private boolean isOutOfRange(BlockPos blockPos) {
         if (!isWithinShape(blockPos, placeRange.get())) return true;
 
-        ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), blockPos.getCenter(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
+        ClipContext clipContext = new ClipContext(mc.player.getEyePosition(), Vec3.atCenterOf(blockPos), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player);
         BlockHitResult result = mc.level.clip(clipContext);
         if (result == null || !result.getBlockPos().equals(blockPos))
             return !isWithinShape(blockPos, placeWallsRange.get());
@@ -250,6 +248,6 @@ public class LiquidFiller extends Module {
         }
 
         // Spherical shape
-        return PlayerUtils.isWithin(blockPos.getCenter(), range);
+        return PlayerUtils.isWithin(Vec3.atCenterOf(blockPos), range);
     }
 }

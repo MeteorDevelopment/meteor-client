@@ -24,20 +24,20 @@ public class InputCommand extends Command {
     private static final List<KeypressHandler> activeHandlers = new ArrayList<>();
 
     private static final List<Pair<KeyMapping, String>> holdKeys = List.of(
-        new Pair<>(mc.options.keyUp, "forwards"),
-        new Pair<>(mc.options.keyDown, "backwards"),
-        new Pair<>(mc.options.keyLeft, "left"),
-        new Pair<>(mc.options.keyRight, "right"),
-        new Pair<>(mc.options.keyJump, "jump"),
-        new Pair<>(mc.options.keyShift, "sneak"),
-        new Pair<>(mc.options.keySprint, "sprint"),
-        new Pair<>(mc.options.keyUse, "use"),
-        new Pair<>(mc.options.keyAttack, "attack")
+        Pair.of(mc.options.keyUp, "forwards"),
+        Pair.of(mc.options.keyDown, "backwards"),
+        Pair.of(mc.options.keyLeft, "left"),
+        Pair.of(mc.options.keyRight, "right"),
+        Pair.of(mc.options.keyJump, "jump"),
+        Pair.of(mc.options.keyShift, "sneak"),
+        Pair.of(mc.options.keySprint, "sprint"),
+        Pair.of(mc.options.keyUse, "use"),
+        Pair.of(mc.options.keyAttack, "attack")
     );
 
     private static final List<Pair<KeyMapping, String>> pressKeys = List.of(
-        new Pair<>(mc.options.keySwapOffhand, "swap"),
-        new Pair<>(mc.options.keyDrop, "drop")
+        Pair.of(mc.options.keySwapOffhand, "swap"),
+        Pair.of(mc.options.keyDrop, "drop")
     );
 
     public InputCommand() {
