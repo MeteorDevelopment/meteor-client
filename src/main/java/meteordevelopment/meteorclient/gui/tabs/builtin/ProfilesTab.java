@@ -148,14 +148,16 @@ public class ProfilesTab extends Tab {
             CompoundTag nbt = NbtIo.read(profileFile.toPath());
 
             Profile p = new Profile();
-            p.name.set(nbt.getStringOr("name", profileFile.getName()));
+            if (!p.name.set(nbt.getStringOr("name", profileFile.getName())) || p.name.get().isEmpty()) return null;
+            File profileFolder = p.getFile().getCanonicalFile();
             //noinspection ResultOfMethodCallIgnored
-            p.getFile().mkdirs();
+            profileFolder.mkdirs();
 
             nbt.remove("name");
             for (var entry : nbt.entrySet()) {
                 String filename = entry.getKey();
                 if (!filename.endsWith(".nbt")) continue;
+                if (filename.contains("/") || filename.contains("\\") || new File(filename).isAbsolute()) continue;
 
                 switch (filename) {
                     case "hud.nbt" -> p.hud.set(true);
@@ -166,8 +168,8 @@ public class ProfilesTab extends Tab {
                     }
                 }
 
-                File f = new File(p.getFile(), filename).getCanonicalFile();
-                if (!f.toPath().startsWith(Profiles.FOLDER.getCanonicalFile().toPath())) continue;
+                File f = new File(profileFolder, filename).getCanonicalFile();
+                if (!f.toPath().startsWith(profileFolder.toPath())) continue;
 
                 NbtIo.writeUnnamedTagWithFallback(entry.getValue(), new DataOutputStream(new FileOutputStream(f)));
             }
