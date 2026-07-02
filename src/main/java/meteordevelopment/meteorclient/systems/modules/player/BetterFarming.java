@@ -1,0 +1,289 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.systems.modules.player;
+
+import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.ServerboundMovePlayerPacketAccessor;
+import meteordevelopment.meteorclient.mixininterface.IServerboundMovePlayerPacket;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.systems.modules.Categories;
+import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.NetherWartBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+
+import java.util.ArrayList;
+
+public class BetterFarming extends Module {
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgNoBreak = settings.createGroup("No Break");
+
+    // General
+
+    private final Setting<Boolean> cropReplace = sgGeneral.add(new BoolSetting.Builder()
+        .name("crop-replace")
+        .description("Automatically plant new crop on harvest.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> suppressTrample = sgGeneral.add(new BoolSetting.Builder()
+        .name("suppress-trample")
+        .description("Attempts to prevent player from trampling crops.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> noBreakUnripe = sgNoBreak.add(new BoolSetting.Builder()
+        .name("no-break-unripe")
+        .description("Prevents player from breaking unripe crops.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> noBreakCaneBase = sgNoBreak.add(new BoolSetting.Builder()
+        .name("no-break-cane-base")
+        .description("Prevents player from breaking the base of sugarcane, bamboo and cactus blocks.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> noBreakSupportingBlocks = sgNoBreak.add(new BoolSetting.Builder()
+        .name("no-break-supporting-blocks")
+        .description("Prevents player from breaking the block supporting a crop, eg. Jungle log with cocoa, budding amethyst, sand under cactus.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public BetterFarming() {
+        super(Categories.Player, "better-farming", "Improvements for crop farming.");
+    }
+
+    private Item placeItem = null;
+    private final ArrayList<BlockPos> cropPlacements = new ArrayList<>();
+    private int blockBreakCooldown = 0;
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onTick(TickEvent.Pre event) {
+        if (cropReplace.get()) autoPlaceTick();
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onStartBreakingBlockEvent(StartBreakingBlockEvent event) {
+        if (noBreakUnripe.get()) noBreakUnripeBreakEvent(event);
+        if (noBreakCaneBase.get()) noBreakCaneBaseBreakEvent(event);
+        if (noBreakSupportingBlocks.get()) noBreakSupportingBlocksBreakEvent(event);
+        if (cropReplace.get()) autoPlaceBreakEvent(event);
+    }
+
+    @EventHandler
+    private void onSendPacket(PacketEvent.Send event) {
+        if (suppressTrample.get()) trampleSuppressionSendEvent(event);
+    }
+
+    private void noBreakUnripeBreakEvent(StartBreakingBlockEvent event) {
+        BlockState blockState = mc.level.getBlockState(event.blockPos);
+
+        if (blockState.getBlock() instanceof CropBlock cropBlock) {
+            if (cropBlock.isMaxAge(blockState)) return;
+
+            event.cancel();
+        }
+
+        if (blockState.getBlock() instanceof NetherWartBlock) {
+            if (blockState.getValue(NetherWartBlock.AGE) >= NetherWartBlock.MAX_AGE) return;
+
+            event.cancel();
+        }
+    }
+
+    private boolean isCaneBlock(BlockState blockState) {
+        return blockState.is(Blocks.SUGAR_CANE)
+            || blockState.is(Blocks.BAMBOO)
+            || blockState.is(Blocks.CACTUS);
+    }
+
+    private boolean isSupportedBelowCrop(BlockState blockState) {
+        return blockState.is(BlockTags.CROPS)
+            || blockState.is(Blocks.NETHER_WART)
+            || isCaneBlock(blockState);
+    }
+
+    private boolean isReplaceableCrop(BlockState blockState) {
+        return blockState.is(BlockTags.CROPS)
+            || blockState.is(Blocks.NETHER_WART);
+    }
+
+    private boolean checkForCocoa(BlockPos blockPos) {
+        Direction[] checkDirections = {
+            Direction.NORTH,
+            Direction.SOUTH,
+            Direction.EAST,
+            Direction.WEST,
+        };
+
+        for (Direction direction : checkDirections) {
+            // Check block at blockPos offset by the direction normal vector.
+            BlockState bsCheck = mc.level.getBlockState(blockPos.offset(direction.getUnitVec3i()));
+
+            if (bsCheck.is(Blocks.COCOA)) {
+
+                Direction facingDirection = bsCheck.getValue(BlockStateProperties.HORIZONTAL_FACING);
+
+                if (facingDirection == direction.getOpposite()) {
+                    return true;
+                }
+            }
+
+        }
+
+        return false;
+    }
+
+    private void noBreakCaneBaseBreakEvent(StartBreakingBlockEvent event) {
+        BlockState blockState = mc.level.getBlockState(event.blockPos);
+        BlockState bsBelow = mc.level.getBlockState(event.blockPos.offset(0, -1, 0));
+
+        boolean bsIsCane = isCaneBlock(blockState);
+        boolean bsBelowIsCane = isCaneBlock(bsBelow);
+
+        if (!bsIsCane || bsBelowIsCane) return;
+
+        event.cancel();
+    }
+
+    private void noBreakSupportingBlocksBreakEvent(StartBreakingBlockEvent event) {
+        BlockPos blockPos = event.blockPos;
+        BlockState blockState = mc.level.getBlockState(blockPos);
+        BlockState bsAbove = mc.level.getBlockState(blockPos.offset(0, 1, 0));
+
+        if (!isSupportedBelowCrop(blockState) && isSupportedBelowCrop(bsAbove)) {
+            event.cancel();
+            return;
+        }
+
+        if (blockState.is(BlockTags.SUPPORTS_COCOA) && checkForCocoa(blockPos)) {
+            event.cancel();
+            return;
+        }
+
+        if (blockState.is(Blocks.BUDDING_AMETHYST)) {
+            event.cancel();
+        }
+    }
+
+    private void autoPlaceTick() {
+        if (blockBreakCooldown > 0) {
+            blockBreakCooldown--;
+        }
+
+        if (placeItem == null) return;
+        if (cropPlacements.isEmpty()) {
+            placeItem = null;
+            return;
+        }
+
+        BlockPos blockPos = cropPlacements.getFirst();
+        cropPlacements.removeFirst();
+
+        FindItemResult foundItem = InvUtils.find(placeItem);
+
+        // If the found item is not in mainhand yet, its not ready
+        if (!foundItem.isMainHand()) return;
+
+        BlockState blockState = mc.level.getBlockState(blockPos);
+
+        if (blockState.is(BlockTags.AIR)) {
+            BlockUtils.place(blockPos, foundItem, 0);
+        } else {
+            BlockUtils.breakBlock(blockPos, true);
+        }
+    }
+
+    private void autoPlaceBreakEvent(StartBreakingBlockEvent event) {
+        if (event.isCancelled()) return;
+
+        BlockState blockState = mc.level.getBlockState(event.blockPos);
+
+        if (!isReplaceableCrop(blockState)) return;
+
+        if (blockBreakCooldown > 0) {
+            event.cancel();
+            return;
+        }
+
+        Item blockItem = blockState.getBlock().asItem();
+        FindItemResult foundItem = InvUtils.find(blockItem);
+
+        if (!foundItem.found()) return;
+
+        placeItem = blockItem;
+        cropPlacements.add(event.blockPos);
+
+        if (foundItem.isMainHand()) {
+            blockBreakCooldown = 3;
+            return;
+        };
+
+        mc.gameMode.handlePickItemFromBlock(event.blockPos, false);
+
+        // Cancel the event to allow pickblock to do its thing
+        event.cancel();
+    }
+
+    private void trampleSuppressionSendEvent(PacketEvent.Send event) {
+        if (mc.player == null) return;
+        if (!(event.packet instanceof ServerboundMovePlayerPacket)
+            || ((IServerboundMovePlayerPacket) event.packet).meteor$getTag() == 1337) return;
+
+        ServerboundMovePlayerPacket packet = (ServerboundMovePlayerPacket) event.packet;
+
+        BlockPos blockPos = new BlockPos(
+            (int) packet.getX(0d),
+            (int) packet.getY(0d),
+            (int) packet.getZ(0d)
+        );
+
+        // Only suppress fall if blocks beneath are farmland
+        // Check 3x3 area beneath player, for if the player jumps on the edge
+        BlockPos[] posChecks = {
+            blockPos.offset(-1, -1, -1),
+            blockPos.offset(-1, -1, 0),
+            blockPos.offset(-1, -1, 1),
+            blockPos.offset(0, -1, -1),
+            blockPos.offset(0, -1, 0),
+            blockPos.offset(0, -1, 1),
+            blockPos.offset(1, -1, -1),
+            blockPos.offset(1, -1, 0),
+            blockPos.offset(1, -1, 1),
+        };
+
+        for (BlockPos pos : posChecks) {
+            BlockState blockState = mc.level.getBlockState(pos);
+
+            if (blockState.is(Blocks.FARMLAND)) {
+                ((ServerboundMovePlayerPacketAccessor) event.packet).meteor$setOnGround(true);
+                break;
+            }
+        }
+    }
+}
