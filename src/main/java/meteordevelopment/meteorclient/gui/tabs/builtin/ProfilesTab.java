@@ -149,14 +149,17 @@ public class ProfilesTab extends Tab {
             NbtCompound nbt = NbtIo.read(profileFile.toPath());
 
             Profile p = new Profile();
-            p.name.set(nbt.getString("name", profileFile.getName()));
+            if (!p.name.set(nbt.getString("name", profileFile.getName()))) return null;
+            File profileFolder = p.getSafeFile();
+            if (profileFolder == null) return null;
             //noinspection ResultOfMethodCallIgnored
-            p.getFile().mkdirs();
+            profileFolder.mkdirs();
 
             nbt.remove("name");
             for (Map.Entry<String, NbtElement> entry : nbt.entrySet()) {
                 String filename = entry.getKey();
                 if (!filename.endsWith(".nbt")) continue;
+                if (filename.contains("/") || filename.contains("\\") || new File(filename).isAbsolute()) continue;
 
                 switch (filename) {
                     case "hud.nbt" -> p.hud.set(true);
@@ -167,8 +170,8 @@ public class ProfilesTab extends Tab {
                     }
                 }
 
-                File f = new File(p.getFile(), filename).getCanonicalFile();
-                if (!f.toPath().startsWith(Profiles.FOLDER.getCanonicalFile().toPath())) continue;
+                File f = new File(profileFolder, filename).getCanonicalFile();
+                if (!f.toPath().startsWith(profileFolder.toPath())) continue;
 
                 NbtIo.write(entry.getValue(), new DataOutputStream(new FileOutputStream(f)));
             }
@@ -213,7 +216,7 @@ public class ProfilesTab extends Tab {
 
             WButton save = add(theme.button(isNew ? "Create" : "Save")).expandX().widget();
             save.action = () -> {
-                if (profile.name.get().isEmpty()) return;
+                if (profile.getSafeFile() == null) return;
 
                 if (isNew) {
                     for (Profile p : Profiles.get()) {
