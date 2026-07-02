@@ -23,6 +23,9 @@
 - Clone this repository
 - Run `./gradlew build`
 
+### Info
+- This project currently builds to 1.21.11. Work has begun on the 26.1 version, but it is in an unready state. Please do not make issues about updating to the latest version.
+
 ### Installation
 Follow the [guide](https://meteorclient.com/faq/installation) on the wiki.
 
