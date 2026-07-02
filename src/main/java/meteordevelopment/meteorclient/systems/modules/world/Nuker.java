@@ -286,6 +286,7 @@ public class Nuker extends Module {
     );
 
     private final List<BlockPos> blocks = new ArrayList<>();
+    private BlockPos currentBlock = null;
     private final Set<BlockPos> interacted = new ObjectOpenHashSet<>();
 
     private boolean firstBlock;
@@ -305,6 +306,7 @@ public class Nuker extends Module {
 
     @Override
     public void onActivate() {
+        currentBlock = null;
         firstBlock = true;
         timer = 0;
         noBlockTimer = 0;
@@ -453,12 +455,25 @@ public class Nuker extends Module {
 
             // Check if some block was found
             if (blocks.isEmpty()) {
+                currentBlock = null;
                 interacted.clear();
                 // If no block was found for long enough then set firstBlock flag to true to not wait before breaking another again
                 if (noBlockTimer++ >= delay.get()) firstBlock = true;
                 return;
             } else {
                 noBlockTimer = 0;
+            }
+
+            // Check if a block is already being mined
+            if (currentBlock != null) {
+                // Check if it's still valid
+                if (!BlockUtils.canInstaBreak(currentBlock) && !packetMine.get() && blocks.contains(currentBlock)) {
+                    // Move it to the start of the list (will be iterated first)
+                    blocks.remove(currentBlock);
+                    blocks.addFirst(currentBlock);
+                } else {
+                    currentBlock = null;
+                }
             }
 
             // Update timer
@@ -486,6 +501,8 @@ public class Nuker extends Module {
                 if (enableRenderBreaking.get())
                     RenderUtils.renderTickingBlock(block, sideColor.get(), lineColor.get(), shapeModeBreak.get(), 0, 8, true, false);
                 lastBlockPos.set(block);
+
+                currentBlock = block;
 
                 count++;
                 if (!canInstaMine && !packetMine.get() /* With packet mine attempt to break everything possible at once */)
