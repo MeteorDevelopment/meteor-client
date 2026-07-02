@@ -148,8 +148,9 @@ public class ProfilesTab extends Tab {
             CompoundTag nbt = NbtIo.read(profileFile.toPath());
 
             Profile p = new Profile();
-            if (!p.name.set(nbt.getStringOr("name", profileFile.getName())) || p.name.get().isEmpty()) return null;
-            File profileFolder = p.getFile().getCanonicalFile();
+            if (!p.name.set(nbt.getStringOr("name", profileFile.getName()))) return null;
+            File profileFolder = p.getSafeFile();
+            if (profileFolder == null) return null;
             //noinspection ResultOfMethodCallIgnored
             profileFolder.mkdirs();
 
@@ -214,7 +215,7 @@ public class ProfilesTab extends Tab {
 
             WButton save = add(theme.button(isNew ? "Create" : "Save")).expandX().widget();
             save.action = () -> {
-                if (profile.name.get().isEmpty()) return;
+                if (profile.getSafeFile() == null) return;
 
                 if (isNew) {
                     for (Profile p : Profiles.get()) {
