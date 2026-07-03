@@ -103,7 +103,7 @@ public class ProfilesTab extends Tab {
                     OkPrompt.create()
                         .title("Failure importing profile")
                         .message("There was an error importing the profile.")
-                        .message("Error: %d", e.getMessage())
+                        .message("Error: %s", e.getMessage())
                         .dontShowAgainCheckboxVisible(false)
                         .show();
                 }
