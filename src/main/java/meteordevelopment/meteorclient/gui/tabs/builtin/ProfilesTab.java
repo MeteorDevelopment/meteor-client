@@ -28,6 +28,7 @@ import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import org.apache.commons.io.FilenameUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
@@ -41,6 +42,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -98,7 +100,7 @@ public class ProfilesTab extends Tab {
                     if (imported != null)
                         MeteorClient.LOG.info("Successfully imported profile '{}'.", imported.name.get());
                     reload();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     MeteorClient.LOG.error("Error importing profile", e);
                     OkPrompt.create()
                         .title("Failure importing profile")
@@ -146,11 +148,20 @@ public class ProfilesTab extends Tab {
             File profileFile = new File(file);
 
             CompoundTag nbt = NbtIo.read(profileFile.toPath());
+            if (nbt == null) return null;
 
             Profile p = new Profile();
-            if (!p.name.set(nbt.getStringOr("name", profileFile.getName()))) return null;
-            File profileFolder = p.getSafeFile();
-            if (profileFolder == null) return null;
+            Optional<String> parsedName = nbt.getString("name").filter(n -> !n.isEmpty());
+
+            if (parsedName.filter(p.name::set).isEmpty() && !p.name.set(FilenameUtils.removeExtension(profileFile.getName()))) {
+                throw new IllegalStateException("Imported profile does not have a valid name.");
+            }
+
+            File profileFolder = p.getFile().getCanonicalFile();
+            if (!profileFolder.getParent().equals(Profiles.FOLDER.getCanonicalPath())) {
+                throw new IllegalStateException("Imported profile does not have a valid location.");
+            }
+
             //noinspection ResultOfMethodCallIgnored
             profileFolder.mkdirs();
 
@@ -215,7 +226,7 @@ public class ProfilesTab extends Tab {
 
             WButton save = add(theme.button(isNew ? "Create" : "Save")).expandX().widget();
             save.action = () -> {
-                if (profile.getSafeFile() == null) return;
+                if (profile.name.get().isEmpty()) return;
 
                 if (isNew) {
                     for (Profile p : Profiles.get()) {
