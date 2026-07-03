@@ -164,8 +164,9 @@ public class ProfilesTab extends Tab {
 
             //noinspection ResultOfMethodCallIgnored
             profileFolder.mkdirs();
-
             nbt.remove("name");
+
+            boolean valid = false;
             for (var entry : nbt.entrySet()) {
                 String filename = entry.getKey();
                 if (!filename.endsWith(".nbt")) continue;
@@ -183,7 +184,12 @@ public class ProfilesTab extends Tab {
                 File f = new File(profileFolder, filename).getCanonicalFile();
                 if (!f.toPath().startsWith(profileFolder.toPath())) continue;
 
+                valid = true;
                 NbtIo.writeUnnamedTagWithFallback(entry.getValue(), new DataOutputStream(new FileOutputStream(f)));
+            }
+
+            if (!valid) {
+                throw new IllegalStateException("Imported file is not a profile.");
             }
 
             Profiles.get().getAll().add(p);
