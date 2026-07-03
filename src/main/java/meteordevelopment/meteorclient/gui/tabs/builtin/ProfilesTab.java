@@ -158,7 +158,7 @@ public class ProfilesTab extends Tab {
             }
 
             File profileFolder = p.getFile().getCanonicalFile();
-            if (!profileFolder.getParent().equals(Profiles.FOLDER.getCanonicalPath())) {
+            if (!profileFolder.getParentFile().equals(Profiles.FOLDER.getCanonicalFile())) {
                 throw new IllegalStateException("Imported profile does not have a valid location.");
             }
 
