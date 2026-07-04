@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements;
 
-import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
@@ -33,7 +32,7 @@ public class ArmorHud extends HudElement {
         .name("orientation")
         .description("How to display armor.")
         .defaultValue(Orientation.Horizontal)
-        .onChanged(_ -> calculateSize())
+        .onChanged(_ -> calculateSize(HudRenderer.INSTANCE))
         .build()
     );
 
@@ -57,7 +56,7 @@ public class ArmorHud extends HudElement {
         .name("durability")
         .description("How to display armor durability.")
         .defaultValue(Durability.Bar)
-        .onChanged(_ -> calculateSize())
+        .onChanged(_ -> calculateSize(HudRenderer.INSTANCE))
         .build()
     );
 
@@ -83,7 +82,7 @@ public class ArmorHud extends HudElement {
         .name("custom-scale")
         .description("Applies a custom scale to this hud element.")
         .defaultValue(false)
-        .onChanged(_ -> calculateSize())
+        .onChanged(_ -> calculateSize(HudRenderer.INSTANCE))
         .build()
     );
 
@@ -92,7 +91,7 @@ public class ArmorHud extends HudElement {
         .description("Custom scale.")
         .visible(customScale::get)
         .defaultValue(2)
-        .onChanged(_ -> calculateSize())
+        .onChanged(_ -> calculateSize(HudRenderer.INSTANCE))
         .min(0.5)
         .sliderRange(0.5, 3)
         .build()
@@ -118,26 +117,94 @@ public class ArmorHud extends HudElement {
     public ArmorHud() {
         super(INFO);
 
-        calculateSize();
+        calculateSize(HudRenderer.INSTANCE);
     }
 
-    private void calculateSize() {
+    @Override
+    public void tick(HudRenderer renderer) {
+        calculateSize(renderer);
+    }
+
+    private boolean showsDurabilityText() {
+        return durability.get() == Durability.Total || durability.get() == Durability.Percentage;
+    }
+
+    private double getIconSize() {
+        return 16 * getScale();
+    }
+
+    private double getPadding() {
+        return 2 * getScale();
+    }
+
+    // Durability text scale relative to the icon scale: 1x (normal HUD text scale) at the default
+    // icon scale, growing/shrinking as the icon's custom scale changes. Uses a square root so the
+    // text doesn't grow as aggressively as the icon does at the higher end of the scale slider.
+    private double getTextScale() {
+        return Math.sqrt(getScale() / scale.getDefaultValue().floatValue()) * Hud.get().getTextScale();
+    }
+
+    // Spacing between items along the main layout axis: columns in Horizontal, rows in Vertical.
+    // The durability text doesn't affect this since it's drawn on the cross axis (below in Horizontal,
+    // to the right in Vertical), not between items.
+    private double getItemStride() {
+        return getIconSize() + getPadding();
+    }
+
+    private ItemStack[] getArmorItems() {
+        // default order is from boots to helmet
+        return flipOrder.get() ?
+            new ItemStack[]{getItem(EquipmentSlot.HEAD), getItem(EquipmentSlot.CHEST), getItem(EquipmentSlot.LEGS), getItem(EquipmentSlot.FEET)} :
+            new ItemStack[]{getItem(EquipmentSlot.FEET), getItem(EquipmentSlot.LEGS), getItem(EquipmentSlot.CHEST), getItem(EquipmentSlot.HEAD)};
+    }
+
+    private String getDurabilityText(ItemStack itemStack) {
+        return switch (durability.get()) {
+            case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamageValue());
+            case Percentage ->
+                Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamageValue()) * 100f) / (float) itemStack.getMaxDamage()));
+            default -> "";
+        };
+    }
+
+    // Widest durability text among the currently displayed items, used to size the Vertical orientation's width.
+    private double getMaxDurabilityTextWidth(HudRenderer renderer) {
+        double maxWidth = 0;
+
+        for (ItemStack stack : getArmorItems()) {
+            if (!stack.isDamageableItem()) continue;
+            maxWidth = Math.max(maxWidth, renderer.textWidth(getDurabilityText(stack), durabilityShadow.get(), getTextScale()));
+        }
+
+        return maxWidth;
+    }
+
+    private void calculateSize(HudRenderer renderer) {
+        double iconSize = getIconSize();
+        double stride = getItemStride();
+        boolean showsText = showsDurabilityText();
+
         switch (orientation.get()) {
-            // Four item stacks plus
-            case Horizontal -> setSize((16 * 4 + 2 * 4) * getScale(), 16 * getScale());
-            case Vertical -> setSize(16 * getScale(), (16 * 4 + 2 * 4) * getScale());
+            case Horizontal -> {
+                // Text sits below each icon, so it grows the box's height.
+                double height = iconSize;
+                if (showsText) height += getPadding() + renderer.textHeight(durabilityShadow.get(), getTextScale());
+                setSize(stride * 4, height);
+            }
+            case Vertical -> {
+                // Text sits to the right of each icon, so it grows the box's width instead of its height.
+                double width = iconSize;
+                if (showsText) width += getPadding() + getMaxDurabilityTextWidth(renderer);
+                setSize(width, stride * 4);
+            }
         }
     }
 
     @Override
     public void render(HudRenderer renderer) {
+        ItemStack[] armor = getArmorItems();
+
         int emptySlots = 0;
-
-        // default order is from boots to helmet
-        ItemStack[] armor = flipOrder.get() ?
-            new ItemStack[]{getItem(EquipmentSlot.HEAD), getItem(EquipmentSlot.CHEST), getItem(EquipmentSlot.LEGS), getItem(EquipmentSlot.FEET)} :
-            new ItemStack[]{getItem(EquipmentSlot.FEET), getItem(EquipmentSlot.LEGS), getItem(EquipmentSlot.CHEST), getItem(EquipmentSlot.HEAD)};
-
         for (ItemStack stack : armor) {
             if (stack.isEmpty()) emptySlots++;
         }
@@ -150,40 +217,42 @@ public class ArmorHud extends HudElement {
             double x = this.x;
             double y = this.y;
 
+            double iconSize = getIconSize();
+            double padding = getPadding();
+            double stride = getItemStride();
+            boolean showsText = showsDurabilityText();
+            boolean vertical = orientation.get() == Orientation.Vertical;
+
             double armorX, armorY;
 
             for (int position = 0; position < 4; position++) {
                 ItemStack itemStack = armor[position];
 
-                if (orientation.get() == Orientation.Vertical) {
+                if (vertical) {
                     armorX = x;
-                    armorY = y + position * 18 * getScale();
+                    armorY = y + position * stride;
                 } else {
-                    armorX = x + position * 18 * getScale();
+                    armorX = x + position * stride;
                     armorY = y;
                 }
 
                 renderer.item(itemStack, (int) armorX, (int) armorY, getScale(), (itemStack.isDamageableItem() && durability.get() == Durability.Bar));
 
-                if (itemStack.isDamageableItem() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
-                    String message = switch (durability.get()) {
-                        case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamageValue());
-                        case Percentage ->
-                            Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamageValue()) * 100f) / (float) itemStack.getMaxDamage()));
-                        default -> "err";
-                    };
+                if (itemStack.isDamageableItem() && showsText && durability.get() != Durability.Bar) {
+                    String message = getDurabilityText(itemStack);
+                    double messageWidth = renderer.textWidth(message, durabilityShadow.get(), getTextScale());
+                    double textHeight = renderer.textHeight(durabilityShadow.get(), getTextScale());
 
-                    double messageWidth = renderer.textWidth(message);
-
-                    if (orientation.get() == Orientation.Vertical) {
-                        armorX = x + 8 * getScale() - messageWidth / 2.0;
-                        armorY = y + (18 * position * getScale()) + (18 * getScale() - renderer.textHeight());
+                    double textX, textY;
+                    if (vertical) {
+                        textX = armorX + iconSize + padding;
+                        textY = armorY + iconSize / 2.0 - textHeight / 2.0;
                     } else {
-                        armorX = x + 18 * position * getScale() + 8 * getScale() - messageWidth / 2.0;
-                        armorY = y + (getHeight() - renderer.textHeight());
+                        textX = armorX + iconSize / 2.0 - messageWidth / 2.0;
+                        textY = armorY + iconSize + padding;
                     }
 
-                    TextRenderer.get().render(message, armorX, armorY, durabilityColor.get(), durabilityShadow.get());
+                    renderer.text(message, textX, textY, durabilityColor.get(), durabilityShadow.get(), getTextScale());
                 }
             }
         });
