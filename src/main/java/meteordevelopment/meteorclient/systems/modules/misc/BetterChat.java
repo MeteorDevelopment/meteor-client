@@ -363,21 +363,8 @@ public class BetterChat extends Module {
         }
 
         if (returnText != null) {
-            List<GuiMessage.Line> visible = ((ChatComponentAccessor) mc.gui.getChat()).meteor$getTrimmedMessages();
-
-            int start = -1;
-            for (int i = 0; i < messageIndex; i++) {
-                start += lines.getInt(i);
-            }
-
-            int i = lines.getInt(messageIndex);
-            while (i > 0) {
-                visible.remove(start + 1);
-                i--;
-            }
-
             messages.remove(messageIndex);
-            lines.removeInt(messageIndex);
+            ((ChatComponentAccessor) mc.gui.getChat()).meteor$refreshTrimmedMessages();
         }
 
         return returnText;
