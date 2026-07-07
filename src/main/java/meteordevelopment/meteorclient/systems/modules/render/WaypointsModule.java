@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -33,6 +34,7 @@ import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class WaypointsModule extends Module {
@@ -252,6 +255,24 @@ public class WaypointsModule extends Module {
                         PathManagers.get().stop();
 
                     PathManagers.get().moveTo(waypoint.getPos());
+                };
+            }
+
+            boolean isOperator = mc.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+            if (isOperator) {
+                WButton teleportB = table.add(theme.button("TP")).widget();
+                teleportB.action = () -> {
+                    BlockPos pos = waypoint.pos.get();
+
+                    String command = String.format(
+                        "/execute in %s run tp %d %d %d",
+                        waypoint.dimension.toString(),
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ()
+                    );
+
+                    ChatUtils.sendPlayerMsg(command, false);
                 };
             }
 

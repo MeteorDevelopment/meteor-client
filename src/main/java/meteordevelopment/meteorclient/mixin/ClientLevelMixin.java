@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -42,6 +43,16 @@ public abstract class ClientLevelMixin {
             MeteorClient.EVENT_BUS.post(EntityRemovedEvent.get(getEntity(id)));
     }
 
+    @Inject(method = "addDestroyBlockEffect", at = @At("HEAD"), cancellable = true)
+    private void onAddDestroyBlockEffect(BlockPos pos, BlockState blockState, CallbackInfo ci) {
+        if (Modules.get().get(NoRender.class).noParticle(ParticleTypes.BLOCK)) ci.cancel();
+    }
+
+    @Inject(method = "addBreakingBlockEffect", at = @At("HEAD"), cancellable = true)
+    private void onAddBlockBreakingParticles(BlockPos pos, Direction direction, CallbackInfo ci) {
+        if (Modules.get().get(NoRender.class).noParticle(ParticleTypes.BLOCK)) ci.cancel();
+    }
+
     @ModifyArgs(method = "animateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;doAnimateTick(IIIILnet/minecraft/util/RandomSource;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos$MutableBlockPos;)V"))
     private void doRandomBlockDisplayTicks(Args args) {
         if (Modules.get().get(NoRender.class).noBarrierInvis()) {
@@ -49,13 +60,5 @@ public abstract class ClientLevelMixin {
         }
     }
 
-    @Inject(method = "addDestroyBlockEffect", at = @At("HEAD"), cancellable = true)
-    private void onAddDestroyBlockEffect(BlockPos pos, BlockState blockState, CallbackInfo ci) {
-        if (Modules.get().get(NoRender.class).noBlockBreakParticles()) ci.cancel();
-    }
 
-    @Inject(method = "addBreakingBlockEffect", at = @At("HEAD"), cancellable = true)
-    private void onAddBlockBreakingParticles(BlockPos pos, Direction direction, CallbackInfo ci) {
-        if (Modules.get().get(NoRender.class).noBlockBreakParticles()) ci.cancel();
-    }
 }

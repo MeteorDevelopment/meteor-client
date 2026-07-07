@@ -80,23 +80,27 @@ public abstract class GuiRendererMixin {
     private void meteor$render2D(Minecraft mc) {
         var mouseX = (int) mc.mouseHandler.getScaledXPos(mc.getWindow());
         var mouseY = (int) mc.mouseHandler.getScaledYPos(mc.getWindow());
-
         var fogRenderer = ((GameRendererAccessor) mc.gameRenderer).meteor$fogRenderer();
-        var delta = mc.getDeltaTracker().getGameTimeDeltaTicks();
-        var graphics = new GuiGraphicsExtractor(mc, renderState, mouseX, mouseY);
 
         if (Utils.canUpdate() || HudEditorScreen.isOpen()) {
             Profiler.get().push(MeteorClient.MOD_ID + "_render_2d");
-
             Utils.unscaledProjection();
-            MeteorClient.EVENT_BUS.post(Render2DEvent.get(graphics, graphics.guiWidth(), graphics.guiHeight(), delta));
+
+            var graphics = new GuiGraphicsExtractor(mc, renderState, mouseX, mouseY);
+            var tickDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
+
+            MeteorClient.EVENT_BUS.post(Render2DEvent.get(graphics, graphics.guiWidth(), graphics.guiHeight(), tickDelta));
             guiRenderer.render(fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
+
             Utils.scaledProjection();
             Profiler.get().pop();
         }
 
         if (mc.screen instanceof WidgetScreen widgetScreen) {
-            widgetScreen.renderCustom(graphics, mouseX, mouseY, delta);
+            var graphics = new GuiGraphicsExtractor(mc, renderState, mouseX, mouseY);
+            var guiDelta = mc.getDeltaTracker().getGameTimeDeltaTicks();
+
+            widgetScreen.renderCustom(graphics, mouseX, mouseY, guiDelta);
             guiRenderer.render(fogRenderer.getBuffer(FogRenderer.FogMode.NONE));
         }
     }

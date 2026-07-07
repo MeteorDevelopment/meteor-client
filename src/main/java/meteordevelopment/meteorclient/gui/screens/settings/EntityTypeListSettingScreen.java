@@ -138,7 +138,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         miscT = misc.add(theme.table()).expandX().widget();
 
         var spawnEggItems = BuiltInRegistries.ITEM.stream()
-            .filter(item -> item.components().has(DataComponents.ENTITY_DATA))
+            .filter(item -> item.builtInRegistryHolder().areComponentsBound() && item.components().has(DataComponents.ENTITY_DATA))
             .toList();
 
         Consumer<EntityType<?>> entityTypeForEach = entityType -> {
