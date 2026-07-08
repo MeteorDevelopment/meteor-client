@@ -241,8 +241,8 @@ public class HudRenderer {
         entity.yBodyRot = previousBodyYaw;
         entity.setYRot(previousYaw);
         entity.setXRot(previousPitch);
-        entity.yHeadRot = lastLastHeadYaw;
-        entity.yHeadRotO = lastHeadYaw;
+        entity.yHeadRot = lastHeadYaw;
+        entity.yHeadRotO = lastLastHeadYaw;
 
         float s = 1.0f / mc.getWindow().getGuiScale();
         int x1 = (int) (x * s);
