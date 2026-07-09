@@ -24,6 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ArrayListDeque;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
@@ -79,7 +80,7 @@ public class BetterFarming extends Module {
     }
 
     private Item placeItem = null;
-    private final ArrayList<BlockPos> cropPlacements = new ArrayList<>();
+    private final ArrayListDeque<BlockPos> cropPlacements = new ArrayListDeque<>();
     private int blockBreakCooldown = 0;
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -174,7 +175,7 @@ public class BetterFarming extends Module {
     private void noBreakSupportingBlocksBreakEvent(StartBreakingBlockEvent event) {
         BlockPos blockPos = event.blockPos;
         BlockState blockState = mc.level.getBlockState(blockPos);
-        BlockState bsAbove = mc.level.getBlockState(blockPos.offset(0, 1, 0));
+        BlockState bsAbove = mc.level.getBlockState(blockPos.above());
 
         if (!isSupportedBelowCrop(blockState) && isSupportedBelowCrop(bsAbove)) {
             event.cancel();
@@ -242,7 +243,7 @@ public class BetterFarming extends Module {
         if (foundItem.isMainHand()) {
             blockBreakCooldown = 3;
             return;
-        };
+        }
 
         mc.gameMode.handlePickItemFromBlock(event.blockPos, false);
 
@@ -257,10 +258,10 @@ public class BetterFarming extends Module {
 
         ServerboundMovePlayerPacket packet = (ServerboundMovePlayerPacket) event.packet;
 
-        BlockPos blockPos = new BlockPos(
-            (int) packet.getX(0d),
-            (int) packet.getY(0d),
-            (int) packet.getZ(0d)
+        BlockPos blockPos = BlockPos.containing(
+            packet.getX(0d),
+            packet.getY(0d),
+            packet.getZ(0d)
         );
 
         // Only suppress fall if blocks beneath are farmland
