@@ -144,7 +144,7 @@ public class BetterFarming extends Module {
 
         for (Direction direction : checkDirections) {
             // Check block at blockPos offset by the direction normal vector.
-            BlockState bsCheck = mc.level.getBlockState(blockPos.offset(direction.getUnitVec3i()));
+            BlockState bsCheck = mc.level.getBlockState(blockPos.relative(direction));
 
             if (bsCheck.is(Blocks.COCOA)) {
 
