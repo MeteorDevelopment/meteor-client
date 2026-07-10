@@ -233,10 +233,7 @@ public class MeshBuilder {
 
     public GpuBuffer getVertexBuffer() {
         vertices.limit(getVerticesOffset());
-        var device = RenderSystem.getDevice();
-        GpuBuffer buffer = device.createBuffer(() -> "Mesh vertex buffer", GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST, vertices.remaining());
-        device.createCommandEncoder().writeToBuffer(buffer.slice(0, vertices.remaining()), vertices);
-        return buffer;
+        return RenderSystem.getDevice().createBuffer(() -> "Mesh vertex buffer", GpuBuffer.USAGE_VERTEX, vertices);
     }
 
     public GpuBufferSlice uploadVertexBuffer(CommandEncoder encoder) {
@@ -246,10 +243,7 @@ public class MeshBuilder {
 
     public GpuBuffer getIndexBuffer() {
         indices.limit(indicesCount * indexType.bytes);
-        var device = RenderSystem.getDevice();
-        GpuBuffer buffer = device.createBuffer(() -> "Mesh index buffer", GpuBuffer.USAGE_INDEX | GpuBuffer.USAGE_COPY_DST, indices.remaining());
-        device.createCommandEncoder().writeToBuffer(buffer.slice(0, indices.remaining()), indices);
-        return buffer;
+        return RenderSystem.getDevice().createBuffer(() -> "Mesh index buffer", GpuBuffer.USAGE_INDEX, indices);
     }
 
     public GpuBufferSlice uploadIndexBuffer(CommandEncoder encoder) {
