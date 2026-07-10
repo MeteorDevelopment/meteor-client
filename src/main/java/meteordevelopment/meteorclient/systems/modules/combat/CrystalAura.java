@@ -1327,7 +1327,7 @@ public class CrystalAura extends Module {
 
         if (NametagUtils.to2D(vec3, damageTextScale.get())) {
             NametagUtils.begin(vec3);
-            TextRenderer.get().begin(1, false, true);
+            TextRenderer.get().begin(event.graphics, 1, false, true);
 
             String text = String.format("%.1f", renderDamage);
             double w = TextRenderer.get().getWidth(text) / 2;

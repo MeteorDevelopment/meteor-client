@@ -28,6 +28,7 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.EnchantmentTags;
@@ -364,12 +365,12 @@ public class Nametags extends Module {
             if (NametagUtils.to2D(pos, scale.get())) {
                 switch (entity) {
                     case Player player -> renderNametagPlayer(event, player, shadow);
-                    case ItemEntity item -> renderNametagItem(item.getItem(), shadow);
-                    case ItemFrame itemFrame -> renderNametagItem(itemFrame.getItem(), shadow);
-                    case PrimedTnt tnt -> renderTntNametag(ticksToTime(tnt.getFuse()), shadow);
-                    case MinecartTNT minecartTNT -> renderTntNametag(ticksToTime(minecartTNT.getFuse()), shadow);
-                    case LivingEntity living -> renderGenericLivingNametag(living, shadow);
-                    default -> renderGenericNametag(entity, shadow);
+                    case ItemEntity item -> renderNametagItem(event.graphics, item.getItem(), shadow);
+                    case ItemFrame itemFrame -> renderNametagItem(event.graphics, itemFrame.getItem(), shadow);
+                    case PrimedTnt tnt -> renderTntNametag(event.graphics, ticksToTime(tnt.getFuse()), shadow);
+                    case MinecartTNT minecartTNT -> renderTntNametag(event.graphics, ticksToTime(minecartTNT.getFuse()), shadow);
+                    case LivingEntity living -> renderGenericLivingNametag(event.graphics, living, shadow);
+                    default -> renderGenericNametag(event.graphics, entity, shadow);
                 }
             }
         }
@@ -467,7 +468,7 @@ public class Nametags extends Module {
         drawBg(-widthHalf, -heightDown, width, heightDown);
 
         // Render texts
-        text.beginBig();
+        text.beginBig(event.graphics);
         double hX = -widthHalf;
         double hY = -heightDown;
 
@@ -531,7 +532,7 @@ public class Nametags extends Module {
                 RenderUtils.drawItem(event.graphics, stack, (int) x, (int) y, 2, true, null, false);
 
                 if (stack.isDamageableItem() && itemDurability.get() != Durability.None) {
-                    text.begin(0.75, false, true);
+                    text.begin(event.graphics, 0.75, false, true);
 
                     String damageText = switch (itemDurability.get()) {
                         case Percentage ->
@@ -546,7 +547,7 @@ public class Nametags extends Module {
                 }
 
                 if (maxEnchantCount > 0 && displayEnchants.get()) {
-                    text.begin(0.5 * enchantTextScale.get(), false, true);
+                    text.begin(event.graphics, 0.5 * enchantTextScale.get(), false, true);
 
                     ItemEnchantments enchantments = EnchantmentHelper.getEnchantmentsForCrafting(stack);
                     Object2IntMap<Holder<Enchantment>> enchantmentsToShow = new Object2IntOpenHashMap<>();
@@ -593,7 +594,7 @@ public class Nametags extends Module {
         NametagUtils.end(event.graphics);
     }
 
-    private void renderNametagItem(ItemStack stack, boolean shadow) {
+    private void renderNametagItem(GuiGraphicsExtractor graphics, ItemStack stack, boolean shadow) {
         if (stack.isEmpty()) return;
 
         TextRenderer text = TextRenderer.get();
@@ -612,7 +613,7 @@ public class Nametags extends Module {
 
         drawBg(-widthHalf, -heightDown, width, heightDown);
 
-        text.beginBig();
+        text.beginBig(graphics);
         double hX = -widthHalf;
         double hY = -heightDown;
 
@@ -623,7 +624,7 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private void renderGenericLivingNametag(LivingEntity entity, boolean shadow) {
+    private void renderGenericLivingNametag(GuiGraphicsExtractor graphics, LivingEntity entity, boolean shadow) {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
@@ -652,7 +653,7 @@ public class Nametags extends Module {
 
         drawBg(-widthHalf, -heightDown, width, heightDown);
 
-        text.beginBig();
+        text.beginBig(graphics);
         double hX = -widthHalf;
         double hY = -heightDown;
 
@@ -663,7 +664,7 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private void renderGenericNametag(Entity entity, boolean shadow) {
+    private void renderGenericNametag(GuiGraphicsExtractor graphics, Entity entity, boolean shadow) {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
@@ -676,7 +677,7 @@ public class Nametags extends Module {
 
         drawBg(-widthHalf, -heightDown, nameWidth, heightDown);
 
-        text.beginBig();
+        text.beginBig(graphics);
         double hX = -widthHalf;
         double hY = -heightDown;
 
@@ -686,7 +687,7 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private void renderTntNametag(String fuseText, boolean shadow) {
+    private void renderTntNametag(GuiGraphicsExtractor graphics, String fuseText, boolean shadow) {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
@@ -697,7 +698,7 @@ public class Nametags extends Module {
 
         drawBg(-widthHalf, -heightDown, width, heightDown);
 
-        text.beginBig();
+        text.beginBig(graphics);
         double hX = -widthHalf;
         double hY = -heightDown;
 

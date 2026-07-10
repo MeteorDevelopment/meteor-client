@@ -88,7 +88,7 @@ public class Excavator extends Module {
     @Override
     public void onDeactivate() {
         baritone.getSelectionManager().removeSelection(baritone.getSelectionManager().getLastSelection());
-        if (baritone.getBuilderProcess().isActive()) baritone.getCommandManager().execute("stop");
+        if (baritone.getBuilderProcess().isActive()) baritone.getPathingBehavior().cancelEverything();
         status = Status.SEL_START;
     }
 

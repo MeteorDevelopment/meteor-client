@@ -39,6 +39,7 @@ import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -606,8 +607,8 @@ public class HighwayBuilder extends Module {
     private void onRender2d(Render2DEvent event) {
         if (suspended || !renderMine.get()) return;
 
-        if (normalMining != null) normalMining.renderLetter();
-        if (packetMining != null) packetMining.renderLetter();
+        if (normalMining != null) normalMining.renderLetter(event.graphics);
+        if (packetMining != null) packetMining.renderLetter(event.graphics);
     }
 
     @EventHandler
@@ -2866,12 +2867,12 @@ public class HighwayBuilder extends Module {
             return BlockUtils.getBreakDelta(slot, blockState) * ((b.mc.player.tickCount - (packet ? packetStartTime : normalStartTime)) + 1);
         }
 
-        public void renderLetter() {
+        public void renderLetter(GuiGraphicsExtractor graphics) {
             vec3.set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
             if (!NametagUtils.to2D(vec3, 2)) return;
 
             NametagUtils.begin(vec3);
-            TextRenderer.get().begin(1.0, false, true);
+            TextRenderer.get().begin(graphics, 1.0, false, true);
 
             String letter = packet ? "P" : "N";
             double w = TextRenderer.get().getWidth(letter) / 2.0;

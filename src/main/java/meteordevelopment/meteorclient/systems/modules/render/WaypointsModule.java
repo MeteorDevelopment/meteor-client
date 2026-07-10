@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class WaypointsModule extends Module {
@@ -148,7 +147,7 @@ public class WaypointsModule extends Module {
                 // Setup text rendering
                 int preTextA = TEXT.a;
                 TEXT.a *= a;
-                text.begin();
+                text.begin(event.graphics);
 
                 // Render name
                 text.render(waypoint.name.get(), -text.getWidth(waypoint.name.get()) / 2, -16 - text.getHeight(), TEXT, true);

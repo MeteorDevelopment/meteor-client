@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
@@ -77,17 +78,17 @@ public class EntityOwner extends Module {
                 pos.add(0, entity.getEyeHeight(entity.getPose()) + 0.75, 0);
 
                 if (NametagUtils.to2D(pos, scale.get())) {
-                    renderNametag(getOwnerName(owner));
+                    renderNametag(event.graphics, getOwnerName(owner));
                 }
             }
         }
     }
 
-    private void renderNametag(String name) {
+    private void renderNametag(GuiGraphicsExtractor graphics, String name) {
         TextRenderer text = TextRenderer.get();
 
         NametagUtils.begin(pos);
-        text.beginBig();
+        text.beginBig(graphics);
 
         double w = text.getWidth(name);
 

@@ -389,7 +389,7 @@ public class Notebot extends Module {
             TextRenderer text = TextRenderer.get();
 
             NametagUtils.begin(pos);
-            text.beginBig();
+            text.beginBig(event.graphics);
 
             double xScreen = text.getWidth(levelText) / 2.0;
             if (tuneHitsText != null) {

@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import meteordevelopment.meteorclient.renderer.MeteorRenderPipelines;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -46,7 +47,7 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
-    public void begin(double scale, boolean scaleOnly, boolean big) {
+    public void begin(GuiGraphicsExtractor graphics, double scale, boolean scaleOnly, boolean big) {
         if (building) throw new RuntimeException("CustomTextRenderer.begin() called twice");
 
         if (!scaleOnly) mesh.begin();
@@ -89,8 +90,7 @@ public class CustomTextRenderer implements TextRenderer {
 
     @Override
     public double render(String text, double x, double y, Color color, boolean shadow) {
-        boolean wasBuilding = building;
-        if (!wasBuilding) begin();
+        if (!building) throw new RuntimeException("VanillaTextRenderer.render() called without calling begin()");
 
         double width;
         if (shadow) {
@@ -105,7 +105,6 @@ public class CustomTextRenderer implements TextRenderer {
             width = font.render(mesh, text, x, y, color, scale / 1.5);
         }
 
-        if (!wasBuilding) end();
         return width;
     }
 

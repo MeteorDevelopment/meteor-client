@@ -70,9 +70,11 @@ public class HudRenderer {
 
         graphics.nextStratum();
 
+        graphics.pose().pushMatrix();
+        graphics.pose().scale(1.0f / mc.getWindow().getGuiScale());
+
         if (!hud.hasCustomFont()) {
-            VanillaTextRenderer.INSTANCE.scaleIndividually = true;
-            VanillaTextRenderer.INSTANCE.begin();
+            VanillaTextRenderer.INSTANCE.begin(graphics);
         }
     }
 
@@ -106,6 +108,8 @@ public class HudRenderer {
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
 
+        graphics.pose().popMatrix();
+
         graphics.nextStratum();
 
         graphics = null;
@@ -137,7 +141,6 @@ public class HudRenderer {
         if (scale == -1) scale = hud.getTextScale();
 
         if (!hud.hasCustomFont()) {
-            VanillaTextRenderer.INSTANCE.scale = scale * 2;
             return VanillaTextRenderer.INSTANCE.render(text, x, y, color, shadow);
         }
 
