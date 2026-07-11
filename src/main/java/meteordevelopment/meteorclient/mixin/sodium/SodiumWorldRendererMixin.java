@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin.sodium;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.caffeinemc.mods.sodium.client.render.SodiumWorldRenderer;
 import net.caffeinemc.mods.sodium.client.util.FogParameters;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,5 +27,10 @@ public abstract class SodiumWorldRendererMixin {
         if (Modules.get().get(NoRender.class).noFog()) return DISABLED_FOG;
 
         return fogParameters;
+    }
+
+    @ModifyVariable(method = "setupTerrain", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+    private boolean modifyUseOcclusionCulling(boolean useOcclusionCulling) {
+        return useOcclusionCulling && !Modules.get().isActive(Xray.class);
     }
 }
