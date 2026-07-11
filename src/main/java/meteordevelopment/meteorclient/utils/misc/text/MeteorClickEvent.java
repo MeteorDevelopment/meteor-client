@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.mixin.ScreenMixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.ClickEvent;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -24,7 +25,7 @@ public class MeteorClickEvent implements ClickEvent {
     }
 
     @Override
-    public Action action() {
+    public @NonNull Action action() {
         return Action.RUN_COMMAND;
     }
 }

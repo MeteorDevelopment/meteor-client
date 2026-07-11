@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.MeshRenderer;
 import net.minecraft.client.renderer.DynamicUniformStorage;
 import org.joml.Vector4f;
+import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
 
@@ -90,7 +91,7 @@ public abstract class PostProcessShader {
 
     private record UniformData(float sizeX, float sizeY, float time) implements DynamicUniformStorage.DynamicUniform {
         @Override
-        public void write(ByteBuffer buffer) {
+        public void write(@NonNull ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)
                 .putVec2(sizeX, sizeY)
                 .putFloat(time);

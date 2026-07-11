@@ -27,6 +27,8 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
@@ -41,10 +43,11 @@ public class OutlineRenderCommandQueue extends SubmitNodeStorage {
     }
 
     @Override
-    public SubmitNodeCollection order(int i) {
+    public @NonNull SubmitNodeCollection order(int i) {
         return submitsPerOrder.computeIfAbsent(i, _ -> new OutlineBatchingRenderCommandQueue());
     }
 
+    @NullMarked
     private class OutlineBatchingRenderCommandQueue extends SubmitNodeCollection {
         @Override
         public void submitShadow(PoseStack poseStack, float shadowRadius, List<EntityRenderState.ShadowPiece> shadowPieces) {

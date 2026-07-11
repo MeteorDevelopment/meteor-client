@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.DisplayItemUtils;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.world.item.Items;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,7 +150,7 @@ public class ModulesScreen extends TabScreen {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent value) {
+    public boolean keyPressed(@NonNull KeyEvent value) {
         if (locked) return false;
 
         boolean cntrl = MacosUtil.IS_MACOS ? value.modifiers() == GLFW_MOD_SUPER : value.modifiers() == GLFW_MOD_CONTROL;

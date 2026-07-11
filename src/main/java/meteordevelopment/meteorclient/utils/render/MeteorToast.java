@@ -90,12 +90,12 @@ public class MeteorToast implements Toast {
     }
 
     @Override
-    public Visibility getWantedVisibility() {
+    public @NonNull Visibility getWantedVisibility() {
         return this.visibility;
     }
 
     @Override
-    public void update(ToastManager manager, long time) {
+    public void update(@NonNull ToastManager manager, long time) {
         if (start == -1) start = time;
 
         visibility = time - start >= duration ? Visibility.HIDE : Visibility.SHOW;
@@ -107,7 +107,7 @@ public class MeteorToast implements Toast {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long fullyVisibleForMs) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, @NonNull Font font, long fullyVisibleForMs) {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURE, 0, 0, width(), height());
 
         int textX = icon != null ? 28 : 12;

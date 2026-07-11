@@ -32,6 +32,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.DynamicUniformStorage;
+import org.jspecify.annotations.NonNull;
 
 import java.nio.ByteBuffer;
 
@@ -269,7 +270,7 @@ public class Blur extends Module {
     private record BlurUniformData(float halfTexelSizeX, float halfTexelSizeY,
                                    float offset) implements DynamicUniformStorage.DynamicUniform {
         @Override
-        public void write(ByteBuffer buffer) {
+        public void write(@NonNull ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)
                 .putVec2(halfTexelSizeX, halfTexelSizeY)
                 .putFloat(offset);

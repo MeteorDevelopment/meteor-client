@@ -22,7 +22,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -126,6 +126,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         }
     }
 
+    @NullMarked
     private static class SRegistry extends MappedRegistry<BlockEntityType<?>> {
         public SRegistry() {
             super(ResourceKey.createRegistryKey(MeteorClient.identifier("storage-blocks")), Lifecycle.stable());
@@ -166,17 +167,12 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         @Override
         public Lifecycle registryLifecycle() {
-            return null;
+            return Lifecycle.stable();
         }
 
         @Override
         public Set<Identifier> keySet() {
-            return null;
-        }
-
-        @Override
-        public BlockEntityType<?> byIdOrThrow(int index) {
-            return super.byIdOrThrow(index);
+            return Set.of();
         }
 
         @Override
@@ -190,7 +186,6 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
             return null;
         }
 
-        @NonNull
         @Override
         public Iterator<BlockEntityType<?>> iterator() {
             return ObjectIterators.wrap(STORAGE_BLOCKS);
@@ -203,7 +198,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         @Override
         public Set<Map.Entry<ResourceKey<BlockEntityType<?>>, BlockEntityType<?>>> entrySet() {
-            return null;
+            return Set.of();
         }
 
         @Override
@@ -213,12 +208,12 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         @Override
         public Registry<BlockEntityType<?>> freeze() {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Holder.Reference<BlockEntityType<?>> createIntrusiveHolder(BlockEntityType<?> value) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -233,17 +228,17 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         @Override
         public Stream<Holder.Reference<BlockEntityType<?>>> listElements() {
-            return null;
+            return Stream.empty();
         }
 
         @Override
         public Stream<HolderSet.Named<BlockEntityType<?>>> getTags() {
-            return null;
+            return Stream.empty();
         }
 
         @Override
         public Set<ResourceKey<BlockEntityType<?>>> registryKeySet() {
-            return null;
+            return Set.of();
         }
     }
 }

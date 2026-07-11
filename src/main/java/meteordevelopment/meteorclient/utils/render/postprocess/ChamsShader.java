@@ -23,6 +23,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.renderer.DynamicUniformStorage;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.entity.Entity;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
@@ -124,7 +125,7 @@ public class ChamsShader extends EntityShader {
 
     private record UniformData(float r, float g, float b, float a) implements DynamicUniformStorage.DynamicUniform {
         @Override
-        public void write(ByteBuffer buffer) {
+        public void write(@NonNull ByteBuffer buffer) {
             Std140Builder.intoBuffer(buffer)
                 .putVec4(r, g, b, a);
         }

@@ -23,11 +23,11 @@ public class CustomBannerGuiElementRenderer extends PictureInPictureRenderer<Cus
     }
 
     @Override
-    public Class<CustomBannerGuiElementRenderState> getRenderStateClass() {
+    public @NonNull Class<CustomBannerGuiElementRenderState> getRenderStateClass() {
         return CustomBannerGuiElementRenderState.class;
     }
 
-    protected void renderToTexture(CustomBannerGuiElementRenderState state, PoseStack matrixStack, SubmitNodeCollector submitNodeCollector) {
+    protected void renderToTexture(CustomBannerGuiElementRenderState state, PoseStack matrixStack, @NonNull SubmitNodeCollector submitNodeCollector) {
         Minecraft.getInstance().gameRenderer.lighting().setupFor(Lighting.Entry.ITEMS_FLAT);
         matrixStack.translate(0.0F, 0.25F, 0.0F);
         BannerRenderer.submitPatterns(

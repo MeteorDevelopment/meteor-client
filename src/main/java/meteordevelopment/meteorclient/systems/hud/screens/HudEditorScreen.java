@@ -20,6 +20,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+    public boolean mouseClicked(@NonNull MouseButtonEvent click, boolean doubled) {
         double s = mc.getWindow().getGuiScale();
 
         double mouseX = click.x();
@@ -116,7 +117,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent click) {
+    public boolean mouseReleased(@NonNull MouseButtonEvent click) {
         double s = mc.getWindow().getGuiScale();
 
         double mouseX = click.x();
@@ -155,7 +156,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent input) {
+    public boolean keyPressed(@NonNull KeyEvent input) {
         if (!pressed) {
             if (input.key() == GLFW.GLFW_KEY_ENTER || input.key() == GLFW.GLFW_KEY_KP_ENTER) {
                 HudElement hovered = getHovered(lastMouseX, lastMouseY);
