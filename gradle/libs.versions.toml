@@ -3,7 +3,7 @@
 jdk = "25"
 minecraft = "26.2"
 fabric-loader = "0.19.3"
-fabric-api = "0.152.1+26.2"
+fabric-api = "0.154.2+26.2"
 
 # Plugins
 # Loom (https://github.com/FabricMC/fabric-loom)
@@ -15,11 +15,11 @@ baritone = "26.1-SNAPSHOT"
 # Sodium (https://github.com/CaffeineMC/sodium-fabric)
 sodium = "mc26.2-0.9.1-fabric"
 # Lithium (https://github.com/CaffeineMC/lithium-fabric)
-lithium = "mc26.2-0.25.0-fabric"
+lithium = "mc26.2-0.25.2-fabric"
 # Iris (https://github.com/IrisShaders/Iris)
-iris = "1.11.0+26.2-fabric"
+iris = "1.11.2+26.2-fabric"
 # ModMenu (https://github.com/TerraformersMC/ModMenu)
-modmenu = "20.0.0-beta.2"
+modmenu = "20.0.1"
 # Orbit (https://github.com/MeteorDevelopment/orbit)
 orbit = "0.2.4"
 # Starscript (https://github.com/MeteorDevelopment/starscript)
@@ -31,7 +31,7 @@ reflections = "0.10.2"
 # Netty (https://github.com/netty/netty)
 netty = "4.2.15.Final"
 # ViaFabricPlus (https://github.com/ViaVersion/ViaFabricPlus)
-viafabricplus = "4.6.0"
+viafabricplus = "4.6.1"
 # WaybackAuthLib (https://github.com/florianreuth/WaybackAuthLib)
 waybackauthlib = "1.1.0"
 
