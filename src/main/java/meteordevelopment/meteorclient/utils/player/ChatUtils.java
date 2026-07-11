@@ -16,7 +16,7 @@ import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.*;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Supplier;
 

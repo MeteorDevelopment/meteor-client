@@ -14,7 +14,7 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -90,7 +90,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     @Override
-    public @NotNull Iterator<Friend> iterator() {
+    public @NonNull Iterator<Friend> iterator() {
         return friends.iterator();
     }
 

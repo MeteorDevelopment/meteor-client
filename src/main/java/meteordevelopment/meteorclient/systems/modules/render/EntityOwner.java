@@ -27,7 +27,6 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
 
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
 import java.util.HashMap;
@@ -63,7 +62,7 @@ public class EntityOwner extends Module {
     @EventHandler
     private void onRender2D(Render2DEvent event) {
         for (Entity entity : mc.level.entitiesForRendering()) {
-            @Nullable EntityReference<LivingEntity> owner;
+            EntityReference<LivingEntity> owner;
 
             switch (entity) {
                 case TamableAnimal tameable -> owner = tameable.getOwnerReference();
@@ -107,7 +106,7 @@ public class EntityOwner extends Module {
 
     private String getOwnerName(EntityReference<LivingEntity> owner) {
         // Check if the player is online
-        @Nullable LivingEntity ownerEntity = EntityReference.get(owner, mc.level, LivingEntity.class);
+        LivingEntity ownerEntity = EntityReference.get(owner, mc.level, LivingEntity.class);
         if (ownerEntity instanceof Player playerEntity) return playerEntity.getName().getString();
 
         UUID uuid = owner.getUUID();

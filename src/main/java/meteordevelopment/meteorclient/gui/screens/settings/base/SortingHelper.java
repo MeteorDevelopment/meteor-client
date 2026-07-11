@@ -8,8 +8,8 @@ package meteordevelopment.meteorclient.gui.screens.settings.base;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.core.IdMap;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -100,7 +100,7 @@ public final class SortingHelper {
 
     private static <T> Iterable<T> iterate(List<Entry<T>> sortedList) {
         return new Iterable<>() {
-            @NotNull
+            @NonNull
             @Override
             public Iterator<T> iterator() {
                 return new Iterator<>() {
@@ -122,7 +122,7 @@ public final class SortingHelper {
 
     private static <T> Iterable<T> filtering(Iterable<T> iterable, Predicate<T> filter) {
         return new Iterable<>() {
-            @NotNull
+            @NonNull
             @Override
             public Iterator<T> iterator() {
                 throw new UnsupportedOperationException("iterator() not supported by this Iterable, use forEach() instead.");

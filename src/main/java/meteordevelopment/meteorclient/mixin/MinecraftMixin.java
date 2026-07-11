@@ -43,7 +43,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.HitResult;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.meteordev.starscript.Script;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;

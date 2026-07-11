@@ -67,9 +67,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector3d;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayDeque;
 import java.util.Iterator;
@@ -2196,7 +2196,7 @@ public class HighwayBuilder extends Module {
 
         void restore();
 
-        @NotNull
+        @NonNull
         @Override
         default Iterator<MBlockPos> iterator() {
             return this;

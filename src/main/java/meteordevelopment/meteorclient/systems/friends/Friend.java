@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.net.http.HttpResponse;
 import java.util.Objects;
 import java.util.UUID;
@@ -119,7 +119,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
     }
 
     @Override
-    public int compareTo(@NotNull Friend friend) {
+    public int compareTo(@NonNull Friend friend) {
         return name.compareToIgnoreCase(friend.name);
     }
 

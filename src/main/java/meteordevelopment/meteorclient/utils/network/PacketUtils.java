@@ -24,8 +24,8 @@ import net.minecraft.network.protocol.ping.PingPacketTypes;
 import net.minecraft.network.protocol.status.StatusPacketTypes;
 import net.minecraft.network.protocol.status.StatusProtocols;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Set;
@@ -33,50 +33,50 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public class PacketUtils {
-    private static final Map<Identifier, PacketType<? extends @NotNull Packet<?>>> CLIENTBOUND_PACKETS_MAP;
-    private static final Map<Identifier, PacketType<? extends @NotNull Packet<?>>> SERVERBOUND_PACKETS_MAP;
-    private static final Set<PacketType<? extends @NotNull Packet<?>>> CLIENTBOUND_PACKETS;
-    private static final Set<PacketType<? extends @NotNull Packet<?>>> SERVERBOUND_PACKETS;
+    private static final Map<Identifier, PacketType<? extends @NonNull Packet<?>>> CLIENTBOUND_PACKETS_MAP;
+    private static final Map<Identifier, PacketType<? extends @NonNull Packet<?>>> SERVERBOUND_PACKETS_MAP;
+    private static final Set<PacketType<? extends @NonNull Packet<?>>> CLIENTBOUND_PACKETS;
+    private static final Set<PacketType<? extends @NonNull Packet<?>>> SERVERBOUND_PACKETS;
 
-    public static Set<PacketType<? extends @NotNull Packet<?>>> getPackets() {
+    public static Set<PacketType<? extends @NonNull Packet<?>>> getPackets() {
         return Sets.union(CLIENTBOUND_PACKETS, SERVERBOUND_PACKETS);
     }
 
-    public static Set<PacketType<? extends @NotNull Packet<?>>> getClientboundPackets() {
+    public static Set<PacketType<? extends @NonNull Packet<?>>> getClientboundPackets() {
         return CLIENTBOUND_PACKETS;
     }
 
-    public static Set<PacketType<? extends @NotNull Packet<?>>> getServerboundPackets() {
+    public static Set<PacketType<? extends @NonNull Packet<?>>> getServerboundPackets() {
         return SERVERBOUND_PACKETS;
     }
 
-    public static @Nullable PacketType<? extends @NotNull Packet<?>> getClientboundPacket(Identifier id) {
+    public static @Nullable PacketType<? extends @NonNull Packet<?>> getClientboundPacket(Identifier id) {
         return CLIENTBOUND_PACKETS_MAP.get(id);
     }
 
-    public static @Nullable PacketType<? extends @NotNull Packet<?>> getServerboundPacket(Identifier id) {
+    public static @Nullable PacketType<? extends @NonNull Packet<?>> getServerboundPacket(Identifier id) {
         return SERVERBOUND_PACKETS_MAP.get(id);
     }
 
-    public static @Nullable PacketType<? extends @NotNull Packet<?>> getPacket(Identifier id) {
-        @Nullable PacketType<? extends @NotNull Packet<?>> clientbound = getClientboundPacket(id);
+    public static @Nullable PacketType<? extends @NonNull Packet<?>> getPacket(Identifier id) {
+        PacketType<? extends @NonNull Packet<?>> clientbound = getClientboundPacket(id);
         return clientbound != null ? clientbound : getServerboundPacket(id);
     }
 
-    public static @Nullable PacketType<? extends @NotNull Packet<?>> getPacket(String name) {
+    public static @Nullable PacketType<? extends @NonNull Packet<?>> getPacket(String name) {
         if (name.startsWith("clientbound/")) {
-            @Nullable Identifier identifier = Identifier.tryParse(name.substring(12));
+            Identifier identifier = Identifier.tryParse(name.substring(12));
             return CLIENTBOUND_PACKETS_MAP.get(identifier);
         }
 
         if (name.startsWith("serverbound/")) {
-            @Nullable Identifier identifier = Identifier.tryParse(name.substring(12));
+            Identifier identifier = Identifier.tryParse(name.substring(12));
             return SERVERBOUND_PACKETS_MAP.get(identifier);
         }
 
-        @Nullable Identifier identifier = Identifier.tryParse(name);
+        Identifier identifier = Identifier.tryParse(name);
         if (identifier != null) {
-            @Nullable PacketType<? extends @NotNull Packet<?>> type = getPacket(identifier);
+            PacketType<? extends @NonNull Packet<?>> type = getPacket(identifier);
             if (type != null) return type;
         }
 
@@ -84,8 +84,8 @@ public class PacketUtils {
     }
 
     static {
-        ImmutableMap.Builder<@NotNull Identifier, @NotNull PacketType<? extends @NotNull Packet<?>>> clientbound = ImmutableMap.builder();
-        ImmutableMap.Builder<@NotNull Identifier, @NotNull PacketType<? extends @NotNull Packet<?>>> serverbound = ImmutableMap.builder();
+        ImmutableMap.Builder<@NonNull Identifier, @NonNull PacketType<? extends @NonNull Packet<?>>> clientbound = ImmutableMap.builder();
+        ImmutableMap.Builder<@NonNull Identifier, @NonNull PacketType<? extends @NonNull Packet<?>>> serverbound = ImmutableMap.builder();
 
         Stream.of(
                 StatusProtocols.CLIENTBOUND_TEMPLATE,
@@ -115,10 +115,10 @@ public class PacketUtils {
      * Maps our legacy packet names to modern packet types.
      * @implNote Do not update keys or add entries, only update values.
      */
-    private static final Map<String, PacketType<? extends @NotNull Packet<?>>> LEGACY_PACKET_MAPPINGS;
+    private static final Map<String, PacketType<? extends @NonNull Packet<?>>> LEGACY_PACKET_MAPPINGS;
 
     static {
-        ImmutableMap.Builder<@NotNull String, @NotNull PacketType<? extends @NotNull Packet<?>>> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<@NonNull String, @NonNull PacketType<? extends @NonNull Packet<?>>> builder = ImmutableMap.builder();
         builder.put("ClientIntentionPacket", HandshakePacketTypes.CLIENT_INTENTION);
         builder.put("ServerboundMovePlayerPacket.Pos", GamePacketTypes.SERVERBOUND_MOVE_PLAYER_POS);
         builder.put("ServerboundMovePlayerPacket.PosRot", GamePacketTypes.SERVERBOUND_MOVE_PLAYER_POS_ROT);

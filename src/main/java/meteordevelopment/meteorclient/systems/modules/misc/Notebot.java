@@ -45,9 +45,9 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.FilenameUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
@@ -943,7 +943,7 @@ public class Notebot extends Module {
      * @return A new instrument mapped by instrument given in parameters
      */
     @Nullable
-    public NoteBlockInstrument getMappedInstrument(@NotNull NoteBlockInstrument inst) {
+    public NoteBlockInstrument getMappedInstrument(@NonNull NoteBlockInstrument inst) {
         if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
             NotebotUtils.OptionalInstrument optionalInstrument = (NotebotUtils.OptionalInstrument) sgNoteMap.getByIndex(inst.ordinal()).get();
             return optionalInstrument.toMinecraftInstrument();

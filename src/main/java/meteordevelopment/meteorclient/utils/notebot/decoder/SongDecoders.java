@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import org.apache.commons.io.FilenameUtils;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -50,7 +50,7 @@ public class SongDecoders {
      * @param file A song file
      * @return A {@link Song} object
      */
-    @NotNull
+    @NonNull
     public static Song parse(File file) throws Exception {
         if (!hasDecoder(file)) throw new IllegalStateException("Decoder for this file does not exists!");
         SongDecoder decoder = getDecoder(file);

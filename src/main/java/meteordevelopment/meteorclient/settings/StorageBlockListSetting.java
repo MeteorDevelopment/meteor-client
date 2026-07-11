@@ -22,8 +22,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -190,7 +190,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
             return null;
         }
 
-        @NotNull
+        @NonNull
         @Override
         public Iterator<BlockEntityType<?>> iterator() {
             return ObjectIterators.wrap(STORAGE_BLOCKS);

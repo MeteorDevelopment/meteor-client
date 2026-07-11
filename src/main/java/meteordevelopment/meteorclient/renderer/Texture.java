@@ -12,7 +12,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
@@ -53,7 +53,7 @@ public class Texture extends AbstractTexture {
         image.close();
     }
 
-    private @NotNull NativeImage getImage() {
+    private @NonNull NativeImage getImage() {
         NativeImage.Format imageFormat = switch (texture.getFormat()) {
             case RGBA8_UNORM -> NativeImage.Format.RGBA;
             case R8_UNORM -> NativeImage.Format.LUMINANCE;
