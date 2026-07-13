@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.entity.fakeplayer;
 
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.mixin.AbstractClientPlayerAccessor;
+import meteordevelopment.meteorclient.mixin.EntityAccessor;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.entity.player.Player;
@@ -32,6 +33,7 @@ public class FakePlayerEntity extends RemotePlayer {
 
     public FakePlayerEntity(Player player, String name, float health, boolean copyInv) {
         super(mc.level, new GameProfile(UUID.randomUUID(), name));
+        ((EntityAccessor) this).meteor$setId(FakePlayerManager.getNextEntityId());
 
         copyPosition(player);
 
@@ -53,6 +55,11 @@ public class FakePlayerEntity extends RemotePlayer {
         }
 
         if (copyInv) getInventory().replaceWith(player.getInventory());
+    }
+
+    @Override
+    public int getId() {
+        return ((EntityAccessor) this).meteor$getId();
     }
 
     public void spawn() {

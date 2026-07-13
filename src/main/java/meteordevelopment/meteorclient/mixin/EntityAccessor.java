@@ -13,4 +13,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface EntityAccessor {
     @Accessor("wasTouchingWater")
     void meteor$setInWater(boolean touchingWater);
+
+    @Accessor("id")
+    int meteor$getId();
+
+    @Accessor("id")
+    void meteor$setId(int id);
 }
