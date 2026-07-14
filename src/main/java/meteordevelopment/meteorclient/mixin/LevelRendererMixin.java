@@ -38,6 +38,7 @@ import org.joml.Vector4f;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -127,9 +128,14 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
             return;
 
         meteor$pushEntityOutlineFramebuffer(shader.framebuffer);
-        renderDispatcher.renderAllFeatures(outlineRenderCommandQueue);
-        outlineRenderCommandQueue.submitsPerOrder.clear();
-        meteor$popEntityOutlineFramebuffer();
+        try {
+            try (var frame = renderDispatcher.prepareFrame(outlineRenderCommandQueue)) {
+                frame.executeOutline();
+            }
+        } finally {
+            outlineRenderCommandQueue.submitsPerOrder.clear();
+            meteor$popEntityOutlineFramebuffer();
+        }
     }
 
     @Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher$PreparedFrame;executeOutline()V", shift = At.Shift.AFTER))
@@ -144,8 +150,9 @@ public abstract class LevelRendererMixin implements ILevelRenderer {
 
     // ILevelRenderer
 
-    // FIXME(26.2): this is effectively @Final, yet we change it later, causing a crash in ESP Shader mode.
     @Shadow
+    @Final
+    @Mutable
     private RenderTarget entityOutlineTarget;
 
     @Shadow
