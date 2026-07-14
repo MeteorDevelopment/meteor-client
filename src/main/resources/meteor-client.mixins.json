@@ -195,6 +195,7 @@
     "TooltipDisplayMixin",
     "TridentItemMixin",
     "Vec3Mixin",
+    "VulkanDeviceMixin",
     "VisGraphMixin",
     "WebBlockMixin",
     "WingsLayerMixin",
