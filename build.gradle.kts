@@ -3,9 +3,12 @@ plugins {
     id("maven-publish")
 }
 
+val archivesBaseName = providers.gradleProperty("archives_base_name").get()
+val mavenGroup = providers.gradleProperty("maven_group").get()
+
 base {
-    archivesName = properties["archives_base_name"] as String
-    group = properties["maven_group"] as String
+    archivesName = archivesBaseName
+    group = mavenGroup
 
     val suffix = providers.gradleProperty("build_number").getOrElse("local")
     version = "${libs.versions.minecraft.get()}-$suffix"
@@ -43,8 +46,11 @@ repositories {
     }
 }
 
-val modInclude: Configuration by configurations.creating
-val jij: Configuration by configurations.creating
+val modInclude = configurations.create("modInclude")
+val jij = configurations.create("jij")
+val launcher = sourceSets.create("launcher") {
+    java.srcDir("src/launcher/java")
+}
 
 configurations {
     // include mods
@@ -92,14 +98,6 @@ dependencies {
     jij(libs.netty.handler.proxy) { isTransitive = false }
     jij(libs.netty.codec.socks) { isTransitive = false }
     jij(libs.waybackauthlib)
-}
-
-sourceSets {
-    val launcher by creating {
-        java {
-            srcDir("src/launcher/java")
-        }
-    }
 }
 
 java {
@@ -192,14 +190,14 @@ tasks {
     }
 
     jar {
-        inputs.property("archivesName", project.base.archivesName.get())
+        inputs.property("archivesName", archivesBaseName)
 
         from("LICENSE") {
-            rename { "${it}_${inputs.properties["archivesName"]}" }
+            rename { "${it}_$archivesBaseName" }
         }
 
         // Include launcher classes
-        from(sourceSets["launcher"].output)
+        from(launcher.output)
 
         manifest {
             attributes["Main-Class"] = "meteordevelopment.meteorclient.Main"
