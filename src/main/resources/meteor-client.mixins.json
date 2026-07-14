@@ -61,6 +61,7 @@
     "ClientPacketListenerMixin",
     "ClientTooltipComponentMixin",
     "ClipContextMixin",
+    "CloudRendererMixin",
     "CommandSuggestionsMixin",
     "CompassAngleStateMixin",
     "ComponentMixin",
