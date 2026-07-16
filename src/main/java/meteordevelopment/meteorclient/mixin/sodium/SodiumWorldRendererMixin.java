@@ -29,7 +29,7 @@ public abstract class SodiumWorldRendererMixin {
         return fogParameters;
     }
 
-    @ModifyVariable(method = "setupTerrain", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+    @ModifyVariable(method = "setupTerrain", at = @At("HEAD"), argsOnly = true, name = "useOcclusionCulling")
     private boolean modifyUseOcclusionCulling(boolean useOcclusionCulling) {
         return useOcclusionCulling && !Modules.get().isActive(Xray.class);
     }

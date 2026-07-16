@@ -41,8 +41,8 @@ import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import org.jspecify.annotations.Nullable;
 import org.joml.Vector3d;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 public class Freecam extends Module {
@@ -200,8 +200,7 @@ public class Freecam extends Module {
     @Override
     public void onDeactivate() {
         if (reloadChunks.get()) {
-            mc.execute(() ->
-                mc.levelExtractor.allChanged());
+            mc.execute(mc.levelExtractor::allChanged);
         }
 
         mc.options.setCameraType(perspective);
@@ -319,7 +318,7 @@ public class Freecam extends Module {
             posVec,
             max,
             AABB.encapsulatingFullBlocks(BlockPos.containing(posVec.x, posVec.y, posVec.z), BlockPos.containing(max.x, max.y, max.z)),
-            entity -> true,
+            _ -> true,
             maxDist
         );
 
