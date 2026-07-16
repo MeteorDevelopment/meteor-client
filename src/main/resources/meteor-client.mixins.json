@@ -16,6 +16,7 @@
     "AbstractMountInventoryMenuAccessor",
     "AbstractSignEditScreenAccessor",
     "AbstractSignRendererMixin",
+    "AddressCheckMixin",
     "ArmorStandRendererMixin",
     "AttackRangeMixin",
     "AvatarRendererMixin",
