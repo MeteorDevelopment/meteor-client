@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.events.entity.player.JumpVelocityMultiplie
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.mixininterface.ICamera;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
 import meteordevelopment.meteorclient.systems.modules.movement.*;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
@@ -161,7 +162,10 @@ public abstract class EntityMixin {
 
     @ModifyReturnValue(method = "isSuppressingBounce", at = @At("RETURN"))
     private boolean cancelBounce(boolean original) {
-        return Modules.get().get(NoFall.class).cancelBounce() || original;
+        if (!Utils.canUpdate()) return original;
+        NoFall noFall = Modules.get().get(NoFall.class);
+        if (noFall == null) return original;
+        return noFall.cancelBounce() || original;
     }
 
     @Inject(method = "turn", at = @At("HEAD"), cancellable = true)
