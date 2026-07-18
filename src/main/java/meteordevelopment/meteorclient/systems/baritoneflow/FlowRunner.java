@@ -8,7 +8,15 @@ package meteordevelopment.meteorclient.systems.baritoneflow;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.pathing.IPathManager;
 import meteordevelopment.meteorclient.pathing.PathManagers;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.AutoReconnect;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
@@ -55,10 +63,15 @@ public class FlowRunner {
     }
 
     public void start(Flow flow) {
+        startFrom(flow, flow.getStart());
+    }
+
+    /** Starts execution from an arbitrary node, e.g. a trigger node whose condition just fired. */
+    public void startFrom(Flow flow, FlowNode entry) {
         stop();
 
         this.flow = flow;
-        this.order = flow.computeOrder();
+        this.order = flow.computeOrder(entry);
         this.index = 0;
         this.running = !order.isEmpty();
         this.state = State.Begin;
@@ -98,7 +111,8 @@ public class FlowRunner {
 
     private void begin(FlowNode node, IPathManager pm) {
         switch (node.type.get()) {
-            case Start, Pause, Resume -> {
+            // Start/OnPlayerNearAppear are entry points only - reaching them just moves on to their children.
+            case Start, OnPlayerNearAppear, Pause, Resume -> {
                 if (node.type.get() == FlowNodeType.Pause && BaritoneUtils.IS_AVAILABLE) pm.pause();
                 if (node.type.get() == FlowNodeType.Resume && BaritoneUtils.IS_AVAILABLE) pm.resume();
                 state = State.Instant;
@@ -130,7 +144,50 @@ public class FlowRunner {
                 BaritoneUtils.runCommand(node.command.get());
                 beginPathing(); // most commands (goto/mine/farm/build) put Baritone into a pathing state
             }
+            case Module -> {
+                executeModuleAction(node);
+                state = State.Instant;
+            }
+            case Leave -> {
+                leave();
+                state = State.Instant;
+            }
+            case Reconnect -> {
+                reconnect();
+                state = State.Instant;
+            }
         }
+    }
+
+    private void executeModuleAction(FlowNode node) {
+        List<Module> modules = node.targetModule.get();
+        if (modules.isEmpty()) return;
+
+        Module module = modules.getFirst();
+
+        switch (node.moduleAction.get()) {
+            case Enable -> module.enable();
+            case Disable -> module.disable();
+            case Toggle -> module.toggle();
+            case SetSetting -> {
+                Setting<?> setting = module.settings.get(node.moduleSettingName.get());
+                if (setting != null) setting.parse(node.moduleSettingValue.get());
+            }
+        }
+    }
+
+    private void leave() {
+        if (mc.player == null || mc.player.connection == null) return;
+
+        mc.player.connection.handleDisconnect(new ClientboundDisconnectPacket(Component.literal("Baritone Flow: Leave node")));
+    }
+
+    private void reconnect() {
+        AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
+        if (autoReconnect == null || autoReconnect.lastServerConnection == null) return;
+
+        var lastServer = autoReconnect.lastServerConnection;
+        ConnectScreen.startConnecting(new TitleScreen(), mc, lastServer.left(), lastServer.right(), false, null);
     }
 
     private void beginPathing() {

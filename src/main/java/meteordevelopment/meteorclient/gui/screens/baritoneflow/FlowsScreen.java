@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.baritoneflow.BaritoneFlows;
 import meteordevelopment.meteorclient.systems.baritoneflow.Flow;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.world.BaritoneFlow;
+import meteordevelopment.meteorclient.systems.modules.baritone.FlowBuilder;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -51,12 +51,20 @@ public class FlowsScreen extends WindowScreen {
 
             row.add(theme.label(flow.name)).expandCellX().widget();
 
+            WButton armed = row.add(theme.button(flow.armed ? "Armed" : "Disarmed")).widget();
+            armed.tooltip = "While armed, this flow's trigger nodes are watched in the background and can start it on their own.";
+            armed.action = () -> {
+                flow.armed = !flow.armed;
+                flows.save();
+                reload();
+            };
+
             WButton edit = row.add(theme.button("Edit")).widget();
             edit.action = () -> mc.setScreen(new FlowEditorScreen(theme, flow));
 
             WButton run = row.add(theme.button("Run")).widget();
             run.action = () -> {
-                BaritoneFlow module = Modules.get().get(BaritoneFlow.class);
+                FlowBuilder module = Modules.get().get(FlowBuilder.class);
                 if (module != null) module.runFlow(flow);
                 onClose();
             };

@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.gui.screens.baritoneflow;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
+import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.baritoneflow.Flow;
 import meteordevelopment.meteorclient.systems.baritoneflow.FlowNode;
@@ -30,10 +31,22 @@ public class AddFlowNodeScreen extends WindowScreen {
 
     @Override
     public void initWidgets() {
+        WSection triggers = add(theme.section("Triggers")).expandX().widget();
+        WSection baritone = add(theme.section("Baritone Tasks")).expandX().widget();
+        WSection modules = add(theme.section("Meteor Modules")).expandX().widget();
+        WSection client = add(theme.section("Client Actions")).expandX().widget();
+
         for (FlowNodeType type : FlowNodeType.values()) {
             if (type == FlowNodeType.Start) continue; // only one Start node per flow
 
-            WButton button = add(theme.button(type.toString())).expandX().widget();
+            WSection section = switch (type.category()) {
+                case Trigger -> triggers;
+                case Module -> modules;
+                case Client -> client;
+                case Baritone -> baritone;
+            };
+
+            WButton button = section.add(theme.button(type.label())).expandX().widget();
             button.action = () -> {
                 FlowNode node = flow.addNode(x, y);
                 node.type.set(type);

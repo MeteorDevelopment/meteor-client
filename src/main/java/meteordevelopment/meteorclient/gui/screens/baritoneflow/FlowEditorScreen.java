@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.systems.baritoneflow.Flow;
 import meteordevelopment.meteorclient.systems.baritoneflow.FlowNode;
 import meteordevelopment.meteorclient.systems.baritoneflow.FlowNodeType;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.world.BaritoneFlow;
+import meteordevelopment.meteorclient.systems.modules.baritone.FlowBuilder;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
@@ -38,6 +38,7 @@ public class FlowEditorScreen extends WidgetScreen {
     private static final Color BG_CURRENT = new Color(70, 62, 30, 235);
     private static final Color OL = new Color(120, 124, 145, 255);
     private static final Color OL_START = new Color(90, 190, 110, 255);
+    private static final Color OL_TRIGGER = new Color(150, 110, 235, 255);
     private static final Color OL_CURRENT = new Color(235, 190, 70, 255);
     private static final Color PORT_COLOR = new Color(150, 155, 190, 255);
     private static final Color LINE = new Color(150, 155, 180, 220);
@@ -142,13 +143,18 @@ public class FlowEditorScreen extends WidgetScreen {
                 }
             }
             case GLFW.GLFW_KEY_R -> {
-                BaritoneFlow module = Modules.get().get(BaritoneFlow.class);
+                FlowBuilder module = Modules.get().get(FlowBuilder.class);
                 if (module != null) module.runFlow(flow);
                 return true;
             }
             case GLFW.GLFW_KEY_X -> {
-                BaritoneFlow module = Modules.get().get(BaritoneFlow.class);
+                FlowBuilder module = Modules.get().get(FlowBuilder.class);
                 if (module != null) module.stopAll();
+                return true;
+            }
+            case GLFW.GLFW_KEY_A -> {
+                flow.armed = !flow.armed;
+                save();
                 return true;
             }
         }
@@ -184,8 +190,9 @@ public class FlowEditorScreen extends WidgetScreen {
         // Nodes
         for (FlowNode node : flow.nodes) {
             boolean isStart = node.type.get() == FlowNodeType.Start;
+            boolean isTrigger = node.type.get().category() == FlowNodeType.Category.Trigger;
             Color bg = node == current ? BG_CURRENT : (node == hovered ? BG_HOVER : BG);
-            Color ol = node == current ? OL_CURRENT : (isStart ? OL_START : OL);
+            Color ol = node == current ? OL_CURRENT : (isStart ? OL_START : (isTrigger ? OL_TRIGGER : OL));
 
             box(r, node.x, node.y, NODE_W, NODE_H, bg, ol);
 
@@ -200,8 +207,8 @@ public class FlowEditorScreen extends WidgetScreen {
         VanillaTextRenderer text = VanillaTextRenderer.INSTANCE;
         text.begin(1, false, false);
 
-        text.render("Flow: " + flow.name, 8, 8, TITLE, true);
-        text.render("Left-drag node / wire ports  -  Right-click: edit or add  -  Delete: remove  -  R: run  -  X: stop", 8, 26, HELP, true);
+        text.render("Flow: " + flow.name + (flow.armed ? "  [ARMED]" : ""), 8, 8, TITLE, true);
+        text.render("Left-drag node / wire ports  -  Right-click: edit or add  -  Delete: remove  -  R: run  -  X: stop  -  A: arm/disarm", 8, 26, HELP, true);
 
         for (FlowNode node : flow.nodes) {
             text.render(node.title(), node.x + 8, node.y + 7, TITLE, false);
@@ -244,7 +251,7 @@ public class FlowEditorScreen extends WidgetScreen {
     }
 
     private FlowNode currentNode() {
-        BaritoneFlow module = Modules.get().get(BaritoneFlow.class);
+        FlowBuilder module = Modules.get().get(FlowBuilder.class);
         if (module == null || module.getRunningFlow() != flow) return null;
         return module.getCurrentNode();
     }

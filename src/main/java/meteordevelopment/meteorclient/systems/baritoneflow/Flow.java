@@ -23,6 +23,8 @@ import java.util.Set;
  */
 public class Flow implements ISerializable<Flow> {
     public String name;
+    /** While armed, this flow's trigger nodes (e.g. {@link FlowNodeType#OnPlayerNearAppear}) are watched in the background and can start it on their own. */
+    public boolean armed;
     public final List<FlowNode> nodes = new ArrayList<>();
     private int nextId = 1;
 
@@ -65,6 +67,14 @@ public class Flow implements ISerializable<Flow> {
         return nodes.isEmpty() ? null : nodes.getFirst();
     }
 
+    public List<FlowNode> getNodesOfType(FlowNodeType type) {
+        List<FlowNode> result = new ArrayList<>();
+        for (FlowNode n : nodes) {
+            if (n.type.get() == type) result.add(n);
+        }
+        return result;
+    }
+
     public void connect(FlowNode from, FlowNode to) {
         if (from == to) return;
         if (!from.children.contains(to.id)) from.children.add(to.id);
@@ -74,19 +84,24 @@ public class Flow implements ISerializable<Flow> {
         from.children.removeIf(id -> id == to.id);
     }
 
-    /**
-     * Depth-first pre-order traversal from the Start node. Already visited nodes are skipped, so
-     * loops in the graph terminate instead of running forever.
-     */
+    /** Depth-first pre-order traversal from the Start node. See {@link #computeOrder(FlowNode)}. */
     public List<FlowNode> computeOrder() {
-        List<FlowNode> order = new ArrayList<>();
-
         FlowNode start = getStart();
-        if (start == null) return order;
+        return start == null ? new ArrayList<>() : computeOrder(start);
+    }
+
+    /**
+     * Depth-first pre-order traversal starting from the given node (used both for a manual run from
+     * Start and for a trigger node firing on its own). Already visited nodes are skipped, so loops
+     * in the graph terminate instead of running forever.
+     */
+    public List<FlowNode> computeOrder(FlowNode entry) {
+        List<FlowNode> order = new ArrayList<>();
+        if (entry == null) return order;
 
         Set<Integer> visited = new HashSet<>();
         Deque<FlowNode> stack = new ArrayDeque<>();
-        stack.push(start);
+        stack.push(entry);
 
         while (!stack.isEmpty()) {
             FlowNode node = stack.pop();
@@ -108,6 +123,7 @@ public class Flow implements ISerializable<Flow> {
         CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
+        tag.putBoolean("armed", armed);
         tag.putInt("nextId", nextId);
         tag.put("nodes", NbtUtils.listToTag(nodes));
 
@@ -117,6 +133,7 @@ public class Flow implements ISerializable<Flow> {
     @Override
     public Flow fromTag(CompoundTag tag) {
         name = tag.getStringOr("name", "Flow");
+        armed = tag.getBooleanOr("armed", false);
         nextId = tag.getIntOr("nextId", 1);
 
         nodes.clear();

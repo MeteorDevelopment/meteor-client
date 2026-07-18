@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.baritoneflow;
 
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -85,10 +86,10 @@ public class FlowNode implements ISerializable<FlowNode> {
 
     public final Setting<Double> seconds = sg.add(new DoubleSetting.Builder()
         .name("seconds")
-        .description("For Wait: how long to pause. For Follow: how long to follow before continuing (0 keeps following in the background).")
+        .description("For Wait: how long to pause (e.g. 1800 for 30 minutes). For Follow: how long to follow before continuing (0 keeps following in the background).")
         .defaultValue(3)
         .min(0)
-        .sliderRange(0, 60)
+        .sliderRange(0, 1800)
         .visible(() -> type.get() == FlowNodeType.Wait || type.get() == FlowNodeType.Follow)
         .build()
     );
@@ -100,6 +101,59 @@ public class FlowNode implements ISerializable<FlowNode> {
         .description("Raw Baritone command without the prefix, e.g. \"farm 30\" or \"build house\".")
         .defaultValue("")
         .visible(() -> type.get() == FlowNodeType.Command)
+        .build()
+    );
+
+    // Module (any Meteor Client module, not just Baritone)
+
+    public final Setting<ModuleAction> moduleAction = sg.add(new EnumSetting.Builder<ModuleAction>()
+        .name("module-action")
+        .description("What to do with the target module.")
+        .defaultValue(ModuleAction.Toggle)
+        .visible(() -> type.get() == FlowNodeType.Module)
+        .build()
+    );
+
+    public final Setting<List<Module>> targetModule = sg.add(new ModuleListSetting.Builder()
+        .name("module")
+        .description("The module to control. Only the first selected module is used.")
+        .visible(() -> type.get() == FlowNodeType.Module)
+        .build()
+    );
+
+    public final Setting<String> moduleSettingName = sg.add(new StringSetting.Builder()
+        .name("setting-name")
+        .description("Name of the setting to change, e.g. \"target-block\" or \"delay\".")
+        .defaultValue("")
+        .visible(() -> type.get() == FlowNodeType.Module && moduleAction.get() == ModuleAction.SetSetting)
+        .build()
+    );
+
+    public final Setting<String> moduleSettingValue = sg.add(new StringSetting.Builder()
+        .name("setting-value")
+        .description("New value for the setting, in the same text format you'd use in chat/commands.")
+        .defaultValue("")
+        .visible(() -> type.get() == FlowNodeType.Module && moduleAction.get() == ModuleAction.SetSetting)
+        .build()
+    );
+
+    // Trigger: On Player Near Appear
+
+    public final Setting<Integer> triggerRange = sg.add(new IntSetting.Builder()
+        .name("range")
+        .description("How close a player has to appear to fire this trigger.")
+        .defaultValue(32)
+        .min(1)
+        .sliderMax(64)
+        .visible(() -> type.get() == FlowNodeType.OnPlayerNearAppear)
+        .build()
+    );
+
+    public final Setting<Boolean> ignoreFriends = sg.add(new BoolSetting.Builder()
+        .name("ignore-friends")
+        .description("Don't fire when the player who appeared is on your friends list.")
+        .defaultValue(true)
+        .visible(() -> type.get() == FlowNodeType.OnPlayerNearAppear)
         .build()
     );
 
@@ -121,7 +175,7 @@ public class FlowNode implements ISerializable<FlowNode> {
     public String title() {
         String custom = label.get();
         if (custom != null && !custom.isBlank()) return custom;
-        return type.get().toString();
+        return type.get().label();
     }
 
     /** One-line summary of the node's key parameter, shown in the node body. */
@@ -135,7 +189,22 @@ public class FlowNode implements ISerializable<FlowNode> {
             case Follow -> followTarget.get() == FollowTarget.PlayerByName ? followName.get() : followTarget.get().toString();
             case Wait -> seconds.get() + "s";
             case Command -> command.get().isBlank() ? "(empty)" : command.get();
+            case Module -> moduleSummary();
+            case OnPlayerNearAppear -> "range " + triggerRange.get() + (ignoreFriends.get() ? ", friends ignored" : "");
+            case Leave -> "Disconnects from the server";
+            case Reconnect -> "Reconnects to the last server";
             default -> "";
+        };
+    }
+
+    private String moduleSummary() {
+        String modName = targetModule.get().isEmpty() ? "(no module)" : targetModule.get().getFirst().title;
+
+        return switch (moduleAction.get()) {
+            case Enable -> "Enable " + modName;
+            case Disable -> "Disable " + modName;
+            case Toggle -> "Toggle " + modName;
+            case SetSetting -> modName + "." + moduleSettingName.get() + " = " + moduleSettingValue.get();
         };
     }
 
@@ -174,5 +243,12 @@ public class FlowNode implements ISerializable<FlowNode> {
         NearestPlayer,
         NearestEntity,
         PlayerByName
+    }
+
+    public enum ModuleAction {
+        Enable,
+        Disable,
+        Toggle,
+        SetSetting
     }
 }
