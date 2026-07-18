@@ -22,12 +22,15 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Fonts {
     public static final String[] BUILTIN_FONTS = {"JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation"};
-    private static final String[] FALLBACK_FONT_FAMILIES = {
+    private static final List<String> FALLBACK_FONT_FAMILIES = List.of(
+        "Noto Sans CJK SC",
         "Noto Sans SC",
         "Microsoft YaHei",
         "Microsoft YaHei UI",
@@ -43,7 +46,7 @@ public class Fonts {
         "WenQuanYi Zen Hei",
         "PingFang SC",
         "Hiragino Sans GB"
-    };
+    );
 
     public static String DEFAULT_FONT_FAMILY;
     public static FontFace DEFAULT_FONT;
@@ -78,14 +81,12 @@ public class Fonts {
     }
 
     public static void load(FontFace fontFace) {
-        if (RENDERER != null) {
-            if (RENDERER.fontFace.equals(fontFace)) return;
-            else RENDERER.destroy();
-        }
+        CustomTextRenderer previous = RENDERER;
+        if (previous != null && previous.fontFace.equals(fontFace)) return;
 
+        CustomTextRenderer replacement;
         try {
-            RENDERER = new CustomTextRenderer(fontFace);
-            MeteorClient.EVENT_BUS.post(CustomFontChangedEvent.get());
+            replacement = new CustomTextRenderer(fontFace);
         } catch (Exception e) {
             if (fontFace.equals(DEFAULT_FONT)) {
                 throw new RuntimeException("Failed to load default font: " + fontFace, e);
@@ -93,7 +94,12 @@ public class Fonts {
 
             MeteorClient.LOG.error("Failed to load font: {}", fontFace, e);
             load(Fonts.DEFAULT_FONT);
+            return;
         }
+
+        RENDERER = replacement;
+        if (previous != null) previous.destroy();
+        MeteorClient.EVENT_BUS.post(CustomFontChangedEvent.get());
 
         if (mc.screen instanceof WidgetScreen widgetScreen && Config.get().customFont.get()) {
             widgetScreen.invalidate();
@@ -110,43 +116,43 @@ public class Fonts {
         return null;
     }
 
-    public static List<FontFace> getFallbackFonts(FontFace primary) {
-        List<FontFace> fonts = new ArrayList<>();
-
+    public static Optional<FontFace> getFallbackFont(FontFace primary) {
         for (String familyName : FALLBACK_FONT_FAMILIES) {
-            FontFace font = getFallbackFont(familyName, primary);
-            if (font != null) {
-                fonts.add(font);
-                break;
-            }
+            FontFace font = findFallbackFont(familyName, primary);
+            if (font != null) return Optional.of(font);
         }
 
-        return fonts;
+        return Optional.empty();
     }
 
     public static List<ByteBuffer> readFontBuffers(FontFace primary) throws IOException {
         List<ByteBuffer> buffers = new ArrayList<>();
         buffers.add(primary.readToDirectByteBuffer());
 
-        for (FontFace fallbackFont : getFallbackFonts(primary)) {
-            try {
-                buffers.add(fallbackFont.readToDirectByteBuffer());
-            } catch (IOException e) {
-                MeteorClient.LOG.warn("Failed to load fallback font: {}", fallbackFont, e);
-            }
-        }
+        getFallbackFont(primary)
+            .flatMap(Fonts::readFallbackFont)
+            .ifPresent(buffers::add);
 
-        return buffers;
+        return List.copyOf(buffers);
     }
 
-    private static FontFace getFallbackFont(String familyName, FontFace primary) {
+    private static Optional<ByteBuffer> readFallbackFont(FontFace font) {
+        try {
+            return Optional.of(font.readToDirectByteBuffer());
+        } catch (IOException e) {
+            MeteorClient.LOG.warn("Failed to load fallback font: {}", font, e);
+            return Optional.empty();
+        }
+    }
+
+    private static FontFace findFallbackFont(String familyName, FontFace primary) {
         FontFamily family = getFamily(familyName);
 
         if (family == null) {
-            String needle = familyName.toLowerCase();
+            String needle = familyName.toLowerCase(Locale.ROOT);
 
             for (FontFamily fontFamily : FONT_FAMILIES) {
-                if (fontFamily.getName().toLowerCase().contains(needle)) {
+                if (fontFamily.getName().toLowerCase(Locale.ROOT).contains(needle)) {
                     family = fontFamily;
                     break;
                 }
@@ -154,10 +160,19 @@ public class Fonts {
         }
 
         if (family == null) return null;
+        if (family.getName().equalsIgnoreCase(primary.info.family())) return null;
+
+        FontFace styleMatch = family.get(primary.info.type());
+        if (styleMatch != null) return styleMatch;
+
+        FontFace regular = family.get(FontInfo.Type.Regular);
+        if (regular != null) return regular;
 
         for (FontInfo.Type type : FontInfo.Type.values()) {
+            if (type == primary.info.type() || type == FontInfo.Type.Regular) continue;
+
             FontFace font = family.get(type);
-            if (font != null && !font.info.equals(primary.info)) return font;
+            if (font != null) return font;
         }
 
         return null;
