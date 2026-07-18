@@ -540,6 +540,7 @@ public class Modules extends System<Modules> {
         add(new AutoShearer());
         add(new AutoSign());
         add(new AutoSmelter());
+        add(new BaritoneFlow());
         add(new BuildHeight());
         add(new Collisions());
         add(new EChestFarmer());

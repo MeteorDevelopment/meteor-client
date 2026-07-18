@@ -20,4 +20,10 @@ public class BaritoneUtils {
 
         return "";
     }
+
+    public static void runCommand(String command) {
+        if (!IS_AVAILABLE || command == null || command.isBlank()) return;
+
+        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(command);
+    }
 }
