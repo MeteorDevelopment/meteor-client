@@ -104,6 +104,28 @@ public class FlowNode implements ISerializable<FlowNode> {
         .build()
     );
 
+    // Max duration for long-running Baritone tasks (Goto/Mine/Command)
+
+    public final Setting<Double> maxDuration = sg.add(new DoubleSetting.Builder()
+        .name("max-duration")
+        .description("Give up on this task after this many seconds and move on. 0 = run until it finishes (needed for mining all night).")
+        .defaultValue(0)
+        .min(0)
+        .sliderRange(0, 3600)
+        .visible(() -> type.get() == FlowNodeType.Goto || type.get() == FlowNodeType.Mine || type.get() == FlowNodeType.Command)
+        .build()
+    );
+
+    // Notify
+
+    public final Setting<String> notifyMessage = sg.add(new StringSetting.Builder()
+        .name("message")
+        .description("Message to print to chat when this node runs (handy for logging what happened overnight).")
+        .defaultValue("")
+        .visible(() -> type.get() == FlowNodeType.Notify)
+        .build()
+    );
+
     // Module (any Meteor Client module, not just Baritone)
 
     public final Setting<ModuleAction> moduleAction = sg.add(new EnumSetting.Builder<ModuleAction>()
@@ -137,15 +159,15 @@ public class FlowNode implements ISerializable<FlowNode> {
         .build()
     );
 
-    // Trigger: On Player Near Appear
+    // Triggers
 
     public final Setting<Integer> triggerRange = sg.add(new IntSetting.Builder()
         .name("range")
-        .description("How close a player has to appear to fire this trigger.")
+        .description("How close a player / hostile mob has to be to fire this trigger.")
         .defaultValue(32)
         .min(1)
         .sliderMax(64)
-        .visible(() -> type.get() == FlowNodeType.OnPlayerNearAppear)
+        .visible(() -> type.get() == FlowNodeType.OnPlayerNearAppear || type.get() == FlowNodeType.OnHostileMobsNear)
         .build()
     );
 
@@ -154,6 +176,54 @@ public class FlowNode implements ISerializable<FlowNode> {
         .description("Don't fire when the player who appeared is on your friends list.")
         .defaultValue(true)
         .visible(() -> type.get() == FlowNodeType.OnPlayerNearAppear)
+        .build()
+    );
+
+    public final Setting<Integer> mobCount = sg.add(new IntSetting.Builder()
+        .name("mob-count")
+        .description("Fire once at least this many hostile mobs are within range.")
+        .defaultValue(1)
+        .min(1)
+        .sliderRange(1, 30)
+        .visible(() -> type.get() == FlowNodeType.OnHostileMobsNear)
+        .build()
+    );
+
+    public final Setting<Integer> hungerThreshold = sg.add(new IntSetting.Builder()
+        .name("hunger-threshold")
+        .description("Fire when your food level drops to or below this (0-20).")
+        .defaultValue(6)
+        .range(0, 20)
+        .sliderRange(0, 20)
+        .visible(() -> type.get() == FlowNodeType.OnHunger)
+        .build()
+    );
+
+    public final Setting<Double> healthThreshold = sg.add(new DoubleSetting.Builder()
+        .name("health-threshold")
+        .description("Fire when your health drops to or below this (0-20).")
+        .defaultValue(8)
+        .range(0, 20)
+        .sliderRange(0, 20)
+        .visible(() -> type.get() == FlowNodeType.OnLowHealth)
+        .build()
+    );
+
+    public final Setting<Integer> freeSlots = sg.add(new IntSetting.Builder()
+        .name("free-slots")
+        .description("Fire when the number of free inventory slots drops to or below this. 0 = fire only when completely full.")
+        .defaultValue(0)
+        .min(0)
+        .sliderRange(0, 36)
+        .visible(() -> type.get() == FlowNodeType.OnInventoryFull)
+        .build()
+    );
+
+    public final Setting<String> disconnectReasonFilter = sg.add(new StringSetting.Builder()
+        .name("reason-contains")
+        .description("Only fire when the disconnect reason contains this text (case-insensitive). Leave empty to fire on any disconnect.")
+        .defaultValue("")
+        .visible(() -> type.get() == FlowNodeType.OnDisconnect)
         .build()
     );
 
@@ -190,7 +260,13 @@ public class FlowNode implements ISerializable<FlowNode> {
             case Wait -> seconds.get() + "s";
             case Command -> command.get().isBlank() ? "(empty)" : command.get();
             case Module -> moduleSummary();
+            case Notify -> notifyMessage.get().isBlank() ? "(no message)" : notifyMessage.get();
             case OnPlayerNearAppear -> "range " + triggerRange.get() + (ignoreFriends.get() ? ", friends ignored" : "");
+            case OnHostileMobsNear -> ">=" + mobCount.get() + " within " + triggerRange.get();
+            case OnHunger -> "food <= " + hungerThreshold.get();
+            case OnLowHealth -> "health <= " + healthThreshold.get();
+            case OnInventoryFull -> freeSlots.get() == 0 ? "completely full" : "<= " + freeSlots.get() + " free slots";
+            case OnDisconnect -> disconnectReasonFilter.get().isBlank() ? "any reason" : "reason contains \"" + disconnectReasonFilter.get() + "\"";
             case Leave -> "Disconnects from the server";
             case Reconnect -> "Reconnects to the last server";
             default -> "";

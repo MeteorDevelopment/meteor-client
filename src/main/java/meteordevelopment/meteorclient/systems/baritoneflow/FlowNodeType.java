@@ -20,15 +20,25 @@ public enum FlowNodeType {
     Stop,
     Command,
     Module,
+    Notify,
     Leave,
     Reconnect,
-    OnPlayerNearAppear;
+    OnPlayerNearAppear,
+    OnHunger,
+    OnHostileMobsNear,
+    OnLowHealth,
+    OnInventoryFull,
+    OnDisconnect;
+
+    public boolean isTrigger() {
+        return category() == Category.Trigger;
+    }
 
     public Category category() {
         return switch (this) {
-            case OnPlayerNearAppear -> Category.Trigger;
+            case OnPlayerNearAppear, OnHunger, OnHostileMobsNear, OnLowHealth, OnInventoryFull, OnDisconnect -> Category.Trigger;
             case Module -> Category.Module;
-            case Leave, Reconnect -> Category.Client;
+            case Notify, Leave, Reconnect -> Category.Client;
             default -> Category.Baritone;
         };
     }
@@ -37,6 +47,11 @@ public enum FlowNodeType {
     public String label() {
         return switch (this) {
             case OnPlayerNearAppear -> "Player Near";
+            case OnHunger -> "On Hunger";
+            case OnHostileMobsNear -> "Hostile Mobs Near";
+            case OnLowHealth -> "On Low Health";
+            case OnInventoryFull -> "Inventory Full";
+            case OnDisconnect -> "On Disconnect";
             default -> toString();
         };
     }

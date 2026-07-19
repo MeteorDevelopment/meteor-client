@@ -19,16 +19,20 @@ import meteordevelopment.meteorclient.systems.modules.combat.CrystalAura;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
@@ -114,6 +118,39 @@ public class AutoEat extends Module {
         .visible(() -> thresholdMode.get() != ThresholdMode.Health)
         .build()
     );
+
+    // Combat Hold
+    private final SettingGroup sgCombat = settings.createGroup("Combat Hold");
+
+    private final Setting<Boolean> combatHold = sgCombat.add(new BoolSetting.Builder()
+        .name("hold-near-mobs")
+        .description("Don't eat while hostile mobs are near and you're still healthy, so healing food is saved for emergencies.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> combatRange = sgCombat.add(new DoubleSetting.Builder()
+        .name("mob-range")
+        .description("Radius to check for hostile mobs.")
+        .defaultValue(8)
+        .min(1)
+        .sliderRange(1, 32)
+        .visible(combatHold::get)
+        .build()
+    );
+
+    private final Setting<Double> combatHealth = sgCombat.add(new DoubleSetting.Builder()
+        .name("min-health")
+        .description("Only hold eating while your health is at or above this. Drop below it and eating is allowed again.")
+        .defaultValue(10)
+        .range(1, 20)
+        .sliderRange(1, 20)
+        .visible(combatHold::get)
+        .build()
+    );
+
+    // Items that restore health (via regeneration/absorption) - only these count as emergency healing food.
+    private static final Set<Item> HEALING_FOOD = Set.of(Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE);
 
     // Module state
     public boolean eating;
@@ -266,6 +303,10 @@ public class AutoEat extends Module {
 
     public boolean shouldEat() {
         if (mc.player == null) return false;
+
+        // Combat hold: don't eat while healthy and near mobs (save healing food for emergencies).
+        if (combatHold.get() && shouldHoldForCombat()) return false;
+
         boolean healthLow = mc.player.getHealth() <= healthThreshold.get();
         boolean hungerLow = mc.player.getFoodData().getFoodLevel() <= hungerThreshold.get();
         if (!thresholdMode.get().test(healthLow, hungerLow)) return false;
@@ -278,6 +319,36 @@ public class AutoEat extends Module {
         if (prop == null || !Utils.isFood(item)) return false;
 
         return (mc.player.getFoodData().needsFood() || prop.canAlwaysEat());
+    }
+
+    /**
+     * True when eating should be held back: we're still healthy, there is HP-restoring food worth
+     * saving, and at least one hostile mob is within range.
+     */
+    private boolean shouldHoldForCombat() {
+        if (mc.player.getHealth() < combatHealth.get()) return false;
+        if (!hasHealingFood()) return false;
+
+        return hostileNearby(combatRange.get());
+    }
+
+    private boolean hasHealingFood() {
+        for (int i = 0; i < mc.player.getInventory().getContainerSize(); i++) {
+            if (HEALING_FOOD.contains(mc.player.getInventory().getItem(i).getItem())) return true;
+        }
+        return false;
+    }
+
+    private boolean hostileNearby(double range) {
+        if (mc.level == null) return false;
+
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            if (entity == mc.player || !entity.isAlive()) continue;
+            if (entity.getType().getCategory() != MobCategory.MONSTER) continue;
+            if (PlayerUtils.isWithin(entity, range)) return true;
+        }
+
+        return false;
     }
 
     /**

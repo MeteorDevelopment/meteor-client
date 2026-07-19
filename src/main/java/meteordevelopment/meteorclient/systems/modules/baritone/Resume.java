@@ -8,16 +8,20 @@ package meteordevelopment.meteorclient.systems.modules.baritone;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 
-/** One-shot command: press its keybind to resume a path paused by {@link Pause}. */
+/** One-shot command: press its keybind to resume a path (and any running flow) paused by {@link Pause}. */
 public class Resume extends Module {
     public Resume() {
-        super(Categories.Baritone, "resume", "Resumes Baritone's paused path.");
+        super(Categories.Baritone, "resume", "Resumes Baritone's paused path (and any paused flow).");
     }
 
     @Override
     public void onActivate() {
         if (BaritoneUtil.check(this)) PathManagers.get().resume();
+
+        FlowBuilder flowBuilder = Modules.get().get(FlowBuilder.class);
+        if (flowBuilder.isRunningFlow()) flowBuilder.resumeRunner();
 
         toggle();
     }
