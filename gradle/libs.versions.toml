@@ -45,7 +45,7 @@ sodium = { module = "maven.modrinth:sodium", version.ref = "sodium" }
 lithium = { module = "maven.modrinth:lithium", version.ref = "lithium" }
 iris = { module = "maven.modrinth:iris", version.ref = "iris" }
 baritone = { module = "meteordevelopment:baritone", version.ref = "baritone" }
-modmenu = { module = "com.terraformersmc:modmenu", version.ref = "modmenu" }
+modmenu = { module = "maven.modrinth:modmenu", version.ref = "modmenu" }
 viafabricplus = { module = "com.viaversion:viafabricplus", version.ref = "viafabricplus" }
 viafabricplus-api = { module = "com.viaversion:viafabricplus-api", version.ref = "viafabricplus" }
 
