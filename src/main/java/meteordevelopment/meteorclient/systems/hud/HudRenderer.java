@@ -217,11 +217,11 @@ public class HudRenderer {
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverlay) {
-        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay, countOverlay, true);
+        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay, countOverlay, false);
     }
 
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay);
+        RenderUtils.drawItem(graphics, itemStack, x, y, scale, overlay, null, false);
     }
 
     public void entity(LivingEntity entity, int x, int y, int width, int height, float yaw, float pitch) {
