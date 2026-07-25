@@ -142,8 +142,7 @@ public class ProjectileEntitySimulator {
     }
 
     public void set(Entity user, double angleOffset, boolean accurate, float tickDelta, MotionData data) {
-        // I lost my mind for an hour trying to figure out why arrows and tridents were spawning lower than expected,
-        // and it was because no slow air strict was silently causing the player to crouch AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        // airStrict or doPacket forces crouching, which lowers the projectile spawn position
         Pose pose = user.getPose();
         if (user == mc.player && (Modules.get().get(NoSlow.class).airStrict() || Modules.get().get(Sneak.class).doPacket()))
             pose = Pose.CROUCHING;

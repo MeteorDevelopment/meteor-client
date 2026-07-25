@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class Flight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick"); //Pog
+    private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick");
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
@@ -154,8 +154,7 @@ public class Flight extends Module {
         switch (mode.get()) {
             case Velocity -> {
                 mc.player.getAbilities().flying = false;
-                mc.player.setDeltaMovement(0, 0, 0);
-                Vec3 playerVelocity = mc.player.getDeltaMovement();
+                Vec3 playerVelocity = Vec3.ZERO;
                 if (mc.options.keyJump.isDown())
                     playerVelocity = playerVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0);
                 if (mc.options.keyShift.isDown())

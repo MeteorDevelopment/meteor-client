@@ -29,7 +29,7 @@ public abstract class BlockMixin extends BlockBehaviour implements ItemLike {
 
     @ModifyReturnValue(method = "getFriction", at = @At("RETURN"))
     public float getFriction(float original) {
-        // For some retarded reason Tweakeroo calls this method before meteor is initialized
+        // Tweakeroo calls this method before meteor is initialized
         if (Modules.get() == null) return original;
 
         Slippy slippy = Modules.get().get(Slippy.class);

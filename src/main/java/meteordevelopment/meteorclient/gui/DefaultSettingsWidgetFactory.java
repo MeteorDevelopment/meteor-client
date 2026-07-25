@@ -102,7 +102,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         return list;
     }
 
-    // If a different theme uses has different heights of widgets this can method can be overwritten to account for it in the setting titles
+    // If a different theme has different heights of widgets this method can be overridden to account for it in the setting titles
     protected double settingTitleTopMargin() {
         return 6;
     }

@@ -32,7 +32,7 @@ public class LagNotifierHud extends HudElement {
 
     private final Setting<SettingColor> textColor = sgGeneral.add(new ColorSetting.Builder()
         .name("text-color")
-        .description("A.")
+        .description("Color of the text.")
         .defaultValue(new SettingColor())
         .build()
     );

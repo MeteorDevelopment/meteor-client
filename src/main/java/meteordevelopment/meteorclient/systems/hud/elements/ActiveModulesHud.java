@@ -370,10 +370,4 @@ public class ActiveModulesHud extends HudElement {
         Random,
         Rainbow
     }
-
-    public enum Background {
-        None,
-        Block,
-        Text
-    }
 }
