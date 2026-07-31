@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.*;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -265,7 +266,17 @@ public class ChatUtils {
         String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
         MutableComponent coordsText = formatMsg(coordsString, ChatFormatting.GRAY);
 
-        if (BaritoneUtils.IS_AVAILABLE) {
+        if (mc.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+            Style style = coordsText.getStyle().applyFormats(ChatFormatting.BOLD)
+                .withHoverEvent(new HoverEvent.ShowText(
+                    Component.literal("Teleport to coordinates")
+                ))
+                .withClickEvent(new ClickEvent.SuggestCommand(
+                    String.format("/tp @s %d %d %d", (int) pos.x, (int) pos.y, (int) pos.z)
+                ));
+
+            coordsText.setStyle(style);
+        } else if (BaritoneUtils.IS_AVAILABLE) {
             Style style = coordsText.getStyle().applyFormats(ChatFormatting.BOLD)
                 .withHoverEvent(new HoverEvent.ShowText(
                     Component.literal("Set as Baritone goal")
