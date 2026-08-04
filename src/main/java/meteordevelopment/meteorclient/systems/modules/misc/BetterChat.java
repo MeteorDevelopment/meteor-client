@@ -47,6 +47,10 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class BetterChat extends Module {
+	private final int FIRST_USABLE_ASCII = (int) ' '; // 32
+	private final int LAST_USABLE_ASCII = (int) '~'; // 126
+	private final int NUM_USABLE_ASCII = LAST_USABLE_ASCII - FIRST_USABLE_ASCII + 1;
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgFilter = settings.createGroup("Filter");
     private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
@@ -101,6 +105,25 @@ public class BetterChat extends Module {
         .name("keep-history")
         .description("Prevents the chat history from being cleared when disconnecting.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> encrypt = sgGeneral.add(new BoolSetting.Builder()
+        .name("encrypt")
+        .description("Applies an encryption routine to chat messages")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> cypherOffset = sgFilter.add(new IntSetting.Builder()
+        .name("cypher-offset")
+        .description("Ceasar cypher offset used for encrypting messages")
+        .defaultValue(20)
+        .min(0)
+        .sliderMin(0)
+        .max(NUM_USABLE_ASCII - 1)
+        .sliderMax(NUM_USABLE_ASCII - 1)
+        .visible(encrypt::get)
         .build()
     );
 
@@ -257,6 +280,10 @@ public class BetterChat extends Module {
     private void onMessageReceive(ReceiveMessageEvent event) {
         Component message = event.getMessage();
 
+        // Always decrypt messages regardless of whether we are encrypting them
+        String decryptedMessage = applyDecryption(message.getString());
+        message = Component.empty().append(decryptedMessage);
+
         if (filterRegex.get()) {
             String messageString = message.getString();
             for (Pattern pattern : filterRegexList) {
@@ -321,6 +348,8 @@ public class BetterChat extends Module {
             event.cancel();
             return;
         }
+
+        if (encrypt.get()) message = applyEncryption(message);
 
         event.message = message;
     }
@@ -509,6 +538,76 @@ public class BetterChat extends Module {
         }
         message = sb.toString();
         return message;
+    }
+
+    // Encrypt
+
+    private String applyEncryption(String message) {
+        int msgLen = message.length();
+        int offset = cypherOffset.get();
+        StringBuilder modString = new StringBuilder();
+
+        // Encode offset into message with char for validation
+        modString.append((char) (FIRST_USABLE_ASCII + offset));
+        modString.append(encryptChar('%', offset));
+
+        for (int i = 0; i < msgLen; ++i) {
+            char chr = message.charAt(i);
+            chr = encryptChar(chr, offset);
+            modString.append(chr);
+        }
+        return modString.toString();
+    }
+
+    private char encryptChar(char chr, int offset) {
+        int ascii = (int) chr;
+        if (ascii > FIRST_USABLE_ASCII && ascii <= LAST_USABLE_ASCII) {
+            ascii -= FIRST_USABLE_ASCII;
+            ascii += offset;
+            ascii %= NUM_USABLE_ASCII;
+            ascii += FIRST_USABLE_ASCII;
+            chr = (char) ascii;
+        }
+        return chr;
+    }
+
+    // Decrypt
+
+    private String applyDecryption(String message) {
+        int msgLen = message.length();
+        StringBuilder modString = new StringBuilder();
+        int msgStart = message.indexOf("> ") + 2;
+
+        int offset = (int)(message.charAt(msgStart)) - FIRST_USABLE_ASCII;
+        boolean isEncrypted = decryptChar(message.charAt(msgStart+1), offset) == '%';
+
+        if (isEncrypted) {
+            for (int i = 0; i < msgLen; ++i) {
+                char chr = message.charAt(i);
+                if (i >= msgStart + 2) {
+                    chr = decryptChar(chr, offset);
+                }
+                else if (i >= msgStart) {
+                    continue;
+                }
+                modString.append(chr);
+            }
+            return modString.toString();
+        }
+        return message;
+    }
+
+    private char decryptChar(char chr, int offset) {
+        int ascii = (int) chr;
+        if (ascii > FIRST_USABLE_ASCII && ascii <= LAST_USABLE_ASCII) {
+            ascii -= FIRST_USABLE_ASCII;
+            ascii -= offset;
+            ascii += NUM_USABLE_ASCII;
+            ascii %= NUM_USABLE_ASCII;
+            ascii += FIRST_USABLE_ASCII;
+            chr = (char) ascii;
+        }
+        return chr;
     }
 
     // Fancy
