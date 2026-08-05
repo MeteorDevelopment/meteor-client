@@ -115,7 +115,14 @@ public class BetterChat extends Module {
         .build()
     );
 
-    private final Setting<Integer> cypherOffset = sgFilter.add(new IntSetting.Builder()
+    private final Setting<Boolean> decrypt = sgGeneral.add(new BoolSetting.Builder()
+        .name("decrypt")
+        .description("Applies a decryption routine to encrypted chat messages")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Integer> cypherOffset = sgGeneral.add(new IntSetting.Builder()
         .name("cypher-offset")
         .description("Ceasar cypher offset used for encrypting messages")
         .defaultValue(20)
@@ -278,9 +285,12 @@ public class BetterChat extends Module {
     private void onMessageReceive(ReceiveMessageEvent event) {
         Component message = event.getMessage();
 
-        // Always decrypt messages regardless of whether we are encrypting them
-        String decryptedMessage = applyDecryption(message.getString());
-        message = Component.empty().append(decryptedMessage);
+        if (decrypt.get()) {
+            Optional<String> decryptedMessage = applyDecryption(message.getString());
+            if (decryptedMessage.isPresent()) {
+                message = Component.empty().append(decryptedMessage.get());
+            }
+        }
 
         if (filterRegex.get()) {
             String messageString = message.getString();
@@ -571,16 +581,22 @@ public class BetterChat extends Module {
 
     // Decrypt
 
-    private String applyDecryption(String message) {
-        int msgLen = message.length();
+    private Optional<String> applyDecryption(String message) {
+        int rawMsgLen = message.length();
+        int nameTagEnd = message.indexOf("> ");
+        int msgStart = nameTagEnd + 2;
+        int msgLen = rawMsgLen - msgStart;
         StringBuilder modString = new StringBuilder();
-        int msgStart = message.indexOf("> ") + 2;
+
+        if (msgLen <= 2) {
+            return Optional.empty();
+        }
 
         int offset = (int)(message.charAt(msgStart)) - FIRST_USABLE_ASCII;
         boolean isEncrypted = decryptChar(message.charAt(msgStart+1), offset) == '%';
 
         if (isEncrypted) {
-            for (int i = 0; i < msgLen; ++i) {
+            for (int i = 0; i < rawMsgLen; ++i) {
                 char chr = message.charAt(i);
                 if (i >= msgStart + 2) {
                     chr = decryptChar(chr, offset);
@@ -590,9 +606,9 @@ public class BetterChat extends Module {
                 }
                 modString.append(chr);
             }
-            return modString.toString();
+            return Optional.of(modString.toString());
         }
-        return message;
+        return Optional.empty();
     }
 
     private char decryptChar(char chr, int offset) {
