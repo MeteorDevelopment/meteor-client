@@ -543,7 +543,7 @@ public class BetterChat extends Module {
     private String applyEncryption(String message) {
         int msgLen = message.length();
         int offset = cypherOffset.get();
-        StringBuilder modString = new StringBuilder();
+        StringBuilder modString = new StringBuilder(msgLen + 2);
 
         // Encode offset into message with char for validation
         modString.append((char) (FIRST_USABLE_ASCII + offset));
