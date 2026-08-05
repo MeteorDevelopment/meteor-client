@@ -119,10 +119,8 @@ public class BetterChat extends Module {
         .name("cypher-offset")
         .description("Ceasar cypher offset used for encrypting messages")
         .defaultValue(20)
-        .min(0)
-        .sliderMin(0)
-        .max(NUM_USABLE_ASCII - 1)
-        .sliderMax(NUM_USABLE_ASCII - 1)
+        .range(0, NUM_USABLE_ASCII - 1)
+        .sliderRange(0, NUM_USABLE_ASCII - 1)
         .visible(encrypt::get)
         .build()
     );
