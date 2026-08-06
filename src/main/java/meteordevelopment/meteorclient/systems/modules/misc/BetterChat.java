@@ -48,8 +48,13 @@ import java.util.regex.PatternSyntaxException;
 
 public class BetterChat extends Module {
 	private final int FIRST_USABLE_ASCII = (int) ' '; // 32
-	private final int LAST_USABLE_ASCII = (int) '~'; // 126
+	private final int LAST_USABLE_ASCII = (int) '}'; // 125
 	private final int NUM_USABLE_ASCII = LAST_USABLE_ASCII - FIRST_USABLE_ASCII + 1;
+    private final int FIRST_LOWERCASE = (int) 'a';
+    private final int LAST_LOWERCASE = (int) 'z';
+    private final int FIRST_CAPITAL = (int) 'A';
+    private final int LAST_CAPITAL = (int) 'Z';
+    private final int NUM_LETTERS = 26;
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgFilter = settings.createGroup("Filter");
@@ -119,16 +124,6 @@ public class BetterChat extends Module {
         .name("decrypt")
         .description("Applies a decryption routine to encrypted chat messages")
         .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Integer> cypherOffset = sgGeneral.add(new IntSetting.Builder()
-        .name("cypher-offset")
-        .description("Ceasar cypher offset used for encrypting messages")
-        .defaultValue(20)
-        .range(0, NUM_USABLE_ASCII - 1)
-        .sliderRange(0, NUM_USABLE_ASCII - 1)
-        .visible(encrypt::get)
         .build()
     );
 
@@ -339,6 +334,8 @@ public class BetterChat extends Module {
     private void onMessageSend(SendMessageEvent event) {
         String message = event.message;
 
+        if (encrypt.get()) message = applyEncryption(message);
+
         if (annoy.get()) message = applyAnnoy(message);
 
         if (fancy.get()) message = applyFancy(message);
@@ -356,8 +353,6 @@ public class BetterChat extends Module {
             event.cancel();
             return;
         }
-
-        if (encrypt.get()) message = applyEncryption(message);
 
         event.message = message;
     }
@@ -552,28 +547,39 @@ public class BetterChat extends Module {
 
     private String applyEncryption(String message) {
         int msgLen = message.length();
-        int offset = cypherOffset.get();
+        int offset = Utils.random(0, 26); //cypherOffset.get();
         StringBuilder modString = new StringBuilder(msgLen + 2);
 
         // Encode offset into message with char for validation
-        modString.append((char) (FIRST_USABLE_ASCII + offset));
-        modString.append(encryptChar('%', offset));
+        modString.append('[');
+        modString.append((char) (FIRST_CAPITAL + offset));
+        modString.append(encryptChar('E', offset));
 
         for (int i = 0; i < msgLen; ++i) {
             char chr = message.charAt(i);
             chr = encryptChar(chr, offset);
             modString.append(chr);
         }
+        modString.append(']');
         return modString.toString();
     }
 
     private char encryptChar(char chr, int offset) {
         int ascii = (int) chr;
-        if (ascii > FIRST_USABLE_ASCII && ascii <= LAST_USABLE_ASCII) {
-            ascii -= FIRST_USABLE_ASCII;
+        if (Character.isUpperCase(chr)) {
+            ascii -= FIRST_CAPITAL;
             ascii += offset;
-            ascii %= NUM_USABLE_ASCII;
-            ascii += FIRST_USABLE_ASCII;
+            ascii += NUM_LETTERS;
+            ascii %= NUM_LETTERS;
+            ascii += FIRST_CAPITAL;
+            chr = (char) ascii;
+        }
+        else if (Character.isLowerCase(chr)) {
+            ascii -= FIRST_LOWERCASE;
+            ascii += offset;
+            ascii += NUM_LETTERS;
+            ascii %= NUM_LETTERS;
+            ascii += FIRST_LOWERCASE;
             chr = (char) ascii;
         }
         return chr;
@@ -583,25 +589,26 @@ public class BetterChat extends Module {
 
     private Optional<String> applyDecryption(String message) {
         int rawMsgLen = message.length();
-        int nameTagEnd = message.indexOf("> ");
-        int msgStart = nameTagEnd + 2;
-        int msgLen = rawMsgLen - msgStart;
+        int nameTagEnd = message.indexOf("> ") + 2;
+        int encStart = message.indexOf('[') + 1;
+        int encEnd = message.lastIndexOf(']') - 1;
+        int msgLen = encEnd - encStart;
         StringBuilder modString = new StringBuilder();
 
-        if (msgLen <= 2) {
+        if (msgLen < 2) {
             return Optional.empty();
         }
 
-        int offset = (int)(message.charAt(msgStart)) - FIRST_USABLE_ASCII;
-        boolean isEncrypted = decryptChar(message.charAt(msgStart+1), offset) == '%';
+        int offset = (int)(message.charAt(encStart)) - FIRST_CAPITAL;
+        boolean isEncrypted = decryptChar(message.charAt(encStart+1), offset) == 'E';
 
         if (isEncrypted) {
             for (int i = 0; i < rawMsgLen; ++i) {
                 char chr = message.charAt(i);
-                if (i >= msgStart + 2) {
+                if (i >= encStart+2 && i <= encEnd) {
                     chr = decryptChar(chr, offset);
                 }
-                else if (i >= msgStart) {
+                else if (i >= nameTagEnd) {
                     continue;
                 }
                 modString.append(chr);
@@ -613,12 +620,20 @@ public class BetterChat extends Module {
 
     private char decryptChar(char chr, int offset) {
         int ascii = (int) chr;
-        if (ascii > FIRST_USABLE_ASCII && ascii <= LAST_USABLE_ASCII) {
-            ascii -= FIRST_USABLE_ASCII;
+        if (Character.isUpperCase(chr)) {
+            ascii -= FIRST_CAPITAL;
             ascii -= offset;
-            ascii += NUM_USABLE_ASCII;
-            ascii %= NUM_USABLE_ASCII;
-            ascii += FIRST_USABLE_ASCII;
+            ascii += NUM_LETTERS;
+            ascii %= NUM_LETTERS;
+            ascii += FIRST_CAPITAL;
+            chr = (char) ascii;
+        }
+        else if (Character.isLowerCase(chr)) {
+            ascii -= FIRST_LOWERCASE;
+            ascii -= offset;
+            ascii += NUM_LETTERS;
+            ascii %= NUM_LETTERS;
+            ascii += FIRST_LOWERCASE;
             chr = (char) ascii;
         }
         return chr;
