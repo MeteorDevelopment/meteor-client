@@ -129,6 +129,13 @@ public abstract class WidgetScreen extends Screen {
         mouseX *= s;
         mouseY *= s;
 
+        // Unfocus all text boxes that are not under the mouse cursor
+        loopWidgets(root, widget -> {
+            if (widget instanceof WTextBox textBox && textBox.isFocused() && !textBox.mouseOver) {
+                textBox.setFocused(false);
+            }
+        });
+
         return root.mouseClicked(new MouseButtonEvent(mouseX, mouseY, click.buttonInfo()), doubled);
     }
 
@@ -337,9 +344,17 @@ public abstract class WidgetScreen extends Screen {
             }
 
             if (onClose) {
+                double restoreX = mc.mouseHandler.xpos();
+                double restoreY = mc.mouseHandler.ypos();
+
                 taskAfterRender = () -> {
                     locked = true;
                     mc.setScreen(parent);
+
+                    // Restore mouse position to where it was when the screen was closed
+                    if (parent != null) {
+                        glfwSetCursorPos(mc.getWindow().handle(), restoreX, restoreY);
+                    }
                 };
             }
         }

@@ -93,6 +93,7 @@ public class WMeteorTextBox extends WTextBox implements MeteorWidget {
     protected void onCursorChanged() {
         cursorVisible = true;
         cursorTimer = 0;
+        animProgress = focused ? 1.0 : 0.0;
     }
 
     @Override

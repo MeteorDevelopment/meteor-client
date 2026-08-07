@@ -7,11 +7,6 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.widgets.WLabel;
-import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -20,7 +15,6 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.server.network.Filterable;
@@ -31,7 +25,6 @@ import net.minecraft.world.item.component.WrittenBookContent;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,10 +37,31 @@ import java.util.function.Predicate;
 public class BookBot extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    private final File DEFAULT_FILE = new File(MeteorClient.FOLDER, "bookbot.txt");
+    private final PointerBuffer filters;
+
+    {
+        filters = BufferUtils.createPointerBuffer(1);
+
+        ByteBuffer txtFilter = MemoryUtil.memASCII("*.txt");
+
+        filters.put(txtFilter);
+        filters.rewind();
+    }
+
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("What kind of text to write.")
         .defaultValue(Mode.Random)
+        .build()
+    );
+
+    private final Setting<File> file = sgGeneral.add(new FileSetting.Builder()
+        .name("file")
+        .description("Which file to use.")
+        .defaultValue(DEFAULT_FILE)
+        .filter(filters)
+        .visible(() -> mode.get() == Mode.File)
         .build()
     );
 
@@ -119,56 +133,17 @@ public class BookBot extends Module {
         .build()
     );
 
-    private File file = new File(MeteorClient.FOLDER, "bookbot.txt");
-    private final PointerBuffer filters;
 
     private int delayTimer, bookCount;
     private Random random;
 
     public BookBot() {
         super(Categories.Misc, "book-bot", "Automatically writes in books.");
-
-        if (!file.exists()) {
-            file = null;
-        }
-
-        filters = BufferUtils.createPointerBuffer(1);
-
-        ByteBuffer txtFilter = MemoryUtil.memASCII("*.txt");
-
-        filters.put(txtFilter);
-        filters.rewind();
-    }
-
-    @Override
-    public WWidget getWidget(GuiTheme theme) {
-        WHorizontalList list = theme.horizontalList();
-
-        WButton selectFile = list.add(theme.button("Select File")).widget();
-
-        WLabel fileName = list.add(theme.label((file != null && file.exists()) ? file.getName() : "No file selected.")).widget();
-
-        selectFile.action = () -> {
-            String path = TinyFileDialogs.tinyfd_openFileDialog(
-                "Select File",
-                new File(MeteorClient.FOLDER, "bookbot.txt").getAbsolutePath(),
-                filters,
-                null,
-                false
-            );
-
-            if (path != null) {
-                file = new File(path);
-                fileName.set(file.getName());
-            }
-        };
-
-        return list;
     }
 
     @Override
     public void onActivate() {
-        if ((file == null || !file.exists()) && mode.get() == Mode.File) {
+        if (!file.get().exists() && mode.get() == Mode.File) {
             info("No file selected, please select a file in the GUI.");
             toggle();
             return;
@@ -221,20 +196,20 @@ public class BookBot extends Module {
             }
         } else if (mode.get() == Mode.File) {
             // Ignore if somehow the file got deleted
-            if ((file == null || !file.exists()) && mode.get() == Mode.File) {
+            if (!file.get().exists() && mode.get() == Mode.File) {
                 info("No file selected, please select a file in the GUI.");
                 toggle();
                 return;
             }
 
             // Handle the file being empty
-            if (file.length() == 0) {
+            if (file.get().length() == 0) {
                 MutableComponent message = Component.literal("");
                 message.append(Component.literal("The bookbot file is empty! ").withStyle(ChatFormatting.RED));
                 message.append(Component.literal("Click here to edit it.")
                     .setStyle(Style.EMPTY
                         .applyFormats(ChatFormatting.UNDERLINE, ChatFormatting.RED)
-                        .withClickEvent(new ClickEvent.OpenFile(file.getAbsolutePath()))
+                        .withClickEvent(new ClickEvent.OpenFile(file.get().getAbsolutePath()))
                     )
                 );
                 info(message);
@@ -243,7 +218,7 @@ public class BookBot extends Module {
             }
 
             // Read each line of the file and construct a string with the needed line breaks
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file.get()))) {
                 StringBuilder file = new StringBuilder();
 
                 String line;
@@ -382,26 +357,6 @@ public class BookBot extends Module {
         mc.player.connection.send(new ServerboundEditBookPacket(mc.player.getInventory().getSelectedSlot(), pages, sign.get() ? Optional.of(title) : Optional.empty()));
 
         bookCount++;
-    }
-
-    @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = super.toTag();
-
-        if (file != null && file.exists()) {
-            tag.putString("file", file.getAbsolutePath());
-        }
-
-        return tag;
-    }
-
-    @Override
-    public Module fromTag(CompoundTag tag) {
-        if (tag.contains("file")) {
-            file = new File(tag.getStringOr("file", ""));
-        }
-
-        return super.fromTag(tag);
     }
 
     public enum Mode {

@@ -21,10 +21,6 @@ repositories {
         url = uri("https://maven.meteordev.org/snapshots")
     }
     maven {
-        name = "Terraformers"
-        url = uri("https://maven.terraformersmc.com")
-    }
-    maven {
         name = "ViaVersion"
         url = uri("https://repo.viaversion.com")
     }
