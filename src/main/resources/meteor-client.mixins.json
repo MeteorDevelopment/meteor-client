@@ -200,7 +200,8 @@
     "WebBlockMixin",
     "WingsLayerMixin",
     "WorldBorderMixin",
-    "YggdrasilMinecraftSessionServiceAccessor"
+    "YggdrasilMinecraftSessionServiceAccessor",
+    "cubiomes.CubiomesInitMixin"
   ],
   "injectors": {
     "defaultRequire": 1

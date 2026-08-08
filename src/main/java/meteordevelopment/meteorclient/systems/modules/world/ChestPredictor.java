@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import dev.xpple.cubiomes.Cubiomes;
 import dev.xpple.cubiomes.EnchantInstance;
@@ -28,6 +27,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
@@ -40,15 +40,16 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Util;
 import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -61,19 +62,33 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
-import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.pools.ListPoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
+import net.minecraft.world.level.levelgen.structure.templatesystem.AlwaysTrueTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlackstoneReplaceProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockAgeProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorRule;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RandomBlockMatchTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RandomBlockStateMatchTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -84,17 +99,18 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -120,166 +136,19 @@ public class ChestPredictor extends Module {
         .build()
     );
 
-    private static final List<Rotation> ALL_ROTATIONS = List.of(Rotation.values());
+    private static final List<PieceData> LOOTABLE_PIECES = Util.make(() -> {
+        List<Rotation> allRotations = List.of(Rotation.values());
 
-    private static final class LootablePiecesHolder {
-        // only pieces with one chest are supported due to optimizations
-        private static final List<PieceData> LOOTABLE_PIECES = Util.make(() -> {
-            Stream.Builder<@Nullable PieceData> builder = Stream.builder();
-
-            // ancient city
-            Set<Block> ANCIENT_CITY_FILTERED_BLOCKS = Set.of(
-                // blocks affected by ANCIENT_CITY_START_DEGRADATION
-                Blocks.DEEPSLATE_BRICKS,
-                Blocks.DEEPSLATE_TILES,
-                Blocks.SOUL_LANTERN,
-                // blocks affected by ANCIENT_CITY_GENERIC_DEGRADATION
-                Blocks.DEEPSLATE,
-                Blocks.DEEPSLATE_BRICK_SLAB,
-                Blocks.DEEPSLATE_TILE_SLAB,
-                Blocks.DEEPSLATE_BRICK_STAIRS,
-                Blocks.DEEPSLATE_TILE_WALL,
-                Blocks.DEEPSLATE_BRICK_WALL,
-                Blocks.COBBLED_DEEPSLATE,
-                Blocks.CRACKED_DEEPSLATE_BRICKS,
-                Blocks.CRACKED_DEEPSLATE_TILES,
-                Blocks.GRAY_WOOL
-            );
-
-            List.of(
-                "ancient_city/structures/chamber_1",
-                "ancient_city/structures/chamber_2",
-                "ancient_city/structures/chamber_3",
-                "ancient_city/structures/tall_ruin_1",
-                "ancient_city/structures/tall_ruin_3",
-                "ancient_city/structures/tall_ruin_4"
-            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.withDefaultNamespace(s), BuiltInLootTables.ANCIENT_CITY, Level.OVERWORLD)
-                .withBiomeFunction(_ -> BuiltinStructures.ANCIENT_CITY)
-                .withRotations(ALL_ROTATIONS)
-                .withFilteredBlocks(ANCIENT_CITY_FILTERED_BLOCKS)
-                .build()));
-
-            builder.add(new PieceDataBuilder(Identifier.withDefaultNamespace("ancient_city/structures/ice_box_1"), BuiltInLootTables.ANCIENT_CITY_ICE_BOX, Level.OVERWORLD)
-                .withBiomeFunction(_ -> BuiltinStructures.ANCIENT_CITY)
-                .withRotations(ALL_ROTATIONS)
-                .withFilteredBlocks(ANCIENT_CITY_FILTERED_BLOCKS)
-                .build());
-
-            // bastion
-            Set<Block> BASTION_FILTERED_BLOCKS = Set.of(
-                // blocks affected by BASTION_GENERIC_DEGRADATION
-                Blocks.POLISHED_BLACKSTONE_BRICKS,
-                Blocks.BLACKSTONE,
-                Blocks.GOLD_BLOCK,
-                Blocks.GILDED_BLACKSTONE
-            );
-
-            List.of(
-                "bastion/bridge/ramparts/rampart_0",
-                "bastion/hoglin_stable/ramparts/ramparts_3",
-                "bastion/hoglin_stable/walls/side_wall_0",
-                "bastion/hoglin_stable/walls/wall_base",
-                "bastion/bridge/starting_pieces/entrance",
-                "bastion/treasure/walls/bottom/wall_0",
-                "bastion/treasure/walls/mid/wall_0",
-                "bastion/units/center_pieces/center_0",
-                "bastion/units/center_pieces/center_1",
-                "bastion/units/center_pieces/center_2",
-                "bastion/units/ramparts/ramparts_1",
-                "bastion/units/stages/stage_0_2",
-                "bastion/units/stages/stage_1_2"
-            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.withDefaultNamespace(s), BuiltInLootTables.BASTION_OTHER, Level.NETHER)
-                .withBiomeFunction(_ -> BuiltinStructures.BASTION_REMNANT)
-                .withRotations(ALL_ROTATIONS)
-                .withFilteredBlocks(BASTION_FILTERED_BLOCKS)
-                .build()));
-
-            List.of(
-                "bastion/hoglin_stable/large_stables/inner_3",
-                "bastion/hoglin_stable/small_stables/inner_2"
-            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.withDefaultNamespace(s), BuiltInLootTables.BASTION_HOGLIN_STABLE, Level.NETHER)
-                .withBiomeFunction(_ -> BuiltinStructures.BASTION_REMNANT)
-                .withRotations(ALL_ROTATIONS)
-                .withFilteredBlocks(BASTION_FILTERED_BLOCKS)
-                .build()));
-
-            List.of(
-                "bastion/treasure/bases/centers/center_0",
-                "bastion/treasure/bases/centers/center_2",
-                "bastion/treasure/bases/centers/center_3"
-            ).forEach(s -> builder.add(new PieceDataBuilder(Identifier.withDefaultNamespace(s), BuiltInLootTables.BASTION_TREASURE, Level.NETHER)
-                .withBiomeFunction(_ -> BuiltinStructures.BASTION_REMNANT)
-                .withRotations(ALL_ROTATIONS)
-                .withFilteredBlocks(BASTION_FILTERED_BLOCKS)
-                .build()));
-
-            return builder.build().filter(Objects::nonNull).toList();
-        });
-    }
-
-    private static final Map<ResourceKey<Structure>, SaltData> STRUCTURE_SALTS = Util.make(() -> {
-        HolderLookup.Provider registry = VanillaRegistries.createLookup();
-        HolderLookup.RegistryLookup<Structure> structures = registry.lookupOrThrow(Registries.STRUCTURE);
-        return structures.listElements()
-            .collect(Collectors.groupingBy(
-                s -> s.value().step().ordinal(),
-                Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(s -> s.key().identifier().toString()))))).entrySet().stream()
-            .<Map.Entry<ResourceKey<Structure>, SaltData>>mapMulti((entry, consumer) -> {
-                TreeSet<Holder.Reference<Structure>> forStep = entry.getValue();
-                int num = forStep.size();
-                for (int i = 0; i < num; i++) {
-                    //noinspection DataFlowIssue
-                    consumer.accept(Map.entry(forStep.pollFirst().key(), new SaltData(entry.getKey(), i)));
-                }
-            })
-            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+        return TemplateReplacements.getTemplateReplacements()
+            .map(e -> new PieceDataBuilder(e.getKey())
+                .withRotations(allRotations)
+                .withReplacementCheck(e.getValue())
+                .build())
+            .filter(Objects::nonNull)
+            .flatMap(List::stream)
+            .filter(Objects::nonNull)
+            .toList();
     });
-
-    private static final Map<Integer, ResourceKey<Enchantment>> CUBIOMES_ENCHANTMENT_ID_TO_MC = ImmutableMap.<Integer, ResourceKey<Enchantment>>builder()
-        .put(Cubiomes.PROTECTION(), Enchantments.PROTECTION)
-        .put(Cubiomes.FIRE_PROTECTION(), Enchantments.FIRE_PROTECTION)
-        .put(Cubiomes.BLAST_PROTECTION(), Enchantments.BLAST_PROTECTION)
-        .put(Cubiomes.PROJECTILE_PROTECTION(), Enchantments.PROJECTILE_PROTECTION)
-        .put(Cubiomes.RESPIRATION(), Enchantments.RESPIRATION)
-        .put(Cubiomes.AQUA_AFFINITY(), Enchantments.AQUA_AFFINITY)
-        .put(Cubiomes.THORNS(), Enchantments.THORNS)
-        .put(Cubiomes.SWIFT_SNEAK(), Enchantments.SWIFT_SNEAK)
-        .put(Cubiomes.FEATHER_FALLING(), Enchantments.FEATHER_FALLING)
-        .put(Cubiomes.DEPTH_STRIDER(), Enchantments.DEPTH_STRIDER)
-        .put(Cubiomes.FROST_WALKER(), Enchantments.FROST_WALKER)
-        .put(Cubiomes.SOUL_SPEED(), Enchantments.SOUL_SPEED)
-        .put(Cubiomes.SHARPNESS(), Enchantments.SHARPNESS)
-        .put(Cubiomes.SMITE(), Enchantments.SMITE)
-        .put(Cubiomes.BANE_OF_ARTHROPODS(), Enchantments.BANE_OF_ARTHROPODS)
-        .put(Cubiomes.KNOCKBACK(), Enchantments.KNOCKBACK)
-        .put(Cubiomes.FIRE_ASPECT(), Enchantments.FIRE_ASPECT)
-        .put(Cubiomes.LOOTING(), Enchantments.LOOTING)
-        .put(Cubiomes.SWEEPING_EDGE(), Enchantments.SWEEPING_EDGE)
-        .put(Cubiomes.EFFICIENCY(), Enchantments.EFFICIENCY)
-        .put(Cubiomes.SILK_TOUCH(), Enchantments.SILK_TOUCH)
-        .put(Cubiomes.FORTUNE(), Enchantments.FORTUNE)
-        .put(Cubiomes.LUCK_OF_THE_SEA(), Enchantments.LUCK_OF_THE_SEA)
-        .put(Cubiomes.LUNGE(), Enchantments.LUNGE)
-        .put(Cubiomes.LURE(), Enchantments.LURE)
-        .put(Cubiomes.POWER(), Enchantments.POWER)
-        .put(Cubiomes.PUNCH(), Enchantments.PUNCH)
-        .put(Cubiomes.FLAME(), Enchantments.FLAME)
-        .put(Cubiomes.INFINITY_ENCHANTMENT(), Enchantments.INFINITY)
-        .put(Cubiomes.QUICK_CHARGE(), Enchantments.QUICK_CHARGE)
-        .put(Cubiomes.MULTISHOT(), Enchantments.MULTISHOT)
-        .put(Cubiomes.PIERCING(), Enchantments.PIERCING)
-        .put(Cubiomes.IMPALING(), Enchantments.IMPALING)
-        .put(Cubiomes.RIPTIDE(), Enchantments.RIPTIDE)
-        .put(Cubiomes.LOYALTY(), Enchantments.LOYALTY)
-        .put(Cubiomes.CHANNELING(), Enchantments.CHANNELING)
-        .put(Cubiomes.DENSITY(), Enchantments.DENSITY)
-        .put(Cubiomes.BREACH(), Enchantments.BREACH)
-        .put(Cubiomes.WIND_BURST(), Enchantments.WIND_BURST)
-        .put(Cubiomes.MENDING(), Enchantments.MENDING)
-        .put(Cubiomes.UNBREAKING(), Enchantments.UNBREAKING)
-        .put(Cubiomes.CURSE_OF_VANISHING(), Enchantments.VANISHING_CURSE)
-        .put(Cubiomes.CURSE_OF_BINDING(), Enchantments.BINDING_CURSE)
-        .build();
 
     public ChestPredictor() {
         super(Categories.World, "chest-predictor", "Predicts chest loot based on the seed");
@@ -350,23 +219,25 @@ public class ChestPredictor extends Module {
         Level level = this.mc.level;
         assert level != null;
 
-        ResourceKey<Level> dimension = detectDimension(level.dimensionType());
+        Holder<Biome> biome = level.getBiomeManager().getNoiseBiomeAtPosition(pos);
 
-        for (PieceData pieceData : LootablePiecesHolder.LOOTABLE_PIECES) {
-
-            if (!pieceData.dimension.equals(dimension)) {
+        for (PieceData pieceData : LOOTABLE_PIECES) {
+            Identifier pieceLocation = pieceData.piece.withPath(p -> {
+                int endIndex = p.indexOf('/');
+                return endIndex != -1 ? p.substring(0, endIndex) : p;
+            });
+            ResourceKey<Structure> structureKey = findStructureKey(pieceLocation, biome);
+            if (structureKey == null) {
                 continue;
             }
 
             for (Map<BlockPos, BlockState> blockMap : pieceData.variants) {
                 BlockPos.MutableBlockPos chestPos = new BlockPos.MutableBlockPos();
-                if (!matchesLevel(pos, blockMap, chestPos)) {
+                if (!matchesLevel(pos, blockMap, pieceData.replacementCheck(), chestPos, pieceData)) {
                     continue;
                 }
 
-                Holder<Biome> biome = level.getBiome(chestPos);
-
-                SaltData saltData = pieceData.biomeFunction.apply(biome);
+                SaltData saltData = STRUCTURE_SALTS.get(structureKey);
 
                 WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(-1, -1));
                 long decorationSeed = worldgenRandom.setDecorationSeed(this.seed.get(), chestPos.getX() & ~15, chestPos.getZ() & ~15);
@@ -398,7 +269,7 @@ public class ChestPredictor extends Module {
         return false;
     }
 
-    private boolean matchesLevel(BlockPos start, Map<BlockPos, BlockState> blocks, BlockPos.MutableBlockPos chestPos) {
+    private boolean matchesLevel(BlockPos start, Map<BlockPos, BlockState> blocks, ReplacementCheck replacementCheck, BlockPos.MutableBlockPos chestPos, PieceData pieceData) {
         Level level = this.mc.level;
         assert level != null;
         return blocks.entrySet().stream().allMatch(posEntry -> {
@@ -410,9 +281,7 @@ public class ChestPredictor extends Module {
             }
             BlockState worldBlockState = chunk.getBlockState(worldPos);
             BlockState expectedBlockState = posEntry.getValue();
-
-            // it is safe to compare block states by identity
-            if (worldBlockState == expectedBlockState) {
+            if (replacementCheck.isValid(expectedBlockState, worldBlockState)) {
                 if (expectedBlockState.is(Blocks.CHEST)) {
                     chestPos.set(worldPos);
                 }
@@ -453,7 +322,13 @@ public class ChestPredictor extends Module {
         return container;
     }
 
-    private record PieceData(Identifier piece, ResourceKey<Level> dimension, List<Map<BlockPos, BlockState>> variants, Function<Holder<Biome>, SaltData> biomeFunction, MemorySegment ltc) {
+    private record PieceTemplateInfo(Vec3i size, Map<BlockPos, BlockState> blocks, Stream<Map.Entry<BlockPos, Identifier>> chests) {
+    }
+
+    private record PieceData(Identifier piece, List<Map<BlockPos, BlockState>> variants, ReplacementCheck replacementCheck, MemorySegment ltc) {
+    }
+
+    private record StructureInfo(Identifier piecesLocation, HolderSet<Biome> biomes) {
     }
 
     private record SaltData(int step, int index) {
@@ -469,36 +344,19 @@ public class ChestPredictor extends Module {
             Blocks.JIGSAW,
             Blocks.STRUCTURE_BLOCK,
             Blocks.STRUCTURE_VOID,
-            Blocks.AIR,
-            // blocks affected by BlockAgeProcessor
-            Blocks.STONE_BRICKS,
-            Blocks.STONE,
-            Blocks.CHISELED_STONE_BRICKS,
-            Blocks.OBSIDIAN
-        );
-
-        private static final List<TagKey<Block>> FILTERED_TAGS = List.of(
-            // blocks affected by BlockAgeProcessor
-            BlockTags.STAIRS,
-            BlockTags.SLABS,
-            BlockTags.WALLS
+            Blocks.AIR
         );
 
         private final Identifier piece;
-        private final ResourceKey<LootTable> lootTable;
-        private final ResourceKey<Level> dimension;
 
         private List<Rotation> rotations = NO_ROTATIONS;
         private List<Mirror> mirrors = NO_MIRRORS;
         private BlockPos pivot = BlockPos.ZERO;
         private boolean centerPivot = false;
-        private Set<Block> filteredBlocks = Collections.emptySet();
-        private @Nullable Function<Holder<Biome>, ResourceKey<Structure>> biomeFunction = null;
+        private ReplacementCheck replacements = (template, observed) -> template == observed;
 
-        private PieceDataBuilder(Identifier piece, ResourceKey<LootTable> lootTable, ResourceKey<Level> dimension) {
+        private PieceDataBuilder(Identifier piece) {
             this.piece = piece;
-            this.lootTable = lootTable;
-            this.dimension = dimension;
         }
 
         private PieceDataBuilder withRotations(List<Rotation> rotations) {
@@ -521,67 +379,63 @@ public class ChestPredictor extends Module {
             return this;
         }
 
-        private PieceDataBuilder withFilteredBlocks(Set<Block> filteredBlocks) {
-            this.filteredBlocks = filteredBlocks;
+        private PieceDataBuilder withReplacementCheck(@Nullable ReplacementCheck replacementCheck) {
+            if (replacementCheck != null) {
+                this.replacements = replacementCheck;
+            }
             return this;
         }
 
-        private PieceDataBuilder withBiomeFunction(Function<Holder<Biome>, ResourceKey<Structure>> biomeFunction) {
-            this.biomeFunction = biomeFunction;
-            return this;
-        }
-
-        private @Nullable PieceData build() {
-            Pair<Vec3i, Map<BlockPos, BlockState>> pieceInfo = loadPiece(this.piece, this.filteredBlocks);
-            if (pieceInfo == null) {
+        private @Nullable List<@Nullable PieceData> build() {
+            PieceTemplateInfo pieceTemplateInfo = loadPiece(this.piece);
+            if (pieceTemplateInfo == null) {
                 return null;
             }
 
-            MemorySegment ltc = loadLootTable(this.lootTable);
-            if (ltc == null) {
-                return null;
-            }
+            return pieceTemplateInfo.chests
+                .map(e -> {
+                    MemorySegment ltc = loadLootTable(e.getValue());
+                    if (ltc == null) {
+                        return null;
+                    }
 
-            if (this.centerPivot) {
-                Vec3i size = pieceInfo.getFirst();
-                this.pivot = new BlockPos(size.getX() / 2, 0, size.getZ() / 2);
-            }
+                    if (this.centerPivot) {
+                        Vec3i size = pieceTemplateInfo.size;
+                        this.pivot = new BlockPos(size.getX() / 2, 0, size.getZ() / 2);
+                    }
 
-            Map<BlockPos, BlockState> blockMap = pieceInfo.getSecond();
-            List<BlockPos> chests = blockMap.entrySet().stream().filter(entry -> entry.getValue().is(Blocks.CHEST)).map(Map.Entry::getKey).toList();
-            if (chests.size() != 1) {
-                LOGGER.error("Structure piece does not have exactly one chest!");
-                return null;
-            }
-            BlockPos chestPos = chests.getFirst();
-            var variants = this.rotations.stream()
-                .flatMap(rot -> this.mirrors.stream().map(mir -> new Object() {
-                    private final Rotation rotation = rot;
-                    private final Mirror mirror = mir;
-                }))
-                .map(variant -> {
-                    BlockPos transformedChestPos = StructureTemplate.transform(chestPos, variant.mirror, variant.rotation, this.pivot);
-                    return blockMap.entrySet().stream()
-                        .collect(Collectors.toUnmodifiableMap(
-                            entry -> StructureTemplate.transform(entry.getKey(), variant.mirror, variant.rotation, this.pivot).subtract(transformedChestPos),
-                            entry -> entry.getValue().mirror(variant.mirror).rotate(variant.rotation))
-                        );
+                    Map<BlockPos, BlockState> blockMap = pieceTemplateInfo.blocks;
+                    BlockPos chestPos = e.getKey();
+                    var variants = this.rotations.stream()
+                        .flatMap(rot -> this.mirrors.stream().map(mir -> new Object() {
+                            private final Rotation rotation = rot;
+                            private final Mirror mirror = mir;
+                        }))
+                        .map(variant -> {
+                            BlockPos transformedChestPos = StructureTemplate.transform(chestPos, variant.mirror, variant.rotation, this.pivot);
+                            return blockMap.entrySet().stream()
+                                .collect(Collectors.toUnmodifiableMap(
+                                    entry -> StructureTemplate.transform(entry.getKey(), variant.mirror, variant.rotation, this.pivot).subtract(transformedChestPos),
+                                    entry -> entry.getValue().mirror(variant.mirror).rotate(variant.rotation))
+                                );
+                        })
+                        .toList();
+
+                    return new PieceData(this.piece, variants, this.replacements, ltc);
                 })
+                .filter(Objects::nonNull)
                 .toList();
-
-            if (this.biomeFunction == null) {
-                LOGGER.error("Biome function must not be undefined for {}", this.piece);
-                return null;
-            }
-
-            return new PieceData(this.piece, this.dimension, variants, this.biomeFunction.andThen(STRUCTURE_SALTS::get), ltc);
         }
 
-        private static @Nullable Pair<Vec3i, Map<BlockPos, BlockState>> loadPiece(Identifier piece, Set<Block> filteredBlocks) {
+        private static @Nullable PieceTemplateInfo loadPiece(Identifier piece) {
+            // https://mojira.dev/MC-249771
+            if (piece.equals(Identifier.withDefaultNamespace("ancient_city/walls/intact_horizontal_wall_stairs_5"))) {
+                return null;
+            }
             Identifier fileIdentifier = StructureTemplateManager.RESOURCE_STRUCTURE_LISTER.idToFile(piece);
             ModContainer modContainer = FabricLoader.getInstance().getModContainer(fileIdentifier.getNamespace()).orElse(null);
             if (modContainer == null) {
-                LOGGER.error("Could not find mod container for {}", fileIdentifier.getNamespace());
+                LOGGER.error("Could not find mod container for piece with namespace {}", fileIdentifier.getNamespace());
                 return null;
             }
             String path = "data/%s/%s".formatted(fileIdentifier.getNamespace(), fileIdentifier.getPath());
@@ -589,58 +443,296 @@ public class ChestPredictor extends Module {
                 CompoundTag compoundTag = NbtIo.readCompressed(is, NbtAccounter.unlimitedHeap());
                 int dataVersion = NbtUtils.getDataVersion(compoundTag, 500);
                 CompoundTag updatedTag = DataFixTypes.STRUCTURE.updateToCurrentVersion(Minecraft.getInstance().getFixerUpper(), compoundTag, dataVersion);
-                Vec3i size = updatedTag.read("size", Vec3i.CODEC).orElseThrow();
-                ListTag blocks = updatedTag.getList("blocks").orElseThrow();
-                ListTag palette = updatedTag.getList("palette").orElseThrow();
-                return Pair.of(size, blocks.compoundStream()
-                    .map(compound -> {
-                        BlockPos pos = compound.read("pos", BlockPos.CODEC).orElseThrow();
-                        int stateIdx = compound.getInt("state").orElseThrow();
-                        BlockState state = BlockState.CODEC.parse(NbtOps.INSTANCE, palette.get(stateIdx)).getOrThrow();
-                        return Map.entry(pos, state);
-                    })
-                    .filter(entry -> !FILTERED_BLOCKS.contains(entry.getValue().getBlock()))
-                    .filter(entry -> FILTERED_TAGS.stream().noneMatch(tag -> entry.getValue().is(tag)))
-                    .filter(entry -> !filteredBlocks.contains(entry.getValue().getBlock()))
-                    .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue)));
+                Vec3i size = updatedTag.read(StructureTemplate.SIZE_TAG, Vec3i.CODEC).orElseThrow();
+                ListTag blocksTag = updatedTag.getList(StructureTemplate.BLOCKS_TAG).orElseThrow();
+                ListTag palette = updatedTag.getList(StructureTemplate.PALETTE_TAG).orElseThrow();
+                ImmutableMap.Builder<BlockPos, BlockState> builder = ImmutableMap.builder();
+                Stream.Builder<Map.Entry<BlockPos, Identifier>> chests = Stream.builder();
+                for (Tag tag : blocksTag) {
+                    if (!(tag instanceof CompoundTag compound)) {
+                        continue;
+                    }
+                    BlockPos pos = compound.read(StructureTemplate.BLOCK_TAG_POS, BlockPos.CODEC).orElseThrow();
+                    int stateIdx = compound.getInt(StructureTemplate.BLOCK_TAG_STATE).orElseThrow();
+                    BlockState state = BlockState.CODEC.parse(NbtOps.INSTANCE, palette.get(stateIdx)).getOrThrow();
+                    if (FILTERED_BLOCKS.contains(state.getBlock())) {
+                        continue;
+                    }
+                    builder.put(pos, state);
+                    if (state.is(Blocks.CHEST)) {
+                        CompoundTag nbt = compound.getCompound(StructureTemplate.BLOCK_TAG_NBT).orElseThrow();
+                        Optional<Identifier> optionalLootTable = nbt.read(RandomizableContainer.LOOT_TABLE_TAG, Identifier.CODEC);
+                        optionalLootTable.ifPresent(identifier -> chests.add(Map.entry(pos, identifier)));
+                    }
+                }
+                return new PieceTemplateInfo(size, builder.build(), chests.build());
             } catch (IOException | NoSuchElementException | IllegalStateException e) {
                 LOGGER.error("Error while loading template for piece %s".formatted(piece), e);
                 return null;
             }
         }
 
-        private static @Nullable MemorySegment loadLootTable(ResourceKey<LootTable> lootTable) {
-            Identifier fileIdentifier = FileToIdConverter.registry(Registries.LOOT_TABLE).idToFile(lootTable.identifier());
+        private static @Nullable MemorySegment loadLootTable(Identifier lootTable) {
+            String lootTableContent = getLootTableContent(lootTable);
+            // use temporary arena so that the loot table string is deallocated
+            try (Arena tempArena = Arena.ofConfined()) {
+                MemorySegment lootTableContentInternal = tempArena.allocateFrom(lootTableContent);
+                MemorySegment ltc = LootTableContext.allocate(GLOBAL_ARENA);
+                if (Cubiomes.init_loot_table(lootTableContentInternal.reinterpret(GLOBAL_ARENA, null), ltc, Cubiomes.MC_NEWEST()) != 0) {
+                    LOGGER.error("Could not initialize loot table {}", lootTable);
+                    return null;
+                }
+                int unresolvedSubtableCount = LootTableContext.unresolved_subtable_count(ltc);
+                for (int i = 0; i < unresolvedSubtableCount; i++) {
+                    MemorySegment unresolvedSubtableName = LootTableContext.unresolved_subtable_names(ltc, i);
+                    String subtableContent = getLootTableContent(Identifier.parse(unresolvedSubtableName.getString(0)));
+                    MemorySegment subtableContentInternal = tempArena.allocateFrom(subtableContent);
+                    if (Cubiomes.resolve_subtable(ltc, unresolvedSubtableName, subtableContentInternal.reinterpret(GLOBAL_ARENA, null)) != 0) {
+                        LOGGER.error("Could not initialize loot subtable {}", lootTable);
+                        return null;
+                    }
+                }
+                return ltc;
+            }
+        }
+
+        private static @Nullable String getLootTableContent(Identifier lootTable) {
+            Identifier fileIdentifier = FileToIdConverter.registry(Registries.LOOT_TABLE).idToFile(lootTable);
             ModContainer modContainer = FabricLoader.getInstance().getModContainer(fileIdentifier.getNamespace()).orElse(null);
             if (modContainer == null) {
-                LOGGER.error("Could not find mod container for {}", fileIdentifier.getNamespace());
+                LOGGER.error("Could not find mod container for loot table with namespace {}", fileIdentifier.getNamespace());
                 return null;
             }
             String path = "data/%s/%s".formatted(fileIdentifier.getNamespace(), fileIdentifier.getPath());
             try (InputStream is = Files.newInputStream(modContainer.findPath(path).orElseThrow())) {
-                String string = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                // use temporary arena so that the loot table string is deallocated
-                try (Arena tempArena = Arena.ofConfined()) {
-                    MemorySegment stringInternal = tempArena.allocateFrom(string);
-                    MemorySegment ltc = LootTableContext.allocate(GLOBAL_ARENA);
-                    if (Cubiomes.init_loot_table(stringInternal.reinterpret(GLOBAL_ARENA, null), ltc, Cubiomes.MC_NEWEST()) != 0) {
-                        LOGGER.error("Could not initialize loot table {}", lootTable.identifier());
-                        return null;
-                    }
-                    return ltc;
-                }
+                return new String(is.readAllBytes(), StandardCharsets.UTF_8);
             } catch (IOException | NoSuchElementException e) {
-                LOGGER.error("Error while loading loot table %s".formatted(lootTable.identifier()), e);
+                LOGGER.error("Error while loading loot table %s".formatted(lootTable), e);
                 return null;
             }
         }
     }
 
-    private static ResourceKey<Level> detectDimension(DimensionType dimension) {
-        return switch (dimension.skybox()) {
-            case OVERWORLD -> Level.OVERWORLD;
-            case NONE -> Level.NETHER;
-            case END -> Level.END;
-        };
+    @FunctionalInterface
+    private interface ReplacementCheck {
+        boolean isValid(BlockState template, BlockState observed);
+
+        default ReplacementCheck and(ReplacementCheck other) {
+            Objects.requireNonNull(other);
+            return (t, u) -> isValid(t, u) && other.isValid(t, u);
+        }
+
+        default ReplacementCheck negate() {
+            return (t, u) -> !isValid(t, u);
+        }
+
+        default ReplacementCheck or(ReplacementCheck other) {
+            Objects.requireNonNull(other);
+            return (t, u) -> isValid(t, u) || other.isValid(t, u);
+        }
     }
+
+    // data stuff
+
+    private static final class TemplateReplacements {
+
+        // maybeReplaceFullStoneBlock
+        private static final Set<Block> FULL_STONE_REPLACEMENTS = Set.of(Blocks.CRACKED_STONE_BRICKS, Blocks.STONE_BRICK_STAIRS, Blocks.MOSSY_STONE_BRICKS, Blocks.MOSSY_STONE_BRICK_STAIRS);
+
+        // maybeReplaceStairs
+        private static final Set<Block> STAIR_REPLACEMENTS = Stream.concat(Arrays.stream(BlockAgeProcessor.NON_MOSSY_REPLACEMENTS).map(BlockBehaviour.BlockStateBase::getBlock), Stream.of(Blocks.MOSSY_STONE_BRICK_STAIRS, Blocks.MOSSY_STONE_BRICK_SLAB)).collect(Collectors.toUnmodifiableSet());
+
+        private static Stream<Map.Entry<Identifier, ReplacementCheck>> getTemplateReplacements() {
+            HolderLookup.Provider registry = VanillaRegistries.createLookup();
+            HolderLookup.RegistryLookup<StructureTemplatePool> templatePools = registry.lookupOrThrow(Registries.TEMPLATE_POOL);
+            return templatePools.listElements()
+                .<SinglePoolElement>mapMulti((pool, consumer) -> {
+                    pool.value().getTemplates().forEach(elementPair -> {
+                        StructurePoolElement element = elementPair.getFirst();
+                        recursePoolElement(element, consumer);
+                    });
+                })
+                .map(element -> {
+                    ReplacementCheck replacementCheck = (template, observed) -> template.is(observed.getBlock());
+                    for (StructureProcessor processor : element.processors.value().list()) {
+                        switch (processor) {
+                            case BlackstoneReplaceProcessor blackstoneReplaceProcessor -> {
+                                replacementCheck = replacementCheck.or((template, observed) -> {
+                                    return blackstoneReplaceProcessor.replacements.get(template.getBlock()) == observed.getBlock();
+                                });
+                            }
+                            case BlockAgeProcessor _ -> {
+                                replacementCheck = replacementCheck.or((template, observed) -> {
+                                    if (template.is(Blocks.STONE_BRICKS) || template.is(Blocks.STONE) || template.is(Blocks.CHISELED_STONE_BRICKS)) {
+                                        return FULL_STONE_REPLACEMENTS.contains(observed.getBlock());
+                                    }
+                                    if (template.is(BlockTags.STAIRS)) {
+                                        return STAIR_REPLACEMENTS.contains(observed.getBlock());
+                                    }
+                                    if (template.is(BlockTags.SLABS)) {
+                                        return observed.is(Blocks.MOSSY_STONE_BRICK_SLAB);
+                                    }
+                                    if (template.is(BlockTags.WALLS)) {
+                                        return observed.is(Blocks.MOSSY_STONE_BRICK_WALL);
+                                    }
+                                    if (template.is(Blocks.OBSIDIAN)) {
+                                        return observed.is(Blocks.CRYING_OBSIDIAN);
+                                    }
+                                    return false;
+                                });
+                            }
+                            case BlockRotProcessor blockRotProcessor -> {
+                                if (blockRotProcessor.rottableBlocks.isPresent()) {
+                                    replacementCheck = replacementCheck.or((template, _) -> {
+                                        // BlockRotProcessor does not replace block with air but keeps
+                                        // the block that was there before the structure generated
+                                        return template.is(blockRotProcessor.rottableBlocks.get());
+                                    });
+                                }
+                            }
+                            case RuleProcessor ruleProcessor -> {
+                                for (ProcessorRule rule : ruleProcessor.rules) {
+                                    ReplacementCheck ruleCheck = switch (rule.inputPredicate) {
+                                        case BlockMatchTest blockMatchTest -> (template, observed) -> {
+                                            if (template.is(blockMatchTest.block)) {
+                                                return observed == rule.getOutputState();
+                                            }
+                                            return false;
+                                        };
+                                        case BlockStateMatchTest blockStateMatchTest -> (template, observed) -> {
+                                            if (template == blockStateMatchTest.blockState) {
+                                                return observed == rule.getOutputState();
+                                            }
+                                            return false;
+                                        };
+                                        case TagMatchTest tagMatchTest -> (template, observed) -> {
+                                            if (template.is(tagMatchTest.tag)) {
+                                                return observed == rule.getOutputState();
+                                            }
+                                            return false;
+                                        };
+                                        case RandomBlockMatchTest randomBlockMatchTest -> (template, observed) -> {
+                                            if (template.is(randomBlockMatchTest.block)) {
+                                                return observed == rule.getOutputState();
+                                            }
+                                            return false;
+                                        };
+                                        case RandomBlockStateMatchTest randomBlockStateMatchTest -> (template, observed) -> {
+                                            if (template == randomBlockStateMatchTest.blockState) {
+                                                return observed == rule.getOutputState();
+                                            }
+                                            return false;
+                                        };
+                                        case AlwaysTrueTest _ -> (_, observed) -> observed == rule.getOutputState();
+                                        default -> throw new AssertionError("RuleTest " + rule.inputPredicate + " not implemented");
+                                    };
+                                    replacementCheck = replacementCheck.or(ruleCheck);
+                                }
+                            }
+                            default -> {}
+                        }
+                    }
+                    return Map.entry(element.getTemplateLocation(), replacementCheck);
+                });
+        }
+
+        private static void recursePoolElement(StructurePoolElement element, Consumer<SinglePoolElement> consumer) {
+            if (element instanceof SinglePoolElement singlePoolElement) {
+                consumer.accept(singlePoolElement);
+            } else if (element instanceof ListPoolElement listPoolElement) {
+                listPoolElement.getElements().forEach(e -> recursePoolElement(e, consumer));
+            }
+        }
+    }
+
+    private static final Map<ResourceKey<Structure>, SaltData> STRUCTURE_SALTS = Util.make(() -> {
+        HolderLookup.Provider registry = VanillaRegistries.createLookup();
+        HolderLookup.RegistryLookup<Structure> structures = registry.lookupOrThrow(Registries.STRUCTURE);
+        return structures.listElements()
+            .collect(Collectors.groupingBy(
+                s -> s.value().step().ordinal(),
+                Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(s -> s.key().identifier().toString()))))).entrySet().stream()
+            .<Map.Entry<ResourceKey<Structure>, SaltData>>mapMulti((entry, consumer) -> {
+                TreeSet<Holder.Reference<Structure>> forStep = entry.getValue();
+                int num = forStep.size();
+                for (int i = 0; i < num; i++) {
+                    //noinspection DataFlowIssue
+                    consumer.accept(Map.entry(forStep.pollFirst().key(), new SaltData(entry.getKey(), i)));
+                }
+            })
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+    });
+
+    private static final Map<ResourceKey<Structure>, StructureInfo> JIGSAW_STRUCTURE_INFO = Util.make(() -> {
+        HolderLookup.Provider registry = VanillaRegistries.createLookup();
+        HolderLookup.RegistryLookup<Structure> structures = registry.lookupOrThrow(Registries.STRUCTURE);
+        return structures.listElements()
+            .<Map.Entry<ResourceKey<Structure>, StructureInfo>>mapMulti((s, consumer) -> {
+                if (!(s.value() instanceof JigsawStructure jigsawStructure)) {
+                    return;
+                }
+                jigsawStructure.getStartPool().unwrapKey().ifPresent(key -> {
+                    Identifier location = key.identifier().withPath(p -> {
+                        int endIndex = p.indexOf('/');
+                        return endIndex != -1 ? p.substring(0, endIndex) : p;
+                    });
+                    consumer.accept(Map.entry(s.key(), new StructureInfo(location, jigsawStructure.biomes())));
+                });
+            })
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+    });
+
+    private static @Nullable ResourceKey<Structure> findStructureKey(Identifier piecesLocation, Holder<Biome> biome) {
+        return JIGSAW_STRUCTURE_INFO.entrySet().stream()
+            .filter(e -> e.getValue().piecesLocation.equals(piecesLocation))
+            .filter(e -> e.getValue().biomes.contains(biome))
+            .map(Map.Entry::getKey)
+            .findAny().orElse(null);
+    }
+
+    private static final Map<Integer, ResourceKey<Enchantment>> CUBIOMES_ENCHANTMENT_ID_TO_MC = ImmutableMap.<Integer, ResourceKey<Enchantment>>builder()
+        .put(Cubiomes.PROTECTION(), Enchantments.PROTECTION)
+        .put(Cubiomes.FIRE_PROTECTION(), Enchantments.FIRE_PROTECTION)
+        .put(Cubiomes.BLAST_PROTECTION(), Enchantments.BLAST_PROTECTION)
+        .put(Cubiomes.PROJECTILE_PROTECTION(), Enchantments.PROJECTILE_PROTECTION)
+        .put(Cubiomes.RESPIRATION(), Enchantments.RESPIRATION)
+        .put(Cubiomes.AQUA_AFFINITY(), Enchantments.AQUA_AFFINITY)
+        .put(Cubiomes.THORNS(), Enchantments.THORNS)
+        .put(Cubiomes.SWIFT_SNEAK(), Enchantments.SWIFT_SNEAK)
+        .put(Cubiomes.FEATHER_FALLING(), Enchantments.FEATHER_FALLING)
+        .put(Cubiomes.DEPTH_STRIDER(), Enchantments.DEPTH_STRIDER)
+        .put(Cubiomes.FROST_WALKER(), Enchantments.FROST_WALKER)
+        .put(Cubiomes.SOUL_SPEED(), Enchantments.SOUL_SPEED)
+        .put(Cubiomes.SHARPNESS(), Enchantments.SHARPNESS)
+        .put(Cubiomes.SMITE(), Enchantments.SMITE)
+        .put(Cubiomes.BANE_OF_ARTHROPODS(), Enchantments.BANE_OF_ARTHROPODS)
+        .put(Cubiomes.KNOCKBACK(), Enchantments.KNOCKBACK)
+        .put(Cubiomes.FIRE_ASPECT(), Enchantments.FIRE_ASPECT)
+        .put(Cubiomes.LOOTING(), Enchantments.LOOTING)
+        .put(Cubiomes.SWEEPING_EDGE(), Enchantments.SWEEPING_EDGE)
+        .put(Cubiomes.EFFICIENCY(), Enchantments.EFFICIENCY)
+        .put(Cubiomes.SILK_TOUCH(), Enchantments.SILK_TOUCH)
+        .put(Cubiomes.FORTUNE(), Enchantments.FORTUNE)
+        .put(Cubiomes.LUCK_OF_THE_SEA(), Enchantments.LUCK_OF_THE_SEA)
+        .put(Cubiomes.LUNGE(), Enchantments.LUNGE)
+        .put(Cubiomes.LURE(), Enchantments.LURE)
+        .put(Cubiomes.POWER(), Enchantments.POWER)
+        .put(Cubiomes.PUNCH(), Enchantments.PUNCH)
+        .put(Cubiomes.FLAME(), Enchantments.FLAME)
+        .put(Cubiomes.INFINITY_ENCHANTMENT(), Enchantments.INFINITY)
+        .put(Cubiomes.QUICK_CHARGE(), Enchantments.QUICK_CHARGE)
+        .put(Cubiomes.MULTISHOT(), Enchantments.MULTISHOT)
+        .put(Cubiomes.PIERCING(), Enchantments.PIERCING)
+        .put(Cubiomes.IMPALING(), Enchantments.IMPALING)
+        .put(Cubiomes.RIPTIDE(), Enchantments.RIPTIDE)
+        .put(Cubiomes.LOYALTY(), Enchantments.LOYALTY)
+        .put(Cubiomes.CHANNELING(), Enchantments.CHANNELING)
+        .put(Cubiomes.DENSITY(), Enchantments.DENSITY)
+        .put(Cubiomes.BREACH(), Enchantments.BREACH)
+        .put(Cubiomes.WIND_BURST(), Enchantments.WIND_BURST)
+        .put(Cubiomes.MENDING(), Enchantments.MENDING)
+        .put(Cubiomes.UNBREAKING(), Enchantments.UNBREAKING)
+        .put(Cubiomes.CURSE_OF_VANISHING(), Enchantments.VANISHING_CURSE)
+        .put(Cubiomes.CURSE_OF_BINDING(), Enchantments.BINDING_CURSE)
+        .build();
 }
